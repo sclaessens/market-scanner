@@ -6,13 +6,19 @@ from typing import List, Tuple, Optional
 import pandas as pd
 import yfinance as yf
 
-TOP_N = 5  # show only top N per section (keeps signal noise low)
+# How many rows to show per section (keeps report readable)
+TOP_N = 5
+
+# Universe maintenance (optional but recommended)
+MIN_PRICE = 10.0
+MIN_AVG_DOLLAR_VOL = 25_000_000  # avg(close * volume) over last ~30 trading days
 
 
 # ---------- Universe (from tickers.txt) ----------
 def load_tickers(path: str = "tickers.txt") -> List[str]:
     """
-    Reads tickers from tickers.txt (one per line). Lines starting with # are ignored.
+    Reads tickers from tickers.txt (one per line).
+    Lines starting with # are ignored.
     Converts tickers like BRK.B -> BRK-B for Yahoo.
     """
     with open(path, "r", encoding="utf-8") as f:
@@ -24,6 +30,45 @@ def load_tickers(path: str = "tickers.txt") -> List[str]:
             t = t.replace(".", "-")
             tickers.append(t)
     return sorted(set(tickers))
+
+
+def filter_liquid_universe(tickers: List[str]) -> List[str]:
+    """
+    Filters out illiquid / untradeable symbols using a simple liquidity proxy:
+      - last close >= MIN_PRICE
+      - average dollar volume (close*volume) >= MIN_AVG_DOLLAR_VOL over last ~30 days
+
+    Keeps the scanner focused on liquid leaders.
+    """
+    if not tickers:
+        return []
+
+    data = yf.download(
+        tickers=tickers,
+        period="2mo",
+        interval="1d",
+        group_by="ticker",
+        auto_adjust=False,
+        threads=True,
+        progress=False,
+    )
+
+    kept = []
+    for t in tickers:
+        try:
+            df = data[t].dropna() if isinstance(data.columns, pd.MultiIndex) else data.dropna()
+            if df is None or df.empty or len(df) < 15:
+                continue
+
+            close_last = float(df["Close"].iloc[-1])
+            dollar_vol = (df["Close"] * df["Volume"]).tail(30).mean()
+
+            if close_last >= MIN_PRICE and float(dollar_vol) >= MIN_AVG_DOLLAR_VOL:
+                kept.append(t)
+        except Exception:
+            continue
+
+    return sorted(set(kept))
 
 
 # ---------- Market regime (QQQ filter) ----------
@@ -83,6 +128,7 @@ class SignalRow:
     close: float
     ma20: float
     ma50: float
+    ma200: float
     atr14: float
     high20: float
     low20: float
@@ -91,7 +137,7 @@ class SignalRow:
     note: str
     score: float
 
-    # Action fields
+    # Action fields (optional)
     entry: Optional[float] = None
     stop: Optional[float] = None
     target: Optional[float] = None
@@ -107,12 +153,13 @@ def safe_float(x) -> float:
         return float("nan")
 
 
-def calc_trade_plan_pullback(close: float, ma20: float, atr14: float) -> Tuple[float, float, float, float]:
+# ---------- Trade plan helpers ----------
+def plan_pullback(ma20: float, atr14: float) -> Tuple[float, float, float, float]:
     """
     Pullback plan:
-    - Entry: near MA20 (use MA20 as "limit zone")
-    - Stop: 1.6 ATR below entry (gives room; less shakeout)
-    - Target: 3.2 ATR above entry (RR ~ 2.0)
+    - Entry: MA20 (treat as "zone")
+    - Stop: 1.6 ATR below entry
+    - Target: 3.2 ATR above entry (RR ~ 2)
     """
     entry = ma20
     stop = entry - 1.6 * atr14
@@ -121,34 +168,103 @@ def calc_trade_plan_pullback(close: float, ma20: float, atr14: float) -> Tuple[f
     return entry, stop, target, rr
 
 
-def calc_trade_plan_breakout(high20: float, atr14: float) -> Tuple[float, float, float, float]:
+def plan_breakout(level: float, atr14: float) -> Tuple[float, float, float, float]:
     """
-    Breakout plan (for watch/retest):
+    Breakout plan (watch + retest):
     - Entry: breakout level (20d high)
     - Stop: 1.5 ATR below entry
-    - Target: 3.0 ATR above entry (RR ~ 2.0)
+    - Target: 3.0 ATR above entry (RR ~ 2)
     """
-    entry = high20
+    entry = level
     stop = entry - 1.5 * atr14
     target = entry + 3.0 * atr14
     rr = (target - entry) / max(entry - stop, 1e-9)
     return entry, stop, target, rr
 
 
+def plan_vcp(high20: float, atr14: float) -> Tuple[float, float, float, float]:
+    """
+    VCP plan:
+    - Entry: a touch above 20d high (break of the contraction) -> we use high20 as proxy
+    - Stop: 1.6 ATR below entry (room for noise)
+    - Target: 3.2 ATR above entry (RR ~ 2)
+    """
+    entry = high20
+    stop = entry - 1.6 * atr14
+    target = entry + 3.2 * atr14
+    rr = (target - entry) / max(entry - stop, 1e-9)
+    return entry, stop, target, rr
+
+
+# ---------- VCP detection ----------
+def detect_vcp(df: pd.DataFrame) -> Tuple[bool, float, str]:
+    """
+    Simple VCP (volatility contraction) detector.
+
+    Criteria (pragmatic, scanner-friendly):
+    - Uptrend: close > MA50 and MA50 > MA200
+    - Contraction: ATR14( last 20 ) < 0.8 * ATR14( prev 20 )
+    - Price near highs: close within ~10% of 40-day high
+    - Tight range: (40d high - 40d low) / 40d high < 18%
+
+    Returns: (is_vcp, score, note)
+    """
+    if df is None or len(df) < 260:
+        return False, 0.0, ""
+
+    recent40 = df.tail(40)
+    prev20 = df.iloc[-60:-40]  # older slice for comparison (20 days)
+
+    if recent40.empty or prev20.empty:
+        return False, 0.0, ""
+
+    close = float(recent40["Close"].iloc[-1])
+    ma50 = float(df["MA50"].iloc[-1])
+    ma200 = float(df["MA200"].iloc[-1])
+
+    if not (close > ma50 and ma50 > ma200):
+        return False, 0.0, ""
+
+    high40 = float(recent40["High"].max())
+    low40 = float(recent40["Low"].min())
+    range_pct = (high40 - low40) / max(high40, 1e-9)
+
+    atr_recent = float(df["ATR14"].tail(20).mean())
+    atr_prev = float(df["ATR14"].iloc[-60:-40].mean())
+
+    if math.isnan(atr_recent) or math.isnan(atr_prev) or atr_prev <= 0:
+        return False, 0.0, ""
+
+    contraction = atr_recent < 0.8 * atr_prev
+    near_high = close >= 0.90 * high40
+    tight = range_pct < 0.18
+
+    if not (contraction and near_high and tight):
+        return False, 0.0, ""
+
+    # Score: stronger contraction + tighter range + closer to high
+    contraction_strength = (atr_prev - atr_recent) / atr_prev  # 0..1
+    closeness = (close / high40)  # 0..1
+    score = 2.0 * contraction_strength + 0.5 * closeness - 1.0 * range_pct
+
+    note = f"VCP: ATR↓ {contraction_strength:.2f}, range {range_pct:.2f}, close/high {closeness:.2f}"
+    return True, float(score), note
+
+
 # ---------- Signal logic ----------
 def classify_signals(
     ticker: str, df: pd.DataFrame
-) -> Tuple[List[SignalRow], List[SignalRow], List[SignalRow]]:
+) -> Tuple[List[SignalRow], List[SignalRow], List[SignalRow], List[SignalRow]]:
     """
-    Returns: (pullbacks, breakouts, failures)
+    Returns: (pullbacks, breakouts, failures, vcps)
     """
-    if df is None or len(df) < 220:
-        # want MA50 slope stability; still ok to be strict
-        return [], [], []
+    if df is None or len(df) < 260:
+        return [], [], [], []
 
     df = df.copy()
     df["MA20"] = sma(df["Close"], 20)
     df["MA50"] = sma(df["Close"], 50)
+    df["MA200"] = sma(df["Close"], 200)
     df["ATR14"] = atr(df, 14)
     df["HIGH20"] = df["High"].rolling(20).max()
     df["LOW20"] = df["Low"].rolling(20).min()
@@ -158,113 +274,86 @@ def classify_signals(
     close = safe_float(last["Close"])
     ma20 = safe_float(last["MA20"])
     ma50 = safe_float(last["MA50"])
+    ma200 = safe_float(last["MA200"])
     atr14 = safe_float(last["ATR14"])
     high20 = safe_float(last["HIGH20"])
     low20 = safe_float(last["LOW20"])
     vol = safe_float(last["Volume"])
     vol20 = safe_float(last["VOL20"])
 
-    if any(math.isnan(v) for v in [close, ma20, ma50, atr14, high20, low20, vol20]) or atr14 <= 0:
-        return [], [], []
+    if any(math.isnan(v) for v in [close, ma20, ma50, ma200, atr14, high20, low20, vol20]) or atr14 <= 0:
+        return [], [], [], []
 
-    # Trend filter: above MA50 and MA50 rising
+    # Pullback in uptrend
     ma50_prev = safe_float(df["MA50"].iloc[-6])  # ~1 week ago
     ma50_rising = (not math.isnan(ma50_prev)) and (ma50 > ma50_prev)
 
-    # Pullback in uptrend:
     dist_ma20 = abs(close - ma20)
     near_ma20 = (dist_ma20 <= 1.25 * atr14) or (abs(close / ma20 - 1) <= 0.015)
 
-    drawdown_from_high20 = (high20 - close) / high20 if high20 > 0 else 0.0
+    drawdown_from_high20 = (high20 - close) / max(high20, 1e-9)
     not_collapsing = drawdown_from_high20 <= 0.12
 
-    pullbacks = []
-    if close > ma50 and ma50_rising and near_ma20 and not_collapsing:
+    pullbacks: List[SignalRow] = []
+    if close > ma50 and ma50_rising and near_ma20 and not_collapsing and ma50 > ma200:
         room = max(high20 - close, 0.0)
         score = (room / atr14) - (dist_ma20 / atr14)
-
-        entry, stop, target, rr = calc_trade_plan_pullback(close, ma20, atr14)
+        entry, stop, target, rr = plan_pullback(ma20, atr14)
         note = f"Pullback near MA20 | room~{room/atr14:.1f} ATR"
-
         pullbacks.append(
-            SignalRow(
-                ticker=ticker,
-                close=close,
-                ma20=ma20,
-                ma50=ma50,
-                atr14=atr14,
-                high20=high20,
-                low20=low20,
-                vol=vol,
-                vol20=vol20,
-                note=note,
-                score=score,
-                entry=entry,
-                stop=stop,
-                target=target,
-                rr=rr,
-            )
+            SignalRow(ticker, close, ma20, ma50, ma200, atr14, high20, low20, vol, vol20, note, score, entry, stop, target, rr)
         )
 
-    # Breakout:
-    breakouts = []
+    # Breakout
+    breakouts: List[SignalRow] = []
     vol_ok = vol >= 1.3 * vol20
-    if close >= high20 * 0.999 and close > ma50 and vol_ok:
+    if close >= high20 * 0.999 and close > ma50 and vol_ok and ma50 > ma200:
         score = (vol / vol20) + ((close - ma20) / atr14)
-
-        entry, stop, target, rr = calc_trade_plan_breakout(high20, atr14)
+        entry, stop, target, rr = plan_breakout(high20, atr14)
         note = f"Breakout 20dH | vol {vol/vol20:.1f}x (watch retest)"
-
         breakouts.append(
-            SignalRow(
-                ticker=ticker,
-                close=close,
-                ma20=ma20,
-                ma50=ma50,
-                atr14=atr14,
-                high20=high20,
-                low20=low20,
-                vol=vol,
-                vol20=vol20,
-                note=note,
-                score=score,
-                entry=entry,
-                stop=stop,
-                target=target,
-                rr=rr,
-            )
+            SignalRow(ticker, close, ma20, ma50, ma200, atr14, high20, low20, vol, vol20, note, score, entry, stop, target, rr)
         )
 
-    # Trend failure / weakening:
-    failures = []
+    # Trend failure / weakening (useful for exit review)
+    failures: List[SignalRow] = []
     below_ma50 = close < ma50
     below_low20 = close <= low20 * 1.001
     if below_ma50 or below_low20:
         severity = (ma50 - close) / atr14 if below_ma50 else (low20 - close) / atr14
         score = severity + (0.5 if below_low20 else 0.0)
         note = "Below MA50" + (" & near/below 20d low" if below_low20 else "")
-
         failures.append(
+            SignalRow(ticker, close, ma20, ma50, ma200, atr14, high20, low20, vol, vol20, note, score)
+        )
+
+    # VCP setups
+    vcps: List[SignalRow] = []
+    is_vcp, vcp_score, vcp_note = detect_vcp(df)
+    if is_vcp:
+        entry, stop, target, rr = plan_vcp(high20, atr14)
+        vcps.append(
             SignalRow(
                 ticker=ticker,
                 close=close,
                 ma20=ma20,
                 ma50=ma50,
+                ma200=ma200,
                 atr14=atr14,
                 high20=high20,
                 low20=low20,
                 vol=vol,
                 vol20=vol20,
-                note=note,
-                score=score,
-                entry=None,
-                stop=None,
-                target=None,
-                rr=None,
+                note=vcp_note,
+                score=vcp_score,
+                entry=entry,
+                stop=stop,
+                target=target,
+                rr=rr,
             )
         )
 
-    return pullbacks, breakouts, failures
+    return pullbacks, breakouts, failures, vcps
 
 
 # ---------- Reporting ----------
@@ -277,24 +366,30 @@ def fmt_trade(r: SignalRow) -> str:
 def fmt_row(r: SignalRow) -> str:
     vol_part = f"Vol {r.vol/1e6:.2f}M (avg {r.vol20/1e6:.2f}M)"
     base = (
-        f"- **{r.ticker}** | close {r.close:.2f} | MA20 {r.ma20:.2f} | MA50 {r.ma50:.2f} | "
+        f"- **{r.ticker}** | close {r.close:.2f} | MA20 {r.ma20:.2f} | MA50 {r.ma50:.2f} | MA200 {r.ma200:.2f} | "
         f"ATR {r.atr14:.2f} | 20dH {r.high20:.2f} | 20dL {r.low20:.2f} | {vol_part} — {r.note}"
     )
     return base + fmt_trade(r)
 
 
 def main():
-    universe = load_tickers()
-    if not universe:
+    # Load + filter universe
+    universe_raw = load_tickers()
+    if not universe_raw:
         raise RuntimeError("tickers.txt is empty (or missing). Add tickers, one per line.")
 
+    universe = filter_liquid_universe(universe_raw)
+
+    # Market regime (QQQ)
     regime = get_market_regime()
 
+    # Download history for universe
     start = (dt.date.today() - dt.timedelta(days=365)).isoformat()
 
     pullbacks_all: List[SignalRow] = []
     breakouts_all: List[SignalRow] = []
     failures_all: List[SignalRow] = []
+    vcps_all: List[SignalRow] = []
 
     chunk = 120
     for i in range(0, len(universe), chunk):
@@ -322,25 +417,31 @@ def main():
                 if df is None or df.empty:
                     continue
 
-                pb, bo, fa = classify_signals(t, df)
+                pb, bo, fa, vcp = classify_signals(t, df)
                 pullbacks_all.extend(pb)
                 breakouts_all.extend(bo)
                 failures_all.extend(fa)
+                vcps_all.extend(vcp)
             except Exception:
                 continue
 
     pullbacks_all.sort(key=lambda r: r.score, reverse=True)
     breakouts_all.sort(key=lambda r: r.score, reverse=True)
     failures_all.sort(key=lambda r: r.score, reverse=True)
+    vcps_all.sort(key=lambda r: r.score, reverse=True)
 
     today = dt.datetime.utcnow().strftime("%Y-%m-%d")
 
-    # Apply QQQ regime filter
+    # Apply QQQ regime filter:
+    # If not bullish, disable long entries (VCP/Pullback/Breakout),
+    # but still report failures (exit review).
     if regime["bullish"]:
+        vcp_out = vcps_all[:TOP_N]
         pullbacks_out = pullbacks_all[:TOP_N]
         breakouts_out = breakouts_all[:TOP_N]
         regime_line = "BULLISH ✅ (long setups enabled)"
     else:
+        vcp_out = []
         pullbacks_out = []
         breakouts_out = []
         regime_line = "BEARISH/NEUTRAL ⚠️ (long setups disabled)"
@@ -350,12 +451,16 @@ def main():
     report_lines = []
     report_lines.append(f"# Market Scan — {today}")
     report_lines.append("")
-    report_lines.append(f"Universe size: **{len(universe)}**")
+    report_lines.append(f"Universe size (raw): **{len(universe_raw)}**")
+    report_lines.append(f"Universe size (liquid-filtered): **{len(universe)}**")
     report_lines.append("")
     report_lines.append("## Market Regime (QQQ)")
     report_lines.append(
         f'QQQ close {regime["close"]} | MA50 {regime["ma50"]} | MA200 {regime["ma200"]} → {regime_line}'
     )
+    report_lines.append("")
+    report_lines.append("## VCP setups (compression → potential breakout)")
+    report_lines.extend([fmt_row(r) for r in vcp_out] or ["- (none)"])
     report_lines.append("")
     report_lines.append("## Pullback setups (actionable)")
     report_lines.extend([fmt_row(r) for r in pullbacks_out] or ["- (none)"])
