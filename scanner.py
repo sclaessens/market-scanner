@@ -1,7 +1,7 @@
 import math
 import datetime as dt
 from dataclasses import dataclass
-from typing import List, Dict, Tuple
+from typing import List, Tuple
 
 import pandas as pd
 import yfinance as yf
@@ -9,16 +9,49 @@ import yfinance as yf
 
 # ---------- Universe (from tickers.txt) ----------
 def load_tickers(path: str = "tickers.txt") -> List[str]:
+    """
+    Reads tickers from tickers.txt (one per line). Lines starting with # are ignored.
+    Converts tickers like BRK.B -> BRK-B for Yahoo.
+    """
     with open(path, "r", encoding="utf-8") as f:
         tickers = []
         for line in f:
             t = line.strip()
             if not t or t.startswith("#"):
                 continue
-            # Yahoo uses BRK-B and BF-B (not BRK.B)
             t = t.replace(".", "-")
             tickers.append(t)
     return sorted(set(tickers))
+
+
+# ---------- Market regime (QQQ filter) ----------
+def get_market_regime() -> dict:
+    """
+    Bullish regime if:
+      QQQ close > MA50 and MA50 > MA200
+    """
+    qqq = yf.download("QQQ", period="2y", interval="1d", progress=False)
+    if qqq is None or qqq.empty or len(qqq) < 210:
+        # If we can't reliably compute MA200, fail-safe to "not bullish"
+        return {"symbol": "QQQ", "close": float("nan"), "ma50": float("nan"), "ma200": float("nan"), "bullish": False}
+
+    qqq["MA50"] = qqq["Close"].rolling(50).mean()
+    qqq["MA200"] = qqq["Close"].rolling(200).mean()
+
+    last = qqq.iloc[-1]
+    close = float(last["Close"])
+    ma50 = float(last["MA50"])
+    ma200 = float(last["MA200"])
+
+    bullish = (close > ma50) and (ma50 > ma200)
+
+    return {
+        "symbol": "QQQ",
+        "close": round(close, 2),
+        "ma50": round(ma50, 2),
+        "ma200": round(ma200, 2),
+        "bullish": bool(bullish),
+    }
 
 
 # ---------- Indicators ----------
@@ -68,8 +101,12 @@ def safe_float(x) -> float:
 
 
 # ---------- Signal logic ----------
-def classify_signals(ticker: str, df: pd.DataFrame) -> Tuple[List[SignalRow], List[SignalRow], List[SignalRow]]:
-    # Needs enough data
+def classify_signals(
+    ticker: str, df: pd.DataFrame
+) -> Tuple[List[SignalRow], List[SignalRow], List[SignalRow]]:
+    """
+    Returns: (pullbacks, breakouts, failures)
+    """
     if df is None or len(df) < 80:
         return [], [], []
 
@@ -101,17 +138,15 @@ def classify_signals(ticker: str, df: pd.DataFrame) -> Tuple[List[SignalRow], Li
     # Pullback in uptrend:
     # - Close above MA50
     # - Close near MA20 (within ~1.25 ATR or within 1.5%)
-    # - No "trend break" (not below MA50)
+    # - Not "collapsing" away from highs
     dist_ma20 = abs(close - ma20)
     near_ma20 = (dist_ma20 <= 1.25 * atr14) or (abs(close / ma20 - 1) <= 0.015)
 
-    # Avoid buying extended: not too far below recent high (still strong)
     drawdown_from_high20 = (high20 - close) / high20 if high20 > 0 else 0.0
     not_collapsing = drawdown_from_high20 <= 0.12  # within 12% of 20d high
 
     pullbacks = []
     if close > ma50 and ma50_rising and near_ma20 and not_collapsing:
-        # Score: closer to MA20 + stronger trend (distance from MA50) + some "room" to high20
         room = max(high20 - close, 0.0)
         score = (room / atr14) - (dist_ma20 / atr14)
         note = f"Pullback: near MA20 | room~{room/atr14:.1f} ATR"
@@ -125,7 +160,6 @@ def classify_signals(ticker: str, df: pd.DataFrame) -> Tuple[List[SignalRow], Li
     breakouts = []
     vol_ok = vol >= 1.3 * vol20
     if close >= high20 * 0.999 and close > ma50 and vol_ok:
-        # Score: volume surprise + breakout strength
         score = (vol / vol20) + ((close - ma20) / atr14)
         note = f"Breakout: 20d high | vol {vol/vol20:.1f}x"
         breakouts.append(
@@ -133,7 +167,7 @@ def classify_signals(ticker: str, df: pd.DataFrame) -> Tuple[List[SignalRow], Li
         )
 
     # Trend failure / weakening:
-    # - Close below MA50 OR close below 20d low (harder fail)
+    # - Close below MA50 OR close below 20d low
     failures = []
     below_ma50 = close < ma50
     below_low20 = close <= low20 * 1.001
@@ -158,13 +192,15 @@ def fmt_row(r: SignalRow) -> str:
 
 
 def main():
-    # Universe
+    # Load tickers
     universe = load_tickers()
+    if not universe:
+        raise RuntimeError("tickers.txt is empty (or missing). Add tickers, one per line.")
 
-    # Limit size a bit if you want faster runs (keep full if you prefer)
-    # universe = universe[:650]
+    # Market regime (QQQ)
+    regime = get_market_regime()
 
-    # Download in chunks (Yahoo limits/robustness)
+    # Download in chunks
     start = (dt.date.today() - dt.timedelta(days=365)).isoformat()
 
     pullbacks_all: List[SignalRow] = []
@@ -174,6 +210,7 @@ def main():
     chunk = 120
     for i in range(0, len(universe), chunk):
         tickers = universe[i : i + chunk]
+
         data = yf.download(
             tickers=tickers,
             start=start,
@@ -187,10 +224,13 @@ def main():
         for t in tickers:
             try:
                 if isinstance(data.columns, pd.MultiIndex):
+                    if t not in data.columns.get_level_values(0):
+                        continue
                     df = data[t].dropna()
                 else:
-                    # single ticker case
+                    # single-ticker case
                     df = data.dropna()
+
                 if df is None or df.empty:
                     continue
 
@@ -206,22 +246,43 @@ def main():
     failures_all.sort(key=lambda r: r.score, reverse=True)
 
     today = dt.datetime.utcnow().strftime("%Y-%m-%d")
+
+    # Apply regime filter:
+    # If QQQ not bullish, disable LONG entries (pullbacks/breakouts),
+    # but still report failures (useful for exit review).
+    if regime["bullish"]:
+        pullbacks_out = pullbacks_all[:15]
+        breakouts_out = breakouts_all[:15]
+        regime_line = "BULLISH ✅ (long setups enabled)"
+    else:
+        pullbacks_out = []
+        breakouts_out = []
+        regime_line = "BEARISH/NEUTRAL ⚠️ (long setups disabled)"
+
+    failures_out = failures_all[:15]
+
     report_lines = []
-    report_lines.append(f"# Market Scan — {today} (S&P 500 + Nasdaq-100)")
+    report_lines.append(f"# Market Scan — {today}")
     report_lines.append("")
     report_lines.append(f"Universe size: **{len(universe)}**")
     report_lines.append("")
+    report_lines.append("## Market Regime (QQQ)")
+    report_lines.append(
+        f'QQQ close {regime["close"]} | MA50 {regime["ma50"]} | MA200 {regime["ma200"]} → {regime_line}'
+    )
+    report_lines.append("")
     report_lines.append("## Pullback setups (trend intact)")
-    report_lines.extend([fmt_row(r) for r in pullbacks_all[:15]] or ["- (none)"])
+    report_lines.extend([fmt_row(r) for r in pullbacks_out] or ["- (none)"])
     report_lines.append("")
     report_lines.append("## Breakouts (watch for pullback/retest)")
-    report_lines.extend([fmt_row(r) for r in breakouts_all[:15]] or ["- (none)"])
+    report_lines.extend([fmt_row(r) for r in breakouts_out] or ["- (none)"])
     report_lines.append("")
     report_lines.append("## Trend failures / weakening (review exits)")
-    report_lines.extend([fmt_row(r) for r in failures_all[:15]] or ["- (none)"])
+    report_lines.extend([fmt_row(r) for r in failures_out] or ["- (none)"])
     report_lines.append("")
 
     md = "\n".join(report_lines)
+
     with open("report.md", "w", encoding="utf-8") as f:
         f.write(md)
 
