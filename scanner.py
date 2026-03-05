@@ -159,9 +159,7 @@ def fmt_row(r: SignalRow) -> str:
 
 def main():
     # Universe
-    sp = get_sp500_tickers()
-    ndx = get_nasdaq100_tickers()
-    universe = sorted(set(sp + ndx))
+    universe = load_tickers()
 
     # Limit size a bit if you want faster runs (keep full if you prefer)
     # universe = universe[:650]
