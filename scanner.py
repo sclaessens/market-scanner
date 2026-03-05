@@ -1,10 +1,12 @@
 import math
 import datetime as dt
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import pandas as pd
 import yfinance as yf
+
+TOP_N = 5  # show only top N per section (keeps signal noise low)
 
 
 # ---------- Universe (from tickers.txt) ----------
@@ -32,7 +34,6 @@ def get_market_regime() -> dict:
     """
     qqq = yf.download("QQQ", period="2y", interval="1d", progress=False)
     if qqq is None or qqq.empty or len(qqq) < 210:
-        # If we can't reliably compute MA200, fail-safe to "not bullish"
         return {"symbol": "QQQ", "close": float("nan"), "ma50": float("nan"), "ma200": float("nan"), "bullish": False}
 
     qqq["MA50"] = qqq["Close"].rolling(50).mean()
@@ -90,6 +91,12 @@ class SignalRow:
     note: str
     score: float
 
+    # Action fields
+    entry: Optional[float] = None
+    stop: Optional[float] = None
+    target: Optional[float] = None
+    rr: Optional[float] = None
+
 
 def safe_float(x) -> float:
     try:
@@ -100,6 +107,34 @@ def safe_float(x) -> float:
         return float("nan")
 
 
+def calc_trade_plan_pullback(close: float, ma20: float, atr14: float) -> Tuple[float, float, float, float]:
+    """
+    Pullback plan:
+    - Entry: near MA20 (use MA20 as "limit zone")
+    - Stop: 1.6 ATR below entry (gives room; less shakeout)
+    - Target: 3.2 ATR above entry (RR ~ 2.0)
+    """
+    entry = ma20
+    stop = entry - 1.6 * atr14
+    target = entry + 3.2 * atr14
+    rr = (target - entry) / max(entry - stop, 1e-9)
+    return entry, stop, target, rr
+
+
+def calc_trade_plan_breakout(high20: float, atr14: float) -> Tuple[float, float, float, float]:
+    """
+    Breakout plan (for watch/retest):
+    - Entry: breakout level (20d high)
+    - Stop: 1.5 ATR below entry
+    - Target: 3.0 ATR above entry (RR ~ 2.0)
+    """
+    entry = high20
+    stop = entry - 1.5 * atr14
+    target = entry + 3.0 * atr14
+    rr = (target - entry) / max(entry - stop, 1e-9)
+    return entry, stop, target, rr
+
+
 # ---------- Signal logic ----------
 def classify_signals(
     ticker: str, df: pd.DataFrame
@@ -107,7 +142,8 @@ def classify_signals(
     """
     Returns: (pullbacks, breakouts, failures)
     """
-    if df is None or len(df) < 80:
+    if df is None or len(df) < 220:
+        # want MA50 slope stability; still ok to be strict
         return [], [], []
 
     df = df.copy()
@@ -131,76 +167,129 @@ def classify_signals(
     if any(math.isnan(v) for v in [close, ma20, ma50, atr14, high20, low20, vol20]) or atr14 <= 0:
         return [], [], []
 
-    # Trend filter: above MA50 and MA50 rising (simple slope proxy)
+    # Trend filter: above MA50 and MA50 rising
     ma50_prev = safe_float(df["MA50"].iloc[-6])  # ~1 week ago
     ma50_rising = (not math.isnan(ma50_prev)) and (ma50 > ma50_prev)
 
     # Pullback in uptrend:
-    # - Close above MA50
-    # - Close near MA20 (within ~1.25 ATR or within 1.5%)
-    # - Not "collapsing" away from highs
     dist_ma20 = abs(close - ma20)
     near_ma20 = (dist_ma20 <= 1.25 * atr14) or (abs(close / ma20 - 1) <= 0.015)
 
     drawdown_from_high20 = (high20 - close) / high20 if high20 > 0 else 0.0
-    not_collapsing = drawdown_from_high20 <= 0.12  # within 12% of 20d high
+    not_collapsing = drawdown_from_high20 <= 0.12
 
     pullbacks = []
     if close > ma50 and ma50_rising and near_ma20 and not_collapsing:
         room = max(high20 - close, 0.0)
         score = (room / atr14) - (dist_ma20 / atr14)
-        note = f"Pullback: near MA20 | room~{room/atr14:.1f} ATR"
+
+        entry, stop, target, rr = calc_trade_plan_pullback(close, ma20, atr14)
+        note = f"Pullback near MA20 | room~{room/atr14:.1f} ATR"
+
         pullbacks.append(
-            SignalRow(ticker, close, ma20, ma50, atr14, high20, low20, vol, vol20, note, score)
+            SignalRow(
+                ticker=ticker,
+                close=close,
+                ma20=ma20,
+                ma50=ma50,
+                atr14=atr14,
+                high20=high20,
+                low20=low20,
+                vol=vol,
+                vol20=vol20,
+                note=note,
+                score=score,
+                entry=entry,
+                stop=stop,
+                target=target,
+                rr=rr,
+            )
         )
 
     # Breakout:
-    # - Close at/above 20d high
-    # - Volume confirmation
     breakouts = []
     vol_ok = vol >= 1.3 * vol20
     if close >= high20 * 0.999 and close > ma50 and vol_ok:
         score = (vol / vol20) + ((close - ma20) / atr14)
-        note = f"Breakout: 20d high | vol {vol/vol20:.1f}x"
+
+        entry, stop, target, rr = calc_trade_plan_breakout(high20, atr14)
+        note = f"Breakout 20dH | vol {vol/vol20:.1f}x (watch retest)"
+
         breakouts.append(
-            SignalRow(ticker, close, ma20, ma50, atr14, high20, low20, vol, vol20, note, score)
+            SignalRow(
+                ticker=ticker,
+                close=close,
+                ma20=ma20,
+                ma50=ma50,
+                atr14=atr14,
+                high20=high20,
+                low20=low20,
+                vol=vol,
+                vol20=vol20,
+                note=note,
+                score=score,
+                entry=entry,
+                stop=stop,
+                target=target,
+                rr=rr,
+            )
         )
 
     # Trend failure / weakening:
-    # - Close below MA50 OR close below 20d low
     failures = []
     below_ma50 = close < ma50
     below_low20 = close <= low20 * 1.001
     if below_ma50 or below_low20:
         severity = (ma50 - close) / atr14 if below_ma50 else (low20 - close) / atr14
         score = severity + (0.5 if below_low20 else 0.0)
-        note = "Failure: below MA50" + (" & near/below 20d low" if below_low20 else "")
+        note = "Below MA50" + (" & near/below 20d low" if below_low20 else "")
+
         failures.append(
-            SignalRow(ticker, close, ma20, ma50, atr14, high20, low20, vol, vol20, note, score)
+            SignalRow(
+                ticker=ticker,
+                close=close,
+                ma20=ma20,
+                ma50=ma50,
+                atr14=atr14,
+                high20=high20,
+                low20=low20,
+                vol=vol,
+                vol20=vol20,
+                note=note,
+                score=score,
+                entry=None,
+                stop=None,
+                target=None,
+                rr=None,
+            )
         )
 
     return pullbacks, breakouts, failures
 
 
 # ---------- Reporting ----------
+def fmt_trade(r: SignalRow) -> str:
+    if r.entry is None or r.stop is None or r.target is None or r.rr is None:
+        return ""
+    return f" | entry {r.entry:.2f} | stop {r.stop:.2f} | tgt {r.target:.2f} | R/R {r.rr:.2f}"
+
+
 def fmt_row(r: SignalRow) -> str:
-    return (
+    vol_part = f"Vol {r.vol/1e6:.2f}M (avg {r.vol20/1e6:.2f}M)"
+    base = (
         f"- **{r.ticker}** | close {r.close:.2f} | MA20 {r.ma20:.2f} | MA50 {r.ma50:.2f} | "
-        f"ATR14 {r.atr14:.2f} | 20dH {r.high20:.2f} | 20dL {r.low20:.2f} | "
-        f"Vol {r.vol/1e6:.2f}M (avg {r.vol20/1e6:.2f}M) — {r.note}"
+        f"ATR {r.atr14:.2f} | 20dH {r.high20:.2f} | 20dL {r.low20:.2f} | {vol_part} — {r.note}"
     )
+    return base + fmt_trade(r)
 
 
 def main():
-    # Load tickers
     universe = load_tickers()
     if not universe:
         raise RuntimeError("tickers.txt is empty (or missing). Add tickers, one per line.")
 
-    # Market regime (QQQ)
     regime = get_market_regime()
 
-    # Download in chunks
     start = (dt.date.today() - dt.timedelta(days=365)).isoformat()
 
     pullbacks_all: List[SignalRow] = []
@@ -228,7 +317,6 @@ def main():
                         continue
                     df = data[t].dropna()
                 else:
-                    # single-ticker case
                     df = data.dropna()
 
                 if df is None or df.empty:
@@ -247,19 +335,17 @@ def main():
 
     today = dt.datetime.utcnow().strftime("%Y-%m-%d")
 
-    # Apply regime filter:
-    # If QQQ not bullish, disable LONG entries (pullbacks/breakouts),
-    # but still report failures (useful for exit review).
+    # Apply QQQ regime filter
     if regime["bullish"]:
-        pullbacks_out = pullbacks_all[:15]
-        breakouts_out = breakouts_all[:15]
+        pullbacks_out = pullbacks_all[:TOP_N]
+        breakouts_out = breakouts_all[:TOP_N]
         regime_line = "BULLISH ✅ (long setups enabled)"
     else:
         pullbacks_out = []
         breakouts_out = []
         regime_line = "BEARISH/NEUTRAL ⚠️ (long setups disabled)"
 
-    failures_out = failures_all[:15]
+    failures_out = failures_all[:TOP_N]
 
     report_lines = []
     report_lines.append(f"# Market Scan — {today}")
@@ -271,7 +357,7 @@ def main():
         f'QQQ close {regime["close"]} | MA50 {regime["ma50"]} | MA200 {regime["ma200"]} → {regime_line}'
     )
     report_lines.append("")
-    report_lines.append("## Pullback setups (trend intact)")
+    report_lines.append("## Pullback setups (actionable)")
     report_lines.extend([fmt_row(r) for r in pullbacks_out] or ["- (none)"])
     report_lines.append("")
     report_lines.append("## Breakouts (watch for pullback/retest)")
