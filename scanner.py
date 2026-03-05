@@ -7,41 +7,18 @@ import pandas as pd
 import yfinance as yf
 
 
-# ---------- Universe (S&P 500 + Nasdaq-100) ----------
-def get_sp500_tickers() -> List[str]:
-    # Wikipedia table "List of S&P 500 companies"
-    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-    tables = pd.read_html(url)
-    df = tables[0]
-    tickers = df["Symbol"].astype(str).tolist()
-    # Yahoo uses BRK-B and BF-B (not BRK.B)
-    tickers = [t.replace(".", "-") for t in tickers]
+# ---------- Universe (from tickers.txt) ----------
+def load_tickers(path: str = "tickers.txt") -> List[str]:
+    with open(path, "r", encoding="utf-8") as f:
+        tickers = []
+        for line in f:
+            t = line.strip()
+            if not t or t.startswith("#"):
+                continue
+            # Yahoo uses BRK-B and BF-B (not BRK.B)
+            t = t.replace(".", "-")
+            tickers.append(t)
     return sorted(set(tickers))
-
-
-def get_nasdaq100_tickers() -> List[str]:
-    # Wikipedia table "NASDAQ-100"
-    url = "https://en.wikipedia.org/wiki/Nasdaq-100"
-    tables = pd.read_html(url)
-    # The first table is often constituents; fallback to searching for "Ticker"
-    cand = None
-    for t in tables:
-        cols = [c.lower() for c in t.columns.astype(str)]
-        if any("ticker" in c for c in cols) or any("symbol" in c for c in cols):
-            cand = t
-            break
-    if cand is None:
-        return []
-    # Try common column names
-    for col in cand.columns:
-        c = str(col).lower()
-        if "ticker" in c or "symbol" in c:
-            tickers = cand[col].astype(str).tolist()
-            tickers = [t.replace(".", "-").strip() for t in tickers]
-            # Some rows can include footnotes; keep only plausible tickers
-            tickers = [t for t in tickers if 1 <= len(t) <= 6 and t.replace("-", "").isalnum()]
-            return sorted(set(tickers))
-    return []
 
 
 # ---------- Indicators ----------
