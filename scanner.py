@@ -93,9 +93,10 @@ def get_market_regime() -> dict:
     qqq["MA200"] = qqq["Close"].rolling(200).mean()
 
     last = qqq.iloc[-1]
-    close = float(last["Close"])
-    ma50 = float(last["MA50"])
-    ma200 = float(last["MA200"])
+
+    close = float(last["Close"].iloc[0] if hasattr(last["Close"], "iloc") else last["Close"])
+    ma50 = float(last["MA50"].iloc[0] if hasattr(last["MA50"], "iloc") else last["MA50"])
+    ma200 = float(last["MA200"].iloc[0] if hasattr(last["MA200"], "iloc") else last["MA200"])
 
     bullish = (close > ma50) and (ma50 > ma200)
 
