@@ -422,6 +422,47 @@ def fmt_row(r: SignalRow) -> str:
 
 
 # ---------- Scan logging ----------
+def initialize_scan_log() -> None:
+    """
+    Ensure data/scans_log.csv exists, even if no setups are found.
+    """
+    os.makedirs("data", exist_ok=True)
+    file_path = "data/scans_log.csv"
+
+    if os.path.exists(file_path):
+        return
+
+    columns = [
+        "run_id",
+        "setup_id",
+        "scan_date",
+        "ticker",
+        "setup_type",
+        "status",
+        "close",
+        "ma20",
+        "ma50",
+        "ma200",
+        "atr14",
+        "high20",
+        "low20",
+        "volume",
+        "volume_avg20",
+        "score",
+        "entry",
+        "stop",
+        "target",
+        "rr",
+        "note",
+        "market_symbol",
+        "market_close",
+        "market_ma50",
+        "market_ma200",
+        "market_bullish",
+    ]
+
+    pd.DataFrame(columns=columns).to_csv(file_path, index=False)
+
 def log_scans(rows: List[SignalRow], setup_type: str, status: str, regime: dict, run_id: str) -> None:
     """
     Logs scan results to data/scans_log.csv
@@ -484,6 +525,7 @@ def main():
 
     universe = filter_liquid_universe(universe_raw)
     regime = get_market_regime()
+    initialize_scan_log()
 
     start = (dt.date.today() - dt.timedelta(days=365)).isoformat()
 
