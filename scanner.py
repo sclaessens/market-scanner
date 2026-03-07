@@ -1,4 +1,6 @@
 import math
+import os
+import uuid
 import datetime as dt
 from dataclasses import dataclass
 from typing import List, Tuple, Optional
@@ -418,6 +420,62 @@ def fmt_row(r: SignalRow) -> str:
     return base + fmt_trade(r)
 
 
+# ---------- Scan logging ----------
+def log_scans(rows: List[SignalRow], setup_type: str, status: str, regime: dict, run_id: str) -> None:
+    """
+    Logs scan results to data/scans_log.csv
+    """
+    if not rows:
+        return
+
+    os.makedirs("data", exist_ok=True)
+    file_path = "data/scans_log.csv"
+
+    records = []
+    scan_date = dt.datetime.utcnow().strftime("%Y-%m-%d")
+
+    for r in rows:
+        setup_id = str(uuid.uuid4())
+
+        records.append(
+            {
+                "run_id": run_id,
+                "setup_id": setup_id,
+                "scan_date": scan_date,
+                "ticker": r.ticker,
+                "setup_type": setup_type,
+                "status": status,
+                "close": r.close,
+                "ma20": r.ma20,
+                "ma50": r.ma50,
+                "ma200": r.ma200,
+                "atr14": r.atr14,
+                "high20": r.high20,
+                "low20": r.low20,
+                "volume": r.vol,
+                "volume_avg20": r.vol20,
+                "score": r.score,
+                "entry": r.entry,
+                "stop": r.stop,
+                "target": r.target,
+                "rr": r.rr,
+                "note": r.note,
+                "market_symbol": regime["symbol"],
+                "market_close": regime["close"],
+                "market_ma50": regime["ma50"],
+                "market_ma200": regime["ma200"],
+                "market_bullish": regime["bullish"],
+            }
+        )
+
+    df = pd.DataFrame(records)
+
+    if os.path.exists(file_path):
+        df.to_csv(file_path, mode="a", header=False, index=False)
+    else:
+        df.to_csv(file_path, mode="w", header=True, index=False)
+
+
 def main():
     universe_raw = load_tickers()
     if not universe_raw:
@@ -473,6 +531,7 @@ def main():
     vcps_all.sort(key=lambda r: r.score, reverse=True)
 
     today = dt.datetime.utcnow().strftime("%Y-%m-%d")
+    run_id = dt.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
 
     if regime["bullish"]:
         regime_line = "BULLISH ✅ (long setups enabled)"
@@ -537,6 +596,18 @@ def main():
     report_lines.append("## Trend failures / weakening (review exits)")
     report_lines.extend([fmt_row(r) for r in failures_out] or ["- (none)"])
     report_lines.append("")
+
+    # ---------- LOGGING ----------
+    if regime["bullish"]:
+        log_scans(vcp_out, "vcp", "actionable", regime, run_id)
+        log_scans(pullbacks_out, "pullback", "actionable", regime, run_id)
+        log_scans(breakouts_out, "breakout", "actionable", regime, run_id)
+    else:
+        log_scans(vcp_watch, "vcp", "watchlist", regime, run_id)
+        log_scans(pullbacks_watch, "pullback", "watchlist", regime, run_id)
+        log_scans(breakouts_watch, "breakout", "watchlist", regime, run_id)
+
+    log_scans(failures_out, "failure", "failure", regime, run_id)
 
     md = "\n".join(report_lines)
 
