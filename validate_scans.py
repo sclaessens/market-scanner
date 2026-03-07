@@ -38,7 +38,8 @@ def ensure_data_dir() -> None:
 
 def load_scans(path: str) -> pd.DataFrame:
     if not os.path.exists(path):
-        raise FileNotFoundError(f"Missing input file: {path}")
+        print("No scans_log.csv found yet. Skipping validation.")
+        return pd.DataFrame()
 
     df = pd.read_csv(path)
 
