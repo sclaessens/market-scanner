@@ -1,3 +1,5 @@
+import pandas as pd
+
 from datetime import datetime
 from pathlib import Path
 
@@ -50,8 +52,14 @@ def main():
         save_csv_file(enriched, Path("data/features") / f"{ticker}.csv")
 
     # 6. Marktregime bepalen op basis van QQQ
+    if "QQQ" not in feature_data or feature_data["QQQ"].empty:
+    raise ValueError("QQQ data is missing after fetch/indicator processing")
+
     qqq_df = feature_data["QQQ"]
     latest_qqq = qqq_df.iloc[-1]
+    
+    if pd.isna(latest_qqq["Close"]) or pd.isna(latest_qqq["MA50"]) or pd.isna(latest_qqq["MA200"]):
+        raise ValueError("QQQ regime data contains NaN values")
 
     qqq_close = float(latest_qqq["Close"])
     qqq_ma50 = float(latest_qqq["MA50"])
