@@ -11,22 +11,17 @@ def load_tickers():
         for line in f:
             ticker = line.strip().upper()
 
-            # lege lijnen overslaan
             if not ticker:
                 continue
 
-            # commentaarlijnen overslaan
             if ticker.startswith("#"):
-                continue
-
-            # scheidingslijnen overslaan
-            if "=" in ticker or "-" in ticker or "~" in ticker:
                 continue
 
             tickers.append(ticker)
 
     return tickers
-    
+
+
 def fetch_ohlcv_data(ticker: str, period: str = "1y", interval: str = "1d") -> pd.DataFrame:
     df = yf.download(
         ticker,
@@ -34,9 +29,19 @@ def fetch_ohlcv_data(ticker: str, period: str = "1y", interval: str = "1d") -> p
         interval=interval,
         auto_adjust=False,
         progress=False,
+        group_by="column",
     )
 
     if df is None or df.empty:
         return pd.DataFrame()
+
+    # Flatten MultiIndex columns if needed
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+
+    # Keep only expected OHLCV columns if present
+    expected_cols = ["Open", "High", "Low", "Close", "Adj Close", "Volume"]
+    available_cols = [col for col in expected_cols if col in df.columns]
+    df = df[available_cols].copy()
 
     return df
