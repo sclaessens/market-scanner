@@ -53,7 +53,7 @@ def main():
 
     # 6. Marktregime bepalen op basis van QQQ
     if "QQQ" not in feature_data or feature_data["QQQ"].empty:
-    raise ValueError("QQQ data is missing after fetch/indicator processing")
+        raise ValueError("QQQ data is missing after fetch/indicator processing")
 
     qqq_df = feature_data["QQQ"]
     latest_qqq = qqq_df.iloc[-1]
