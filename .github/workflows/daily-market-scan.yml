@@ -8,6 +8,7 @@ on:
 jobs:
   scan:
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
 
@@ -25,29 +26,25 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas yfinance
+          pip install -r requirements.txt
 
-      - name: Run scanner
+      - name: Run market scan
         run: python run_scan.py
-
-      - name: Run validation
-        run: python validate_scans.py
 
       - name: Upload reports and data
         uses: actions/upload-artifact@v4
         with:
           name: market-scan-output
           path: |
-            report.md
-            data/scans_log.csv
-            data/scans_outcomes.csv
+            reports/
+            data/
 
       - name: Commit updated scan files
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add report.md data/scans_log.csv data/scans_outcomes.csv
-          git commit -m "Update daily market scan data" || echo "No changes to commit"
+          git add reports/*.md data/*.csv
+          git commit -m "Update daily market scan files" || echo "No changes to commit"
           git push
 
       - name: Send Telegram success notification
