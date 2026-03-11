@@ -28,7 +28,7 @@ jobs:
           pip install pandas yfinance
 
       - name: Run scanner
-        run: python scanner.py
+        run: python run_scan.py
 
       - name: Run validation
         run: python validate_scans.py
