@@ -43,7 +43,7 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add reports/*.md data/*.csv
+          git add reports/*.md data/*.csv data/features/*.csv
           git commit -m "Update daily market scan files" || echo "No changes to commit"
           git push
 
