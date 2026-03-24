@@ -14,6 +14,7 @@ FAILED_TICKERS_FILE = Path("data/failed_tickers.csv")
 LOOKBACK_PERIOD = "1y"
 MIN_HISTORY_ROWS = 220
 TOP_SETUPS_LIMIT = 5
+MIN_RR = 1.8
 
 
 def ensure_dirs() -> None:
@@ -40,10 +41,6 @@ def load_tickers(path: Path) -> list[str]:
 
 
 def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Zorgt dat de dataframe standaard kolommen heeft:
-    Open, High, Low, Close, Volume
-    """
     if df is None or df.empty:
         return pd.DataFrame()
 
@@ -79,10 +76,6 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def fetch_ticker_data(ticker: str, period: str = LOOKBACK_PERIOD) -> pd.DataFrame:
-    """
-    Robuuste single-ticker fetch.
-    Eerst via download, daarna fallback via Ticker.history().
-    """
     print(f"Fetching data for {ticker}...")
 
     try:
@@ -176,8 +169,11 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     if df.empty or len(df) < MIN_HISTORY_ROWS:
         return None
 
-    df = compute_indicators(df)
     latest = df.iloc[-1]
+
+    required_cols = {"Close", "MA20", "MA50", "MA200", "20D_High"}
+    if not required_cols.issubset(df.columns):
+        return None
 
     if pd.isna(latest["MA20"]) or pd.isna(latest["MA50"]) or pd.isna(latest["MA200"]):
         return None
@@ -191,25 +187,24 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     if pd.isna(high_20):
         return None
 
-    # Bearish regime = geen longs
     if regime == "BEARISH":
         return None
 
-    # 1. Trend
+    # Trend
     strong_trend = close > ma20 > ma50 > ma200
 
-    # 2. Pullback quality
+    # Pullback quality
     distance_ma20 = abs((close - ma20) / ma20)
     distance_ma50 = abs((close - ma50) / ma50)
     healthy_pullback = distance_ma20 < 0.02 or distance_ma50 < 0.02
 
-    # 3. Structuur intact
+    # Structuur intact
     not_broken = close > ma50
 
     if not (strong_trend and healthy_pullback and not_broken):
         return None
 
-    # 4. Regime adaptation
+    # Regime adaptation
     if regime == "NEUTRAL":
         momentum_threshold_5d = 0.01
         momentum_threshold_10d = 0.03
@@ -219,7 +214,6 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
         momentum_threshold_10d = 0.10
         setup_type = "A"
 
-    # 5. Score
     score = 0
 
     # Relative strength
@@ -241,6 +235,9 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
         score += 1
 
     # Momentum via returns
+    if len(df) < 11:
+        return None
+
     ret_5d = (df["Close"].iloc[-1] / df["Close"].iloc[-6]) - 1
     ret_10d = (df["Close"].iloc[-1] / df["Close"].iloc[-11]) - 1
 
@@ -252,7 +249,7 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     else:
         return None
 
-    # Extra cleanup
+    # Cleanup
     if close < 20:
         return None
 
@@ -267,37 +264,39 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     }
 
 
-def save_failed_tickers(rows: list[dict]) -> None:
-    if not rows:
-        return
-
-    df = pd.DataFrame(rows)
-    df.to_csv(FAILED_TICKERS_FILE, index=False)
-
 def build_tradeplan(df: pd.DataFrame) -> dict:
+    if df.empty:
+        return {}
+
+    required_cols = {"Close", "MA20", "MA50", "ATR14"}
+    if not required_cols.issubset(df.columns):
+        return {}
+
     latest = df.iloc[-1]
 
-    close = latest["Close"]
     ma20 = latest["MA20"]
     ma50 = latest["MA50"]
     atr = latest["ATR14"]
 
-    # Entry = rond MA20 (pullback zone)
+    if pd.isna(ma20) or pd.isna(ma50) or pd.isna(atr):
+        return {}
+
+    # Entry = rond MA20
     entry = ma20
 
-    # Stop = onder MA50 - buffer
+    # Stop = onder MA50 met ATR-buffer
     stop = ma50 - atr * 0.5
 
-    # Risk
     risk = entry - stop
-
     if risk <= 0:
         return {}
 
-    # Target = 2x risk
+    # Target = 2R
     target = entry + (2 * risk)
-
     rr = (target - entry) / (entry - stop)
+
+    if rr < MIN_RR:
+        return {}
 
     return {
         "entry": round(float(entry), 2),
@@ -305,6 +304,15 @@ def build_tradeplan(df: pd.DataFrame) -> dict:
         "target": round(float(target), 2),
         "rr": round(float(rr), 2),
     }
+
+
+def save_failed_tickers(rows: list[dict]) -> None:
+    if not rows:
+        return
+
+    df = pd.DataFrame(rows)
+    df.to_csv(FAILED_TICKERS_FILE, index=False)
+
 
 def write_report(
     total_tickers: int,
@@ -394,25 +402,21 @@ def main() -> None:
             )
             continue
 
+        df_ind = compute_indicators(df)
         successful_count += 1
 
-        result = scan_ticker(ticker, df, regime)
-
-        df_ind = compute_indicators(df)
-
         result = scan_ticker(ticker, df_ind, regime)
-        
-        if result is not None:
-            tradeplan = build_tradeplan(df_ind)
-        
-            if tradeplan:
-                result.update(tradeplan)
-                setups.append(result)
-        if result is not None:
-            setups.append(result)
+        if result is None:
+            continue
 
-    # Sort & keep top setups
-    setups = sorted(setups, key=lambda x: (x["score"], x["ticker"]), reverse=True)
+        tradeplan = build_tradeplan(df_ind)
+        if not tradeplan:
+            continue
+
+        result.update(tradeplan)
+        setups.append(result)
+
+    setups = sorted(setups, key=lambda x: (x["score"], x["rr"], x["ticker"]), reverse=True)
     setups = setups[:TOP_SETUPS_LIMIT]
 
     save_failed_tickers(failed_rows)
