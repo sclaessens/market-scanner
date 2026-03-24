@@ -238,8 +238,24 @@ def write_report(
     lines.append(f"**{regime}**")
     lines.append("")
     lines.append("## Setups")
+    lines.append("## Setups")
+
     if not setups:
         lines.append("- (none)")
+        lines.append("")
+        lines.append("## Interpretation")
+        
+        if regime == "NEUTRAL":
+            lines.append("Market is NEUTRAL → low conviction environment.")
+            lines.append("Scanner is intentionally selective → no A-quality setups.")
+        
+        elif regime == "BEARISH":
+            lines.append("Market is BEARISH → long setups are filtered out.")
+            lines.append("No long opportunities expected in this regime.")
+        
+        else:
+            lines.append("No setups found despite bullish regime → check scan logic.")
+    
     else:
         for setup in setups:
             lines.append(
