@@ -213,6 +213,16 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     if not (strong_trend and healthy_pullback and not_broken and momentum):
         return None
 
+    # =========================
+    # REGIME ADAPTATION
+    # =========================
+    if regime == "NEUTRAL":
+        momentum_threshold_5d = 0.02
+        momentum_threshold_10d = 0.05
+    else:
+        momentum_threshold_5d = 0.05
+        momentum_threshold_10d = 0.10
+
     # 6. Score
     score = 0
 
@@ -246,15 +256,15 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     ret_5d = (df["Close"].iloc[-1] / df["Close"].iloc[-6]) - 1
     ret_10d = (df["Close"].iloc[-1] / df["Close"].iloc[-11]) - 1
     
-    if ret_5d > 0.05:
-        score += 3
-    elif ret_5d > 0.02:
+    if ret_5d > momentum_threshold_5d:
         score += 2
     
-    if ret_10d > 0.10:
+    if ret_10d > momentum_threshold_10d:
         score += 2
-    elif ret_10d > 0.05:
-        score += 1
+    
+    # extra filter
+    if ret_10d < momentum_threshold_10d:
+        return None
     
     # =========================
     # 4. FILTER SLOW / DEFENSIVE
