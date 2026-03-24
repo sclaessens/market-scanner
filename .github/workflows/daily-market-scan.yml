@@ -6,17 +6,12 @@ on:
     - cron: "30 20 * * 1-5"
 
 jobs:
-  scan:
+  run-scan:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -26,37 +21,79 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install pandas yfinance openpyxl requests
 
       - name: Run market scan
         run: python run_scan.py
 
-      - name: Upload reports and data
+      - name: Upload reports artifact
         uses: actions/upload-artifact@v4
         with:
-          name: market-scan-output
-          path: |
-            reports/
-            data/
+          name: market-scan-report
+          path: reports/
 
-      - name: Commit updated scan files
+      - name: Commit generated reports
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add reports/*.md data/*.csv data/features/*.csv
-          git commit -m "Update daily market scan files" || echo "No changes to commit"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/*.md reports/*.txt data/failed_tickers.csv
+          git diff --cached --quiet || git commit -m "Update market scan outputs"
           git push
 
-      - name: Send Telegram success notification
+      - name: Send Telegram message
         if: success()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d text="Daily Market Scan completed successfully."
+          python - <<'PY'
+          from pathlib import Path
+          import os
+          import requests
 
-      - name: Send Telegram failure notification
+          token = os.environ["TELEGRAM_BOT_TOKEN"]
+          chat_id = os.environ["TELEGRAM_CHAT_ID"]
+          message_path = Path("reports/telegram_message.txt")
+
+          if not message_path.exists():
+              raise FileNotFoundError("Missing reports/telegram_message.txt")
+
+          text = message_path.read_text(encoding="utf-8").strip()
+
+          resp = requests.post(
+              f"https://api.telegram.org/bot{token}/sendMessage",
+              data={
+                  "chat_id": chat_id,
+                  "text": text,
+              },
+              timeout=30,
+          )
+          resp.raise_for_status()
+          print("Telegram message sent successfully.")
+          PY
+
+      - name: Send Telegram failure alert
         if: failure()
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-            -d text="Daily Market Scan failed. Check GitHub Actions."
+          python - <<'PY'
+          import os
+          import requests
+
+          token = os.environ["TELEGRAM_BOT_TOKEN"]
+          chat_id = os.environ["TELEGRAM_CHAT_ID"]
+          text = "Market Scan failed. Check GitHub Actions logs."
+
+          resp = requests.post(
+              f"https://api.telegram.org/bot{token}/sendMessage",
+              data={
+                  "chat_id": chat_id,
+                  "text": text,
+              },
+              timeout=30,
+          )
+          resp.raise_for_status()
+          print("Telegram failure alert sent successfully.")
+          PY
