@@ -11,6 +11,7 @@ TICKERS_FILE = Path("tickers.txt")
 REPORTS_DIR = Path("reports")
 FAILED_TICKERS_FILE = Path("data/failed_tickers.csv")
 TELEGRAM_MESSAGE_FILE = REPORTS_DIR / "telegram_message.txt"
+SCANS_LOG_FILE = Path("data/scans_log.csv")
 
 LOOKBACK_PERIOD = "1y"
 MIN_HISTORY_ROWS = 220
@@ -294,6 +295,39 @@ def build_tradeplan(df: pd.DataFrame) -> dict:
         "rr": round(float(rr), 2),
     }
 
+def append_scan_log(scan_date: str, regime: str, setups: list[dict]) -> None:
+    if not setups:
+        return
+
+    rows = []
+    for setup in setups:
+        rows.append({
+            "scan_date": scan_date,
+            "ticker": setup["ticker"],
+            "regime": regime,
+            "setup": setup["setup"],
+            "score": setup["score"],
+            "close": setup["close"],
+            "entry": setup["entry"],
+            "stop": setup["stop"],
+            "target": setup["target"],
+            "rr": setup["rr"],
+        })
+
+    df_new = pd.DataFrame(rows)
+
+    if SCANS_LOG_FILE.exists():
+        df_old = pd.read_csv(SCANS_LOG_FILE)
+        df_all = pd.concat([df_old, df_new], ignore_index=True)
+        df_all = df_all.drop_duplicates(
+            subset=["scan_date", "ticker", "setup", "entry"],
+            keep="last",
+        )
+    else:
+        df_all = df_new
+
+    df_all.to_csv(SCANS_LOG_FILE, index=False)
+
 
 def save_failed_tickers(rows: list[dict]) -> None:
     if not rows:
@@ -455,6 +489,9 @@ def main() -> None:
 
     save_failed_tickers(failed_rows)
 
+    report_date = pd.Timestamp.today().strftime("%Y-%m-%d")
+    append_scan_log(report_date, regime, setups)
+
     report_path = write_report(
         total_tickers=len(tickers),
         successful_tickers=successful_count,
@@ -463,7 +500,6 @@ def main() -> None:
         setups=setups,
     )
 
-    report_date = pd.Timestamp.today().strftime("%Y-%m-%d")
     telegram_path = write_telegram_message(
         report_date=report_date,
         regime=regime,
