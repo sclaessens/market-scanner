@@ -1,5 +1,7 @@
-📊 Market Scan — 2026-03-24 16:15
+📊 Market Scan — 2026-03-24 17:42
 Regime: 🟡 NEUTRAL
 Universe: 292/298 valid | Failed: 1
-Setups: none
-Context: low conviction environment.
+Setups: 3
+KMI | B_pullback | score 9 | entry 33.35 | stop 31.11 | target 37.84 | RR 2.0
+KEYS | B_pullback | score 7 | entry 290.67 | stop 245.97 | target 380.07 | RR 2.0
+CSCO | B_pullback | score 7 | entry 78.68 | stop 77.54 | target 80.95 | RR 2.0

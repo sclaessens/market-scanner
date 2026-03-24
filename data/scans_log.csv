@@ -1,1 +1,4 @@
-timestamp,ticker,setup,score,regime,notes
+timestamp,ticker,setup,score,regime,notes,scan_date,close,entry,stop,target,rr
+,KMI,B_pullback,9,NEUTRAL,,2026-03-24,33.97,33.35,31.11,37.84,2.0
+,KEYS,B_pullback,7,NEUTRAL,,2026-03-24,295.72,290.67,245.97,380.07,2.0
+,CSCO,B_pullback,7,NEUTRAL,,2026-03-24,80.14,78.68,77.54,80.95,2.0
