@@ -216,18 +216,43 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     # 6. Score
     score = 0
 
+    # =========================
+    # 1. RELATIVE STRENGTH
+    # =========================
     distance_high = (high_20 - close) / high_20
-
-    if distance_high < 0.05:
+    
+    if distance_high < 0.03:
+        score += 3   # zeer sterk (leaders)
+    elif distance_high < 0.06:
         score += 2
     elif distance_high < 0.10:
         score += 1
-
-    if ma20 > ma50:
+    else:
+        return None   # te zwak → eruit
+    
+    # =========================
+    # 2. TREND KWALITEIT
+    # =========================
+    trend_strength = (ma20 - ma50) / ma50
+    
+    if trend_strength > 0.05:
+        score += 2
+    elif trend_strength > 0.02:
         score += 1
-
-    if momentum:
-        score += 1
+    
+    # =========================
+    # 3. MOMENTUM (prijs)
+    # =========================
+    recent_closes = df["Close"].iloc[-5:]
+    
+    if recent_closes.is_monotonic_increasing:
+        score += 2
+    
+    # =========================
+    # 4. FILTER DEFENSIVE STOCKS
+    # =========================
+    if close < 20:
+        return None  # vaak garbage small caps / zwakke names
 
     return {
         "ticker": ticker,
