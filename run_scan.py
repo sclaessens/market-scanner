@@ -190,39 +190,47 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     ma200 = latest["MA200"]
 
     # =========================
-    # 1. TREND CHECK
+    # 1. STRONG TREND ONLY
     # =========================
-    uptrend = close > ma50 and ma50 > ma200
+    strong_trend = close > ma20 > ma50 > ma200
 
     # =========================
-    # 2. PULLBACK LOGICA
+    # 2. PULLBACK QUALITY
     # =========================
-    distance_to_ma20 = abs(close - ma20) / ma20
-    distance_to_ma50 = abs(close - ma50) / ma50
+    distance_ma20 = (close - ma20) / ma20
+    distance_ma50 = (close - ma50) / ma50
 
-    near_ma20 = distance_to_ma20 < 0.03   # binnen 3%
-    near_ma50 = distance_to_ma50 < 0.03
-
-    pullback = near_ma20 or near_ma50
-
-    # =========================
-    # 3. GEEN STRUCTUUR BREUK
-    # =========================
-    not_broken = close > ma50 * 0.97
+    # Niet te ver van MA20, maar ook niet er ver boven
+    healthy_pullback = (
+        abs(distance_ma20) < 0.02   # dicht bij MA20
+        or abs(distance_ma50) < 0.02
+    )
 
     # =========================
-    # 4. REGIME FILTER
+    # 3. GEEN DIEPE BREAK
+    # =========================
+    not_broken = close > ma50
+
+    # =========================
+    # 4. MOMENTUM FILTER
+    # =========================
+    # recente kracht: MA20 stijgt
+    ma20_slope = df["MA20"].iloc[-5:]
+    momentum = ma20_slope.is_monotonic_increasing
+
+    # =========================
+    # 5. REGIME FILTER
     # =========================
     if regime == "BEARISH":
         return None
 
-    if uptrend and pullback and not_broken:
+    if strong_trend and healthy_pullback and not_broken and momentum:
         return {
             "ticker": ticker,
             "close": round(float(close), 2),
             "ma20": round(float(ma20), 2),
             "ma50": round(float(ma50), 2),
-            "setup": "pullback",
+            "setup": "A_pullback",
         }
 
     return None
