@@ -274,6 +274,37 @@ def save_failed_tickers(rows: list[dict]) -> None:
     df = pd.DataFrame(rows)
     df.to_csv(FAILED_TICKERS_FILE, index=False)
 
+def build_tradeplan(df: pd.DataFrame) -> dict:
+    latest = df.iloc[-1]
+
+    close = latest["Close"]
+    ma20 = latest["MA20"]
+    ma50 = latest["MA50"]
+    atr = latest["ATR14"]
+
+    # Entry = rond MA20 (pullback zone)
+    entry = ma20
+
+    # Stop = onder MA50 - buffer
+    stop = ma50 - atr * 0.5
+
+    # Risk
+    risk = entry - stop
+
+    if risk <= 0:
+        return {}
+
+    # Target = 2x risk
+    target = entry + (2 * risk)
+
+    rr = (target - entry) / (entry - stop)
+
+    return {
+        "entry": round(float(entry), 2),
+        "stop": round(float(stop), 2),
+        "target": round(float(target), 2),
+        "rr": round(float(rr), 2),
+    }
 
 def write_report(
     total_tickers: int,
@@ -313,8 +344,9 @@ def write_report(
     else:
         for setup in setups:
             lines.append(
-                f"- {setup['ticker']} | close {setup['close']} | "
-                f"{setup['setup']} | score {setup['score']}"
+                f"- {setup['ticker']} | close {setup['close']} | {setup['setup']} | "
+                f"score {setup['score']} | entry {setup['entry']} | stop {setup['stop']} | "
+                f"target {setup['target']} | RR {setup['rr']}"
             )
 
     report_path.write_text("\n".join(lines), encoding="utf-8")
@@ -365,6 +397,13 @@ def main() -> None:
         successful_count += 1
 
         result = scan_ticker(ticker, df, regime)
+
+        if result is not None:
+            tradeplan = build_tradeplan(df)
+            
+            if tradeplan:
+                result.update(tradeplan)
+                setups.append(result)
         if result is not None:
             setups.append(result)
 
