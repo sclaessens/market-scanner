@@ -8,8 +8,5 @@ Failed tickers: **1**
 **NEUTRAL**
 
 ## Setups
-- (none)
-
-## Interpretation
-Market is NEUTRAL → low conviction environment.
-Scanner is intentionally selective → no A-quality setups.
+- KMI | close 33.99 | B_pullback | score 9
+- APD | close 284.58 | B_pullback | score 4
