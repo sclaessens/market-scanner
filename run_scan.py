@@ -217,11 +217,18 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     # REGIME ADAPTATION
     # =========================
     if regime == "NEUTRAL":
-        momentum_threshold_5d = 0.02
-        momentum_threshold_10d = 0.05
+        momentum_threshold_5d = 0.01
+        momentum_threshold_10d = 0.03
+        setup_type = "B"
     else:
         momentum_threshold_5d = 0.05
         momentum_threshold_10d = 0.10
+        setup_type = "A"
+
+    # =========================
+    # SETUP TYPE
+    # =========================
+    setup_type = "A"
 
     # 6. Score
     score = 0
@@ -283,8 +290,7 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
         "close": round(float(close), 2),
         "ma20": round(float(ma20), 2),
         "ma50": round(float(ma50), 2),
-        "ma200": round(float(ma200), 2),
-        "setup": "A_pullback",
+        "setup": f"{setup_type}_pullback",
         "score": score,
     }
 
