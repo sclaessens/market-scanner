@@ -359,8 +359,16 @@ def write_telegram_message(
     setups: list[dict],
 ) -> Path:
     lines: list[str] = []
-    lines.append(f"Market Scan — {report_date}")
-    lines.append(f"Regime: {regime}")
+    now = pd.Timestamp.now().strftime("%H:%M")
+    lines.append(f"📊 Market Scan — {report_date} {now}")
+    if regime == "BULLISH":
+        regime_icon = "🟢"
+    elif regime == "BEARISH":
+        regime_icon = "🔴"
+    else:
+        regime_icon = "🟡"
+    
+    lines.append(f"Regime: {regime_icon} {regime}")
     lines.append(
         f"Universe: {successful_tickers}/{total_tickers} valid | Failed: {failed_tickers}"
     )
