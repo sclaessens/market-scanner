@@ -8,8 +8,8 @@ Failed tickers: **1**
 **NEUTRAL**
 
 ## Setups
-- VZ | close 50.58 | A_pullback | score 5
-- KMI | close 33.71 | A_pullback | score 5
-- EQIX | close 966.96 | A_pullback | score 5
-- ENB | close 54.16 | A_pullback | score 5
-- ABNB | close 132.59 | A_pullback | score 2
+- (none)
+
+## Interpretation
+Market is NEUTRAL → low conviction environment.
+Scanner is intentionally selective → no A-quality setups.
