@@ -8,4 +8,9 @@ Failed tickers: **1**
 **NEUTRAL**
 
 ## Setups
+## Setups
 - (none)
+
+## Interpretation
+Market is NEUTRAL → low conviction environment.
+Scanner is intentionally selective → no A-quality setups.
