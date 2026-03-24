@@ -175,10 +175,6 @@ def validate_reference_index(ticker: str) -> pd.DataFrame:
 
 
 def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
-    """
-    Eenvoudige placeholder scanlogica.
-    Later breiden we dit uit met echte pullback/breakout/VCP regels.
-    """
     if df.empty or len(df) < MIN_HISTORY_ROWS:
         return None
 
@@ -193,17 +189,40 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     ma50 = latest["MA50"]
     ma200 = latest["MA200"]
 
-    # Voorbeeld: simpele bullish trend check
-    in_uptrend = close > ma20 and ma20 > ma50 and ma50 > ma200
+    # =========================
+    # 1. TREND CHECK
+    # =========================
+    uptrend = close > ma50 and ma50 > ma200
 
-    if regime == "BULLISH" and in_uptrend:
+    # =========================
+    # 2. PULLBACK LOGICA
+    # =========================
+    distance_to_ma20 = abs(close - ma20) / ma20
+    distance_to_ma50 = abs(close - ma50) / ma50
+
+    near_ma20 = distance_to_ma20 < 0.03   # binnen 3%
+    near_ma50 = distance_to_ma50 < 0.03
+
+    pullback = near_ma20 or near_ma50
+
+    # =========================
+    # 3. GEEN STRUCTUUR BREUK
+    # =========================
+    not_broken = close > ma50 * 0.97
+
+    # =========================
+    # 4. REGIME FILTER
+    # =========================
+    if regime == "BEARISH":
+        return None
+
+    if uptrend and pullback and not_broken:
         return {
             "ticker": ticker,
             "close": round(float(close), 2),
             "ma20": round(float(ma20), 2),
             "ma50": round(float(ma50), 2),
-            "ma200": round(float(ma200), 2),
-            "setup": "trend_candidate",
+            "setup": "pullback",
         }
 
     return None
