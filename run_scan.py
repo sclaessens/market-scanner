@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import pandas as pd
 import yfinance as yf
@@ -13,6 +13,7 @@ FAILED_TICKERS_FILE = Path("data/failed_tickers.csv")
 
 LOOKBACK_PERIOD = "1y"
 MIN_HISTORY_ROWS = 220
+TOP_SETUPS_LIMIT = 5
 
 
 def ensure_dirs() -> None:
@@ -49,7 +50,6 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
 
     if isinstance(out.columns, pd.MultiIndex):
-        # Bij yfinance krijg je soms MultiIndex-kolommen
         if len(out.columns.levels) >= 2:
             if "Open" in out.columns.get_level_values(0):
                 out.columns = out.columns.get_level_values(0)
@@ -85,7 +85,6 @@ def fetch_ticker_data(ticker: str, period: str = LOOKBACK_PERIOD) -> pd.DataFram
     """
     print(f"Fetching data for {ticker}...")
 
-    # Probeer eerst download()
     try:
         df = yf.download(
             ticker,
@@ -102,7 +101,6 @@ def fetch_ticker_data(ticker: str, period: str = LOOKBACK_PERIOD) -> pd.DataFram
     except Exception as exc:
         print(f"Download error for {ticker}: {exc}")
 
-    # Fallback via Ticker.history()
     try:
         ticker_obj = yf.Ticker(ticker)
         df = ticker_obj.history(period=period, interval="1d", auto_adjust=False)
@@ -188,52 +186,58 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     ma20 = latest["MA20"]
     ma50 = latest["MA50"]
     ma200 = latest["MA200"]
+    high_20 = latest["20D_High"]
 
-    # =========================
-    # 1. STRONG TREND ONLY
-    # =========================
+    if pd.isna(high_20):
+        return None
+
+    # 1. Strong trend only
     strong_trend = close > ma20 > ma50 > ma200
 
-    # =========================
-    # 2. PULLBACK QUALITY
-    # =========================
-    distance_ma20 = (close - ma20) / ma20
-    distance_ma50 = (close - ma50) / ma50
+    # 2. Pullback quality
+    distance_ma20 = abs((close - ma20) / ma20)
+    distance_ma50 = abs((close - ma50) / ma50)
+    healthy_pullback = distance_ma20 < 0.02 or distance_ma50 < 0.02
 
-    # Niet te ver van MA20, maar ook niet er ver boven
-    healthy_pullback = (
-        abs(distance_ma20) < 0.02   # dicht bij MA20
-        or abs(distance_ma50) < 0.02
-    )
-
-    # =========================
-    # 3. GEEN DIEPE BREAK
-    # =========================
+    # 3. No structural break
     not_broken = close > ma50
 
-    # =========================
-    # 4. MOMENTUM FILTER
-    # =========================
-    # recente kracht: MA20 stijgt
+    # 4. Momentum filter
     ma20_slope = df["MA20"].iloc[-5:]
     momentum = ma20_slope.is_monotonic_increasing
 
-    # =========================
-    # 5. REGIME FILTER
-    # =========================
+    # 5. Regime filter
     if regime == "BEARISH":
         return None
 
-    if strong_trend and healthy_pullback and not_broken and momentum:
-        return {
-            "ticker": ticker,
-            "close": round(float(close), 2),
-            "ma20": round(float(ma20), 2),
-            "ma50": round(float(ma50), 2),
-            "setup": "A_pullback",
-        }
+    if not (strong_trend and healthy_pullback and not_broken and momentum):
+        return None
 
-    return None
+    # 6. Score
+    score = 0
+
+    distance_high = (high_20 - close) / high_20
+
+    if distance_high < 0.05:
+        score += 2
+    elif distance_high < 0.10:
+        score += 1
+
+    if ma20 > ma50:
+        score += 1
+
+    if momentum:
+        score += 1
+
+    return {
+        "ticker": ticker,
+        "close": round(float(close), 2),
+        "ma20": round(float(ma20), 2),
+        "ma50": round(float(ma50), 2),
+        "ma200": round(float(ma200), 2),
+        "setup": "A_pullback",
+        "score": score,
+    }
 
 
 def save_failed_tickers(rows: list[dict]) -> None:
@@ -261,7 +265,7 @@ def write_report(
     lines.append(f"Universe size (valid data): **{successful_tickers}**")
     lines.append(f"Failed tickers: **{failed_tickers}**")
     lines.append("")
-    lines.append(f"## Market Regime")
+    lines.append("## Market Regime")
     lines.append(f"**{regime}**")
     lines.append("")
     lines.append("## Setups")
@@ -270,22 +274,20 @@ def write_report(
         lines.append("- (none)")
         lines.append("")
         lines.append("## Interpretation")
-        
+
         if regime == "NEUTRAL":
             lines.append("Market is NEUTRAL → low conviction environment.")
             lines.append("Scanner is intentionally selective → no A-quality setups.")
-        
         elif regime == "BEARISH":
             lines.append("Market is BEARISH → long setups are filtered out.")
             lines.append("No long opportunities expected in this regime.")
-        
         else:
             lines.append("No setups found despite bullish regime → check scan logic.")
-    
     else:
         for setup in setups:
             lines.append(
-                f"- {setup['ticker']} | close {setup['close']} | {setup['setup']}"
+                f"- {setup['ticker']} | close {setup['close']} | "
+                f"{setup['setup']} | score {setup['score']}"
             )
 
     report_path.write_text("\n".join(lines), encoding="utf-8")
@@ -299,22 +301,27 @@ def main() -> None:
 
     tickers = load_tickers(TICKERS_FILE)
 
-    # Referentie-indexen MOETEN eerst gevalideerd worden
     qqq_df = validate_reference_index("QQQ")
     spy_df = validate_reference_index("SPY")
 
     regime = determine_market_regime(qqq_df)
     print(f"Market regime: {regime}")
 
-    _ = spy_df  # later gebruiken voor extra context/filtering
+    _ = spy_df  # later uitbreiden voor extra marktfilter
 
     setups: list[dict] = []
     failed_rows: list[dict] = []
     successful_count = 0
 
+    seen_tickers: set[str] = set()
+
     for ticker in tickers:
         if ticker in {"QQQ", "SPY"}:
             continue
+
+        if ticker in seen_tickers:
+            continue
+        seen_tickers.add(ticker)
 
         df = fetch_ticker_data(ticker)
 
@@ -333,6 +340,10 @@ def main() -> None:
         result = scan_ticker(ticker, df, regime)
         if result is not None:
             setups.append(result)
+
+    # Sort & keep top setups
+    setups = sorted(setups, key=lambda x: (x["score"], x["ticker"]), reverse=True)
+    setups = setups[:TOP_SETUPS_LIMIT]
 
     save_failed_tickers(failed_rows)
 
