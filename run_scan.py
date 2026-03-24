@@ -10,6 +10,7 @@ import yfinance as yf
 TICKERS_FILE = Path("tickers.txt")
 REPORTS_DIR = Path("reports")
 FAILED_TICKERS_FILE = Path("data/failed_tickers.csv")
+TELEGRAM_MESSAGE_FILE = REPORTS_DIR / "telegram_message.txt"
 
 LOOKBACK_PERIOD = "1y"
 MIN_HISTORY_ROWS = 220
@@ -190,21 +191,17 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     if regime == "BEARISH":
         return None
 
-    # Trend
     strong_trend = close > ma20 > ma50 > ma200
 
-    # Pullback quality
     distance_ma20 = abs((close - ma20) / ma20)
     distance_ma50 = abs((close - ma50) / ma50)
     healthy_pullback = distance_ma20 < 0.02 or distance_ma50 < 0.02
 
-    # Structuur intact
     not_broken = close > ma50
 
     if not (strong_trend and healthy_pullback and not_broken):
         return None
 
-    # Regime adaptation
     if regime == "NEUTRAL":
         momentum_threshold_5d = 0.01
         momentum_threshold_10d = 0.03
@@ -216,7 +213,6 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
 
     score = 0
 
-    # Relative strength
     distance_high = (high_20 - close) / high_20
     if distance_high < 0.03:
         score += 3
@@ -227,14 +223,12 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     else:
         return None
 
-    # Trend quality
     trend_strength = (ma20 - ma50) / ma50
     if trend_strength > 0.05:
         score += 2
     elif trend_strength > 0.02:
         score += 1
 
-    # Momentum via returns
     if len(df) < 11:
         return None
 
@@ -249,7 +243,6 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     else:
         return None
 
-    # Cleanup
     if close < 20:
         return None
 
@@ -281,17 +274,13 @@ def build_tradeplan(df: pd.DataFrame) -> dict:
     if pd.isna(ma20) or pd.isna(ma50) or pd.isna(atr):
         return {}
 
-    # Entry = rond MA20
     entry = ma20
-
-    # Stop = onder MA50 met ATR-buffer
     stop = ma50 - atr * 0.5
 
     risk = entry - stop
     if risk <= 0:
         return {}
 
-    # Target = 2R
     target = entry + (2 * risk)
     rr = (target - entry) / (entry - stop)
 
@@ -361,6 +350,39 @@ def write_report(
     return report_path
 
 
+def write_telegram_message(
+    report_date: str,
+    regime: str,
+    total_tickers: int,
+    successful_tickers: int,
+    failed_tickers: int,
+    setups: list[dict],
+) -> Path:
+    lines: list[str] = []
+    lines.append(f"Market Scan — {report_date}")
+    lines.append(f"Regime: {regime}")
+    lines.append(
+        f"Universe: {successful_tickers}/{total_tickers} valid | Failed: {failed_tickers}"
+    )
+
+    if not setups:
+        lines.append("Setups: none")
+        if regime == "NEUTRAL":
+            lines.append("Context: low conviction environment.")
+        elif regime == "BEARISH":
+            lines.append("Context: long setups filtered out.")
+    else:
+        lines.append(f"Setups: {len(setups)}")
+        for setup in setups:
+            lines.append(
+                f"{setup['ticker']} | {setup['setup']} | score {setup['score']} | "
+                f"entry {setup['entry']} | stop {setup['stop']} | target {setup['target']} | RR {setup['rr']}"
+            )
+
+    TELEGRAM_MESSAGE_FILE.write_text("\n".join(lines), encoding="utf-8")
+    return TELEGRAM_MESSAGE_FILE
+
+
 def main() -> None:
     ensure_dirs()
 
@@ -374,7 +396,7 @@ def main() -> None:
     regime = determine_market_regime(qqq_df)
     print(f"Market regime: {regime}")
 
-    _ = spy_df  # later uitbreiden voor extra marktfilter
+    _ = spy_df
 
     setups: list[dict] = []
     failed_rows: list[dict] = []
@@ -416,14 +438,12 @@ def main() -> None:
         result.update(tradeplan)
         setups.append(result)
 
-    setups = sorted(setups, key=lambda x: (x["score"], x["rr"], x["ticker"]), reverse=True)
-    # Alleen beste setups houden
-    if setups:
-        top_score = setups[0]["score"]
-        setups = [s for s in setups if s["score"] == top_score]
-    
-    # max 3
-    setups = setups[:3]
+    setups = sorted(
+        setups,
+        key=lambda x: (x["score"], x["rr"], x["ticker"]),
+        reverse=True,
+    )
+    setups = setups[:TOP_SETUPS_LIMIT]
 
     save_failed_tickers(failed_rows)
 
@@ -435,7 +455,18 @@ def main() -> None:
         setups=setups,
     )
 
+    report_date = pd.Timestamp.today().strftime("%Y-%m-%d")
+    telegram_path = write_telegram_message(
+        report_date=report_date,
+        regime=regime,
+        total_tickers=len(tickers),
+        successful_tickers=successful_count,
+        failed_tickers=len(failed_rows),
+        setups=setups,
+    )
+
     print(f"Report written to: {report_path}")
+    print(f"Telegram message written to: {telegram_path}")
     print(f"Failed tickers log written to: {FAILED_TICKERS_FILE}")
 
 
