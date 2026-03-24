@@ -191,7 +191,11 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     if pd.isna(high_20):
         return None
 
-    # 1. Strong trend only
+    # Bearish regime = geen longs
+    if regime == "BEARISH":
+        return None
+
+    # 1. Trend
     strong_trend = close > ma20 > ma50 > ma200
 
     # 2. Pullback quality
@@ -199,23 +203,13 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     distance_ma50 = abs((close - ma50) / ma50)
     healthy_pullback = distance_ma20 < 0.02 or distance_ma50 < 0.02
 
-    # 3. No structural break
+    # 3. Structuur intact
     not_broken = close > ma50
 
-    # 4. Momentum filter
-    ma20_slope = df["MA20"].iloc[-5:]
-    momentum = ma20_slope.is_monotonic_increasing
-
-    # 5. Regime filter
-    if regime == "BEARISH":
+    if not (strong_trend and healthy_pullback and not_broken):
         return None
 
-    if not (strong_trend and healthy_pullback and not_broken and momentum):
-        return None
-
-    # =========================
-    # REGIME ADAPTATION
-    # =========================
+    # 4. Regime adaptation
     if regime == "NEUTRAL":
         momentum_threshold_5d = 0.01
         momentum_threshold_10d = 0.03
@@ -225,19 +219,11 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
         momentum_threshold_10d = 0.10
         setup_type = "A"
 
-    # =========================
-    # SETUP TYPE
-    # =========================
-    setup_type = "A"
-
-    # 6. Score
+    # 5. Score
     score = 0
 
-    # =========================
-    # 1. RELATIVE STRENGTH (belangrijkste)
-    # =========================
+    # Relative strength
     distance_high = (high_20 - close) / high_20
-    
     if distance_high < 0.03:
         score += 3
     elif distance_high < 0.06:
@@ -246,42 +232,27 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
         score += 1
     else:
         return None
-    
-    # =========================
-    # 2. TREND KWALITEIT
-    # =========================
+
+    # Trend quality
     trend_strength = (ma20 - ma50) / ma50
-    
     if trend_strength > 0.05:
         score += 2
     elif trend_strength > 0.02:
         score += 1
-    
-    # =========================
-    # 3. MOMENTUM (RETURNS, niet monotonic)
-    # =========================
+
+    # Momentum via returns
     ret_5d = (df["Close"].iloc[-1] / df["Close"].iloc[-6]) - 1
     ret_10d = (df["Close"].iloc[-1] / df["Close"].iloc[-11]) - 1
-    
+
     if ret_5d > momentum_threshold_5d:
         score += 2
-    
+
     if ret_10d > momentum_threshold_10d:
         score += 2
-    
-    # extra filter
-    if ret_10d < momentum_threshold_10d:
+    else:
         return None
-    
-    # =========================
-    # 4. FILTER SLOW / DEFENSIVE
-    # =========================
-    if ret_10d < 0.03:
-        return None  # te traag → eruit
-    
-    # =========================
-    # 5. EXTRA FILTER (optioneel)
-    # =========================
+
+    # Extra cleanup
     if close < 20:
         return None
 
@@ -290,6 +261,7 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
         "close": round(float(close), 2),
         "ma20": round(float(ma20), 2),
         "ma50": round(float(ma50), 2),
+        "ma200": round(float(ma200), 2),
         "setup": f"{setup_type}_pullback",
         "score": score,
     }
