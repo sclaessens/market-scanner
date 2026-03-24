@@ -417,7 +417,13 @@ def main() -> None:
         setups.append(result)
 
     setups = sorted(setups, key=lambda x: (x["score"], x["rr"], x["ticker"]), reverse=True)
-    setups = setups[:TOP_SETUPS_LIMIT]
+    # Alleen beste setups houden
+    if setups:
+        top_score = setups[0]["score"]
+        setups = [s for s in setups if s["score"] == top_score]
+    
+    # max 3
+    setups = setups[:3]
 
     save_failed_tickers(failed_rows)
 
