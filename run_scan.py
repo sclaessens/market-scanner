@@ -18,6 +18,55 @@ MIN_HISTORY_ROWS = 220
 TOP_SETUPS_LIMIT = 5
 MIN_RR = 1.8
 
+def detect_pullback(df):
+    row = df.iloc[-1]
+
+    close = row["Close"]
+    ma20 = row["MA20"]
+    ma50 = row["MA50"]
+    high_20 = df["High"].rolling(20).max().iloc[-1]
+
+    distance_ma20 = (close - ma20) / ma20
+
+    trend_ok = close > ma50
+    pullback_zone = -0.08 < distance_ma20 < 0.03
+    near_high = close > 0.85 * high_20
+
+    return trend_ok and pullback_zone and near_high
+
+
+def detect_breakout(df):
+    row = df.iloc[-1]
+
+    close = row["Close"]
+    high_20 = df["High"].rolling(20).max().iloc[-1]
+    volume = row["Volume"]
+    vol_avg = df["Volume"].rolling(20).mean().iloc[-1]
+
+    near_high = close >= 0.97 * high_20
+    volume_spike = volume > 1.5 * vol_avg
+
+    return near_high and volume_spike
+
+
+def detect_vcp(df):
+    if len(df) < 30:
+        return False
+
+    recent = df.tail(5)
+    previous = df.tail(20)
+
+    range_recent = recent["High"].max() - recent["Low"].min()
+    range_prev = previous["High"].max() - previous["Low"].min()
+
+    volume_recent = recent["Volume"].mean()
+    volume_prev = previous["Volume"].mean()
+
+    contraction = range_recent < range_prev
+    volume_dry = volume_recent < volume_prev
+
+    return contraction and volume_dry
+
 
 def ensure_dirs() -> None:
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -189,30 +238,44 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     if pd.isna(high_20):
         return None
 
-    if regime == "BEARISH":
+    if close < 20:
         return None
 
-    strong_trend = close > ma20 > ma50 > ma200
+    # -----------------------------
+    # TREND (NIET MEER HARD)
+    # -----------------------------
+    strong_trend = close > ma50
 
-    distance_ma20 = abs((close - ma20) / ma20)
-    distance_ma50 = abs((close - ma50) / ma50)
-    healthy_pullback = distance_ma20 < 0.02 or distance_ma50 < 0.02
+    # -----------------------------
+    # PULLBACK (VERSOEPELD)
+    # -----------------------------
+    distance_ma20 = (close - ma20) / ma20
+    pullback = -0.08 < distance_ma20 < 0.03
 
-    not_broken = close > ma50
+    # -----------------------------
+    # BREAKOUT
+    # -----------------------------
+    volume = latest["Volume"]
+    vol_avg = df["Volume"].rolling(20).mean().iloc[-1]
 
-    if not (strong_trend and healthy_pullback and not_broken):
+    breakout = close >= 0.97 * high_20 and volume > 1.5 * vol_avg
+
+    # -----------------------------
+    # VCP
+    # -----------------------------
+    vcp = detect_vcp(df)
+
+    # 👉 BELANGRIJK: enkel skippen als GEEN setup
+    if not (pullback or breakout or vcp):
         return None
 
-    if regime == "NEUTRAL":
-        momentum_threshold_5d = 0.01
-        momentum_threshold_10d = 0.03
-        setup_type = "B"
-    else:
-        momentum_threshold_5d = 0.05
-        momentum_threshold_10d = 0.10
-        setup_type = "A"
-
+    # -----------------------------
+    # SCORE
+    # -----------------------------
     score = 0
+
+    if strong_trend:
+        score += 2
 
     distance_high = (high_20 - close) / high_20
     if distance_high < 0.03:
@@ -221,8 +284,6 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
         score += 2
     elif distance_high < 0.10:
         score += 1
-    else:
-        return None
 
     trend_strength = (ma20 - ma50) / ma50
     if trend_strength > 0.05:
@@ -230,30 +291,42 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     elif trend_strength > 0.02:
         score += 1
 
-    if len(df) < 11:
-        return None
+    if len(df) >= 11:
+        ret_5d = (df["Close"].iloc[-1] / df["Close"].iloc[-6]) - 1
+        ret_10d = (df["Close"].iloc[-1] / df["Close"].iloc[-11]) - 1
 
-    ret_5d = (df["Close"].iloc[-1] / df["Close"].iloc[-6]) - 1
-    ret_10d = (df["Close"].iloc[-1] / df["Close"].iloc[-11]) - 1
+        if ret_5d > 0:
+            score += 1
 
-    if ret_5d > momentum_threshold_5d:
-        score += 2
+        if ret_10d > 0:
+            score += 1
 
-    if ret_10d > momentum_threshold_10d:
-        score += 2
-    else:
-        return None
+    # -----------------------------
+    # SETUP TYPE (NIEUW)
+    # -----------------------------
+    setups = []
 
-    if close < 20:
-        return None
+    if pullback:
+        setups.append("PULLBACK")
 
+    if breakout:
+        setups.append("BREAKOUT")
+
+    if vcp:
+        setups.append("VCP")
+
+    setup_str = ", ".join(setups)
+
+    # -----------------------------
+    # RESULT
+    # -----------------------------
     return {
         "ticker": ticker,
         "close": round(float(close), 2),
         "ma20": round(float(ma20), 2),
         "ma50": round(float(ma50), 2),
         "ma200": round(float(ma200), 2),
-        "setup": f"{setup_type}_pullback",
+        "setup": setup_str,
         "score": score,
     }
 
