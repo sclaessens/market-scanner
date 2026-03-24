@@ -238,7 +238,6 @@ def write_report(
     lines.append(f"**{regime}**")
     lines.append("")
     lines.append("## Setups")
-    lines.append("## Setups")
 
     if not setups:
         lines.append("- (none)")
