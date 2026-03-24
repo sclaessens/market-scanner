@@ -398,9 +398,13 @@ def main() -> None:
 
         result = scan_ticker(ticker, df, regime)
 
+        df_ind = compute_indicators(df)
+
+        result = scan_ticker(ticker, df_ind, regime)
+        
         if result is not None:
-            tradeplan = build_tradeplan(df)
-            
+            tradeplan = build_tradeplan(df_ind)
+        
             if tradeplan:
                 result.update(tradeplan)
                 setups.append(result)
