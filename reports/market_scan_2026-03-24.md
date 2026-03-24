@@ -8,5 +8,8 @@ Failed tickers: **1**
 **NEUTRAL**
 
 ## Setups
-- CSCO | close 80.12 | B_pullback | score 7 | entry 78.68 | stop 77.57 | target 80.9 | RR 2.0
-- APD | close 285.18 | B_pullback | score 4 | entry 279.79 | stop 272.48 | target 294.41 | RR 2.0
+- (none)
+
+## Interpretation
+Market is NEUTRAL → low conviction environment.
+Scanner is intentionally selective → no A-quality setups.
