@@ -217,18 +217,18 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
     score = 0
 
     # =========================
-    # 1. RELATIVE STRENGTH
+    # 1. RELATIVE STRENGTH (belangrijkste)
     # =========================
     distance_high = (high_20 - close) / high_20
     
     if distance_high < 0.03:
-        score += 3   # zeer sterk (leaders)
+        score += 3
     elif distance_high < 0.06:
         score += 2
     elif distance_high < 0.10:
         score += 1
     else:
-        return None   # te zwak → eruit
+        return None
     
     # =========================
     # 2. TREND KWALITEIT
@@ -241,18 +241,32 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
         score += 1
     
     # =========================
-    # 3. MOMENTUM (prijs)
+    # 3. MOMENTUM (RETURNS, niet monotonic)
     # =========================
-    recent_closes = df["Close"].iloc[-5:]
+    ret_5d = (df["Close"].iloc[-1] / df["Close"].iloc[-6]) - 1
+    ret_10d = (df["Close"].iloc[-1] / df["Close"].iloc[-11]) - 1
     
-    if recent_closes.is_monotonic_increasing:
+    if ret_5d > 0.05:
+        score += 3
+    elif ret_5d > 0.02:
         score += 2
     
+    if ret_10d > 0.10:
+        score += 2
+    elif ret_10d > 0.05:
+        score += 1
+    
     # =========================
-    # 4. FILTER DEFENSIVE STOCKS
+    # 4. FILTER SLOW / DEFENSIVE
+    # =========================
+    if ret_10d < 0.03:
+        return None  # te traag → eruit
+    
+    # =========================
+    # 5. EXTRA FILTER (optioneel)
     # =========================
     if close < 20:
-        return None  # vaak garbage small caps / zwakke names
+        return None
 
     return {
         "ticker": ticker,
