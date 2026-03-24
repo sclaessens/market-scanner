@@ -1,146 +1,309 @@
-import pandas as pd
+from __future__ import annotations
 
-from datetime import datetime
 from pathlib import Path
+from typing import Optional, Tuple
 
-from config.settings import INDEX_TICKERS, REPORTS_DIR
-from src.validator import validate_inputs
-from src.data_fetcher import load_tickers, fetch_ohlcv_data
-from src.indicators import add_indicators
-from src.regime import classify_market_regime
-from src.reporter import build_report
-from src.utils import save_text_file, save_csv_file
-from src.scanner import detect_vcp, rank_setups
+import pandas as pd
+import yfinance as yf
 
 
-def main():
-    print("Starting market scan...")
+TICKERS_FILE = Path("tickers.txt")
+REPORTS_DIR = Path("reports")
+FAILED_TICKERS_FILE = Path("data/failed_tickers.csv")
 
-    # 1. Validate project structure and required inputs
-    validate_inputs()
+LOOKBACK_PERIOD = "1y"
+MIN_HISTORY_ROWS = 220
 
-    # 2. Load user tickers
-    tickers = load_tickers()
+
+def ensure_dirs() -> None:
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    FAILED_TICKERS_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+
+def load_tickers(path: Path) -> list[str]:
+    if not path.exists():
+        raise FileNotFoundError(f"Missing tickers file: {path}")
+
+    tickers: list[str] = []
+    with path.open("r", encoding="utf-8") as f:
+        for line in f:
+            ticker = line.strip().upper()
+            if not ticker or ticker.startswith("#"):
+                continue
+            tickers.append(ticker)
+
     if not tickers:
         raise ValueError("No tickers found in tickers.txt")
 
-    # 3. Add index tickers needed for regime analysis
-    combined_tickers = list(dict.fromkeys(tickers + INDEX_TICKERS))
+    return tickers
 
-    # 4. Fetch raw price data
-    price_data = {}
 
-    for ticker in combined_tickers:
-        print(f"Fetching data for {ticker}...")
-        df = fetch_ohlcv_data(ticker)
+def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Zorgt dat de dataframe standaard kolommen heeft:
+    Open, High, Low, Close, Volume
+    """
+    if df is None or df.empty:
+        return pd.DataFrame()
 
-        if df is None or df.empty:
-            print(f"Warning: no data returned for {ticker}")
-            continue
+    out = df.copy()
 
-        price_data[ticker] = df
+    if isinstance(out.columns, pd.MultiIndex):
+        # Bij yfinance krijg je soms MultiIndex-kolommen
+        if len(out.columns.levels) >= 2:
+            if "Open" in out.columns.get_level_values(0):
+                out.columns = out.columns.get_level_values(0)
+            else:
+                out.columns = [c[0] if isinstance(c, tuple) else c for c in out.columns]
 
-    if "QQQ" not in price_data:
+    rename_map = {
+        "open": "Open",
+        "high": "High",
+        "low": "Low",
+        "close": "Close",
+        "adj close": "Adj Close",
+        "volume": "Volume",
+    }
+
+    out.columns = [
+        rename_map.get(str(col).strip().lower(), str(col).strip())
+        for col in out.columns
+    ]
+
+    required = {"Open", "High", "Low", "Close", "Volume"}
+    if not required.issubset(set(out.columns)):
+        return pd.DataFrame()
+
+    out = out.dropna(subset=["Open", "High", "Low", "Close", "Volume"]).copy()
+    return out
+
+
+def fetch_ticker_data(ticker: str, period: str = LOOKBACK_PERIOD) -> pd.DataFrame:
+    """
+    Robuuste single-ticker fetch.
+    Eerst via download, daarna fallback via Ticker.history().
+    """
+    print(f"Fetching data for {ticker}...")
+
+    # Probeer eerst download()
+    try:
+        df = yf.download(
+            ticker,
+            period=period,
+            interval="1d",
+            auto_adjust=False,
+            progress=False,
+            threads=False,
+            group_by="column",
+        )
+        df = normalize_columns(df)
+        if not df.empty:
+            return df
+    except Exception as exc:
+        print(f"Download error for {ticker}: {exc}")
+
+    # Fallback via Ticker.history()
+    try:
+        ticker_obj = yf.Ticker(ticker)
+        df = ticker_obj.history(period=period, interval="1d", auto_adjust=False)
+        df = normalize_columns(df)
+        if not df.empty:
+            return df
+    except Exception as exc:
+        print(f"History error for {ticker}: {exc}")
+
+    print(f"Warning: no data returned for {ticker}")
+    return pd.DataFrame()
+
+
+def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
+    out = df.copy()
+
+    out["MA20"] = out["Close"].rolling(20).mean()
+    out["MA50"] = out["Close"].rolling(50).mean()
+    out["MA200"] = out["Close"].rolling(200).mean()
+
+    prev_close = out["Close"].shift(1)
+    tr1 = out["High"] - out["Low"]
+    tr2 = (out["High"] - prev_close).abs()
+    tr3 = (out["Low"] - prev_close).abs()
+    out["TR"] = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+    out["ATR14"] = out["TR"].rolling(14).mean()
+
+    out["20D_High"] = out["High"].rolling(20).max()
+    out["20D_Low"] = out["Low"].rolling(20).min()
+    out["AVG_VOL20"] = out["Volume"].rolling(20).mean()
+
+    return out
+
+
+def determine_market_regime(qqq_df: pd.DataFrame) -> str:
+    if qqq_df.empty or len(qqq_df) < 200:
         raise ValueError("QQQ data is required to determine market regime")
 
-    # 5. Enrich with indicators and save feature files
-    feature_data = {}
+    latest = qqq_df.iloc[-1]
 
-    for ticker, df in price_data.items():
-        enriched = add_indicators(df)
-        feature_data[ticker] = enriched
+    close = latest["Close"]
+    ma50 = latest["MA50"]
+    ma200 = latest["MA200"]
 
-        save_csv_file(enriched, Path("data/features") / f"{ticker}.csv")
+    if pd.isna(close) or pd.isna(ma50) or pd.isna(ma200):
+        raise ValueError("QQQ regime cannot be determined because MA data is incomplete")
 
-    # 6. Build liquid universe count
-    liquid_tickers = []
+    if close > ma50 and ma50 > ma200:
+        return "BULLISH"
+    if close < ma50 and ma50 < ma200:
+        return "BEARISH"
+    return "NEUTRAL"
 
-    for ticker in tickers:
-        if ticker not in feature_data:
-            continue
 
-        df = feature_data[ticker]
-        if df.empty:
-            continue
+def validate_reference_index(ticker: str) -> pd.DataFrame:
+    df = fetch_ticker_data(ticker)
+    if df.empty:
+        raise ValueError(f"{ticker} data is required but no valid data was returned")
 
-        latest = df.iloc[-1]
-        close = latest.get("Close")
-        avg_vol = latest.get("AVG_VOL_20")
+    if len(df) < MIN_HISTORY_ROWS:
+        raise ValueError(
+            f"{ticker} data is incomplete: expected at least {MIN_HISTORY_ROWS} rows, got {len(df)}"
+        )
 
-        if pd.notna(close) and pd.notna(avg_vol):
-            if close >= 10 and avg_vol >= 1_000_000:
-                liquid_tickers.append(ticker)
+    df = compute_indicators(df)
+    if df[["MA50", "MA200"]].iloc[-1].isna().any():
+        raise ValueError(f"{ticker} data is present but MA calculation is incomplete")
 
-    # 7. Determine market regime from QQQ
-    if "QQQ" not in feature_data or feature_data["QQQ"].empty:
-        raise ValueError("QQQ data is missing after fetch/indicator processing")
+    return df
 
-    qqq_df = feature_data["QQQ"]
-    latest_qqq = qqq_df.iloc[-1]
 
-    if (
-        pd.isna(latest_qqq["Close"])
-        or pd.isna(latest_qqq["MA50"])
-        or pd.isna(latest_qqq["MA200"])
-    ):
-        raise ValueError("QQQ regime data contains NaN values")
+def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
+    """
+    Eenvoudige placeholder scanlogica.
+    Later breiden we dit uit met echte pullback/breakout/VCP regels.
+    """
+    if df.empty or len(df) < MIN_HISTORY_ROWS:
+        return None
 
-    qqq_close = float(latest_qqq["Close"])
-    qqq_ma50 = float(latest_qqq["MA50"])
-    qqq_ma200 = float(latest_qqq["MA200"])
+    df = compute_indicators(df)
+    latest = df.iloc[-1]
 
-    regime_label = classify_market_regime(
-        qqq_close=qqq_close,
-        ma50=qqq_ma50,
-        ma200=qqq_ma200,
-    )
+    if pd.isna(latest["MA20"]) or pd.isna(latest["MA50"]) or pd.isna(latest["MA200"]):
+        return None
 
-    regime_text = (
-        f"QQQ close {qqq_close:.2f} | "
-        f"MA50 {qqq_ma50:.2f} | "
-        f"MA200 {qqq_ma200:.2f} "
-        f"→ {regime_label}"
-    )
+    close = latest["Close"]
+    ma20 = latest["MA20"]
+    ma50 = latest["MA50"]
+    ma200 = latest["MA200"]
 
-    # 8. Sprint 2: detect and rank VCP setups
-    all_vcp_setups = []
+    # Voorbeeld: simpele bullish trend check
+    in_uptrend = close > ma20 and ma20 > ma50 and ma50 > ma200
 
-    for ticker in tickers:
-        if ticker not in feature_data:
-            continue
+    if regime == "BULLISH" and in_uptrend:
+        return {
+            "ticker": ticker,
+            "close": round(float(close), 2),
+            "ma20": round(float(ma20), 2),
+            "ma50": round(float(ma50), 2),
+            "ma200": round(float(ma200), 2),
+            "setup": "trend_candidate",
+        }
 
-        df = feature_data[ticker]
-        vcp_setup = detect_vcp(ticker, df)
+    return None
 
-        if vcp_setup:
-            all_vcp_setups.append(vcp_setup)
 
-    ranked_vcp_setups = rank_setups(all_vcp_setups)
-    vcp_setups = [item["summary"] for item in ranked_vcp_setups]
+def save_failed_tickers(rows: list[dict]) -> None:
+    if not rows:
+        return
 
-    # Placeholder sections for later Sprint 2 additions
-    pullback_setups = []
-    breakout_setups = []
-    weakening_setups = []
+    df = pd.DataFrame(rows)
+    df.to_csv(FAILED_TICKERS_FILE, index=False)
 
-    # 9. Build report
-    report_text = build_report(
-        universe_size=len(tickers),
-        liquid_universe_size=len(liquid_tickers),
-        regime=regime_text,
-        vcp=vcp_setups,
-        pullbacks=pullback_setups,
-        breakouts=breakout_setups,
-        weakening=weakening_setups,
-    )
 
-    # 10. Save report
-    today = datetime.now().strftime("%Y-%m-%d")
+def write_report(
+    total_tickers: int,
+    successful_tickers: int,
+    failed_tickers: int,
+    regime: str,
+    setups: list[dict],
+) -> Path:
+    today = pd.Timestamp.today().strftime("%Y-%m-%d")
     report_path = REPORTS_DIR / f"market_scan_{today}.md"
-    save_text_file(report_text, report_path)
 
-    print(f"Report saved to: {report_path}")
-    print("Market scan completed successfully.")
+    lines: list[str] = []
+    lines.append(f"# Market Scan — {today}")
+    lines.append("")
+    lines.append(f"Universe size (raw): **{total_tickers}**")
+    lines.append(f"Universe size (valid data): **{successful_tickers}**")
+    lines.append(f"Failed tickers: **{failed_tickers}**")
+    lines.append("")
+    lines.append(f"## Market Regime")
+    lines.append(f"**{regime}**")
+    lines.append("")
+    lines.append("## Setups")
+    if not setups:
+        lines.append("- (none)")
+    else:
+        for setup in setups:
+            lines.append(
+                f"- {setup['ticker']} | close {setup['close']} | {setup['setup']}"
+            )
+
+    report_path.write_text("\n".join(lines), encoding="utf-8")
+    return report_path
+
+
+def main() -> None:
+    ensure_dirs()
+
+    print("Starting market scan...")
+
+    tickers = load_tickers(TICKERS_FILE)
+
+    # Referentie-indexen MOETEN eerst gevalideerd worden
+    qqq_df = validate_reference_index("QQQ")
+    spy_df = validate_reference_index("SPY")
+
+    regime = determine_market_regime(qqq_df)
+    print(f"Market regime: {regime}")
+
+    _ = spy_df  # later gebruiken voor extra context/filtering
+
+    setups: list[dict] = []
+    failed_rows: list[dict] = []
+    successful_count = 0
+
+    for ticker in tickers:
+        if ticker in {"QQQ", "SPY"}:
+            continue
+
+        df = fetch_ticker_data(ticker)
+
+        if df.empty:
+            failed_rows.append({"ticker": ticker, "reason": "no_data_returned"})
+            continue
+
+        if len(df) < MIN_HISTORY_ROWS:
+            failed_rows.append(
+                {"ticker": ticker, "reason": f"insufficient_history_{len(df)}"}
+            )
+            continue
+
+        successful_count += 1
+
+        result = scan_ticker(ticker, df, regime)
+        if result is not None:
+            setups.append(result)
+
+    save_failed_tickers(failed_rows)
+
+    report_path = write_report(
+        total_tickers=len(tickers),
+        successful_tickers=successful_count,
+        failed_tickers=len(failed_rows),
+        regime=regime,
+        setups=setups,
+    )
+
+    print(f"Report written to: {report_path}")
+    print(f"Failed tickers log written to: {FAILED_TICKERS_FILE}")
 
 
 if __name__ == "__main__":
