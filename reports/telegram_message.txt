@@ -1,9 +1,14 @@
-📊 Market Scan — 2026-03-24 21:02
+📊 Market Scan — 2026-03-25 15:49
 Regime: 🟡 NEUTRAL
 Universe: 292/298 valid | Failed: 1
-Setups: 5
-VZ | PULLBACK | score 9 | entry 50.42 | stop 46.16 | target 58.94 | RR 2.0
-OXY | VCP | score 9 | entry 55.98 | stop 48.86 | target 70.22 | RR 2.0
-KMI | PULLBACK | score 9 | entry 33.35 | stop 31.11 | target 37.83 | RR 2.0
-ENB | PULLBACK | score 9 | entry 53.76 | stop 50.75 | target 59.78 | RR 2.0
-DOW | VCP | score 9 | entry 34.36 | stop 30.7 | target 41.68 | RR 2.0
+Ranked setups: 10 | A: 10 | B: 0
+PFE | PULLBACK | A | score 14.0 | entry 27.02 | stop 26.4 | target 28.4 | RR 2.2
+T | PULLBACK | A | score 13.0 | entry 28.09 | stop 26.55 | target 31.47 | RR 2.2
+TJX | PULLBACK | A | score 12.5 | entry 157.84 | stop 154.04 | target 166.19 | RR 2.2
+VZ | PULLBACK | A | score 12.0 | entry 50.5 | stop 46.4 | target 59.52 | RR 2.2
+KMI | PULLBACK | A | score 12.0 | entry 33.42 | stop 31.26 | target 38.15 | RR 2.2
+SRE | PULLBACK | A | score 11.5 | entry 94.51 | stop 90.52 | target 103.29 | RR 2.2
+ROST | PULLBACK | A | score 11.5 | entry 209.62 | stop 197.35 | target 236.63 | RR 2.2
+ETN | PULLBACK | A | score 11.5 | entry 361.32 | stop 353.68 | target 378.13 | RR 2.2
+ENB | PULLBACK | A | score 11.5 | entry 53.86 | stop 50.93 | target 60.32 | RR 2.2
+MRK | PULLBACK | A | score 11.0 | entry 117.21 | stop 114.86 | target 122.37 | RR 2.2
