@@ -10,11 +10,11 @@ from config.settings import (
     SCANS_LOG_FILE,
     TOP_SETUPS_PER_SECTION,
 )
-from data_fetcher import fetch_ohlcv_data, load_tickers
-from indicators import add_indicators
-from regime import classify_market_regime
-from reporter import build_report
-from scanner import rank_setups, scan_ticker
+from src.data_fetcher import fetch_ohlcv_data, load_tickers
+from src.indicators import add_indicators
+from src.regime import classify_market_regime
+from src.reporter import build_report
+from src.scanner import rank_setups, scan_ticker
 
 
 FAILED_TICKERS_FILE = DATA_DIR / "failed_tickers.csv"
