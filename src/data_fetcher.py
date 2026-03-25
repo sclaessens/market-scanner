@@ -22,47 +22,45 @@ def load_tickers():
     return tickers
 
 
-def _flatten_columns(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
+def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
+    if df is None or df.empty:
+        return pd.DataFrame()
 
-    if isinstance(df.columns, pd.MultiIndex):
-        flattened = []
+    out = df.copy()
 
-        for col in df.columns:
-            parts = [str(x) for x in col if str(x) != ""]
-            flattened.append("_".join(parts))
+    if isinstance(out.columns, pd.MultiIndex):
+        if len(out.columns.levels) >= 2:
+            level0 = list(out.columns.get_level_values(0))
+            if "Open" in level0:
+                out.columns = out.columns.get_level_values(0)
+            else:
+                out.columns = [
+                    c[1] if isinstance(c, tuple) and len(c) > 1 else c[0]
+                    if isinstance(c, tuple)
+                    else c
+                    for c in out.columns
+                ]
 
-        df.columns = flattened
-
-    return df
-
-
-def _normalize_ohlcv_columns(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
-    df = _flatten_columns(df)
-
-    normalized = pd.DataFrame(index=df.index)
-
-    column_map = {
-        "Open": [f"Open_{ticker}", "Open"],
-        "High": [f"High_{ticker}", "High"],
-        "Low": [f"Low_{ticker}", "Low"],
-        "Close": [f"Close_{ticker}", "Close"],
-        "Adj Close": [f"Adj Close_{ticker}", "Adj Close"],
-        "Volume": [f"Volume_{ticker}", "Volume"],
+    rename_map = {
+        "open": "Open",
+        "high": "High",
+        "low": "Low",
+        "close": "Close",
+        "adj close": "Adj Close",
+        "volume": "Volume",
     }
 
-    for target_col, candidates in column_map.items():
-        for candidate in candidates:
-            if candidate in df.columns:
-                series = df[candidate]
+    out.columns = [
+        rename_map.get(str(col).strip().lower(), str(col).strip())
+        for col in out.columns
+    ]
 
-                if isinstance(series, pd.DataFrame):
-                    series = series.iloc[:, 0]
+    required = {"Open", "High", "Low", "Close", "Volume"}
+    if not required.issubset(set(out.columns)):
+        return pd.DataFrame()
 
-                normalized[target_col] = pd.to_numeric(series, errors="coerce")
-                break
-
-    return normalized
+    out = out.dropna(subset=["Open", "High", "Low", "Close", "Volume"]).copy()
+    return out
 
 
 def fetch_ohlcv_data(ticker: str, period: str = "1y", interval: str = "1d") -> pd.DataFrame:
@@ -73,22 +71,26 @@ def fetch_ohlcv_data(ticker: str, period: str = "1y", interval: str = "1d") -> p
             interval=interval,
             auto_adjust=False,
             progress=False,
-            group_by="ticker",
+            group_by="column",
             threads=False,
         )
+        df = _normalize_columns(df)
+        if not df.empty:
+            return df
     except Exception:
-        return pd.DataFrame()
+        pass
 
-    if df is None or df.empty:
-        return pd.DataFrame()
+    try:
+        ticker_obj = yf.Ticker(ticker)
+        df = ticker_obj.history(
+            period=period,
+            interval=interval,
+            auto_adjust=False,
+        )
+        df = _normalize_columns(df)
+        if not df.empty:
+            return df
+    except Exception:
+        pass
 
-    df = _normalize_ohlcv_columns(df, ticker)
-
-    required_cols = ["Open", "High", "Low", "Close", "Volume"]
-    missing = [col for col in required_cols if col not in df.columns]
-
-    if missing:
-        return pd.DataFrame()
-
-    df = df.dropna(subset=["Close"])
-    return df
+    return pd.DataFrame()
