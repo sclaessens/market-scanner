@@ -1,206 +1,35 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 import pandas as pd
-import yfinance as yf
+
+from config.settings import (
+    DATA_DIR,
+    REPORTS_DIR,
+    SCANS_LOG_FILE,
+    TOP_SETUPS_PER_SECTION,
+)
+from data_fetcher import fetch_ohlcv_data, load_tickers
+from indicators import add_indicators
+from regime import classify_market_regime
+from reporter import build_report
+from scanner import rank_setups, scan_ticker
 
 
-TICKERS_FILE = Path("tickers.txt")
-REPORTS_DIR = Path("reports")
-FAILED_TICKERS_FILE = Path("data/failed_tickers.csv")
+FAILED_TICKERS_FILE = DATA_DIR / "failed_tickers.csv"
 TELEGRAM_MESSAGE_FILE = REPORTS_DIR / "telegram_message.txt"
-SCANS_LOG_FILE = Path("data/scans_log.csv")
-
-LOOKBACK_PERIOD = "1y"
 MIN_HISTORY_ROWS = 220
-TOP_SETUPS_LIMIT = 5
-MIN_RR = 1.8
-
-def detect_pullback(df):
-    row = df.iloc[-1]
-
-    close = row["Close"]
-    ma20 = row["MA20"]
-    ma50 = row["MA50"]
-    high_20 = df["High"].rolling(20).max().iloc[-1]
-
-    distance_ma20 = (close - ma20) / ma20
-
-    trend_ok = close > ma50
-    pullback_zone = -0.08 < distance_ma20 < 0.03
-    near_high = close > 0.85 * high_20
-
-    return trend_ok and pullback_zone and near_high
-
-
-def detect_breakout(df):
-    row = df.iloc[-1]
-
-    close = row["Close"]
-    high_20 = df["High"].rolling(20).max().iloc[-1]
-    volume = row["Volume"]
-    vol_avg = df["Volume"].rolling(20).mean().iloc[-1]
-
-    near_high = close >= 0.97 * high_20
-    volume_spike = volume > 1.5 * vol_avg
-
-    return near_high and volume_spike
-
-
-def detect_vcp(df):
-    if len(df) < 30:
-        return False
-
-    recent = df.tail(5)
-    previous = df.tail(20)
-
-    range_recent = recent["High"].max() - recent["Low"].min()
-    range_prev = previous["High"].max() - previous["Low"].min()
-
-    volume_recent = recent["Volume"].mean()
-    volume_prev = previous["Volume"].mean()
-
-    contraction = range_recent < range_prev
-    volume_dry = volume_recent < volume_prev
-
-    return contraction and volume_dry
 
 
 def ensure_dirs() -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    FAILED_TICKERS_FILE.parent.mkdir(parents=True, exist_ok=True)
-
-
-def load_tickers(path: Path) -> list[str]:
-    if not path.exists():
-        raise FileNotFoundError(f"Missing tickers file: {path}")
-
-    tickers: list[str] = []
-    with path.open("r", encoding="utf-8") as f:
-        for line in f:
-            ticker = line.strip().upper()
-            if not ticker or ticker.startswith("#"):
-                continue
-            tickers.append(ticker)
-
-    if not tickers:
-        raise ValueError("No tickers found in tickers.txt")
-
-    return tickers
-
-
-def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    if df is None or df.empty:
-        return pd.DataFrame()
-
-    out = df.copy()
-
-    if isinstance(out.columns, pd.MultiIndex):
-        if len(out.columns.levels) >= 2:
-            if "Open" in out.columns.get_level_values(0):
-                out.columns = out.columns.get_level_values(0)
-            else:
-                out.columns = [c[0] if isinstance(c, tuple) else c for c in out.columns]
-
-    rename_map = {
-        "open": "Open",
-        "high": "High",
-        "low": "Low",
-        "close": "Close",
-        "adj close": "Adj Close",
-        "volume": "Volume",
-    }
-
-    out.columns = [
-        rename_map.get(str(col).strip().lower(), str(col).strip())
-        for col in out.columns
-    ]
-
-    required = {"Open", "High", "Low", "Close", "Volume"}
-    if not required.issubset(set(out.columns)):
-        return pd.DataFrame()
-
-    out = out.dropna(subset=["Open", "High", "Low", "Close", "Volume"]).copy()
-    return out
-
-
-def fetch_ticker_data(ticker: str, period: str = LOOKBACK_PERIOD) -> pd.DataFrame:
-    print(f"Fetching data for {ticker}...")
-
-    try:
-        df = yf.download(
-            ticker,
-            period=period,
-            interval="1d",
-            auto_adjust=False,
-            progress=False,
-            threads=False,
-            group_by="column",
-        )
-        df = normalize_columns(df)
-        if not df.empty:
-            return df
-    except Exception as exc:
-        print(f"Download error for {ticker}: {exc}")
-
-    try:
-        ticker_obj = yf.Ticker(ticker)
-        df = ticker_obj.history(period=period, interval="1d", auto_adjust=False)
-        df = normalize_columns(df)
-        if not df.empty:
-            return df
-    except Exception as exc:
-        print(f"History error for {ticker}: {exc}")
-
-    print(f"Warning: no data returned for {ticker}")
-    return pd.DataFrame()
-
-
-def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    out = df.copy()
-
-    out["MA20"] = out["Close"].rolling(20).mean()
-    out["MA50"] = out["Close"].rolling(50).mean()
-    out["MA200"] = out["Close"].rolling(200).mean()
-
-    prev_close = out["Close"].shift(1)
-    tr1 = out["High"] - out["Low"]
-    tr2 = (out["High"] - prev_close).abs()
-    tr3 = (out["Low"] - prev_close).abs()
-    out["TR"] = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    out["ATR14"] = out["TR"].rolling(14).mean()
-
-    out["20D_High"] = out["High"].rolling(20).max()
-    out["20D_Low"] = out["Low"].rolling(20).min()
-    out["AVG_VOL20"] = out["Volume"].rolling(20).mean()
-
-    return out
-
-
-def determine_market_regime(qqq_df: pd.DataFrame) -> str:
-    if qqq_df.empty or len(qqq_df) < 200:
-        raise ValueError("QQQ data is required to determine market regime")
-
-    latest = qqq_df.iloc[-1]
-
-    close = latest["Close"]
-    ma50 = latest["MA50"]
-    ma200 = latest["MA200"]
-
-    if pd.isna(close) or pd.isna(ma50) or pd.isna(ma200):
-        raise ValueError("QQQ regime cannot be determined because MA data is incomplete")
-
-    if close > ma50 and ma50 > ma200:
-        return "BULLISH"
-    if close < ma50 and ma50 < ma200:
-        return "BEARISH"
-    return "NEUTRAL"
 
 
 def validate_reference_index(ticker: str) -> pd.DataFrame:
-    df = fetch_ticker_data(ticker)
+    df = fetch_ohlcv_data(ticker)
+
     if df.empty:
         raise ValueError(f"{ticker} data is required but no valid data was returned")
 
@@ -209,205 +38,73 @@ def validate_reference_index(ticker: str) -> pd.DataFrame:
             f"{ticker} data is incomplete: expected at least {MIN_HISTORY_ROWS} rows, got {len(df)}"
         )
 
-    df = compute_indicators(df)
-    if df[["MA50", "MA200"]].iloc[-1].isna().any():
-        raise ValueError(f"{ticker} data is present but MA calculation is incomplete")
+    df = add_indicators(df)
+
+    latest = df.iloc[-1]
+    if pd.isna(latest.get("MA50")) or pd.isna(latest.get("MA200")):
+        raise ValueError(f"{ticker} MA calculation is incomplete")
 
     return df
 
-
-def scan_ticker(ticker: str, df: pd.DataFrame, regime: str) -> Optional[dict]:
-    if df.empty or len(df) < MIN_HISTORY_ROWS:
-        return None
-
-    latest = df.iloc[-1]
-
-    required_cols = {"Close", "MA20", "MA50", "MA200", "20D_High"}
-    if not required_cols.issubset(df.columns):
-        return None
-
-    if pd.isna(latest["MA20"]) or pd.isna(latest["MA50"]) or pd.isna(latest["MA200"]):
-        return None
-
-    close = latest["Close"]
-    ma20 = latest["MA20"]
-    ma50 = latest["MA50"]
-    ma200 = latest["MA200"]
-    high_20 = latest["20D_High"]
-
-    if pd.isna(high_20):
-        return None
-
-    if close < 20:
-        return None
-
-    # -----------------------------
-    # TREND (NIET MEER HARD)
-    # -----------------------------
-    strong_trend = close > ma50
-
-    # -----------------------------
-    # PULLBACK (VERSOEPELD)
-    # -----------------------------
-    distance_ma20 = (close - ma20) / ma20
-    pullback = -0.08 < distance_ma20 < 0.03
-
-    # -----------------------------
-    # BREAKOUT
-    # -----------------------------
-    volume = latest["Volume"]
-    vol_avg = df["Volume"].rolling(20).mean().iloc[-1]
-
-    breakout = close >= 0.97 * high_20 and volume > 1.5 * vol_avg
-
-    # -----------------------------
-    # VCP
-    # -----------------------------
-    vcp = detect_vcp(df)
-
-    # 👉 BELANGRIJK: enkel skippen als GEEN setup
-    if not (pullback or breakout or vcp):
-        return None
-
-    # -----------------------------
-    # SCORE
-    # -----------------------------
-    score = 0
-
-    if strong_trend:
-        score += 2
-
-    distance_high = (high_20 - close) / high_20
-    if distance_high < 0.03:
-        score += 3
-    elif distance_high < 0.06:
-        score += 2
-    elif distance_high < 0.10:
-        score += 1
-
-    trend_strength = (ma20 - ma50) / ma50
-    if trend_strength > 0.05:
-        score += 2
-    elif trend_strength > 0.02:
-        score += 1
-
-    if len(df) >= 11:
-        ret_5d = (df["Close"].iloc[-1] / df["Close"].iloc[-6]) - 1
-        ret_10d = (df["Close"].iloc[-1] / df["Close"].iloc[-11]) - 1
-
-        if ret_5d > 0:
-            score += 1
-
-        if ret_10d > 0:
-            score += 1
-
-    # -----------------------------
-    # SETUP TYPE (NIEUW)
-    # -----------------------------
-    setups = []
-
-    if pullback:
-        setups.append("PULLBACK")
-
-    if breakout:
-        setups.append("BREAKOUT")
-
-    if vcp:
-        setups.append("VCP")
-
-    setup_str = ", ".join(setups)
-
-    # -----------------------------
-    # RESULT
-    # -----------------------------
-    return {
-        "ticker": ticker,
-        "close": round(float(close), 2),
-        "ma20": round(float(ma20), 2),
-        "ma50": round(float(ma50), 2),
-        "ma200": round(float(ma200), 2),
-        "setup": setup_str,
-        "score": score,
-    }
-
-
-def build_tradeplan(df: pd.DataFrame) -> dict:
-    if df.empty:
-        return {}
-
-    required_cols = {"Close", "MA20", "MA50", "ATR14"}
-    if not required_cols.issubset(df.columns):
-        return {}
-
-    latest = df.iloc[-1]
-
-    ma20 = latest["MA20"]
-    ma50 = latest["MA50"]
-    atr = latest["ATR14"]
-
-    if pd.isna(ma20) or pd.isna(ma50) or pd.isna(atr):
-        return {}
-
-    entry = ma20
-    stop = ma50 - atr * 0.5
-
-    risk = entry - stop
-    if risk <= 0:
-        return {}
-
-    target = entry + (2 * risk)
-    rr = (target - entry) / (entry - stop)
-
-    if rr < MIN_RR:
-        return {}
-
-    return {
-        "entry": round(float(entry), 2),
-        "stop": round(float(stop), 2),
-        "target": round(float(target), 2),
-        "rr": round(float(rr), 2),
-    }
 
 def append_scan_log(scan_date: str, regime: str, setups: list[dict]) -> None:
     if not setups:
         return
 
-    rows = []
+    rows: list[dict] = []
     for setup in setups:
-        rows.append({
-            "scan_date": scan_date,
-            "ticker": setup["ticker"],
-            "regime": regime,
-            "setup": setup["setup"],
-            "score": setup["score"],
-            "close": setup["close"],
-            "entry": setup["entry"],
-            "stop": setup["stop"],
-            "target": setup["target"],
-            "rr": setup["rr"],
-        })
+        rows.append(
+            {
+                "scan_date": scan_date,
+                "ticker": setup["ticker"],
+                "regime": regime,
+                "setup": setup["setup"],
+                "primary_setup": setup.get("primary_setup", ""),
+                "grade": setup.get("grade", ""),
+                "score": setup["score"],
+                "close": setup["close"],
+                "entry": setup["entry"],
+                "stop": setup["stop"],
+                "target": setup["target"],
+                "rr": setup["rr"],
+            }
+        )
 
     df_new = pd.DataFrame(rows)
 
     if SCANS_LOG_FILE.exists():
         df_old = pd.read_csv(SCANS_LOG_FILE)
         df_all = pd.concat([df_old, df_new], ignore_index=True)
-        df_all = df_all.drop_duplicates(
-            subset=["scan_date", "ticker", "setup", "entry"],
-            keep="last",
-        )
+        subset_cols = ["scan_date", "ticker", "setup", "entry"]
+
+        existing_subset_cols = [col for col in subset_cols if col in df_all.columns]
+        if existing_subset_cols:
+            df_all = df_all.drop_duplicates(subset=existing_subset_cols, keep="last")
     else:
         df_all = df_new
 
+    SCANS_LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
     df_all.to_csv(SCANS_LOG_FILE, index=False)
 
 
 def save_failed_tickers(rows: list[dict]) -> None:
+    FAILED_TICKERS_FILE.parent.mkdir(parents=True, exist_ok=True)
+
     if not rows:
+        pd.DataFrame(columns=["ticker", "reason"]).to_csv(FAILED_TICKERS_FILE, index=False)
         return
 
-    df = pd.DataFrame(rows)
-    df.to_csv(FAILED_TICKERS_FILE, index=False)
+    pd.DataFrame(rows).to_csv(FAILED_TICKERS_FILE, index=False)
+
+
+def _format_setup_line(setup: dict) -> str:
+    grade = setup.get("grade", "C")
+    primary_setup = setup.get("primary_setup", setup.get("setup", ""))
+    return (
+        f"{setup['ticker']} | {primary_setup} | grade {grade} | "
+        f"score {setup['score']} | entry {setup['entry']} | stop {setup['stop']} | "
+        f"target {setup['target']} | RR {setup['rr']}"
+    )
 
 
 def write_report(
@@ -415,45 +112,56 @@ def write_report(
     successful_tickers: int,
     failed_tickers: int,
     regime: str,
+    qqq_df: pd.DataFrame,
     setups: list[dict],
 ) -> Path:
-    today = pd.Timestamp.today().strftime("%Y-%m-%d")
-    report_path = REPORTS_DIR / f"market_scan_{today}.md"
+    report_date = pd.Timestamp.today().strftime("%Y-%m-%d")
+    report_path = REPORTS_DIR / f"market_scan_{report_date}.md"
 
-    lines: list[str] = []
-    lines.append(f"# Market Scan — {today}")
-    lines.append("")
-    lines.append(f"Universe size (raw): **{total_tickers}**")
-    lines.append(f"Universe size (valid data): **{successful_tickers}**")
-    lines.append(f"Failed tickers: **{failed_tickers}**")
-    lines.append("")
-    lines.append("## Market Regime")
-    lines.append(f"**{regime}**")
-    lines.append("")
-    lines.append("## Setups")
+    latest_qqq = qqq_df.iloc[-1]
+    qqq_regime_line = (
+        f"QQQ close {latest_qqq['Close']:.2f} | "
+        f"MA50 {latest_qqq['MA50']:.2f} | "
+        f"MA200 {latest_qqq['MA200']:.2f} → {regime}"
+    )
 
-    if not setups:
-        lines.append("- (none)")
-        lines.append("")
-        lines.append("## Interpretation")
+    vcp_lines = [_format_setup_line(s) for s in setups if s.get("primary_setup") == "VCP"]
+    pullback_lines = [_format_setup_line(s) for s in setups if s.get("primary_setup") == "PULLBACK"]
+    breakout_lines = [_format_setup_line(s) for s in setups if s.get("primary_setup") == "BREAKOUT"]
 
-        if regime == "NEUTRAL":
-            lines.append("Market is NEUTRAL → low conviction environment.")
-            lines.append("Scanner is intentionally selective → no A-quality setups.")
-        elif regime == "BEARISH":
-            lines.append("Market is BEARISH → long setups are filtered out.")
-            lines.append("No long opportunities expected in this regime.")
-        else:
-            lines.append("No setups found despite bullish regime → check scan logic.")
-    else:
+    weakening_lines = []
+    if failed_tickers > 0:
+        weakening_lines.append(f"Failed tickers during fetch/validation: {failed_tickers}")
+
+    report_text = build_report(
+        universe_size=total_tickers,
+        liquid_universe_size=successful_tickers,
+        regime=qqq_regime_line,
+        vcp=vcp_lines,
+        pullbacks=pullback_lines,
+        breakouts=breakout_lines,
+        weakening=weakening_lines,
+    )
+
+    if setups:
+        a_setups = [s for s in setups if s.get("grade") == "A"]
+        b_setups = [s for s in setups if s.get("grade") == "B"]
+
+        extra_lines: list[str] = []
+        extra_lines.append("")
+        extra_lines.append("## Ranked setups")
         for setup in setups:
-            lines.append(
-                f"- {setup['ticker']} | close {setup['close']} | {setup['setup']} | "
-                f"score {setup['score']} | entry {setup['entry']} | stop {setup['stop']} | "
-                f"target {setup['target']} | RR {setup['rr']}"
-            )
+            extra_lines.append(f"- {_format_setup_line(setup)}")
 
-    report_path.write_text("\n".join(lines), encoding="utf-8")
+        extra_lines.append("")
+        extra_lines.append("## Grade summary")
+        extra_lines.append(f"- A setups: {len(a_setups)}")
+        extra_lines.append(f"- B setups: {len(b_setups)}")
+        extra_lines.append(f"- Total ranked setups: {len(setups)}")
+
+        report_text = report_text.rstrip() + "\n" + "\n".join(extra_lines) + "\n"
+
+    report_path.write_text(report_text, encoding="utf-8")
     return report_path
 
 
@@ -467,14 +175,18 @@ def write_telegram_message(
 ) -> Path:
     lines: list[str] = []
     now = pd.Timestamp.now().strftime("%H:%M")
-    lines.append(f"📊 Market Scan — {report_date} {now}")
+
     if regime == "BULLISH":
         regime_icon = "🟢"
     elif regime == "BEARISH":
         regime_icon = "🔴"
     else:
         regime_icon = "🟡"
-    
+
+    a_count = len([s for s in setups if s.get("grade") == "A"])
+    b_count = len([s for s in setups if s.get("grade") == "B"])
+
+    lines.append(f"📊 Market Scan — {report_date} {now}")
     lines.append(f"Regime: {regime_icon} {regime}")
     lines.append(
         f"Universe: {successful_tickers}/{total_tickers} valid | Failed: {failed_tickers}"
@@ -487,11 +199,13 @@ def write_telegram_message(
         elif regime == "BEARISH":
             lines.append("Context: long setups filtered out.")
     else:
-        lines.append(f"Setups: {len(setups)}")
+        lines.append(f"Ranked setups: {len(setups)} | A: {a_count} | B: {b_count}")
         for setup in setups:
             lines.append(
-                f"{setup['ticker']} | {setup['setup']} | score {setup['score']} | "
-                f"entry {setup['entry']} | stop {setup['stop']} | target {setup['target']} | RR {setup['rr']}"
+                f"{setup['ticker']} | {setup.get('primary_setup', setup['setup'])} | "
+                f"{setup.get('grade', 'C')} | score {setup['score']} | "
+                f"entry {setup['entry']} | stop {setup['stop']} | "
+                f"target {setup['target']} | RR {setup['rr']}"
             )
 
     TELEGRAM_MESSAGE_FILE.write_text("\n".join(lines), encoding="utf-8")
@@ -503,12 +217,17 @@ def main() -> None:
 
     print("Starting market scan...")
 
-    tickers = load_tickers(TICKERS_FILE)
+    tickers = load_tickers()
 
     qqq_df = validate_reference_index("QQQ")
     spy_df = validate_reference_index("SPY")
 
-    regime = determine_market_regime(qqq_df)
+    qqq_latest = qqq_df.iloc[-1]
+    regime = classify_market_regime(
+        qqq_close=float(qqq_latest["Close"]),
+        ma50=float(qqq_latest["MA50"]),
+        ma200=float(qqq_latest["MA200"]),
+    )
     print(f"Market regime: {regime}")
 
     _ = spy_df
@@ -516,10 +235,11 @@ def main() -> None:
     setups: list[dict] = []
     failed_rows: list[dict] = []
     successful_count = 0
-
     seen_tickers: set[str] = set()
 
     for ticker in tickers:
+        ticker = ticker.upper().strip()
+
         if ticker in {"QQQ", "SPY"}:
             continue
 
@@ -527,7 +247,9 @@ def main() -> None:
             continue
         seen_tickers.add(ticker)
 
-        df = fetch_ticker_data(ticker)
+        print(f"Scanning {ticker}...")
+
+        df = fetch_ohlcv_data(ticker)
 
         if df.empty:
             failed_rows.append({"ticker": ticker, "reason": "no_data_returned"})
@@ -539,26 +261,21 @@ def main() -> None:
             )
             continue
 
-        df_ind = compute_indicators(df)
+        try:
+            df_ind = add_indicators(df)
+        except Exception as exc:
+            failed_rows.append({"ticker": ticker, "reason": f"indicator_error: {exc}"})
+            continue
+
         successful_count += 1
 
         result = scan_ticker(ticker, df_ind, regime)
         if result is None:
             continue
 
-        tradeplan = build_tradeplan(df_ind)
-        if not tradeplan:
-            continue
-
-        result.update(tradeplan)
         setups.append(result)
 
-    setups = sorted(
-        setups,
-        key=lambda x: (x["score"], x["rr"], x["ticker"]),
-        reverse=True,
-    )
-    setups = setups[:TOP_SETUPS_LIMIT]
+    setups = rank_setups(setups, top_n=TOP_SETUPS_PER_SECTION)
 
     save_failed_tickers(failed_rows)
 
@@ -570,6 +287,7 @@ def main() -> None:
         successful_tickers=successful_count,
         failed_tickers=len(failed_rows),
         regime=regime,
+        qqq_df=qqq_df,
         setups=setups,
     )
 
@@ -585,6 +303,7 @@ def main() -> None:
     print(f"Report written to: {report_path}")
     print(f"Telegram message written to: {telegram_path}")
     print(f"Failed tickers log written to: {FAILED_TICKERS_FILE}")
+    print(f"Scan log updated: {SCANS_LOG_FILE}")
 
 
 if __name__ == "__main__":
