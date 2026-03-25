@@ -4,22 +4,17 @@ Universe size (raw): **298**
 Universe size (liquid-filtered): **292**
 
 ## Market Regime (QQQ)
-QQQ close 587.51 | MA50 608.65 | MA200 593.71 → NEUTRAL
+QQQ close 587.26 | MA50 608.65 | MA200 593.71 → NEUTRAL
 
 ## VCP setups (compression → potential breakout)
-- (none)
+- PFE | VCP | grade A | score 12.5 | entry 27.76 | stop 26.44 | target 31.71 | RR 3.0
+- TJX | VCP | grade A | score 12.0 | entry 159.64 | stop 152.18 | target 182.02 | RR 3.0
 
 ## Pullback setups (actionable)
-- PFE | PULLBACK | grade A | score 14.0 | entry 27.02 | stop 26.4 | target 28.4 | RR 2.2
-- T | PULLBACK | grade A | score 13.0 | entry 28.09 | stop 26.55 | target 31.47 | RR 2.2
-- TJX | PULLBACK | grade A | score 12.5 | entry 157.84 | stop 154.04 | target 166.19 | RR 2.2
-- VZ | PULLBACK | grade A | score 12.0 | entry 50.5 | stop 46.4 | target 59.52 | RR 2.2
-- KMI | PULLBACK | grade A | score 12.0 | entry 33.42 | stop 31.26 | target 38.15 | RR 2.2
-- SRE | PULLBACK | grade A | score 11.5 | entry 94.51 | stop 90.52 | target 103.29 | RR 2.2
-- ROST | PULLBACK | grade A | score 11.5 | entry 209.62 | stop 197.35 | target 236.63 | RR 2.2
-- ETN | PULLBACK | grade A | score 11.5 | entry 361.32 | stop 353.68 | target 378.13 | RR 2.2
-- ENB | PULLBACK | grade A | score 11.5 | entry 53.86 | stop 50.93 | target 60.32 | RR 2.2
-- MRK | PULLBACK | grade A | score 11.0 | entry 117.21 | stop 114.86 | target 122.37 | RR 2.2
+- KMI | PULLBACK | grade A | score 12.5 | entry 34.08 | stop 31.61 | target 39.01 | RR 2.0
+- SRE | PULLBACK | grade B | score 10.5 | entry 95.63 | stop 91.16 | target 104.57 | RR 2.0
+- ENB | PULLBACK | grade B | score 10.0 | entry 54.53 | stop 51.35 | target 60.91 | RR 2.0
+- EA | PULLBACK | grade B | score 8.0 | entry 201.85 | stop 198.77 | target 207.99 | RR 2.0
 
 ## Breakouts (watch for pullback/retest)
 - (none)
@@ -28,18 +23,14 @@ QQQ close 587.51 | MA50 608.65 | MA200 593.71 → NEUTRAL
 - Failed tickers during fetch/validation: 1
 
 ## Ranked setups
-- PFE | PULLBACK | grade A | score 14.0 | entry 27.02 | stop 26.4 | target 28.4 | RR 2.2
-- T | PULLBACK | grade A | score 13.0 | entry 28.09 | stop 26.55 | target 31.47 | RR 2.2
-- TJX | PULLBACK | grade A | score 12.5 | entry 157.84 | stop 154.04 | target 166.19 | RR 2.2
-- VZ | PULLBACK | grade A | score 12.0 | entry 50.5 | stop 46.4 | target 59.52 | RR 2.2
-- KMI | PULLBACK | grade A | score 12.0 | entry 33.42 | stop 31.26 | target 38.15 | RR 2.2
-- SRE | PULLBACK | grade A | score 11.5 | entry 94.51 | stop 90.52 | target 103.29 | RR 2.2
-- ROST | PULLBACK | grade A | score 11.5 | entry 209.62 | stop 197.35 | target 236.63 | RR 2.2
-- ETN | PULLBACK | grade A | score 11.5 | entry 361.32 | stop 353.68 | target 378.13 | RR 2.2
-- ENB | PULLBACK | grade A | score 11.5 | entry 53.86 | stop 50.93 | target 60.32 | RR 2.2
-- MRK | PULLBACK | grade A | score 11.0 | entry 117.21 | stop 114.86 | target 122.37 | RR 2.2
+- PFE | VCP | grade A | score 12.5 | entry 27.76 | stop 26.44 | target 31.71 | RR 3.0
+- TJX | VCP | grade A | score 12.0 | entry 159.64 | stop 152.18 | target 182.02 | RR 3.0
+- KMI | PULLBACK | grade A | score 12.5 | entry 34.08 | stop 31.61 | target 39.01 | RR 2.0
+- SRE | PULLBACK | grade B | score 10.5 | entry 95.63 | stop 91.16 | target 104.57 | RR 2.0
+- ENB | PULLBACK | grade B | score 10.0 | entry 54.53 | stop 51.35 | target 60.91 | RR 2.0
+- EA | PULLBACK | grade B | score 8.0 | entry 201.85 | stop 198.77 | target 207.99 | RR 2.0
 
 ## Grade summary
-- A setups: 10
-- B setups: 0
-- Total ranked setups: 10
+- A setups: 3
+- B setups: 3
+- Total ranked setups: 6
