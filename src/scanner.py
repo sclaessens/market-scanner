@@ -169,23 +169,20 @@ def _score_common_components(df: pd.DataFrame, qqq_return_20d: float) -> dict:
         elif avg_vol >= 2_000_000:
             score_position += 0.5
 
-    # ATR sanity
+    # ATR sanity + mover profile
     atr_pct = float("nan")
-
-    # Penalize lage volatility (defensieve stocks)
-    if atr_pct < 0.02:
-        score -= 2
-    elif atr_pct < 0.03:
-        score -= 1
-        
     if not pd.isna(atr) and close > 0:
         atr_pct = atr / close
+
         if atr_pct > 0.08:
             score_position -= 0.5
 
-        # mild penalty for very slow / sleepy names
-        if atr_pct < 0.015:
+        if atr_pct < 0.03:
             score_position -= 1.0
+        if atr_pct < 0.02:
+            score_trend *= 0.7
+            score_momentum *= 0.7
+            score_position *= 0.7
 
     return {
         "trend": round(score_trend, 2),
@@ -282,7 +279,7 @@ def build_tradeplan(df: pd.DataFrame, primary_setup: str) -> dict:
         stop = min(x for x in [swing_low_5, ma20, entry - (1.3 * atr)] if not pd.isna(x))
         target_multiple = 3.0
 
-    else:
+    else:  # PULLBACK
         entry = max(x for x in [ma20, close] if not pd.isna(x))
         stop = min(x for x in [swing_low_10, ma50, entry - (1.2 * atr)] if not pd.isna(x))
         target_multiple = 2.0
@@ -484,8 +481,8 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
         rs_20d_pct = setup.get("rs_20d_pct")
         atr_pct = setup.get("atr_pct")
 
-        rs_ok_for_a = rs_20d_pct is not None and rs_20d_pct >= 0
-        atr_ok_for_a = atr_pct is not None and atr_pct >= 2.0
+        rs_ok_for_a = rs_20d_pct is not None and rs_20d_pct >= 3.0
+        atr_ok_for_a = atr_pct is not None and atr_pct >= 2.5
 
         allow_a = (
             regime_ok
@@ -514,7 +511,7 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
         setup["score"] = round(raw_score, 2)
 
     return ranked
-    
+
 
 def rank_setups(setups: list[dict], top_n: int = TOP_SETUPS_PER_SECTION) -> list[dict]:
     primary_priority = {"VCP": 3, "BREAKOUT": 2, "PULLBACK": 1}
