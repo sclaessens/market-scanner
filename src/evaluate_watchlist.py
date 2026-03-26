@@ -210,31 +210,28 @@ def evaluate_breakout(latest: pd.Series, regime: str) -> Tuple[str, str, str]:
     return "WAIT", "wait", "not yet above breakout trigger"
 
 
-def evaluate_vcp(latest: pd.Series, regime: str) -> Tuple[str, str, str]:
+def evaluate_vcp(latest, regime):
     close = latest.get("close")
     ma20 = latest.get("ma20")
     ma50 = latest.get("ma50")
     high_20d = latest.get("high_20d")
 
     if pd.isna(close) or pd.isna(ma20) or pd.isna(ma50) or pd.isna(high_20d):
-        return "WAIT", "wait", "missing VCP indicators"
+        return "WAIT", "wait", "missing basic indicators"
 
     if close < ma50:
-        return "REJECTED", "avoid", "VCP candidate below MA50"
+        return "REJECTED", "avoid", "below MA50"
 
     if regime == "BEARISH":
-        return "WAIT", "wait", "market regime bearish"
+        return "WAIT", "wait", "bearish regime"
 
-    trigger = high_20d * (1 - DEFAULT_VCP_READY_BUFFER_PCT / 100.0)
+    # simpele breakout logic
+    trigger = high_20d * 0.99
 
     if close >= trigger:
-        return "READY", "buy", "VCP close to pivot / breakout trigger"
+        return "READY", "buy", "near breakout"
 
-    # VCP mag ook wachten als de prijs netjes boven MA20 blijft maar nog niet uitbreekt
-    if close >= ma20:
-        return "WAIT", "wait", "VCP intact but not yet through trigger"
-
-    return "WAIT", "wait", "VCP still building"
+    return "WAIT", "wait", "VCP not yet at trigger"
 
 
 def evaluate_general(latest: pd.Series, regime: str) -> Tuple[str, str, str]:
