@@ -211,6 +211,18 @@ def write_telegram_message(
     TELEGRAM_MESSAGE_FILE.write_text("\n".join(lines), encoding="utf-8")
     return TELEGRAM_MESSAGE_FILE
 
+def compute_return_20d(df: pd.DataFrame) -> float:
+    if df.empty or len(df) < 21:
+        return float("nan")
+
+    latest_close = float(df["Close"].iloc[-1])
+    ref_close = float(df["Close"].iloc[-21])
+
+    if ref_close == 0:
+        return float("nan")
+
+    return (latest_close / ref_close) - 1.0
+
 
 def main() -> None:
     ensure_dirs()
@@ -221,6 +233,8 @@ def main() -> None:
 
     qqq_df = validate_reference_index("QQQ")
     spy_df = validate_reference_index("SPY")
+
+    qqq_return_20d = compute_return_20d(qqq_df)
 
     qqq_latest = qqq_df.iloc[-1]
     regime = classify_market_regime(
@@ -269,7 +283,7 @@ def main() -> None:
 
         successful_count += 1
 
-        result = scan_ticker(ticker, df_ind, regime)
+        result = scan_ticker(ticker, df_ind, regime, qqq_return_20d)
         if result is None:
             continue
 
