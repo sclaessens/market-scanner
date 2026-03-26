@@ -469,10 +469,6 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
     if not ranked:
         return ranked
 
-    atr_pct = setup.get("atr_pct")
-
-    atr_ok_for_a = atr_pct is not None and atr_pct >= 2.0
-
     total = len(ranked)
     top_a_count = max(1, round(total * 0.20))
     top_b_count = max(1, round(total * 0.50))
@@ -484,9 +480,12 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
         trend_ok = bool(setup.get("trend_ok", False))
         momentum_ok = bool(setup.get("momentum_ok", False))
         regime_ok = bool(setup.get("regime_ok", False))
+
         rs_20d_pct = setup.get("rs_20d_pct")
+        atr_pct = setup.get("atr_pct")
 
         rs_ok_for_a = rs_20d_pct is not None and rs_20d_pct >= 0
+        atr_ok_for_a = atr_pct is not None and atr_pct >= 2.0
 
         allow_a = (
             regime_ok
@@ -515,7 +514,7 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
         setup["score"] = round(raw_score, 2)
 
     return ranked
-
+    
 
 def rank_setups(setups: list[dict], top_n: int = TOP_SETUPS_PER_SECTION) -> list[dict]:
     primary_priority = {"VCP": 3, "BREAKOUT": 2, "PULLBACK": 1}
