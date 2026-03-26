@@ -1,0 +1,42 @@
+name: Run Script
+
+on:
+  workflow_dispatch:
+    inputs:
+      script:
+        description: "Which script do you want to run?"
+        required: true
+        default: "evaluate_watchlist"
+        type: choice
+        options:
+          - evaluate_watchlist
+          - build_watchlist
+          - run_scan
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run selected script
+        run: |
+          if [ "${{ github.event.inputs.script }}" = "evaluate_watchlist" ]; then
+            python src/evaluate_watchlist.py
+          elif [ "${{ github.event.inputs.script }}" = "build_watchlist" ]; then
+            python src/build_watchlist.py
+          elif [ "${{ github.event.inputs.script }}" = "run_scan" ]; then
+            python run_scan.py
+          fi
