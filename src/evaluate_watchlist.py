@@ -8,7 +8,7 @@ import pandas as pd
 WATCHLIST_FILE = "data/watchlist/watchlist_active.csv"
 MARKET_REGIME_FILE = "data/processed/market_regime.csv"
 OUTPUT_FILE = "data/watchlist/watchlist_status.csv"
-PROCESSED_DIR = "data/processed"
+PROCESSED_DIR = "data/features"
 
 # Simpele defaults voor MVP.
 # Later kan dit naar config/thresholds.yaml.
