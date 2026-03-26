@@ -1,14 +1,14 @@
-📊 Market Scan — 2026-03-26 14:37
+📊 Market Scan — 2026-03-26 14:54
 Regime: 🟡 NEUTRAL
 Universe: 292/298 valid | Failed: 1
-Ranked setups: 10 | A: 0 | B: 10
-PFE | VCP | B | score 13.5 | RS20 6.27% | entry 27.83 | stop 26.44 | target 32.01 | RR 3.0
-TJX | VCP | B | score 10.45 | RS20 4.77% | entry 160.09 | stop 154.27 | target 177.55 | RR 3.0
-SRE | PULLBACK | B | score 11.0 | RS20 5.03% | entry 95.97 | stop 91.16 | target 105.6 | RR 2.0
-KMI | PULLBACK | B | score 10.5 | RS20 6.96% | entry 33.97 | stop 31.74 | target 38.42 | RR 2.0
-ENB | PULLBACK | B | score 9.3 | RS20 9.06% | entry 54.78 | stop 51.52 | target 61.31 | RR 2.0
-ABNB | PULLBACK | B | score 8.5 | RS20 1.8% | entry 133.65 | stop 125.62 | target 149.71 | RR 2.0
-TGT | PULLBACK | B | score 8.0 | RS20 7.09% | entry 118.08 | stop 112.69 | target 128.87 | RR 2.0
-TER | PULLBACK | B | score 7.5 | RS20 -3.14% | entry 308.2 | stop 283.46 | target 357.69 | RR 2.0
-LIN | PULLBACK | B | score 7.5 | RS20 3.47% | entry 494.76 | stop 473.44 | target 537.4 | RR 2.0
-EBAY | PULLBACK | B | score 7.5 | RS20 7.69% | entry 90.95 | stop 87.8 | target 97.25 | RR 2.0
+Ranked setups: 10 | A: 1 | B: 9
+PFE | VCP | B | score 13.5 | RS20 6.87% | entry 27.83 | stop 26.44 | target 32.01 | RR 3.0
+TJX | VCP | B | score 12.0 | RS20 4.88% | entry 160.09 | stop 154.27 | target 177.55 | RR 3.0
+TWLO | PULLBACK | A | score 11.5 | RS20 11.26% | entry 127.6 | stop 121.01 | target 140.79 | RR 2.0
+SRE | PULLBACK | B | score 11.0 | RS20 5.28% | entry 95.86 | stop 91.16 | target 105.26 | RR 2.0
+KMI | PULLBACK | B | score 10.5 | RS20 7.14% | entry 33.9 | stop 31.73 | target 38.25 | RR 2.0
+VZ | PULLBACK | B | score 8.6 | RS20 8.59% | entry 50.85 | stop 47.11 | target 58.34 | RR 2.0
+ENB | PULLBACK | B | score 8.6 | RS20 9.19% | entry 54.65 | stop 51.51 | target 60.94 | RR 2.0
+ABNB | PULLBACK | B | score 8.5 | RS20 1.96% | entry 133.38 | stop 125.62 | target 148.9 | RR 2.0
+TGT | PULLBACK | B | score 8.0 | RS20 7.52% | entry 118.16 | stop 112.69 | target 129.1 | RR 2.0
+LIN | PULLBACK | B | score 7.5 | RS20 3.65% | entry 493.85 | stop 473.44 | target 534.67 | RR 2.0
