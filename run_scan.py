@@ -204,6 +204,7 @@ def write_telegram_message(
             lines.append(
                 f"{setup['ticker']} | {setup.get('primary_setup', setup['setup'])} | "
                 f"{setup.get('grade', 'C')} | score {setup['score']} | "
+                f"RS20 {setup.get('rs_20d_pct', 'n/a')}% | "
                 f"entry {setup['entry']} | stop {setup['stop']} | "
                 f"target {setup['target']} | RR {setup['rr']}"
             )
