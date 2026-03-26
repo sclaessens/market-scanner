@@ -4,21 +4,21 @@ Universe size (raw): **298**
 Universe size (liquid-filtered): **292**
 
 ## Market Regime (QQQ)
-QQQ close 582.70 | MA50 607.79 | MA200 593.97 → NEUTRAL
+QQQ close 583.94 | MA50 607.81 | MA200 593.98 → NEUTRAL
 
 ## VCP setups (compression → potential breakout)
-- PFE | VCP | grade A | score 14.5 | entry 27.66 | stop 26.44 | target 31.33 | RR 3.0
-- TJX | VCP | grade A | score 14.0 | entry 160.07 | stop 154.27 | target 177.47 | RR 3.0
+- PFE | VCP | grade A | score 14.5 | entry 27.77 | stop 26.44 | target 31.75 | RR 3.0
+- TJX | VCP | grade A | score 13.0 | entry 160.07 | stop 154.27 | target 177.47 | RR 3.0
 
 ## Pullback setups (actionable)
-- SRE | PULLBACK | grade A | score 12.0 | entry 95.83 | stop 91.16 | target 105.17 | RR 2.0
-- ENB | PULLBACK | grade A | score 12.0 | entry 54.57 | stop 51.51 | target 60.69 | RR 2.0
-- TWLO | PULLBACK | grade A | score 11.5 | entry 127.6 | stop 121.01 | target 140.79 | RR 2.0
-- KMI | PULLBACK | grade B | score 11.5 | entry 33.92 | stop 31.73 | target 38.31 | RR 2.0
-- VZ | PULLBACK | grade B | score 11.0 | entry 50.68 | stop 47.1 | target 57.83 | RR 2.0
-- MRK | PULLBACK | grade B | score 11.0 | entry 119.55 | stop 112.72 | target 133.21 | RR 2.0
-- LIN | PULLBACK | grade B | score 9.5 | entry 498.4 | stop 473.44 | target 548.32 | RR 2.0
-- ABNB | PULLBACK | grade B | score 8.5 | entry 132.96 | stop 125.62 | target 147.65 | RR 2.0
+- SRE | PULLBACK | grade A | score 12.0 | entry 95.89 | stop 91.16 | target 105.35 | RR 2.0
+- TWLO | PULLBACK | grade A | score 11.5 | entry 127.57 | stop 121.01 | target 140.7 | RR 2.0
+- ENB | PULLBACK | grade B | score 11.5 | entry 54.56 | stop 51.51 | target 60.66 | RR 2.0
+- MRK | PULLBACK | grade B | score 11.0 | entry 119.04 | stop 112.72 | target 131.67 | RR 2.0
+- KMI | PULLBACK | grade B | score 11.0 | entry 33.83 | stop 31.73 | target 38.01 | RR 2.0
+- LIN | PULLBACK | grade B | score 8.5 | entry 494.89 | stop 473.44 | target 537.79 | RR 2.0
+- EBAY | PULLBACK | grade B | score 8.5 | entry 90.98 | stop 87.83 | target 97.28 | RR 2.0
+- ABNB | PULLBACK | grade B | score 8.5 | entry 133.95 | stop 125.62 | target 150.6 | RR 2.0
 
 ## Breakouts (watch for pullback/retest)
 - (none)
@@ -27,18 +27,18 @@ QQQ close 582.70 | MA50 607.79 | MA200 593.97 → NEUTRAL
 - Failed tickers during fetch/validation: 1
 
 ## Ranked setups
-- PFE | VCP | grade A | score 14.5 | entry 27.66 | stop 26.44 | target 31.33 | RR 3.0
-- TJX | VCP | grade A | score 14.0 | entry 160.07 | stop 154.27 | target 177.47 | RR 3.0
-- SRE | PULLBACK | grade A | score 12.0 | entry 95.83 | stop 91.16 | target 105.17 | RR 2.0
-- ENB | PULLBACK | grade A | score 12.0 | entry 54.57 | stop 51.51 | target 60.69 | RR 2.0
-- TWLO | PULLBACK | grade A | score 11.5 | entry 127.6 | stop 121.01 | target 140.79 | RR 2.0
-- KMI | PULLBACK | grade B | score 11.5 | entry 33.92 | stop 31.73 | target 38.31 | RR 2.0
-- VZ | PULLBACK | grade B | score 11.0 | entry 50.68 | stop 47.1 | target 57.83 | RR 2.0
-- MRK | PULLBACK | grade B | score 11.0 | entry 119.55 | stop 112.72 | target 133.21 | RR 2.0
-- LIN | PULLBACK | grade B | score 9.5 | entry 498.4 | stop 473.44 | target 548.32 | RR 2.0
-- ABNB | PULLBACK | grade B | score 8.5 | entry 132.96 | stop 125.62 | target 147.65 | RR 2.0
+- PFE | VCP | grade A | score 14.5 | entry 27.77 | stop 26.44 | target 31.75 | RR 3.0
+- TJX | VCP | grade A | score 13.0 | entry 160.07 | stop 154.27 | target 177.47 | RR 3.0
+- SRE | PULLBACK | grade A | score 12.0 | entry 95.89 | stop 91.16 | target 105.35 | RR 2.0
+- TWLO | PULLBACK | grade A | score 11.5 | entry 127.57 | stop 121.01 | target 140.7 | RR 2.0
+- ENB | PULLBACK | grade B | score 11.5 | entry 54.56 | stop 51.51 | target 60.66 | RR 2.0
+- MRK | PULLBACK | grade B | score 11.0 | entry 119.04 | stop 112.72 | target 131.67 | RR 2.0
+- KMI | PULLBACK | grade B | score 11.0 | entry 33.83 | stop 31.73 | target 38.01 | RR 2.0
+- LIN | PULLBACK | grade B | score 8.5 | entry 494.89 | stop 473.44 | target 537.79 | RR 2.0
+- EBAY | PULLBACK | grade B | score 8.5 | entry 90.98 | stop 87.83 | target 97.28 | RR 2.0
+- ABNB | PULLBACK | grade B | score 8.5 | entry 133.95 | stop 125.62 | target 150.6 | RR 2.0
 
 ## Grade summary
-- A setups: 5
-- B setups: 5
+- A setups: 4
+- B setups: 6
 - Total ranked setups: 10
