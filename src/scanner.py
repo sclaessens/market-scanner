@@ -171,6 +171,13 @@ def _score_common_components(df: pd.DataFrame, qqq_return_20d: float) -> dict:
 
     # ATR sanity
     atr_pct = float("nan")
+
+    # Penalize lage volatility (defensieve stocks)
+    if atr_pct < 0.02:
+        score -= 2
+    elif atr_pct < 0.03:
+        score -= 1
+        
     if not pd.isna(atr) and close > 0:
         atr_pct = atr / close
         if atr_pct > 0.08:
@@ -462,6 +469,10 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
     if not ranked:
         return ranked
 
+    atr_pct = setup.get("atr_pct")
+
+    atr_ok_for_a = atr_pct is not None and atr_pct >= 2.0
+
     total = len(ranked)
     top_a_count = max(1, round(total * 0.20))
     top_b_count = max(1, round(total * 0.50))
@@ -477,7 +488,14 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
 
         rs_ok_for_a = rs_20d_pct is not None and rs_20d_pct >= 0
 
-        allow_a = regime_ok and trend_ok and momentum_ok and rr >= 2.0 and rs_ok_for_a
+        allow_a = (
+            regime_ok
+            and trend_ok
+            and momentum_ok
+            and rr >= 2.0
+            and rs_ok_for_a
+            and atr_ok_for_a
+        )
 
         if primary == "PULLBACK":
             allow_a = allow_a and raw_score >= 8.0
