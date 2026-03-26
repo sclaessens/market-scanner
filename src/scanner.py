@@ -412,8 +412,15 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str, qqq_return_20d: floa
         score_components["position"] += 0.5
 
     if vcp:
-        score_components["position"] += 2.0
-        score_components["trend"] += 0.5
+        rs_20d = score_components.get("rs_20d")
+    
+        if rs_20d is not None and rs_20d >= 0.03:
+            # echte leader → sterke VCP
+            score_components["position"] += 2.0
+            score_components["trend"] += 0.5
+        else:
+            # zwakke VCP (defensief / geen leader)
+            score_components["position"] += 0.5
 
     if strong_trend:
         score_components["trend"] += 1.0
