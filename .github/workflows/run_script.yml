@@ -4,45 +4,95 @@ on:
   workflow_dispatch:
     inputs:
       script:
-        description: "Which script do you want to run?"
+        description: "Select script to run"
         required: true
         default: "evaluate_watchlist"
         type: choice
         options:
-          - evaluate_watchlist
-          - build_watchlist
           - run_scan
+          - build_watchlist
+          - evaluate_watchlist
+
+permissions:
+  contents: write
+
+concurrency:
+  group: run-script-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   run:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run selected script
+      - name: Create expected directories
         run: |
-          if [ "${{ github.event.inputs.script }}" = "evaluate_watchlist" ]; then
-            echo "Building watchlist first..."
-            python src/build_watchlist.py
-      
-            echo "Evaluating watchlist..."
-            python src/evaluate_watchlist.py
-      
-          elif [ "${{ github.event.inputs.script }}" = "build_watchlist" ]; then
-            python src/build_watchlist.py
-      
-          elif [ "${{ github.event.inputs.script }}" = "run_scan" ]; then
-            python run_scan.py
+          mkdir -p data/watchlist
+          mkdir -p data/features
+          mkdir -p reports
+
+      - name: Show selected script
+        run: echo "Selected script = ${{ github.event.inputs.script }}"
+
+      - name: Run market scan
+        if: ${{ github.event.inputs.script == 'run_scan' }}
+        run: |
+          python run_scan.py
+
+      - name: Build watchlist
+        if: ${{ github.event.inputs.script == 'build_watchlist' }}
+        run: |
+          python src/build_watchlist.py
+
+      - name: Build and evaluate watchlist
+        if: ${{ github.event.inputs.script == 'evaluate_watchlist' }}
+        run: |
+          echo "Building watchlist first..."
+          python src/build_watchlist.py
+
+          echo "Evaluating watchlist..."
+          python src/evaluate_watchlist.py
+
+      - name: Debug generated files
+        if: always()
+        run: |
+          echo "===== DATA TREE ====="
+          find data -maxdepth 3 -type f | sort || true
+          echo "===== WATCHLIST TREE ====="
+          ls -la data/watchlist || true
+          echo "===== REPORTS TREE ====="
+          find reports -maxdepth 3 -type f | sort || true
+
+      - name: Commit generated files
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add data/**/*.csv || true
+          git add reports/**/*.md || true
+          git add reports/**/*.txt || true
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Update generated files for ${{ github.event.inputs.script }}"
+            git push
           fi
