@@ -119,6 +119,12 @@ def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
             rename_map[col] = "ret_10d"
         elif c in ["Date", "date"]:
             rename_map[col] = "date"
+        elif c in ["20D_HIGH", "20d_high", "High_20d"]:
+            rename_map[col] = "high_20d"
+        elif c in ["20D_LOW", "20d_low", "Low_20d"]:
+            rename_map[col] = "low_20d"
+        elif c in ["AVG_VOL_20", "avg_vol_20", "avg_volume_20d"]:
+            rename_map[col] = "avg_volume_20d"
 
     return df.rename(columns=rename_map)
 
