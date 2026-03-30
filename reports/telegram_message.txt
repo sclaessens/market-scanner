@@ -1,9 +1,9 @@
-📊 Market Scan — 2026-03-27 21:03
+📊 Market Scan — 2026-03-30 21:08
 Regime: 🟡 NEUTRAL
 Universe: 292/298 valid | Failed: 1
-Ranked setups: 5 | A: 0 | B: 5
-PFE | VCP | B | score 10.5 | RS20 5.16% | entry 27.84 | stop 26.44 | target 32.03 | RR 3.0
-SRE | PULLBACK | B | score 11.0 | RS20 6.96% | entry 95.88 | stop 91.16 | target 105.32 | RR 2.0
-KMI | PULLBACK | B | score 10.0 | RS20 9.65% | entry 34.03 | stop 31.87 | target 38.35 | RR 2.0
-CSCO | PULLBACK | B | score 9.0 | RS20 7.94% | entry 79.92 | stop 76.71 | target 86.34 | RR 2.0
-ROST | PULLBACK | B | score 8.25 | RS20 10.3% | entry 211.69 | stop 200.49 | target 234.09 | RR 2.0
+Ranked setups: 5 | A: 1 | B: 4
+PFE | VCP | B | score 14.5 | RS20 10.06% | entry 27.84 | stop 26.44 | target 32.05 | RR 3.0
+XOM | BREAKOUT | A | score 15.0 | RS20 19.38% | entry 176.75 | stop 157.63 | target 226.46 | RR 2.6
+ENB | BREAKOUT | B | score 8.35 | RS20 8.88% | entry 55.55 | stop 53.93 | target 59.77 | RR 2.6
+T | PULLBACK | B | score 11.0 | RS20 10.94% | entry 28.78 | stop 27.21 | target 31.92 | RR 2.0
+LIN | PULLBACK | B | score 11.0 | RS20 6.21% | entry 499.26 | stop 473.44 | target 550.9 | RR 2.0
