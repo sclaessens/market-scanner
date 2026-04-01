@@ -1,2 +1,0 @@
-# market-scanner
-Stock scanner

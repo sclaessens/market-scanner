@@ -1,4 +1,0 @@
-timestamp,ticker,action,setup_type,source,note
-2026-03-26 15:00:00,TWLO,WATCH,PULLBACK,manual,test
-2026-03-26 15:01:00,PFE,WATCH,VCP,manual,test
-2026-03-26 15:02:00,TJX,WATCH,VCP,manual,test

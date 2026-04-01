@@ -1,4 +1,0 @@
-ticker,is_active,setup_type,added_at,last_action,last_action_at,source,note
-PFE,True,VCP,2026-03-26 15:01:00,WATCH,2026-03-26 15:01:00,manual,test
-TJX,True,VCP,2026-03-26 15:02:00,WATCH,2026-03-26 15:02:00,manual,test
-TWLO,True,PULLBACK,2026-03-26 15:00:00,WATCH,2026-03-26 15:00:00,manual,test
