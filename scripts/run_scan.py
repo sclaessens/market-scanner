@@ -1,30 +1,39 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import pandas as pd
 
-from config.settings import (
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from config.settings import (  # noqa: E402
     DATA_DIR,
     REPORTS_DIR,
     SCANS_LOG_FILE,
     TOP_SETUPS_PER_SECTION,
 )
-from src.data_fetcher import fetch_ohlcv_data, load_tickers
-from src.indicators import add_indicators
-from src.regime import classify_market_regime
-from src.reporter import build_report
-from src.scanner import rank_setups, scan_ticker
+from scripts.core.data_fetcher import fetch_ohlcv_data, load_tickers  # noqa: E402
+from scripts.core.indicators import add_indicators  # noqa: E402
+from scripts.core.regime import classify_market_regime  # noqa: E402
+from scripts.core.scanner import rank_setups, scan_ticker  # noqa: E402
+from scripts.reporting.reporter import build_report  # noqa: E402
 
 
-FAILED_TICKERS_FILE = DATA_DIR / "failed_tickers.csv"
-TELEGRAM_MESSAGE_FILE = REPORTS_DIR / "telegram_message.txt"
+FAILED_TICKERS_FILE = DATA_DIR / "logs" / "failed_tickers.csv"
+TELEGRAM_MESSAGE_FILE = REPORTS_DIR / "daily" / "telegram_message.txt"
 MIN_HISTORY_ROWS = 220
 
 
 def ensure_dirs() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    FAILED_TICKERS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    TELEGRAM_MESSAGE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    SCANS_LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 
 def validate_reference_index(ticker: str) -> pd.DataFrame:
@@ -116,7 +125,7 @@ def write_report(
     setups: list[dict],
 ) -> Path:
     report_date = pd.Timestamp.today().strftime("%Y-%m-%d")
-    report_path = REPORTS_DIR / f"market_scan_{report_date}.md"
+    report_path = REPORTS_DIR / "daily" / f"market_scan_{report_date}.md"
 
     latest_qqq = qqq_df.iloc[-1]
     qqq_regime_line = (
@@ -209,8 +218,10 @@ def write_telegram_message(
                 f"target {setup['target']} | RR {setup['rr']}"
             )
 
+    TELEGRAM_MESSAGE_FILE.parent.mkdir(parents=True, exist_ok=True)
     TELEGRAM_MESSAGE_FILE.write_text("\n".join(lines), encoding="utf-8")
     return TELEGRAM_MESSAGE_FILE
+
 
 def compute_return_20d(df: pd.DataFrame) -> float:
     if df.empty or len(df) < 21:
