@@ -1,13 +1,15 @@
+from __future__ import annotations
+
 import pandas as pd
 import yfinance as yf
 
 from config.settings import TICKERS_FILE
 
 
-def load_tickers():
-    tickers = []
+def load_tickers() -> list[str]:
+    tickers: list[str] = []
 
-    with open(TICKERS_FILE, "r", encoding="utf-8") as f:
+    with TICKERS_FILE.open("r", encoding="utf-8") as f:
         for line in f:
             ticker = line.strip().upper()
 
@@ -31,15 +33,20 @@ def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     if isinstance(out.columns, pd.MultiIndex):
         if len(out.columns.levels) >= 2:
             level0 = list(out.columns.get_level_values(0))
+
             if "Open" in level0:
                 out.columns = out.columns.get_level_values(0)
             else:
-                out.columns = [
-                    c[1] if isinstance(c, tuple) and len(c) > 1 else c[0]
-                    if isinstance(c, tuple)
-                    else c
-                    for c in out.columns
-                ]
+                new_cols = []
+                for col in out.columns:
+                    if isinstance(col, tuple):
+                        if len(col) > 1:
+                            new_cols.append(col[1])
+                        else:
+                            new_cols.append(col[0])
+                    else:
+                        new_cols.append(col)
+                out.columns = new_cols
 
     rename_map = {
         "open": "Open",
@@ -63,7 +70,11 @@ def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def fetch_ohlcv_data(ticker: str, period: str = "1y", interval: str = "1d") -> pd.DataFrame:
+def fetch_ohlcv_data(
+    ticker: str,
+    period: str = "1y",
+    interval: str = "1d",
+) -> pd.DataFrame:
     try:
         df = yf.download(
             ticker,
@@ -75,6 +86,7 @@ def fetch_ohlcv_data(ticker: str, period: str = "1y", interval: str = "1d") -> p
             threads=False,
         )
         df = _normalize_columns(df)
+
         if not df.empty:
             return df
     except Exception:
@@ -88,6 +100,7 @@ def fetch_ohlcv_data(ticker: str, period: str = "1y", interval: str = "1d") -> p
             auto_adjust=False,
         )
         df = _normalize_columns(df)
+
         if not df.empty:
             return df
     except Exception:

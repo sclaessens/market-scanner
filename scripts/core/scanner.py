@@ -8,7 +8,6 @@ from config.settings import (
     MIN_PRICE,
     MIN_AVG_VOLUME,
     MIN_RR,
-    TOP_SETUPS_PER_SECTION,
     VCP_LOOKBACK_DAYS,
     VCP_NEAR_HIGH_THRESHOLD,
     VCP_CONTRACTION_THRESHOLD,
@@ -98,7 +97,6 @@ def _score_common_components(df: pd.DataFrame, qqq_return_20d: float) -> dict:
     score_position = 0.0
     score_relative_strength = 0.0
 
-    # Trend
     if close > ma20:
         score_trend += 1.0
     if close > ma50:
@@ -108,7 +106,6 @@ def _score_common_components(df: pd.DataFrame, qqq_return_20d: float) -> dict:
     if ma50 > ma200:
         score_trend += 1.0
 
-    # Momentum
     ret_5d = float("nan")
     ret_10d = float("nan")
     ret_20d = _compute_return_20d(df)
@@ -133,7 +130,6 @@ def _score_common_components(df: pd.DataFrame, qqq_return_20d: float) -> dict:
             elif ret_10d < -0.05:
                 score_momentum -= 1.0
 
-    # Relative strength vs QQQ
     rs_20d = float("nan")
     if not pd.isna(ret_20d) and not pd.isna(qqq_return_20d):
         rs_20d = ret_20d - qqq_return_20d
@@ -147,7 +143,6 @@ def _score_common_components(df: pd.DataFrame, qqq_return_20d: float) -> dict:
         elif rs_20d < 0:
             score_relative_strength -= 1.0
 
-    # Position in range
     if not pd.isna(high_20) and high_20 > 0:
         distance_from_high = (high_20 - close) / high_20
         if distance_from_high <= 0.02:
@@ -162,14 +157,12 @@ def _score_common_components(df: pd.DataFrame, qqq_return_20d: float) -> dict:
         elif range_position >= 0.65:
             score_position += 1.0
 
-    # Liquidity
     if not pd.isna(avg_vol):
         if avg_vol >= 5_000_000:
             score_position += 1.0
         elif avg_vol >= 2_000_000:
             score_position += 0.5
 
-    # ATR sanity + mover profile
     atr_pct = float("nan")
     if not pd.isna(atr) and close > 0:
         atr_pct = atr / close
@@ -196,7 +189,17 @@ def _score_common_components(df: pd.DataFrame, qqq_return_20d: float) -> dict:
 
 
 def detect_vcp(ticker: str, df: pd.DataFrame, regime: str = "NEUTRAL") -> Optional[dict]:
-    required = {"Close", "High", "Low", "MA20", "MA50", "MA200", "AVG_VOL_20", "ATR14", "Volume"}
+    required = {
+        "Close",
+        "High",
+        "Low",
+        "MA20",
+        "MA50",
+        "MA200",
+        "AVG_VOL_20",
+        "ATR14",
+        "Volume",
+    }
     if not _has_required_columns(df, required):
         return None
 
@@ -233,7 +236,11 @@ def detect_vcp(ticker: str, df: pd.DataFrame, regime: str = "NEUTRAL") -> Option
 
     recent_vol = _to_float(recent.tail(5)["Volume"].mean())
     prior_vol = _to_float(recent.head(max(len(recent) - 5, 1))["Volume"].mean())
-    volume_dry = not pd.isna(recent_vol) and not pd.isna(prior_vol) and recent_vol <= prior_vol
+    volume_dry = (
+        not pd.isna(recent_vol)
+        and not pd.isna(prior_vol)
+        and recent_vol <= prior_vol
+    )
 
     if not (near_high and contraction and trend_aligned and volume_dry):
         return None
@@ -271,17 +278,26 @@ def build_tradeplan(df: pd.DataFrame, primary_setup: str) -> dict:
 
     if primary_setup == "BREAKOUT":
         entry = max(close, high_20 * 1.002)
-        stop = min(x for x in [swing_low_5, ma20, entry - (1.5 * atr)] if not pd.isna(x))
+        stop = min(
+            x for x in [swing_low_5, ma20, entry - (1.5 * atr)] if not pd.isna(x)
+        )
         target_multiple = 2.6
 
     elif primary_setup == "VCP":
-        entry = max(close, swing_high_5 * 1.001 if not pd.isna(swing_high_5) else close)
-        stop = min(x for x in [swing_low_5, ma20, entry - (1.3 * atr)] if not pd.isna(x))
+        entry = max(
+            close,
+            swing_high_5 * 1.001 if not pd.isna(swing_high_5) else close,
+        )
+        stop = min(
+            x for x in [swing_low_5, ma20, entry - (1.3 * atr)] if not pd.isna(x)
+        )
         target_multiple = 3.0
 
-    else:  # PULLBACK
+    else:
         entry = max(x for x in [ma20, close] if not pd.isna(x))
-        stop = min(x for x in [swing_low_10, ma50, entry - (1.2 * atr)] if not pd.isna(x))
+        stop = min(
+            x for x in [swing_low_10, ma50, entry - (1.2 * atr)] if not pd.isna(x)
+        )
         target_multiple = 2.0
 
     risk = entry - stop
@@ -302,7 +318,12 @@ def build_tradeplan(df: pd.DataFrame, primary_setup: str) -> dict:
     }
 
 
-def scan_ticker(ticker: str, df: pd.DataFrame, regime: str, qqq_return_20d: float) -> Optional[dict]:
+def scan_ticker(
+    ticker: str,
+    df: pd.DataFrame,
+    regime: str,
+    qqq_return_20d: float,
+) -> Optional[dict]:
     required = {
         "Close",
         "High",
@@ -335,7 +356,10 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str, qqq_return_20d: floa
     volume = _to_float(latest["Volume"])
     avg_vol = _to_float(latest["AVG_VOL_20"])
 
-    if any(pd.isna(x) for x in [close, ma20, ma50, ma200, atr, high_20, low_20, volume, avg_vol]):
+    if any(
+        pd.isna(x)
+        for x in [close, ma20, ma50, ma200, atr, high_20, low_20, volume, avg_vol]
+    ):
         return None
 
     if close < MIN_PRICE or avg_vol < MIN_AVG_VOLUME:
@@ -352,8 +376,16 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str, qqq_return_20d: floa
     trend_ok = close > ma50 and ma50 > ma200
     strong_trend = close > ma20 > ma50 > ma200
 
-    ret_5d = _safe_pct(close, _to_float(df["Close"].iloc[-6])) if len(df) >= 6 else float("nan")
-    ret_10d = _safe_pct(close, _to_float(df["Close"].iloc[-11])) if len(df) >= 11 else float("nan")
+    ret_5d = (
+        _safe_pct(close, _to_float(df["Close"].iloc[-6]))
+        if len(df) >= 6
+        else float("nan")
+    )
+    ret_10d = (
+        _safe_pct(close, _to_float(df["Close"].iloc[-11]))
+        if len(df) >= 11
+        else float("nan")
+    )
     momentum_ok = (
         not pd.isna(ret_5d)
         and not pd.isna(ret_10d)
@@ -413,13 +445,11 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str, qqq_return_20d: floa
 
     if vcp:
         rs_20d = score_components.get("rs_20d")
-    
+
         if rs_20d is not None and rs_20d >= 0.03:
-            # echte leader → sterke VCP
             score_components["position"] += 2.0
             score_components["trend"] += 0.5
         else:
-            # zwakke VCP (defensief / geen leader)
             score_components["position"] += 0.5
 
     if strong_trend:
@@ -450,7 +480,9 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str, qqq_return_20d: floa
         "score_trend": round(float(score_components["trend"]), 2),
         "score_momentum": round(float(score_components["momentum"]), 2),
         "score_position": round(float(score_components["position"]), 2),
-        "score_relative_strength": round(float(score_components["relative_strength"]), 2),
+        "score_relative_strength": round(
+            float(score_components["relative_strength"]), 2
+        ),
         "trend_ok": trend_ok,
         "momentum_ok": momentum_ok,
         "regime_ok": regime != "BEARISH",
@@ -462,9 +494,21 @@ def scan_ticker(ticker: str, df: pd.DataFrame, regime: str, qqq_return_20d: floa
         "high_20d": round(float(high_20), 2),
         "low_20d": round(float(low_20), 2),
         "avg_vol_20": int(avg_vol),
-        "ret_20d_pct": round(float(score_components["ret_20d"] * 100), 2) if score_components["ret_20d"] is not None else None,
-        "rs_20d_pct": round(float(score_components["rs_20d"] * 100), 2) if score_components["rs_20d"] is not None else None,
-        "atr_pct": round(float(score_components["atr_pct"] * 100), 2) if score_components["atr_pct"] is not None else None,
+        "ret_20d_pct": (
+            round(float(score_components["ret_20d"] * 100), 2)
+            if score_components["ret_20d"] is not None
+            else None
+        ),
+        "rs_20d_pct": (
+            round(float(score_components["rs_20d"] * 100), 2)
+            if score_components["rs_20d"] is not None
+            else None
+        ),
+        "atr_pct": (
+            round(float(score_components["atr_pct"] * 100), 2)
+            if score_components["atr_pct"] is not None
+            else None
+        ),
         **tradeplan,
     }
 
@@ -520,7 +564,7 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
     return ranked
 
 
-def rank_setups(setups: list[dict], top_n: int = TOP_SETUPS_PER_SECTION) -> list[dict]:
+def rank_setups(setups: list[dict], top_n: int = 10) -> list[dict]:
     primary_priority = {"VCP": 3, "BREAKOUT": 2, "PULLBACK": 1}
 
     ranked = sorted(
