@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+.DS_Store
+.idea/
+.venv/
+
+data/processed/*.csv
+data/logs/*.csv
+data/scans_log.csv
+data/watchlist/*.csv
+reports/daily/*.md
+reports/daily/*.txt
