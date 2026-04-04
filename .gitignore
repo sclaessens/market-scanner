@@ -12,3 +12,4 @@ data/scans_log.csv
 data/watchlist/*.csv
 reports/daily/*.md
 reports/daily/*.txt
+.github/
