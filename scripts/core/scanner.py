@@ -397,21 +397,21 @@ def scan_ticker(
         trend_ok
         and momentum_ok
         and not pd.isna(distance_ma20)
-        and -0.06 <= distance_ma20 <= 0.02
+        and -0.08 <= distance_ma20 <= 0.04
         and not pd.isna(distance_ma50)
-        and distance_ma50 >= 0.00
-        and close >= 0.88 * high_20
+        and distance_ma50 >= -0.02
+        and close >= 0.80 * high_20
         and not pd.isna(atr_pct)
-        and atr_pct <= 0.08
+        and atr_pct <= 0.10
     )
 
     breakout = (
         trend_ok
         and not pd.isna(distance_high)
-        and distance_high <= 0.05
-        and volume >= 1.20 * avg_vol
+        and distance_high <= 0.08
+        and volume >= 1.10 * avg_vol
         and close > ma20
-        and (pd.isna(ret_5d) or ret_5d >= 0.00)
+        and (pd.isna(ret_5d) or ret_5d >= -0.01)
     )
 
     vcp_result = detect_vcp(ticker, df, regime)
@@ -468,8 +468,14 @@ def scan_ticker(
     )
 
     tradeplan = build_tradeplan(df, primary_setup)
+
     if not tradeplan:
-        return None
+        tradeplan = {
+            "entry": None,
+            "stop": None,
+            "target": None,
+            "rr": None,
+        }
 
     return {
         "ticker": ticker,

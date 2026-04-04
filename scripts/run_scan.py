@@ -6,9 +6,8 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
-    
-import pandas as pd
 
+import pandas as pd
 
 from config.settings import (  # noqa: E402
     DATA_DIR,
@@ -209,14 +208,37 @@ def write_telegram_message(
             lines.append("Context: long setups filtered out.")
     else:
         lines.append(f"Ranked setups: {len(setups)} | A: {a_count} | B: {b_count}")
-        for setup in setups:
-            lines.append(
-                f"{setup['ticker']} | {setup.get('primary_setup', setup['setup'])} | "
-                f"{setup.get('grade', 'C')} | score {setup['score']} | "
-                f"RS20 {setup.get('rs_20d_pct', 'n/a')}% | "
-                f"entry {setup['entry']} | stop {setup['stop']} | "
-                f"target {setup['target']} | RR {setup['rr']}"
-            )
+
+        a_setups = [s for s in setups if s.get("grade") == "A"]
+        b_setups = [s for s in setups if s.get("grade") == "B"]
+
+        def print_section(title: str, setups_list: list[dict]) -> None:
+            if not setups_list:
+                return
+
+            lines.append("")
+            lines.append(title)
+
+            for setup_type in ["BREAKOUT", "PULLBACK", "VCP"]:
+                filtered = [
+                    s for s in setups_list
+                    if s.get("primary_setup") == setup_type
+                ]
+
+                if not filtered:
+                    continue
+
+                lines.append(setup_type)
+
+                for s in filtered:
+                    lines.append(
+                        f"- {s['ticker']} | score {s['score']} | "
+                        f"entry {s['entry']} | stop {s['stop']} | "
+                        f"target {s['target']} | RR {s['rr']}"
+                    )
+
+        print_section("🔥 A SETUPS", a_setups)
+        print_section("📈 B SETUPS", b_setups)
 
     TELEGRAM_MESSAGE_FILE.parent.mkdir(parents=True, exist_ok=True)
     TELEGRAM_MESSAGE_FILE.write_text("\n".join(lines), encoding="utf-8")
@@ -296,7 +318,9 @@ def main() -> None:
         successful_count += 1
 
         result = scan_ticker(ticker, df_ind, regime, qqq_return_20d)
+
         if result is None:
+            failed_rows.append({"ticker": ticker, "reason": "no_valid_setup"})
             continue
 
         setups.append(result)
