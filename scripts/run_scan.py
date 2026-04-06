@@ -19,11 +19,19 @@ from scripts.core.data_fetcher import fetch_ohlcv_data, load_tickers  # noqa: E4
 from scripts.core.indicators import add_indicators  # noqa: E402
 from scripts.core.regime import classify_market_regime  # noqa: E402
 from scripts.core.scanner import rank_setups, scan_ticker  # noqa: E402
+from scripts.portfolio.build_portfolio import build_portfolio  # noqa: E402
+from scripts.portfolio.evaluate_positions import evaluate_positions  # noqa: E402
+from scripts.reporting.build_telegram_summary import (  # noqa: E402
+    build_telegram_summary_text,
+    save_summary,
+)
 from scripts.reporting.reporter import build_report  # noqa: E402
 
 
 FAILED_TICKERS_FILE = DATA_DIR / "logs" / "failed_tickers.csv"
 TELEGRAM_MESSAGE_FILE = REPORTS_DIR / "daily" / "telegram_message.txt"
+MARKET_REGIME_FILE = DATA_DIR / "processed" / "market_regime.csv"
+SCANNER_RANKED_FILE = DATA_DIR / "processed" / "scanner_ranked.csv"
 MIN_HISTORY_ROWS = 220
 
 
@@ -33,6 +41,8 @@ def ensure_dirs() -> None:
     FAILED_TICKERS_FILE.parent.mkdir(parents=True, exist_ok=True)
     TELEGRAM_MESSAGE_FILE.parent.mkdir(parents=True, exist_ok=True)
     SCANS_LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    MARKET_REGIME_FILE.parent.mkdir(parents=True, exist_ok=True)
+    SCANNER_RANKED_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 
 def validate_reference_index(ticker: str) -> pd.DataFrame:
@@ -105,6 +115,75 @@ def save_failed_tickers(rows: list[dict]) -> None:
     pd.DataFrame(rows).to_csv(FAILED_TICKERS_FILE, index=False)
 
 
+def save_market_regime(
+    report_date: str,
+    regime: str,
+    qqq_df: pd.DataFrame,
+    spy_df: pd.DataFrame,
+) -> None:
+    qqq_latest = qqq_df.iloc[-1]
+    spy_latest = spy_df.iloc[-1]
+
+    df = pd.DataFrame(
+        [
+            {
+                "date": report_date,
+                "qqq_close": float(qqq_latest["Close"]),
+                "qqq_ma50": float(qqq_latest["MA50"]),
+                "qqq_ma200": float(qqq_latest["MA200"]),
+                "spy_close": float(spy_latest["Close"]),
+                "regime": regime,
+            }
+        ]
+    )
+
+    MARKET_REGIME_FILE.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(MARKET_REGIME_FILE, index=False)
+
+
+def save_scanner_ranked(setups: list[dict]) -> None:
+    rows: list[dict] = []
+
+    for setup in setups:
+        rows.append(
+            {
+                "ticker": setup.get("ticker"),
+                "setup_type": setup.get("primary_setup", setup.get("setup", "")),
+                "setup_grade": setup.get("grade", ""),
+                "score_total": setup.get("score"),
+                "entry": setup.get("entry"),
+                "stop": setup.get("stop"),
+                "target": setup.get("target"),
+                "rr": setup.get("rr"),
+                "close": setup.get("close"),
+                "setup": setup.get("setup", ""),
+                "primary_setup": setup.get("primary_setup", ""),
+            }
+        )
+
+    if rows:
+        df = pd.DataFrame(rows)
+    else:
+        df = pd.DataFrame(
+            columns=[
+                "ticker",
+                "setup_type",
+                "setup_grade",
+                "score_total",
+                "entry",
+                "stop",
+                "target",
+                "rr",
+                "close",
+                "setup",
+                "primary_setup",
+            ]
+        )
+
+    SCANNER_RANKED_FILE.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(SCANNER_RANKED_FILE, index=False)
+
+
 def _format_setup_line(setup: dict) -> str:
     grade = setup.get("grade", "C")
     primary_setup = setup.get("primary_setup", setup.get("setup", ""))
@@ -173,78 +252,6 @@ def write_report(
     return report_path
 
 
-def write_telegram_message(
-    report_date: str,
-    regime: str,
-    total_tickers: int,
-    successful_tickers: int,
-    failed_tickers: int,
-    setups: list[dict],
-) -> Path:
-    lines: list[str] = []
-    now = pd.Timestamp.now().strftime("%H:%M")
-
-    if regime == "BULLISH":
-        regime_icon = "🟢"
-    elif regime == "BEARISH":
-        regime_icon = "🔴"
-    else:
-        regime_icon = "🟡"
-
-    a_count = len([s for s in setups if s.get("grade") == "A"])
-    b_count = len([s for s in setups if s.get("grade") == "B"])
-
-    lines.append(f"📊 Market Scan — {report_date} {now}")
-    lines.append(f"Regime: {regime_icon} {regime}")
-    lines.append(
-        f"Universe: {successful_tickers}/{total_tickers} valid | Failed: {failed_tickers}"
-    )
-
-    if not setups:
-        lines.append("Setups: none")
-        if regime == "NEUTRAL":
-            lines.append("Context: low conviction environment.")
-        elif regime == "BEARISH":
-            lines.append("Context: long setups filtered out.")
-    else:
-        lines.append(f"Ranked setups: {len(setups)} | A: {a_count} | B: {b_count}")
-
-        a_setups = [s for s in setups if s.get("grade") == "A"]
-        b_setups = [s for s in setups if s.get("grade") == "B"]
-
-        def print_section(title: str, setups_list: list[dict]) -> None:
-            if not setups_list:
-                return
-
-            lines.append("")
-            lines.append(title)
-
-            for setup_type in ["BREAKOUT", "PULLBACK", "VCP"]:
-                filtered = [
-                    s for s in setups_list
-                    if s.get("primary_setup") == setup_type
-                ]
-
-                if not filtered:
-                    continue
-
-                lines.append(setup_type)
-
-                for s in filtered:
-                    lines.append(
-                        f"- {s['ticker']} | score {s['score']} | "
-                        f"entry {s['entry']} | stop {s['stop']} | "
-                        f"target {s['target']} | RR {s['rr']}"
-                    )
-
-        print_section("🔥 A SETUPS", a_setups)
-        print_section("📈 B SETUPS", b_setups)
-
-    TELEGRAM_MESSAGE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    TELEGRAM_MESSAGE_FILE.write_text("\n".join(lines), encoding="utf-8")
-    return TELEGRAM_MESSAGE_FILE
-
-
 def compute_return_20d(df: pd.DataFrame) -> float:
     if df.empty or len(df) < 21:
         return float("nan")
@@ -277,8 +284,6 @@ def main() -> None:
         ma200=float(qqq_latest["MA200"]),
     )
     print(f"Market regime: {regime}")
-
-    _ = spy_df
 
     setups: list[dict] = []
     failed_rows: list[dict] = []
@@ -332,6 +337,18 @@ def main() -> None:
     report_date = pd.Timestamp.today().strftime("%Y-%m-%d")
     append_scan_log(report_date, regime, setups)
 
+    print("Saving regime snapshot...")
+    save_market_regime(
+        report_date=report_date,
+        regime=regime,
+        qqq_df=qqq_df,
+        spy_df=spy_df,
+    )
+
+    print("Saving scanner ranked output...")
+    save_scanner_ranked(setups)
+
+    print("Writing markdown report...")
     report_path = write_report(
         total_tickers=len(tickers),
         successful_tickers=successful_count,
@@ -341,19 +358,24 @@ def main() -> None:
         setups=setups,
     )
 
-    telegram_path = write_telegram_message(
-        report_date=report_date,
-        regime=regime,
-        total_tickers=len(tickers),
-        successful_tickers=successful_count,
-        failed_tickers=len(failed_rows),
-        setups=setups,
-    )
+    print("Building portfolio...")
+    portfolio_df = build_portfolio()
+    print(f"Portfolio positions: {len(portfolio_df)}")
+
+    print("Evaluating positions...")
+    portfolio_review_df = evaluate_positions()
+    print(f"Portfolio reviews: {len(portfolio_review_df)}")
+
+    print("Building telegram summary...")
+    telegram_text = build_telegram_summary_text()
+    save_summary(telegram_text)
 
     print(f"Report written to: {report_path}")
-    print(f"Telegram message written to: {telegram_path}")
+    print(f"Telegram message written to: {TELEGRAM_MESSAGE_FILE}")
     print(f"Failed tickers log written to: {FAILED_TICKERS_FILE}")
     print(f"Scan log updated: {SCANS_LOG_FILE}")
+    print(f"Market regime snapshot written to: {MARKET_REGIME_FILE}")
+    print(f"Scanner ranked output written to: {SCANNER_RANKED_FILE}")
 
 
 if __name__ == "__main__":
