@@ -26,6 +26,7 @@ from scripts.reporting.build_telegram_summary import (  # noqa: E402
     save_summary,
 )
 from scripts.reporting.reporter import build_report  # noqa: E402
+from scripts.reporting.send_telegram import send_daily_summary
 
 
 FAILED_TICKERS_FILE = DATA_DIR / "logs" / "failed_tickers.csv"
@@ -376,6 +377,12 @@ def main() -> None:
     print(f"Scan log updated: {SCANS_LOG_FILE}")
     print(f"Market regime snapshot written to: {MARKET_REGIME_FILE}")
     print(f"Scanner ranked output written to: {SCANNER_RANKED_FILE}")
+
+    try:
+        send_daily_summary()
+        print("Telegram summary succesvol verstuurd.")
+    except Exception as exc:
+        print(f"Waarschuwing: Telegram verzending mislukt: {exc}")
 
 
 if __name__ == "__main__":
