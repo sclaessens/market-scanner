@@ -6,6 +6,9 @@ on:
     # Maandag t.e.m. vrijdag om 20:17 UTC
     - cron: "17 20 * * 1-5"
 
+permissions:
+  contents: write
+
 jobs:
   run-scan:
     runs-on: ubuntu-latest
@@ -13,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -31,8 +36,41 @@ jobs:
           TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
           EOF
 
+      - name: Disable Telegram webhook for polling mode
+        run: |
+          curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/deleteWebhook?drop_pending_updates=false"
+
       - name: Process Telegram commands
         run: python scripts/telegram/process_telegram_commands.py
 
       - name: Run scanner
         run: python scripts/run_scan.py
+
+      - name: Show generated files
+        run: |
+          echo "=== WATCHLIST ==="
+          ls -la data/watchlist || true
+          echo "=== PORTFOLIO ==="
+          ls -la data/portfolio || true
+          echo "=== PROCESSED ==="
+          ls -la data/processed || true
+          echo "=== REPORTS ==="
+          ls -la reports/daily || true
+
+      - name: Commit updated state and reports
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/watchlist/*.csv || true
+          git add data/portfolio/*.csv || true
+          git add data/processed/market_regime.csv || true
+          git add data/processed/scanner_ranked.csv || true
+          git add reports/daily/telegram_message.txt || true
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Automated daily scan update"
+            git push
+          fi
