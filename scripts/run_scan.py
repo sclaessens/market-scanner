@@ -317,6 +317,11 @@ def main() -> None:
 
         try:
             df_ind = add_indicators(df)
+
+            # 🔥 SAVE PROCESSED DATA PER TICKER
+            processed_path = DATA_DIR / "processed" / f"{ticker}.csv"
+            processed_path.parent.mkdir(parents=True, exist_ok=True)
+            df_ind.to_csv(processed_path, index=False)
         except Exception as exc:
             failed_rows.append({"ticker": ticker, "reason": f"indicator_error: {exc}"})
             continue

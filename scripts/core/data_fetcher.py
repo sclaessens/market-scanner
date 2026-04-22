@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import pandas as pd
 import yfinance as yf
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 from config.settings import TICKERS_FILE
 

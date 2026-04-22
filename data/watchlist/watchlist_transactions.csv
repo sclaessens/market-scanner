@@ -1,0 +1,40 @@
+timestamp,ticker,action,setup_type,source,note
+2026-03-26 15:00:00,TWLO,WATCH,PULLBACK,manual,test
+2026-03-26 15:01:00,PFE,WATCH,VCP,manual,test
+2026-03-26 15:02:00,TJX,WATCH,VCP,manual,test
+2026-04-06 14:39:25,AMD,WATCH,BREAKOUT,auto_scan,auto-added from A setup
+2026-04-06 14:39:25,EBAY,WATCH,PULLBACK,auto_scan,auto-added from A setup
+2026-04-06 14:39:25,INTC,WATCH,BREAKOUT,auto_scan,auto-added from A setup
+2026-04-06 14:54:57,AMD,UNWATCH,BREAKOUT,decision_engine,auto-removed (REJECTED)
+2026-04-06 14:54:57,INTC,UNWATCH,BREAKOUT,decision_engine,auto-removed (REJECTED)
+2026-04-06 15:14:46,AMD,WATCH,BREAKOUT,auto_scan,auto-added from A setup
+2026-04-06 15:14:46,INTC,WATCH,BREAKOUT,auto_scan,auto-added from A setup
+2026-04-06 15:14:48,AMD,UNWATCH,BREAKOUT,decision_engine,auto-removed (REJECTED)
+2026-04-06 15:14:48,INTC,UNWATCH,BREAKOUT,decision_engine,auto-removed (REJECTED)
+2026-04-06 15:52:14,AMD,WATCH,BREAKOUT,auto_scan,auto-added from A setup
+2026-04-06 15:52:14,BHP,WATCH,PULLBACK,auto_scan,auto-added from A setup
+2026-04-06 15:52:14,INTC,WATCH,BREAKOUT,auto_scan,auto-added from A setup
+2026-04-06 15:52:14,KEYS,WATCH,PULLBACK,auto_scan,auto-added from A setup
+2026-04-06 15:52:15,AMD,UNWATCH,BREAKOUT,decision_engine,auto-removed (REJECTED)
+2026-04-06 15:52:15,BHP,UNWATCH,PULLBACK,decision_engine,auto-removed (REJECTED)
+2026-04-06 15:52:15,INTC,UNWATCH,BREAKOUT,decision_engine,auto-removed (REJECTED)
+2026-04-06 15:57:02,AMD,WATCH,BREAKOUT,auto_scan,auto-added from A setup
+2026-04-06 15:57:02,BHP,WATCH,PULLBACK,auto_scan,auto-added from A setup
+2026-04-06 15:57:02,INTC,WATCH,BREAKOUT,auto_scan,auto-added from A setup
+2026-04-06 15:57:02,JBL,WATCH,PULLBACK,auto_scan,auto-added from A setup
+2026-04-06 15:57:02,TER,WATCH,PULLBACK,auto_scan,auto-added from A setup
+2026-04-06 15:57:03,AMD,UNWATCH,BREAKOUT,decision_engine,auto-removed (REJECTED)
+2026-04-06 15:57:03,BHP,UNWATCH,PULLBACK,decision_engine,auto-removed (REJECTED)
+2026-04-06 15:57:03,INTC,UNWATCH,BREAKOUT,decision_engine,auto-removed (REJECTED)
+2026-04-06 16:11:41,AMD,WATCH,BREAKOUT,auto_scan,auto-added from A setup
+2026-04-06 16:11:41,BHP,WATCH,PULLBACK,auto_scan,auto-added from A setup
+2026-04-06 16:11:41,INTC,WATCH,BREAKOUT,auto_scan,auto-added from A setup
+2026-04-06 16:11:43,AMD,UNWATCH,BREAKOUT,decision_engine,auto-removed (REJECTED)
+2026-04-06 16:11:43,BHP,UNWATCH,PULLBACK,decision_engine,auto-removed (REJECTED)
+2026-04-06 16:11:43,INTC,UNWATCH,BREAKOUT,decision_engine,auto-removed (REJECTED)
+2026-04-06 16:36:01,AMD,WATCH,BREAKOUT,auto_scan,auto-added from A setup
+2026-04-06 16:36:01,BHP,WATCH,PULLBACK,auto_scan,auto-added from A setup
+2026-04-06 16:36:01,INTC,WATCH,BREAKOUT,auto_scan,auto-added from A setup
+2026-04-06 16:36:03,AMD,UNWATCH,BREAKOUT,decision_engine,auto-removed (REJECTED)
+2026-04-06 16:36:03,BHP,UNWATCH,PULLBACK,decision_engine,auto-removed (REJECTED)
+2026-04-06 16:36:03,INTC,UNWATCH,BREAKOUT,decision_engine,auto-removed (REJECTED)

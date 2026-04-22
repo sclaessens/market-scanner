@@ -1,0 +1,80 @@
+📲 Trading Signals — 2026-04-22 20:59
+Regime: 🟢 Markt is sterk (BULLISH)
+
+✅ Geen READY setups op dit moment.
+
+👀 OPVOLGEN VOOR LATER (4)
+
+Pullback
+- EBAY
+  → Actie nu: Niet najagen
+  → Trigger: limietorder rond 96.89
+  → Waarom: Koers staat te ver boven de korte trend. Wacht op een rustigere instap.
+  → Context: close 105.44 | MA20 96.89 | MA50 91.72
+- JBL
+  → Actie nu: Niet najagen
+  → Trigger: limietorder rond 291.47
+  → Waarom: Koers staat te ver boven de korte trend. Wacht op een rustigere instap.
+  → Context: close 335.33 | MA20 291.47 | MA50 272.22
+- KEYS
+  → Actie nu: Niet najagen
+  → Trigger: limietorder rond 310.55
+  → Waarom: Koers staat te ver boven de korte trend. Wacht op een rustigere instap.
+  → Context: close 340.33 | MA20 310.55 | MA50 289.34
+- TER
+  → Actie nu: Niet najagen
+  → Trigger: limietorder rond 341.19
+  → Waarom: Koers staat te ver boven de korte trend. Wacht op een rustigere instap.
+  → Context: close 384.48 | MA20 341.19 | MA50 321.63
+
+❌ VAN WATCHLIST HALEN (3)
+
+- PFE
+  → Actie nu: Niet kopen
+  → Waarom: Trend is verzwakt onder MA50.
+  → Context: close 26.81 | MA20 27.46 | MA50 27.24
+- TJX
+  → Actie nu: Van watchlist halen
+  → Waarom: Deze setup staat al te lang op de watchlist zonder trigger.
+  → Context: close 158.97 | MA20 159.74 | MA50 158.10
+- TWLO
+  → Actie nu: Van watchlist halen
+  → Waarom: Deze setup staat al te lang op de watchlist zonder trigger.
+  → Context: close 149.92 | MA20 130.81 | MA50 124.53
+
+🎯 SCANNER IDEEËN
+Interessante kansen voor later
+Pullback
+- WMT | instap 129.91 | stop 122.55 | doel 144.63 | R:R 2.00
+- HAL | instap 39.33 | stop 35.51 | doel 46.97 | R:R 2.00
+- CSX | instap 43.17 | stop 41.24 | doel 47.02 | R:R 2.00
+- PLD | instap 141.56 | stop 135.03 | doel 154.62 | R:R 2.00
+
+💼 PORTFOLIO — ACTIES
+🟠 Gedeeltelijk winst nemen (2)
+(koers is hard opgelopen → deel van winst vastzetten)
+
+- MRVL
+  → Actie: Verkoop 25%
+  → Waarom: koers staat ver boven de korte trend
+  → Positie: 15 stuks | koers 157.79 | winst/verlies 15.24%
+  → Risico: MEDIUM ⚠️
+- ON
+  → Actie: Verkoop 25%
+  → Waarom: koers staat ver boven de korte trend
+  → Positie: 25 stuks | koers 89.09 | winst/verlies 9.97%
+  → Risico: MEDIUM ⚠️
+
+🟢 Gewoon aanhouden (2)
+(trend is gezond → niets doen)
+
+- COST
+  → Actie: Houden
+  → Waarom: trend blijft gezond boven korte en middellange trend
+  → Positie: 2 stuks | koers 1004.61 | winst/verlies -2.09%
+  → Risico: LOW ✅
+- TECK
+  → Actie: Houden
+  → Waarom: trend blijft gezond boven korte en middellange trend
+  → Positie: 40 stuks | koers 59.20 | winst/verlies 0.31%
+  → Risico: LOW ✅

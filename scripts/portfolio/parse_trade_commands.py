@@ -11,39 +11,80 @@ from scripts.portfolio.portfolio_manager import log_trade, build_positions
 
 def parse_trade_command(command: str):
     """
-    Parse a trade command string and execute it.
+    Smart parser for human-friendly trade commands.
 
-    Example:
-    BUY ASML 5 842.50
-    SELL NVDA 2 190.00
+    Supported formats:
+    - BUY ASML 5 842.50
+    - buy asml 5 842,50
+    - buy asml 5 at 842.50
+    - buy asml 5 @ 842.50
+    - BUY NVDA 2 market
     """
 
-    parts = command.strip().split()
+    if not command:
+        raise ValueError("Empty command")
 
-    if len(parts) != 4:
-        raise ValueError("Invalid command format. Use: BUY TICKER QTY PRICE")
+    # =========================
+    # NORMALIZE INPUT
+    # =========================
+    cmd = command.strip().lower()
 
-    side, ticker, quantity, price = parts
+    # Replace common separators
+    cmd = cmd.replace("@", " ")
+    cmd = cmd.replace(" at ", " ")
 
-    side = side.upper()
-    ticker = ticker.upper()
+    parts = cmd.split()
+
+    if len(parts) < 3:
+        raise ValueError("Invalid command format")
+
+    side = parts[0].upper()
+    ticker = parts[1].upper()
 
     if side not in ["BUY", "SELL"]:
         raise ValueError("Side must be BUY or SELL")
 
+    # =========================
+    # QUANTITY
+    # =========================
     try:
-        quantity = float(quantity)
-        price = float(price)
+        quantity = float(parts[2])
     except ValueError:
-        raise ValueError("Quantity and price must be numbers")
+        raise ValueError("Quantity must be a number")
 
     if quantity <= 0:
         raise ValueError("Quantity must be > 0")
 
-    if price <= 0:
-        raise ValueError("Price must be > 0")
+    # =========================
+    # PRICE
+    # =========================
+    price = None
 
-    # === EXECUTE ===
+    if len(parts) >= 4:
+        raw_price = parts[3]
+
+        if raw_price == "market":
+            price = None
+        else:
+            try:
+                price = float(raw_price.replace(",", "."))
+            except ValueError:
+                raise ValueError("Invalid price format")
+
+    else:
+        raise ValueError("Missing price")
+
+    # =========================
+    # HANDLE MARKET ORDERS
+    # =========================
+    if price is None:
+        raise ValueError("Market orders not supported yet (no price)")
+
+    # =========================
+    # EXECUTE
+    # =========================
+    from scripts.portfolio.portfolio_manager import log_trade, build_positions
+
     log_trade(ticker, side, quantity, price)
     positions = build_positions()
 

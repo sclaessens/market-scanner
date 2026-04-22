@@ -1,15 +1,40 @@
+# ========================
+# Python / env
+# ========================
 __pycache__/
 *.pyc
 *.pyo
 .env
-.DS_Store
-.idea/
 .venv/
 
+# ========================
+# OS / IDE
+# ========================
+.DS_Store
+.idea/
+
+# ========================
+# Logs
+# ========================
+data/logs/
+
+# ========================
+# Raw data
+# ========================
+data/raw/
+
+# ========================
+# Indicator files (ALLE ticker CSV's blokkeren)
+# ========================
 data/processed/*.csv
-data/logs/*.csv
-data/scans_log.csv
-data/watchlist/*.csv
-reports/daily/*.md
-reports/daily/*.txt
-.github/
+
+# ========================
+# MAAR deze toelaten
+# ========================
+!data/processed/market_regime.csv
+!data/processed/scanner_ranked.csv
+
+# ========================
+# Reports
+# ========================
+reports/archive/

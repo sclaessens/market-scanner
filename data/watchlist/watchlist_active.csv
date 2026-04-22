@@ -1,0 +1,8 @@
+ticker,is_active,setup_type,added_at,last_action,last_action_at,source,note
+EBAY,True,PULLBACK,2026-04-06 14:39:25,WATCH,2026-04-06 14:39:25,auto_scan,auto-added from A setup
+JBL,True,PULLBACK,2026-04-06 15:57:02,WATCH,2026-04-06 15:57:02,auto_scan,auto-added from A setup
+KEYS,True,PULLBACK,2026-04-06 15:52:14,WATCH,2026-04-06 15:52:14,auto_scan,auto-added from A setup
+PFE,True,VCP,2026-03-26 15:01:00,WATCH,2026-03-26 15:01:00,manual,test
+TER,True,PULLBACK,2026-04-06 15:57:02,WATCH,2026-04-06 15:57:02,auto_scan,auto-added from A setup
+TJX,True,VCP,2026-03-26 15:02:00,WATCH,2026-03-26 15:02:00,manual,test
+TWLO,True,PULLBACK,2026-03-26 15:00:00,WATCH,2026-03-26 15:00:00,manual,test
