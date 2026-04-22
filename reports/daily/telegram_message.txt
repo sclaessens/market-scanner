@@ -1,4 +1,4 @@
-📲 Trading Signals — 2026-04-22 20:59
+📲 Trading Signals — 2026-04-22 19:49
 Regime: 🟢 Markt is sterk (BULLISH)
 
 ✅ Geen READY setups op dit moment.
@@ -43,12 +43,20 @@ Pullback
   → Context: close 149.92 | MA20 130.81 | MA50 124.53
 
 🎯 SCANNER IDEEËN
+Sterkste setups
+Breakout
+- AMD | instap 304.11 | stop 239.38 | doel 472.39 | R:R 2.60
+- TXN | instap 238.66 | stop 209.89 | doel 313.45 | R:R 2.60
+
 Interessante kansen voor later
+Breakout
+- TWLO | instap 154.95 | stop 130.77 | doel 217.81 | R:R 2.60
+- NUE | instap 216.69 | stop 182.58 | doel 305.38 | R:R 2.60
+
 Pullback
-- WMT | instap 129.91 | stop 122.55 | doel 144.63 | R:R 2.00
-- HAL | instap 39.33 | stop 35.51 | doel 46.97 | R:R 2.00
-- CSX | instap 43.17 | stop 41.24 | doel 47.02 | R:R 2.00
-- PLD | instap 141.56 | stop 135.03 | doel 154.62 | R:R 2.00
+- WMT | instap 129.77 | stop 122.55 | doel 144.22 | R:R 2.00
+- HAL | instap 39.10 | stop 35.51 | doel 46.28 | R:R 2.00
+- CSX | instap 43.06 | stop 41.23 | doel 46.73 | R:R 2.00
 
 💼 PORTFOLIO — ACTIES
 🟠 Gedeeltelijk winst nemen (2)
@@ -57,12 +65,12 @@ Pullback
 - MRVL
   → Actie: Verkoop 25%
   → Waarom: koers staat ver boven de korte trend
-  → Positie: 15 stuks | koers 157.79 | winst/verlies 15.24%
+  → Positie: 15 stuks | koers 157.53 | winst/verlies 15.04%
   → Risico: MEDIUM ⚠️
 - ON
   → Actie: Verkoop 25%
   → Waarom: koers staat ver boven de korte trend
-  → Positie: 25 stuks | koers 89.09 | winst/verlies 9.97%
+  → Positie: 25 stuks | koers 89.37 | winst/verlies 10.32%
   → Risico: MEDIUM ⚠️
 
 🟢 Gewoon aanhouden (2)
@@ -71,10 +79,10 @@ Pullback
 - COST
   → Actie: Houden
   → Waarom: trend blijft gezond boven korte en middellange trend
-  → Positie: 2 stuks | koers 1004.61 | winst/verlies -2.09%
+  → Positie: 2 stuks | koers 1002.62 | winst/verlies -2.28%
   → Risico: LOW ✅
 - TECK
   → Actie: Houden
   → Waarom: trend blijft gezond boven korte en middellange trend
-  → Positie: 40 stuks | koers 59.20 | winst/verlies 0.31%
+  → Positie: 40 stuks | koers 59.16 | winst/verlies 0.23%
   → Risico: LOW ✅
