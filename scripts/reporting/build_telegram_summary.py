@@ -117,6 +117,52 @@ def urgency_icon(level: str) -> str:
     }.get(level, "ℹ️")
 
 
+def get_portfolio_tickers() -> set[str]:
+    """
+    Alle tickers die momenteel als open portfolio-actie in portfolio_review.csv staan.
+    Deze tickers krijgen prioriteit boven watchlist en scanner.
+    """
+    df = read_csv_safe(PORTFOLIO_REVIEW_FILE)
+    if df.empty or "ticker" not in df.columns:
+        return set()
+
+    return set(
+        df["ticker"]
+        .astype(str)
+        .str.upper()
+        .str.strip()
+        .tolist()
+    )
+
+def get_watchlist_tickers() -> set[str]:
+    """
+    Alle tickers die momenteel op de watchlist staan.
+    Deze tickers krijgen prioriteit boven scanner.
+    """
+    df = read_csv_safe(WATCHLIST_FILE)
+    if df.empty or "ticker" not in df.columns:
+        return set()
+
+    return set(
+        df["ticker"]
+        .astype(str)
+        .str.upper()
+        .str.strip()
+        .tolist()
+    )
+
+def exclude_portfolio_tickers(df: pd.DataFrame, portfolio_tickers: set[str]) -> pd.DataFrame:
+    """
+    Verwijder tickers uit scanner/watchlist als ze al in portfolio zitten.
+    """
+    if df.empty or "ticker" not in df.columns or not portfolio_tickers:
+        return df.copy()
+
+    out = df.copy()
+    out["ticker"] = out["ticker"].astype(str).str.upper().str.strip()
+    return out[~out["ticker"].isin(portfolio_tickers)].copy()
+
+
 # =========================
 # PORTFOLIO TRANSLATION LAYER
 # =========================
@@ -400,6 +446,8 @@ def append_watchlist_group(lines: list[str], title: str, subset: pd.DataFrame, r
 
 def build_watchlist_action_sections() -> list[str]:
     df = read_csv_safe(WATCHLIST_FILE)
+    portfolio_tickers = get_portfolio_tickers()
+
     regime_df = read_csv_safe(MARKET_REGIME_FILE)
     regime = "UNKNOWN"
     if not regime_df.empty and "regime" in regime_df.columns:
@@ -419,6 +467,9 @@ def build_watchlist_action_sections() -> list[str]:
         df["setup_type"] = df["setup_type"].astype(str).str.upper()
     else:
         df["setup_type"] = "UNKNOWN"
+
+    # Portfolio heeft prioriteit boven watchlist
+    df = exclude_portfolio_tickers(df, portfolio_tickers)
 
     lines: list[str] = []
 
@@ -474,6 +525,10 @@ def format_scanner_line(row: pd.Series) -> str:
 
 def build_scanner_context_section() -> list[str]:
     df = read_csv_safe(SCANNER_FILE)
+    portfolio_tickers = get_portfolio_tickers()
+    watchlist_tickers = get_watchlist_tickers()
+    blocked_tickers = portfolio_tickers | watchlist_tickers
+
     header = ["🎯 SCANNER IDEEËN"]
 
     if df.empty:
@@ -489,6 +544,9 @@ def build_scanner_context_section() -> list[str]:
     if "score_total" in df.columns:
         df["score_total"] = pd.to_numeric(df["score_total"], errors="coerce")
         df = df.sort_values(by="score_total", ascending=False)
+
+    # Prioriteit: Portfolio > Watchlist > Scanner
+    df = exclude_portfolio_tickers(df, blocked_tickers)
 
     lines: list[str] = []
     grade_order = ["A", "B"]

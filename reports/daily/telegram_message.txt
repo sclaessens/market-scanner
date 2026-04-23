@@ -1,4 +1,4 @@
-📲 Trading Signals — 2026-04-22 21:10
+📲 Trading Signals — 2026-04-23 20:37
 Regime: 🟢 Markt is sterk (BULLISH)
 
 ✅ Geen READY setups op dit moment.
@@ -9,43 +9,42 @@ Pullback
 - EBAY
   → Actie nu: Niet najagen
   → Trigger: limietorder rond 96.89
-  → Waarom: Koers staat te ver boven de korte trend. Wacht op een rustigere instap.
+  → Waarom: Wacht op een rustigere pullback richting MA20.
   → Context: close 105.44 | MA20 96.89 | MA50 91.72
 - JBL
   → Actie nu: Niet najagen
   → Trigger: limietorder rond 291.47
-  → Waarom: Koers staat te ver boven de korte trend. Wacht op een rustigere instap.
+  → Waarom: Wacht op een rustigere pullback richting MA20.
   → Context: close 335.33 | MA20 291.47 | MA50 272.22
 - KEYS
   → Actie nu: Niet najagen
   → Trigger: limietorder rond 310.55
-  → Waarom: Koers staat te ver boven de korte trend. Wacht op een rustigere instap.
+  → Waarom: Wacht op een rustigere pullback richting MA20.
   → Context: close 340.33 | MA20 310.55 | MA50 289.34
 - TER
   → Actie nu: Niet najagen
   → Trigger: limietorder rond 341.19
-  → Waarom: Koers staat te ver boven de korte trend. Wacht op een rustigere instap.
+  → Waarom: Wacht op een rustigere pullback richting MA20.
   → Context: close 384.48 | MA20 341.19 | MA50 321.63
 
 ❌ VAN WATCHLIST HALEN (3)
 
 - PFE
-  → Actie nu: Niet kopen
-  → Waarom: Trend is verzwakt onder MA50.
+  → Actie nu: Van watchlist halen
+  → Waarom: De setup is niet meer geldig.
   → Context: close 26.81 | MA20 27.46 | MA50 27.24
 - TJX
   → Actie nu: Van watchlist halen
-  → Waarom: Deze setup staat al te lang op de watchlist zonder trigger.
+  → Waarom: De setup staat te lang open zonder trigger.
   → Context: close 158.97 | MA20 159.74 | MA50 158.10
 - TWLO
   → Actie nu: Van watchlist halen
-  → Waarom: Deze setup staat al te lang op de watchlist zonder trigger.
+  → Waarom: De setup staat te lang open zonder trigger.
   → Context: close 149.92 | MA20 130.81 | MA50 124.53
 
 🎯 SCANNER IDEEËN
 Sterkste setups
 Breakout
-- ON | instap 89.87 | stop 69.85 | doel 141.93 | R:R 2.60
 - ANET | instap 178.84 | stop 143.53 | doel 270.64 | R:R 2.60
 - AMD | instap 304.71 | stop 239.40 | doel 474.51 | R:R 2.60
 - TXN | instap 238.66 | stop 209.90 | doel 313.43 | R:R 2.60
@@ -53,7 +52,6 @@ Breakout
 
 Interessante kansen voor later
 Breakout
-- TWLO | instap 154.95 | stop 130.83 | doel 217.65 | R:R 2.60
 - NUE | instap 216.69 | stop 182.57 | doel 305.42 | R:R 2.60
 - CCJ | instap 126.85 | stop 114.02 | doel 160.19 | R:R 2.60
 - NXE | instap 13.21 | stop 11.82 | doel 16.82 | R:R 2.60
@@ -66,12 +64,12 @@ Breakout
 - MRVL
   → Actie: Verkoop 25%
   → Waarom: koers staat ver boven de korte trend
-  → Positie: 15 stuks | koers 157.32 | winst/verlies 14.89%
+  → Positie: 15 stuks | koers 157.79 | winst/verlies 15.24%
   → Risico: MEDIUM ⚠️
 - ON
   → Actie: Verkoop 25%
   → Waarom: koers staat ver boven de korte trend
-  → Positie: 25 stuks | koers 88.99 | winst/verlies 9.85%
+  → Positie: 25 stuks | koers 89.09 | winst/verlies 9.97%
   → Risico: MEDIUM ⚠️
 
 🟢 Gewoon aanhouden (2)
@@ -80,10 +78,10 @@ Breakout
 - COST
   → Actie: Houden
   → Waarom: trend blijft gezond boven korte en middellange trend
-  → Positie: 2 stuks | koers 1003.70 | winst/verlies -2.17%
+  → Positie: 2 stuks | koers 1004.61 | winst/verlies -2.09%
   → Risico: LOW ✅
 - TECK
   → Actie: Houden
   → Waarom: trend blijft gezond boven korte en middellange trend
-  → Positie: 40 stuks | koers 59.26 | winst/verlies 0.41%
+  → Positie: 40 stuks | koers 59.20 | winst/verlies 0.31%
   → Risico: LOW ✅

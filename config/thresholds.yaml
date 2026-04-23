@@ -1,7 +1,16 @@
 watchlist:
-  ready_distance_to_ma20_pct: 0.025
-  neutral_ready_distance_to_ma20_pct: 0.015
-  max_extended_from_ma20_pct: 0.06
-  ready_near_high_pct: 0.015
+  # PULLBACK
+  ready_distance_to_ma20_pct: 0.05
+  neutral_ready_distance_to_ma20_pct: 0.03
+
+  # EXTENSION
+  max_extended_from_ma20_pct: 0.10
+
+  # BREAKOUT / VCP
+  ready_near_high_pct: 0.04
+
+  # TREND
   reject_below_ma50: true
+
+  # EXPIRY
   expire_after_days: 20

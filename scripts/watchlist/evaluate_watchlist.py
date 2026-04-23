@@ -28,10 +28,17 @@ THRESHOLDS_FILE = PROJECT_ROOT / "config" / "thresholds.yaml"
 
 DEFAULT_THRESHOLDS = {
     "watchlist": {
+        # Pullback
         "ready_distance_to_ma20_pct": 0.025,
         "neutral_ready_distance_to_ma20_pct": 0.015,
         "max_extended_from_ma20_pct": 0.06,
+        # Breakout / VCP
         "ready_near_high_pct": 0.015,
+        "breakout_break_above_high_pct": 0.002,
+        "vcp_break_above_high_pct": 0.002,
+        "vcp_max_range_pct": 0.08,
+        "vcp_max_close_to_ma20_pct": 0.04,
+        # Shared
         "reject_below_ma50": True,
         "expire_after_days": 20,
     }
@@ -68,7 +75,6 @@ def load_market_regime() -> str:
         return "NEUTRAL"
 
     last_row = df.iloc[-1]
-
     for col in ["regime", "Regime", "market_regime"]:
         if col in df.columns:
             value = str(last_row[col]).strip().upper()
@@ -142,26 +148,71 @@ def round_or_none(value: float) -> Optional[float]:
     return round(float(value), 2)
 
 
+def build_metric_alias_map(columns: list[str]) -> dict[str, str]:
+    normalized = {str(col).strip().upper(): col for col in columns}
+    aliases = {
+        "CLOSE": ["CLOSE", "close"],
+        "HIGH": ["HIGH", "high"],
+        "LOW": ["LOW", "low"],
+        "VOLUME": ["VOLUME", "volume"],
+        "MA20": ["MA20", "ma20"],
+        "MA50": ["MA50", "ma50"],
+        "MA200": ["MA200", "ma200"],
+        "20D_HIGH": ["20D_HIGH", "HIGH_20D", "20d_high", "high_20d"],
+        "20D_LOW": ["20D_LOW", "LOW_20D", "20d_low", "low_20d"],
+        "AVG_VOL_20": ["AVG_VOL_20", "AVG_VOLUME_20D", "avg_vol_20", "avg_volume_20d"],
+        "ATR14": ["ATR14", "ATR_14", "atr14", "atr_14"],
+    }
+
+    resolved = {}
+    for canonical, options in aliases.items():
+        resolved[canonical] = None
+        for option in options:
+            key = str(option).strip().upper()
+            if key in normalized:
+                resolved[canonical] = normalized[key]
+                break
+    return resolved
+
+
 def get_latest_metrics(df: pd.DataFrame) -> Optional[dict]:
-    required_cols = {"Close", "MA20", "MA50", "MA200", "20D_HIGH"}
-    if df.empty or not required_cols.issubset(df.columns):
+    if df.empty:
+        return None
+
+    alias_map = build_metric_alias_map(list(df.columns))
+    required = ["CLOSE", "MA20", "MA50", "MA200", "20D_HIGH"]
+    if any(alias_map.get(name) is None for name in required):
         return None
 
     latest = df.iloc[-1]
-
-    close = to_float(latest.get("Close"))
-    ma20 = to_float(latest.get("MA20"))
-    ma50 = to_float(latest.get("MA50"))
-    ma200 = to_float(latest.get("MA200"))
-    high_20d = to_float(latest.get("20D_HIGH"))
-    avg_vol_20 = to_float(latest.get("AVG_VOL_20")) if "AVG_VOL_20" in df.columns else float("nan")
-    volume = to_float(latest.get("Volume")) if "Volume" in df.columns else float("nan")
+    close = to_float(latest.get(alias_map["CLOSE"]))
+    ma20 = to_float(latest.get(alias_map["MA20"]))
+    ma50 = to_float(latest.get(alias_map["MA50"]))
+    ma200 = to_float(latest.get(alias_map["MA200"]))
+    high_20d = to_float(latest.get(alias_map["20D_HIGH"]))
+    low_20d = to_float(latest.get(alias_map["20D_LOW"])) if alias_map.get("20D_LOW") else float("nan")
+    avg_vol_20 = to_float(latest.get(alias_map["AVG_VOL_20"])) if alias_map.get("AVG_VOL_20") else float("nan")
+    volume = to_float(latest.get(alias_map["VOLUME"])) if alias_map.get("VOLUME") else float("nan")
+    high = to_float(latest.get(alias_map["HIGH"])) if alias_map.get("HIGH") else close
+    low = to_float(latest.get(alias_map["LOW"])) if alias_map.get("LOW") else close
+    atr14 = to_float(latest.get(alias_map["ATR14"])) if alias_map.get("ATR14") else float("nan")
 
     if any(pd.isna(x) for x in [close, ma20, ma50, ma200, high_20d]):
         return None
 
+    candle_range = high - low if not pd.isna(high) and not pd.isna(low) else float("nan")
+    range_pct = candle_range / close if close else float("nan")
     distance_to_ma20_pct = (close - ma20) / ma20 if ma20 else float("nan")
     distance_to_high_pct = (high_20d - close) / high_20d if high_20d else float("nan")
+    breakout_above_high_pct = (close - high_20d) / high_20d if high_20d else float("nan")
+    price_vs_ma50_pct = (close - ma50) / ma50 if ma50 else float("nan")
+    atr_pct = atr14 / close if close and not pd.isna(atr14) else float("nan")
+
+    compression_ready = False
+    if not pd.isna(range_pct):
+        compression_ready = range_pct <= 0.08
+    if not pd.isna(atr_pct):
+        compression_ready = compression_ready and atr_pct <= 0.05
 
     return {
         "close": round(close, 2),
@@ -169,121 +220,149 @@ def get_latest_metrics(df: pd.DataFrame) -> Optional[dict]:
         "ma50": round(ma50, 2),
         "ma200": round(ma200, 2),
         "high_20d": round(high_20d, 2),
+        "low_20d": round_or_none(low_20d),
         "avg_vol_20": round_or_none(avg_vol_20),
         "volume": round_or_none(volume),
+        "atr14": round_or_none(atr14),
+        "range_pct": range_pct,
+        "atr_pct": atr_pct,
         "distance_to_ma20_pct": distance_to_ma20_pct,
         "distance_to_high_pct": distance_to_high_pct,
+        "breakout_above_high_pct": breakout_above_high_pct,
+        "price_vs_ma50_pct": price_vs_ma50_pct,
+        "compression_ready": compression_ready,
     }
 
 
-def evaluate_pullback(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, str]:
+def resolve_regime_bias(regime: str) -> str:
+    regime = str(regime).upper().strip()
+    if regime in {"BULLISH", "NEUTRAL", "BEARISH"}:
+        return regime
+    return "NEUTRAL"
+
+
+def evaluate_pullback(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, str, str]:
     close = metrics["close"]
     ma20 = metrics["ma20"]
     ma50 = metrics["ma50"]
     dist_ma20 = metrics["distance_to_ma20_pct"]
 
-    reject_below_ma50 = cfg["reject_below_ma50"]
     ready_distance = cfg["ready_distance_to_ma20_pct"]
     neutral_ready_distance = cfg["neutral_ready_distance_to_ma20_pct"]
     max_extended = cfg["max_extended_from_ma20_pct"]
+    reject_below_ma50 = cfg["reject_below_ma50"]
 
     if reject_below_ma50 and close < ma50:
-        return "REJECTED", "none", "below_ma50"
+        return "REJECTED", "none", "below_ma50", "Trend is gebroken onder MA50."
+
+    if regime == "BEARISH":
+        return "WAIT", "wait", "bearish_regime", "Pullback is niet koopbaar in bearish regime."
 
     if pd.isna(dist_ma20):
-        return "WAIT", "wait", "missing_ma20_distance"
+        return "WAIT", "wait", "missing_ma20_distance", "Afstand tot MA20 kon niet berekend worden."
 
-    if regime == "BEARISH":
-        return "WAIT", "wait", "bearish_regime"
+    if close < ma20:
+        return "WAIT", "wait", "pullback_not_confirmed", "Prijs zit nog onder MA20. Eerst reclaim nodig."
 
     if dist_ma20 > max_extended:
-        return "WAIT", "wait", "too_extended_above_ma20"
+        return "WAIT", "wait", "too_extended_above_ma20", "Prijs staat te ver boven MA20 voor een nette pullback."
 
-    if close < ma20:
-        return "WAIT", "wait", "still_below_ma20"
+    current_ready_band = ready_distance if regime == "BULLISH" else neutral_ready_distance
+    if dist_ma20 <= current_ready_band and close > ma50:
+        if regime == "BULLISH":
+            return "READY", "buy", "pullback_ready_near_ma20", "Pullback is bevestigd dicht bij MA20 in een gezonde trend."
+        return "READY", "buy", "pullback_ready_near_ma20_neutral", "Pullback is scherp genoeg ondanks neutraal regime."
 
-    if regime == "BULLISH":
-        if -ready_distance <= dist_ma20 <= ready_distance and close >= ma50:
-            return "READY", "buy", "pullback_near_ma20_bullish"
-        return "WAIT", "wait", "trend_ok_but_not_in_buy_zone"
-
-    if regime == "NEUTRAL":
-        if -neutral_ready_distance <= dist_ma20 <= neutral_ready_distance and close >= ma50:
-            return "READY", "buy", "pullback_near_ma20_neutral"
-        return "WAIT", "wait", "neutral_regime_wait_for_better_entry"
-
-    return "WAIT", "wait", "unsupported_regime"
+    return "WAIT", "wait", "pullback_wait_better_entry", "Trend is ok, maar de instap ligt nog niet mooi bij MA20."
 
 
-def evaluate_breakout(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, str]:
+def evaluate_breakout(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, str, str]:
     close = metrics["close"]
     ma20 = metrics["ma20"]
     ma50 = metrics["ma50"]
     dist_high = metrics["distance_to_high_pct"]
+    breakout_above_high_pct = metrics["breakout_above_high_pct"]
 
-    reject_below_ma50 = cfg["reject_below_ma50"]
     ready_near_high = cfg["ready_near_high_pct"]
+    breakout_break_above_high_pct = cfg.get("breakout_break_above_high_pct", 0.002)
+    reject_below_ma50 = cfg["reject_below_ma50"]
 
     if reject_below_ma50 and close < ma50:
-        return "REJECTED", "none", "below_ma50"
-
-    if pd.isna(dist_high):
-        return "WAIT", "wait", "missing_high_distance"
+        return "REJECTED", "none", "below_ma50", "Trend is gebroken onder MA50."
 
     if regime == "BEARISH":
-        return "WAIT", "wait", "bearish_regime"
+        return "WAIT", "wait", "bearish_regime", "Breakout krijgt geen groen licht in bearish regime."
+
+    if pd.isna(dist_high):
+        return "WAIT", "wait", "missing_high_distance", "Afstand tot de breakout-trigger kon niet berekend worden."
 
     if close < ma20:
-        return "WAIT", "wait", "below_ma20"
+        return "WAIT", "wait", "below_ma20", "Prijs zit nog onder MA20. Breakout mist korte-trend steun."
 
-    if regime == "NEUTRAL":
-        return "WAIT", "wait", "neutral_regime_wait_for_breakout_confirmation"
+    if breakout_above_high_pct >= breakout_break_above_high_pct:
+        return "READY", "buy", "breakout_triggered", "Prijs breekt al door de 20D high."
 
-    if regime == "BULLISH" and dist_high <= ready_near_high and close >= ma20 and close >= ma50:
-        return "READY", "buy", "near_breakout_trigger_bullish"
+    if dist_high <= ready_near_high:
+        if regime == "NEUTRAL":
+            return "WAIT", "wait", "breakout_near_trigger_neutral", "Prijs zit dicht bij trigger, maar neutraal regime vraagt bevestiging."
+        return "READY", "buy", "breakout_near_trigger", "Prijs zit vlak onder de breakout-trigger."
 
-    return "WAIT", "wait", "not_close_enough_to_breakout"
+    return "WAIT", "wait", "breakout_below_trigger", "Prijs zit nog onder de breakout-trigger."
 
 
-def evaluate_vcp(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, str]:
+def evaluate_vcp(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, str, str]:
     close = metrics["close"]
     ma20 = metrics["ma20"]
     ma50 = metrics["ma50"]
     dist_high = metrics["distance_to_high_pct"]
+    breakout_above_high_pct = metrics["breakout_above_high_pct"]
+    range_pct = metrics["range_pct"]
+    compression_ready = metrics["compression_ready"]
 
-    reject_below_ma50 = cfg["reject_below_ma50"]
     ready_near_high = cfg["ready_near_high_pct"]
+    vcp_break_above_high_pct = cfg.get("vcp_break_above_high_pct", 0.002)
+    vcp_max_range_pct = cfg.get("vcp_max_range_pct", 0.08)
+    vcp_max_close_to_ma20_pct = cfg.get("vcp_max_close_to_ma20_pct", 0.04)
+    reject_below_ma50 = cfg["reject_below_ma50"]
 
     if reject_below_ma50 and close < ma50:
-        return "REJECTED", "none", "below_ma50"
-
-    if pd.isna(dist_high):
-        return "WAIT", "wait", "missing_high_distance"
+        return "REJECTED", "none", "below_ma50", "VCP-structuur is ongeldig onder MA50."
 
     if regime == "BEARISH":
-        return "WAIT", "wait", "bearish_regime"
+        return "WAIT", "wait", "bearish_regime", "VCP wordt niet geactiveerd in bearish regime."
+
+    if pd.isna(dist_high):
+        return "WAIT", "wait", "missing_high_distance", "Afstand tot pivot kon niet berekend worden."
 
     if close < ma20:
-        return "WAIT", "wait", "below_ma20"
+        return "WAIT", "wait", "below_ma20", "Prijs zit nog onder MA20. Structuur is nog niet rijp."
 
-    if regime == "NEUTRAL":
-        return "WAIT", "wait", "neutral_regime_wait_for_vcp_confirmation"
+    if abs(metrics["distance_to_ma20_pct"]) > vcp_max_close_to_ma20_pct:
+        return "WAIT", "wait", "vcp_too_far_from_ma20", "Prijs zit te ver van MA20 voor een strakke VCP."
 
-    if regime == "BULLISH" and dist_high <= ready_near_high and close >= ma20 and close >= ma50:
-        return "READY", "buy", "vcp_near_pivot_bullish"
+    if pd.isna(range_pct) or range_pct > vcp_max_range_pct or not compression_ready:
+        return "WAIT", "wait", "vcp_pattern_not_ready", "Compressie is nog niet strak genoeg."
 
-    return "WAIT", "wait", "vcp_not_ready"
+    if breakout_above_high_pct >= vcp_break_above_high_pct:
+        return "READY", "buy", "vcp_breakout_triggered", "Compressie is klaar en prijs breekt al door de pivot."
+
+    if dist_high <= ready_near_high:
+        if regime == "NEUTRAL":
+            return "WAIT", "wait", "vcp_near_trigger_neutral", "VCP zit dicht bij pivot, maar neutraal regime vraagt extra bevestiging."
+        return "READY", "buy", "vcp_near_trigger", "Compressie is aanwezig en prijs zit vlak bij de pivot."
+
+    return "WAIT", "wait", "vcp_wait_for_trigger", "Patroon oogt goed, maar de breakout-trigger is nog niet geraakt."
 
 
-def apply_expiry(status: str, added_at: pd.Timestamp, expire_after_days: int) -> tuple[str, Optional[str]]:
+def apply_expiry(status: str, added_at: pd.Timestamp, expire_after_days: int) -> tuple[str, Optional[str], Optional[str]]:
     if pd.isna(added_at):
-        return status, None
+        return status, None, None
 
     days_active = (pd.Timestamp.now().normalize() - added_at.normalize()).days
     if days_active > expire_after_days and status not in {"READY", "REJECTED"}:
-        return "EXPIRED", f"expired_after_{days_active}_days"
+        return "EXPIRED", f"expired_after_{days_active}_days", f"Setup staat al {days_active} dagen open zonder geldige trigger."
 
-    return status, None
+    return status, None, None
 
 
 def get_setup_label(setup_type: str) -> str:
@@ -298,13 +377,12 @@ def get_setup_label(setup_type: str) -> str:
 def build_watchlist_plan(
     setup_type: str,
     status: str,
-    reason: str,
+    reason_code: str,
     regime: str,
     metrics: dict,
 ) -> dict:
     close = metrics["close"]
     ma20 = metrics["ma20"]
-    ma50 = metrics["ma50"]
     high_20d = metrics["high_20d"]
 
     plan = {
@@ -324,7 +402,7 @@ def build_watchlist_plan(
                 trigger_type="buy_now",
                 trigger_price=close,
                 entry_plan="market_or_limit",
-                why_now="Pullback is bevestigd en de trend blijft gezond.",
+                why_now="Pullback is bevestigd en de instapzone is actief.",
                 urgency="high",
             )
         else:
@@ -333,30 +411,20 @@ def build_watchlist_plan(
                 trigger_type="buy_now",
                 trigger_price=close,
                 entry_plan="market_or_stop",
-                why_now="Aandeel zit dicht bij een geldige uitbraaktrigger.",
+                why_now="Prijs zit aan of boven een geldige breakout-trigger.",
                 urgency="high",
             )
         return plan
 
     if status == "REJECTED":
-        if reason == "below_ma50":
-            plan.update(
-                action_now="Niet kopen",
-                trigger_type="none",
-                trigger_price=None,
-                entry_plan="remove_from_watchlist",
-                why_now="Trend is verzwakt onder MA50.",
-                urgency="medium",
-            )
-        elif reason == "missing_indicator_data":
-            plan.update(
-                action_now="Niet doen",
-                trigger_type="none",
-                trigger_price=None,
-                entry_plan="data_check",
-                why_now="Er ontbreekt koers- of indicatorendata.",
-                urgency="medium",
-            )
+        plan.update(
+            action_now="Van watchlist halen",
+            trigger_type="none",
+            trigger_price=None,
+            entry_plan="remove_from_watchlist",
+            why_now="De setup is niet meer geldig.",
+            urgency="medium",
+        )
         return plan
 
     if status == "EXPIRED":
@@ -365,171 +433,90 @@ def build_watchlist_plan(
             trigger_type="none",
             trigger_price=None,
             entry_plan="expire",
-            why_now="Deze setup staat al te lang op de watchlist zonder trigger.",
+            why_now="De setup staat te lang open zonder trigger.",
             urgency="low",
         )
         return plan
 
-    if reason == "bearish_regime":
-        plan.update(
-            action_now="Nog niets doen",
-            trigger_type="none",
-            trigger_price=None,
-            entry_plan="wait",
-            why_now="De markt geeft tegenwind. Wacht liever op beter marktsentiment.",
-            urgency="low",
-        )
-        return plan
-
-    if reason in {"still_below_ma20", "below_ma20"}:
+    if reason_code in {"pullback_not_confirmed", "below_ma20"}:
         plan.update(
             action_now="Nog niets doen",
             trigger_type="buy_above",
             trigger_price=ma20,
             entry_plan="stop_order",
-            why_now="Koers zit nog onder de korte trend. Eerst reclaim boven MA20 nodig.",
+            why_now="Eerst een reclaim boven MA20 nodig.",
             urgency="low",
         )
         return plan
 
-    if reason == "too_extended_above_ma20":
+    if reason_code in {"too_extended_above_ma20", "pullback_wait_better_entry"}:
         plan.update(
             action_now="Niet najagen",
             trigger_type="limit_buy",
             trigger_price=ma20,
             entry_plan="limit_order",
-            why_now="Koers staat te ver boven de korte trend. Wacht op een rustigere instap.",
+            why_now="Wacht op een rustigere pullback richting MA20.",
             urgency="low",
         )
         return plan
 
-    if reason == "trend_ok_but_not_in_buy_zone":
-        plan.update(
-            action_now="Nog niets doen",
-            trigger_type="limit_buy",
-            trigger_price=ma20,
-            entry_plan="limit_order",
-            why_now="Trend is ok, maar instap is nog niet mooi genoeg. Een pullback richting MA20 is beter.",
-            urgency="low",
-        )
-        return plan
-
-    if reason == "neutral_regime_wait_for_better_entry":
-        plan.update(
-            action_now="Nog niets doen",
-            trigger_type="limit_buy",
-            trigger_price=ma20,
-            entry_plan="limit_order",
-            why_now="Trend is ok, maar in een neutrale markt wil je een scherpere instap.",
-            urgency="low",
-        )
-        return plan
-
-    if reason == "neutral_regime_wait_for_breakout_confirmation":
-        plan.update(
-            action_now="Nog niets doen",
-            trigger_type="buy_above",
-            trigger_price=high_20d,
-            entry_plan="stop_order",
-            why_now="Wacht op bevestiging van de uitbraak. In een neutrale markt wil je extra bewijs.",
-            urgency="low",
-        )
-        return plan
-
-    if reason == "neutral_regime_wait_for_vcp_confirmation":
-        plan.update(
-            action_now="Nog niets doen",
-            trigger_type="buy_above",
-            trigger_price=high_20d,
-            entry_plan="stop_order",
-            why_now="Rustige opbouw is zichtbaar, maar de uitbraak moet nog bevestigd worden.",
-            urgency="low",
-        )
-        return plan
-
-    if reason == "not_close_enough_to_breakout":
-        plan.update(
-            action_now="Nog niets doen",
-            trigger_type="buy_above",
-            trigger_price=high_20d,
-            entry_plan="stop_order",
-            why_now="Aandeel zit nog niet dicht genoeg bij de uitbraakzone.",
-            urgency="low",
-        )
-        return plan
-
-    if reason == "vcp_not_ready":
-        plan.update(
-            action_now="Nog niets doen",
-            trigger_type="buy_above",
-            trigger_price=high_20d,
-            entry_plan="stop_order",
-            why_now="De opbouw ziet er netjes uit, maar er is nog geen geldige uitbraaktrigger.",
-            urgency="low",
-        )
-        return plan
-
-    if reason == "missing_ma20_distance":
-        plan.update(
-            action_now="Niet doen",
-            trigger_type="none",
-            trigger_price=None,
-            entry_plan="data_check",
-            why_now="Afstand tot MA20 kon niet berekend worden.",
-            urgency="medium",
-        )
-        return plan
-
-    if reason == "missing_high_distance":
-        plan.update(
-            action_now="Niet doen",
-            trigger_type="none",
-            trigger_price=None,
-            entry_plan="data_check",
-            why_now="Afstand tot recente weerstand kon niet berekend worden.",
-            urgency="medium",
-        )
-        return plan
-
-    if reason.startswith("expired_after_"):
-        plan.update(
-            action_now="Van watchlist halen",
-            trigger_type="none",
-            trigger_price=None,
-            entry_plan="expire",
-            why_now="Deze setup staat al te lang open zonder nieuwe bevestiging.",
-            urgency="low",
-        )
-        return plan
-
-    # Fallback keeps logic intact but gives usable guidance.
-    if setup_type == "PULLBACK":
-        plan.update(
-            action_now="Nog niets doen",
-            trigger_type="limit_buy",
-            trigger_price=ma20,
-            entry_plan="limit_order",
-            why_now="Wacht op een betere pullback-instap dicht bij MA20.",
-            urgency="low",
-        )
-    else:
-        plan.update(
-            action_now="Nog niets doen",
-            trigger_type="buy_above",
-            trigger_price=high_20d,
-            entry_plan="stop_order",
-            why_now="Wacht op een duidelijke uitbraak boven recente weerstand.",
-            urgency="low",
-        )
-
-    # Small nuance for bullish regime: the setup can still be interesting, just not active yet.
-    if regime == "BULLISH" and status == "WAIT" and reason in {
-        "neutral_regime_wait_for_better_entry",
-        "neutral_regime_wait_for_breakout_confirmation",
-        "neutral_regime_wait_for_vcp_confirmation",
+    if reason_code in {
+        "breakout_below_trigger",
+        "breakout_near_trigger_neutral",
+        "vcp_wait_for_trigger",
+        "vcp_near_trigger_neutral",
     }:
-        plan["why_now"] = "Setup is interessant, maar de instap is nog niet scherp genoeg."
+        plan.update(
+            action_now="Voorbereiden",
+            trigger_type="buy_above",
+            trigger_price=high_20d,
+            entry_plan="stop_order",
+            why_now="De setup leeft nog, maar de trigger is nog niet volledig bevestigd.",
+            urgency="low" if regime == "NEUTRAL" else "medium",
+        )
+        return plan
 
+    if reason_code in {"vcp_pattern_not_ready", "vcp_too_far_from_ma20"}:
+        plan.update(
+            action_now="Nog niets doen",
+            trigger_type="buy_above",
+            trigger_price=high_20d,
+            entry_plan="stop_order",
+            why_now="De VCP-structuur is nog niet strak genoeg.",
+            urgency="low",
+        )
+        return plan
+
+    if reason_code == "bearish_regime":
+        plan.update(
+            action_now="Nog niets doen",
+            trigger_type="none",
+            trigger_price=None,
+            entry_plan="wait",
+            why_now="De markt geeft tegenwind. Geen agressieve entries.",
+            urgency="low",
+        )
+        return plan
+
+    if reason_code in {"missing_ma20_distance", "missing_high_distance", "missing_indicator_data"}:
+        plan.update(
+            action_now="Niet doen",
+            trigger_type="none",
+            trigger_price=None,
+            entry_plan="data_check",
+            why_now="Er ontbreekt data om de setup veilig te beoordelen.",
+            urgency="medium",
+        )
+        return plan
+
+    plan.update(
+        action_now="Nog niets doen",
+        trigger_type="none",
+        trigger_price=None,
+        entry_plan="wait",
+        why_now="Wacht op betere bevestiging.",
+        urgency="low",
+    )
     return plan
 
 
@@ -538,6 +525,7 @@ def evaluate_row(row: pd.Series, regime: str, cfg: dict) -> dict:
     setup_type = str(row.get("setup_type", "PULLBACK")).upper().strip()
     is_active = bool(row.get("is_active", True))
     added_at = parse_timestamp(row.get("added_at"))
+    regime = resolve_regime_bias(regime)
 
     base_result = {
         "ticker": ticker,
@@ -555,6 +543,8 @@ def evaluate_row(row: pd.Series, regime: str, cfg: dict) -> dict:
         "added_at": row.get("added_at"),
         "last_reviewed_at": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
         "reason": "",
+        "reason_text": "",
+        "reason_code": "",
         "regime": regime,
         "close": None,
         "ma20": None,
@@ -566,7 +556,9 @@ def evaluate_row(row: pd.Series, regime: str, cfg: dict) -> dict:
     if not is_active:
         base_result["status"] = "INACTIVE"
         base_result["entry_bias"] = "none"
-        base_result["reason"] = "not_active"
+        base_result["reason"] = "Aandeel staat niet meer actief op de watchlist."
+        base_result["reason_text"] = base_result["reason"]
+        base_result["reason_code"] = "not_active"
         base_result["action_now"] = "Niets doen"
         base_result["why_now"] = "Aandeel staat niet meer actief op de watchlist."
         return base_result
@@ -577,7 +569,9 @@ def evaluate_row(row: pd.Series, regime: str, cfg: dict) -> dict:
     if metrics is None:
         base_result["status"] = "REJECTED"
         base_result["entry_bias"] = "none"
-        base_result["reason"] = "missing_indicator_data"
+        base_result["reason"] = "Er ontbreekt indicatorendata om deze setup te evalueren."
+        base_result["reason_text"] = base_result["reason"]
+        base_result["reason_code"] = "missing_indicator_data"
         base_result["action_now"] = "Niet doen"
         base_result["entry_plan"] = "data_check"
         base_result["why_now"] = "Er ontbreekt indicatorendata om dit aandeel correct te evalueren."
@@ -591,22 +585,25 @@ def evaluate_row(row: pd.Series, regime: str, cfg: dict) -> dict:
     base_result["high_20d"] = metrics["high_20d"]
 
     if setup_type == "BREAKOUT":
-        status, entry_bias, reason = evaluate_breakout(metrics, regime, cfg)
+        status, entry_bias, reason_code, reason_text = evaluate_breakout(metrics, regime, cfg)
     elif setup_type == "VCP":
-        status, entry_bias, reason = evaluate_vcp(metrics, regime, cfg)
+        status, entry_bias, reason_code, reason_text = evaluate_vcp(metrics, regime, cfg)
     else:
-        status, entry_bias, reason = evaluate_pullback(metrics, regime, cfg)
+        status, entry_bias, reason_code, reason_text = evaluate_pullback(metrics, regime, cfg)
 
-    status, expiry_reason = apply_expiry(status, added_at, cfg["expire_after_days"])
-    if expiry_reason:
-        reason = expiry_reason
+    status, expiry_reason_code, expiry_reason_text = apply_expiry(status, added_at, cfg["expire_after_days"])
+    if expiry_reason_code:
+        reason_code = expiry_reason_code
+        reason_text = expiry_reason_text or reason_text
         entry_bias = "none"
 
-    plan = build_watchlist_plan(setup_type, status, reason, regime, metrics)
+    plan = build_watchlist_plan(setup_type, status, reason_code, regime, metrics)
 
     base_result["status"] = status
     base_result["entry_bias"] = entry_bias
-    base_result["reason"] = reason
+    base_result["reason"] = reason_text
+    base_result["reason_text"] = reason_text
+    base_result["reason_code"] = reason_code
     base_result["action_now"] = plan["action_now"]
     base_result["trigger_type"] = plan["trigger_type"]
     base_result["trigger_price"] = plan["trigger_price"]
@@ -622,7 +619,6 @@ def main() -> None:
     regime = load_market_regime()
 
     active_df = load_watchlist_active()
-
     WATCHLIST_STATUS_FILE.parent.mkdir(parents=True, exist_ok=True)
 
     if active_df.empty:
@@ -642,6 +638,8 @@ def main() -> None:
             "added_at",
             "last_reviewed_at",
             "reason",
+            "reason_text",
+            "reason_code",
             "regime",
             "close",
             "ma20",
@@ -653,10 +651,7 @@ def main() -> None:
         print(f"No active watchlist found. Empty status file written to: {WATCHLIST_STATUS_FILE}")
         return
 
-    rows = []
-    for _, row in active_df.iterrows():
-        rows.append(evaluate_row(row, regime, cfg))
-
+    rows = [evaluate_row(row, regime, cfg) for _, row in active_df.iterrows()]
     result_df = pd.DataFrame(rows)
 
     sort_order = {"READY": 0, "WAIT": 1, "REJECTED": 2, "EXPIRED": 3, "INACTIVE": 4}
