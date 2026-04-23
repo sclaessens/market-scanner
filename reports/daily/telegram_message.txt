@@ -1,4 +1,4 @@
-📲 Trading Signals — 2026-04-23 18:43
+📲 Trading Signals — 2026-04-23 21:08
 Regime: 🟢 Markt is sterk (BULLISH)
 
 ✅ Geen READY setups op dit moment.
@@ -45,19 +45,15 @@ Pullback
 🎯 SCANNER IDEEËN
 Sterkste setups
 Breakout
-- TXN | instap 284.66 | stop 214.01 | doel 468.34 | R:R 2.60
-- MCHP | instap 92.42 | stop 72.14 | doel 145.17 | R:R 2.60
+- TXN | instap 284.66 | stop 214.17 | doel 467.92 | R:R 2.60
+- MCHP | instap 92.42 | stop 72.14 | doel 145.18 | R:R 2.60
+- AMD | instap 310.84 | stop 243.65 | doel 485.53 | R:R 2.60
+- STLD | instap 229.46 | stop 192.25 | doel 326.19 | R:R 2.60
 
 Interessante kansen voor later
 Breakout
-- CSX | instap 46.64 | stop 42.09 | doel 58.49 | R:R 2.60
-- NEE | instap 96.81 | stop 89.90 | doel 114.79 | R:R 2.60
-- CMCSA | instap 32.11 | stop 28.69 | doel 41.00 | R:R 2.60
-- UNP | instap 269.74 | stop 248.27 | doel 325.56 | R:R 2.60
-- CCJ | instap 131.47 | stop 114.78 | doel 174.88 | R:R 2.60
-
-Pullback
-- VALE | instap 17.31 | stop 16.19 | doel 19.54 | R:R 2.00
+- ADI | instap 409.19 | stop 344.85 | doel 576.47 | R:R 2.60
+- ETN | instap 430.17 | stop 385.95 | doel 545.14 | R:R 2.60
 
 💼 PORTFOLIO — ACTIES
 🟠 Gedeeltelijk winst nemen (3)
@@ -66,17 +62,17 @@ Pullback
 - MRVL
   → Actie: Verkoop 25%
   → Waarom: koers staat ver boven de korte trend
-  → Positie: 15 stuks | koers 165.19 | winst/verlies 20.64%
+  → Positie: 15 stuks | koers 165.56 | winst/verlies 20.91%
   → Risico: MEDIUM ⚠️
 - ON
   → Actie: Verkoop 25%
   → Waarom: koers staat ver boven de korte trend
-  → Positie: 25 stuks | koers 98.22 | winst/verlies 21.24%
+  → Positie: 25 stuks | koers 97.78 | winst/verlies 20.70%
   → Risico: MEDIUM ⚠️
 - TECK
   → Actie: Verkoop 25%
   → Waarom: koers staat ver boven de korte trend
-  → Positie: 40 stuks | koers 60.70 | winst/verlies 2.85%
+  → Positie: 40 stuks | koers 60.75 | winst/verlies 2.93%
   → Risico: MEDIUM ⚠️
 
 🟢 Gewoon aanhouden (1)
@@ -85,5 +81,5 @@ Pullback
 - COST
   → Actie: Houden
   → Waarom: trend blijft gezond boven korte en middellange trend
-  → Positie: 2 stuks | koers 1013.32 | winst/verlies -1.24%
+  → Positie: 2 stuks | koers 1014.38 | winst/verlies -1.13%
   → Risico: LOW ✅
