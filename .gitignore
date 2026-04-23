@@ -1,9 +1,10 @@
 # ========================
-# Python / env
+# Python / environment
 # ========================
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 .env
 .venv/
 
@@ -12,29 +13,58 @@ __pycache__/
 # ========================
 .DS_Store
 .idea/
+.vscode/
 
 # ========================
 # Logs
 # ========================
 data/logs/
+data/scans_log.csv
+*.log
 
 # ========================
-# Raw data
+# Raw data (altijd gegenereerd)
 # ========================
 data/raw/
 
 # ========================
-# Indicator files (ALLE ticker CSV's blokkeren)
+# Processed data (alle ticker files blokkeren)
 # ========================
 data/processed/*.csv
 
 # ========================
-# MAAR deze toelaten
+# MAAR deze core files toelaten
 # ========================
 !data/processed/market_regime.csv
 !data/processed/scanner_ranked.csv
 
+# (optioneel later toevoegen indien nodig)
+# !data/processed/validation_summary.csv
+
 # ========================
-# Reports
+# Watchlist data (state = WEL bewaren)
 # ========================
+# NIET negeren → hoort bij je systeem state
+
+# ========================
+# Portfolio data (state = WEL bewaren)
+# ========================
+# NIET negeren → hoort bij je systeem state
+
+# ========================
+# Reports (gegenereerd)
+# ========================
+reports/daily/
 reports/archive/
+reports/*.md
+
+# ========================
+# Jupyter / temp (future proof)
+# ========================
+.ipynb_checkpoints/
+
+# ========================
+# Misc
+# ========================
+*.tmp
+*.bak
