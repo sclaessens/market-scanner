@@ -1,4 +1,4 @@
-📲 Trading Signals — 2026-04-23 20:37
+📲 Trading Signals — 2026-04-23 18:43
 Regime: 🟢 Markt is sterk (BULLISH)
 
 ✅ Geen READY setups op dit moment.
@@ -45,43 +45,45 @@ Pullback
 🎯 SCANNER IDEEËN
 Sterkste setups
 Breakout
-- ANET | instap 178.84 | stop 143.53 | doel 270.64 | R:R 2.60
-- AMD | instap 304.71 | stop 239.40 | doel 474.51 | R:R 2.60
-- TXN | instap 238.66 | stop 209.90 | doel 313.43 | R:R 2.60
-- STLD | instap 228.65 | stop 189.68 | doel 329.97 | R:R 2.60
+- TXN | instap 284.66 | stop 214.01 | doel 468.34 | R:R 2.60
+- MCHP | instap 92.42 | stop 72.14 | doel 145.17 | R:R 2.60
 
 Interessante kansen voor later
 Breakout
-- NUE | instap 216.69 | stop 182.57 | doel 305.42 | R:R 2.60
-- CCJ | instap 126.85 | stop 114.02 | doel 160.19 | R:R 2.60
-- NXE | instap 13.21 | stop 11.82 | doel 16.82 | R:R 2.60
-- ABNB | instap 147.54 | stop 131.90 | doel 188.22 | R:R 2.60
+- CSX | instap 46.64 | stop 42.09 | doel 58.49 | R:R 2.60
+- NEE | instap 96.81 | stop 89.90 | doel 114.79 | R:R 2.60
+- CMCSA | instap 32.11 | stop 28.69 | doel 41.00 | R:R 2.60
+- UNP | instap 269.74 | stop 248.27 | doel 325.56 | R:R 2.60
+- CCJ | instap 131.47 | stop 114.78 | doel 174.88 | R:R 2.60
+
+Pullback
+- VALE | instap 17.31 | stop 16.19 | doel 19.54 | R:R 2.00
 
 💼 PORTFOLIO — ACTIES
-🟠 Gedeeltelijk winst nemen (2)
+🟠 Gedeeltelijk winst nemen (3)
 (koers is hard opgelopen → deel van winst vastzetten)
 
 - MRVL
   → Actie: Verkoop 25%
   → Waarom: koers staat ver boven de korte trend
-  → Positie: 15 stuks | koers 157.79 | winst/verlies 15.24%
+  → Positie: 15 stuks | koers 165.19 | winst/verlies 20.64%
   → Risico: MEDIUM ⚠️
 - ON
   → Actie: Verkoop 25%
   → Waarom: koers staat ver boven de korte trend
-  → Positie: 25 stuks | koers 89.09 | winst/verlies 9.97%
+  → Positie: 25 stuks | koers 98.22 | winst/verlies 21.24%
+  → Risico: MEDIUM ⚠️
+- TECK
+  → Actie: Verkoop 25%
+  → Waarom: koers staat ver boven de korte trend
+  → Positie: 40 stuks | koers 60.70 | winst/verlies 2.85%
   → Risico: MEDIUM ⚠️
 
-🟢 Gewoon aanhouden (2)
+🟢 Gewoon aanhouden (1)
 (trend is gezond → niets doen)
 
 - COST
   → Actie: Houden
   → Waarom: trend blijft gezond boven korte en middellange trend
-  → Positie: 2 stuks | koers 1004.61 | winst/verlies -2.09%
-  → Risico: LOW ✅
-- TECK
-  → Actie: Houden
-  → Waarom: trend blijft gezond boven korte en middellange trend
-  → Positie: 40 stuks | koers 59.20 | winst/verlies 0.31%
+  → Positie: 2 stuks | koers 1013.32 | winst/verlies -1.24%
   → Risico: LOW ✅
