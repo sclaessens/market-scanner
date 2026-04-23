@@ -1,0 +1,7 @@
+watchlist:
+  ready_distance_to_ma20_pct: 0.025
+  neutral_ready_distance_to_ma20_pct: 0.015
+  max_extended_from_ma20_pct: 0.06
+  ready_near_high_pct: 0.015
+  reject_below_ma50: true
+  expire_after_days: 20
