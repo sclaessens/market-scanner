@@ -448,63 +448,94 @@ def build_watchlist_action_sections() -> list[str]:
     df = read_csv_safe(WATCHLIST_FILE)
     portfolio_tickers = get_portfolio_tickers()
 
-    regime_df = read_csv_safe(MARKET_REGIME_FILE)
-    regime = "UNKNOWN"
-    if not regime_df.empty and "regime" in regime_df.columns:
-        regime = clean_text(regime_df.iloc[-1].get("regime"), fallback="UNKNOWN").upper()
-
     if df.empty or "status" not in df.columns:
         return [
-            "✅ Geen READY setups op dit moment.",
-            "",
-            "👀 Geen watchlist data beschikbaar.",
+            "🔥 ACTIE NU",
+            "Geen data beschikbaar.",
             "",
         ]
 
     df = df.copy()
     df["status"] = df["status"].astype(str).str.upper()
-    if "setup_type" in df.columns:
-        df["setup_type"] = df["setup_type"].astype(str).str.upper()
-    else:
-        df["setup_type"] = "UNKNOWN"
 
-    # Portfolio heeft prioriteit boven watchlist
+    # Portfolio heeft prioriteit
     df = exclude_portfolio_tickers(df, portfolio_tickers)
 
     lines: list[str] = []
 
-    ready_df = df[df["status"] == "READY"].copy()
-    if ready_df.empty:
-        lines.append("✅ Geen READY setups op dit moment.")
+    # =========================
+    # GROEPEREN PER ACTIE
+    # =========================
+
+    def get_action_group(action: str) -> str:
+        action = clean_text(action).upper()
+
+        if action == "BUY NOW":
+            return "BUY NOW"
+        if action == "SET LIMIT BUY":
+            return "SET LIMIT BUY"
+        if action == "SET STOP BUY":
+            return "SET STOP BUY"
+        if action == "REMOVE":
+            return "REMOVE"
+
+        return "WAIT"
+
+    df["action_group"] = df["action_now"].apply(get_action_group)
+
+    # =========================
+    # BUY NOW
+    # =========================
+
+    buy_df = df[df["action_group"] == "BUY NOW"]
+    if buy_df.empty:
+        lines.append("🔥 ACTIE NU")
+        lines.append("Geen directe BUY NOW setups.")
         lines.append("")
     else:
-        lines.append(f"🚀 KLAAR VOOR KOOPCHECK ({len(ready_df)})")
+        lines.append("🔥 BUY NOW")
+        for _, row in buy_df.iterrows():
+            ticker = row["ticker"]
+            price = fmt_price(row.get("close"))
+            lines.append(f"- {ticker} → {price}")
         lines.append("")
-        for setup_type in get_grouped_setup_order():
-            subset = ready_df[ready_df["setup_type"] == setup_type].copy()
-            append_watchlist_group(lines, title_case_setup(setup_type), subset, regime)
-        remaining = ready_df[~ready_df["setup_type"].isin(get_grouped_setup_order())]
-        append_watchlist_group(lines, "Overig", remaining, regime)
 
-    wait_df = df[df["status"] == "WAIT"].copy()
-    if wait_df.empty:
-        lines.append("👀 Geen aandelen om verder op te volgen.")
-        lines.append("")
-    else:
-        lines.append(f"👀 OPVOLGEN VOOR LATER ({len(wait_df)})")
-        lines.append("")
-        for setup_type in get_grouped_setup_order():
-            subset = wait_df[wait_df["setup_type"] == setup_type].copy()
-            append_watchlist_group(lines, title_case_setup(setup_type), subset, regime)
-        remaining = wait_df[~wait_df["setup_type"].isin(get_grouped_setup_order())]
-        append_watchlist_group(lines, "Overig", remaining, regime)
+    # =========================
+    # SET LIMIT BUY
+    # =========================
 
-    removed_df = df[df["status"].isin(["REJECTED", "EXPIRED"])].copy()
-    if not removed_df.empty:
-        lines.append(f"❌ VAN WATCHLIST HALEN ({len(removed_df)})")
+    limit_df = df[df["action_group"] == "SET LIMIT BUY"]
+    if not limit_df.empty:
+        lines.append("📌 SET LIMIT BUY")
+        for _, row in limit_df.iterrows():
+            ticker = row["ticker"]
+            price = fmt_price(row.get("trigger_price") or row.get("ma20"))
+            lines.append(f"- {ticker} → {price}")
         lines.append("")
-        for _, row in removed_df.iterrows():
-            lines.extend(format_watchlist_line(row, regime))
+
+    # =========================
+    # SET STOP BUY
+    # =========================
+
+    stop_df = df[df["action_group"] == "SET STOP BUY"]
+    if not stop_df.empty:
+        lines.append("📌 SET STOP BUY")
+        for _, row in stop_df.iterrows():
+            ticker = row["ticker"]
+            price = fmt_price(row.get("trigger_price") or row.get("high_20d"))
+            lines.append(f"- {ticker} → {price}")
+        lines.append("")
+
+    # =========================
+    # REMOVE
+    # =========================
+
+    remove_df = df[df["action_group"] == "REMOVE"]
+    if not remove_df.empty:
+        lines.append("❌ REMOVE")
+        for _, row in remove_df.iterrows():
+            ticker = row["ticker"]
+            lines.append(f"- {ticker}")
         lines.append("")
 
     return lines
@@ -529,57 +560,45 @@ def build_scanner_context_section() -> list[str]:
     watchlist_tickers = get_watchlist_tickers()
     blocked_tickers = portfolio_tickers | watchlist_tickers
 
-    header = ["🎯 SCANNER IDEEËN"]
+    lines = ["🎯 NIEUWE IDEEËN"]
 
     if df.empty:
-        return header + ["- geen scanner data", ""]
+        return lines + ["- geen data", ""]
 
     df = df.copy()
+
     if "setup_grade" in df.columns:
         df["setup_grade"] = df["setup_grade"].astype(str).str.upper()
+
     if "setup_type" in df.columns:
         df["setup_type"] = df["setup_type"].astype(str).str.upper()
     else:
         df["setup_type"] = "UNKNOWN"
+
     if "score_total" in df.columns:
         df["score_total"] = pd.to_numeric(df["score_total"], errors="coerce")
         df = df.sort_values(by="score_total", ascending=False)
 
-    # Prioriteit: Portfolio > Watchlist > Scanner
+    # Portfolio > Watchlist > Scanner
     df = exclude_portfolio_tickers(df, blocked_tickers)
 
-    lines: list[str] = []
-    grade_order = ["A", "B"]
+    # Alleen A setups tonen
+    df = df[df["setup_grade"] == "A"]
 
-    for grade in grade_order:
-        subset_grade = df[df["setup_grade"] == grade].copy() if "setup_grade" in df.columns else pd.DataFrame()
-        if subset_grade.empty:
-            continue
-
-        label = "Sterkste setups" if grade == "A" else "Interessante kansen voor later"
-        lines.append(label)
-
-        for setup_type in get_grouped_setup_order():
-            subset = subset_grade[subset_grade["setup_type"] == setup_type].copy()
-            if subset.empty:
-                continue
-            lines.append(title_case_setup(setup_type))
-            for _, row in subset.head(5).iterrows():
-                lines.append(format_scanner_line(row))
-            lines.append("")
-
-        remaining = subset_grade[~subset_grade["setup_type"].isin(get_grouped_setup_order())]
-        if not remaining.empty:
-            lines.append("Overig")
-            for _, row in remaining.head(5).iterrows():
-                lines.append(format_scanner_line(row))
-            lines.append("")
-
-    if len(lines) == 0:
-        lines.append("- geen A/B setups")
+    if df.empty:
+        lines.append("- geen sterke setups")
         lines.append("")
+        return lines
 
-    return header + lines
+    lines.append("Sterkste setups")
+
+    for _, row in df.head(6).iterrows():
+        ticker = row["ticker"]
+        setup = title_case_setup(row["setup_type"])
+        lines.append(f"- {ticker} — {setup}")
+
+    lines.append("")
+    return lines
 
 
 # =========================
@@ -611,36 +630,46 @@ def format_portfolio_position(row: pd.Series) -> list[str]:
 
 def build_portfolio_section() -> list[str]:
     df = read_csv_safe(PORTFOLIO_REVIEW_FILE)
-    header = ["💼 PORTFOLIO — ACTIES"]
+
+    lines = ["💼 PORTFOLIO"]
 
     if df.empty or "decision" not in df.columns:
-        return header + ["- geen portfolio review data", ""]
+        return lines + ["- geen data", ""]
 
     df = df.copy()
     df["decision"] = df["decision"].astype(str).str.upper()
 
-    lines: list[str] = []
-    decision_order = ["SELL", "TRIM", "REVIEW", "HOLD"]
+    def fmt_line(row):
+        ticker = row["ticker"]
+        pnl = fmt_pct(row.get("pnl_pct"))
+        decision = row["decision"]
 
-    for decision in decision_order:
-        subset = df[df["decision"] == decision].copy()
+        if decision == "TRIM":
+            return f"- {ticker} → verkoop 25% | {pnl}"
+        if decision == "SELL":
+            return f"- {ticker} → verkopen | {pnl}"
+        if decision == "HOLD":
+            return f"- {ticker} → houden | {pnl}"
+        if decision == "REVIEW":
+            return f"- {ticker} → opvolgen | {pnl}"
+
+        return f"- {ticker} → {decision} | {pnl}"
+
+    order = ["SELL", "TRIM", "REVIEW", "HOLD"]
+
+    for decision in order:
+        subset = df[df["decision"] == decision]
         if subset.empty:
             continue
 
-        info = map_portfolio_decision(decision)
-        lines.append(f"{info['header']} ({len(subset)})")
-        lines.append(f"({info['summary']})")
-        lines.append("")
+        lines.append(decision)
 
         for _, row in subset.iterrows():
-            lines.extend(format_portfolio_position(row))
+            lines.append(fmt_line(row))
+
         lines.append("")
 
-    if not lines:
-        lines.append("- geen open portfoliobeslissingen")
-        lines.append("")
-
-    return header + lines
+    return lines
 
 
 # =========================
