@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import sys
@@ -32,12 +31,16 @@ DEFAULT_THRESHOLDS = {
         "ready_distance_to_ma20_pct": 0.025,
         "neutral_ready_distance_to_ma20_pct": 0.015,
         "max_extended_from_ma20_pct": 0.06,
+
         # Breakout / VCP
         "ready_near_high_pct": 0.015,
         "breakout_break_above_high_pct": 0.002,
+        "max_breakout_chase_pct": 0.03,
+        "missed_breakout_pct": 0.08,
         "vcp_break_above_high_pct": 0.002,
         "vcp_max_range_pct": 0.08,
         "vcp_max_close_to_ma20_pct": 0.04,
+
         # Shared
         "reject_below_ma50": True,
         "expire_after_days": 20,
@@ -285,6 +288,8 @@ def evaluate_breakout(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, 
 
     ready_near_high = cfg["ready_near_high_pct"]
     breakout_break_above_high_pct = cfg.get("breakout_break_above_high_pct", 0.002)
+    max_breakout_chase_pct = cfg.get("max_breakout_chase_pct", 0.03)
+    missed_breakout_pct = cfg.get("missed_breakout_pct", 0.08)
     reject_below_ma50 = cfg["reject_below_ma50"]
 
     if reject_below_ma50 and close < ma50:
@@ -293,15 +298,33 @@ def evaluate_breakout(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, 
     if regime == "BEARISH":
         return "WAIT", "wait", "bearish_regime", "Breakout krijgt geen groen licht in bearish regime."
 
-    if pd.isna(dist_high):
+    if pd.isna(dist_high) or pd.isna(breakout_above_high_pct):
         return "WAIT", "wait", "missing_high_distance", "Afstand tot de breakout-trigger kon niet berekend worden."
 
     if close < ma20:
         return "WAIT", "wait", "below_ma20", "Prijs zit nog onder MA20. Breakout mist korte-trend steun."
 
-    if breakout_above_high_pct >= breakout_break_above_high_pct:
-        return "READY", "buy", "breakout_triggered", "Prijs breekt al door de 20D high."
+    # Te ver boven de breakout-trigger = gemiste trade, niet najagen.
+    if breakout_above_high_pct >= missed_breakout_pct:
+        return (
+            "MISSED",
+            "none",
+            "missed_breakout",
+            "Breakout is al te ver gevorderd. Niet najagen; wacht op een nieuwe setup of pullback.",
+        )
 
+    # Net boven trigger = geldige breakout-entry.
+    if breakout_above_high_pct >= breakout_break_above_high_pct:
+        if breakout_above_high_pct <= max_breakout_chase_pct:
+            return "READY", "buy", "breakout_triggered", "Prijs breekt gecontroleerd door de 20D high."
+        return (
+            "MISSED",
+            "none",
+            "late_breakout",
+            "Breakout is al gebeurd, maar de koers staat te ver boven de trigger voor een goede entry.",
+        )
+
+    # Net onder trigger = stop buy voorbereiden.
     if dist_high <= ready_near_high:
         if regime == "NEUTRAL":
             return "WAIT", "wait", "breakout_near_trigger_neutral", "Prijs zit dicht bij trigger, maar neutraal regime vraagt bevestiging."
@@ -354,13 +377,43 @@ def evaluate_vcp(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, str, 
     return "WAIT", "wait", "vcp_wait_for_trigger", "Patroon oogt goed, maar de breakout-trigger is nog niet geraakt."
 
 
-def apply_expiry(status: str, added_at: pd.Timestamp, expire_after_days: int) -> tuple[str, Optional[str], Optional[str]]:
+def apply_expiry(
+    status: str,
+    added_at: pd.Timestamp,
+    expire_after_days: int,
+    reason_code: str,
+) -> tuple[str, Optional[str], Optional[str]]:
     if pd.isna(added_at):
         return status, None, None
 
+    # Deze statussen mogen nooit door expiry overschreven worden
+    if status in {"READY", "REJECTED", "MISSED"}:
+        return status, None, None
+
+    # Sterke aandelen die gewoon te extended zijn, niet verwijderen.
+    # Dit zijn geen dode setups, maar "wacht op betere entry".
+    keep_waiting_reasons = {
+        "too_extended_above_ma20",
+        "pullback_wait_better_entry",
+        "breakout_below_trigger",
+        "breakout_near_trigger_neutral",
+        "vcp_wait_for_trigger",
+        "vcp_near_trigger_neutral",
+        "vcp_pattern_not_ready",
+        "vcp_too_far_from_ma20",
+    }
+
+    if reason_code in keep_waiting_reasons:
+        return status, None, None
+
     days_active = (pd.Timestamp.now().normalize() - added_at.normalize()).days
-    if days_active > expire_after_days and status not in {"READY", "REJECTED"}:
-        return "EXPIRED", f"expired_after_{days_active}_days", f"Setup staat al {days_active} dagen open zonder geldige trigger."
+
+    if days_active > expire_after_days:
+        return (
+            "EXPIRED",
+            f"expired_after_{days_active}_days",
+            f"Setup staat al {days_active} dagen open zonder geldige trigger.",
+        )
 
     return status, None, None
 
@@ -387,7 +440,7 @@ def build_watchlist_plan(
 
     plan = {
         "setup_label": get_setup_label(setup_type),
-        "action_now": "Nog niets doen",
+        "action_now": "WAIT",
         "trigger_type": "none",
         "trigger_price": None,
         "entry_plan": "wait",
@@ -398,27 +451,67 @@ def build_watchlist_plan(
     if status == "READY":
         if setup_type == "PULLBACK":
             plan.update(
-                action_now="Koopbaar",
+                action_now="BUY NOW",
                 trigger_type="buy_now",
                 trigger_price=close,
                 entry_plan="market_or_limit",
                 why_now="Pullback is bevestigd en de instapzone is actief.",
                 urgency="high",
             )
-        else:
-            plan.update(
-                action_now="Koopbaar",
-                trigger_type="buy_now",
-                trigger_price=close,
-                entry_plan="market_or_stop",
-                why_now="Prijs zit aan of boven een geldige breakout-trigger.",
-                urgency="high",
-            )
+        elif setup_type == "BREAKOUT":
+            if reason_code == "breakout_near_trigger":
+                plan.update(
+                    action_now="SET STOP BUY",
+                    trigger_type="buy_above",
+                    trigger_price=high_20d,
+                    entry_plan="stop_order",
+                    why_now="Prijs zit vlak onder de breakout-trigger. Koop pas bij bevestiging boven de trigger.",
+                    urgency="medium",
+                )
+            else:
+                plan.update(
+                    action_now="BUY NOW",
+                    trigger_type="buy_now",
+                    trigger_price=close,
+                    entry_plan="market_or_stop",
+                    why_now="Prijs breekt gecontroleerd door de breakout-trigger.",
+                    urgency="high",
+                )
+        elif setup_type == "VCP":
+            if reason_code == "vcp_near_trigger":
+                plan.update(
+                    action_now="SET STOP BUY",
+                    trigger_type="buy_above",
+                    trigger_price=high_20d,
+                    entry_plan="stop_order",
+                    why_now="VCP zit vlak onder pivot. Koop pas bij bevestiging boven de trigger.",
+                    urgency="medium",
+                )
+            else:
+                plan.update(
+                    action_now="BUY NOW",
+                    trigger_type="buy_now",
+                    trigger_price=close,
+                    entry_plan="market_or_stop",
+                    why_now="VCP breekt gecontroleerd door de pivot.",
+                    urgency="high",
+                )
+        return plan
+
+    if status == "MISSED":
+        plan.update(
+            action_now="SET LIMIT BUY",
+            trigger_type="limit_buy",
+            trigger_price=ma20,
+            entry_plan="wait_for_pullback",
+            why_now="Breakout is al gebeurd. Niet najagen; wacht op pullback richting MA20.",
+            urgency="low",
+        )
         return plan
 
     if status == "REJECTED":
         plan.update(
-            action_now="Van watchlist halen",
+            action_now="REMOVE",
             trigger_type="none",
             trigger_price=None,
             entry_plan="remove_from_watchlist",
@@ -429,7 +522,7 @@ def build_watchlist_plan(
 
     if status == "EXPIRED":
         plan.update(
-            action_now="Van watchlist halen",
+            action_now="REMOVE",
             trigger_type="none",
             trigger_price=None,
             entry_plan="expire",
@@ -440,7 +533,7 @@ def build_watchlist_plan(
 
     if reason_code in {"pullback_not_confirmed", "below_ma20"}:
         plan.update(
-            action_now="Nog niets doen",
+            action_now="WAIT",
             trigger_type="buy_above",
             trigger_price=ma20,
             entry_plan="stop_order",
@@ -451,7 +544,7 @@ def build_watchlist_plan(
 
     if reason_code in {"too_extended_above_ma20", "pullback_wait_better_entry"}:
         plan.update(
-            action_now="Niet najagen",
+            action_now="SET LIMIT BUY",
             trigger_type="limit_buy",
             trigger_price=ma20,
             entry_plan="limit_order",
@@ -467,18 +560,18 @@ def build_watchlist_plan(
         "vcp_near_trigger_neutral",
     }:
         plan.update(
-            action_now="Voorbereiden",
+            action_now="SET STOP BUY",
             trigger_type="buy_above",
             trigger_price=high_20d,
             entry_plan="stop_order",
-            why_now="De setup leeft nog, maar de trigger is nog niet volledig bevestigd.",
+            why_now="De setup leeft nog, maar koop pas bij bevestiging boven de trigger.",
             urgency="low" if regime == "NEUTRAL" else "medium",
         )
         return plan
 
     if reason_code in {"vcp_pattern_not_ready", "vcp_too_far_from_ma20"}:
         plan.update(
-            action_now="Nog niets doen",
+            action_now="WAIT",
             trigger_type="buy_above",
             trigger_price=high_20d,
             entry_plan="stop_order",
@@ -489,7 +582,7 @@ def build_watchlist_plan(
 
     if reason_code == "bearish_regime":
         plan.update(
-            action_now="Nog niets doen",
+            action_now="WAIT",
             trigger_type="none",
             trigger_price=None,
             entry_plan="wait",
@@ -500,7 +593,7 @@ def build_watchlist_plan(
 
     if reason_code in {"missing_ma20_distance", "missing_high_distance", "missing_indicator_data"}:
         plan.update(
-            action_now="Niet doen",
+            action_now="REMOVE",
             trigger_type="none",
             trigger_price=None,
             entry_plan="data_check",
@@ -510,7 +603,7 @@ def build_watchlist_plan(
         return plan
 
     plan.update(
-        action_now="Nog niets doen",
+        action_now="WAIT",
         trigger_type="none",
         trigger_price=None,
         entry_plan="wait",
@@ -534,7 +627,7 @@ def evaluate_row(row: pd.Series, regime: str, cfg: dict) -> dict:
         "setup_label": get_setup_label(setup_type),
         "status": "WAIT",
         "entry_bias": "wait",
-        "action_now": "Nog niets doen",
+        "action_now": "WAIT",
         "trigger_type": "none",
         "trigger_price": None,
         "entry_plan": "wait",
@@ -559,7 +652,7 @@ def evaluate_row(row: pd.Series, regime: str, cfg: dict) -> dict:
         base_result["reason"] = "Aandeel staat niet meer actief op de watchlist."
         base_result["reason_text"] = base_result["reason"]
         base_result["reason_code"] = "not_active"
-        base_result["action_now"] = "Niets doen"
+        base_result["action_now"] = "WAIT"
         base_result["why_now"] = "Aandeel staat niet meer actief op de watchlist."
         return base_result
 
@@ -572,7 +665,7 @@ def evaluate_row(row: pd.Series, regime: str, cfg: dict) -> dict:
         base_result["reason"] = "Er ontbreekt indicatorendata om deze setup te evalueren."
         base_result["reason_text"] = base_result["reason"]
         base_result["reason_code"] = "missing_indicator_data"
-        base_result["action_now"] = "Niet doen"
+        base_result["action_now"] = "REMOVE"
         base_result["entry_plan"] = "data_check"
         base_result["why_now"] = "Er ontbreekt indicatorendata om dit aandeel correct te evalueren."
         base_result["urgency"] = "medium"
@@ -591,10 +684,18 @@ def evaluate_row(row: pd.Series, regime: str, cfg: dict) -> dict:
     else:
         status, entry_bias, reason_code, reason_text = evaluate_pullback(metrics, regime, cfg)
 
-    status, expiry_reason_code, expiry_reason_text = apply_expiry(status, added_at, cfg["expire_after_days"])
+    status, expiry_reason_code, expiry_reason_text = apply_expiry(
+        status,
+        added_at,
+        cfg["expire_after_days"],
+        reason_code,
+    )
     if expiry_reason_code:
         reason_code = expiry_reason_code
         reason_text = expiry_reason_text or reason_text
+        entry_bias = "none"
+
+    if status == "MISSED":
         entry_bias = "none"
 
     plan = build_watchlist_plan(setup_type, status, reason_code, regime, metrics)
@@ -621,32 +722,33 @@ def main() -> None:
     active_df = load_watchlist_active()
     WATCHLIST_STATUS_FILE.parent.mkdir(parents=True, exist_ok=True)
 
+    empty_cols = [
+        "ticker",
+        "is_active",
+        "setup_type",
+        "setup_label",
+        "status",
+        "entry_bias",
+        "action_now",
+        "trigger_type",
+        "trigger_price",
+        "entry_plan",
+        "why_now",
+        "urgency",
+        "added_at",
+        "last_reviewed_at",
+        "reason",
+        "reason_text",
+        "reason_code",
+        "regime",
+        "close",
+        "ma20",
+        "ma50",
+        "ma200",
+        "high_20d",
+    ]
+
     if active_df.empty:
-        empty_cols = [
-            "ticker",
-            "is_active",
-            "setup_type",
-            "setup_label",
-            "status",
-            "entry_bias",
-            "action_now",
-            "trigger_type",
-            "trigger_price",
-            "entry_plan",
-            "why_now",
-            "urgency",
-            "added_at",
-            "last_reviewed_at",
-            "reason",
-            "reason_text",
-            "reason_code",
-            "regime",
-            "close",
-            "ma20",
-            "ma50",
-            "ma200",
-            "high_20d",
-        ]
         pd.DataFrame(columns=empty_cols).to_csv(WATCHLIST_STATUS_FILE, index=False)
         print(f"No active watchlist found. Empty status file written to: {WATCHLIST_STATUS_FILE}")
         return
@@ -654,7 +756,20 @@ def main() -> None:
     rows = [evaluate_row(row, regime, cfg) for _, row in active_df.iterrows()]
     result_df = pd.DataFrame(rows)
 
-    sort_order = {"READY": 0, "WAIT": 1, "REJECTED": 2, "EXPIRED": 3, "INACTIVE": 4}
+    for col in empty_cols:
+        if col not in result_df.columns:
+            result_df[col] = None
+
+    result_df = result_df[empty_cols]
+
+    sort_order = {
+        "READY": 0,
+        "MISSED": 1,
+        "WAIT": 2,
+        "REJECTED": 3,
+        "EXPIRED": 4,
+        "INACTIVE": 5,
+    }
     result_df["sort_key"] = result_df["status"].map(sort_order).fillna(99)
     result_df = result_df.sort_values(["sort_key", "ticker"]).drop(columns=["sort_key"])
 
