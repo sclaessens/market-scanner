@@ -219,9 +219,8 @@ def detect_vcp(ticker: str, df: pd.DataFrame, regime: str = "NEUTRAL") -> Option
     ma20 = _to_float(latest["MA20"])
     ma50 = _to_float(latest["MA50"])
     ma200 = _to_float(latest["MA200"])
-    avg_vol = _to_float(latest["AVG_VOL_20"])
 
-    if any(pd.isna(x) for x in [close, ma20, ma50, ma200, avg_vol]):
+    if any(pd.isna(x) for x in [close, ma20, ma50, ma200]):
         return None
 
     recent_high = _to_float(recent["High"].max())
@@ -318,6 +317,38 @@ def build_tradeplan(df: pd.DataFrame, primary_setup: str) -> dict:
     }
 
 
+def _compute_breakout_strength(
+    distance_high: float,
+    volume_ratio: float,
+    strong_trend: bool,
+    ret_5d: float,
+) -> float:
+    breakout_strength = 0.0
+
+    if not pd.isna(distance_high):
+        if distance_high <= 0.02:
+            breakout_strength += 2.0
+        elif distance_high <= 0.05:
+            breakout_strength += 1.0
+
+    if not pd.isna(volume_ratio):
+        if volume_ratio >= 1.50:
+            breakout_strength += 2.0
+        elif volume_ratio >= 1.20:
+            breakout_strength += 1.0
+
+    if strong_trend:
+        breakout_strength += 1.0
+
+    if not pd.isna(ret_5d):
+        if ret_5d > 0.04:
+            breakout_strength += 1.5
+        elif ret_5d > 0.01:
+            breakout_strength += 0.5
+
+    return round(float(breakout_strength), 2)
+
+
 def scan_ticker(
     ticker: str,
     df: pd.DataFrame,
@@ -373,6 +404,9 @@ def scan_ticker(
     distance_high = (high_20 - close) / high_20 if high_20 else float("nan")
     atr_pct = atr / close if close > 0 else float("nan")
 
+    volume_ratio = volume / avg_vol if avg_vol > 0 else float("nan")
+    extension_atr = (close - ma20) / atr if atr > 0 else float("nan")
+
     trend_ok = close > ma50 and ma50 > ma200
     strong_trend = close > ma20 > ma50 > ma200
 
@@ -386,11 +420,19 @@ def scan_ticker(
         if len(df) >= 11
         else float("nan")
     )
+
     momentum_ok = (
         not pd.isna(ret_5d)
         and not pd.isna(ret_10d)
         and ret_5d > -0.02
         and ret_10d > 0.00
+    )
+
+    breakout_strength = _compute_breakout_strength(
+        distance_high=distance_high,
+        volume_ratio=volume_ratio,
+        strong_trend=strong_trend,
+        ret_5d=ret_5d,
     )
 
     pullback = (
@@ -409,7 +451,8 @@ def scan_ticker(
         trend_ok
         and not pd.isna(distance_high)
         and distance_high <= 0.08
-        and volume >= 1.10 * avg_vol
+        and not pd.isna(volume_ratio)
+        and volume_ratio >= 1.10
         and close > ma20
         and (pd.isna(ret_5d) or ret_5d >= -0.01)
     )
@@ -443,6 +486,19 @@ def scan_ticker(
         score_components["momentum"] += 1.5
         score_components["position"] += 0.5
 
+        score_components["momentum"] += breakout_strength * 0.8
+        score_components["position"] += breakout_strength * 0.5
+
+        if breakout_strength < 2:
+            score_components["momentum"] -= 1.0
+
+        rs_20d = score_components.get("rs_20d")
+        if rs_20d is not None:
+            if rs_20d >= 0.05:
+                score_components["momentum"] += 1.0
+            elif rs_20d <= -0.02:
+                score_components["momentum"] -= 1.0
+
     if vcp:
         rs_20d = score_components.get("rs_20d")
 
@@ -459,6 +515,12 @@ def scan_ticker(
         score_components["trend"] += 1.0
     elif regime == "NEUTRAL":
         score_components["trend"] -= 0.5
+
+    if not pd.isna(extension_atr):
+        if extension_atr >= 2.5:
+            score_components["position"] -= 2.0
+        elif extension_atr >= 1.5:
+            score_components["position"] -= 1.0
 
     raw_total_score = (
         score_components["trend"]
@@ -500,6 +562,13 @@ def scan_ticker(
         "high_20d": round(float(high_20), 2),
         "low_20d": round(float(low_20), 2),
         "avg_vol_20": int(avg_vol),
+        "volume_ratio": round(float(volume_ratio), 2)
+        if not pd.isna(volume_ratio)
+        else None,
+        "breakout_strength": round(float(breakout_strength), 2),
+        "extension_atr": round(float(extension_atr), 2)
+        if not pd.isna(extension_atr)
+        else None,
         "ret_20d_pct": (
             round(float(score_components["ret_20d"] * 100), 2)
             if score_components["ret_20d"] is not None
@@ -537,6 +606,8 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
 
         rs_20d_pct = setup.get("rs_20d_pct")
         atr_pct = setup.get("atr_pct")
+        breakout_strength = setup.get("breakout_strength")
+        extension_atr = setup.get("extension_atr")
 
         rs_ok_for_a = rs_20d_pct is not None and rs_20d_pct >= 3.0
         atr_ok_for_a = atr_pct is not None and atr_pct >= 2.5
@@ -552,8 +623,20 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
 
         if primary == "PULLBACK":
             allow_a = allow_a and raw_score >= 8.0
+
         elif primary == "BREAKOUT":
-            allow_a = allow_a and raw_score >= 8.5
+            breakout_quality_ok = (
+                breakout_strength is not None and breakout_strength >= 3.0
+            )
+            not_too_extended = extension_atr is None or extension_atr <= 2.5
+
+            allow_a = (
+                allow_a
+                and raw_score >= 8.5
+                and breakout_quality_ok
+                and not_too_extended
+            )
+
         elif primary == "VCP":
             allow_a = allow_a and raw_score >= 9.0
 

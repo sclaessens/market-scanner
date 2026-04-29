@@ -36,6 +36,28 @@ SCANNER_RANKED_FILE = DATA_DIR / "processed" / "scanner_ranked.csv"
 MIN_HISTORY_ROWS = 220
 
 
+SCANNER_RANKED_COLUMNS = [
+    "ticker",
+    "setup_type",
+    "setup_grade",
+    "score_total",
+    "entry",
+    "stop",
+    "target",
+    "rr",
+    "close",
+    "high_20d",
+    "ma20",
+    "ma50",
+    "setup",
+    "primary_setup",
+    "volume_ratio",
+    "breakout_strength",
+    "extension_atr",
+    "rs_20d_pct",
+]
+
+
 def ensure_dirs() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -54,7 +76,8 @@ def validate_reference_index(ticker: str) -> pd.DataFrame:
 
     if len(df) < MIN_HISTORY_ROWS:
         raise ValueError(
-            f"{ticker} data is incomplete: expected at least {MIN_HISTORY_ROWS} rows, got {len(df)}"
+            f"{ticker} data is incomplete: expected at least {MIN_HISTORY_ROWS} rows, "
+            f"got {len(df)}"
         )
 
     df = add_indicators(df)
@@ -71,6 +94,7 @@ def append_scan_log(scan_date: str, regime: str, setups: list[dict]) -> None:
         return
 
     rows: list[dict] = []
+
     for setup in setups:
         rows.append(
             {
@@ -94,11 +118,15 @@ def append_scan_log(scan_date: str, regime: str, setups: list[dict]) -> None:
     if SCANS_LOG_FILE.exists():
         df_old = pd.read_csv(SCANS_LOG_FILE)
         df_all = pd.concat([df_old, df_new], ignore_index=True)
-        subset_cols = ["scan_date", "ticker", "setup", "entry"]
 
+        subset_cols = ["scan_date", "ticker", "setup", "entry"]
         existing_subset_cols = [col for col in subset_cols if col in df_all.columns]
+
         if existing_subset_cols:
-            df_all = df_all.drop_duplicates(subset=existing_subset_cols, keep="last")
+            df_all = df_all.drop_duplicates(
+                subset=existing_subset_cols,
+                keep="last",
+            )
     else:
         df_all = df_new
 
@@ -110,7 +138,10 @@ def save_failed_tickers(rows: list[dict]) -> None:
     FAILED_TICKERS_FILE.parent.mkdir(parents=True, exist_ok=True)
 
     if not rows:
-        pd.DataFrame(columns=["ticker", "reason"]).to_csv(FAILED_TICKERS_FILE, index=False)
+        pd.DataFrame(columns=["ticker", "reason"]).to_csv(
+            FAILED_TICKERS_FILE,
+            index=False,
+        )
         return
 
     pd.DataFrame(rows).to_csv(FAILED_TICKERS_FILE, index=False)
@@ -162,30 +193,18 @@ def save_scanner_ranked(setups: list[dict]) -> None:
                 "ma50": setup.get("ma50"),
                 "setup": setup.get("setup", ""),
                 "primary_setup": setup.get("primary_setup", ""),
+                "volume_ratio": setup.get("volume_ratio"),
+                "breakout_strength": setup.get("breakout_strength"),
+                "extension_atr": setup.get("extension_atr"),
+                "rs_20d_pct": setup.get("rs_20d_pct"),
             }
         )
 
     if rows:
         df = pd.DataFrame(rows)
+        df = df.reindex(columns=SCANNER_RANKED_COLUMNS)
     else:
-        df = pd.DataFrame(
-            columns=[
-                "ticker",
-                "setup_type",
-                "setup_grade",
-                "score_total",
-                "entry",
-                "stop",
-                "target",
-                "rr",
-                "close",
-                "high_20d",
-                "ma20",
-                "ma50",
-                "setup",
-                "primary_setup",
-            ]
-        )
+        df = pd.DataFrame(columns=SCANNER_RANKED_COLUMNS)
 
     SCANNER_RANKED_FILE.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(SCANNER_RANKED_FILE, index=False)
@@ -194,6 +213,7 @@ def save_scanner_ranked(setups: list[dict]) -> None:
 def _format_setup_line(setup: dict) -> str:
     grade = setup.get("grade", "C")
     primary_setup = setup.get("primary_setup", setup.get("setup", ""))
+
     return (
         f"{setup['ticker']} | {primary_setup} | grade {grade} | "
         f"score {setup['score']} | entry {setup['entry']} | stop {setup['stop']} | "
@@ -219,13 +239,27 @@ def write_report(
         f"MA200 {latest_qqq['MA200']:.2f} → {regime}"
     )
 
-    vcp_lines = [_format_setup_line(s) for s in setups if s.get("primary_setup") == "VCP"]
-    pullback_lines = [_format_setup_line(s) for s in setups if s.get("primary_setup") == "PULLBACK"]
-    breakout_lines = [_format_setup_line(s) for s in setups if s.get("primary_setup") == "BREAKOUT"]
+    vcp_lines = [
+        _format_setup_line(s)
+        for s in setups
+        if s.get("primary_setup") == "VCP"
+    ]
+    pullback_lines = [
+        _format_setup_line(s)
+        for s in setups
+        if s.get("primary_setup") == "PULLBACK"
+    ]
+    breakout_lines = [
+        _format_setup_line(s)
+        for s in setups
+        if s.get("primary_setup") == "BREAKOUT"
+    ]
 
     weakening_lines = []
     if failed_tickers > 0:
-        weakening_lines.append(f"Failed tickers during fetch/validation: {failed_tickers}")
+        weakening_lines.append(
+            f"Failed tickers during fetch/validation: {failed_tickers}"
+        )
 
     report_text = build_report(
         universe_size=total_tickers,
@@ -244,6 +278,7 @@ def write_report(
         extra_lines: list[str] = []
         extra_lines.append("")
         extra_lines.append("## Ranked setups")
+
         for setup in setups:
             extra_lines.append(f"- {_format_setup_line(setup)}")
 
@@ -305,6 +340,7 @@ def main() -> None:
 
         if ticker in seen_tickers:
             continue
+
         seen_tickers.add(ticker)
 
         print(f"Scanning {ticker}...")
@@ -317,24 +353,37 @@ def main() -> None:
 
         if len(df) < MIN_HISTORY_ROWS:
             failed_rows.append(
-                {"ticker": ticker, "reason": f"insufficient_history_{len(df)}"}
+                {
+                    "ticker": ticker,
+                    "reason": f"insufficient_history_{len(df)}",
+                }
             )
             continue
 
         try:
             df_ind = add_indicators(df)
 
-            # 🔥 SAVE PROCESSED DATA PER TICKER
             processed_path = DATA_DIR / "processed" / f"{ticker}.csv"
             processed_path.parent.mkdir(parents=True, exist_ok=True)
             df_ind.to_csv(processed_path, index=False)
+
         except Exception as exc:
-            failed_rows.append({"ticker": ticker, "reason": f"indicator_error: {exc}"})
+            failed_rows.append(
+                {
+                    "ticker": ticker,
+                    "reason": f"indicator_error: {exc}",
+                }
+            )
             continue
 
         successful_count += 1
 
-        result = scan_ticker(ticker, df_ind, regime, qqq_return_20d)
+        result = scan_ticker(
+            ticker=ticker,
+            df=df_ind,
+            regime=regime,
+            qqq_return_20d=qqq_return_20d,
+        )
 
         if result is None:
             failed_rows.append({"ticker": ticker, "reason": "no_valid_setup"})

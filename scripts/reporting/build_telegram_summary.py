@@ -5,7 +5,6 @@ from typing import Optional
 
 import pandas as pd
 
-# Zorg dat project root in path zit
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 MARKET_REGIME_FILE = "data/processed/market_regime.csv"
@@ -14,10 +13,6 @@ WATCHLIST_FILE = "data/watchlist/watchlist_status.csv"
 PORTFOLIO_REVIEW_FILE = "data/portfolio/portfolio_review.csv"
 OUTPUT_FILE = "reports/daily/telegram_message.txt"
 
-
-# =========================
-# HELPERS
-# =========================
 
 def ensure_directories() -> None:
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
@@ -84,10 +79,6 @@ def title_case_setup(setup_type: str) -> str:
     return mapping.get(key, key.title())
 
 
-def get_grouped_setup_order() -> list[str]:
-    return ["BREAKOUT", "PULLBACK", "VCP"]
-
-
 def normalize_reason(reason: str) -> str:
     mapping = {
         "still_below_ma20": "nog onder MA20",
@@ -118,45 +109,22 @@ def urgency_icon(level: str) -> str:
 
 
 def get_portfolio_tickers() -> set[str]:
-    """
-    Alle tickers die momenteel als open portfolio-actie in portfolio_review.csv staan.
-    Deze tickers krijgen prioriteit boven watchlist en scanner.
-    """
     df = read_csv_safe(PORTFOLIO_REVIEW_FILE)
     if df.empty or "ticker" not in df.columns:
         return set()
 
-    return set(
-        df["ticker"]
-        .astype(str)
-        .str.upper()
-        .str.strip()
-        .tolist()
-    )
+    return set(df["ticker"].astype(str).str.upper().str.strip().tolist())
+
 
 def get_watchlist_tickers() -> set[str]:
-    """
-    Alle tickers die momenteel op de watchlist staan.
-    Deze tickers krijgen prioriteit boven scanner.
-    """
     df = read_csv_safe(WATCHLIST_FILE)
     if df.empty or "ticker" not in df.columns:
         return set()
 
-    return set(
-        df["ticker"]
-        .astype(str)
-        .str.upper()
-        .str.strip()
-        .tolist()
-    )
+    return set(df["ticker"].astype(str).str.upper().str.strip().tolist())
+
 
 def get_scanner_close_map() -> dict[str, float]:
-    """
-    Fallback om verouderde watchlist_status-data te herkennen.
-    Als scanner_ranked.csv een veel recentere close toont dan watchlist_status.csv,
-    gebruiken we die close alleen voor Telegram-safety en context.
-    """
     df = read_csv_safe(SCANNER_FILE)
     if df.empty or "ticker" not in df.columns or "close" not in df.columns:
         return {}
@@ -170,7 +138,10 @@ def get_scanner_close_map() -> dict[str, float]:
     return out
 
 
-def get_effective_watchlist_close(row: pd.Series, scanner_close_map: dict[str, float]) -> tuple[Optional[float], str]:
+def get_effective_watchlist_close(
+    row: pd.Series,
+    scanner_close_map: dict[str, float],
+) -> tuple[Optional[float], str]:
     ticker = clean_text(row.get("ticker"), fallback="").upper()
     watchlist_close = safe_float(row.get("close"))
     scanner_close = scanner_close_map.get(ticker)
@@ -178,26 +149,45 @@ def get_effective_watchlist_close(row: pd.Series, scanner_close_map: dict[str, f
     if scanner_close is None:
         return watchlist_close, "watchlist"
 
-    if watchlist_close is None:
-        return scanner_close, "scanner"
-
-    if watchlist_close == 0:
+    if watchlist_close is None or watchlist_close == 0:
         return scanner_close, "scanner"
 
     difference_pct = abs(scanner_close - watchlist_close) / abs(watchlist_close)
 
-    # Meer dan 2% verschil wijst meestal op oude watchlist_status-data.
     if difference_pct > 0.02:
         return scanner_close, "scanner"
 
     return watchlist_close, "watchlist"
 
 
-def get_watchlist_display_decision(row: pd.Series, scanner_close_map: dict[str, float]) -> dict:
-    """
-    Maakt de Telegram-regel veiliger zonder de CSV-architectuur te wijzigen.
-    Belangrijkste guard: toon nooit een stop-buy onder de meest actuele bekende koers.
-    """
+def exclude_tickers(df: pd.DataFrame, tickers: set[str]) -> pd.DataFrame:
+    if df.empty or "ticker" not in df.columns or not tickers:
+        return df.copy()
+
+    out = df.copy()
+    out["ticker"] = out["ticker"].astype(str).str.upper().str.strip()
+    return out[~out["ticker"].isin(tickers)].copy()
+
+
+def build_watchlist_action_from_row(row: pd.Series) -> str:
+    explicit = clean_text(row.get("action_now"), fallback="-")
+    if explicit != "-":
+        return explicit
+
+    status = clean_text(row.get("status"), fallback="WAIT").upper()
+    mapping = {
+        "READY": "Koopcheck doen",
+        "WAIT": "Nog niets doen",
+        "REJECTED": "Niet meer volgen",
+        "EXPIRED": "Van watchlist halen",
+    }
+    return mapping.get(status, "Opvolgen")
+
+
+def get_watchlist_display_decision(
+    row: pd.Series,
+    scanner_close_map: dict[str, float],
+) -> dict:
     action_now = build_watchlist_action_from_row(row)
     action_group = clean_text(action_now).upper()
 
@@ -215,7 +205,10 @@ def get_watchlist_display_decision(row: pd.Series, scanner_close_map: dict[str, 
     display_price = trigger_price
     why = clean_text(row.get("why_now"), fallback="-")
     if why == "-":
-        why = clean_text(row.get("reason_text"), fallback=clean_text(row.get("reason"), fallback="-"))
+        why = clean_text(
+            row.get("reason_text"),
+            fallback=clean_text(row.get("reason"), fallback="-"),
+        )
 
     safety_note = ""
 
@@ -224,14 +217,16 @@ def get_watchlist_display_decision(row: pd.Series, scanner_close_map: dict[str, 
             action_group = "SET LIMIT BUY"
             action_now = "SET LIMIT BUY"
             display_price = safe_float(row.get("ma20"))
-            why = "Breakout-trigger ligt onder de actuele koers. Breakout niet najagen; wacht op pullback richting MA20."
+            why = (
+                "Breakout-trigger ligt onder de actuele koers. "
+                "Breakout niet najagen; wacht op pullback richting MA20."
+            )
             safety_note = "⚠️ Stop-buy gecorrigeerd omdat trigger onder actuele koers ligt."
 
     context_parts = []
+
     if close_value is not None:
-        label = "close"
-        if close_source == "scanner":
-            label = "actuele close"
+        label = "actuele close" if close_source == "scanner" else "close"
         context_parts.append(f"{label} {close_value:.2f}")
 
     if trigger_price is not None:
@@ -256,237 +251,20 @@ def get_watchlist_display_decision(row: pd.Series, scanner_close_map: dict[str, 
     }
 
 
-def append_compact_watchlist_decision(lines: list[str], row: pd.Series, scanner_close_map: dict[str, float]) -> None:
+def append_compact_watchlist_decision(
+    lines: list[str],
+    row: pd.Series,
+    scanner_close_map: dict[str, float],
+) -> None:
     decision = get_watchlist_display_decision(row, scanner_close_map)
     price = fmt_price(decision["display_price"])
     ticker = decision["ticker"]
 
-    # Telegram blijft actiegericht. De uitleg staat in watchlist_status.csv.
     if decision["safety_note"]:
         lines.append(f"- {ticker} → {price} (breakout gemist; wacht op pullback)")
     else:
         lines.append(f"- {ticker} → {price}")
 
-
-def exclude_portfolio_tickers(df: pd.DataFrame, portfolio_tickers: set[str]) -> pd.DataFrame:
-    """
-    Verwijder tickers uit scanner/watchlist als ze al in portfolio zitten.
-    """
-    if df.empty or "ticker" not in df.columns or not portfolio_tickers:
-        return df.copy()
-
-    out = df.copy()
-    out["ticker"] = out["ticker"].astype(str).str.upper().str.strip()
-    return out[~out["ticker"].isin(portfolio_tickers)].copy()
-
-
-# =========================
-# PORTFOLIO TRANSLATION LAYER
-# =========================
-
-def map_portfolio_decision(decision: str) -> dict:
-    key = clean_text(decision, fallback="REVIEW").upper()
-    mapping = {
-        "SELL": {
-            "header": "🔴 Volledig verkopen",
-            "action": "Volledig verkopen",
-            "urgency": "high",
-            "summary": "trend is gebroken → positie sluiten",
-        },
-        "TRIM": {
-            "header": "🟠 Gedeeltelijk winst nemen",
-            "action": "Verkoop 25%",
-            "urgency": "medium",
-            "summary": "koers is hard opgelopen → deel van winst vastzetten",
-        },
-        "REVIEW": {
-            "header": "🟡 Extra aandacht nodig",
-            "action": "Nog niets doen",
-            "urgency": "medium",
-            "summary": "beeld is gemengd → positie extra opvolgen",
-        },
-        "HOLD": {
-            "header": "🟢 Gewoon aanhouden",
-            "action": "Houden",
-            "urgency": "low",
-            "summary": "trend is gezond → niets doen",
-        },
-    }
-    return mapping.get(key, mapping["REVIEW"])
-
-
-def explain_portfolio_reason(reason: str) -> str:
-    text = clean_text(reason, fallback="-")
-    key = text.lower().strip()
-
-    direct_mapping = {
-        "extended": "koers is sterk opgelopen tegenover de korte trend",
-        "extended_above_ma20": "koers staat ver boven de korte trend",
-        "above_ma20_and_ma50": "trend blijft gezond boven korte en middellange trend",
-        "above_ma20_ma50": "trend blijft gezond boven korte en middellange trend",
-        "below_ma50": "prijs is onder de middellange trend gezakt",
-        "below_ma50_above_ma200": "middellange trend verzwakt, maar lange trend houdt nog stand",
-        "below_ma50_and_ma200": "zowel middellange als lange trend zijn gebroken",
-        "mixed_structure": "signalen spreken elkaar tegen",
-        "missing_price_data": "prijsdata ontbreekt, beslissing is minder betrouwbaar",
-        "missing_moving_average_data": "trenddata ontbreekt, beslissing is minder betrouwbaar",
-    }
-    if key in direct_mapping:
-        return direct_mapping[key]
-
-    normalized = normalize_reason(text)
-    normalized_lower = normalized.lower()
-
-    if "extended" in normalized_lower and "ma20" in normalized_lower:
-        return "koers staat ver boven de korte trend"
-    if "above ma20" in normalized_lower and "ma50" in normalized_lower:
-        return "trend blijft gezond boven korte en middellange trend"
-    if "below ma50 and ma200" in normalized_lower:
-        return "zowel middellange als lange trend zijn gebroken"
-    if "below ma50 but above ma200" in normalized_lower or "onder ma50 maar boven ma200" in normalized_lower:
-        return "middellange trend verzwakt, maar lange trend houdt nog stand"
-    if "below ma50" in normalized_lower or "onder ma50" in normalized_lower:
-        return "prijs is onder de middellange trend gezakt"
-    if "missing" in normalized_lower or "ontbrekende" in normalized_lower:
-        return normalized.capitalize()
-
-    return normalized.capitalize()
-
-
-# =========================
-# WATCHLIST TRANSLATION LAYER
-# =========================
-
-def choose_watchlist_setup_label(row: pd.Series) -> str:
-    explicit = clean_text(row.get("setup_label"), fallback="-")
-    if explicit != "-":
-        return explicit
-    return title_case_setup(row.get("setup_type", "UNKNOWN"))
-
-
-def explain_watchlist_reason(reason: str, regime: str) -> str:
-    normalized = normalize_reason(reason)
-    key = normalized.lower()
-    regime_key = clean_text(regime, fallback="UNKNOWN").upper()
-
-    mapping = {
-        "nog onder ma20": "wacht tot de koers opnieuw boven de korte trend komt",
-        "onder ma50": "trend is te zwak om nu in te stappen",
-        "nog geen reclaim van ma20": "er is nog geen bevestiging van hernieuwde sterkte",
-        "onder ma50 maar boven ma200": "middellange trend is zwak, dus voorlopig afwachten",
-        "onder ma50 en ma200": "trend is duidelijk kapot",
-        "gemengde structuur": "de signalen zijn niet overtuigend genoeg",
-        "ontbrekende prijsdata": "er is te weinig data om dit goed te beoordelen",
-        "ontbrekende moving average data": "trenddata ontbreekt voor een goede evaluatie",
-        "too extended above ma20": "de koers is al te ver opgelopen voor een mooie instap",
-        "trend ok but not in buy zone": "trend is oké, maar de instapzone is nog niet ideaal",
-        "not close enough to breakout": "de koers zit nog niet dicht genoeg bij een overtuigende uitbraak",
-        "vcp not ready": "de opbouw ziet er goed uit, maar er is nog geen kooptrigger",
-    }
-    if key in mapping:
-        return mapping[key]
-
-    if "neutral regime" in key or "neutraal regime" in key:
-        if regime_key == "BULLISH":
-            return "setup is nog niet mooi genoeg voor een instap"
-        if regime_key == "BEARISH":
-            return "markt geeft tegenwind, dus liever nog niet instappen"
-        return "markt is nog niet overtuigend genoeg voor een instap"
-
-    if "bearish regime" in key:
-        return "markt geeft tegenwind, dus liever nog niet instappen"
-    if "near breakout trigger" in key:
-        return "de koers zit dicht bij een mogelijke uitbraak"
-    if "near pivot" in key:
-        return "de opbouw is goed en de koers zit dicht bij een kooptrigger"
-    if "pullback near ma20" in key:
-        return "de koers zit in een interessante terugvalzone"
-    if "expired_after_" in key:
-        return "de setup staat al te lang op de watchlist zonder trigger"
-
-    return normalized.capitalize()
-
-
-def build_watchlist_action_from_row(row: pd.Series) -> str:
-    explicit = clean_text(row.get("action_now"), fallback="-")
-    if explicit != "-":
-        return explicit
-
-    status = clean_text(row.get("status"), fallback="WAIT").upper()
-    mapping = {
-        "READY": "Koopcheck doen",
-        "WAIT": "Nog niets doen",
-        "REJECTED": "Niet meer volgen",
-        "EXPIRED": "Van watchlist halen",
-    }
-    return mapping.get(status, "Opvolgen")
-
-
-def build_watchlist_trigger_text(row: pd.Series) -> str:
-    explicit_action = clean_text(row.get("action_now"), fallback="-")
-    trigger_type = clean_text(row.get("trigger_type"), fallback="-").lower()
-    trigger_price = fmt_price(row.get("trigger_price"))
-    entry_plan = clean_text(row.get("entry_plan"), fallback="-")
-    reason = clean_text(row.get("reason"), fallback="-").lower()
-    close = fmt_price(row.get("close"))
-    ma20 = fmt_price(row.get("ma20"))
-    high_20d = fmt_price(row.get("high_20d"))
-    status = clean_text(row.get("status"), fallback="WAIT").upper()
-
-    explicit_trigger = clean_text(row.get("trigger_text"), fallback="-")
-    if explicit_trigger != "-":
-        return explicit_trigger
-
-    if trigger_type == "buy_now":
-        if trigger_price != "-":
-            return f"nu koopbaar rond {trigger_price}"
-        if close != "-":
-            return f"nu koopbaar rond {close}"
-        return "nu koopbaar"
-
-    if trigger_type == "buy_above":
-        if trigger_price != "-":
-            return f"koop pas boven {trigger_price}"
-        if high_20d != "-":
-            return f"koop pas boven {high_20d}"
-        return "koop pas bij een duidelijke uitbraak"
-
-    if trigger_type == "limit_buy":
-        if trigger_price != "-":
-            return f"limietorder rond {trigger_price}"
-        if ma20 != "-":
-            return f"limietorder rond {ma20}"
-        return "koop alleen op een betere terugval"
-
-    if trigger_type == "none" and status in {"REJECTED", "EXPIRED"}:
-        return "geen nieuwe instap zoeken"
-
-    if explicit_action != "-":
-        action_lower = explicit_action.lower()
-        if "stop order" in action_lower and trigger_price != "-":
-            return f"zet een stop order boven {trigger_price}"
-        if "limietorder" in action_lower and trigger_price != "-":
-            return f"leg een limietorder rond {trigger_price}"
-
-    if "below_ma20" in reason or "still_below_ma20" in reason:
-        if ma20 != "-":
-            return f"koop pas boven {ma20}"
-        return "koop pas boven de korte trend"
-    if "breakout" in reason or "vcp" in reason:
-        if high_20d != "-":
-            return f"koop pas boven {high_20d}"
-        return "koop pas bij een duidelijke uitbraak"
-    if status == "READY":
-        if close != "-":
-            return f"koopcheck rond {close}"
-        return "nu verder opvolgen voor instap"
-
-    return "-"
-
-
-# =========================
-# MARKET REGIME
-# =========================
 
 def build_market_regime_header() -> list[str]:
     df = read_csv_safe(MARKET_REGIME_FILE)
@@ -511,89 +289,120 @@ def build_market_regime_header() -> list[str]:
         "BEARISH": "Markt is zwak",
         "UNKNOWN": "Marktstatus onbekend",
     }
+
     emoji = emoji_map.get(regime, "⚪")
     readable = readable_map.get(regime, "Marktstatus onbekend")
 
     return [f"Regime: {emoji} {readable} ({regime})", ""]
 
 
-# =========================
-# WATCHLIST / DECISION LAYER
-# =========================
-
-def format_watchlist_line(row: pd.Series, regime: str) -> list[str]:
-    ticker = clean_text(row.get("ticker", "?")).upper()
-    status = clean_text(row.get("status", "WAIT")).upper()
-    action_now = build_watchlist_action_from_row(row)
-    trigger_text = build_watchlist_trigger_text(row)
-    why_now = clean_text(row.get("why_now"), fallback="-")
-    if why_now == "-":
-        why_now = explain_watchlist_reason(row.get("reason"), regime)
-
-    close = fmt_price(row.get("close"))
-    ma20 = fmt_price(row.get("ma20"))
-    ma50 = fmt_price(row.get("ma50"))
-
-    details = []
-    if close != "-":
-        details.append(f"close {close}")
-    if ma20 != "-":
-        details.append(f"MA20 {ma20}")
-    if ma50 != "-":
-        details.append(f"MA50 {ma50}")
-
-    lines = [f"- {ticker}"]
-    lines.append(f"  → Actie nu: {action_now}")
-    if trigger_text != "-" and status not in {"REJECTED", "EXPIRED"}:
-        lines.append(f"  → Trigger: {trigger_text}")
-    lines.append(f"  → Waarom: {why_now}")
-    if details:
-        lines.append(f"  → Context: {' | '.join(details)}")
-    return lines
-
-
-def append_watchlist_group(lines: list[str], title: str, subset: pd.DataFrame, regime: str) -> None:
-    if subset.empty:
-        return
-    lines.append(title)
-    for _, row in subset.iterrows():
-        lines.extend(format_watchlist_line(row, regime))
-    lines.append("")
-
-
-def get_scanner_buy_now_candidates(max_items: int = 4) -> pd.DataFrame:
-    """
-    Scanner blijft ideeën leveren, maar sterke A-breakouts mogen in Telegram
-    als directe actie verschijnen zolang Portfolio > Watchlist > Scanner bewaakt blijft.
-    """
+def get_scanner_df() -> pd.DataFrame:
     df = read_csv_safe(SCANNER_FILE)
+
     if df.empty or "ticker" not in df.columns:
         return pd.DataFrame()
-
-    portfolio_tickers = get_portfolio_tickers()
-    watchlist_tickers = get_watchlist_tickers()
-    blocked_tickers = portfolio_tickers | watchlist_tickers
 
     df = df.copy()
     df["ticker"] = df["ticker"].astype(str).str.upper().str.strip()
 
-    if "setup_grade" not in df.columns:
-        return pd.DataFrame()
-    df["setup_grade"] = df["setup_grade"].astype(str).str.upper().str.strip()
+    if "setup_grade" in df.columns:
+        df["setup_grade"] = df["setup_grade"].astype(str).str.upper().str.strip()
+    else:
+        df["setup_grade"] = ""
 
     if "setup_type" in df.columns:
         df["setup_type"] = df["setup_type"].astype(str).str.upper().str.strip()
     else:
         df["setup_type"] = "UNKNOWN"
 
-    df = exclude_portfolio_tickers(df, blocked_tickers)
-    df = df[(df["setup_grade"] == "A") & (df["setup_type"] == "BREAKOUT")].copy()
+    numeric_cols = [
+        "score_total",
+        "entry",
+        "stop",
+        "target",
+        "rr",
+        "close",
+        "high_20d",
+        "ma20",
+        "ma50",
+        "volume_ratio",
+        "breakout_strength",
+        "extension_atr",
+        "rs_20d_pct",
+    ]
+
+    for col in numeric_cols:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    if "score_total" in df.columns:
+        df = df.sort_values(by="score_total", ascending=False)
+
+    return df.reset_index(drop=True)
+
+
+def get_scanner_buy_now_candidates(max_items: int = 4) -> pd.DataFrame:
+    df = get_scanner_df()
+
+    if df.empty:
+        return pd.DataFrame()
+
+    portfolio_tickers = get_portfolio_tickers()
+    watchlist_tickers = get_watchlist_tickers()
+    blocked_tickers = portfolio_tickers | watchlist_tickers
+
+    df = exclude_tickers(df, blocked_tickers)
+
+    required_cols = {"setup_grade", "setup_type", "breakout_strength", "extension_atr"}
+    if not required_cols.issubset(df.columns):
+        return pd.DataFrame()
+
+    df = df[
+        (df["setup_grade"] == "A")
+        & (df["setup_type"] == "BREAKOUT")
+        & (df["breakout_strength"] >= 3.0)
+        & (df["extension_atr"] <= 1.5)
+    ].copy()
+
+    if df.empty:
+        return df
+
+    return df.head(max_items).reset_index(drop=True)
+
+
+def get_strong_extended_breakouts(max_items: int = 6) -> pd.DataFrame:
+    df = get_scanner_df()
+
+    if df.empty:
+        return pd.DataFrame()
+
+    portfolio_tickers = get_portfolio_tickers()
+    watchlist_tickers = get_watchlist_tickers()
+    scanner_buy_df = get_scanner_buy_now_candidates()
+
+    scanner_buy_tickers: set[str] = set()
+    if not scanner_buy_df.empty and "ticker" in scanner_buy_df.columns:
+        scanner_buy_tickers = set(
+            scanner_buy_df["ticker"].astype(str).str.upper().str.strip().tolist()
+        )
+
+    blocked_tickers = portfolio_tickers | watchlist_tickers | scanner_buy_tickers
+    df = exclude_tickers(df, blocked_tickers)
+
+    required_cols = {"setup_type", "breakout_strength", "extension_atr"}
+    if not required_cols.issubset(df.columns):
+        return pd.DataFrame()
+
+    df = df[
+        (df["setup_type"] == "BREAKOUT")
+        & (df["breakout_strength"] >= 3.0)
+        & (df["extension_atr"] > 1.5)
+    ].copy()
 
     if df.empty:
         return df
 
     if "score_total" in df.columns:
-        df["score_total"] = pd.to_numeric(df["score_total"], errors="coerce")
         df = df.sort_values(by="score_total", ascending=False)
 
     return df.head(max_items).reset_index(drop=True)
@@ -631,7 +440,7 @@ def build_watchlist_action_sections() -> list[str]:
     else:
         df = df.copy()
         df["status"] = df["status"].astype(str).str.upper()
-        df = exclude_portfolio_tickers(df, portfolio_tickers)
+        df = exclude_tickers(df, portfolio_tickers)
 
         def get_action_group_for_row(row: pd.Series) -> str:
             return get_watchlist_display_decision(row, scanner_close_map)["action_group"]
@@ -678,96 +487,121 @@ def build_watchlist_action_sections() -> list[str]:
     return lines
 
 
-# =========================
-# SCANNER CONTEXT
-# =========================
-
-def format_scanner_line(row: pd.Series) -> str:
-    ticker = clean_text(row.get("ticker", "?")).upper()
-    entry = fmt_price(row.get("entry"))
-    stop = fmt_price(row.get("stop"))
-    target = fmt_price(row.get("target"))
-    rr = fmt_price(row.get("rr"))
-    return f"- {ticker} | instap {entry} | stop {stop} | doel {target} | R:R {rr}"
-
-
 def build_scanner_context_section() -> list[str]:
-    df = read_csv_safe(SCANNER_FILE)
+    df = get_scanner_df()
+    strong_extended_df = get_strong_extended_breakouts()
+
     portfolio_tickers = get_portfolio_tickers()
     watchlist_tickers = get_watchlist_tickers()
-    scanner_buy_tickers = set()
-    scanner_buy_df = get_scanner_buy_now_candidates()
-    if not scanner_buy_df.empty and "ticker" in scanner_buy_df.columns:
-        scanner_buy_tickers = set(scanner_buy_df["ticker"].astype(str).str.upper().str.strip().tolist())
 
-    blocked_tickers = portfolio_tickers | watchlist_tickers | scanner_buy_tickers
+    scanner_buy_df = get_scanner_buy_now_candidates()
+    scanner_buy_tickers: set[str] = set()
+    if not scanner_buy_df.empty and "ticker" in scanner_buy_df.columns:
+        scanner_buy_tickers = set(
+            scanner_buy_df["ticker"].astype(str).str.upper().str.strip().tolist()
+        )
+
+    strong_extended_tickers: set[str] = set()
+    if not strong_extended_df.empty and "ticker" in strong_extended_df.columns:
+        strong_extended_tickers = set(
+            strong_extended_df["ticker"].astype(str).str.upper().str.strip().tolist()
+        )
+
+    blocked_tickers = (
+        portfolio_tickers
+        | watchlist_tickers
+        | scanner_buy_tickers
+        | strong_extended_tickers
+    )
 
     lines = ["🎯 NIEUWE IDEEËN"]
 
     if df.empty:
         return lines + ["- geen data", ""]
 
-    df = df.copy()
+    if not strong_extended_df.empty:
+        lines.append("Sterke breakouts, maar niet najagen")
+        for _, row in strong_extended_df.iterrows():
+            ticker = clean_text(row.get("ticker"), fallback="?").upper()
+            ext = fmt_price(row.get("extension_atr"))
+            strength = fmt_price(row.get("breakout_strength"))
+            lines.append(
+                f"- {ticker} → sterk momentum, maar wacht op betere instap "
+                f"(ext {ext} ATR | strength {strength})"
+            )
+        lines.append("")
 
-    if "setup_grade" in df.columns:
-        df["setup_grade"] = df["setup_grade"].astype(str).str.upper()
+    df = exclude_tickers(df, blocked_tickers)
 
-    if "setup_type" in df.columns:
-        df["setup_type"] = df["setup_type"].astype(str).str.upper()
-    else:
-        df["setup_type"] = "UNKNOWN"
+    if "setup_grade" not in df.columns:
+        lines.append("- geen sterke setups")
+        lines.append("")
+        return lines
 
-    if "score_total" in df.columns:
-        df["score_total"] = pd.to_numeric(df["score_total"], errors="coerce")
-        df = df.sort_values(by="score_total", ascending=False)
-
-    # Portfolio > Watchlist > Scanner
-    df = exclude_portfolio_tickers(df, blocked_tickers)
-
-    # Alleen A setups tonen
     df = df[df["setup_grade"] == "A"]
 
     if df.empty:
-        lines.append("- geen sterke setups")
-        lines.append("")
+        if strong_extended_df.empty:
+            lines.append("- geen sterke setups")
+            lines.append("")
         return lines
 
     lines.append("Sterkste setups")
 
     for _, row in df.head(6).iterrows():
-        ticker = row["ticker"]
-        setup = title_case_setup(row["setup_type"])
+        ticker = clean_text(row.get("ticker"), fallback="?").upper()
+        setup = title_case_setup(row.get("setup_type"))
         lines.append(f"- {ticker} — {setup}")
 
     lines.append("")
     return lines
 
 
-# =========================
-# PORTFOLIO SECTION
-# =========================
+def map_portfolio_decision(decision: str) -> dict:
+    key = clean_text(decision, fallback="REVIEW").upper()
+    mapping = {
+        "SELL": {
+            "action": "Volledig verkopen",
+            "urgency": "high",
+        },
+        "TRIM": {
+            "action": "Verkoop 25%",
+            "urgency": "medium",
+        },
+        "REVIEW": {
+            "action": "Nog niets doen",
+            "urgency": "medium",
+        },
+        "HOLD": {
+            "action": "Houden",
+            "urgency": "low",
+        },
+    }
+    return mapping.get(key, mapping["REVIEW"])
 
-def format_portfolio_position(row: pd.Series) -> list[str]:
-    decision = clean_text(row.get("decision", "REVIEW")).upper()
-    decision_info = map_portfolio_decision(decision)
 
-    ticker = clean_text(row.get("ticker", "?")).upper()
-    qty = fmt_qty(row.get("quantity"))
-    last_price = fmt_price(row.get("last_price"))
-    pnl_pct = fmt_pct(row.get("pnl_pct"))
-    why = explain_portfolio_reason(row.get("reason"))
-    urgency = urgency_icon(decision_info["urgency"])
-    risk_flag = clean_text(row.get("risk_flag", "-")).upper()
+def explain_portfolio_reason(reason: str) -> str:
+    text = clean_text(reason, fallback="-")
+    key = text.lower().strip()
 
-    lines = [f"- {ticker}"]
-    lines.append(f"  → Actie: {decision_info['action']}")
-    lines.append(f"  → Waarom: {why}")
-    lines.append(f"  → Positie: {qty} stuks | koers {last_price} | winst/verlies {pnl_pct}")
-    if risk_flag != "-":
-        lines.append(f"  → Risico: {risk_flag} {urgency}")
-    else:
-        lines.append(f"  → Urgentie: {urgency}")
-    return lines
+    direct_mapping = {
+        "extended": "koers is sterk opgelopen tegenover de korte trend",
+        "extended_above_ma20": "koers staat ver boven de korte trend",
+        "above_ma20_and_ma50": "trend blijft gezond boven korte en middellange trend",
+        "above_ma20_ma50": "trend blijft gezond boven korte en middellange trend",
+        "below_ma50": "prijs is onder de middellange trend gezakt",
+        "below_ma50_above_ma200": "middellange trend verzwakt, maar lange trend houdt nog stand",
+        "below_ma50_and_ma200": "zowel middellange als lange trend zijn gebroken",
+        "mixed_structure": "signalen spreken elkaar tegen",
+        "missing_price_data": "prijsdata ontbreekt, beslissing is minder betrouwbaar",
+        "missing_moving_average_data": "trenddata ontbreekt, beslissing is minder betrouwbaar",
+    }
+
+    if key in direct_mapping:
+        return direct_mapping[key]
+
+    normalized = normalize_reason(text)
+    return normalized.capitalize()
 
 
 def build_portfolio_section() -> list[str]:
@@ -781,10 +615,10 @@ def build_portfolio_section() -> list[str]:
     df = df.copy()
     df["decision"] = df["decision"].astype(str).str.upper()
 
-    def fmt_line(row):
-        ticker = row["ticker"]
+    def fmt_line(row: pd.Series) -> str:
+        ticker = clean_text(row.get("ticker"), fallback="?").upper()
         pnl = fmt_pct(row.get("pnl_pct"))
-        decision = row["decision"]
+        decision = clean_text(row.get("decision"), fallback="REVIEW").upper()
 
         if decision == "TRIM":
             return f"- {ticker} → verkoop 25% | {pnl}"
@@ -814,10 +648,6 @@ def build_portfolio_section() -> list[str]:
     return lines
 
 
-# =========================
-# MAIN BUILDER
-# =========================
-
 def build_telegram_summary_text() -> str:
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
 
@@ -829,6 +659,7 @@ def build_telegram_summary_text() -> str:
 
     cleaned: list[str] = []
     previous_blank = False
+
     for line in lines:
         is_blank = line == ""
         if is_blank and previous_blank:
