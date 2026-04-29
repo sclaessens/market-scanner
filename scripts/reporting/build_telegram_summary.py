@@ -151,6 +151,123 @@ def get_watchlist_tickers() -> set[str]:
         .tolist()
     )
 
+def get_scanner_close_map() -> dict[str, float]:
+    """
+    Fallback om verouderde watchlist_status-data te herkennen.
+    Als scanner_ranked.csv een veel recentere close toont dan watchlist_status.csv,
+    gebruiken we die close alleen voor Telegram-safety en context.
+    """
+    df = read_csv_safe(SCANNER_FILE)
+    if df.empty or "ticker" not in df.columns or "close" not in df.columns:
+        return {}
+
+    out: dict[str, float] = {}
+    for _, row in df.iterrows():
+        ticker = clean_text(row.get("ticker"), fallback="").upper()
+        close = safe_float(row.get("close"))
+        if ticker and close is not None:
+            out[ticker] = close
+    return out
+
+
+def get_effective_watchlist_close(row: pd.Series, scanner_close_map: dict[str, float]) -> tuple[Optional[float], str]:
+    ticker = clean_text(row.get("ticker"), fallback="").upper()
+    watchlist_close = safe_float(row.get("close"))
+    scanner_close = scanner_close_map.get(ticker)
+
+    if scanner_close is None:
+        return watchlist_close, "watchlist"
+
+    if watchlist_close is None:
+        return scanner_close, "scanner"
+
+    if watchlist_close == 0:
+        return scanner_close, "scanner"
+
+    difference_pct = abs(scanner_close - watchlist_close) / abs(watchlist_close)
+
+    # Meer dan 2% verschil wijst meestal op oude watchlist_status-data.
+    if difference_pct > 0.02:
+        return scanner_close, "scanner"
+
+    return watchlist_close, "watchlist"
+
+
+def get_watchlist_display_decision(row: pd.Series, scanner_close_map: dict[str, float]) -> dict:
+    """
+    Maakt de Telegram-regel veiliger zonder de CSV-architectuur te wijzigen.
+    Belangrijkste guard: toon nooit een stop-buy onder de meest actuele bekende koers.
+    """
+    action_now = build_watchlist_action_from_row(row)
+    action_group = clean_text(action_now).upper()
+
+    ticker = clean_text(row.get("ticker"), fallback="?").upper()
+    setup_type = clean_text(row.get("setup_type"), fallback="-").upper()
+    close_value, close_source = get_effective_watchlist_close(row, scanner_close_map)
+
+    trigger_price = safe_float(row.get("trigger_price"))
+    if trigger_price is None:
+        if action_group == "SET LIMIT BUY":
+            trigger_price = safe_float(row.get("ma20"))
+        elif action_group == "SET STOP BUY":
+            trigger_price = safe_float(row.get("high_20d"))
+
+    display_price = trigger_price
+    why = clean_text(row.get("why_now"), fallback="-")
+    if why == "-":
+        why = clean_text(row.get("reason_text"), fallback=clean_text(row.get("reason"), fallback="-"))
+
+    safety_note = ""
+
+    if action_group == "SET STOP BUY" and trigger_price is not None and close_value is not None:
+        if trigger_price <= close_value:
+            action_group = "SET LIMIT BUY"
+            action_now = "SET LIMIT BUY"
+            display_price = safe_float(row.get("ma20"))
+            why = "Breakout-trigger ligt onder de actuele koers. Breakout niet najagen; wacht op pullback richting MA20."
+            safety_note = "⚠️ Stop-buy gecorrigeerd omdat trigger onder actuele koers ligt."
+
+    context_parts = []
+    if close_value is not None:
+        label = "close"
+        if close_source == "scanner":
+            label = "actuele close"
+        context_parts.append(f"{label} {close_value:.2f}")
+
+    if trigger_price is not None:
+        context_parts.append(f"trigger {trigger_price:.2f}")
+
+    ma20 = safe_float(row.get("ma20"))
+    if ma20 is not None:
+        context_parts.append(f"MA20 {ma20:.2f}")
+
+    high_20d = safe_float(row.get("high_20d"))
+    if high_20d is not None and setup_type == "BREAKOUT":
+        context_parts.append(f"20D high {high_20d:.2f}")
+
+    return {
+        "ticker": ticker,
+        "action_group": action_group,
+        "action_now": action_now,
+        "display_price": display_price,
+        "why": why,
+        "context": " | ".join(context_parts),
+        "safety_note": safety_note,
+    }
+
+
+def append_compact_watchlist_decision(lines: list[str], row: pd.Series, scanner_close_map: dict[str, float]) -> None:
+    decision = get_watchlist_display_decision(row, scanner_close_map)
+    price = fmt_price(decision["display_price"])
+    ticker = decision["ticker"]
+
+    # Telegram blijft actiegericht. De uitleg staat in watchlist_status.csv.
+    if decision["safety_note"]:
+        lines.append(f"- {ticker} → {price} (breakout gemist; wacht op pullback)")
+    else:
+        lines.append(f"- {ticker} → {price}")
+
+
 def exclude_portfolio_tickers(df: pd.DataFrame, portfolio_tickers: set[str]) -> pd.DataFrame:
     """
     Verwijder tickers uit scanner/watchlist als ze al in portfolio zitten.
@@ -444,97 +561,117 @@ def append_watchlist_group(lines: list[str], title: str, subset: pd.DataFrame, r
     lines.append("")
 
 
+def get_scanner_buy_now_candidates(max_items: int = 4) -> pd.DataFrame:
+    """
+    Scanner blijft ideeën leveren, maar sterke A-breakouts mogen in Telegram
+    als directe actie verschijnen zolang Portfolio > Watchlist > Scanner bewaakt blijft.
+    """
+    df = read_csv_safe(SCANNER_FILE)
+    if df.empty or "ticker" not in df.columns:
+        return pd.DataFrame()
+
+    portfolio_tickers = get_portfolio_tickers()
+    watchlist_tickers = get_watchlist_tickers()
+    blocked_tickers = portfolio_tickers | watchlist_tickers
+
+    df = df.copy()
+    df["ticker"] = df["ticker"].astype(str).str.upper().str.strip()
+
+    if "setup_grade" not in df.columns:
+        return pd.DataFrame()
+    df["setup_grade"] = df["setup_grade"].astype(str).str.upper().str.strip()
+
+    if "setup_type" in df.columns:
+        df["setup_type"] = df["setup_type"].astype(str).str.upper().str.strip()
+    else:
+        df["setup_type"] = "UNKNOWN"
+
+    df = exclude_portfolio_tickers(df, blocked_tickers)
+    df = df[(df["setup_grade"] == "A") & (df["setup_type"] == "BREAKOUT")].copy()
+
+    if df.empty:
+        return df
+
+    if "score_total" in df.columns:
+        df["score_total"] = pd.to_numeric(df["score_total"], errors="coerce")
+        df = df.sort_values(by="score_total", ascending=False)
+
+    return df.head(max_items).reset_index(drop=True)
+
+
+def append_scanner_buy_now(lines: list[str], row: pd.Series) -> None:
+    ticker = clean_text(row.get("ticker"), fallback="?").upper()
+    entry = safe_float(row.get("entry"))
+    close = safe_float(row.get("close"))
+    high_20d = safe_float(row.get("high_20d"))
+    price = entry if entry is not None else close
+
+    buy_label = "BUY NOW"
+
+    if close is not None and high_20d is not None and high_20d > 0:
+        breakout_extension_pct = (close - high_20d) / high_20d
+        if breakout_extension_pct > 0.03:
+            buy_label = "BUY NOW (agressief)"
+        else:
+            buy_label = "BUY NOW (sterk)"
+
+    lines.append(f"- {ticker} → {buy_label} rond {fmt_price(price)}")
+
+
 def build_watchlist_action_sections() -> list[str]:
     df = read_csv_safe(WATCHLIST_FILE)
     portfolio_tickers = get_portfolio_tickers()
-
-    if df.empty or "status" not in df.columns:
-        return [
-            "🔥 ACTIE NU",
-            "Geen data beschikbaar.",
-            "",
-        ]
-
-    df = df.copy()
-    df["status"] = df["status"].astype(str).str.upper()
-
-    # Portfolio heeft prioriteit
-    df = exclude_portfolio_tickers(df, portfolio_tickers)
+    scanner_close_map = get_scanner_close_map()
+    scanner_buy_df = get_scanner_buy_now_candidates()
 
     lines: list[str] = []
 
-    # =========================
-    # GROEPEREN PER ACTIE
-    # =========================
-
-    def get_action_group(action: str) -> str:
-        action = clean_text(action).upper()
-
-        if action == "BUY NOW":
-            return "BUY NOW"
-        if action == "SET LIMIT BUY":
-            return "SET LIMIT BUY"
-        if action == "SET STOP BUY":
-            return "SET STOP BUY"
-        if action == "REMOVE":
-            return "REMOVE"
-
-        return "WAIT"
-
-    df["action_group"] = df["action_now"].apply(get_action_group)
-
-    # =========================
-    # BUY NOW
-    # =========================
-
-    buy_df = df[df["action_group"] == "BUY NOW"]
-    if buy_df.empty:
-        lines.append("🔥 ACTIE NU")
-        lines.append("Geen directe BUY NOW setups.")
-        lines.append("")
+    if df.empty or "status" not in df.columns:
+        df = pd.DataFrame()
     else:
-        lines.append("🔥 BUY NOW")
-        for _, row in buy_df.iterrows():
-            ticker = row["ticker"]
-            price = fmt_price(row.get("close"))
-            lines.append(f"- {ticker} → {price}")
-        lines.append("")
+        df = df.copy()
+        df["status"] = df["status"].astype(str).str.upper()
+        df = exclude_portfolio_tickers(df, portfolio_tickers)
 
-    # =========================
-    # SET LIMIT BUY
-    # =========================
+        def get_action_group_for_row(row: pd.Series) -> str:
+            return get_watchlist_display_decision(row, scanner_close_map)["action_group"]
+
+        df["action_group"] = df.apply(get_action_group_for_row, axis=1)
+
+    buy_df = df[df["action_group"] == "BUY NOW"] if not df.empty else pd.DataFrame()
+
+    lines.append("🔥 ACTIE NU")
+    if buy_df.empty and scanner_buy_df.empty:
+        lines.append("Geen directe BUY NOW setups.")
+    else:
+        for _, row in buy_df.iterrows():
+            append_compact_watchlist_decision(lines, row, scanner_close_map)
+        for _, row in scanner_buy_df.iterrows():
+            append_scanner_buy_now(lines, row)
+    lines.append("")
+
+    if df.empty:
+        return lines
 
     limit_df = df[df["action_group"] == "SET LIMIT BUY"]
     if not limit_df.empty:
         lines.append("📌 SET LIMIT BUY")
         for _, row in limit_df.iterrows():
-            ticker = row["ticker"]
-            price = fmt_price(row.get("trigger_price") or row.get("ma20"))
-            lines.append(f"- {ticker} → {price}")
+            append_compact_watchlist_decision(lines, row, scanner_close_map)
         lines.append("")
-
-    # =========================
-    # SET STOP BUY
-    # =========================
 
     stop_df = df[df["action_group"] == "SET STOP BUY"]
     if not stop_df.empty:
         lines.append("📌 SET STOP BUY")
         for _, row in stop_df.iterrows():
-            ticker = row["ticker"]
-            price = fmt_price(row.get("trigger_price") or row.get("high_20d"))
-            lines.append(f"- {ticker} → {price}")
+            append_compact_watchlist_decision(lines, row, scanner_close_map)
         lines.append("")
-
-    # =========================
-    # REMOVE
-    # =========================
 
     remove_df = df[df["action_group"] == "REMOVE"]
     if not remove_df.empty:
         lines.append("❌ REMOVE")
         for _, row in remove_df.iterrows():
-            ticker = row["ticker"]
+            ticker = clean_text(row.get("ticker"), fallback="?").upper()
             lines.append(f"- {ticker}")
         lines.append("")
 
@@ -558,7 +695,12 @@ def build_scanner_context_section() -> list[str]:
     df = read_csv_safe(SCANNER_FILE)
     portfolio_tickers = get_portfolio_tickers()
     watchlist_tickers = get_watchlist_tickers()
-    blocked_tickers = portfolio_tickers | watchlist_tickers
+    scanner_buy_tickers = set()
+    scanner_buy_df = get_scanner_buy_now_candidates()
+    if not scanner_buy_df.empty and "ticker" in scanner_buy_df.columns:
+        scanner_buy_tickers = set(scanner_buy_df["ticker"].astype(str).str.upper().str.strip().tolist())
+
+    blocked_tickers = portfolio_tickers | watchlist_tickers | scanner_buy_tickers
 
     lines = ["🎯 NIEUWE IDEEËN"]
 

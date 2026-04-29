@@ -1,13 +1,14 @@
 watchlist:
+
   # PULLBACK
-  ready_distance_to_ma20_pct: 0.05
-  neutral_ready_distance_to_ma20_pct: 0.03
+  ready_distance_to_ma20_pct: 0.08
+  neutral_ready_distance_to_ma20_pct: 0.05
 
   # EXTENSION
-  max_extended_from_ma20_pct: 0.10
+  max_extended_from_ma20_pct: 0.15
 
   # BREAKOUT / VCP
-  ready_near_high_pct: 0.04
+  ready_near_high_pct: 0.05
 
   # TREND
   reject_below_ma50: true

@@ -157,6 +157,9 @@ def save_scanner_ranked(setups: list[dict]) -> None:
                 "target": setup.get("target"),
                 "rr": setup.get("rr"),
                 "close": setup.get("close"),
+                "high_20d": setup.get("high_20d"),
+                "ma20": setup.get("ma20"),
+                "ma50": setup.get("ma50"),
                 "setup": setup.get("setup", ""),
                 "primary_setup": setup.get("primary_setup", ""),
             }
@@ -176,6 +179,9 @@ def save_scanner_ranked(setups: list[dict]) -> None:
                 "target",
                 "rr",
                 "close",
+                "high_20d",
+                "ma20",
+                "ma50",
                 "setup",
                 "primary_setup",
             ]
