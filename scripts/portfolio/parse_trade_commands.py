@@ -4,49 +4,43 @@ import os
 # Zorg dat project root in path zit
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
-from scripts.portfolio.portfolio_manager import log_trade, build_positions
+from scripts.portfolio.portfolio_manager import log_trade
 
-
-# === CORE PARSER ===
 
 def parse_trade_command(command: str):
     """
-    Smart parser for human-friendly trade commands.
+    Parser voor trade commands.
 
     Supported formats:
     - BUY ASML 5 842.50
     - buy asml 5 842,50
     - buy asml 5 at 842.50
     - buy asml 5 @ 842.50
-    - BUY NVDA 2 market
+    - SELL ASML 2 870.00
+
+    Belangrijk:
+    Deze parser logt enkel de transactie in portfolio_transactions.csv.
+    De actuele portfolio_positions.csv wordt later opgebouwd door build_portfolio.py.
     """
 
     if not command:
         raise ValueError("Empty command")
 
-    # =========================
-    # NORMALIZE INPUT
-    # =========================
     cmd = command.strip().lower()
-
-    # Replace common separators
     cmd = cmd.replace("@", " ")
     cmd = cmd.replace(" at ", " ")
 
     parts = cmd.split()
 
-    if len(parts) < 3:
-        raise ValueError("Invalid command format")
+    if len(parts) < 4:
+        raise ValueError("Invalid command format. Expected: BUY TICKER QUANTITY PRICE")
 
     side = parts[0].upper()
     ticker = parts[1].upper()
 
-    if side not in ["BUY", "SELL"]:
+    if side not in {"BUY", "SELL"}:
         raise ValueError("Side must be BUY or SELL")
 
-    # =========================
-    # QUANTITY
-    # =========================
     try:
         quantity = float(parts[2])
     except ValueError:
@@ -55,64 +49,47 @@ def parse_trade_command(command: str):
     if quantity <= 0:
         raise ValueError("Quantity must be > 0")
 
-    # =========================
-    # PRICE
-    # =========================
-    price = None
+    raw_price = parts[3]
 
-    if len(parts) >= 4:
-        raw_price = parts[3]
+    if raw_price == "market":
+        raise ValueError("Market orders not supported yet. Please provide an execution price.")
 
-        if raw_price == "market":
-            price = None
-        else:
-            try:
-                price = float(raw_price.replace(",", "."))
-            except ValueError:
-                raise ValueError("Invalid price format")
+    try:
+        price = float(raw_price.replace(",", "."))
+    except ValueError:
+        raise ValueError("Invalid price format")
 
-    else:
-        raise ValueError("Missing price")
-
-    # =========================
-    # HANDLE MARKET ORDERS
-    # =========================
-    if price is None:
-        raise ValueError("Market orders not supported yet (no price)")
-
-    # =========================
-    # EXECUTE
-    # =========================
-    from scripts.portfolio.portfolio_manager import log_trade, build_positions
+    if price <= 0:
+        raise ValueError("Price must be > 0")
 
     log_trade(ticker, side, quantity, price)
-    positions = build_positions()
 
     return {
         "status": "success",
         "message": f"{side} {ticker} {quantity} @ {price}",
-        "positions": positions
+        "ticker": ticker,
+        "side": side,
+        "quantity": quantity,
+        "price": price,
     }
 
 
-# === CLI / TEST ===
-
 if __name__ == "__main__":
     print("Enter trade command (e.g. BUY ASML 5 842.50)")
+    print("Type exit or quit to stop.")
 
     while True:
         try:
             command = input(">> ")
 
-            if command.lower() in ["exit", "quit"]:
+            if command.lower() in {"exit", "quit"}:
                 break
 
             result = parse_trade_command(command)
 
-            print("\n✅ Trade executed:")
+            print("\n✅ Trade logged:")
             print(result["message"])
-            print("\n📊 Updated positions:")
-            print(result["positions"])
+            print("\nℹ️ Portfolio positions will be rebuilt by build_portfolio.py during the scan.")
 
         except Exception as e:
             print(f"\n❌ Error: {e}")
