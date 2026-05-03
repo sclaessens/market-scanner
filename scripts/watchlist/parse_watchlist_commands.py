@@ -349,20 +349,43 @@ def build_note(classification: dict) -> str:
 
 def parse_command(args: list[str]) -> tuple[str, str, Optional[str]]:
     if not args:
-        raise ValueError("Gebruik: python scripts/watchlist/parse_watchlist_commands.py WATCH NVDA")
+        raise ValueError("Gebruik: WATCH NVDA of UNWATCH NVDA")
 
-    action = args[0].upper().strip()
+    # Ondersteunt:
+    # WATCH ON BREAKOUT
+    # "WATCH ON BREAKOUT"
+    # watch on breakout
+    # Watch On
+    # watch on breakout extra woorden
+    if len(args) == 1:
+        args = args[0].strip().split()
+
+    args = [str(x).strip() for x in args if str(x).strip()]
+
+    if not args:
+        raise ValueError("Leeg command.")
+
+    action = args[0].upper()
+
     if action not in {"WATCH", "UNWATCH"}:
         raise ValueError("Alleen WATCH en UNWATCH worden ondersteund.")
 
     if len(args) < 2:
         raise ValueError("Ticker ontbreekt. Voorbeeld: WATCH NVDA")
 
-    ticker = args[1].upper().strip()
-    manual_setup = args[2].upper().strip() if len(args) >= 3 else None
+    ticker = args[1].upper()
 
-    if manual_setup and manual_setup not in VALID_SETUP_TYPES:
-        raise ValueError(f"Ongeldig setup_type: {manual_setup}. Gebruik PULLBACK, BREAKOUT of VCP.")
+    manual_setup = None
+
+    if len(args) >= 3:
+        candidate_setup = args[2].upper()
+
+        if candidate_setup in VALID_SETUP_TYPES:
+            manual_setup = candidate_setup
+        else:
+            # Extra woorden worden als notitie genegeerd.
+            # Daardoor faalt "watch on graag opvolgen" niet.
+            manual_setup = None
 
     return action, ticker, manual_setup
 

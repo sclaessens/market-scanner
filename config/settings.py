@@ -51,7 +51,7 @@ MIN_PRICE = 10
 # Risk / model thresholds
 # =========================
 PROBABILITY_THRESHOLD = 0.60
-MIN_RR = 1.8
+MIN_RR = 2.0
 
 
 # =========================

@@ -28,12 +28,10 @@ THRESHOLDS_FILE = PROJECT_ROOT / "config" / "thresholds.yaml"
 
 DEFAULT_THRESHOLDS = {
     "watchlist": {
-        # Pullback
         "ready_distance_to_ma20_pct": 0.025,
         "neutral_ready_distance_to_ma20_pct": 0.015,
         "max_extended_from_ma20_pct": 0.06,
 
-        # Breakout / VCP
         "ready_near_high_pct": 0.015,
         "breakout_break_above_high_pct": 0.002,
         "max_breakout_chase_pct": 0.03,
@@ -42,7 +40,6 @@ DEFAULT_THRESHOLDS = {
         "vcp_max_range_pct": 0.08,
         "vcp_max_close_to_ma20_pct": 0.04,
 
-        # Shared
         "reject_below_ma50": True,
         "expire_after_days": 20,
     }
@@ -130,12 +127,10 @@ def load_indicator_file(ticker: str) -> pd.DataFrame:
     return pd.DataFrame()
 
 
-
-def load_breakout_strength_map() -> dict[str, float]:
+def load_scanner_quality_map() -> dict[str, dict]:
     """
-    Haalt breakout_strength uit scanner_ranked.csv.
-    De scanner blijft de bron van breakoutkwaliteit; de watchlist gebruikt dit
-    alleen om zwakke breakouts niet als STOP BUY of BUY NOW te behandelen.
+    Haalt setup_grade en breakout_strength uit scanner_ranked.csv.
+    De watchlist gebruikt dit alleen als kwaliteitsfilter.
     """
     if not SCANNER_RANKED_FILE.exists():
         return {}
@@ -145,21 +140,33 @@ def load_breakout_strength_map() -> dict[str, float]:
     except Exception:
         return {}
 
-    if df.empty or "ticker" not in df.columns or "breakout_strength" not in df.columns:
+    if df.empty or "ticker" not in df.columns:
         return {}
 
     df = df.copy()
     df["ticker"] = df["ticker"].astype(str).str.upper().str.strip()
-    df["breakout_strength"] = pd.to_numeric(df["breakout_strength"], errors="coerce")
 
-    strength_map: dict[str, float] = {}
+    if "breakout_strength" in df.columns:
+        df["breakout_strength"] = pd.to_numeric(df["breakout_strength"], errors="coerce")
+
+    quality_map: dict[str, dict] = {}
+
     for _, row in df.iterrows():
         ticker = str(row.get("ticker", "")).upper().strip()
-        strength = row.get("breakout_strength")
-        if ticker and not pd.isna(strength):
-            strength_map[ticker] = float(strength)
+        if not ticker:
+            continue
 
-    return strength_map
+        grade = str(row.get("setup_grade", row.get("grade", ""))).upper().strip()
+        breakout_strength = row.get("breakout_strength")
+
+        quality_map[ticker] = {
+            "grade": grade,
+            "breakout_strength": float(breakout_strength)
+            if breakout_strength is not None and not pd.isna(breakout_strength)
+            else None,
+        }
+
+    return quality_map
 
 
 def to_float(value) -> float:
@@ -208,6 +215,7 @@ def build_metric_alias_map(columns: list[str]) -> dict[str, str]:
             if key in normalized:
                 resolved[canonical] = normalized[key]
                 break
+
     return resolved
 
 
@@ -217,15 +225,18 @@ def get_latest_metrics(df: pd.DataFrame) -> Optional[dict]:
 
     alias_map = build_metric_alias_map(list(df.columns))
     required = ["CLOSE", "MA20", "MA50", "MA200", "20D_HIGH"]
+
     if any(alias_map.get(name) is None for name in required):
         return None
 
     latest = df.iloc[-1]
+
     close = to_float(latest.get(alias_map["CLOSE"]))
     ma20 = to_float(latest.get(alias_map["MA20"]))
     ma50 = to_float(latest.get(alias_map["MA50"]))
     ma200 = to_float(latest.get(alias_map["MA200"]))
     high_20d = to_float(latest.get(alias_map["20D_HIGH"]))
+
     low_20d = to_float(latest.get(alias_map["20D_LOW"])) if alias_map.get("20D_LOW") else float("nan")
     avg_vol_20 = to_float(latest.get(alias_map["AVG_VOL_20"])) if alias_map.get("AVG_VOL_20") else float("nan")
     volume = to_float(latest.get(alias_map["VOLUME"])) if alias_map.get("VOLUME") else float("nan")
@@ -282,7 +293,12 @@ def resolve_regime_bias(regime: str) -> str:
     return "NEUTRAL"
 
 
-def evaluate_pullback(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, str, str]:
+def evaluate_pullback(
+    metrics: dict,
+    regime: str,
+    cfg: dict,
+    grade: str,
+) -> tuple[str, str, str, str]:
     close = metrics["close"]
     ma20 = metrics["ma20"]
     ma50 = metrics["ma50"]
@@ -308,16 +324,26 @@ def evaluate_pullback(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, 
     if dist_ma20 > max_extended:
         return "WAIT", "wait", "too_extended_above_ma20", "Prijs staat te ver boven MA20 voor een nette pullback."
 
+    if grade != "A":
+        return "WAIT", "wait", "non_a_pullback", "Geen A-grade pullback. Geen agressieve entry."
+
     current_ready_band = ready_distance if regime == "BULLISH" else neutral_ready_distance
+
     if dist_ma20 <= current_ready_band and close > ma50:
         if regime == "BULLISH":
-            return "READY", "buy", "pullback_ready_near_ma20", "Pullback is bevestigd dicht bij MA20 in een gezonde trend."
-        return "READY", "buy", "pullback_ready_near_ma20_neutral", "Pullback is scherp genoeg ondanks neutraal regime."
+            return "READY", "buy", "pullback_ready_near_ma20", "A-grade pullback dicht bij MA20 in een gezonde trend."
+
+        return "READY", "buy", "pullback_ready_near_ma20_neutral", "A-grade pullback is scherp genoeg ondanks neutraal regime."
 
     return "WAIT", "wait", "pullback_wait_better_entry", "Trend is ok, maar de instap ligt nog niet mooi bij MA20."
 
 
-def evaluate_breakout(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, str, str]:
+def evaluate_breakout(
+    metrics: dict,
+    regime: str,
+    cfg: dict,
+    grade: str,
+) -> tuple[str, str, str, str]:
     close = metrics["close"]
     ma20 = metrics["ma20"]
     ma50 = metrics["ma50"]
@@ -333,159 +359,60 @@ def evaluate_breakout(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, 
     reject_below_ma50 = cfg["reject_below_ma50"]
 
     if reject_below_ma50 and close < ma50:
-        return (
-            "REJECTED",
-            "none",
-            "below_ma50",
-            "Trend is gebroken onder MA50.",
-        )
+        return "REJECTED", "none", "below_ma50", "Trend is gebroken onder MA50."
 
     if regime == "BEARISH":
-        return (
-            "WAIT",
-            "wait",
-            "bearish_regime",
-            "Breakout krijgt geen groen licht in bearish regime.",
-        )
+        return "WAIT", "wait", "bearish_regime", "Breakout krijgt geen groen licht in bearish regime."
+
+    if grade != "A":
+        return "WAIT", "wait", "non_a_breakout", "Breakout is geen A-grade. Geen agressieve entry."
 
     if pd.isna(dist_high) or pd.isna(breakout_above_high_pct):
-        return (
-            "WAIT",
-            "wait",
-            "missing_high_distance",
-            "Afstand tot de breakout-trigger kon niet berekend worden.",
-        )
+        return "WAIT", "wait", "missing_high_distance", "Afstand tot de breakout-trigger kon niet berekend worden."
 
     if close < ma20:
-        return (
-            "WAIT",
-            "wait",
-            "below_ma20",
-            "Prijs zit nog onder MA20. Breakout mist korte-trend steun.",
-        )
+        return "WAIT", "wait", "below_ma20", "Prijs zit nog onder MA20. Breakout mist korte-trend steun."
 
-    # 1. Extension krijgt voorrang.
-    # Een aandeel kan dicht bij de trigger zitten, maar toch al te ver boven MA20 staan.
     if extension_atr is not None and not pd.isna(extension_atr):
         if extension_atr >= 3.5:
-            return (
-                "MISSED",
-                "none",
-                "too_extended_breakout",
-                "Breakout is veel te ver opgelopen tegenover MA20. Niet najagen.",
-            )
+            return "MISSED", "none", "too_extended_breakout", "Breakout is veel te ver opgelopen tegenover MA20. Niet najagen."
 
         if extension_atr >= 2.0:
-            return (
-                "WAIT",
-                "wait",
-                "extended_breakout",
-                "Breakout is sterk, maar de koers staat te ver boven MA20. Wacht op pullback.",
-            )
+            return "WAIT", "wait", "extended_breakout", "Breakout is sterk, maar de koers staat te ver boven MA20. Wacht op pullback."
 
-    # 2. Mini-step: breakout quality filter.
-    # Zwakke breakouts mogen geen READY / STOP BUY worden.
     if breakout_strength is not None and not pd.isna(breakout_strength):
         if breakout_strength < 2.5:
-            return (
-                "WAIT",
-                "wait",
-                "weak_breakout",
-                "Breakout mist kracht. Wacht op een betere setup.",
-            )
+            return "WAIT", "wait", "weak_breakout", "Breakout mist kracht. Wacht op een betere setup."
 
-    # 3. Te ver boven de breakout-trigger = gemiste trade.
     if breakout_above_high_pct >= missed_breakout_pct:
-        return (
-            "MISSED",
-            "none",
-            "missed_breakout",
-            "Breakout is al te ver gevorderd. Niet najagen; wacht op een nieuwe setup of pullback.",
-        )
+        return "MISSED", "none", "missed_breakout", "Breakout is al te ver gevorderd. Niet najagen; wacht op een nieuwe setup of pullback."
 
-    # 4. Net boven trigger = BUY NOW, maar alleen als hij niet te ver doorgeschoten is.
     if breakout_above_high_pct >= breakout_break_above_high_pct:
         if breakout_above_high_pct <= max_breakout_chase_pct:
-            return (
-                "READY",
-                "buy",
-                "breakout_triggered",
-                "Prijs breekt gecontroleerd door de 20D high.",
-            )
+            return "READY", "buy", "breakout_triggered", "A-grade breakout breekt gecontroleerd door de trigger."
 
-        return (
-            "WAIT",
-            "wait",
-            "late_breakout",
-            "Breakout is gebeurd, maar niet meer mooi instapbaar.",
-        )
+        return "WAIT", "wait", "late_breakout", "Breakout is gebeurd, maar niet meer mooi instapbaar."
 
-    # 5. Net onder trigger = SET STOP BUY, maar alleen als hij sterk genoeg en niet extended is.
     if dist_high <= ready_near_high:
         if regime == "NEUTRAL":
-            return (
-                "WAIT",
-                "wait",
-                "breakout_near_trigger_neutral",
-                "Prijs zit dicht bij trigger, maar neutraal regime vraagt bevestiging.",
-            )
+            return "WAIT", "wait", "breakout_near_trigger_neutral", "Prijs zit dicht bij trigger, maar neutraal regime vraagt bevestiging."
 
-        return (
-            "READY",
-            "buy",
-            "breakout_near_trigger",
-            "Prijs zit vlak onder de breakout-trigger.",
-        )
+        return "READY", "buy", "breakout_near_trigger", "A-grade breakout zit vlak onder de trigger."
 
+    return "WAIT", "wait", "breakout_below_trigger", "Prijs zit nog onder de breakout-trigger."
+
+
+def evaluate_vcp(
+    metrics: dict,
+    regime: str,
+    cfg: dict,
+) -> tuple[str, str, str, str]:
     return (
         "WAIT",
         "wait",
-        "breakout_below_trigger",
-        "Prijs zit nog onder de breakout-trigger.",
+        "vcp_blocked_by_validation",
+        "VCP wordt voorlopig niet als koopsetup gebruikt op basis van validation.",
     )
-
-def evaluate_vcp(metrics: dict, regime: str, cfg: dict) -> tuple[str, str, str, str]:
-    close = metrics["close"]
-    ma20 = metrics["ma20"]
-    ma50 = metrics["ma50"]
-    dist_high = metrics["distance_to_high_pct"]
-    breakout_above_high_pct = metrics["breakout_above_high_pct"]
-    range_pct = metrics["range_pct"]
-    compression_ready = metrics["compression_ready"]
-
-    ready_near_high = cfg["ready_near_high_pct"]
-    vcp_break_above_high_pct = cfg.get("vcp_break_above_high_pct", 0.002)
-    vcp_max_range_pct = cfg.get("vcp_max_range_pct", 0.08)
-    vcp_max_close_to_ma20_pct = cfg.get("vcp_max_close_to_ma20_pct", 0.04)
-    reject_below_ma50 = cfg["reject_below_ma50"]
-
-    if reject_below_ma50 and close < ma50:
-        return "REJECTED", "none", "below_ma50", "VCP-structuur is ongeldig onder MA50."
-
-    if regime == "BEARISH":
-        return "WAIT", "wait", "bearish_regime", "VCP wordt niet geactiveerd in bearish regime."
-
-    if pd.isna(dist_high):
-        return "WAIT", "wait", "missing_high_distance", "Afstand tot pivot kon niet berekend worden."
-
-    if close < ma20:
-        return "WAIT", "wait", "below_ma20", "Prijs zit nog onder MA20. Structuur is nog niet rijp."
-
-    if abs(metrics["distance_to_ma20_pct"]) > vcp_max_close_to_ma20_pct:
-        return "WAIT", "wait", "vcp_too_far_from_ma20", "Prijs zit te ver van MA20 voor een strakke VCP."
-
-    if pd.isna(range_pct) or range_pct > vcp_max_range_pct or not compression_ready:
-        return "WAIT", "wait", "vcp_pattern_not_ready", "Compressie is nog niet strak genoeg."
-
-    if breakout_above_high_pct >= vcp_break_above_high_pct:
-        return "READY", "buy", "vcp_breakout_triggered", "Compressie is klaar en prijs breekt al door de pivot."
-
-    if dist_high <= ready_near_high:
-        if regime == "NEUTRAL":
-            return "WAIT", "wait", "vcp_near_trigger_neutral", "VCP zit dicht bij pivot, maar neutraal regime vraagt extra bevestiging."
-        return "READY", "buy", "vcp_near_trigger", "Compressie is aanwezig en prijs zit vlak bij de pivot."
-
-    return "WAIT", "wait", "vcp_wait_for_trigger", "Patroon oogt goed, maar de breakout-trigger is nog niet geraakt."
 
 
 def apply_expiry(
@@ -497,12 +424,9 @@ def apply_expiry(
     if pd.isna(added_at):
         return status, None, None
 
-    # Deze statussen mogen nooit door expiry overschreven worden
     if status in {"READY", "REJECTED", "MISSED"}:
         return status, None, None
 
-    # Sterke aandelen die gewoon te extended zijn, niet verwijderen.
-    # Dit zijn geen dode setups, maar "wacht op betere entry".
     keep_waiting_reasons = {
         "too_extended_above_ma20",
         "pullback_wait_better_entry",
@@ -512,6 +436,7 @@ def apply_expiry(
         "vcp_near_trigger_neutral",
         "vcp_pattern_not_ready",
         "vcp_too_far_from_ma20",
+        "vcp_blocked_by_validation",
     }
 
     if reason_code in keep_waiting_reasons:
@@ -566,9 +491,10 @@ def build_watchlist_plan(
                 trigger_type="buy_now",
                 trigger_price=close,
                 entry_plan="market_or_limit",
-                why_now="Pullback is bevestigd en de instapzone is actief.",
+                why_now="A-grade pullback is bevestigd en de instapzone is actief.",
                 urgency="high",
             )
+
         elif setup_type == "BREAKOUT":
             if reason_code == "breakout_near_trigger":
                 plan.update(
@@ -576,7 +502,7 @@ def build_watchlist_plan(
                     trigger_type="buy_above",
                     trigger_price=high_20d,
                     entry_plan="stop_order",
-                    why_now="Prijs zit vlak onder de breakout-trigger. Koop pas bij bevestiging boven de trigger.",
+                    why_now="A-grade breakout zit vlak onder de trigger. Koop pas bij bevestiging.",
                     urgency="medium",
                 )
             else:
@@ -585,28 +511,10 @@ def build_watchlist_plan(
                     trigger_type="buy_now",
                     trigger_price=close,
                     entry_plan="market_or_stop",
-                    why_now="Prijs breekt gecontroleerd door de breakout-trigger.",
+                    why_now="A-grade breakout breekt gecontroleerd door de trigger.",
                     urgency="high",
                 )
-        elif setup_type == "VCP":
-            if reason_code == "vcp_near_trigger":
-                plan.update(
-                    action_now="SET STOP BUY",
-                    trigger_type="buy_above",
-                    trigger_price=high_20d,
-                    entry_plan="stop_order",
-                    why_now="VCP zit vlak onder pivot. Koop pas bij bevestiging boven de trigger.",
-                    urgency="medium",
-                )
-            else:
-                plan.update(
-                    action_now="BUY NOW",
-                    trigger_type="buy_now",
-                    trigger_price=close,
-                    entry_plan="market_or_stop",
-                    why_now="VCP breekt gecontroleerd door de pivot.",
-                    urgency="high",
-                )
+
         return plan
 
     if reason_code in {"extended_breakout", "too_extended_breakout", "late_breakout", "missed_breakout"}:
@@ -678,8 +586,6 @@ def build_watchlist_plan(
     if reason_code in {
         "breakout_below_trigger",
         "breakout_near_trigger_neutral",
-        "vcp_wait_for_trigger",
-        "vcp_near_trigger_neutral",
     }:
         plan.update(
             action_now="SET STOP BUY",
@@ -691,13 +597,19 @@ def build_watchlist_plan(
         )
         return plan
 
-    if reason_code in {"vcp_pattern_not_ready", "vcp_too_far_from_ma20"}:
+    if reason_code in {
+        "vcp_blocked_by_validation",
+        "vcp_wait_for_trigger",
+        "vcp_near_trigger_neutral",
+        "vcp_pattern_not_ready",
+        "vcp_too_far_from_ma20",
+    }:
         plan.update(
             action_now="WAIT",
-            trigger_type="buy_above",
-            trigger_price=high_20d,
-            entry_plan="stop_order",
-            why_now="De VCP-structuur is nog niet strak genoeg.",
+            trigger_type="none",
+            trigger_price=None,
+            entry_plan="wait",
+            why_now="VCP wordt voorlopig niet als koopsetup gebruikt op basis van validation.",
             urgency="low",
         )
         return plan
@@ -713,7 +625,11 @@ def build_watchlist_plan(
         )
         return plan
 
-    if reason_code in {"missing_ma20_distance", "missing_high_distance", "missing_indicator_data"}:
+    if reason_code in {
+        "missing_ma20_distance",
+        "missing_high_distance",
+        "missing_indicator_data",
+    }:
         plan.update(
             action_now="REMOVE",
             trigger_type="none",
@@ -739,13 +655,21 @@ def evaluate_row(
     row: pd.Series,
     regime: str,
     cfg: dict,
-    breakout_strength_map: dict[str, float],
+    scanner_quality_map: dict[str, dict],
 ) -> dict:
     ticker = str(row.get("ticker", "")).upper().strip()
     setup_type = str(row.get("setup_type", "PULLBACK")).upper().strip()
     is_active = bool(row.get("is_active", True))
     added_at = parse_timestamp(row.get("added_at"))
     regime = resolve_regime_bias(regime)
+
+    scanner_quality = scanner_quality_map.get(ticker, {})
+    grade = str(
+        row.get(
+            "setup_grade",
+            scanner_quality.get("grade", ""),
+        )
+    ).upper().strip()
 
     base_result = {
         "ticker": ticker,
@@ -798,9 +722,7 @@ def evaluate_row(
         base_result["urgency"] = "medium"
         return base_result
 
-    # Mini-step: breakout_strength toevoegen uit scanner_ranked.csv.
-    # Dit verandert de CSV-structuur niet, maar maakt breakout-evaluatie slimmer.
-    metrics["breakout_strength"] = breakout_strength_map.get(ticker)
+    metrics["breakout_strength"] = scanner_quality.get("breakout_strength")
 
     base_result["close"] = metrics["close"]
     base_result["ma20"] = metrics["ma20"]
@@ -813,6 +735,7 @@ def evaluate_row(
             metrics,
             regime,
             cfg,
+            grade,
         )
     elif setup_type == "VCP":
         status, entry_bias, reason_code, reason_text = evaluate_vcp(
@@ -825,6 +748,7 @@ def evaluate_row(
             metrics,
             regime,
             cfg,
+            grade,
         )
 
     status, expiry_reason_code, expiry_reason_text = apply_expiry(
@@ -871,7 +795,8 @@ def main() -> None:
     regime = load_market_regime()
 
     active_df = load_watchlist_active()
-    breakout_strength_map = load_breakout_strength_map()
+    scanner_quality_map = load_scanner_quality_map()
+
     WATCHLIST_STATUS_FILE.parent.mkdir(parents=True, exist_ok=True)
 
     empty_cols = [
@@ -906,9 +831,10 @@ def main() -> None:
         return
 
     rows = [
-        evaluate_row(row, regime, cfg, breakout_strength_map)
+        evaluate_row(row, regime, cfg, scanner_quality_map)
         for _, row in active_df.iterrows()
     ]
+
     result_df = pd.DataFrame(rows)
 
     for col in empty_cols:
@@ -925,10 +851,11 @@ def main() -> None:
         "EXPIRED": 4,
         "INACTIVE": 5,
     }
+
     result_df["sort_key"] = result_df["status"].map(sort_order).fillna(99)
     result_df = result_df.sort_values(["sort_key", "ticker"]).drop(columns=["sort_key"])
-
     result_df.to_csv(WATCHLIST_STATUS_FILE, index=False)
+
     print(f"Watchlist status written to: {WATCHLIST_STATUS_FILE}")
 
 

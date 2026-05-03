@@ -34,6 +34,24 @@ def _safe_pct(current: float, reference: float) -> float:
     return (current / reference) - 1.0
 
 
+def _prior_high_20d(df: pd.DataFrame) -> float:
+    """
+    Hoogste high van de vorige 20 handelsdagen, exclusief vandaag.
+    Dit voorkomt dat de huidige candle zichzelf als breakout-trigger gebruikt.
+    """
+    if df.empty or "High" not in df.columns or len(df) < 21:
+        return float("nan")
+
+    return _to_float(df["High"].iloc[-21:-1].max())
+
+
+def _prior_low_20d(df: pd.DataFrame) -> float:
+    if df.empty or "Low" not in df.columns or len(df) < 21:
+        return float("nan")
+
+    return _to_float(df["Low"].iloc[-21:-1].min())
+
+
 def _recent_swing_low(df: pd.DataFrame, lookback: int = 10) -> float:
     if df.empty or "Low" not in df.columns:
         return float("nan")
@@ -87,8 +105,16 @@ def _score_common_components(df: pd.DataFrame, qqq_return_20d: float) -> dict:
     ma20 = _to_float(latest["MA20"])
     ma50 = _to_float(latest["MA50"])
     ma200 = _to_float(latest["MA200"])
-    high_20 = _to_float(latest["20D_HIGH"])
-    low_20 = _to_float(latest["20D_LOW"])
+
+    high_20 = _prior_high_20d(df)
+    low_20 = _prior_low_20d(df)
+
+    if pd.isna(high_20):
+        high_20 = _to_float(latest["20D_HIGH"])
+
+    if pd.isna(low_20):
+        low_20 = _to_float(latest["20D_LOW"])
+
     avg_vol = _to_float(latest["AVG_VOL_20"])
     atr = _to_float(latest["ATR14"])
 
@@ -200,6 +226,7 @@ def detect_vcp(ticker: str, df: pd.DataFrame, regime: str = "NEUTRAL") -> Option
         "ATR14",
         "Volume",
     }
+
     if not _has_required_columns(df, required):
         return None
 
@@ -253,6 +280,7 @@ def detect_vcp(ticker: str, df: pd.DataFrame, regime: str = "NEUTRAL") -> Option
 
 def build_tradeplan(df: pd.DataFrame, primary_setup: str) -> dict:
     required = {"Close", "MA20", "MA50", "ATR14", "20D_HIGH", "20D_LOW", "High", "Low"}
+
     if not _has_required_columns(df, required):
         return {}
 
@@ -262,8 +290,15 @@ def build_tradeplan(df: pd.DataFrame, primary_setup: str) -> dict:
     ma20 = _to_float(latest["MA20"])
     ma50 = _to_float(latest["MA50"])
     atr = _to_float(latest["ATR14"])
-    high_20 = _to_float(latest["20D_HIGH"])
-    low_20 = _to_float(latest["20D_LOW"])
+
+    high_20 = _prior_high_20d(df)
+    low_20 = _prior_low_20d(df)
+
+    if pd.isna(high_20):
+        high_20 = _to_float(latest["20D_HIGH"])
+
+    if pd.isna(low_20):
+        low_20 = _to_float(latest["20D_LOW"])
 
     if any(pd.isna(x) for x in [close, ma20, ma50, atr, high_20, low_20]):
         return {}
@@ -382,10 +417,16 @@ def scan_ticker(
     ma50 = _to_float(latest["MA50"])
     ma200 = _to_float(latest["MA200"])
     atr = _to_float(latest["ATR14"])
-    high_20 = _to_float(latest["20D_HIGH"])
-    low_20 = _to_float(latest["20D_LOW"])
+    high_20 = _prior_high_20d(df)
+    low_20 = _prior_low_20d(df)
     volume = _to_float(latest["Volume"])
     avg_vol = _to_float(latest["AVG_VOL_20"])
+
+    if pd.isna(high_20):
+        high_20 = _to_float(latest["20D_HIGH"])
+
+    if pd.isna(low_20):
+        low_20 = _to_float(latest["20D_LOW"])
 
     if any(
         pd.isna(x)
@@ -415,6 +456,7 @@ def scan_ticker(
         if len(df) >= 6
         else float("nan")
     )
+
     ret_10d = (
         _safe_pct(close, _to_float(df["Close"].iloc[-11]))
         if len(df) >= 11
@@ -439,7 +481,7 @@ def scan_ticker(
         trend_ok
         and momentum_ok
         and not pd.isna(distance_ma20)
-        and -0.08 <= distance_ma20 <= 0.04
+        and -0.06 <= distance_ma20 <= 0.025
         and not pd.isna(distance_ma50)
         and distance_ma50 >= -0.02
         and close >= 0.80 * high_20
@@ -450,9 +492,9 @@ def scan_ticker(
     breakout = (
         trend_ok
         and not pd.isna(distance_high)
-        and distance_high <= 0.08
+        and distance_high <= 0.05
         and not pd.isna(volume_ratio)
-        and volume_ratio >= 1.10
+        and volume_ratio >= 1.20
         and close > ma20
         and (pd.isna(ret_5d) or ret_5d >= -0.01)
     )
@@ -462,10 +504,10 @@ def scan_ticker(
 
     if breakout:
         primary_setup = "BREAKOUT"
-    elif vcp:
-        primary_setup = "VCP"
     elif pullback:
         primary_setup = "PULLBACK"
+    elif vcp:
+        primary_setup = "VCP"
     else:
         return None
 
@@ -500,13 +542,7 @@ def scan_ticker(
                 score_components["momentum"] -= 1.0
 
     if vcp:
-        rs_20d = score_components.get("rs_20d")
-
-        if rs_20d is not None and rs_20d >= 0.03:
-            score_components["position"] += 2.0
-            score_components["trend"] += 0.5
-        else:
-            score_components["position"] += 0.5
+        score_components["position"] += 0.5
 
     if strong_trend:
         score_components["trend"] += 1.0
@@ -517,10 +553,10 @@ def scan_ticker(
         score_components["trend"] -= 0.5
 
     if not pd.isna(extension_atr):
-        if extension_atr >= 2.5:
-            score_components["position"] -= 2.0
-        elif extension_atr >= 1.5:
-            score_components["position"] -= 1.0
+        if extension_atr >= 2.0:
+            score_components["position"] -= 2.5
+        elif extension_atr >= 1.25:
+            score_components["position"] -= 1.5
 
     raw_total_score = (
         score_components["trend"]
@@ -628,7 +664,7 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
             breakout_quality_ok = (
                 breakout_strength is not None and breakout_strength >= 3.0
             )
-            not_too_extended = extension_atr is None or extension_atr <= 2.5
+            not_too_extended = extension_atr is None or extension_atr <= 1.5
 
             allow_a = (
                 allow_a
@@ -638,7 +674,7 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
             )
 
         elif primary == "VCP":
-            allow_a = allow_a and raw_score >= 9.0
+            allow_a = False
 
         if idx < top_a_count and allow_a:
             grade = "A"
@@ -654,7 +690,11 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
 
 
 def rank_setups(setups: list[dict], top_n: int = 10) -> list[dict]:
-    primary_priority = {"VCP": 3, "BREAKOUT": 2, "PULLBACK": 1}
+    primary_priority = {
+        "BREAKOUT": 3,
+        "PULLBACK": 2,
+        "VCP": 1,
+    }
 
     ranked = sorted(
         setups,
