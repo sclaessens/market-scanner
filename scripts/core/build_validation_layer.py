@@ -55,11 +55,17 @@ def _has_required_price_fields(row: pd.Series) -> bool:
 def evaluate_valid_setup(row: pd.Series) -> tuple[bool, str]:
     """
     Sprint 1 rule:
-    VALID_SETUP = technische setup is geldig volgens scanner-output.
+    VALID_SETUP = technische setup-validatie op basis van scanner-output.
+
+    Minimale edge logic:
+    - Alleen A-grade setups zijn valid.
+    - Alleen BREAKOUT en PULLBACK worden voorlopig toegelaten.
+    - RR moet minimaal 2.0 zijn.
 
     Geen fundamentals.
     Geen confidence.
     Geen decision logic.
+    Geen context layer.
     """
 
     if not _has_required_price_fields(row):
@@ -71,22 +77,26 @@ def evaluate_valid_setup(row: pd.Series) -> tuple[bool, str]:
         return False, "no_setup"
 
     grade = str(row.get("grade", "")).upper().strip()
-    rr = float(row.get("rr", 0))
 
-    if grade not in {"A", "B"}:
-        return False, "invalid_grade"
-
-    if rr < 2:
+    try:
+        rr = float(row.get("rr", 0))
+    except (TypeError, ValueError):
         return False, "invalid_rr"
+
+    if grade != "A":
+        return False, "filtered_non_A"
+
+    if setup not in {"BREAKOUT", "PULLBACK"}:
+        return False, "filtered_setup_type"
+
+    if rr < 2.0:
+        return False, "filtered_rr"
 
     if setup == "BREAKOUT":
         return True, "valid_breakout"
 
     if setup == "PULLBACK":
         return True, "valid_pullback"
-
-    if setup == "VCP":
-        return True, "valid_vcp"
 
     return False, "unknown_setup"
 
@@ -104,7 +114,6 @@ def build_validation_layer() -> pd.DataFrame:
         )
 
     rows: list[dict] = []
-
     validation_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     for _, row in df.iterrows():
