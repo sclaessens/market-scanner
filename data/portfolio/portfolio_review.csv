@@ -1,4 +1,4 @@
 ticker,quantity,avg_cost,last_price,pnl_pct,ma20,ma50,ma200,reviewed_at,decision,reason,risk_flag
-COST,2.0,1026.0,1011.7,-1.3938,1003.491,996.876,950.5531,2026-05-01 21:08:22,HOLD,above_ma20_and_ma50,LOW
-EBAY,20.0,101.08,104.07,2.9581,100.9075,94.4124,90.2233,2026-05-01 21:08:22,HOLD,above_ma20_and_ma50,LOW
-TECK,40.0,59.02,57.95,-1.8129,57.537,54.6526,45.9466,2026-05-01 21:08:22,HOLD,above_ma20_and_ma50,LOW
+COST,2.0,1026.0,,,,,,2026-05-04 21:20:56,REVIEW,missing_price_data,HIGH
+EBAY,20.0,101.08,,,,,,2026-05-04 21:20:56,REVIEW,missing_price_data,HIGH
+TECK,40.0,59.02,,,,,,2026-05-04 21:20:56,REVIEW,missing_price_data,HIGH
