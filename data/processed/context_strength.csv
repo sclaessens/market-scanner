@@ -1,0 +1,11 @@
+ticker,date,rs_20d,rs_vs_sector,context_strength,context_reason,context_tradeable,context_tradeable_reason
+MU,2026-05-05,69.13,,STRONG,market_outperformance,False,invalid_setup
+DD,2026-05-05,7.42,,STRONG,market_outperformance,False,invalid_setup
+RIO,2026-05-05,6.01,,STRONG,market_outperformance,False,invalid_setup
+BHP,2026-05-05,8.1,,STRONG,market_outperformance,False,invalid_setup
+WELL,2026-05-05,6.58,,STRONG,market_outperformance,True,tradeable_context
+MS,2026-05-05,12.4,,STRONG,market_outperformance,False,invalid_setup
+ALL,2026-05-05,3.89,,STRONG,market_outperformance,False,invalid_setup
+NSC,2026-05-05,8.47,,STRONG,market_outperformance,False,invalid_setup
+CVS,2026-05-05,3.3,,STRONG,market_outperformance,False,invalid_setup
+UNP,2026-05-05,7.24,,STRONG,market_outperformance,False,invalid_setup

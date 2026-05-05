@@ -19,9 +19,8 @@ from scripts.core.data_fetcher import fetch_ohlcv_data, load_tickers
 from scripts.core.indicators import add_indicators
 from scripts.core.regime import classify_market_regime
 from scripts.core.scanner import rank_setups, scan_ticker
-
-# ✅ NIEUW (SPRINT 1)
 from scripts.core.build_validation_layer import build_validation_layer
+from scripts.core.build_context_layer import build_context_layer
 
 from scripts.portfolio.build_portfolio import build_portfolio
 from scripts.portfolio.evaluate_positions import evaluate_positions
@@ -123,11 +122,11 @@ def main() -> None:
     print("Saving scanner ranked output...")
     pd.DataFrame(setups).to_csv(SCANNER_RANKED_FILE, index=False)
 
-    # ✅ CRUCIALE TOEVOEGING (SPRINT 1)
     print("Building validation layer...")
     build_validation_layer()
 
-    # ⛔ BELANGRIJK: niets hieronder aangepast
+    print("Building context strength layer...")
+    build_context_layer()
 
     print("Building portfolio...")
     portfolio_df = build_portfolio()

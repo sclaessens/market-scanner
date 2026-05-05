@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from datetime import datetime
+from functools import lru_cache
 from typing import Optional
 
 import pandas as pd
+import yfinance as yf
 
 from config.settings import (
     MIN_PRICE,
@@ -15,6 +18,24 @@ from config.settings import (
 
 
 MIN_HISTORY_ROWS = 220
+
+
+@lru_cache(maxsize=512)
+def get_sector(ticker: str) -> str:
+    try:
+        info = yf.Ticker(ticker).info
+        sector = info.get("sector")
+
+        if sector is None or str(sector).strip() == "":
+            return "UNKNOWN"
+
+        return str(sector).strip().upper()
+    except Exception:
+        return "UNKNOWN"
+
+
+def _current_scan_date() -> str:
+    return datetime.now().strftime("%Y-%m-%d")
 
 
 def _has_required_columns(df: pd.DataFrame, columns: set[str]) -> bool:
@@ -35,10 +56,6 @@ def _safe_pct(current: float, reference: float) -> float:
 
 
 def _prior_high_20d(df: pd.DataFrame) -> float:
-    """
-    Hoogste high van de vorige 20 handelsdagen, exclusief vandaag.
-    Dit voorkomt dat de huidige candle zichzelf als breakout-trigger gebruikt.
-    """
     if df.empty or "High" not in df.columns or len(df) < 21:
         return float("nan")
 
@@ -575,8 +592,12 @@ def scan_ticker(
             "rr": None,
         }
 
+    normalized_ticker = str(ticker).strip().upper()
+
     return {
-        "ticker": ticker,
+        "ticker": normalized_ticker,
+        "date": _current_scan_date(),
+        "sector": get_sector(normalized_ticker),
         "setup": ", ".join(setup_types),
         "primary_setup": primary_setup,
         "raw_score": round(float(raw_total_score), 2),
@@ -635,7 +656,9 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
     for idx, setup in enumerate(ranked):
         primary = setup.get("primary_setup", "")
         raw_score = float(setup.get("raw_score", setup.get("score", 0)))
-        rr = float(setup.get("rr", 0))
+        rr = _to_float(setup.get("rr", 0))
+        if pd.isna(rr):
+            rr = 0.0
         trend_ok = bool(setup.get("trend_ok", False))
         momentum_ok = bool(setup.get("momentum_ok", False))
         regime_ok = bool(setup.get("regime_ok", False))

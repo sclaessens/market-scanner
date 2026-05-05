@@ -1,0 +1,3 @@
+run_date,total_rows,valid_setups,tradeable_setups_before,tradeable_setups_after,weak_count,neutral_count,strong_count,leading_count,unknown_count,missing_sector_count
+2026-05-05 20:11:00,10,1,1,1,0,0,10,0,0,10
+2026-05-05 20:12:11,10,1,1,1,0,0,10,0,0,10
