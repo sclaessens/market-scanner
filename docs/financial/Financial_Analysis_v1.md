@@ -274,6 +274,30 @@ ontbrekende data
 Gedrag:
 neutraal behandelen
 
+ENTRY TIMING QUALITY (NIEUW)
+
+Binnen momentum strategieën is niet alleen richting belangrijk,
+maar ook timing van entry.
+
+Observatie:
+
+Late entries (sterk extended boven moving averages)
+hebben:
+
+- slechtere risk/reward
+- hogere kans op pullbacks
+- lagere expectancy
+
+Implicatie voor systeem:
+
+Entry quality moet expliciet gevalideerd worden
+binnen de technische validation layer.
+
+Belangrijk:
+
+Dit is GEEN fundamentele evaluatie,
+maar een technische optimalisatie van entry timing.
+
 6. Interaction with Technical Signals
 Sterk technisch + sterke fundamentals
 hoogste confidence

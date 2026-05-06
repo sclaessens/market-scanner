@@ -82,7 +82,44 @@ TRADEABLE_SETUP
 Definitie:
 
 VALID_SETUP:
+
 → voldoet aan technische criteria
+→ EN entry is structureel valide
+
+Nieuwe definitie:
+
+VALID_SETUP =
+    technische geldigheid
+    + entry quality validatie
+
+---
+
+ENTRY QUALITY (NIEUW CONCEPT)
+
+Definitie:
+
+Een setup kan technisch correct zijn,
+maar toch niet geschikt voor trading indien de entry te ver extended is.
+
+Voorbeelden:
+
+GOEDE entry:
+- breakout net boven resistance
+- beperkte afstand tot MA20
+- momentum bevestiging met volume
+
+SLECHTE entry:
+- breakout die al sterk doorgelopen is
+- grote afstand tot MA20 (overextension)
+- crowd already positioned
+
+---
+
+Doel:
+
+- vermijden van late entries
+- verbeteren van risk/reward
+- reduceren van false breakouts
 
 TRADEABLE_SETUP:
 → VALID_SETUP + context + fundamentals OK

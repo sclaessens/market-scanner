@@ -55,40 +55,117 @@ context_tradeable = (
 assert no_context_usage
 assert no_fundamental_usage
 assert no_decision_logic
-4. VALIDATION LAYER (v2 — REFINED)
+4. VALIDATION LAYER (v3 — ENTRY QUALITY AWARE)
+
 4.1 Doel
-VALIDATION = technische geldigheid
-NIET kwaliteit bepalen
+
+VALIDATION = technische geldigheid + entry structure kwaliteit
+
+De Validation Layer bepaalt:
+
+1. Is de setup technisch correct?
+2. Is de entry structureel valide (niet te laat / niet te extended)?
+
+👉 Belangrijk onderscheid:
+
+VALIDATION bepaalt GEEN:
+- relatieve sterkte (context layer)
+- fundamentals (fundamental layer)
+- beslissingen (decision engine)
+
+VALIDATION bepaalt WEL:
+- of een entry technisch verantwoord is
+
+---
+
 4.2 VALID_SETUP definitie
+
 VALID_SETUP = (
     setup_structure_valid
     AND rr >= 1.8
     AND trend_ok
+    AND entry_quality_ok
 )
-4.3 Setup-type validatie
+
+---
+
+4.3 ENTRY QUALITY CONSTRAINT (NIEUW)
+
+Doel:
+
+Voorkomen van late entries in momentum setups.
+
+Probleem:
+
+Momentum setups die te ver extended zijn hebben:
+- slechtere risk/reward
+- hogere failure rate
+- grotere drawdowns
+
+Definitie:
+
+Een setup kan technisch correct zijn,
+maar alsnog invalid zijn indien de entry te ver verwijderd is van een optimale entry zone.
+
+---
+
+4.4 Setup-type validatie
+
 BREAKOUT
+
 valid_breakout = (
     distance_high <= 0.08
-    AND volume_ratio >= 1.1
+    AND volume_ratio >= 1.3
     AND close > ma20
-    AND trend_ok
+    AND close > ma50
+
+    # ENTRY QUALITY (NIEUW)
+    AND extension_atr <= 2.5
+    AND distance_high <= 0.03
 )
+
+Interpretatie:
+
+- volume bevestigt breakout kwaliteit
+- extension_atr voorkomt late entries
+- distance_high voorkomt chasing boven breakout
+
+---
+
 PULLBACK
+
+(valid_pullback blijft ongewijzigd)
+
 valid_pullback = (
     -0.08 <= distance_ma20 <= 0.03
     AND close > ma50
-    AND trend_ok
 )
+
+---
+
 VCP
+
+(valid_vcp blijft ongewijzigd)
+
 valid_vcp = (
     contraction_detected
     AND near_high
     AND trend_aligned
 )
-4.4 RR constraint
+
+---
+
+4.5 RR constraint (ongewijzigd)
+
 if rr is None or rr < 1.8:
     valid_setup = False
-4.5 validation_reason (STRICT ENUM)
+
+---
+
+4.6 validation_reason (STRICT ENUM)
+
+GEEN wijzigingen
+
 valid_breakout
 valid_pullback
 valid_vcp
@@ -97,7 +174,11 @@ invalid_structure
 weak_trend
 missing_data
 no_setup
-4.6 tradeable_setup (unchanged)
+
+---
+
+4.7 tradeable_setup (ongewijzigd)
+
 tradeable_setup = valid_setup
 5. CONTEXT LAYER (Sprint 2 — CURRENT)
 5.1 Classification
