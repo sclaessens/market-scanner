@@ -724,7 +724,7 @@ def rank_setups(setups: list[dict], top_n: int = 10) -> list[dict]:
         key=lambda x: (
             primary_priority.get(x.get("primary_setup", ""), 0),
             x.get("raw_score", x.get("score", 0)),
-            x.get("rr", 0),
+            _to_float(x.get("rr", 0)) if not pd.isna(_to_float(x.get("rr", 0))) else 0.0,
             x.get("ticker", ""),
         ),
         reverse=True,
