@@ -60,9 +60,9 @@ def _base_row(**overrides):
         "close": 100.0,
         "ma20": 95.0,
         "ma50": 90.0,
-        "high_20d": 104.0,
-        "volume_ratio": 1.2,
-        "extension_atr": 1.0,
+        "high_20d": 102.0,
+        "volume_ratio": 1.4,
+        "extension_atr": 1.5,
     }
     row.update(overrides)
     return row
@@ -293,3 +293,68 @@ def test_validation_layer_log_csv_is_written(isolated_paths):
     assert list(log_df.columns) == expected_log_columns
     assert int(log_df.iloc[-1]["total_rows"]) == 3
     assert int(log_df.iloc[-1]["invalid_rr_count"]) == 1
+
+def test_breakout_too_extended_is_invalid_structure(isolated_paths):
+    scanner_path, _, _ = isolated_paths
+
+    result = _run(
+        scanner_path,
+        [
+            _base_row(
+                primary_setup="BREAKOUT",
+                close=100.0,
+                ma20=95.0,
+                ma50=90.0,
+                high_20d=102.0,
+                volume_ratio=1.5,
+                extension_atr=2.51,
+            )
+        ],
+    )
+
+    assert result.loc[0, "valid_setup"] == False
+    assert result.loc[0, "validation_reason"] == "invalid_structure"
+
+
+def test_breakout_too_far_from_high_is_invalid_structure(isolated_paths):
+    scanner_path, _, _ = isolated_paths
+
+    result = _run(
+        scanner_path,
+        [
+            _base_row(
+                primary_setup="BREAKOUT",
+                close=100.0,
+                ma20=95.0,
+                ma50=90.0,
+                high_20d=104.0,
+                volume_ratio=1.5,
+                extension_atr=1.5,
+            )
+        ],
+    )
+
+    assert result.loc[0, "valid_setup"] == False
+    assert result.loc[0, "validation_reason"] == "invalid_structure"
+
+
+def test_breakout_low_volume_is_invalid_structure(isolated_paths):
+    scanner_path, _, _ = isolated_paths
+
+    result = _run(
+        scanner_path,
+        [
+            _base_row(
+                primary_setup="BREAKOUT",
+                close=100.0,
+                ma20=95.0,
+                ma50=90.0,
+                high_20d=102.0,
+                volume_ratio=1.29,
+                extension_atr=1.5,
+            )
+        ],
+    )
+
+    assert result.loc[0, "valid_setup"] == False
+    assert result.loc[0, "validation_reason"] == "invalid_structure"

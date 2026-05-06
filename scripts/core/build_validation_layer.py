@@ -182,12 +182,15 @@ def evaluate_valid_setup(row: pd.Series) -> tuple[bool, str]:
 
     if primary_setup == "BREAKOUT":
         distance_high = (high_20d - close) / high_20d
+        extension_atr = float(row["extension_atr"])
 
         valid_breakout = (
-            distance_high <= 0.08
-            and volume_ratio >= 1.1
-            and close > ma20
-            and close > ma50
+                distance_high <= 0.08
+                and distance_high <= 0.03
+                and volume_ratio >= 1.3
+                and close > ma20
+                and close > ma50
+                and extension_atr <= 2.5
         )
 
         if valid_breakout:
