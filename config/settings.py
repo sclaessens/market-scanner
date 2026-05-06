@@ -61,9 +61,9 @@ ENTRY_QUALITY_CONFIG = {
     "max_distance_breakout_pct": 3.0,
     "max_breakout_extension_atr": 2.0,
     "max_extension_atr": 2.5,
-    "min_volume_ratio": 1.2,
+    "min_volume_ratio": 0.10,
     "max_volume_ratio": 4.0,
-    "max_range_atr": 2.5,
+    "max_range_atr": 4.0,
 }
 
 assert (

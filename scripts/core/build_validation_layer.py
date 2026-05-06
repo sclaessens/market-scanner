@@ -321,9 +321,11 @@ def _build_entry_quality_metrics_df(scanner_df: pd.DataFrame) -> pd.DataFrame:
     distance_ma20_pct = (df["close"] - df["ma20"]) / df["ma20"] * 100
     volume_ratio = df["volume_ratio"]
     range_atr = (df["high_20d"] - df["low_20d"]) / df["atr14"]
-    range_atr = range_atr.mask(df["high_20d"] == df["low_20d"], 0)
 
-    invalid_structure = breakout_extension_atr < 0
+    invalid_structure = (
+            (df["high_20d"] < df["low_20d"]) |
+            (df["atr14"] <= 0)
+    )
 
     too_far_from_breakout = (
         distance_to_breakout_pct > cfg["max_distance_breakout_pct"]
