@@ -21,14 +21,12 @@ from scripts.core.regime import classify_market_regime
 from scripts.core.scanner import rank_setups, scan_ticker
 from scripts.core.build_validation_layer import build_validation_layer
 from scripts.core.build_context_layer import build_context_layer
-
 from scripts.portfolio.build_portfolio import build_portfolio
 from scripts.portfolio.evaluate_positions import evaluate_positions
 from scripts.reporting.build_telegram_summary import (
     build_telegram_summary_text,
     save_summary,
 )
-from scripts.reporting.reporter import build_report
 from scripts.reporting.send_telegram import send_daily_summary
 from scripts.core.decision_engine import build_final_decisions
 
@@ -40,28 +38,6 @@ SCANNER_RANKED_FILE = DATA_DIR / "processed" / "scanner_ranked.csv"
 MIN_HISTORY_ROWS = 220
 
 
-SCANNER_RANKED_COLUMNS = [
-    "ticker",
-    "setup_type",
-    "setup_grade",
-    "score_total",
-    "entry",
-    "stop",
-    "target",
-    "rr",
-    "close",
-    "high_20d",
-    "ma20",
-    "ma50",
-    "setup",
-    "primary_setup",
-    "volume_ratio",
-    "breakout_strength",
-    "extension_atr",
-    "rs_20d_pct",
-]
-
-
 def ensure_dirs() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -70,6 +46,72 @@ def ensure_dirs() -> None:
     SCANS_LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
     MARKET_REGIME_FILE.parent.mkdir(parents=True, exist_ok=True)
     SCANNER_RANKED_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+
+def prepare_scanner_output(setups: list[dict]) -> pd.DataFrame:
+    scanner_df = pd.DataFrame(setups)
+
+    if scanner_df.empty:
+        raise ValueError("scanner output is empty; scanner_ranked.csv would be empty")
+
+    if "ticker" not in scanner_df.columns:
+        raise ValueError("scanner output is missing required column: ticker")
+
+    if "date" not in scanner_df.columns:
+        scanner_df["date"] = pd.Timestamp.today().strftime("%Y-%m-%d")
+
+    scanner_df["ticker"] = scanner_df["ticker"].astype(str).str.strip().str.upper()
+    scanner_df["date"] = pd.to_datetime(
+        scanner_df["date"],
+        errors="raise",
+    ).dt.strftime("%Y-%m-%d")
+
+    sort_columns = ["ticker", "date"]
+    sort_ascending = [True, True]
+
+    if "score_total" in scanner_df.columns:
+        sort_columns.append("score_total")
+        sort_ascending.append(False)
+
+    if "rr" in scanner_df.columns:
+        sort_columns.append("rr")
+        sort_ascending.append(False)
+
+    scanner_df = scanner_df.sort_values(
+        by=sort_columns,
+        ascending=sort_ascending,
+    )
+
+    duplicate_mask = scanner_df.duplicated(
+        subset=["ticker", "date"],
+        keep="first",
+    )
+
+    if duplicate_mask.any():
+        debug_columns = [
+            column
+            for column in [
+                "ticker",
+                "date",
+                "primary_setup",
+                "setup_type",
+                "score_total",
+                "rr",
+            ]
+            if column in scanner_df.columns
+        ]
+
+        duplicate_rows = scanner_df.loc[duplicate_mask, debug_columns]
+
+        print("Warning: duplicate scanner rows removed before validation:")
+        print(duplicate_rows.to_string(index=False))
+
+    scanner_df = scanner_df.drop_duplicates(
+        subset=["ticker", "date"],
+        keep="first",
+    ).reset_index(drop=True)
+
+    return scanner_df
 
 
 def main() -> None:
@@ -119,8 +161,13 @@ def main() -> None:
 
     setups = rank_setups(setups, top_n=TOP_SETUPS_PER_SECTION)
 
+    scanner_df = prepare_scanner_output(setups)
+
     print("Saving scanner ranked output...")
-    pd.DataFrame(setups).to_csv(SCANNER_RANKED_FILE, index=False)
+    scanner_df.to_csv(SCANNER_RANKED_FILE, index=False)
+
+    if failed_rows:
+        pd.DataFrame(failed_rows).to_csv(FAILED_TICKERS_FILE, index=False)
 
     print("Building validation layer...")
     build_validation_layer()
@@ -129,13 +176,13 @@ def main() -> None:
     build_context_layer()
 
     print("Building portfolio...")
-    portfolio_df = build_portfolio()
+    build_portfolio()
 
     print("Evaluating positions...")
-    portfolio_review_df = evaluate_positions()
+    evaluate_positions()
 
     print("Building final decisions...")
-    final_decisions_df = build_final_decisions()
+    build_final_decisions()
 
     print("Building telegram summary...")
     telegram_text = build_telegram_summary_text()

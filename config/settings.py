@@ -55,6 +55,27 @@ MIN_RR = 2.0
 
 
 # =========================
+# Entry quality validation
+# =========================
+ENTRY_QUALITY_CONFIG = {
+    "max_distance_breakout_pct": 3.0,
+    "max_breakout_extension_atr": 2.0,
+    "max_extension_atr": 2.5,
+    "min_volume_ratio": 1.2,
+    "max_volume_ratio": 4.0,
+    "max_range_atr": 2.5,
+}
+
+assert (
+    0
+    < ENTRY_QUALITY_CONFIG["min_volume_ratio"]
+    < ENTRY_QUALITY_CONFIG["max_volume_ratio"]
+)
+assert ENTRY_QUALITY_CONFIG["max_extension_atr"] > 0
+assert ENTRY_QUALITY_CONFIG["max_distance_breakout_pct"] > 0
+
+
+# =========================
 # Report settings
 # =========================
 REPORT_EMPTY_TEXT = "(none)"
