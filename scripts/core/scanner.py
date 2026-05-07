@@ -10,7 +10,6 @@ import yfinance as yf
 from config.settings import (
     MIN_PRICE,
     MIN_AVG_VOLUME,
-    MIN_RR,
     VCP_LOOKBACK_DAYS,
     VCP_NEAR_HIGH_THRESHOLD,
     VCP_CONTRACTION_THRESHOLD,
@@ -250,9 +249,6 @@ def detect_vcp(ticker: str, df: pd.DataFrame, regime: str = "NEUTRAL") -> Option
     if len(df) < VCP_LOOKBACK_DAYS:
         return None
 
-    if regime == "BEARISH":
-        return None
-
     if not is_liquid_leader(df):
         return None
 
@@ -358,8 +354,6 @@ def build_tradeplan(df: pd.DataFrame, primary_setup: str) -> dict:
     target = entry + (target_multiple * risk)
     rr = (target - entry) / risk
 
-    if rr < MIN_RR:
-        return {}
 
     return {
         "entry": round(float(entry), 2),
@@ -452,9 +446,6 @@ def scan_ticker(
         return None
 
     if close < MIN_PRICE or avg_vol < MIN_AVG_VOLUME:
-        return None
-
-    if regime == "BEARISH":
         return None
 
     distance_ma20 = (close - ma20) / ma20 if ma20 else float("nan")
@@ -610,7 +601,7 @@ def scan_ticker(
         ),
         "trend_ok": trend_ok,
         "momentum_ok": momentum_ok,
-        "regime_ok": regime != "BEARISH",
+        "regime_state": regime,
         "close": round(float(close), 2),
         "ma20": round(float(ma20), 2),
         "ma50": round(float(ma50), 2),
@@ -654,54 +645,11 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
     top_b_count = max(1, round(total * 0.50))
 
     for idx, setup in enumerate(ranked):
-        primary = setup.get("primary_setup", "")
         raw_score = float(setup.get("raw_score", setup.get("score", 0)))
-        rr = _to_float(setup.get("rr", 0))
-        if pd.isna(rr):
-            rr = 0.0
-        trend_ok = bool(setup.get("trend_ok", False))
-        momentum_ok = bool(setup.get("momentum_ok", False))
-        regime_ok = bool(setup.get("regime_ok", False))
 
-        rs_20d_pct = setup.get("rs_20d_pct")
-        atr_pct = setup.get("atr_pct")
-        breakout_strength = setup.get("breakout_strength")
-        extension_atr = setup.get("extension_atr")
-
-        rs_ok_for_a = rs_20d_pct is not None and rs_20d_pct >= 3.0
-        atr_ok_for_a = atr_pct is not None and atr_pct >= 2.5
-
-        allow_a = (
-            regime_ok
-            and trend_ok
-            and momentum_ok
-            and rr >= 2.0
-            and rs_ok_for_a
-            and atr_ok_for_a
-        )
-
-        if primary == "PULLBACK":
-            allow_a = allow_a and raw_score >= 8.0
-
-        elif primary == "BREAKOUT":
-            breakout_quality_ok = (
-                breakout_strength is not None and breakout_strength >= 3.0
-            )
-            not_too_extended = extension_atr is None or extension_atr <= 1.5
-
-            allow_a = (
-                allow_a
-                and raw_score >= 8.5
-                and breakout_quality_ok
-                and not_too_extended
-            )
-
-        elif primary == "VCP":
-            allow_a = False
-
-        if idx < top_a_count and allow_a:
+        if idx < top_a_count:
             grade = "A"
-        elif idx < top_b_count and raw_score >= 6.5:
+        elif idx < top_b_count:
             grade = "B"
         else:
             grade = "C"
@@ -710,7 +658,6 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
         setup["score"] = round(raw_score, 2)
 
     return ranked
-
 
 def rank_setups(setups: list[dict], top_n: int = 10) -> list[dict]:
     primary_priority = {

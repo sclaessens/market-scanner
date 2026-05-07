@@ -313,7 +313,7 @@ def evaluate_pullback(
         return "REJECTED", "none", "below_ma50", "Trend is gebroken onder MA50."
 
     if regime == "BEARISH":
-        return "WAIT", "wait", "bearish_regime", "Pullback is niet koopbaar in bearish regime."
+        return "WAIT", "wait", "bearish_regime", "Pullback krijgt bearish-regime timinglabel WAIT."
 
     if pd.isna(dist_ma20):
         return "WAIT", "wait", "missing_ma20_distance", "Afstand tot MA20 kon niet berekend worden."
@@ -325,15 +325,15 @@ def evaluate_pullback(
         return "WAIT", "wait", "too_extended_above_ma20", "Prijs staat te ver boven MA20 voor een nette pullback."
 
     if grade != "A":
-        return "WAIT", "wait", "non_a_pullback", "Geen A-grade pullback. Geen agressieve entry."
+        return "WAIT", "wait", "non_a_pullback", "Geen A-grade pullback. Timing blijft WAIT."
 
     current_ready_band = ready_distance if regime == "BULLISH" else neutral_ready_distance
 
     if dist_ma20 <= current_ready_band and close > ma50:
         if regime == "BULLISH":
-            return "READY", "buy", "pullback_ready_near_ma20", "A-grade pullback dicht bij MA20 in een gezonde trend."
+            return "READY", "ready", "pullback_ready_near_ma20", "A-grade pullback dicht bij MA20 in een gezonde trend."
 
-        return "READY", "buy", "pullback_ready_near_ma20_neutral", "A-grade pullback is scherp genoeg ondanks neutraal regime."
+        return "READY", "ready", "pullback_ready_near_ma20_neutral", "A-grade pullback is scherp genoeg ondanks neutraal regime."
 
     return "WAIT", "wait", "pullback_wait_better_entry", "Trend is ok, maar de instap ligt nog niet mooi bij MA20."
 
@@ -362,7 +362,7 @@ def evaluate_breakout(
         return "REJECTED", "none", "below_ma50", "Trend is gebroken onder MA50."
 
     if regime == "BEARISH":
-        return "WAIT", "wait", "bearish_regime", "Breakout krijgt geen groen licht in bearish regime."
+        return "WAIT", "wait", "bearish_regime", "Breakout krijgt bearish-regime timinglabel WAIT."
 
     if grade != "A":
         return "WAIT", "wait", "non_a_breakout", "Breakout is geen A-grade. Geen agressieve entry."
@@ -389,7 +389,7 @@ def evaluate_breakout(
 
     if breakout_above_high_pct >= breakout_break_above_high_pct:
         if breakout_above_high_pct <= max_breakout_chase_pct:
-            return "READY", "buy", "breakout_triggered", "A-grade breakout breekt gecontroleerd door de trigger."
+            return "READY", "ready", "breakout_triggered", "A-grade breakout breekt gecontroleerd door de trigger."
 
         return "WAIT", "wait", "late_breakout", "Breakout is gebeurd, maar niet meer mooi instapbaar."
 
@@ -397,7 +397,7 @@ def evaluate_breakout(
         if regime == "NEUTRAL":
             return "WAIT", "wait", "breakout_near_trigger_neutral", "Prijs zit dicht bij trigger, maar neutraal regime vraagt bevestiging."
 
-        return "READY", "buy", "breakout_near_trigger", "A-grade breakout zit vlak onder de trigger."
+        return "READY", "ready", "breakout_near_trigger", "A-grade breakout zit vlak onder de trigger."
 
     return "WAIT", "wait", "breakout_below_trigger", "Prijs zit nog onder de breakout-trigger."
 
@@ -411,7 +411,7 @@ def evaluate_vcp(
         "WAIT",
         "wait",
         "vcp_blocked_by_validation",
-        "VCP wordt voorlopig niet als koopsetup gebruikt op basis van validation.",
+        "VCP blijft timing-only en wordt niet als allocatiesignaal behandeld.",
     )
 
 
@@ -476,110 +476,110 @@ def build_watchlist_plan(
 
     plan = {
         "setup_label": get_setup_label(setup_type),
-        "action_now": "WAIT",
+        "timing_state": "WAIT",
         "trigger_type": "none",
         "trigger_price": None,
         "entry_plan": "wait",
         "why_now": "Setup is nog niet klaar.",
-        "urgency": "low",
+        "timing_priority": "low",
     }
 
     if status == "READY":
         if setup_type == "PULLBACK":
             plan.update(
-                action_now="BUY NOW",
-                trigger_type="buy_now",
+                timing_state="READY",
+                trigger_type="ready_now",
                 trigger_price=close,
                 entry_plan="market_or_limit",
                 why_now="A-grade pullback is bevestigd en de instapzone is actief.",
-                urgency="high",
+                timing_priority="high",
             )
 
         elif setup_type == "BREAKOUT":
             if reason_code == "breakout_near_trigger":
                 plan.update(
-                    action_now="SET STOP BUY",
-                    trigger_type="buy_above",
+                    timing_state="BREAKOUT_PENDING",
+                    trigger_type="breakout_level",
                     trigger_price=high_20d,
                     entry_plan="stop_order",
-                    why_now="A-grade breakout zit vlak onder de trigger. Koop pas bij bevestiging.",
-                    urgency="medium",
+                    why_now="A-grade breakout zit vlak onder de trigger. Wacht op bevestiging.",
+                    timing_priority="medium",
                 )
             else:
                 plan.update(
-                    action_now="BUY NOW",
-                    trigger_type="buy_now",
+                    timing_state="READY",
+                    trigger_type="ready_now",
                     trigger_price=close,
                     entry_plan="market_or_stop",
                     why_now="A-grade breakout breekt gecontroleerd door de trigger.",
-                    urgency="high",
+                    timing_priority="high",
                 )
 
         return plan
 
     if reason_code in {"extended_breakout", "too_extended_breakout", "late_breakout", "missed_breakout"}:
         plan.update(
-            action_now="SET LIMIT BUY",
-            trigger_type="limit_buy",
+            timing_state="PULLBACK_PENDING",
+            trigger_type="pullback_level",
             trigger_price=ma20,
             entry_plan="wait_for_pullback",
             why_now="Breakout is sterk, maar te ver opgelopen. Wacht op pullback richting MA20.",
-            urgency="low",
+            timing_priority="low",
         )
         return plan
 
     if status == "MISSED":
         plan.update(
-            action_now="SET LIMIT BUY",
-            trigger_type="limit_buy",
+            timing_state="PULLBACK_PENDING",
+            trigger_type="pullback_level",
             trigger_price=ma20,
             entry_plan="wait_for_pullback",
             why_now="Breakout is al gebeurd. Niet najagen; wacht op pullback richting MA20.",
-            urgency="low",
+            timing_priority="low",
         )
         return plan
 
     if status == "REJECTED":
         plan.update(
-            action_now="REMOVE",
+            timing_state="STALE",
             trigger_type="none",
             trigger_price=None,
             entry_plan="remove_from_watchlist",
             why_now="De setup is niet meer geldig.",
-            urgency="medium",
+            timing_priority="medium",
         )
         return plan
 
     if status == "EXPIRED":
         plan.update(
-            action_now="REMOVE",
+            timing_state="STALE",
             trigger_type="none",
             trigger_price=None,
             entry_plan="expire",
             why_now="De setup staat te lang open zonder trigger.",
-            urgency="low",
+            timing_priority="low",
         )
         return plan
 
     if reason_code in {"pullback_not_confirmed", "below_ma20"}:
         plan.update(
-            action_now="WAIT",
-            trigger_type="buy_above",
+            timing_state="WAIT",
+            trigger_type="breakout_level",
             trigger_price=ma20,
             entry_plan="stop_order",
             why_now="Eerst een reclaim boven MA20 nodig.",
-            urgency="low",
+            timing_priority="low",
         )
         return plan
 
     if reason_code in {"too_extended_above_ma20", "pullback_wait_better_entry"}:
         plan.update(
-            action_now="SET LIMIT BUY",
-            trigger_type="limit_buy",
+            timing_state="PULLBACK_PENDING",
+            trigger_type="pullback_level",
             trigger_price=ma20,
             entry_plan="limit_order",
             why_now="Wacht op een rustigere pullback richting MA20.",
-            urgency="low",
+            timing_priority="low",
         )
         return plan
 
@@ -588,12 +588,12 @@ def build_watchlist_plan(
         "breakout_near_trigger_neutral",
     }:
         plan.update(
-            action_now="SET STOP BUY",
-            trigger_type="buy_above",
+            timing_state="BREAKOUT_PENDING",
+            trigger_type="breakout_level",
             trigger_price=high_20d,
             entry_plan="stop_order",
-            why_now="De setup leeft nog, maar koop pas bij bevestiging boven de trigger.",
-            urgency="low" if regime == "NEUTRAL" else "medium",
+            why_now="De setup leeft nog, maar wacht op bevestiging boven de trigger.",
+            timing_priority="low" if regime == "NEUTRAL" else "medium",
         )
         return plan
 
@@ -605,23 +605,23 @@ def build_watchlist_plan(
         "vcp_too_far_from_ma20",
     }:
         plan.update(
-            action_now="WAIT",
+            timing_state="WAIT",
             trigger_type="none",
             trigger_price=None,
             entry_plan="wait",
-            why_now="VCP wordt voorlopig niet als koopsetup gebruikt op basis van validation.",
-            urgency="low",
+            why_now="VCP blijft timing-only en wordt niet als allocatiesignaal behandeld.",
+            timing_priority="low",
         )
         return plan
 
     if reason_code == "bearish_regime":
         plan.update(
-            action_now="WAIT",
+            timing_state="WAIT",
             trigger_type="none",
             trigger_price=None,
             entry_plan="wait",
-            why_now="De markt geeft tegenwind. Geen agressieve entries.",
-            urgency="low",
+            why_now="De markt geeft tegenwind. Geen agressieve timing.",
+            timing_priority="low",
         )
         return plan
 
@@ -631,22 +631,22 @@ def build_watchlist_plan(
         "missing_indicator_data",
     }:
         plan.update(
-            action_now="REMOVE",
+            timing_state="STALE",
             trigger_type="none",
             trigger_price=None,
             entry_plan="data_check",
             why_now="Er ontbreekt data om de setup veilig te beoordelen.",
-            urgency="medium",
+            timing_priority="medium",
         )
         return plan
 
     plan.update(
-        action_now="WAIT",
+        timing_state="WAIT",
         trigger_type="none",
         trigger_price=None,
         entry_plan="wait",
         why_now="Wacht op betere bevestiging.",
-        urgency="low",
+        timing_priority="low",
     )
     return plan
 
@@ -678,12 +678,12 @@ def evaluate_row(
         "setup_label": get_setup_label(setup_type),
         "status": "WAIT",
         "entry_bias": "wait",
-        "action_now": "WAIT",
+        "timing_state": "WAIT",
         "trigger_type": "none",
         "trigger_price": None,
         "entry_plan": "wait",
         "why_now": "",
-        "urgency": "low",
+        "timing_priority": "low",
         "added_at": row.get("added_at"),
         "last_reviewed_at": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S"),
         "reason": "",
@@ -703,7 +703,7 @@ def evaluate_row(
         base_result["reason"] = "Aandeel staat niet meer actief op de watchlist."
         base_result["reason_text"] = base_result["reason"]
         base_result["reason_code"] = "not_active"
-        base_result["action_now"] = "WAIT"
+        base_result["timing_state"] = "WAIT"
         base_result["why_now"] = "Aandeel staat niet meer actief op de watchlist."
         return base_result
 
@@ -716,10 +716,10 @@ def evaluate_row(
         base_result["reason"] = "Er ontbreekt indicatorendata om deze setup te evalueren."
         base_result["reason_text"] = base_result["reason"]
         base_result["reason_code"] = "missing_indicator_data"
-        base_result["action_now"] = "REMOVE"
+        base_result["timing_state"] = "STALE"
         base_result["entry_plan"] = "data_check"
         base_result["why_now"] = "Er ontbreekt indicatorendata om dit aandeel correct te evalueren."
-        base_result["urgency"] = "medium"
+        base_result["timing_priority"] = "medium"
         return base_result
 
     metrics["breakout_strength"] = scanner_quality.get("breakout_strength")
@@ -779,12 +779,12 @@ def evaluate_row(
     base_result["reason"] = reason_text
     base_result["reason_text"] = reason_text
     base_result["reason_code"] = reason_code
-    base_result["action_now"] = plan["action_now"]
+    base_result["timing_state"] = plan["timing_state"]
     base_result["trigger_type"] = plan["trigger_type"]
     base_result["trigger_price"] = plan["trigger_price"]
     base_result["entry_plan"] = plan["entry_plan"]
     base_result["why_now"] = plan["why_now"]
-    base_result["urgency"] = plan["urgency"]
+    base_result["timing_priority"] = plan["timing_priority"]
 
     return base_result
 
@@ -806,12 +806,12 @@ def main() -> None:
         "setup_label",
         "status",
         "entry_bias",
-        "action_now",
+        "timing_state",
         "trigger_type",
         "trigger_price",
         "entry_plan",
         "why_now",
-        "urgency",
+        "timing_priority",
         "added_at",
         "last_reviewed_at",
         "reason",

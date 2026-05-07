@@ -102,19 +102,19 @@ def build_action_rows(status_df: pd.DataFrame, last_actions: dict) -> list[dict]
                     "ticker": ticker,
                     "action": "UNWATCH",
                     "setup_type": setup_type,
-                    "source": "decision_engine",
+                    "source": "watchlist_state",
                     "note": "auto-removed (REJECTED)"
                 })
 
-        # 🟢 READY → BUY SIGNAL (nog geen echte trade)
+        # READY state is classification-only; no allocation signal is created here
         elif status == "READY":
             rows.append({
                 "timestamp": now,
                 "ticker": ticker,
-                "action": "SIGNAL",
+                "action": "STATE_UPDATE",
                 "setup_type": setup_type,
-                "source": "decision_engine",
-                "note": "ready-to-buy signal"
+                "source": "watchlist_state",
+                "note": "watchlist timing state READY"
             })
 
     return rows
@@ -151,7 +151,7 @@ def main() -> None:
 
     save_transactions(tx_df, new_rows)
 
-    print(f"Decision engine processed.")
+    print(f"Watchlist state updates processed.")
     print(f"New actions created: {len(new_rows)}")
 
 

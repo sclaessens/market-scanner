@@ -219,7 +219,7 @@ def classify_watch_candidate(ticker: str) -> dict:
             "ticker": ticker,
             "accepted": False,
             "setup_type": "",
-            "action_now": "PORTFOLIO",
+            "timing_state": "PORTFOLIO",
             "trigger_type": "none",
             "trigger_price": None,
             "reason": "Ticker zit al in portfolio. Portfolio heeft prioriteit boven watchlist.",
@@ -231,7 +231,7 @@ def classify_watch_candidate(ticker: str) -> dict:
             "ticker": ticker,
             "accepted": False,
             "setup_type": "",
-            "action_now": "REJECTED",
+            "timing_state": "REJECTED",
             "trigger_type": "none",
             "trigger_price": None,
             "reason": "Geen geldige indicatorendata gevonden.",
@@ -245,40 +245,39 @@ def classify_watch_candidate(ticker: str) -> dict:
     dist_high = metrics["distance_to_high_pct"]
     breakout_above_high = metrics["breakout_above_high_pct"]
 
-    # Zwakke trend: niet opvolgen als nieuwe koopkans.
+    # Zwakke trend: niet opvolgen als nieuwe watchlist-kandidaat.
     if close < ma50:
         return {
             "ticker": ticker,
             "accepted": False,
             "setup_type": "REJECTED",
-            "action_now": "REJECTED",
+            "timing_state": "REJECTED",
             "trigger_type": "none",
             "trigger_price": None,
-            "reason": "Koers staat onder MA50. Trend is te zwak voor een nieuwe watchlist-entry.",
+            "reason": "Koers staat onder MA50. Trendstructuur is zwak voor watchlist-opvolging.",
         }
 
-    # Boven de breakout-trigger: nooit nog een stop-buy onder de actuele koers voorstellen.
-    # Net boven de trigger mag nog BUY NOW zijn; verder erboven wordt automatisch PULLBACK.
+    # Boven de breakout-trigger: classificeer timing zonder allocatie-actie.
     if breakout_above_high >= 0.002:
         if breakout_above_high <= 0.03:
             return {
                 "ticker": ticker,
                 "accepted": True,
                 "setup_type": "BREAKOUT",
-                "action_now": "BUY NOW",
-                "trigger_type": "buy_now",
+                "timing_state": "READY",
+                "trigger_type": "ready_now",
                 "trigger_price": close,
-                "reason": "Koers is net gecontroleerd boven de 20D high uitgebroken.",
+                "reason": "Koers is net gecontroleerd boven de 20D high uitgebroken; timing staat READY.",
             }
 
         return {
             "ticker": ticker,
             "accepted": True,
             "setup_type": "PULLBACK",
-            "action_now": "SET LIMIT BUY",
-            "trigger_type": "limit_buy",
+            "timing_state": "PULLBACK_PENDING",
+            "trigger_type": "pullback_level",
             "trigger_price": ma20,
-            "reason": "Breakout is al gebeurd. Niet najagen; wacht op pullback richting MA20.",
+            "reason": "Breakout is al gebeurd; timing verschuift naar pullback-opvolging richting MA20.",
         }
 
     # Vlak onder 20D high: breakout kandidaat met stop buy.
@@ -287,10 +286,10 @@ def classify_watch_candidate(ticker: str) -> dict:
             "ticker": ticker,
             "accepted": True,
             "setup_type": "BREAKOUT",
-            "action_now": "SET STOP BUY",
-            "trigger_type": "buy_above",
+            "timing_state": "BREAKOUT_PENDING",
+            "trigger_type": "breakout_level",
             "trigger_price": high_20d,
-            "reason": "Koers staat vlak onder de 20D high. Breakout-kandidaat.",
+            "reason": "Koers staat vlak onder de 20D high. Breakout timing pending.",
         }
 
     # Gezonde trend dicht bij MA20: pullback kandidaat.
@@ -299,10 +298,10 @@ def classify_watch_candidate(ticker: str) -> dict:
             "ticker": ticker,
             "accepted": True,
             "setup_type": "PULLBACK",
-            "action_now": "BUY NOW",
-            "trigger_type": "buy_now",
+            "timing_state": "READY",
+            "trigger_type": "ready_now",
             "trigger_price": close,
-            "reason": "Koers zit dicht bij MA20 in een gezonde trend.",
+            "reason": "Koers zit dicht bij MA20 in een gezonde trend; timing staat READY.",
         }
 
     # Gezonde trend maar te ver boven MA20: pullback afwachten.
@@ -311,10 +310,10 @@ def classify_watch_candidate(ticker: str) -> dict:
             "ticker": ticker,
             "accepted": True,
             "setup_type": "PULLBACK",
-            "action_now": "SET LIMIT BUY",
-            "trigger_type": "limit_buy",
+            "timing_state": "PULLBACK_PENDING",
+            "trigger_type": "pullback_level",
             "trigger_price": ma20,
-            "reason": "Trend is gezond, maar koers staat te ver boven MA20. Wacht op betere pullback-entry.",
+            "reason": "Trend is gezond, maar koers staat te ver boven MA20. Timing wacht op pullback.",
         }
 
     # Onder MA20 maar boven MA50: nog geen entry, wel opvolgen als pullback.
@@ -322,10 +321,10 @@ def classify_watch_candidate(ticker: str) -> dict:
         "ticker": ticker,
         "accepted": True,
         "setup_type": "PULLBACK",
-        "action_now": "WAIT",
-        "trigger_type": "buy_above",
+        "timing_state": "WAIT",
+        "trigger_type": "breakout_level",
         "trigger_price": ma20,
-        "reason": "Koers zit boven MA50 maar nog onder MA20. Eerst reclaim van MA20 afwachten.",
+        "reason": "Koers zit boven MA50 maar nog onder MA20. Timing wacht op reclaim van MA20.",
     }
 
 
@@ -335,7 +334,7 @@ def build_note(classification: dict) -> str:
 
     parts = [
         f"auto_classified=1",
-        f"action_now={classification.get('action_now', '')}",
+        f"timing_state={classification.get('timing_state', '')}",
         f"trigger_type={classification.get('trigger_type', '')}",
         f"trigger_price={trigger_price_text}",
         f"reason={classification.get('reason', '')}",
@@ -415,7 +414,7 @@ def handle_watch(ticker: str, manual_setup: Optional[str] = None) -> None:
 
     print(f"WATCH toegevoegd: {ticker}")
     print(f"Setup type: {classification['setup_type']}")
-    print(f"Actie nu: {classification['action_now']}")
+    print(f"Timing state: {classification['timing_state']}")
     print(f"Trigger: {classification['trigger_type']} {classification.get('trigger_price')}")
     print(f"Waarom: {classification['reason']}")
 
