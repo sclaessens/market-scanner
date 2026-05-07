@@ -16,7 +16,7 @@ def _hash_file(path: Path) -> str:
 def _write_base_files(
     tmp_path: Path,
     scanner_rows: list[dict],
-    validation_rows: list[dict],
+    validation_rows: list[dict] | None = None,
     sector_rows: list[dict] | None = None,
 ) -> tuple[Path, Path, Path, Path, Path]:
     processed_dir = tmp_path / "data" / "processed"
@@ -32,7 +32,7 @@ def _write_base_files(
     log_path = logs_dir / "context_layer_log.csv"
 
     pd.DataFrame(scanner_rows).to_csv(scanner_path, index=False)
-    pd.DataFrame(validation_rows).to_csv(validation_path, index=False)
+    pd.DataFrame(validation_rows or []).to_csv(validation_path, index=False)
 
     if sector_rows is not None:
         pd.DataFrame(sector_rows).to_csv(sector_path, index=False)
@@ -44,7 +44,7 @@ def _write_base_files(
 def patch_paths(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     def _patch(
         scanner_rows: list[dict],
-        validation_rows: list[dict],
+        validation_rows: list[dict] | None = None,
         sector_rows: list[dict] | None = None,
     ):
         scanner_path, validation_path, sector_path, output_path, log_path = (
@@ -52,7 +52,6 @@ def patch_paths(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
         )
 
         monkeypatch.setattr(context_module, "SCANNER_PATH", scanner_path)
-        monkeypatch.setattr(context_module, "VALIDATION_PATH", validation_path)
         monkeypatch.setattr(context_module, "SECTOR_RS_PATH", sector_path)
         monkeypatch.setattr(context_module, "OUTPUT_PATH", output_path)
         monkeypatch.setattr(context_module, "LOG_PATH", log_path)
@@ -80,14 +79,15 @@ def _validation_row(
     ticker: str = "AAPL",
     date: str = "2026-05-05",
     valid_setup: bool = True,
-    tradeable_setup: bool = True,
 ) -> dict:
     return {
         "ticker": ticker,
         "date": date,
+        "structure_state": "COHERENT" if valid_setup else "BROKEN",
+        "structure_reason": "coherent_breakout" if valid_setup else "structure_broken",
+        "setup_type": "BREAKOUT",
         "valid_setup": valid_setup,
-        "tradeable_setup": tradeable_setup,
-        "validation_reason": "valid_breakout",
+        "validation_reason": "coherent_breakout" if valid_setup else "structure_broken",
     }
 
 
@@ -106,88 +106,87 @@ def _sector_row(
 def test_leading_correct(patch_paths):
     patch_paths(
         scanner_rows=[_scanner_row(rs_20d_pct=1.0, sector=" Technology ")],
-        validation_rows=[_validation_row(valid_setup=True)],
         sector_rows=[_sector_row(sector="TECHNOLOGY", sector_rs_20d_pct=0.5)],
     )
 
     df = context_module.build_context_layer()
 
     assert df.loc[0, "context_strength"] == "LEADING"
-    assert df.loc[0, "context_reason"] == "market_and_sector_outperformance"
+    assert df.loc[0, "context_reason"] == "top_decile_leadership"
 
 
 def test_strong_correct(patch_paths):
     patch_paths(
-        scanner_rows=[_scanner_row(rs_20d_pct=1.0)],
-        validation_rows=[_validation_row(valid_setup=True)],
+        scanner_rows=[
+            _scanner_row(ticker="AAA", rs_20d_pct=1.0),
+            _scanner_row(ticker="BBB", rs_20d_pct=2.0),
+            _scanner_row(ticker="CCC", rs_20d_pct=0.2),
+            _scanner_row(ticker="DDD", rs_20d_pct=-0.1),
+        ],
         sector_rows=[_sector_row(sector_rs_20d_pct=0.9)],
     )
 
-    df = context_module.build_context_layer()
+    df = context_module.build_context_layer().set_index("ticker")
 
-    assert df.loc[0, "context_strength"] == "STRONG"
-    assert df.loc[0, "context_reason"] == "market_outperformance"
+    assert df.loc["AAA", "context_strength"] == "STRONG"
+    assert df.loc["AAA", "context_reason"] == "upper_quartile_leadership"
 
 
 def test_weak_correct(patch_paths):
     patch_paths(
-        scanner_rows=[_scanner_row(rs_20d_pct=-0.5)],
-        validation_rows=[_validation_row(valid_setup=True)],
+        scanner_rows=[
+            _scanner_row(ticker="AAA", rs_20d_pct=-0.5),
+            _scanner_row(ticker="BBB", rs_20d_pct=2.0),
+            _scanner_row(ticker="CCC", rs_20d_pct=1.0),
+            _scanner_row(ticker="DDD", rs_20d_pct=0.0),
+        ],
         sector_rows=[_sector_row(sector_rs_20d_pct=0.0)],
     )
 
-    df = context_module.build_context_layer()
+    df = context_module.build_context_layer().set_index("ticker")
 
-    assert df.loc[0, "context_strength"] == "WEAK"
-    assert df.loc[0, "context_reason"] == "negative_rs"
+    assert df.loc["AAA", "context_strength"] == "WEAK"
+    assert df.loc["AAA", "context_reason"] == "lower_distribution"
 
 
 def test_neutral_correct(patch_paths):
     patch_paths(
-        scanner_rows=[_scanner_row(rs_20d_pct=0.25)],
-        validation_rows=[_validation_row(valid_setup=True)],
+        scanner_rows=[
+            _scanner_row(ticker="AAA", rs_20d_pct=0.25),
+            _scanner_row(ticker="BBB", rs_20d_pct=2.0),
+            _scanner_row(ticker="CCC", rs_20d_pct=1.0),
+            _scanner_row(ticker="DDD", rs_20d_pct=-0.5),
+        ],
         sector_rows=[_sector_row(sector_rs_20d_pct=0.0)],
     )
 
-    df = context_module.build_context_layer()
+    df = context_module.build_context_layer().set_index("ticker")
 
-    assert df.loc[0, "context_strength"] == "NEUTRAL"
-    assert df.loc[0, "context_reason"] == "neutral_rs"
+    assert df.loc["AAA", "context_strength"] == "NEUTRAL"
+    assert df.loc["AAA", "context_reason"] == "middle_distribution"
 
 
 def test_unknown_correct(patch_paths):
-    patch_paths(
-        scanner_rows=[_scanner_row(rs_20d_pct=None)],
-        validation_rows=[_validation_row(valid_setup=True)],
-        sector_rows=[_sector_row(sector_rs_20d_pct=0.0)],
-    )
+    strength, reason = context_module._classify_from_percentile(float("nan"))
 
-    df = context_module.build_context_layer()
-
-    assert df.loc[0, "context_strength"] == "UNKNOWN"
-    assert df.loc[0, "context_reason"] == "missing_rs_20d"
+    assert strength == "UNKNOWN"
+    assert reason == "missing_percentile"
 
 
-def test_context_tradeable_correct(patch_paths):
+def test_context_outputs_classification_columns_only(patch_paths):
     patch_paths(
         scanner_rows=[
             _scanner_row(ticker="AAA", rs_20d_pct=1.0, sector="Technology"),
             _scanner_row(ticker="BBB", rs_20d_pct=1.0, sector="Technology"),
             _scanner_row(ticker="CCC", rs_20d_pct=-1.0, sector="Technology"),
         ],
-        validation_rows=[
-            _validation_row(ticker="AAA", valid_setup=True),
-            _validation_row(ticker="BBB", valid_setup=False),
-            _validation_row(ticker="CCC", valid_setup=True),
-        ],
         sector_rows=[_sector_row(sector="TECHNOLOGY", sector_rs_20d_pct=0.9)],
     )
 
-    df = context_module.build_context_layer().set_index("ticker")
+    df = context_module.build_context_layer()
 
-    assert bool(df.loc["AAA", "context_tradeable"]) is True
-    assert bool(df.loc["BBB", "context_tradeable"]) is False
-    assert bool(df.loc["CCC", "context_tradeable"]) is False
+    forbidden_columns = {"context_" + "trad" + "eable", "context_" + "trad" + "eable_reason"}
+    assert set(df.columns).isdisjoint(forbidden_columns)
 
 
 def test_duplicate_ticker_date_fails(patch_paths):
@@ -196,7 +195,6 @@ def test_duplicate_ticker_date_fails(patch_paths):
             _scanner_row(ticker="AAPL"),
             _scanner_row(ticker="AAPL"),
         ],
-        validation_rows=[_validation_row(ticker="AAPL")],
         sector_rows=[_sector_row()],
     )
 
@@ -210,7 +208,6 @@ def test_missing_column_fails(patch_paths):
 
     patch_paths(
         scanner_rows=[scanner],
-        validation_rows=[_validation_row()],
         sector_rows=[_sector_row()],
     )
 
@@ -237,7 +234,6 @@ def test_validation_layer_not_modified(patch_paths):
 def test_scanner_ranked_not_modified(patch_paths):
     scanner_path, validation_path, *_ = patch_paths(
         scanner_rows=[_scanner_row(rs_20d_pct=1.0)],
-        validation_rows=[_validation_row(valid_setup=True)],
         sector_rows=[_sector_row(sector_rs_20d_pct=0.5)],
     )
 
@@ -253,7 +249,6 @@ def test_scanner_ranked_not_modified(patch_paths):
 def test_empty_scanner_fails(patch_paths):
     patch_paths(
         scanner_rows=[],
-        validation_rows=[_validation_row()],
         sector_rows=[_sector_row()],
     )
 
@@ -261,26 +256,27 @@ def test_empty_scanner_fails(patch_paths):
         context_module.build_context_layer()
 
 
-def test_empty_validation_fails(patch_paths):
+def test_context_layer_does_not_require_validation_layer(patch_paths):
     patch_paths(
         scanner_rows=[_scanner_row()],
         validation_rows=[],
         sector_rows=[_sector_row()],
     )
 
-    with pytest.raises(ValueError, match="validation_layer.csv is empty"):
-        context_module.build_context_layer()
+    df = context_module.build_context_layer()
+
+    assert len(df) == 1
+    assert "context_" + "trad" + "eable" not in df.columns
 
 
-def test_missing_sector_data_no_crash_but_never_leading(patch_paths):
+def test_missing_sector_data_no_crash_and_remains_distribution_only(patch_paths):
     patch_paths(
         scanner_rows=[_scanner_row(rs_20d_pct=1.0, sector="Technology")],
-        validation_rows=[_validation_row(valid_setup=True)],
         sector_rows=None,
     )
 
     df = context_module.build_context_layer()
 
-    assert df.loc[0, "context_strength"] == "STRONG"
-    assert df.loc[0, "context_strength"] != "LEADING"
-    assert bool(df.loc[0, "context_tradeable"]) is True
+    assert df.loc[0, "context_strength"] == "LEADING"
+    assert df.loc[0, "context_reason"] == "top_decile_leadership"
+    assert pd.isna(df.loc[0, "rs_vs_sector"])

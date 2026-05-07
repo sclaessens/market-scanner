@@ -72,10 +72,10 @@ def test_entry_quality_reason_order_and_schema():
         "distance_ma20_pct",
         "volume_ratio",
         "range_atr",
-        "entry_quality_flag",
+        "entry_quality_state",
         "entry_quality_reason",
     ]
-    assert out.loc[0, "entry_quality_flag"] is False or out.loc[0, "entry_quality_flag"] == False
+    assert out.loc[0, "entry_quality_state"] == "EXTENDED"
     assert out.loc[0, "entry_quality_reason"] == "too_far_from_breakout"
 
 
@@ -91,8 +91,8 @@ def test_validate_output_fails_on_nan():
             "distance_ma20_pct": [0.0],
             "volume_ratio": [1.0],
             "range_atr": [1.0],
-            "entry_quality_flag": [True],
-            "entry_quality_reason": ["ok"],
+            "entry_quality_state": ["BALANCED"],
+            "entry_quality_reason": ["balanced_structure"],
         }
     )
     with pytest.raises(AssertionError, match="NaN"):

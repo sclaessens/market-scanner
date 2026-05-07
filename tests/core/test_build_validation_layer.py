@@ -21,7 +21,10 @@ BASE_COLUMNS = [
     "close",
     "ma20",
     "ma50",
+    "ma200",
     "high_20d",
+    "low_20d",
+    "atr14",
     "volume_ratio",
     "extension_atr",
 ]
@@ -29,8 +32,10 @@ BASE_COLUMNS = [
 OUTPUT_COLUMNS = [
     "ticker",
     "date",
+    "structure_state",
+    "structure_reason",
+    "setup_type",
     "valid_setup",
-    "tradeable_setup",
     "validation_reason",
 ]
 
@@ -60,7 +65,10 @@ def _base_row(**overrides):
         "close": 100.0,
         "ma20": 95.0,
         "ma50": 90.0,
+        "ma200": 80.0,
         "high_20d": 102.0,
+        "low_20d": 95.0,
+        "atr14": 2.0,
         "volume_ratio": 1.4,
         "extension_atr": 1.5,
     }
@@ -82,8 +90,10 @@ def test_valid_breakout_correct(isolated_paths):
 
     result = _run(scanner_path, [_base_row(primary_setup="BREAKOUT")])
 
+    assert result.loc[0, "structure_state"] == "COHERENT"
+    assert result.loc[0, "structure_reason"] == "coherent_breakout"
     assert result.loc[0, "valid_setup"] is True or result.loc[0, "valid_setup"] == True
-    assert result.loc[0, "validation_reason"] == "valid_breakout"
+    assert result.loc[0, "validation_reason"] == "coherent_breakout"
 
 
 def test_valid_pullback_correct(isolated_paths):
@@ -103,8 +113,10 @@ def test_valid_pullback_correct(isolated_paths):
         ],
     )
 
+    assert result.loc[0, "structure_state"] == "COHERENT"
+    assert result.loc[0, "structure_reason"] == "coherent_pullback"
     assert result.loc[0, "valid_setup"] is True or result.loc[0, "valid_setup"] == True
-    assert result.loc[0, "validation_reason"] == "valid_pullback"
+    assert result.loc[0, "validation_reason"] == "coherent_pullback"
 
 
 def test_valid_vcp_correct(isolated_paths):
@@ -124,26 +136,30 @@ def test_valid_vcp_correct(isolated_paths):
         ],
     )
 
+    assert result.loc[0, "structure_state"] == "COHERENT"
+    assert result.loc[0, "structure_reason"] == "coherent_vcp"
     assert result.loc[0, "valid_setup"] is True or result.loc[0, "valid_setup"] == True
-    assert result.loc[0, "validation_reason"] == "valid_vcp"
+    assert result.loc[0, "validation_reason"] == "coherent_vcp"
 
 
-def test_invalid_rr_correct(isolated_paths):
+def test_rr_is_metadata_not_structure_gate(isolated_paths):
     scanner_path, _, _ = isolated_paths
 
     result = _run(scanner_path, [_base_row(rr=1.79)])
 
-    assert result.loc[0, "valid_setup"] is False or result.loc[0, "valid_setup"] == False
-    assert result.loc[0, "validation_reason"] == "invalid_rr"
+    assert result.loc[0, "structure_state"] == "COHERENT"
+    assert result.loc[0, "valid_setup"] is True or result.loc[0, "valid_setup"] == True
+    assert result.loc[0, "validation_reason"] == "coherent_breakout"
 
 
-def test_weak_trend_correct(isolated_paths):
+def test_broken_price_structure_correct(isolated_paths):
     scanner_path, _, _ = isolated_paths
 
     result = _run(scanner_path, [_base_row(close=89.0, ma50=90.0)])
 
+    assert result.loc[0, "structure_state"] == "BROKEN"
     assert result.loc[0, "valid_setup"] is False or result.loc[0, "valid_setup"] == False
-    assert result.loc[0, "validation_reason"] == "weak_trend"
+    assert result.loc[0, "validation_reason"] == "structure_broken"
 
 
 def test_missing_data_correct(isolated_paths):
@@ -151,6 +167,7 @@ def test_missing_data_correct(isolated_paths):
 
     result = _run(scanner_path, [_base_row(close=None)])
 
+    assert result.loc[0, "structure_state"] == "INCOMPLETE"
     assert result.loc[0, "valid_setup"] is False or result.loc[0, "valid_setup"] == False
     assert result.loc[0, "validation_reason"] == "missing_data"
 
@@ -160,6 +177,7 @@ def test_no_setup_correct(isolated_paths):
 
     result = _run(scanner_path, [_base_row(primary_setup="")])
 
+    assert result.loc[0, "structure_state"] == "INCOMPLETE"
     assert result.loc[0, "valid_setup"] is False or result.loc[0, "valid_setup"] == False
     assert result.loc[0, "validation_reason"] == "no_setup"
 
@@ -181,11 +199,12 @@ def test_invalid_structure_correct(isolated_paths):
         ],
     )
 
+    assert result.loc[0, "structure_state"] == "BROKEN"
     assert result.loc[0, "valid_setup"] is False or result.loc[0, "valid_setup"] == False
-    assert result.loc[0, "validation_reason"] == "invalid_structure"
+    assert result.loc[0, "validation_reason"] == "structure_broken"
 
 
-def test_tradeable_setup_equals_valid_setup(isolated_paths):
+def test_legacy_allocation_alias_not_emitted(isolated_paths):
     scanner_path, _, _ = isolated_paths
 
     result = _run(
@@ -196,10 +215,7 @@ def test_tradeable_setup_equals_valid_setup(isolated_paths):
         ],
     )
 
-    assert (
-        result["tradeable_setup"].astype(bool)
-        == result["valid_setup"].astype(bool)
-    ).all()
+    assert "trad" + "eable_setup" not in result.columns
 
 
 def test_duplicate_ticker_date_fails(isolated_paths):
@@ -280,21 +296,19 @@ def test_validation_layer_log_csv_is_written(isolated_paths):
     expected_log_columns = [
         "run_date",
         "total_rows",
-        "valid_count",
-        "invalid_count",
-        "breakout_valid_count",
-        "pullback_valid_count",
-        "vcp_valid_count",
-        "invalid_rr_count",
-        "weak_trend_count",
-        "missing_data_count",
+        "coherent_count",
+        "broken_count",
+        "incomplete_count",
+        "avg_extension_atr",
+        "avg_volume_ratio",
+        "median_range_atr",
     ]
 
     assert list(log_df.columns) == expected_log_columns
     assert int(log_df.iloc[-1]["total_rows"]) == 3
-    assert int(log_df.iloc[-1]["invalid_rr_count"]) == 1
+    assert int(log_df.iloc[-1]["coherent_count"]) == 3
 
-def test_breakout_too_extended_is_invalid_structure(isolated_paths):
+def test_breakout_extension_is_metadata_not_structure_gate(isolated_paths):
     scanner_path, _, _ = isolated_paths
 
     result = _run(
@@ -312,11 +326,12 @@ def test_breakout_too_extended_is_invalid_structure(isolated_paths):
         ],
     )
 
-    assert result.loc[0, "valid_setup"] == False
-    assert result.loc[0, "validation_reason"] == "invalid_structure"
+    assert result.loc[0, "structure_state"] == "COHERENT"
+    assert result.loc[0, "valid_setup"] == True
+    assert result.loc[0, "validation_reason"] == "coherent_breakout"
 
 
-def test_breakout_too_far_from_high_is_invalid_structure(isolated_paths):
+def test_breakout_distance_is_metadata_not_structure_gate(isolated_paths):
     scanner_path, _, _ = isolated_paths
 
     result = _run(
@@ -334,11 +349,12 @@ def test_breakout_too_far_from_high_is_invalid_structure(isolated_paths):
         ],
     )
 
-    assert result.loc[0, "valid_setup"] == False
-    assert result.loc[0, "validation_reason"] == "invalid_structure"
+    assert result.loc[0, "structure_state"] == "COHERENT"
+    assert result.loc[0, "valid_setup"] == True
+    assert result.loc[0, "validation_reason"] == "coherent_breakout"
 
 
-def test_breakout_low_volume_is_invalid_structure(isolated_paths):
+def test_breakout_volume_is_metadata_not_structure_gate(isolated_paths):
     scanner_path, _, _ = isolated_paths
 
     result = _run(
@@ -356,5 +372,6 @@ def test_breakout_low_volume_is_invalid_structure(isolated_paths):
         ],
     )
 
-    assert result.loc[0, "valid_setup"] == False
-    assert result.loc[0, "validation_reason"] == "invalid_structure"
+    assert result.loc[0, "structure_state"] == "COHERENT"
+    assert result.loc[0, "valid_setup"] == True
+    assert result.loc[0, "validation_reason"] == "coherent_breakout"

@@ -44,8 +44,6 @@ def test_output_row_count_validation():
                 "rs_vs_sector": np.nan,
                 "context_strength": "STRONG",
                 "context_reason": "market_outperformance",
-                "context_tradeable": True,
-                "context_tradeable_reason": "strong_or_leading_context",
             }
         ]
     )
@@ -123,10 +121,8 @@ def test_allowed_enum_validation_fails():
                 "benchmark_return_20d": 0.5,
                 "rs_vs_market": 1.0,
                 "rs_vs_sector": np.nan,
-                "context_strength": "BUY",  # invalid, prevents decision leakage semantics
+                "context_strength": "INVALID",
                 "context_reason": "market_outperformance",
-                "context_tradeable": True,
-                "context_tradeable_reason": "strong_or_leading_context",
             }
         ]
     )

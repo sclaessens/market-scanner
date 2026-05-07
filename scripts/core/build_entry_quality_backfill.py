@@ -45,18 +45,27 @@ OUTPUT_COLUMNS = [
     "distance_ma20_pct",
     "volume_ratio",
     "range_atr",
-    "entry_quality_flag",
+    "entry_quality_state",
     "entry_quality_reason",
 ]
 
+ALLOWED_STATES = {
+    "BALANCED",
+    "EXTENDED",
+    "VOLUME_DIVERGENCE",
+    "WIDE_RANGE",
+    "STRUCTURE_GAP",
+    "DATA_GAP",
+}
+
 ALLOWED_REASONS = {
-    "ok",
+    "balanced_structure",
     "too_far_from_breakout",
     "overextended_atr",
     "overextended_ma20",
     "weak_volume",
     "excessive_volume",
-    "range_expansion",
+    "wide_recent_range",
     "invalid_structure",
     "missing_data",
 }
@@ -381,33 +390,34 @@ def calculate_entry_quality(df: pd.DataFrame, config: EntryQualityConfig) -> pd.
     )
     missing_data = out[required].isna().any(axis=1) | out[metrics].replace([np.inf, -np.inf], np.nan).isna().any(axis=1)
 
-    out["entry_quality_flag"] = True
-    out["entry_quality_reason"] = "ok"
+    out["entry_quality_state"] = "BALANCED"
+    out["entry_quality_reason"] = "balanced_structure"
 
-    out.loc[missing_data, ["entry_quality_flag", "entry_quality_reason"]] = [False, "missing_data"]
-    out.loc[invalid_structure & ~missing_data, ["entry_quality_flag", "entry_quality_reason"]] = [False, "invalid_structure"]
+    out.loc[missing_data, ["entry_quality_state", "entry_quality_reason"]] = ["DATA_GAP", "missing_data"]
+    out.loc[invalid_structure & ~missing_data, ["entry_quality_state", "entry_quality_reason"]] = ["STRUCTURE_GAP", "invalid_structure"]
 
-    eligible = ~(missing_data | invalid_structure)
+    classifiable = ~(missing_data | invalid_structure)
     rules = [
-        (out["distance_to_breakout_pct"] > config.max_distance_breakout_pct, "too_far_from_breakout"),
-        (out["breakout_extension_atr"] > config.max_breakout_extension_atr, "overextended_atr"),
-        (out["extension_atr"] > config.max_extension_atr, "overextended_ma20"),
-        (out["volume_ratio"] < config.min_volume_ratio, "weak_volume"),
-        (out["volume_ratio"] > config.max_volume_ratio, "excessive_volume"),
-        (out["range_atr"] > config.max_range_atr, "range_expansion"),
+        (out["distance_to_breakout_pct"] > config.max_distance_breakout_pct, "EXTENDED", "too_far_from_breakout"),
+        (out["breakout_extension_atr"] > config.max_breakout_extension_atr, "EXTENDED", "overextended_atr"),
+        (out["extension_atr"] > config.max_extension_atr, "EXTENDED", "overextended_ma20"),
+        (out["volume_ratio"] < config.min_volume_ratio, "VOLUME_DIVERGENCE", "weak_volume"),
+        (out["volume_ratio"] > config.max_volume_ratio, "VOLUME_DIVERGENCE", "excessive_volume"),
+        (out["range_atr"] > config.max_range_atr, "WIDE_RANGE", "wide_recent_range"),
     ]
-    still_ok = eligible.copy()
-    for mask, reason in rules:
-        hit = still_ok & mask
-        out.loc[hit, ["entry_quality_flag", "entry_quality_reason"]] = [False, reason]
-        still_ok = still_ok & ~mask
+    unclassified = classifiable.copy()
+    for mask, state, reason in rules:
+        hit = unclassified & mask
+        out.loc[hit, ["entry_quality_state", "entry_quality_reason"]] = [state, reason]
+        unclassified = unclassified & ~mask
 
+    if not set(out["entry_quality_state"].dropna().unique()).issubset(ALLOWED_STATES):
+        raise AssertionError("Unexpected entry_quality_state detected")
     if not set(out["entry_quality_reason"].dropna().unique()).issubset(ALLOWED_REASONS):
         raise AssertionError("Unexpected entry_quality_reason detected")
 
     for col in metrics:
         out[col] = out[col].astype("float64").round(4)
-    out["entry_quality_flag"] = out["entry_quality_flag"].astype(bool)
     return out[OUTPUT_COLUMNS]
 
 
@@ -436,12 +446,12 @@ def validate_output(scans: pd.DataFrame, output: pd.DataFrame) -> None:
 
 
 def write_log(output: pd.DataFrame, log_path: Path, fetch_errors: dict[str, str] | None = None) -> None:
+    state_distribution = output["entry_quality_state"].value_counts().to_dict()
     reason_distribution = output["entry_quality_reason"].value_counts().to_dict()
     row = {
         "run_date": pd.Timestamp.utcnow().isoformat(),
         "total_rows": int(len(output)),
-        "valid_count": int(output["entry_quality_flag"].sum()),
-        "invalid_count": int((~output["entry_quality_flag"]).sum()),
+        "state_distribution": json.dumps(state_distribution, sort_keys=True),
         "reason_distribution": json.dumps(reason_distribution, sort_keys=True),
         "avg_extension_atr": float(output["extension_atr"].mean()),
         "avg_volume_ratio": float(output["volume_ratio"].mean()),

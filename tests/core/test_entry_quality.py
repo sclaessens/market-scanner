@@ -17,6 +17,7 @@ def _base_row(**overrides) -> dict:
         "close": 102.0,
         "ma20": 100.0,
         "ma50": 90.0,
+        "ma200": 80.0,
         "high_20d": 100.0,
         "low_20d": 95.0,
         "atr14": 2.0,
@@ -58,71 +59,71 @@ def _run_with_rows(patch_paths, rows: list[dict]) -> tuple[pd.DataFrame, pd.Data
     return validation_df, metrics_df
 
 
-def test_clean_row_entry_quality_true_reason_ok(patch_paths):
+def test_clean_row_entry_quality_balanced(patch_paths):
     _, metrics_df = _run_with_rows(patch_paths, [_base_row()])
 
-    assert bool(metrics_df.loc[0, "entry_quality_flag"]) is True
-    assert metrics_df.loc[0, "entry_quality_reason"] == "ok"
+    assert metrics_df.loc[0, "entry_quality_state"] == "BALANCED"
+    assert metrics_df.loc[0, "entry_quality_reason"] == "balanced_structure"
 
 
-def test_distance_to_breakout_above_threshold_false(patch_paths):
+def test_distance_to_breakout_metric_is_descriptive(patch_paths):
     _, metrics_df = _run_with_rows(
         patch_paths,
         [_base_row(close=104.0, high_20d=100.0, atr14=10.0, ma20=100.0)],
     )
 
-    assert bool(metrics_df.loc[0, "entry_quality_flag"]) is False
-    assert metrics_df.loc[0, "entry_quality_reason"] == "too_far_from_breakout"
+    assert float(metrics_df.loc[0, "distance_to_breakout_pct"]) == pytest.approx(4.0)
+    assert metrics_df.loc[0, "entry_quality_state"] == "BALANCED"
 
 
-def test_breakout_extension_atr_above_threshold_false(patch_paths):
+def test_breakout_extension_atr_metric_is_descriptive(patch_paths):
     _, metrics_df = _run_with_rows(
         patch_paths,
         [_base_row(close=102.5, high_20d=100.0, atr14=1.0, ma20=101.5)],
     )
 
-    assert bool(metrics_df.loc[0, "entry_quality_flag"]) is False
-    assert metrics_df.loc[0, "entry_quality_reason"] == "overextended_atr"
+    assert float(metrics_df.loc[0, "breakout_extension_atr"]) == pytest.approx(2.5)
+    assert metrics_df.loc[0, "entry_quality_state"] == "BALANCED"
 
 
-def test_extension_atr_above_threshold_false(patch_paths):
+def test_extension_atr_classified_extended(patch_paths):
     _, metrics_df = _run_with_rows(
         patch_paths,
         [_base_row(close=102.0, high_20d=100.0, atr14=1.0, ma20=99.0)],
     )
 
-    assert bool(metrics_df.loc[0, "entry_quality_flag"]) is False
-    assert metrics_df.loc[0, "entry_quality_reason"] == "overextended_ma20"
+    assert metrics_df.loc[0, "entry_quality_state"] == "EXTENDED"
+    assert metrics_df.loc[0, "entry_quality_reason"] == "extended_vs_ma20"
 
 
-def test_volume_ratio_below_min_false(patch_paths):
+def test_volume_ratio_below_min_is_metric_only(patch_paths):
     _, metrics_df = _run_with_rows(
         patch_paths,
         [_base_row(volume_ratio=1.0)],
     )
 
-    assert bool(metrics_df.loc[0, "entry_quality_flag"]) is False
-    assert metrics_df.loc[0, "entry_quality_reason"] == "weak_volume"
+    assert float(metrics_df.loc[0, "volume_ratio"]) == pytest.approx(1.0)
+    assert metrics_df.loc[0, "entry_quality_state"] == "BALANCED"
 
 
-def test_volume_ratio_above_max_false(patch_paths):
+def test_volume_ratio_above_max_is_metric_only(patch_paths):
     _, metrics_df = _run_with_rows(
         patch_paths,
         [_base_row(volume_ratio=4.5)],
     )
 
-    assert bool(metrics_df.loc[0, "entry_quality_flag"]) is False
-    assert metrics_df.loc[0, "entry_quality_reason"] == "excessive_volume"
+    assert float(metrics_df.loc[0, "volume_ratio"]) == pytest.approx(4.5)
+    assert metrics_df.loc[0, "entry_quality_state"] == "BALANCED"
 
 
-def test_range_atr_above_max_false(patch_paths):
+def test_range_atr_classified_wide_range(patch_paths):
     _, metrics_df = _run_with_rows(
         patch_paths,
-        [_base_row(high_20d=100.0, low_20d=94.0, atr14=2.0)],
+        [_base_row(high_20d=100.0, low_20d=86.0, atr14=2.0)],
     )
 
-    assert bool(metrics_df.loc[0, "entry_quality_flag"]) is False
-    assert metrics_df.loc[0, "entry_quality_reason"] == "range_expansion"
+    assert metrics_df.loc[0, "entry_quality_state"] == "WIDE_RANGE"
+    assert metrics_df.loc[0, "entry_quality_reason"] == "wide_recent_range"
 
 
 def test_atr14_zero_hard_fail(patch_paths):
@@ -157,8 +158,10 @@ def test_validation_layer_schema_unchanged(patch_paths):
     assert list(validation_df.columns) == [
         "ticker",
         "date",
+        "structure_state",
+        "structure_reason",
+        "setup_type",
         "valid_setup",
-        "tradeable_setup",
         "validation_reason",
     ]
 
@@ -175,7 +178,7 @@ def test_entry_quality_metrics_schema_exact(patch_paths):
         "distance_ma20_pct",
         "volume_ratio",
         "range_atr",
-        "entry_quality_flag",
+        "entry_quality_state",
         "entry_quality_reason",
     ]
 
@@ -189,11 +192,12 @@ def test_high_equals_low_sets_range_atr_zero(patch_paths):
     assert float(metrics_df.loc[0, "range_atr"]) == 0.0
 
 
-def test_entry_quality_does_not_change_valid_setup(patch_paths):
+def test_entry_quality_does_not_change_structure_contract(patch_paths):
     validation_df, metrics_df = _run_with_rows(
         patch_paths,
         [_base_row(close=104.0, high_20d=100.0, atr14=10.0, ma20=100.0)],
     )
 
-    assert bool(metrics_df.loc[0, "entry_quality_flag"]) is False
+    assert metrics_df.loc[0, "entry_quality_state"] == "BALANCED"
+    assert "structure_state" in validation_df.columns
     assert "valid_setup" in validation_df.columns
