@@ -519,6 +519,7 @@ Een sprint is PAS klaar wanneer:
 ✅ forbidden logic afwezig is
 ✅ end-to-end pipeline werkt
 ✅ data contracts gevalideerd zijn
+✅ After every completed sprint phase or sprint, the relevant sprint status document must be updated before the work can be considered complete.
 
 11. Migration Governance
 11.1 Belangrijkste Migratierisico
