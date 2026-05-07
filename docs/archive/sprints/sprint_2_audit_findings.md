@@ -284,3 +284,6 @@ Maar:
 
 Status: COMPLETE
 Ready for: Sprint 1 Refinement — Validation Upgrade
+
+Validation bottleneck → mogelijke oplossing:
+entry quality refinement (zie research document)
