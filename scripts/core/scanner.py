@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from functools import lru_cache
-from typing import Optional
-
 import pandas as pd
 import yfinance as yf
 
@@ -46,6 +44,53 @@ def _to_float(value) -> float:
         return float(value)
     except Exception:
         return float("nan")
+
+
+def _round_or_none(value: float, digits: int = 2) -> float | None:
+    if pd.isna(value):
+        return
+    return round(float(value), digits)
+
+
+def _unclassified_row(ticker: str, regime: str, reason: str) -> dict:
+    normalized_ticker = str(ticker).strip().upper()
+    return {
+        "ticker": normalized_ticker,
+        "date": _current_scan_date(),
+        "sector": get_sector(normalized_ticker),
+        "setup": "NONE",
+        "primary_setup": "",
+        "raw_score": 0.0,
+        "score": 0.0,
+        "score_trend": 0.0,
+        "score_momentum": 0.0,
+        "score_position": 0.0,
+        "score_relative_strength": 0.0,
+        "trend_ok": False,
+        "momentum_ok": False,
+        "liquidity_state": "UNKNOWN",
+        "discovery_state": "UNCLASSIFIED",
+        "discovery_reason": reason,
+        "regime_state": regime,
+        "close": None,
+        "ma20": None,
+        "ma50": None,
+        "ma200": None,
+        "atr14": None,
+        "high_20d": None,
+        "low_20d": None,
+        "avg_vol_20": None,
+        "volume_ratio": None,
+        "breakout_strength": None,
+        "extension_atr": None,
+        "ret_20d_pct": None,
+        "rs_20d_pct": None,
+        "atr_pct": None,
+        "entry": None,
+        "stop": None,
+        "target": None,
+        "rr": None,
+    }
 
 
 def _safe_pct(current: float, reference: float) -> float:
@@ -230,7 +275,7 @@ def _score_common_components(df: pd.DataFrame, qqq_return_20d: float) -> dict:
     }
 
 
-def detect_vcp(ticker: str, df: pd.DataFrame, regime: str = "NEUTRAL") -> Optional[dict]:
+def detect_vcp(ticker: str, df: pd.DataFrame, regime: str = "NEUTRAL") -> dict:
     required = {
         "Close",
         "High",
@@ -244,13 +289,10 @@ def detect_vcp(ticker: str, df: pd.DataFrame, regime: str = "NEUTRAL") -> Option
     }
 
     if not _has_required_columns(df, required):
-        return None
+        return {}
 
     if len(df) < VCP_LOOKBACK_DAYS:
-        return None
-
-    if not is_liquid_leader(df):
-        return None
+        return {}
 
     recent = df.tail(VCP_LOOKBACK_DAYS).copy()
     latest = recent.iloc[-1]
@@ -261,13 +303,13 @@ def detect_vcp(ticker: str, df: pd.DataFrame, regime: str = "NEUTRAL") -> Option
     ma200 = _to_float(latest["MA200"])
 
     if any(pd.isna(x) for x in [close, ma20, ma50, ma200]):
-        return None
+        return {}
 
     recent_high = _to_float(recent["High"].max())
     recent_low = _to_float(recent["Low"].min())
 
     if pd.isna(recent_high) or pd.isna(recent_low) or recent_high <= 0:
-        return None
+        return {}
 
     near_high = close >= recent_high * VCP_NEAR_HIGH_THRESHOLD
     contraction = ((recent_high - recent_low) / recent_high) <= VCP_CONTRACTION_THRESHOLD
@@ -282,7 +324,7 @@ def detect_vcp(ticker: str, df: pd.DataFrame, regime: str = "NEUTRAL") -> Option
     )
 
     if not (near_high and contraction and trend_aligned and volume_dry):
-        return None
+        return {}
 
     return {
         "ticker": ticker,
@@ -400,7 +442,7 @@ def scan_ticker(
     df: pd.DataFrame,
     regime: str,
     qqq_return_20d: float,
-) -> Optional[dict]:
+) -> dict:
     required = {
         "Close",
         "High",
@@ -416,10 +458,10 @@ def scan_ticker(
     }
 
     if not _has_required_columns(df, required):
-        return None
+        return _unclassified_row(ticker, regime, "missing_required_columns")
 
     if len(df) < MIN_HISTORY_ROWS:
-        return None
+        return _unclassified_row(ticker, regime, "insufficient_history")
 
     latest = df.iloc[-1]
 
@@ -443,10 +485,7 @@ def scan_ticker(
         pd.isna(x)
         for x in [close, ma20, ma50, ma200, atr, high_20, low_20, volume, avg_vol]
     ):
-        return None
-
-    if close < MIN_PRICE or avg_vol < MIN_AVG_VOLUME:
-        return None
+        return _unclassified_row(ticker, regime, "missing_required_metrics")
 
     distance_ma20 = (close - ma20) / ma20 if ma20 else float("nan")
     distance_ma50 = (close - ma50) / ma50 if ma50 else float("nan")
@@ -508,7 +547,7 @@ def scan_ticker(
     )
 
     vcp_result = detect_vcp(ticker, df, regime)
-    vcp = vcp_result is not None
+    vcp = bool(vcp_result)
 
     if breakout:
         primary_setup = "BREAKOUT"
@@ -517,7 +556,7 @@ def scan_ticker(
     elif vcp:
         primary_setup = "VCP"
     else:
-        return None
+        primary_setup = ""
 
     setup_types = []
     if pullback:
@@ -526,6 +565,10 @@ def scan_ticker(
         setup_types.append("BREAKOUT")
     if vcp:
         setup_types.append("VCP")
+
+    setup_classification = ", ".join(setup_types)
+    if not setup_classification:
+        setup_classification = "NONE"
 
     score_components = _score_common_components(df, qqq_return_20d)
 
@@ -573,7 +616,7 @@ def scan_ticker(
         + score_components["relative_strength"]
     )
 
-    tradeplan = build_tradeplan(df, primary_setup)
+    tradeplan = build_tradeplan(df, primary_setup) if primary_setup else {}
 
     if not tradeplan:
         tradeplan = {
@@ -589,7 +632,7 @@ def scan_ticker(
         "ticker": normalized_ticker,
         "date": _current_scan_date(),
         "sector": get_sector(normalized_ticker),
-        "setup": ", ".join(setup_types),
+        "setup": setup_classification,
         "primary_setup": primary_setup,
         "raw_score": round(float(raw_total_score), 2),
         "score": round(float(raw_total_score), 2),
@@ -601,6 +644,9 @@ def scan_ticker(
         ),
         "trend_ok": trend_ok,
         "momentum_ok": momentum_ok,
+        "liquidity_state": "LIQUID" if is_liquid_leader(df) else "ILLIQUID",
+        "discovery_state": "DISCOVERED" if primary_setup else "UNCLASSIFIED",
+        "discovery_reason": "classified_setup" if primary_setup else "no_setup_detected",
         "regime_state": regime,
         "close": round(float(close), 2),
         "ma20": round(float(ma20), 2),
@@ -614,24 +660,16 @@ def scan_ticker(
         if not pd.isna(volume_ratio)
         else None,
         "breakout_strength": round(float(breakout_strength), 2),
-        "extension_atr": round(float(extension_atr), 2)
-        if not pd.isna(extension_atr)
+        "extension_atr": _round_or_none(extension_atr),
+        "ret_20d_pct": _round_or_none(score_components["ret_20d"] * 100)
+        if score_components["ret_20d"] is not None
         else None,
-        "ret_20d_pct": (
-            round(float(score_components["ret_20d"] * 100), 2)
-            if score_components["ret_20d"] is not None
-            else None
-        ),
-        "rs_20d_pct": (
-            round(float(score_components["rs_20d"] * 100), 2)
-            if score_components["rs_20d"] is not None
-            else None
-        ),
-        "atr_pct": (
-            round(float(score_components["atr_pct"] * 100), 2)
-            if score_components["atr_pct"] is not None
-            else None
-        ),
+        "rs_20d_pct": _round_or_none(score_components["rs_20d"] * 100)
+        if score_components["rs_20d"] is not None
+        else None,
+        "atr_pct": _round_or_none(score_components["atr_pct"] * 100)
+        if score_components["atr_pct"] is not None
+        else None,
         **tradeplan,
     }
 
@@ -659,7 +697,7 @@ def _assign_relative_grades(ranked: list[dict]) -> list[dict]:
 
     return ranked
 
-def rank_setups(setups: list[dict], top_n: int = 10) -> list[dict]:
+def rank_setups(setups: list[dict], **_legacy_options) -> list[dict]:
     primary_priority = {
         "BREAKOUT": 3,
         "PULLBACK": 2,
@@ -679,8 +717,4 @@ def rank_setups(setups: list[dict], top_n: int = 10) -> list[dict]:
 
     ranked = _assign_relative_grades(ranked)
 
-    non_c_ranked = [s for s in ranked if s.get("grade") != "C"]
-    if len(non_c_ranked) >= min(top_n, 3):
-        ranked = non_c_ranked
-
-    return ranked[:top_n]
+    return ranked
