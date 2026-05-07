@@ -352,6 +352,38 @@ communication transitions
 escalation communication
 observability generation
 reporting failures
+
+## Runtime Observability
+
+The pipeline must provide clear runtime feedback during execution so operators can see what the system is doing without inferring hidden logic from generated outputs.
+
+Runtime observability must include:
+
+- clear runtime feedback during pipeline execution
+- visibility into scanner progress
+- visibility into validation, context, Decision Engine, and reporting phases
+- operator-friendly terminal output
+- deterministic logging behavior
+- no hidden execution logic
+- no automatic retry logic
+
+Examples:
+
+```text
+[scanner] Processing 14/82: NVDA
+[validation] Structure classification completed
+[decision_engine] Allocation decisions generated
+[reporting] Telegram summary generated
+```
+
+This observability layer must NOT:
+
+- alter trading logic
+- alter allocation behavior
+- introduce hidden state
+- introduce retries
+- modify pipeline outputs
+
 16. CI / Enforcement Requirements
 Verplicht
 schema enforcement

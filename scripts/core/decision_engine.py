@@ -215,7 +215,12 @@ def opportunity_rows(scanner_df: pd.DataFrame, validation_df: pd.DataFrame, cont
         base["date"] = date
 
     if not validation.empty:
-        base = base.merge(validation[["ticker", "date", "valid_setup", "structure_state", "validation_reason"]], on=["ticker", "date"], how="left")
+        validation_cols = [
+            column
+            for column in ["ticker", "date", "structure_state", "structure_reason", "validation_reason"]
+            if column in validation.columns
+        ]
+        base = base.merge(validation[validation_cols], on=["ticker", "date"], how="left")
     if not context.empty:
         base = base.merge(context[["ticker", "date", "context_strength", "leadership_state"]], on=["ticker", "date"], how="left")
     if not watchlist.empty:
@@ -225,6 +230,7 @@ def opportunity_rows(scanner_df: pd.DataFrame, validation_df: pd.DataFrame, cont
     for _, row in base.iterrows():
         ticker = clean_text(row.get("ticker"), fallback="?").upper()
         validation_state = clean_text(row.get("structure_state"), fallback="UNKNOWN").upper()
+        structure_reason = clean_text(row.get("structure_reason", row.get("validation_reason")), fallback="").lower()
         context_strength = clean_text(row.get("context_strength"), fallback="UNKNOWN").upper()
         leadership_state = clean_text(row.get("leadership_state"), fallback=context_strength).upper()
         timing_state = _timing_state_from_watchlist(row) if "status" in row.index or "timing_state" in row.index else _scanner_timing_state(row)
@@ -239,7 +245,7 @@ def opportunity_rows(scanner_df: pd.DataFrame, validation_df: pd.DataFrame, cont
             "context_strength": context_strength, "leadership_state": leadership_state,
             "timing_state": timing_state, "portfolio_state": "EXISTING" if ticker in portfolio_tickers else "NONE",
             "execution_style": "AGGRESSIVE" if final_action == ACTION_BUY and conviction in {"VERY_HIGH", "HIGH"} else "PASSIVE",
-            "decision_reason": reason, "entry": safe_float(row.get("entry")),
+            "decision_reason": reason if not structure_reason else f"{reason}:{structure_reason}", "entry": safe_float(row.get("entry")),
             "stop": safe_float(row.get("stop")), "target": safe_float(row.get("target")),
             "rr": safe_float(row.get("rr")), "trigger_price": safe_float(row.get("trigger_price", row.get("entry"))),
             "close": safe_float(row.get("close")), "ma20": safe_float(row.get("ma20")),

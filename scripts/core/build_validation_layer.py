@@ -21,7 +21,8 @@ NUMERIC_COLUMNS = [
 ]
 
 VALIDATION_OUTPUT_COLUMNS = [
-    "ticker", "date", "valid_setup", "validation_reason", "setup_type", "structure_state",
+    "ticker", "date", "structure_state", "structure_reason", "setup_type",
+    "valid_setup", "validation_reason",
 ]
 
 ENTRY_QUALITY_OUTPUT_COLUMNS = [
@@ -31,14 +32,13 @@ ENTRY_QUALITY_OUTPUT_COLUMNS = [
 ]
 
 LOG_COLUMNS = [
-    "run_date", "total_rows", "valid_setups", "invalid_setups",
-    "coherent_count", "broken_count", "incomplete_count", "avg_extension_atr",
+    "run_date", "total_rows", "coherent_count", "broken_count", "incomplete_count", "avg_extension_atr",
     "avg_volume_ratio", "median_range_atr",
 ]
 
-VALIDATION_REASON_ENUM = {
+STRUCTURE_REASON_ENUM = {
     "coherent_breakout", "coherent_pullback", "coherent_vcp",
-    "broken_price_structure", "missing_data", "no_setup", "unknown_setup",
+    "structure_broken", "missing_data", "no_setup", "unknown_setup",
 }
 
 
@@ -120,13 +120,13 @@ def _build_validation_layer_df(scanner_df: pd.DataFrame) -> pd.DataFrame:
 
     valid_setup = breakout_structure | pullback_structure | vcp_structure
 
-    validation_reason = pd.Series("unknown_setup", index=df.index, dtype="object")
-    validation_reason = validation_reason.mask(breakout_structure, "coherent_breakout")
-    validation_reason = validation_reason.mask(pullback_structure, "coherent_pullback")
-    validation_reason = validation_reason.mask(vcp_structure, "coherent_vcp")
-    validation_reason = validation_reason.mask(known_setup & ~valid_setup, "broken_price_structure")
-    validation_reason = validation_reason.mask(missing_required_data, "missing_data")
-    validation_reason = validation_reason.mask(no_setup, "no_setup")
+    structure_reason = pd.Series("unknown_setup", index=df.index, dtype="object")
+    structure_reason = structure_reason.mask(breakout_structure, "coherent_breakout")
+    structure_reason = structure_reason.mask(pullback_structure, "coherent_pullback")
+    structure_reason = structure_reason.mask(vcp_structure, "coherent_vcp")
+    structure_reason = structure_reason.mask(known_setup & ~valid_setup, "structure_broken")
+    structure_reason = structure_reason.mask(missing_required_data, "missing_data")
+    structure_reason = structure_reason.mask(no_setup, "no_setup")
 
     structure_state = pd.Series("BROKEN", index=df.index, dtype="object")
     structure_state = structure_state.mask(valid_setup, "COHERENT")
@@ -135,15 +135,17 @@ def _build_validation_layer_df(scanner_df: pd.DataFrame) -> pd.DataFrame:
     validation_df = pd.DataFrame({
         "ticker": df["ticker"],
         "date": df["date"],
-        "valid_setup": valid_setup.astype(bool),
-        "validation_reason": validation_reason,
-        "setup_type": df["primary_setup"],
         "structure_state": structure_state,
+        "structure_reason": structure_reason,
+        "setup_type": df["primary_setup"],
+        # Deprecated compatibility alias: structure coherence only, never allocation eligibility.
+        "valid_setup": valid_setup.astype(bool),
+        "validation_reason": structure_reason,
     }, columns=VALIDATION_OUTPUT_COLUMNS)
 
-    if not validation_df["validation_reason"].isin(VALIDATION_REASON_ENUM).all():
-        invalid_values = sorted(set(validation_df["validation_reason"]) - VALIDATION_REASON_ENUM)
-        raise ValueError(f"Invalid validation_reason values: {invalid_values}")
+    if not validation_df["structure_reason"].isin(STRUCTURE_REASON_ENUM).all():
+        invalid_values = sorted(set(validation_df["structure_reason"]) - STRUCTURE_REASON_ENUM)
+        raise ValueError(f"Invalid structure_reason values: {invalid_values}")
     return validation_df
 
 
@@ -156,12 +158,12 @@ def _build_entry_quality_metrics_df(scanner_df: pd.DataFrame) -> pd.DataFrame:
     distance_ma20_pct = (df["close"] - df["ma20"]) / df["ma20"] * 100
     range_atr = (df["high_20d"] - df["low_20d"]) / df["atr14"]
 
-    state = pd.Series("NORMAL", index=df.index, dtype="object")
+    state = pd.Series("BALANCED", index=df.index, dtype="object")
     state = state.mask(extension_atr >= 2.0, "EXTENDED")
     state = state.mask(extension_atr <= -1.0, "PULLBACK")
     state = state.mask(range_atr >= 6.0, "WIDE_RANGE")
 
-    reason = pd.Series("metadata_only", index=df.index, dtype="object")
+    reason = pd.Series("balanced_structure", index=df.index, dtype="object")
     reason = reason.mask(state == "EXTENDED", "extended_vs_ma20")
     reason = reason.mask(state == "PULLBACK", "below_ma20")
     reason = reason.mask(state == "WIDE_RANGE", "wide_recent_range")
@@ -203,8 +205,6 @@ def _write_validation_log(validation_df: pd.DataFrame, metrics_df: pd.DataFrame)
     log_row = {
         "run_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "total_rows": int(len(validation_df)),
-        "valid_setups": int(validation_df["valid_setup"].sum()),
-        "invalid_setups": int((~validation_df["valid_setup"]).sum()),
         "coherent_count": int(counts.get("COHERENT", 0)),
         "broken_count": int(counts.get("BROKEN", 0)),
         "incomplete_count": int(counts.get("INCOMPLETE", 0)),
