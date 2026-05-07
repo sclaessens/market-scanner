@@ -86,35 +86,21 @@ def last_action_map(df: pd.DataFrame) -> dict:
 def build_action_rows(status_df: pd.DataFrame, last_actions: dict) -> list[dict]:
     rows = []
     now = pd.Timestamp.now().strftime("%Y-%m-%d %H:%M:%S")
+    allowed_states = {"EARLY", "READY", "EXTENDED", "PULLBACK", "BREAKOUT_PENDING", "STALE", "FAILED"}
 
     for _, row in status_df.iterrows():
         ticker = row["ticker"]
         status = row["status"]
         setup_type = row.get("setup_type", "PULLBACK")
 
-        last_action = last_actions.get(ticker, "")
-
-        # 🔴 REJECTED → UNWATCH
-        if status == "REJECTED":
-            if last_action != "UNWATCH":
-                rows.append({
-                    "timestamp": now,
-                    "ticker": ticker,
-                    "action": "UNWATCH",
-                    "setup_type": setup_type,
-                    "source": "watchlist_state",
-                    "note": "auto-removed (REJECTED)"
-                })
-
-        # READY state is classification-only; no allocation signal is created here
-        elif status == "READY":
+        if status in allowed_states:
             rows.append({
                 "timestamp": now,
                 "ticker": ticker,
                 "action": "STATE_UPDATE",
                 "setup_type": setup_type,
                 "source": "watchlist_state",
-                "note": "watchlist timing state READY"
+                "note": f"watchlist timing state {status}"
             })
 
     return rows
