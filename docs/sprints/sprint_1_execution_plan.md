@@ -2,7 +2,9 @@
 
 ## 1. Sprint Status
 
-Status: READY FOR TECHNICAL LEAD DEVELOPER SPEC
+Status: CERTIFIED COMPLETE
+
+Closeout note: Sprint 1 is formally certified complete. See `docs/sprints/sprint_1_closeout.md`.
 
 Sprint 1 Institutional Re-Alignment Audit is complete.
 

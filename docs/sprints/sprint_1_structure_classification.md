@@ -4,7 +4,9 @@ Trading System — Institutional Decision Engine
 
 ## 1. Sprint Status
 
-Status: READY FOR FINAL GOVERNANCE REVIEW
+Status: CERTIFIED COMPLETE
+
+Closeout note: Sprint 1 is formally certified complete. See `docs/sprints/sprint_1_closeout.md`.
 
 Sprint 1 inherits the certified Sprint 0 architecture:
 

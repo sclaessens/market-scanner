@@ -144,6 +144,8 @@ Definition of Done
 ✅ Alle oude pseudo-tradeability verwijderd
 
 Sprint 1 — Structure Classification Layer
+
+Status: CERTIFIED COMPLETE. See `docs/sprints/sprint_1_closeout.md`. Sprint 2 may begin after Sprint 1 certification.
 Doel
 
 Institutionele structure classification bouwen.
