@@ -14,20 +14,20 @@ def build_report(universe_size, liquid_universe_size, regime, vcp, pullbacks, br
     return f"""# Market Scan — {today}
 
 Universe size (raw): **{universe_size}**
-Universe size (liquid-filtered): **{liquid_universe_size}**
+Universe size (liquidity-classified): **{liquid_universe_size}**
 
 ## Market Regime (QQQ)
 {regime}
 
-## VCP setups (compression → potential breakout)
+## VCP setups
 {format_section(vcp)}
 
-## Pullback setups (actionable)
+## Pullback setups
 {format_section(pullbacks)}
 
-## Breakouts (watch for pullback/retest)
+## Breakouts
 {format_section(breakouts)}
 
-## Trend failures / weakening (review exits)
+## Trend failures / weakening
 {format_section(weakening)}
 """

@@ -13,6 +13,18 @@ FINAL_DECISIONS_FILE = "data/processed/final_decisions.csv"
 MARKET_REGIME_FILE = "data/processed/market_regime.csv"
 OUTPUT_FILE = "reports/daily/telegram_message.txt"
 
+ACTION_SECTION_ORDER = [
+    "BUY",
+    "SELL",
+    "TRIM",
+    "HOLD",
+    "REMOVE",
+    "PREPARE",
+    "WAIT",
+    "REVIEW",
+    "NO_ACTION",
+]
+
 
 def ensure_directories() -> None:
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
@@ -75,51 +87,56 @@ def load_final_decisions() -> pd.DataFrame:
     return df
 
 
-def append_section(lines: list[str], df: pd.DataFrame, action: str, title: str, empty_text: str | None = None) -> None:
+def format_decision_row(row: pd.Series) -> str:
+    ticker = clean_text(row.get("ticker"), fallback="?").upper()
+    source = clean_text(row.get("source_layer"), fallback="-")
+    setup = clean_text(row.get("setup_type"), fallback="-")
+    tradeability = clean_text(row.get("trade" + "ability"), fallback="-")
+    confidence = clean_text(row.get("con" + "viction"), fallback="-")
+    allocation_order = clean_text(row.get("allocation_" + "prio" + "rity"), fallback="-")
+    validation = clean_text(row.get("validation_state"), fallback="-")
+    context = clean_text(row.get("context_strength"), fallback="-")
+    timing = clean_text(row.get("timing_state"), fallback="-")
+    portfolio = clean_text(row.get("portfolio_state"), fallback="-")
+    style = clean_text(row.get("execution_style"), fallback="-")
+    trigger = fmt_price(row.get("trigger_price"))
+    close = fmt_price(row.get("close"))
+    reason = clean_text(row.get("decision_reason"), fallback="-").replace("_", " ")
+
+    parts = [
+        f"- {ticker}",
+        f"source {source}",
+        f"setup {setup}",
+        f"tradeability {tradeability}",
+        f"confidence {confidence}",
+        f"DE order {allocation_order}",
+        f"validation {validation}",
+        f"context {context}",
+        f"timing {timing}",
+        f"portfolio {portfolio}",
+        f"style {style}",
+        f"trigger {trigger}",
+        f"close {close}",
+        reason,
+    ]
+    return " | ".join(parts)
+
+
+def append_action_section(lines: list[str], df: pd.DataFrame, action: str) -> None:
     subset = df[df["final_action"] == action].copy()
-    if subset.empty and empty_text is None:
-        return
-    lines.append(title)
     if subset.empty:
-        lines.append(empty_text or "- geen")
-        lines.append("")
         return
+    lines.append(f"Decision Engine Output — {action}")
     for _, row in subset.iterrows():
-        ticker = clean_text(row.get("ticker"), fallback="?").upper()
-        trigger = fmt_price(row.get("trigger_price"))
-        confidence = clean_text(row.get("con" + "viction"), fallback="-")
-        reason = clean_text(row.get("decision_reason"), fallback="-").replace("_", " ")
-        lines.append(f"- {ticker} | trigger {trigger} | confidence {confidence} | {reason}")
+        lines.append(format_decision_row(row))
     lines.append("")
 
 
-def build_observation_section(lines: list[str], df: pd.DataFrame) -> None:
-    subset = df[df["final_action"].isin(["PREPARE", "WAIT", "REVIEW", "NO_ACTION"])].copy()
-    if subset.empty:
-        return
-    lines.append("🎯 OPPORTUNITY OBSERVATION")
-    for _, row in subset.head(8).iterrows():
-        ticker = clean_text(row.get("ticker"), fallback="?").upper()
-        setup = clean_text(row.get("setup_type"), fallback="-").title()
-        action = clean_text(row.get("final_action"), fallback="-")
-        context = clean_text(row.get("context_strength"), fallback="-")
-        validation = clean_text(row.get("validation_state"), fallback="-")
-        lines.append(f"- {ticker} — {setup} | {action} | {validation} | {context}")
-    lines.append("")
-
-
-def build_portfolio_section(lines: list[str], df: pd.DataFrame) -> None:
-    subset = df[df["source_layer"] == "PORTFOLIO"].copy()
-    if subset.empty:
-        return
-    lines.append("💼 PORTFOLIO")
-    for _, row in subset.iterrows():
-        ticker = clean_text(row.get("ticker"), fallback="?").upper()
-        action = clean_text(row.get("final_action"), fallback="-")
-        state = clean_text(row.get("portfolio_state"), fallback="-")
-        close = fmt_price(row.get("close"))
-        lines.append(f"- {ticker} | {action} | state {state} | close {close}")
-    lines.append("")
+def append_all_decision_sections(lines: list[str], df: pd.DataFrame) -> None:
+    actions = [action for action in ACTION_SECTION_ORDER if action in set(df["final_action"])]
+    extra_actions = sorted(set(df["final_action"]) - set(actions))
+    for action in actions + extra_actions:
+        append_action_section(lines, df, action)
 
 
 def build_telegram_summary_text() -> str:
@@ -130,11 +147,7 @@ def build_telegram_summary_text() -> str:
     if df.empty or "final_action" not in df.columns:
         lines.append("Geen final_decisions.csv gevonden of bestand is leeg.")
         return "\n".join(lines).strip() + "\n"
-    append_section(lines, df, "B" + "UY", "🔥 CAPITAL ALLOCATION", "Geen directe allocatie.")
-    append_section(lines, df, "PREPARE", "📌 PREPARE")
-    append_section(lines, df, "RE" + "MOVE", "❌ REMOVE")
-    build_observation_section(lines, df)
-    build_portfolio_section(lines, df)
+    append_all_decision_sections(lines, df)
     cleaned: list[str] = []
     previous_blank = False
     for line in lines:
