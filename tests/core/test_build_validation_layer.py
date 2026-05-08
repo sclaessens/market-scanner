@@ -39,11 +39,28 @@ OUTPUT_COLUMNS = [
     "validation_reason",
 ]
 
+FORBIDDEN_VALIDATION_FIELDS = [
+    "tradeable_setup",
+    "context_tradeable",
+    "tradeability",
+    "conviction",
+    "allocation_priority",
+    "final_action",
+    "urgency",
+    "actionable",
+    "BUY",
+    "SELL",
+    "HOLD",
+    "TRIM",
+    "REMOVE",
+]
+
 
 @pytest.fixture()
 def isolated_paths(tmp_path, monkeypatch):
     scanner_path = tmp_path / "data" / "processed" / "scanner_ranked.csv"
     output_path = tmp_path / "data" / "processed" / "validation_layer.csv"
+    metrics_path = tmp_path / "data" / "processed" / "entry_quality_metrics.csv"
     log_path = tmp_path / "data" / "logs" / "validation_layer_log.csv"
 
     scanner_path.parent.mkdir(parents=True, exist_ok=True)
@@ -51,6 +68,7 @@ def isolated_paths(tmp_path, monkeypatch):
 
     monkeypatch.setattr(validation_module, "INPUT_PATH", scanner_path)
     monkeypatch.setattr(validation_module, "OUTPUT_PATH", output_path)
+    monkeypatch.setattr(validation_module, "ENTRY_QUALITY_OUTPUT_PATH", metrics_path)
     monkeypatch.setattr(validation_module, "LOG_PATH", log_path)
 
     return scanner_path, output_path, log_path
@@ -182,7 +200,7 @@ def test_no_setup_correct(isolated_paths):
     assert result.loc[0, "validation_reason"] == "no_setup"
 
 
-def test_invalid_structure_correct(isolated_paths):
+def test_broken_structure_correct(isolated_paths):
     scanner_path, _, _ = isolated_paths
 
     result = _run(
@@ -216,6 +234,34 @@ def test_legacy_tradeability_alias_not_emitted(isolated_paths):
     )
 
     assert "trad" + "eable_setup" not in result.columns
+
+
+def test_forbidden_validation_fields_not_emitted(isolated_paths):
+    scanner_path, output_path, _ = isolated_paths
+
+    result = _run(scanner_path, [_base_row()])
+    written = pd.read_csv(output_path)
+
+    for field in FORBIDDEN_VALIDATION_FIELDS:
+        assert field not in result.columns
+        assert field not in written.columns
+
+
+def test_compatibility_aliases_mirror_primary_contract(isolated_paths):
+    scanner_path, _, _ = isolated_paths
+
+    result = _run(
+        scanner_path,
+        [
+            _base_row(ticker="AAA", primary_setup="BREAKOUT"),
+            _base_row(ticker="BBB", close=80.0, ma20=95.0),
+            _base_row(ticker="CCC", primary_setup=""),
+        ],
+    )
+
+    assert result.loc[result["structure_state"] == "COHERENT", "valid_setup"].all()
+    assert not result.loc[result["structure_state"] != "COHERENT", "valid_setup"].any()
+    assert result["validation_reason"].equals(result["structure_reason"])
 
 
 def test_duplicate_ticker_date_fails(isolated_paths):

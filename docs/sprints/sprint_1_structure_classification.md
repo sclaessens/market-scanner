@@ -1,375 +1,353 @@
-SPRINT 1 — STRUCTURE CLASSIFICATION LAYER
+# Sprint 1 — Structure Classification Alignment & Governance Refinement
+
 Trading System — Institutional Decision Engine
-Validation Layer Reconstruction Sprint
-1. Executive Summary
 
-Sprint 1 herbouwt de volledige Validation Layer volgens de nieuwe institutionele architectuur.
+## 1. Sprint Status
 
-De vorige Validation Layer was architecturaal fout omdat ze:
+Status: READY FOR FINAL GOVERNANCE REVIEW
 
-tradeability simuleerde
-opportunities vroegtijdig elimineerde
-execution quality gebruikte als hard gate
-implicit allocation logic bevatte
+Sprint 1 inherits the certified Sprint 0 architecture:
 
-De architecture audit heeft bevestigd dat Validation:
+- classification upstream
+- allocation downstream
+- Decision Engine = ONLY allocation authority
+- upstream layers classify only
+- reporting communicates only
+- no upstream tradeability
+- no hidden filtering
+- no hidden allocation semantics outside Decision Engine
 
-technische coherentie moet classificeren
+Authoritative references:
 
-en NIET:
+- `AGENTS.md`
+- `README.md`
+- `docs/sprints/sprint_0_governance_status.md`
+- `docs/audits/sprint_0_final_governance_audit.md`
+- `docs/audits/documentation_alignment_audit_post_sprint_0.md`
+- `docs/technical/Technical_Analysis_v3.md`
+- `docs/functional/Functional_Analysis_v2.md`
+- `docs/execution/execution_delivery_framework_v2.md`
 
-kapitaalwaardigheid moet bepalen
+## 2. Executive Summary
 
+Sprint 1 is not a full Validation Layer rebuild.
 
+Sprint 1 is a governance refinement sprint for the Validation Layer. Its purpose is to stabilize structure-classification terminology, schemas, compatibility aliases, tests, and CI enforcement so future work cannot reintroduce filtering-first validation semantics.
 
+Validation may classify structural coherence only.
 
-1.1 Grootste Architecturale Correctie
-OUDE VALIDATION
-validation-first filtering
-NIEUWE VALIDATION
-structure classification
-1.2 Nieuwe Validation Doctrine
+Validation may not determine:
 
-Validation bepaalt uitsluitend:
+- tradeability
+- allocation eligibility
+- conviction
+- urgency
+- actionability
+- execution readiness
+- BUY/SELL/HOLD/TRIM/REMOVE behaviour
 
-“Is deze setup technisch coherent?”
+## 3. Sprint Objective
 
-Niet:
+Sprint 1 aligns the Validation Layer around the governance-clean runtime contract:
 
-“Verdient deze setup kapitaal?”
-2. Sprint Objective
+- `structure_state`
+- `structure_reason`
 
-Het doel van Sprint 1 is:
+Sprint 1 must preserve deterministic output, opportunity distribution, and separation of concerns.
 
-een pure institutionele structure-classification layer bouwen
+Sprint 1 must not add strategy logic, optimize thresholds, create filters, or alter downstream allocation behavior.
 
-zonder:
+## 4. Validation Contract
 
-allocation logic
-tradeability logic
-conviction logic
-timing invalidation
-2.1 Strategische Doelstelling
+### Primary Contract
 
-Validation moet:
+The authoritative validation output contract is:
 
-✅ structuur classificeren
-✅ coherentie bewaken
-✅ broken structures detecteren
-✅ data integrity bewaken
+- `structure_state`
+- `structure_reason`
 
-Maar NOOIT:
+These fields describe structural classification only.
 
-❌ allocatie simuleren
-❌ filtering engine worden
-❌ opportunities vernietigen
+### Deprecated Compatibility Aliases
 
-3. Strategic Context
+The following fields may remain temporarily for compatibility only:
 
-De vorige Validation Layer gebruikte:
+- `valid_setup`
+- `validation_reason`
 
-entry quality
-extension
-execution risk
-aggressive thresholds
+Compatibility rules:
 
-als:
+- `valid_setup` means structure coherence only.
+- `valid_setup` must never mean tradeability, allocation eligibility, actionability, or capital worthiness.
+- `validation_reason` must mirror or map to `structure_reason`.
+- New code should prefer `structure_state` and `structure_reason`.
 
-hard invalidation logic
+## 5. Structure States
 
-Dit veroorzaakte:
+Allowed structure-state vocabulary:
 
-distribution collapse
-premature edge destruction
-pseudo-decisioning upstream
-3.1 Nieuwe Validation Filosofie
+- `COHERENT`
+- `BROKEN`
+- `INCOMPLETE`
+- `MISSING_DATA`
+- `DEGRADED_STRUCTURE` only if needed and explicitly defined as descriptive metadata
 
-Validation moet:
+Forbidden binary vocabulary:
 
-distributie behouden
+- `VALID`
+- `INVALID`
 
-Niet:
+Rationale:
 
-edge vroegtijdig proberen beschermen
+Validation classifies structure. It does not make capital-allocation or execution decisions.
 
-Zoals expliciet gedefinieerd in Technical Analysis v3.
+## 6. Descriptive Metadata Policy
 
-4. Architectural Context
+The following are descriptive metadata only:
 
-Sprint 1 implementeert de volgende doctrine:
+- entry quality
+- extension
+- volume quality
+- breakout quality
+- RR quality
 
-VALID_SETUP = technische coherentie
-4.1 Nieuwe Validation Boundary
+These fields or concepts may not:
 
-Validation mag:
-
-✅ structuur interpreteren
-✅ coherentie bepalen
-✅ technische invalidatie uitvoeren
-
-Maar NOOIT:
-
-❌ tradeability bepalen
-❌ context interpreteren
-❌ conviction bepalen
-❌ allocation readiness bepalen
-
-
-
-
-5. Sprint Scope
-5.1 Nieuwe Validation Architecture
-Verplicht bouwen
-structure_valid
-trend_structure_valid
-data_integrity_valid
-structure_state
-5.2 Nieuwe VALID_SETUP Definitie
-Verplicht implementeren
-VALID_SETUP = (
-    structure_valid
-    AND trend_structure_valid
-    AND data_integrity_valid
-)
-5.3 Validation Metadata
-Verplicht toevoegen
-validation_reason
-structure_tags
-invalidation_metadata
-missing_data_flags
-structure_failure_type
-5.4 Structure States
-Verplicht classificeren
-VALID
-BROKEN
-INCOMPLETE
-WEAK_STRUCTURE
-MISSING_DATA
-INVALID
-5.5 Logging Infrastructure
-Verplicht loggen
-setup distribution
-invalidation distribution
-structure-state distribution
-missing-data distribution
-6. Explicit Non-Scope
-
-Sprint 1 mag NIET:
-
-❌ tradeability bouwen
-❌ conviction bouwen
-❌ timing quality bepalen
-❌ execution quality gebruiken als gate
-❌ BUY/SELL logic introduceren
-❌ portfolio interaction toevoegen
-❌ context filtering introduceren
-
-7. Required Inputs
-Verplichte documentatie
-Technical_Analysis_v3.md
-Functional_Analysis_v2.md
-execution_roadmap_v2.md
-Vereiste bestaande data
-scanner_ranked.csv
-OHLCV data
-indicator datasets
-8. Required Outputs
-8.1 validation_layer.csv
-Verplicht schema
-ticker
-date
-valid_setup
-validation_reason
-setup_type
-structure_state
-structure_valid
-trend_structure_valid
-data_integrity_valid
-8.2 Verboden Velden
-
-❌ tradeable_setup
-❌ conviction
-❌ context_strength
-❌ allocation_priority
-❌ BUY/SELL fields
-
-9. Data Contracts
-HARD RULE
-
-Validation mag uitsluitend:
-
-structure metadata
-
-produceren.
-
-HARD RULE
-
-Validation mag NOOIT:
-
-allocation metadata
-
-produceren.
-
-10. Governance Rules
-HARD RULE
-Validation = structure classification only
-HARD RULE
-No validation logic may simulate tradeability.
-HARD RULE
-No execution-quality metric may invalidate a setup directly.
-HARD RULE
-Validation may not collapse opportunity distribution excessively.
-
-11. Forbidden Logic
-11.1 Verboden Validation Logic
-
-❌ entry-quality gating
-❌ extension invalidation
-❌ momentum filtering
-❌ pseudo tradeability
-❌ conviction scoring
-❌ capital-worthiness logic
-
-11.2 Verboden Cross-Layer Logic
-
-Validation mag NOOIT:
-
-❌ context interpreteren
-❌ portfolio interpreteren
-❌ timing interpreteren
-❌ fundamentals interpreteren
-
-12. Technical Requirements
-12.1 build_validation_layer.py
-Verplicht herwerken
-
-Bestand:
-
-scripts/core/build_validation_layer.py
-12.2 Verplichte Functionaliteit
-structure validation
-trend validation
-integrity validation
-missing-data handling
-deterministic outputs
-fail-fast handling
-12.3 CI Enforcement
-Verplicht toevoegen
-grep -R "tradeable" scripts/core/build_validation_layer.py
-grep -R "BUY" scripts/core/build_validation_layer.py
-grep -R "SELL" scripts/core/build_validation_layer.py
-
-Resultaat moet leeg zijn.
-
-13. Functional Requirements
-Validation moet:
-
-✅ coherentie bepalen
-✅ structuur bewaken
-✅ invalid structures detecteren
-
-Validation mag NIET:
-
-❌ entries blokkeren op basis van extension
-❌ momentum beoordelen
-❌ opportunities prioriteren
-
-14. Validation Requirements
-Verplicht aantonen
-VALID_SETUP distributie
-
-Voor en na migratie.
-
-Structure-state distributie
-Invalidation distribution
-Missing-data handling
-15. Logging Requirements
-Verplicht loggen
-invalidation reasons
-missing-data warnings
-removed legacy gating
-setup distributions
-16. CI / Enforcement Requirements
-Verplicht
-schema enforcement
-forbidden-field detection
-forbidden-keyword scanning
-deterministic output validation
-17. Acceptance Criteria
-Sprint is PAS geslaagd wanneer:
-
-✅ VALID_SETUP enkel structuur betekent
-✅ Geen tradeability logic aanwezig is
-✅ Geen conviction logic aanwezig is
-✅ Entry quality géén hard gate meer is
-✅ Extension géén invalidation meer veroorzaakt
-✅ validation_layer.csv schema correct is
-✅ Distribution collapse beperkt blijft
-✅ Logging aanwezig is
-✅ CI checks slagen
-
-18. Definition of Done
-Verplicht
-
-✅ Alle governance rules gerespecteerd
-✅ Geen allocation leakage
-✅ Geen hidden filtering
-✅ Validation volledig deterministic
-✅ Outputs reproduceerbaar
-✅ Logging aanwezig
-✅ CI enforcement actief
-✅ Technical Lead review geslaagd
-✅ Functional Analyst review geslaagd
-
-19. Risks
-Grootste Risico
-legacy filtering remnants
-
-Bijvoorbeeld:
-
-hidden extension gates
-hidden entry-quality invalidation
-hidden momentum filtering
-old threshold remnants
-Verboden Reactie
-
-❌ snel opnieuw filtering toevoegen
-
-Correcte Reactie
-
-✅ distributie observeren
-✅ structuurclassificatie stabiliseren
-✅ allocatie downstream oplossen
-
-20. Migration Notes
-
-Na Sprint 1 zal waarschijnlijk:
-
-het aantal VALID setups stijgen
-
-Dat is EXPECTED.
-
-En institutioneel correct.
-
-Waarom?
-
-Omdat Validation niet langer:
-
-allocation logic simuleert
-21. Final Sprint Doctrine
-classify structure
-preserve opportunity distribution
-eliminate hidden filtering
-eliminate pseudo-tradeability
-prepare downstream allocation
-POST-SPRINT-0 GOVERNANCE INHERITANCE
-
-Status: FUTURE SPRINT PLAN — ACTIVE ONLY UNDER CERTIFIED GOVERNANCE
-
-This sprint plan must inherit Sprint 0 certification:
-
-classification upstream
-allocation downstream
-Decision Engine = ONLY allocation authority
-
-Validation work may classify structure only. It may not reintroduce tradeability, conviction, allocation priority, hidden filtering, or execution gating.
+- change `structure_state`
+- block the `valid_setup` compatibility alias
+- eliminate opportunities
+- act as hidden filters
+- imply tradeability
+- imply allocation readiness
+- imply execution readiness
+
+If emitted, descriptive metadata must remain separate from the primary validation contract.
+
+## 7. Structure Reason Policy
+
+Sprint 1 must use classification-first language.
+
+Preferred terms:
+
+- structure classification
+- `structure_reason`
+- `structure_failure_metadata`
+- structure-state distribution
+- broken or incomplete structures
+
+Avoid or replace:
+
+- technical invalidation
+- invalidation metadata
+- invalidation distribution
+- invalid structures
+
+Reason labels must describe structure, data quality, or classification state. They must not describe rejection, tradeability, actionability, urgency, allocation, or execution.
+
+## 8. Sprint Scope
+
+In scope:
+
+- align Sprint 1 documentation with certified Sprint 0 governance
+- review and stabilize `validation_layer.csv` schema expectations
+- confirm `structure_state` and `structure_reason` are the primary contract
+- mark `valid_setup` and `validation_reason` as deprecated compatibility aliases
+- ensure tests validate classification-first behavior
+- ensure CI/governance checks detect forbidden validation fields
+- monitor structure-state distribution
+- monitor missing-data distribution
+- monitor compatibility drift
+- monitor migration drift
+
+Out of scope:
+
+- rebuilding the full Validation Layer without a specific governance defect
+- changing scanner behavior
+- changing context behavior
+- changing watchlist behavior
+- changing portfolio behavior
+- changing Decision Engine allocation behavior
+- changing reporting behavior
+- adding strategy logic
+- adding filters
+- optimizing thresholds
+- creating BUY/SELL/HOLD/TRIM/REMOVE behavior
+- adding allocation, conviction, urgency, actionability, or execution readiness semantics
+
+## 9. Required Inputs
+
+Documentation:
+
+- `AGENTS.md`
+- `README.md`
+- `docs/technical/Technical_Analysis_v3.md`
+- `docs/functional/Functional_Analysis_v2.md`
+- `docs/execution/execution_delivery_framework_v2.md`
+- `docs/audits/sprint_0_final_governance_audit.md`
+- `docs/audits/documentation_alignment_audit_post_sprint_0.md`
+- `docs/sprints/sprint_0_governance_status.md`
+
+Runtime data for schema inspection:
+
+- `data/processed/scanner_ranked.csv`
+- `data/processed/validation_layer.csv`
+- `data/processed/entry_quality_metrics.csv`
+
+## 10. Required Outputs
+
+### Runtime Schema Expectation
+
+`validation_layer.csv` must expose structure-classification fields only.
+
+Required primary fields:
+
+- `ticker`
+- `date`
+- `structure_state`
+- `structure_reason`
+- `setup_type`
+
+Deprecated compatibility aliases, if still present:
+
+- `valid_setup`
+- `validation_reason`
+
+Forbidden validation output fields:
+
+- `tradeable_setup`
+- `context_tradeable`
+- `tradeability`
+- `conviction`
+- `allocation_priority`
+- `final_action`
+- `urgency`
+- `actionable`
+- `BUY`
+- `SELL`
+- `HOLD`
+- `TRIM`
+- `REMOVE`
+
+## 11. Generated Artifact Hygiene
+
+Legacy generated CSV columns such as:
+
+- `context_tradeable`
+- `entry_quality_flag`
+- `urgency`
+- `entry_plan`
+- `action_now`
+
+are schema/artifact hygiene risks only.
+
+They are not active Sprint 1 runtime scope unless explicitly added as a separate cleanup subtask. Sprint 1 may document these risks but must not expand scope implicitly.
+
+## 12. Distribution Preservation
+
+Sprint 1 must monitor:
+
+- structure-state distribution
+- missing-data distribution
+- compatibility drift
+- migration drift
+
+Sprint 1 may not optimize these distributions through hidden filtering.
+
+Distribution changes are observations. They are not permission to add filters, thresholds, or allocation shortcuts.
+
+## 13. Governance Rules
+
+Hard rules:
+
+- Validation = structure classification only.
+- `structure_state` is the authoritative validation contract.
+- `structure_reason` is the authoritative classification reason.
+- `valid_setup` is compatibility-only.
+- `validation_reason` is compatibility-only.
+- Entry quality and extension may not act as gates.
+- Validation may not emit allocation fields.
+- Validation may not emit action fields.
+- Validation may not interpret context, watchlist, portfolio, fundamentals, or reporting outputs.
+
+## 14. CI / Governance Enforcement
+
+Required checks for Validation Layer source and tests:
+
+```bash
+grep -R "tradeable_setup" scripts/core/build_validation_layer.py tests/core/test_build_validation_layer.py
+grep -R "context_tradeable" scripts/core/build_validation_layer.py tests/core/test_build_validation_layer.py
+grep -R "allocation_priority" scripts/core/build_validation_layer.py tests/core/test_build_validation_layer.py
+grep -R "final_action" scripts/core/build_validation_layer.py tests/core/test_build_validation_layer.py
+grep -R "urgency" scripts/core/build_validation_layer.py tests/core/test_build_validation_layer.py
+grep -R "BUY" scripts/core/build_validation_layer.py tests/core/test_build_validation_layer.py
+grep -R "SELL" scripts/core/build_validation_layer.py tests/core/test_build_validation_layer.py
+grep -R "REMOVE" scripts/core/build_validation_layer.py tests/core/test_build_validation_layer.py
+```
+
+Expected result:
+
+- no active validation logic emits forbidden fields
+- tests only reference forbidden terms when asserting absence
+- compatibility aliases are explicitly documented as deprecated and structure-only
+
+## 15. Acceptance Criteria
+
+Sprint 1 passes only when:
+
+- `structure_state` is the authoritative validation contract
+- `structure_reason` is the authoritative validation reason field
+- `valid_setup` is compatibility-only
+- `validation_reason` is compatibility-only
+- Validation emits no tradeability fields
+- Validation emits no allocation fields
+- Validation emits no conviction fields
+- Validation emits no action fields
+- entry quality is descriptive metadata only
+- extension is descriptive metadata only
+- RR quality is descriptive metadata only
+- volume quality is descriptive metadata only
+- no metadata field acts as a hidden filter
+- structure-state distribution is monitored, not optimized through filtering
+- missing-data distribution is monitored, not optimized through filtering
+- CI checks for forbidden fields pass
+- Technical Lead governance review passes
+- Functional Analyst review passes
+
+## 16. Definition of Done
+
+Sprint 1 is complete only when:
+
+- documentation is aligned with certified Sprint 0 doctrine
+- runtime schema expectations are governance-clean
+- tests enforce classification-first validation behavior
+- compatibility aliases are explicitly marked and tested as non-allocation fields
+- no hidden filtering is introduced
+- no new strategy logic is introduced
+- no threshold optimization is introduced
+- no downstream allocation behavior is changed
+- final governance review confirms readiness for developer execution or confirms no implementation work is required
+
+## 17. Risks And Controls
+
+| Risk | Control |
+|---|---|
+| `valid_setup` is treated as tradeability | Mark as deprecated compatibility alias for structure coherence only |
+| `VALID` / `INVALID` vocabulary reintroduces binary gating | Use `COHERENT`, `BROKEN`, `INCOMPLETE`, `MISSING_DATA` |
+| entry quality becomes a hidden gate | Keep entry quality separate and descriptive |
+| extension becomes a hidden gate | Test extension as metadata only |
+| distribution monitoring becomes optimization | Treat distributions as observability only |
+| legacy generated artifacts mislead developers | Document as artifact hygiene risk outside Sprint 1 runtime scope |
+
+## 18. Final Sprint Doctrine
+
+Classify structure.
+
+Preserve opportunity distribution.
+
+Stabilize schema language.
+
+Keep compatibility aliases temporary and explicit.
+
+Do not allocate upstream.
+
+Do not filter through hidden assumptions.
