@@ -1,3 +1,21 @@
+POST-SPRINT-0 DOCUMENT STATUS
+
+Status: COMPLETED SPRINT 0 PLAN / HISTORICAL
+
+Sprint 0 has been certified COMPLETE. This document is retained as the original migration specification and may contain planning language from before certification. Current operational governance is authoritative in:
+
+- `AGENTS.md`
+- `docs/sprints/sprint_0_governance_status.md`
+- `docs/audits/sprint_0_final_governance_audit.md`
+
+All implementation and future sprint work must follow the certified doctrine:
+
+- classification upstream
+- allocation downstream
+- Decision Engine = ONLY allocation authority
+
+---
+
 Sprint 0 — Governance Purification
 
 Institutional Architecture Migration — Developer Specification v1
@@ -9,7 +27,7 @@ Sprint Name	Governance Purification
 Priority	CRITICAL
 Classification	Architecture Migration
 Owner	Technical Lead
-Status	ACTIVE
+Status	COMPLETE
 Blocking Future Sprints	YES
 2. Sprint Objective
 

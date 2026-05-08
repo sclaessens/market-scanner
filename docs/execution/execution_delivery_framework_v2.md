@@ -1,5 +1,24 @@
 EXECUTION & DELIVERY FRAMEWORK v2
 Institutional Trading System — Architecture-Corrected Delivery Governance
+
+POST-SPRINT-0 CERTIFICATION STATUS
+
+Status: ACTIVE, GOVERNANCE-SYNCHRONIZED
+
+Sprint 0 Governance Purification is certified COMPLETE. Future delivery must inherit the certified doctrine:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+No sprint, implementation task, or delivery shortcut may reintroduce upstream tradeability, hidden filtering, allocation semantics outside Decision Engine, or reporting interpretation logic.
+
+Authoritative references:
+
+- AGENTS.md
+- docs/sprints/sprint_0_governance_status.md
+- docs/audits/sprint_0_final_governance_audit.md
+
 1. Purpose (REDEFINED)
 
 Dit document definieert het institutionele delivery framework voor het trading system.
@@ -189,6 +208,8 @@ classification capabilities first
 Pas later:
 
 allocation intelligence
+
+Allocation intelligence is only permitted inside Decision Engine-owned work. Classification sprints may not emit tradeability, conviction, allocation priority, or final action fields.
 4.2 Nieuwe Sprinttypes
 Type A — Classification Sprints
 
@@ -226,6 +247,10 @@ Sprint 0 — Architecture Stabilisation
 Doel
 
 Architecturale fouten elimineren.
+
+Post-Sprint-0 status:
+
+COMPLETE and certified. See `docs/sprints/sprint_0_governance_status.md` and `docs/audits/sprint_0_final_governance_audit.md`.
 
 Scope
 

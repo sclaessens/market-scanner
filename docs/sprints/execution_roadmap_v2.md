@@ -1,6 +1,25 @@
 SPRINT RESTRUCTURING DOCUMENT v2
 Architecture-Corrected Delivery Roadmap
 Trading System — Institutional Decision Engine
+
+POST-SPRINT-0 CERTIFICATION STATUS
+
+Status: ACTIVE ROADMAP, GOVERNANCE-SYNCHRONIZED
+
+Sprint 0 Governance Purification is certified COMPLETE. This roadmap remains active only under the certified doctrine:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Future sprints must inherit the certified runtime schemas and layer responsibilities documented in:
+
+- AGENTS.md
+- docs/sprints/sprint_0_governance_status.md
+- docs/audits/sprint_0_final_governance_audit.md
+
+Any roadmap wording about filtering, conviction, allocation, tradeability, or final actions is permitted only for Decision Engine-owned work. Upstream sprint work must remain classification-only.
+
 1. Executive Summary
 
 De originele sprintstructuur was gebaseerd op een architectuur die:
@@ -56,6 +75,8 @@ Sprint 0 — Architecture Migration & Stabilisation
 Doel
 
 De bestaande codebase corrigeren zodat ze compatibel wordt met de nieuwe institutionele architectuur.
+
+Status: COMPLETE and certified.
 
 PRIORITEIT
 

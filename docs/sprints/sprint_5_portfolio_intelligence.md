@@ -403,3 +403,14 @@ model exposure pressure
 eliminate hidden suppression
 preserve opportunity distribution
 prepare downstream allocation intelligence
+POST-SPRINT-0 GOVERNANCE INHERITANCE
+
+Status: FUTURE SPRINT PLAN — ACTIVE ONLY UNDER CERTIFIED GOVERNANCE
+
+This sprint plan must inherit Sprint 0 certification:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Portfolio work may model exposure and risk state only. It may not determine BUY/SELL, destroy upstream opportunities, or replace Decision Engine allocation authority.

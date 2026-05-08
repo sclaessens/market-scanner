@@ -422,3 +422,14 @@ rank opportunities
 allocate probabilistically
 centralize allocation authority
 preserve upstream classification integrity
+POST-SPRINT-0 GOVERNANCE INHERITANCE
+
+Status: FUTURE SPRINT PLAN — ACTIVE ONLY UNDER CERTIFIED GOVERNANCE
+
+This sprint plan must inherit Sprint 0 certification:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Decision Engine work is the only sprint category that may own final actions, tradeability, conviction, allocation priority, and capital allocation semantics.

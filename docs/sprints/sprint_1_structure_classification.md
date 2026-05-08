@@ -362,3 +362,14 @@ preserve opportunity distribution
 eliminate hidden filtering
 eliminate pseudo-tradeability
 prepare downstream allocation
+POST-SPRINT-0 GOVERNANCE INHERITANCE
+
+Status: FUTURE SPRINT PLAN — ACTIVE ONLY UNDER CERTIFIED GOVERNANCE
+
+This sprint plan must inherit Sprint 0 certification:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Validation work may classify structure only. It may not reintroduce tradeability, conviction, allocation priority, hidden filtering, or execution gating.

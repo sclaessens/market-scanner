@@ -389,3 +389,14 @@ preserve opportunity distribution
 eliminate hidden filtering
 separate quality from timing
 prepare downstream conviction enrichment
+POST-SPRINT-0 GOVERNANCE INHERITANCE
+
+Status: FUTURE SPRINT PLAN — ACTIVE ONLY UNDER CERTIFIED GOVERNANCE
+
+This sprint plan must inherit Sprint 0 certification:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Fundamental work may classify quality only. Any effect on conviction, sizing, tradeability, or allocation must be implemented only through Decision Engine-owned logic.

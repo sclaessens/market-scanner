@@ -456,3 +456,14 @@ preserve decision integrity
 maximize observability
 eliminate hidden interpretation
 keep allocation authority centralized
+POST-SPRINT-0 GOVERNANCE INHERITANCE
+
+Status: FUTURE SPRINT PLAN — ACTIVE ONLY UNDER CERTIFIED GOVERNANCE
+
+This sprint plan must inherit Sprint 0 certification:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Reporting work may communicate Decision Engine output only. It may not recalculate conviction, decide urgency, prioritize allocation, hide rows, or inject decision logic.

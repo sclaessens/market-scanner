@@ -1,5 +1,24 @@
 Decision Engine Design v2
 Institutional Allocation Authority Architecture
+
+POST-SPRINT-0 CERTIFICATION STATUS
+
+Status: ACTIVE, GOVERNANCE-SYNCHRONIZED
+
+Sprint 0 Governance Purification is certified COMPLETE. This document is active only under the binding doctrine:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Current runtime Decision Engine output is `data/processed/final_decisions.csv`. Older references to `decision_output.csv` are conceptual and should be read as `final_decisions.csv`.
+
+Authoritative references:
+
+- AGENTS.md
+- docs/sprints/sprint_0_governance_status.md
+- docs/audits/sprint_0_final_governance_audit.md
+
 1. Purpose (REDEFINED)
 
 De Decision Engine is de centrale allocatieautoriteit van het volledige trading system.
@@ -445,7 +464,7 @@ regime-adjusted exposure
 liquidity risk
 11. Output Architecture (REDEFINED)
 11.1 Nieuwe Centrale Output
-decision_output.csv
+final_decisions.csv
 11.2 Verplichte Velden
 ticker
 date

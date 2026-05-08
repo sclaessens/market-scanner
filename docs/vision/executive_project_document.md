@@ -1,3 +1,23 @@
+POST-SPRINT-0 DOCUMENT STATUS
+
+Status: NEEDS FUTURE UPDATE / PRE-SPRINT-0 STRATEGIC VISION
+
+This document is a valuable strategic vision artifact, but it predates certified Sprint 0 governance. It must not be used as an operational architecture source where it implies filtering, validation, or allocation outside Decision Engine.
+
+Current binding doctrine:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Authoritative current references:
+
+- AGENTS.md
+- docs/sprints/sprint_0_governance_status.md
+- docs/audits/sprint_0_final_governance_audit.md
+
+Any wording below about fundamentals filtering, context deciding how aggressively to act, or layers validating opportunities should be interpreted as downstream Decision Engine interpretation only.
+
 1. Executive Summary
 
 The current trading system represents a robust and scalable technical foundation, with a fully operational pipeline covering data ingestion, market scanning, watchlist management, portfolio tracking, and reporting. The architecture is modular, automated, and aligned with professional system design principles .
@@ -6,7 +26,7 @@ However, recent financial analysis has introduced a critical refinement to the s
 
 The key insight is that momentum alone is insufficient for consistent capital allocation. Momentum determines when the market is moving, but not whether that movement is reliable.
 
-This document therefore proposes an evolved system architecture that integrates financial intelligence as a non-intrusive, context-driven layer. Fundamentals are not introduced to replace the existing edge, but to stabilize, filter, and validate it.
+This document therefore proposes an evolved system architecture that integrates financial intelligence as a non-intrusive, classification-driven layer. Fundamentals are not introduced to replace the existing edge, but to classify quality for downstream Decision Engine interpretation.
 
 The objective is to transform the system from a signal generator into a disciplined decision engine that:
 
@@ -15,7 +35,7 @@ reduces false positives
 improves risk-adjusted returns
 increases decision consistency
 
-This positions the system closer to institutional trading frameworks where technical execution is combined with quality and risk filtering.
+This positions the system closer to institutional trading frameworks where technical classifications are combined downstream with quality and risk interpretation.
 
 2. Problem Statement
 
@@ -23,7 +43,7 @@ The current system’s limitations are not rooted in signal detection, but in de
 
 At present, the system generates technically valid setups, yet these setups are evaluated in isolation from underlying business strength and valuation context. This results in several structural weaknesses.
 
-First, decision inconsistency remains a key issue. Signals react to short-term price movements without sufficient stability controls, leading to frequent transitions between actionable and non-actionable states. This “flip-flop” behavior reduces execution confidence.
+First, decision inconsistency remains a key issue. Signals react to short-term price movements without sufficient stability controls, leading to frequent transitions between classification states before Decision Engine interpretation. This “flip-flop” behavior reduces execution confidence.
 
 Second, the system lacks differentiation between structurally strong and weak assets. A technically identical breakout can occur in both high-quality and fundamentally weak companies, yet both are treated equally. This leads to inefficient capital allocation and higher failure rates.
 

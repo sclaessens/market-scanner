@@ -412,3 +412,14 @@ preserve edge
 smooth probabilistically
 control transitions
 avoid hidden suppression
+POST-SPRINT-0 GOVERNANCE INHERITANCE
+
+Status: FUTURE SPRINT PLAN — ACTIVE ONLY UNDER CERTIFIED GOVERNANCE
+
+This sprint plan must inherit Sprint 0 certification:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Stability work may track persistence and transitions, but may not become hidden filtering or override Decision Engine allocation authority.

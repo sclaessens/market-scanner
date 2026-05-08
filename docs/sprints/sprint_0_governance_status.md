@@ -268,3 +268,27 @@ Sprint 0 is complete only when:
 - reporting is presentation-only
 - final governance audit passes
 - sprint status document is updated
+
+## 9. Post-Certification Documentation Synchronization
+
+Status: COMPLETE
+
+After Sprint 0 certification, active project documentation was synchronized to reflect the governance-clean institutional architecture.
+
+Documentation synchronization completed:
+
+- active architecture, functional, technical, execution, role, roadmap, and README documentation aligned to certified Sprint 0 doctrine
+- future sprint documents updated with governance inheritance notes
+- archival and research documentation marked as historical or non-operational where legacy terminology remains useful for audit context
+- post-certification documentation alignment audit created at `docs/audits/documentation_alignment_audit_post_sprint_0.md`
+
+Governance interpretation:
+
+- active operational documentation must follow classification upstream and allocation downstream
+- legacy terminology in archive, research, audit, or completed sprint records is historical context only
+- `AGENTS.md`, this status document, and `docs/audits/sprint_0_final_governance_audit.md` remain authoritative when documentation conflicts arise
+
+Commit/push status:
+
+- Not committed
+- Not pushed

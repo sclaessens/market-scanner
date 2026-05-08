@@ -409,3 +409,14 @@ model timing states
 eliminate hidden invalidation
 preserve opportunity distribution
 prepare downstream execution intelligence
+POST-SPRINT-0 GOVERNANCE INHERITANCE
+
+Status: FUTURE SPRINT PLAN — ACTIVE ONLY UNDER CERTIFIED GOVERNANCE
+
+This sprint plan must inherit Sprint 0 certification:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Watchlist/timing work may track timing state only. It may not emit BUY/SELL/REMOVE, tradeability, conviction, allocation priority, urgency, or execution instructions.

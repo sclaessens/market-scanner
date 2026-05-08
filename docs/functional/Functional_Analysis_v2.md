@@ -1,5 +1,24 @@
 FUNCTIONAL ANALYSIS DOCUMENT (v2 — ARCHITECTURE CORRECTED)
 Trading System — Institutional Decision Behaviour Framework
+
+POST-SPRINT-0 CERTIFICATION STATUS
+
+Status: ACTIVE, GOVERNANCE-SYNCHRONIZED
+
+Sprint 0 Governance Purification is certified COMPLETE. The current functional doctrine is:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Upstream layers classify only. Reporting communicates only. Only Decision Engine may produce tradeability, conviction, allocation priority, and final action fields.
+
+Authoritative references:
+
+- AGENTS.md
+- docs/sprints/sprint_0_governance_status.md
+- docs/audits/sprint_0_final_governance_audit.md
+
 1. Executive Overview (REDEFINED)
 
 Het systeem evolueert definitief van:
@@ -129,7 +148,7 @@ tradeable setup
 ✅ structure coherence
 ✅ technical integrity
 ✅ broken structures
-✅ invalid setups
+✅ structure_state classification
 
 4.2.3 Validation bepaalt NIET
 
@@ -164,17 +183,18 @@ NIEUWE FUNCTIONELE DEFINITIE
 
 Entry quality wordt:
 
-execution-quality metadata
+descriptive timing/structure metadata
 Entry quality mag:
 
-✅ conviction beïnvloeden
-✅ aggressiveness beïnvloeden
-✅ sizing beïnvloeden
-✅ timing beïnvloeden
+✅ geobserveerd worden door downstream lagen
+✅ als metadata gecommuniceerd worden
+✅ later door Decision Engine geïnterpreteerd worden
 
 Maar:
 
 ❌ VALID_SETUP niet blokkeren
+❌ geen execution instruction genereren
+❌ geen allocation gate vormen
 
 4.2.6 Nieuwe Validation Gedragsregel
 
@@ -224,7 +244,7 @@ LEADING
 STRONG
 NEUTRAL
 WEAK
-LAGGING
+UNKNOWN
 4.3.5 Nieuwe Gedragsregel
 
 Context bepaalt:
@@ -248,13 +268,14 @@ timing
 
 Sterke fundamentals:
 
-✅ verhogen conviction
-✅ verhogen holding tolerance
-✅ verlagen exit-agressiviteit
+✅ classificeren kwaliteit
+✅ verrijken downstream interpretatie
+✅ mogen later door Decision Engine worden gebruikt
 
 Maar:
 
 ❌ triggeren geen entries
+❌ bepalen geen upstream conviction
 
 4.4.3 Belangrijkste Functionele Correctie
 OUDE FOUT
@@ -490,15 +511,18 @@ Niet:
 
 filteringbeslissingen
 9.2 Verplichte Outputvelden
+Decision Engine output:
+
 final_action
 conviction
 tradeability
 allocation_priority
 validation_state
 context_strength
-fundamental_profile
+leadership_state
 timing_state
 portfolio_state
+execution_style
 decision_reason
 10. Governance Rules (UPDATED)
 10.1 Hard Rules That Stay

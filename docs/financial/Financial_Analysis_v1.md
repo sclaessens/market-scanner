@@ -1,4 +1,19 @@
 FINANCIAL MODEL & THEORY INTEGRATION DOCUMENT
+
+POST-SPRINT-0 DOCUMENT STATUS
+
+Status: NEEDS FUTURE UPDATE / PRE-SPRINT-0 FINANCIAL ANALYSIS
+
+This document contains useful financial research direction, but predates certified Sprint 0 governance. It must not be used to justify upstream filtering, upstream confidence/conviction, or allocation semantics outside Decision Engine.
+
+Current doctrine:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Fundamentals may classify quality upstream. Any effect on conviction, sizing, filtering, or allocation must be implemented only through Decision Engine-owned logic.
+
 1. Executive Overview
 
 De rol van financiële theorie binnen dit systeem is niet om signalen te genereren, maar om:
@@ -19,14 +34,15 @@ scanner → watchlist → portfolio → decision engine → reporting
 
 Deze laag:
 
-beïnvloedt confidence
-beïnvloedt position sizing (later)
-beïnvloedt filtering van zwakke setups
+classificeert kwaliteit
+verrijkt downstream interpretatie
+mag later door Decision Engine worden gebruikt
 
 Maar:
 
 bepaalt NOOIT timing
 vervangt NOOIT technische signalen
+filtert NOOIT upstream opportunities
 
 Dit is essentieel om de bestaande edge (momentum) te behouden.
 

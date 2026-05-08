@@ -1,5 +1,17 @@
 # Sprint 0 Governance Cleanup Patch Notes
 
+## Post-Sprint-0 Document Status
+
+Status: HISTORICAL PATCH NOTES
+
+Sprint 0 has been certified COMPLETE. This document preserves interim cleanup notes and may describe states or terms that were later removed during certification. Current governance authority is held by `AGENTS.md`, `docs/sprints/sprint_0_governance_status.md`, and `docs/audits/sprint_0_final_governance_audit.md`.
+
+Certified doctrine:
+
+- classification upstream
+- allocation downstream
+- Decision Engine = ONLY allocation authority
+
 ## Scope
 This patch removes the remaining governance leakage identified after the first Sprint 0 migration.
 

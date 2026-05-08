@@ -2,7 +2,17 @@ ENTRY QUALITY RESEARCH DOCUMENT
 
 Author: Senior Quant Researcher
 Scope: Entry Quality Metrics — Empirical Validation
-Status: Data-driven analysis (phase 1 complete)
+Status: Data-driven analysis (phase 1 complete); ARCHIVAL / PRE-SPRINT-0 terminology
+
+POST-SPRINT-0 GOVERNANCE NOTE
+
+This research remains useful evidence that entry-quality gates were harmful, but it uses pre-Sprint-0 terms such as `entry_quality_flag` and filtering. Current runtime governance treats entry quality as descriptive metadata only.
+
+Do not implement entry-quality filtering outside Decision Engine. Current doctrine:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
 
 1. 🎯 OBJECTIVE
 

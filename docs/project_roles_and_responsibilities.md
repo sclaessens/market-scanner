@@ -5,6 +5,24 @@ Version: v1 (Institutional Standard)
 
 ---
 
+## Post-Sprint-0 Governance Status
+
+Status: ACTIVE, GOVERNANCE-SYNCHRONIZED
+
+Sprint 0 Governance Purification is certified COMPLETE. All roles must follow:
+
+- classification upstream
+- allocation downstream
+- Decision Engine = ONLY allocation authority
+
+Authoritative references:
+
+- `AGENTS.md`
+- `docs/sprints/sprint_0_governance_status.md`
+- `docs/audits/sprint_0_final_governance_audit.md`
+
+No role may reintroduce upstream tradeability, hidden filtering, or allocation semantics outside Decision Engine.
+
 ## 1. Purpose of This Document
 
 Dit document definieert de rollen, verantwoordelijkheden en het niveau van expertise binnen het trading system project.
@@ -57,10 +75,13 @@ Het volledige systeem is gebaseerd op:
 Architectuur:
 
 * Scanner → detectie
+* Validation → structuurclassificatie
+* Context → leadershipclassificatie
 * Watchlist → timing
-* Portfolio → risico
 * Fundamentals → kwaliteit
+* Portfolio → exposure/risicostatus
 * Decision Engine → beslissing
+* Reporting → communicatie
 
 👉
 De **Decision Engine is de enige bron van waarheid** 
@@ -157,16 +178,14 @@ Top performer, geselecteerd door het board.
 
 ### Kernconcepten
 
-* VALID_SETUP vs TRADEABLE_SETUP
-* Confidence levels
+* structure_state vs Decision Engine tradeability
+* Classification states
 * State transitions
 
 👉
-Focus verschuift van:
+Focus:
 
-“Welke setups bestaan er?”
-naar:
-“Welke setups verdienen kapitaal?” 
+“Welke classificaties bestaan er upstream, en hoe mag alleen de Decision Engine kapitaal toewijzen?”
 
 ---
 
@@ -220,7 +239,7 @@ Top performer, geselecteerd door het board.
 
 * Sprint-based development
 * Eén layer per sprint
-* Validation-first aanpak
+* Classification-first aanpak
 
 👉
 Sprint 0 = stabilisatie

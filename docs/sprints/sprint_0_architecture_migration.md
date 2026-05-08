@@ -400,3 +400,11 @@ remove hidden filtering
 preserve opportunity distribution
 enforce classification-only upstream
 prepare institutional allocation downstream
+POST-SPRINT-0 DOCUMENT STATUS
+
+Status: COMPLETED SPRINT PLAN / HISTORICAL
+
+Sprint 0 is certified COMPLETE. This document is retained as historical planning context. Current status and certification are authoritative in:
+
+- docs/sprints/sprint_0_governance_status.md
+- docs/audits/sprint_0_final_governance_audit.md

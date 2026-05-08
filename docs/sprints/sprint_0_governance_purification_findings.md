@@ -1,5 +1,17 @@
 # Sprint 0 — Governance Purification Findings
 
+## Post-Sprint-0 Document Status
+
+Status: HISTORICAL MIGRATION FINDINGS
+
+Sprint 0 has been certified COMPLETE. This document records findings from the migration period and may include legacy field names for audit context. Current governance authority is held by `AGENTS.md`, `docs/sprints/sprint_0_governance_status.md`, and `docs/audits/sprint_0_final_governance_audit.md`.
+
+Where this document conflicts with certified runtime architecture, the certified doctrine applies:
+
+- classification upstream
+- allocation downstream
+- Decision Engine = ONLY allocation authority
+
 ## Executive Summary
 
 Sprint 0 purified the uploaded codebase from filtering-first governance and migrated the implementation toward the architecture-corrected doctrine:

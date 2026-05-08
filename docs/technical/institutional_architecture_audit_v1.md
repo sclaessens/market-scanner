@@ -758,3 +758,16 @@ allocation last
 Dat is institutioneel correct.
 
 En dat is de belangrijkste conclusie van deze audit.
+POST-SPRINT-0 DOCUMENT STATUS
+
+Status: ARCHIVAL / PRE-SPRINT-0 AUDIT INPUT
+
+This document is a historical architecture audit that identified issues later resolved by Sprint 0 Governance Purification. It may contain legacy terms such as `tradeable_setup`, `context_tradeable`, and allocation eligibility outside the current schema.
+
+Current authoritative certification:
+
+- docs/audits/sprint_0_final_governance_audit.md
+- docs/sprints/sprint_0_governance_status.md
+- AGENTS.md
+
+Use this file as historical evidence only. Do not use it as active implementation guidance where it conflicts with certified Sprint 0 governance.

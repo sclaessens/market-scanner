@@ -1,5 +1,24 @@
 TECHNICAL SPECIFICATION DOCUMENT (v3 — ARCHITECTURE CORRECTED)
 Trading System — Institutional Decision Engine Architecture
+
+POST-SPRINT-0 CERTIFICATION STATUS
+
+Status: ACTIVE, GOVERNANCE-SYNCHRONIZED
+
+Sprint 0 Governance Purification is certified COMPLETE. This document describes the active architecture only when read under the binding doctrine:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Authoritative references:
+
+- AGENTS.md
+- docs/sprints/sprint_0_governance_status.md
+- docs/audits/sprint_0_final_governance_audit.md
+
+If any older wording in this document appears to imply upstream tradeability, hidden filtering, or allocation semantics outside Decision Engine, the authoritative governance documents prevail.
+
 1. CORE TECHNICAL ARCHITECTURE (CORRECTED)
 1.1 Fundamental Architectural Principle
 
@@ -144,13 +163,16 @@ Technische structuurclassificatie.
 Schema
 ticker
 date
+structure_state
+structure_reason
+setup_type
 valid_setup
 validation_reason
-setup_type
-structure_state
 VERWIJDERD
 
 ❌ tradeable_setup
+❌ allocation fields
+❌ final_action
 
 Waarom
 
@@ -179,19 +201,33 @@ VERWIJDERD
 
 3.3 decision_output.csv (EXPANDED)
 Nieuwe centrale autoriteit
-decision_output.csv
+final_decisions.csv
 Schema
 ticker
 date
+source_layer
+setup_type
 final_action
-conviction
 tradeability
+conviction
 allocation_priority
-context_strength
 validation_state
-fundamental_profile
+context_strength
+leadership_state
+timing_state
 portfolio_state
+execution_style
 decision_reason
+entry
+stop
+target
+rr
+trigger_price
+regime
+close
+ma20
+ma50
+high_20d
 4. VALIDATION LAYER (REDEFINED)
 4.1 Core Responsibility
 
@@ -201,10 +237,11 @@ technische coherentie
 4.2 Wat Validation MAG doen
 
 ✅ structure checks
-✅ RR sanity checks
+✅ data integrity checks
+✅ structure state classification
 ✅ broken structure detecteren
 ✅ missing-data detection
-✅ technical invalidation
+✅ descriptive metadata
 
 4.3 Wat Validation NIET MAG doen
 
@@ -234,7 +271,7 @@ NIEUWE ROL
 
 Entry quality wordt:
 
-execution metadata
+descriptive timing/structure metadata
 
 Dus:
 
@@ -245,6 +282,8 @@ Dus:
 Maar:
 
 ❌ géén VALID_SETUP blokkeren
+❌ géén execution instruction
+❌ géén allocation gate
 
 4.6 Validation Philosophy
 

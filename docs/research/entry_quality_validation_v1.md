@@ -277,3 +277,22 @@ breakout_extension_atr <= 2.0
 extension_atr <= 3.0
 volume_ratio tussen 1.2 en 4.0
 range_atr <= 2.5
+POST-SPRINT-0 DOCUMENT STATUS
+
+Status: ARCHIVAL / PRE-SPRINT-0 RESEARCH NOTE
+
+This document preserves historical entry-quality research and contains outdated schema assumptions such as `tradeable_setup`. It must not be used as active implementation guidance.
+
+Current binding governance:
+
+- AGENTS.md
+- docs/sprints/sprint_0_governance_status.md
+- docs/audits/sprint_0_final_governance_audit.md
+
+Certified doctrine:
+
+classification upstream
+allocation downstream
+Decision Engine = ONLY allocation authority
+
+Entry quality is descriptive metadata only and must not determine upstream eligibility, tradeability, or allocation.
