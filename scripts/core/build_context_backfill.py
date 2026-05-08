@@ -39,21 +39,25 @@ OPTIONAL_SCAN_COLUMNS = {"sector", "regime"}
 OUTPUT_COLUMNS = [
     "ticker",
     "date",
+    "rs_score",
+    "rs_rank",
+    "rs_percentile",
     "rs_20d",
     "benchmark_return_20d",
     "rs_vs_market",
     "rs_vs_sector",
     "context_strength",
     "context_reason",
+    "leadership_state",
 ]
 
 ALLOWED_CONTEXT_STRENGTH = {"WEAK", "NEUTRAL", "STRONG", "LEADING", "UNKNOWN"}
 ALLOWED_CONTEXT_REASON = {
     "missing_rs_20d",
-    "neutral_rs",
-    "negative_rs",
-    "market_outperformance",
-    "market_and_sector_outperformance",
+    "top_decile_leadership",
+    "upper_quartile_leadership",
+    "middle_distribution",
+    "lower_distribution",
     "missing_price_data",
     "fallback",
 }
@@ -175,17 +179,27 @@ def classify_context(rs_20d: float | None, rs_vs_sector: float | None) -> tuple[
         return "UNKNOWN", "missing_rs_20d"
 
     if abs(rs_20d) <= NEUTRAL_BAND:
-        return "NEUTRAL", "neutral_rs"
+        return "NEUTRAL", "middle_distribution"
 
     if rs_20d < -NEUTRAL_BAND:
-        return "WEAK", "negative_rs"
+        return "WEAK", "lower_distribution"
 
     if rs_20d > NEUTRAL_BAND:
-        if rs_vs_sector is not None and not pd.isna(rs_vs_sector) and rs_vs_sector > NEUTRAL_BAND:
-            return "LEADING", "market_and_sector_outperformance"
-        return "STRONG", "market_outperformance"
+        return "STRONG", "upper_quartile_leadership"
 
     return "UNKNOWN", "fallback"
+
+
+def classify_percentile(percentile: float | None) -> tuple[str, str]:
+    if percentile is None or pd.isna(percentile):
+        return "UNKNOWN", "missing_rs_20d"
+    if percentile >= 90:
+        return "LEADING", "top_decile_leadership"
+    if percentile >= 75:
+        return "STRONG", "upper_quartile_leadership"
+    if percentile >= 40:
+        return "NEUTRAL", "middle_distribution"
+    return "WEAK", "lower_distribution"
 
 
 def build_context_backfill(
@@ -216,9 +230,9 @@ def build_context_backfill(
         if ticker_result.return_20d is None or benchmark_result.return_20d is None:
             context_strength = "UNKNOWN"
             context_reason = "missing_price_data"
-            rs_20d = 0.0
+            rs_20d = np.nan
             benchmark_return_20d = 0.0
-            rs_vs_market = 0.0
+            rs_vs_market = np.nan
             rs_vs_sector = np.nan
         else:
             benchmark_return_20d = benchmark_result.return_20d
@@ -231,16 +245,37 @@ def build_context_backfill(
             {
                 "ticker": ticker,
                 "date": scan_date.strftime("%Y-%m-%d"),
-                "rs_20d": round(float(rs_20d), 4),
+                "rs_score": rs_20d,
+                "rs_rank": pd.NA,
+                "rs_percentile": np.nan,
+                "rs_20d": rs_20d,
                 "benchmark_return_20d": round(float(benchmark_return_20d), 4),
-                "rs_vs_market": round(float(rs_vs_market), 4),
+                "rs_vs_market": rs_vs_market,
                 "rs_vs_sector": rs_vs_sector,
                 "context_strength": context_strength,
                 "context_reason": context_reason,
+                "leadership_state": context_strength,
             }
         )
 
     output = pd.DataFrame(rows, columns=OUTPUT_COLUMNS)
+    ready = output["rs_score"].notna()
+    if ready.any():
+        output.loc[ready, "rs_rank"] = (
+            output.loc[ready].groupby("date")["rs_score"].rank(method="first", ascending=False).astype("Int64")
+        )
+        output.loc[ready, "rs_percentile"] = (
+            output.loc[ready].groupby("date")["rs_score"].rank(method="average", pct=True) * 100
+        )
+        classifications = output.loc[ready, "rs_percentile"].apply(classify_percentile)
+        output.loc[ready, "context_strength"] = classifications.apply(lambda item: item[0])
+        output.loc[ready, "context_reason"] = classifications.apply(lambda item: item[1])
+        output.loc[ready, "leadership_state"] = output.loc[ready, "context_strength"]
+
+    float_columns = ["rs_score", "rs_percentile", "rs_20d", "rs_vs_market", "rs_vs_sector"]
+    for column in float_columns:
+        output[column] = pd.to_numeric(output[column], errors="coerce").round(4)
+
     validate_output(output, expected_rows=len(scans))
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

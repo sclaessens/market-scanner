@@ -38,12 +38,16 @@ def test_output_row_count_validation():
             {
                 "ticker": "AAA",
                 "date": "2026-02-01",
+                "rs_score": 1.0,
+                "rs_rank": 1,
+                "rs_percentile": 100.0,
                 "rs_20d": 1.0,
                 "benchmark_return_20d": 0.5,
                 "rs_vs_market": 1.0,
                 "rs_vs_sector": np.nan,
                 "context_strength": "STRONG",
-                "context_reason": "market_outperformance",
+                "context_reason": "upper_quartile_leadership",
+                "leadership_state": "STRONG",
             }
         ]
     )
@@ -61,26 +65,26 @@ def test_no_future_candle_usage():
 
 
 def test_strong_classification_correct():
-    assert b.classify_context(0.26, np.nan) == ("STRONG", "market_outperformance")
+    assert b.classify_context(0.26, np.nan) == ("STRONG", "upper_quartile_leadership")
 
 
 def test_weak_classification_correct():
-    assert b.classify_context(-0.26, np.nan) == ("WEAK", "negative_rs")
+    assert b.classify_context(-0.26, np.nan) == ("WEAK", "lower_distribution")
 
 
 def test_neutral_classification_correct():
-    assert b.classify_context(0.25, np.nan) == ("NEUTRAL", "neutral_rs")
-    assert b.classify_context(-0.25, np.nan) == ("NEUTRAL", "neutral_rs")
+    assert b.classify_context(0.25, np.nan) == ("NEUTRAL", "middle_distribution")
+    assert b.classify_context(-0.25, np.nan) == ("NEUTRAL", "middle_distribution")
 
 
-def test_leading_impossible_without_sector_data():
+def test_positive_relative_strength_does_not_require_sector_data():
     strength, reason = b.classify_context(5.0, np.nan)
     assert strength == "STRONG"
-    assert reason == "market_outperformance"
+    assert reason == "upper_quartile_leadership"
 
 
-def test_leading_when_sector_data_available():
-    assert b.classify_context(5.0, 1.0) == ("LEADING", "market_and_sector_outperformance")
+def test_cross_sectional_percentile_classification():
+    assert b.classify_percentile(95.0) == ("LEADING", "top_decile_leadership")
 
 
 def test_unknown_missing_price_data_policy(tmp_path: Path, monkeypatch):
@@ -105,9 +109,10 @@ def test_unknown_missing_price_data_policy(tmp_path: Path, monkeypatch):
     row = output.iloc[0]
     assert row["context_strength"] == "UNKNOWN"
     assert row["context_reason"] == "missing_price_data"
-    assert row["rs_20d"] == 0.0
+    assert pd.isna(row["rs_score"])
+    assert pd.isna(row["rs_20d"])
     assert row["benchmark_return_20d"] == 0.0
-    assert row["rs_vs_market"] == 0.0
+    assert pd.isna(row["rs_vs_market"])
     assert pd.isna(row["rs_vs_sector"])
 
 
@@ -117,12 +122,16 @@ def test_allowed_enum_validation_fails():
             {
                 "ticker": "AAA",
                 "date": "2026-02-01",
+                "rs_score": 1.0,
+                "rs_rank": 1,
+                "rs_percentile": 100.0,
                 "rs_20d": 1.0,
                 "benchmark_return_20d": 0.5,
                 "rs_vs_market": 1.0,
                 "rs_vs_sector": np.nan,
                 "context_strength": "INVALID",
-                "context_reason": "market_outperformance",
+                "context_reason": "upper_quartile_leadership",
+                "leadership_state": "INVALID",
             }
         ]
     )
