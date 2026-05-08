@@ -40,7 +40,7 @@ DEFAULT_THRESHOLDS = {
         "vcp_max_range_pct": 0.08,
         "vcp_max_close_to_ma20_pct": 0.04,
 
-        "reject_below_ma50": True,
+        "fail_below_ma50": True,
         "expire_after_days": 20,
     }
 }
@@ -307,9 +307,9 @@ def evaluate_pullback(
     ready_distance = cfg["ready_distance_to_ma20_pct"]
     neutral_ready_distance = cfg["neutral_ready_distance_to_ma20_pct"]
     max_extended = cfg["max_extended_from_ma20_pct"]
-    reject_below_ma50 = cfg["reject_below_ma50"]
+    fail_below_ma50 = cfg["fail_below_ma50"]
 
-    if reject_below_ma50 and close < ma50:
+    if fail_below_ma50 and close < ma50:
         return "FAILED", "below_ma50", "Trend is gebroken onder MA50."
 
     if regime == "BEARISH":
@@ -356,9 +356,9 @@ def evaluate_breakout(
     breakout_break_above_high_pct = cfg.get("breakout_break_above_high_pct", 0.002)
     max_breakout_chase_pct = cfg.get("max_breakout_chase_pct", 0.03)
     missed_breakout_pct = cfg.get("missed_breakout_pct", 0.08)
-    reject_below_ma50 = cfg["reject_below_ma50"]
+    fail_below_ma50 = cfg["fail_below_ma50"]
 
-    if reject_below_ma50 and close < ma50:
+    if fail_below_ma50 and close < ma50:
         return "FAILED", "below_ma50", "Trend is gebroken onder MA50."
 
     if regime == "BEARISH":

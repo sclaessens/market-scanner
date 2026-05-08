@@ -138,7 +138,7 @@ def _build_validation_layer_df(scanner_df: pd.DataFrame) -> pd.DataFrame:
         "structure_state": structure_state,
         "structure_reason": structure_reason,
         "setup_type": df["primary_setup"],
-        # Deprecated compatibility alias: structure coherence only, never allocation eligibility.
+        # Deprecated compatibility alias: structure coherence only, never capital eligibility.
         "valid_setup": valid_setup.astype(bool),
         "validation_reason": structure_reason,
     }, columns=VALIDATION_OUTPUT_COLUMNS)

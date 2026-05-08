@@ -204,7 +204,7 @@ def test_invalid_structure_correct(isolated_paths):
     assert result.loc[0, "validation_reason"] == "structure_broken"
 
 
-def test_legacy_allocation_alias_not_emitted(isolated_paths):
+def test_legacy_tradeability_alias_not_emitted(isolated_paths):
     scanner_path, _, _ = isolated_paths
 
     result = _run(

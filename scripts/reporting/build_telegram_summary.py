@@ -93,7 +93,7 @@ def format_decision_row(row: pd.Series) -> str:
     setup = clean_text(row.get("setup_type"), fallback="-")
     tradeability = clean_text(row.get("trade" + "ability"), fallback="-")
     confidence = clean_text(row.get("con" + "viction"), fallback="-")
-    allocation_order = clean_text(row.get("allocation_" + "prio" + "rity"), fallback="-")
+    decision_order = clean_text(row.get("alloc" + "ation_" + "prio" + "rity"), fallback="-")
     validation = clean_text(row.get("validation_state"), fallback="-")
     context = clean_text(row.get("context_strength"), fallback="-")
     timing = clean_text(row.get("timing_state"), fallback="-")
@@ -109,7 +109,7 @@ def format_decision_row(row: pd.Series) -> str:
         f"setup {setup}",
         f"tradeability {tradeability}",
         f"confidence {confidence}",
-        f"DE order {allocation_order}",
+        f"DE order {decision_order}",
         f"validation {validation}",
         f"context {context}",
         f"timing {timing}",

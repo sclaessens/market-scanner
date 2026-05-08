@@ -22,7 +22,7 @@ The sprint objective is to purify upstream layers so they preserve opportunity d
 | Phase 3B — Historical/Test Governance Cleanup | COMPLETE | Historical entry-quality backfill converted to classification state; tests updated to classification-first schemas |
 | Phase 4 — Reporting Purification | COMPLETE | Reporting now formats Decision Engine output only; self-authored allocation framing and row suppression removed |
 | Phase 5 — Context Purification | COMPLETE | Context runtime/backfill classification-only; historical backfill now uses cross-sectional leadership classification when available |
-| Phase 6 — Final Governance Audit | PENDING | Full architecture verification still required |
+| Phase 6 — Final Governance Audit | COMPLETE | Final governance audit passed; Sprint 0 certified complete with non-blocking residual risks documented |
 
 ## 4. Completed Migrations
 
@@ -193,6 +193,40 @@ Commit/push status:
 - Not committed
 - Not pushed
 
+### Final Governance Audit
+
+Files changed:
+
+- `docs/audits/sprint_0_final_governance_audit.md`
+- `docs/sprints/sprint_0_governance_status.md`
+- `scripts/watchlist/parse_watchlist_commands.py`
+- `scripts/watchlist/evaluate_watchlist.py`
+- `scripts/core/scanner.py`
+- `scripts/core/build_validation_layer.py`
+- `scripts/reporting/build_telegram_summary.py`
+- `scripts/run_full_pipeline.py`
+- `tests/core/test_build_validation_layer.py`
+
+Governance violations removed:
+
+- manual watchlist command parsing no longer emits rejection, accepted/eligibility, or trigger-plan semantics
+- watchlist timing configuration labels no longer use rejection terminology
+- scanner ranking helper naming no longer uses allocation-adjacent priority terminology
+- reporting and validation/test labels no longer contain active allocation wording outside Decision Engine-owned schema access
+- full-pipeline wrapper comments no longer contain allocation wording outside Decision Engine context
+
+Validation performed:
+
+- full test suite passed
+- full pipeline completed successfully with virtual environment interpreter
+- final governance grep audit completed and interpreted
+- runtime output schemas inspected
+
+Commit/push status:
+
+- Not committed
+- Not pushed
+
 ## 5. Remaining Risks
 
 - Telegram command parsing still contains BUY/SELL syntax for user transaction commands; this is intentionally out of reporting decision generation scope
@@ -202,15 +236,15 @@ Commit/push status:
 
 | Governance Area | Status |
 |---|---|
-| Allocation Centralisation | IN PROGRESS |
-| Upstream Purification | IN PROGRESS |
+| Allocation Centralisation | COMPLETE |
+| Upstream Purification | COMPLETE |
 | Watchlist Purification | COMPLETE |
 | Scanner Purification | COMPLETE |
 | Validation Runtime Purification | COMPLETE |
 | Historical/Test Cleanup | COMPLETE |
 | Reporting Purification | COMPLETE |
 | Context Purification | COMPLETE |
-| Final Governance Audit | PENDING |
+| Final Governance Audit | COMPLETE |
 
 ## 7. Mandatory Execution Workflow
 
