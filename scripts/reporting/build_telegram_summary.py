@@ -15,15 +15,18 @@ OUTPUT_FILE = "reports/daily/telegram_message.txt"
 
 ACTION_SECTION_ORDER = [
     "BUY",
+    "ACCUMULATE",
     "SELL",
     "TRIM",
     "HOLD",
     "REMOVE",
-    "PREPARE",
-    "WAIT",
     "REVIEW",
-    "NO_ACTION",
+    "PREPARE",
 ]
+
+GROUPABLE_ACTIONS = {"WAIT", "NO_ACTION", "NOT_TRADEABLE", "REVIEW"}
+OBSERVATION_ACTIONS = {"WAIT", "WATCH", "NOT_TRADEABLE", "NO_ACTION"}
+MAX_OBSERVATION_EXAMPLES = 3
 
 
 def ensure_directories() -> None:
@@ -54,6 +57,8 @@ def clean_text(value, fallback: str = "-") -> str:
     if isinstance(value, float) and pd.isna(value):
         return fallback
     text = str(value).strip()
+    if text.upper() in {"NAN", "NONE", "NULL"}:
+        return fallback
     return text if text else fallback
 
 
@@ -73,8 +78,7 @@ def build_market_regime_header() -> list[str]:
             if col in df.columns:
                 regime = clean_text(last_row.get(col), fallback="UNKNOWN").upper()
                 break
-    emoji_map = {"BULLISH": "🟢", "NEUTRAL": "🟡", "BEARISH": "🔴", "UNKNOWN": "⚪"}
-    return [f"Regime: {emoji_map.get(regime, '⚪')} {regime}", ""]
+    return [f"Regime: {regime}", ""]
 
 
 def load_final_decisions() -> pd.DataFrame:
@@ -87,62 +91,131 @@ def load_final_decisions() -> pd.DataFrame:
     return df
 
 
-def format_decision_row(row: pd.Series) -> str:
+def format_compact_decision_row(row: pd.Series) -> str:
     ticker = clean_text(row.get("ticker"), fallback="?").upper()
-    source = clean_text(row.get("source_layer"), fallback="-")
-    setup = clean_text(row.get("setup_type"), fallback="-")
-    tradeability = clean_text(row.get("trade" + "ability"), fallback="-")
-    confidence = clean_text(row.get("con" + "viction"), fallback="-")
-    decision_order = clean_text(row.get("alloc" + "ation_" + "prio" + "rity"), fallback="-")
-    validation = clean_text(row.get("validation_state"), fallback="-")
+    action = clean_text(row.get("final_action"), fallback="-").upper()
     context = clean_text(row.get("context_strength"), fallback="-")
     timing = clean_text(row.get("timing_state"), fallback="-")
     portfolio = clean_text(row.get("portfolio_state"), fallback="-")
-    style = clean_text(row.get("execution_style"), fallback="-")
     trigger = fmt_price(row.get("trigger_price"))
     close = fmt_price(row.get("close"))
-    reason = clean_text(row.get("decision_reason"), fallback="-").replace("_", " ")
 
-    parts = [
-        f"- {ticker}",
-        f"source {source}",
-        f"setup {setup}",
-        f"tradeability {tradeability}",
-        f"confidence {confidence}",
-        f"DE order {decision_order}",
-        f"validation {validation}",
-        f"context {context}",
-        f"timing {timing}",
-        f"portfolio {portfolio}",
-        f"style {style}",
-        f"trigger {trigger}",
-        f"close {close}",
-        reason,
-    ]
+    parts = [f"- {ticker} — {action}"]
+    if timing not in {"-", "UNKNOWN"}:
+        parts.append(f"timing {timing}")
+    if context not in {"-", "UNKNOWN"}:
+        parts.append(f"context {context}")
+    if portfolio not in {"-", "UNKNOWN"}:
+        parts.append(f"portfolio {portfolio}")
+    if trigger != "-":
+        parts.append(f"trigger {trigger}")
+    if close != "-":
+        parts.append(f"close {close}")
     return " | ".join(parts)
+
+
+def normalized_cell(row: pd.Series, column: str, fallback: str = "-") -> str:
+    return clean_text(row.get(column), fallback=fallback).upper()
+
+
+def is_low_information_observation(row: pd.Series) -> bool:
+    action = normalized_cell(row, "final_action")
+    source = normalized_cell(row, "source_layer")
+    setup = normalized_cell(row, "setup_type")
+    tradeability = normalized_cell(row, "trade" + "ability")
+    validation = normalized_cell(row, "validation_state")
+    timing = normalized_cell(row, "timing_state")
+    portfolio = normalized_cell(row, "portfolio_state")
+    reason = clean_text(row.get("decision_reason"), fallback="").lower().replace("_", " ")
+
+    no_setup_reason = "no setup" in reason and "structure not coherent" in reason
+    return (
+        action in GROUPABLE_ACTIONS
+        and source == "SCANNER"
+        and setup in {"-", "NAN", "NONE", "UNKNOWN", ""}
+        and tradeability in {"NOT_TRADEABLE", "NO_ACTION"}
+        and validation == "INCOMPLETE"
+        and timing == "UNKNOWN"
+        and portfolio in {"NONE", "-", "UNKNOWN", ""}
+        and no_setup_reason
+    )
+
+
+def append_low_information_summary(lines: list[str], omitted_count: int) -> None:
+    if omitted_count <= 0:
+        return
+    lines.append(f"Low-information scanner observations omitted: {omitted_count}")
+    lines.append("")
+
+
+def is_scanner_observation(row: pd.Series) -> bool:
+    action = normalized_cell(row, "final_action")
+    source = normalized_cell(row, "source_layer")
+    return source == "SCANNER" and action in OBSERVATION_ACTIONS
 
 
 def append_action_section(lines: list[str], df: pd.DataFrame, action: str) -> None:
     subset = df[df["final_action"] == action].copy()
     if subset.empty:
         return
-    lines.append(f"Decision Engine Output — {action}")
+    lines.append(action)
     for _, row in subset.iterrows():
-        lines.append(format_decision_row(row))
+        lines.append(format_compact_decision_row(row))
     lines.append("")
 
 
-def append_all_decision_sections(lines: list[str], df: pd.DataFrame) -> None:
+def append_active_decision_sections(lines: list[str], df: pd.DataFrame) -> None:
+    if df.empty:
+        return
     actions = [action for action in ACTION_SECTION_ORDER if action in set(df["final_action"])]
     extra_actions = sorted(set(df["final_action"]) - set(actions))
+    if not actions and not extra_actions:
+        return
+    lines.append("Portfolio / Active Decisions")
     for action in actions + extra_actions:
         append_action_section(lines, df, action)
 
 
+def append_observation_summary(lines: list[str], df: pd.DataFrame) -> None:
+    if df.empty:
+        return
+    lines.append("Watch / Observation Candidates")
+    lines.append("Observed opportunities:")
+    grouped = (
+        df.assign(
+            setup_group=df["setup_type"].apply(lambda value: clean_text(value, fallback="UNKNOWN").upper()),
+            context_group=df["context_strength"].apply(lambda value: clean_text(value, fallback="UNKNOWN").upper()),
+        )
+        .groupby(["setup_group", "context_group"], dropna=False)
+    )
+    for (setup, context), group in grouped:
+        examples = ", ".join(group["ticker"].astype(str).str.upper().head(MAX_OBSERVATION_EXAMPLES))
+        example_text = f" | examples: {examples}" if examples else ""
+        lines.append(f"- {setup} / {context}: {len(group)}{example_text}")
+    lines.append(f"Scanner observations summarized: {len(df)}")
+    lines.append("")
+
+
+def append_footer(lines: list[str]) -> None:
+    lines.append("Full detail remains available in:")
+    lines.append("data/processed/final_decisions.csv")
+
+
+def append_all_decision_sections(lines: list[str], df: pd.DataFrame) -> None:
+    low_info_mask = df.apply(is_low_information_observation, axis=1)
+    observation_mask = df.apply(is_scanner_observation, axis=1) & ~low_info_mask
+    active_df = df[~low_info_mask & ~observation_mask].copy()
+    observation_df = df[observation_mask].copy()
+    append_active_decision_sections(lines, active_df)
+    append_observation_summary(lines, observation_df)
+    append_low_information_summary(lines, int(low_info_mask.sum()))
+    append_footer(lines)
+
+
 def build_telegram_summary_text() -> str:
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    today = datetime.now().strftime("%Y-%m-%d")
     df = load_final_decisions()
-    lines: list[str] = [f"📲 Trading Decisions — {timestamp}"]
+    lines: list[str] = ["Daily Decision Summary", f"Date: {today}", ""]
     lines.extend(build_market_regime_header())
     if df.empty or "final_action" not in df.columns:
         lines.append("Geen final_decisions.csv gevonden of bestand is leeg.")
