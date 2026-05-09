@@ -1,422 +1,477 @@
-SPRINT 4 — TIMING STATE LAYER
-Trading System — Institutional Decision Engine
-Timing Readiness Classification Sprint
-1. Executive Summary
+# Sprint 4 — Timing State Layer
+
+## 1. Sprint Status
+
+Status: READY FOR SPRINT 4 GOVERNANCE AUDIT
+
+Sprint 4 is in governance preparation only. This document does not authorize implementation, runtime code changes, test changes, generated data changes, architecture redesign, strategy optimization, allocation logic, filtering logic, ranking logic, scoring authority, Decision Engine logic, or developer execution.
+
+Sprint 4 may proceed only through the audit-first sequence:
+
+1. governance preparation
+2. governance audit
+3. architecture validation
+4. execution planning
+5. developer specification
+6. implementation
 
-Sprint 4 introduceert de volledige Timing State Layer binnen de nieuwe institutionele architectuur.
-
-De architecture audit heeft bevestigd dat timing historisch verkeerd gebruikt werd als:
-
-hidden allocation filter
-pseudo tradeability logic
-hard invalidation engine
-premature opportunity elimination
-
-Specifiek:
-
-EXTENDED = invalid
-
-werd architecturaal expliciet afgekeurd.
-
-Institutioneel correcte systemen behandelen timing als:
-
-execution readiness metadata
-
-Niet als:
-
-allocation authority
-
-Sprint 4 corrigeert deze fout fundamenteel.
-
-1.1 Grootste Architecturale Correctie
-OUDE TIMING FILOSOFIE
-timing as hard invalidation
-NIEUWE TIMING FILOSOFIE
-timing as execution-state classification
-1.2 Nieuwe Timing Doctrine
-
-Timing bepaalt uitsluitend:
-
-execution readiness
-
-Niet:
-
-tradeability
-
-Zoals expliciet gedefinieerd in:
-
-Functional Analysis v2
-Technical Analysis v3
-Decision Engine Design v2
-2. Sprint Objective
-
-Het doel van Sprint 4 is:
-
-een institutionele timing-readiness classification layer bouwen
-
-die:
-
-✅ execution states classificeert
-✅ extension states modelleert
-✅ pullback readiness detecteert
-✅ breakout readiness classificeert
-
-Maar NOOIT:
-
-❌ allocation bepaalt
-❌ opportunities elimineert
-❌ BUY/SELL bepaalt
-❌ tradeability simuleert
-
-2.1 Strategische Doelstelling
-
-Timing moet evolueren van:
-
-hard invalidation logic
-
-naar:
-
-execution-state modelling
-3. Strategic Context
-
-Historisch werden timing metrics gebruikt als:
-
-extension invalidation
-hidden filtering
-pseudo allocation gating
-entry rejection logic
-
-Dat veroorzaakte:
-
-premature edge destruction
-momentum truncation
-late leadership capture
-hidden upstream decisioning
-3.1 Grootste Timingfout
-
-De vorige architectuur behandelde:
-
-EXTENDED momentum
-
-als:
-
-invalid opportunity
-
-Maar institutioneel betekent EXTENDED eigenlijk:
-
-higher execution risk
-
-Niet:
-
-allocation impossibility
-3.2 Nieuwe Timing Filosofie
-
-Timing moet:
-
-readiness classificeren
-
-Niet:
-
-kapitaalwaardigheid bepalen
-4. Architectural Context
-
-Sprint 4 implementeert de doctrine:
-
-timing classifies execution state
-decision engine allocates capital
-
-Zoals expliciet gedefinieerd in de nieuwe architectuurdocumentatie.
-
-4.1 Nieuwe Timing Boundary
-
-Timing mag:
-
-✅ readiness classificeren
-✅ execution risk modelleren
-✅ pullback states modelleren
-✅ breakout states modelleren
-
-Maar NOOIT:
-
-❌ tradeability bepalen
-❌ BUY/SELL bepalen
-❌ opportunities blokkeren
-❌ allocation readiness bepalen
-
-5. Sprint Scope
-5.1 Nieuwe Timing Architecture
-Verplicht bouwen
-timing_state
-extension_state
-pullback_state
-breakout_readiness
-timing_quality
-5.2 Nieuwe Timing States
-Verplicht classificeren
-READY
-EARLY
-EXTENDED
-PULLBACK
-BREAKOUT_PENDING
-LATE
-STALE
-FAILED
-5.3 Extension Infrastructure
-Verplicht bouwen
-ATR extension tracking
-MA distance tracking
-breakout extension tracking
-execution risk states
-5.4 Pullback Infrastructure
-Verplicht bouwen
-pullback proximity
-pullback depth
-pullback recovery state
-pullback readiness
-5.5 Breakout Readiness Infrastructure
-Verplicht bouwen
-breakout proximity
-breakout pressure
-compression state
-trigger readiness
-5.6 Timing Persistence
-Verplicht toevoegen
-timing persistence tracking
-state-duration tracking
-timing transition tracking
-6. Explicit Non-Scope
-
-Sprint 4 mag NIET:
-
-❌ BUY/SELL logic introduceren
-❌ tradeability bepalen
-❌ conviction bepalen
-❌ allocation filtering introduceren
-❌ opportunities invalidaten
-❌ portfolio interaction toevoegen
-
-7. Required Inputs
-Verplichte documentatie
-Technical_Analysis_v3.md
-Functional_Analysis_v2.md
-Decision Engine Design v2
-execution_roadmap_v2.md
-Vereiste datasets
-OHLCV data
-ATR metrics
-moving averages
-breakout levels
-context classifications
-8. Required Outputs
-8.1 watchlist_state.csv
-Verplicht schema
-ticker
-date
-timing_state
-extension_state
-pullback_state
-breakout_readiness
-timing_quality
-execution_risk
-timing_reason
-timing_persistence
-8.2 Verboden Velden
-
-❌ BUY/SELL fields
-❌ conviction
-❌ tradeability
-❌ allocation_priority
-❌ final_action
-
-9. Data Contracts
-HARD RULE
-
-Timing mag uitsluitend:
-
-execution-state metadata
-
-produceren.
-
-HARD RULE
-
-Timing mag NOOIT:
-
-allocation metadata
-
-produceren.
-
-10. Governance Rules
-HARD RULE
-Timing = execution-state classification only
-HARD RULE
-EXTENDED may never invalidate a setup directly.
-HARD RULE
-No timing logic may determine tradeability.
-HARD RULE
-Timing may enrich execution aggressiveness downstream but never allocate capital upstream.
-HARD RULE
-Timing may not collapse opportunity distribution excessively.
-11. Forbidden Logic
-11.1 Verboden Timing Logic
-
-❌ hard invalidation
-❌ BUY/SELL logic
-❌ pseudo tradeability
-❌ allocation filtering
-❌ conviction scoring
-❌ hidden gating
-
-11.2 Verboden Timing Behaviour
-
-❌ “EXTENDED = invalid”
-❌ “late entry = automatic rejection”
-❌ hard exclusion via timing
-
-11.3 Verboden Cross-Layer Logic
-
-Timing mag NOOIT:
-
-❌ validation overrulen
-❌ context overrulen
-❌ fundamentals overrulen
-❌ portfolio interpreteren
-
-12. Technical Requirements
-12.1 build_timing_state_layer.py
-Verplicht bouwen
-
-Bestand:
-
-scripts/watchlist/build_timing_state_layer.py
-12.2 Verplichte Functionaliteit
-timing classification
-extension tracking
-pullback tracking
-breakout readiness
-persistence tracking
-deterministic outputs
-fail-fast handling
-12.3 CI Enforcement
-Verplicht toevoegen
-grep -R "BUY" scripts/watchlist/build_timing_state_layer.py
-grep -R "SELL" scripts/watchlist/build_timing_state_layer.py
-grep -R "tradeable" scripts/watchlist/build_timing_state_layer.py
-
-Resultaat moet leeg zijn.
-
-13. Functional Requirements
-Timing moet:
-
-✅ readiness classificeren
-✅ execution risk modelleren
-✅ pullback states modelleren
-✅ breakout states modelleren
-
-Timing mag NIET:
-
-❌ entries triggeren
-❌ opportunities blokkeren
-❌ allocation readiness bepalen
-
-14. Validation Requirements
-Verplicht aantonen
-Timing-state distribution
-Extension distribution
-Pullback distribution
-Breakout-readiness distribution
-Timing persistence distribution
-15. Logging Requirements
-Verplicht loggen
-timing distributions
-extension shifts
-pullback shifts
-removed legacy invalidation
-timing persistence
-16. CI / Enforcement Requirements
-Verplicht
-schema enforcement
-forbidden-field detection
-forbidden-keyword scanning
-deterministic output validation
-17. Acceptance Criteria
-Sprint is PAS geslaagd wanneer:
-
-✅ Timing uitsluitend execution-state metadata produceert
-✅ Geen tradeability logic aanwezig is
-✅ Geen hidden filtering aanwezig is
-✅ EXTENDED geen invalidation meer veroorzaakt
-✅ watchlist_state.csv schema correct is
-✅ Timing states correct functioneren
-✅ Logging aanwezig is
-✅ CI checks slagen
-
-18. Definition of Done
-Verplicht
-
-✅ Alle governance rules gerespecteerd
-✅ Geen hidden allocation logic
-✅ Geen hidden invalidation logic
-✅ Timing volledig deterministic
-✅ Outputs reproduceerbaar
-✅ Timing distributions valide
-✅ Logging aanwezig
-✅ CI enforcement actief
-✅ Technical Lead review geslaagd
-✅ Functional Analyst review geslaagd
-✅ Quant Analyst review geslaagd
-
-19. Risks
-Grootste Risico
-legacy timing-as-filter assumptions
-
-Bijvoorbeeld:
-
-hidden extension invalidation
-hard rejection logic
-pseudo tradeability
-hidden allocation gating
-Verboden Reactie
-
-❌ EXTENDED momentum opnieuw hard invalidaten
-
-Correcte Reactie
-
-✅ timing observeren
-✅ execution risk modelleren
-✅ allocatie downstream oplossen
-
-20. Migration Notes
-
-Na Sprint 4 zal waarschijnlijk:
-
-meer EXTENDED opportunities zichtbaar blijven
-
-Dat is EXPECTED.
-
-En institutioneel correct.
-
-Waarom?
-
-Omdat Timing niet langer:
-
-hidden allocation filtering
-
-uitvoert.
-
-21. Final Sprint Doctrine
-classify execution readiness
-model timing states
-eliminate hidden invalidation
-preserve opportunity distribution
-prepare downstream execution intelligence
-POST-SPRINT-0 GOVERNANCE INHERITANCE
-
-Status: FUTURE SPRINT PLAN — ACTIVE ONLY UNDER CERTIFIED GOVERNANCE
-
-This sprint plan must inherit Sprint 0 certification:
-
-classification upstream
-allocation downstream
-Decision Engine = ONLY allocation authority
-
-Watchlist/timing work may track timing state only. It may not emit BUY/SELL/REMOVE, tradeability, conviction, allocation priority, urgency, or execution instructions.
+Execution planning, developer specification, and implementation must not begin from this document.
+
+## 2. Governance Inheritance From Sprint 0 Through Sprint 3
+
+Sprint 4 inherits the certified Sprint 0 doctrine:
+
+- classification upstream
+- allocation downstream
+- Decision Engine = ONLY allocation authority
+- upstream layers classify only
+- reporting communicates only
+- no upstream tradeability
+- no hidden filtering
+- no hidden allocation semantics outside Decision Engine
+- no decision semantics outside Decision Engine
+- no ranking authority outside Decision Engine
+- no scoring authority outside Decision Engine
+- distribution preservation is mandatory
+
+Sprint 4 inherits Sprint 1 Validation certification:
+
+- Validation Layer = structure classification only
+- Validation may not invalidate extended momentum
+- Validation may not simulate execution quality
+- Validation may not determine allocation eligibility
+- Validation output may not be reinterpreted by Timing as tradeability, urgency, conviction, ranking, scoring, or execution readiness
+
+Sprint 4 inherits Sprint 2 Context certification:
+
+- Context Layer = leadership and relative-strength classification only
+- weak context is not rejection
+- strong or leading context is not tradeability
+- sector-relative context data is enrichment only
+- Context output may not be reinterpreted by Timing as allocation, urgency, conviction, ranking, scoring, priority, or execution readiness
+
+Sprint 4 inherits Sprint 3 Fundamental certification:
+
+- Fundamental Layer = quality classification and enrichment only
+- high quality is not tradeability
+- low quality is not rejection
+- missing fundamental data is not removal
+- Fundamental output may not be reinterpreted by Timing as allocation, urgency, conviction, ranking, scoring, priority, or execution readiness
+
+## 3. Sprint Objective
+
+Sprint 4 prepares the Timing State Layer as a pure timing-condition classification and enrichment layer.
+
+The objective is to define how timing and technical state metadata can exist without introducing:
+
+- allocation logic
+- filtering-first behavior
+- tradeability semantics
+- urgency semantics
+- conviction semantics
+- execution semantics
+- hidden filtering
+- Decision Engine leakage
+- ranking authority
+- scoring authority
+- opportunity suppression
+- composite opportunity intelligence
+- multi-factor opportunity synthesis
+- composite scoring
+- signal aggregation authority
+- cross-layer weighted interpretation
+
+Core Sprint 4 doctrine:
+
+The Timing State Layer exists to preserve informational richness without creating execution authority.
+
+## 4. Timing State Layer Responsibilities
+
+The Timing State Layer may classify and enrich timing conditions only.
+
+Allowed responsibilities:
+
+- classify pullback state
+- classify breakout state
+- classify consolidation state
+- classify volatility contraction state
+- classify extension state
+- classify compression state
+- classify momentum continuation state
+- classify timing structure observations
+- classify timing environment metadata
+- classify timing pattern state
+- classify trend participation state
+- append descriptive timing metadata
+- log timing-state distributions
+
+The layer must remain descriptive, deterministic, non-mutating, and non-decisional.
+
+## 5. Explicitly Forbidden Timing State Responsibilities
+
+The Timing State Layer may not determine:
+
+- tradeability
+- allocation eligibility
+- conviction
+- urgency
+- actionability
+- execution readiness
+- final action
+- portfolio action
+- BUY/SELL/HOLD/TRIM/REMOVE behavior
+- opportunity priority
+- opportunity rank
+- opportunity score
+- capital weight
+- approval or rejection
+- expected return
+- expected alpha
+- portfolio desirability
+
+The Timing State Layer may not:
+
+- remove opportunities
+- suppress opportunities
+- reorder opportunities
+- prioritize opportunities
+- narrow opportunity distribution
+- become a hard gate
+- become a hidden filter
+- override scanner output
+- override Validation output
+- override Context output
+- override Fundamental output
+- create portfolio semantics
+- create recommendation semantics
+- create execution preference semantics
+- simulate Decision Engine behavior
+
+## 6. Classification-Only Doctrine
+
+Timing classification means describing observed timing conditions only.
+
+Allowed:
+
+- descriptive state labels
+- structural timing observations
+- extension and compression classifications
+- participation classifications
+- pattern classifications
+- metadata availability status
+- missing-data status
+- deterministic audit logging
+
+Forbidden:
+
+- trade filtering
+- execution filtering
+- allocation filtering
+- ranking authority
+- scoring authority
+- signal aggregation authority
+- final-action logic
+- conviction logic
+- urgency logic
+- BUY/SELL/HOLD/TRIM/REMOVE behavior
+- recommendation logic
+- expected-performance logic
+
+Extended means extended timing condition only. It does not mean invalid.
+
+Compressed means compressed timing condition only. It does not mean preferred.
+
+Pullback means pullback timing condition only. It does not mean ready.
+
+Breakout means breakout timing condition only. It does not mean buy.
+
+## 7. Distribution-Preservation Doctrine
+
+The Timing State Layer must preserve the full upstream opportunity universe.
+
+The layer may enrich opportunities with timing metadata only.
+
+It must preserve:
+
+- row count
+- ticker universe
+- upstream ordering
+- upstream distribution shape
+- upstream opportunity visibility
+
+It may never:
+
+- suppress rows
+- remove tickers
+- reorder opportunities
+- prioritize opportunities
+- narrow the universe
+- gatekeep opportunities
+- reduce visibility of upstream classifications
+
+Distribution changes are audit findings, not permission to add hidden filters.
+
+## 8. Non-Mutating Enrichment Doctrine
+
+The Timing State Layer may append descriptive metadata only.
+
+It may not:
+
+- mutate upstream classifications
+- rewrite upstream outputs
+- alter upstream decisions
+- overwrite upstream metadata
+- normalize away upstream signals
+- reinterpret Validation Layer outputs
+- reinterpret Context Layer outputs
+- reinterpret Fundamental Layer outputs
+- reinterpret Decision Engine authority
+
+Any future implementation must treat upstream fields as read-only source classifications.
+
+## 9. Governance-Safe Schema Direction
+
+Sprint 4 governance audit should evaluate schema direction before any execution planning or developer specification.
+
+Possible governance-safe schema direction candidates include:
+
+- `ticker`
+- `date`
+- `timing_state`
+- `timing_reason`
+- `breakout_state`
+- `pullback_state`
+- `compression_state`
+- `extension_state`
+- `participation_state`
+- `timing_environment`
+- `timing_metadata_status`
+- `timing_pattern_state`
+- `trend_participation_state`
+- `timing_structure_state`
+- `source_data_status`
+- `source_timestamp`
+- `generated_at`
+
+No schema candidate is finalized by this preparation document.
+
+Forbidden schema semantics include:
+
+- `tradeable`
+- `approved`
+- `rejected`
+- `high_conviction`
+- `conviction_score`
+- `priority`
+- `actionable`
+- `execution_ready`
+- `best_opportunity`
+- `buy_candidate`
+- `sell_candidate`
+- `ranking_score`
+- `timing_score`
+- `final_score`
+- `allocation_weight`
+- `expected_return`
+- `alpha_score`
+- `opportunity_rank`
+- `preferred_setup`
+
+## 10. Descriptive Metadata Policy
+
+Timing metadata must remain:
+
+- descriptive
+- classificatory
+- deterministic
+- non-allocative
+- non-executory
+- non-decisional
+- non-preferential
+
+Timing metadata must not imply:
+
+- actionability
+- urgency
+- priority
+- conviction
+- allocation
+- execution readiness
+- good trade
+- bad trade
+- approval
+- rejection
+- opportunity preference
+- expected outperformance
+- expected alpha
+- portfolio desirability
+
+Descriptive timing states must never be interpreted as recommendation, preference, opportunity quality, execution preference, portfolio preference, expected performance, or alpha expectation.
+
+## 11. Forbidden Semantics Matrix
+
+| Forbidden Semantic | Forbidden Timing Output Examples | Governance Reason |
+|---|---|---|
+| Tradeability | `tradeable`, `approved`, `buy_candidate` | Decision Engine owns tradeability |
+| Rejection | `rejected`, `failed_trade`, `blocked` | Timing may not suppress opportunities |
+| Conviction | `high_conviction`, `conviction_score` | Decision Engine owns conviction semantics |
+| Priority | `priority`, `best_opportunity`, `preferred_setup` | Decision Engine owns prioritization |
+| Actionability | `actionable`, `execution_ready`, `trigger_ready` | Decision Engine owns execution semantics |
+| Allocation | `allocation_weight`, `capital_weight` | Decision Engine owns allocation |
+| Ranking | `opportunity_rank`, `timing_rank` | Decision Engine owns opportunity ranking authority |
+| Scoring authority | `timing_score`, `composite_score`, `final_score` | Upstream layers may not become scoring authorities |
+| Final actions | `BUY`, `SELL`, `HOLD`, `TRIM`, `REMOVE` | Decision Engine owns final actions |
+| Urgency | `urgency`, `act_now`, `immediate` | Decision Engine owns urgency semantics |
+| Expected performance | `expected_return`, `alpha_score`, `outperformance_expected` | Timing may not create alpha expectation |
+
+## 12. Layer Responsibility Matrix
+
+| Layer | Certified Responsibility | Sprint 4 Boundary |
+|---|---|---|
+| Scanner | discovery | Timing may not suppress scanner opportunities |
+| Validation | structure classification | Timing may not override `structure_state` or reinterpret `valid_setup` |
+| Context | leadership classification | Timing may not override leadership classification or reinterpret strength as actionability |
+| Fundamentals | quality classification | Timing may not override quality metadata or synthesize quality with timing |
+| Watchlist / Timing | timing-state tracking | Timing may classify timing conditions only |
+| Portfolio | exposure/risk-state modelling | Timing may not create portfolio semantics |
+| Decision Engine | allocation decisions | Only Decision Engine may allocate, rank, prioritize, score decisions, create conviction, or create final actions |
+| Reporting | communication only | Timing may not create reporting priorities or execution framing |
+
+## 13. Interaction Boundaries With Certified Upstream Layers
+
+Validation interaction boundary:
+
+- Timing may read structural fields as context for timing observation only after governance approval.
+- Timing may not invalidate, override, downgrade, upgrade, or repair Validation classifications.
+- Timing may not convert `valid_setup` into timing actionability.
+
+Context interaction boundary:
+
+- Timing may preserve Context classifications as upstream metadata.
+- Timing may not combine leadership with timing into a composite opportunity interpretation.
+- Timing may not treat strong leadership as execution preference or weak leadership as rejection.
+
+Fundamental interaction boundary:
+
+- Timing may preserve Fundamental classifications as upstream metadata.
+- Timing may not combine quality with timing into a composite opportunity interpretation.
+- Timing may not treat high quality as preferred timing or low quality as degraded timing.
+
+## 14. Decision Engine Exclusivity Inheritance
+
+Decision Engine exclusivity remains fully active.
+
+Only `scripts/core/decision_engine.py` may determine:
+
+- tradeability
+- conviction
+- allocation eligibility
+- allocation priority
+- execution aggressiveness
+- urgency
+- BUY logic
+- SELL logic
+- REMOVE logic
+- final action
+- portfolio-aware capital allocation
+
+Sprint 4 may create no direct or indirect substitute for Decision Engine authority.
+
+## 15. Risks And Controls
+
+| Risk | Example | Required Control |
+|---|---|---|
+| Execution-readiness leakage | `breakout_ready`, `execution_ready` | Use descriptive state names only |
+| Hidden filtering | dropping extended or stale rows | Row-count and key-preservation audit |
+| Composite intelligence | combining timing, context, and quality into one label | Prohibit multi-factor synthesis outside Decision Engine |
+| Ranking drift | sorting by timing state | Preserve upstream ordering |
+| Scoring drift | numeric timing score becomes preference | Prohibit scoring-authority fields |
+| Urgency drift | `act_now` style timing language | Ban urgency semantics outside Decision Engine |
+| Recommendation drift | "preferred setup" timing states | Ban preference and recommendation semantics |
+| Upstream mutation | replacing Validation or Context values | Treat upstream data as read-only |
+
+## 16. Governance Leakage Scenarios
+
+The following scenarios must be rejected during audit, execution planning, developer specification, and implementation:
+
+- extended timing rows are removed
+- pullback rows are marked as better opportunities
+- breakout rows are marked as actionable
+- compressed rows are promoted as preferred
+- stale rows are hidden or deprioritized
+- timing state changes output ordering
+- timing metadata becomes a score, rank, or priority
+- timing metadata implies urgency or readiness
+- timing combines leadership and quality into a composite recommendation
+- timing overwrites upstream structure, leadership, or quality classifications
+
+## 17. In-Scope And Out-of-Scope Boundaries
+
+In scope for Sprint 4 preparation:
+
+- define governance-safe Timing State Layer responsibilities
+- define forbidden responsibilities
+- define classification-only doctrine
+- define possible schema direction candidates
+- define descriptive metadata policy
+- define distribution-preservation doctrine
+- define boundary controls
+- define interaction boundaries
+- define risks and controls
+- define acceptance criteria for future governance audit and execution planning
+
+Out of scope for Sprint 4 preparation:
+
+- runtime implementation
+- test implementation
+- generated CSV/data changes
+- architecture redesign
+- strategy optimization
+- thresholds
+- filters
+- ranking logic
+- scoring authority
+- allocation logic
+- Decision Engine logic
+- execution semantics
+- developer specification
+- implementation sequencing
+
+## 18. Acceptance Criteria For Governance Audit
+
+Sprint 4 may proceed to governance audit when this preparation package confirms:
+
+- Sprint 0 through Sprint 3 doctrine is explicitly inherited
+- Timing State Layer is descriptive only
+- Decision Engine exclusivity is preserved
+- distribution preservation is mandatory
+- non-mutating enrichment is mandatory
+- forbidden schema semantics are documented
+- interaction boundaries with Validation, Context, and Fundamentals are documented
+- governance leakage scenarios are documented
+- no implementation is authorized
+- no execution planning has begun
+
+## 19. Acceptance Criteria For Future Execution Planning
+
+Future execution planning may begin only after governance audit certification.
+
+Future execution planning must define, without implementing:
+
+- exact upstream input source
+- exact row-key contract
+- exact output artifact direction
+- exact schema after audit approval
+- deterministic ordering rules that preserve upstream order
+- missing-data handling
+- logging expectations
+- forbidden-field checks
+- distribution-preservation checks
+- implementation file boundaries
+- validation commands
+
+Future execution planning must not authorize developer execution.
+
+## 20. Scrum Master Recommendation
+
+READY FOR SPRINT 4 GOVERNANCE AUDIT

@@ -346,31 +346,40 @@ Definition of Done
 ✅ Sprint 3 closeout certified
 
 Sprint 4 — Timing State Layer
+
+Status: CERTIFIED COMPLETE / CLOSED. See `docs/sprints/sprint_4_closeout.md`. Sprint 5 may begin only after Sprint 4 certification and explicit Sprint 5 preparation authorization.
+
 Doel
 
-Timing readiness classificeren zonder allocatiebeslissingen.
+Timing state descriptively classify and enrich without allocation decisions.
 
 Scope
 Timing states
 
-✅ READY
-✅ EARLY
+✅ UNCLASSIFIED
 ✅ EXTENDED
-✅ PULLBACK
-✅ BREAKOUT_PENDING
+✅ PULLBACK_OBSERVED
+✅ NEUTRAL
+✅ EXPANDING
+✅ SOURCE_MISSING
 
 Timing metadata
 
 ✅ extension state
-✅ pullback proximity
-✅ breakout readiness
-✅ timing quality
+✅ pullback state
+✅ breakout state
+✅ compression state
+✅ participation state
+✅ timing environment
+✅ timing pattern state
+✅ timing structure state
+✅ deterministic audit metadata
 
 Grootste Correctie
 
 EXTENDED betekent:
 
-higher execution risk
+descriptive extension condition observed
 
 Niet:
 
@@ -381,9 +390,20 @@ Verboden
 ❌ SELL
 ❌ tradeability
 ❌ allocation eligibility
+❌ actionability
+❌ urgency
+❌ conviction
+❌ readiness
+❌ priority
+❌ ranking
+❌ scoring
 
 Deliverables
-watchlist_state.csv
+scripts/core/build_timing_state_layer.py
+tests/core/test_build_timing_state_layer.py
+data/processed/timing_state_layer.csv
+data/logs/timing_state_layer_log.csv
+docs/sprints/sprint_4_closeout.md
 Sprint 5 — Portfolio Intelligence Layer
 Doel
 
