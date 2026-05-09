@@ -2,9 +2,11 @@
 
 ## 1. Sprint Status
 
-Status: READY FOR TECHNICAL LEAD DEVELOPER SPEC
+Status: CERTIFIED COMPLETE
 
-Sprint 2 is approved for execution planning after governance audit. Developer execution has not started.
+Sprint 2 is certified complete. See `docs/sprints/sprint_2_closeout.md`.
+
+Execution completed with test hardening and artifact-hygiene documentation only. Runtime Context code was not changed.
 
 ## 2. Governance Inheritance
 

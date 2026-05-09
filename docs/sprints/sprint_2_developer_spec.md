@@ -2,9 +2,11 @@
 
 ## 1. Sprint Status
 
-Status: READY FOR DEVELOPER EXECUTION
+Status: IMPLEMENTATION COMPLETE / CERTIFIED COMPLETE
 
-Sprint 2 has completed Scrum execution planning and is ready for a scoped, inspection-first developer execution pass.
+Sprint 2 implementation is complete and certified. See `docs/sprints/sprint_2_closeout.md`.
+
+Developer execution strengthened Context tests and documented historical artifact handling. Runtime Context code was not changed.
 
 This specification does not authorize broad runtime reconstruction, strategy redesign, allocation changes, or threshold optimization.
 

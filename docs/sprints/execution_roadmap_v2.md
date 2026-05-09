@@ -202,6 +202,9 @@ Definition of Done
 ✅ CI checks slagen
 
 Sprint 2 — Cross-Sectional Leadership Layer
+
+Status: CERTIFIED COMPLETE. See `docs/sprints/sprint_2_closeout.md`. Sprint 3 may begin after Sprint 2 certification.
+
 Doel
 
 Institutioneel momentum correct modelleren.
