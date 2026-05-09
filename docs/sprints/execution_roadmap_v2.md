@@ -17,8 +17,14 @@ Future sprints must inherit the certified runtime schemas and layer responsibili
 - AGENTS.md
 - docs/sprints/sprint_0_governance_status.md
 - docs/audits/sprint_0_final_governance_audit.md
+- docs/sprints/sprint_status_tracker.md
+- docs/sprints/project_backlog.md
 
 Any roadmap wording about filtering, conviction, allocation, tradeability, or final actions is permitted only for Decision Engine-owned work. Upstream sprint work must remain classification-only.
+
+Operational sprint lifecycle status is maintained in `docs/sprints/sprint_status_tracker.md`. This roadmap defines doctrine, sequencing, and sprint intent; it is not the operational status tracker. Sprint phase transitions must be recorded in the tracker and supported by the relevant governance artifact.
+
+Deferred improvements, optional corrections, technical debt, research questions, and future enhancement ideas are maintained in `docs/sprints/project_backlog.md`. Backlog items do not modify this roadmap, authorize implementation, or change sprint scope without formal governance.
 
 1. Executive Summary
 
@@ -258,40 +264,87 @@ Definition of Done
 ✅ benchmark-only momentum verwijderd
 ✅ sector dependency niet langer blocking
 
-Sprint 3 — Fundamental Quality Classification
+Sprint 3 — Fundamental Quality Layer
+
+Status: CERTIFIED COMPLETE / CLOSED. See `docs/sprints/sprint_3_closeout.md`. Sprint 4 may begin after Sprint 3 certification.
+
 Doel
 
-Institutionele kwaliteitsclassificatie toevoegen.
+Institutionele kwaliteitsclassificatie voorbereiden als pure classification/enrichment layer.
 
 Scope
-Quality metrics
+Quality classification metadata
 
 ✅ profitability quality
 ✅ balance-sheet quality
 ✅ earnings quality
 ✅ capital efficiency quality
+✅ cash-flow quality
+✅ stability metrics
+✅ quality-factor metadata
+✅ sector-relative quality metadata
 
-Quality states
+Governance-clean quality outputs
 
-✅ HIGH_QUALITY
-✅ MEDIUM_QUALITY
-✅ LOW_QUALITY
+✅ quality_profile
+✅ profitability_profile
+✅ balance_sheet_profile
+✅ earnings_quality_profile
+✅ capital_efficiency_profile
+✅ cashflow_profile
+✅ quality_reason
+✅ quality_metadata
+✅ quality_classification
+✅ quality_state
 
 Belangrijke Regel
 
 Fundamentals mogen:
 
-✅ conviction downstream beïnvloeden
+✅ business quality classificeren
+✅ financial quality classificeren
+✅ descriptive metadata toevoegen
+✅ upstream opportunity distribution behouden
 
 Maar NOOIT:
 
+❌ conviction creëren
+❌ priority creëren
+❌ ranking authority creëren
+❌ scoring authority creëren
+❌ tradeability bepalen
+❌ allocation bepalen
+❌ execution readiness bepalen
 ❌ entries triggeren
 ❌ timing bepalen
 ❌ VALID_SETUP beïnvloeden
+❌ opportunities suppressen, verwijderen, herordenen, prioriteren, versmallen of gatekeepen
+
+Decision Engine Protection
+
+Fundamental metadata may be consumed by a future Decision Engine-owned sprint only if that sprint explicitly defines the interpretation. The Fundamental Layer itself must not carry actionability, conviction, priority, ranking, scoring-authority, allocation, or execution semantics.
 
 Deliverables
 scripts/core/build_fundamental_layer.py
-data/processed/fundamental_profile.csv
+tests/core/test_build_fundamental_layer.py
+data/processed/fundamental_quality.csv
+data/logs/fundamental_layer_log.csv
+docs/sprints/sprint_3_developer_spec.md
+docs/audits/sprint_3_implementation_audit.md
+docs/sprints/sprint_3_closeout.md
+
+Definition of Done
+
+✅ Fundamental Layer implemented as classification/enrichment only
+✅ ticker/date row-key governance enforced
+✅ duplicate ticker/date rows fail fast
+✅ missing fundamentals preserve rows
+✅ descriptive quality metadata emitted
+✅ forbidden allocation, tradeability, conviction, urgency, priority, ranking, scoring, execution readiness, and BUY/SELL semantics absent
+✅ tests passed
+✅ implementation audit passed
+✅ Sprint 3 closeout certified
+
 Sprint 4 — Timing State Layer
 Doel
 

@@ -18,6 +18,12 @@ Authoritative references:
 - AGENTS.md
 - docs/sprints/sprint_0_governance_status.md
 - docs/audits/sprint_0_final_governance_audit.md
+- docs/sprints/sprint_status_tracker.md
+- docs/sprints/project_backlog.md
+
+Operational sprint lifecycle status is maintained in `docs/sprints/sprint_status_tracker.md`. The roadmap defines doctrine and sequencing, but it must not be used as the operational status tracker.
+
+Deferred work is maintained in `docs/sprints/project_backlog.md`. The backlog captures future improvements, optional corrections, technical debt, and research questions, but it does not authorize implementation.
 
 1. Purpose (REDEFINED)
 
@@ -210,6 +216,29 @@ Pas later:
 allocation intelligence
 
 Allocation intelligence is only permitted inside Decision Engine-owned work. Classification sprints may not emit tradeability, conviction, allocation priority, or final action fields.
+
+4.1.1 Sprint Status Tracking
+
+Sprint phase status must be maintained in `docs/sprints/sprint_status_tracker.md`.
+
+Every sprint phase transition requires the relevant governance artifact:
+
+- preparation document for governance audit readiness
+- governance audit or re-audit for certification
+- execution plan for execution review readiness
+- Technical Lead execution review for developer specification readiness
+- approved developer specification for implementation readiness
+- implementation evidence for implementation audit readiness
+- implementation audit approval for closeout readiness
+- closeout certification for CLOSED status
+
+Status changes must not be made casually. Do not mark a sprint phase complete unless the required document exists and contains the required recommendation.
+
+4.1.2 Project Backlog Discipline
+
+Deferred improvements, optional corrections, technical debt, research questions, test expansion ideas, reporting improvements, operational reliability ideas, and out-of-scope suggestions must be captured in `docs/sprints/project_backlog.md`.
+
+Backlog entries do not authorize implementation. A backlog item may become active work only after analysis, prioritization, sprint proposal, governance review, execution planning, Technical Lead approval, developer specification, and implementation authorization.
 4.2 Nieuwe Sprinttypes
 Type A — Classification Sprints
 

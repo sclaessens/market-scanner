@@ -1,402 +1,422 @@
-SPRINT 3 — FUNDAMENTAL QUALITY
-Trading System — Institutional Decision Engine
-Fundamental Classification Layer Sprint
-1. Executive Summary
-
-Sprint 3 introduceert de volledige Fundamental Quality Layer binnen de nieuwe institutionele architectuur.
-
-De architecture audit en de nieuwe governance-documentatie hebben expliciet bevestigd dat fundamentals:
-
-✅ kwaliteit mogen classificeren
-✅ conviction downstream mogen beïnvloeden
-
-Maar NOOIT:
-
-❌ entries mogen triggeren
-❌ timing mogen bepalen
-❌ VALID_SETUP mogen beïnvloeden
-❌ upstream filtering mogen uitvoeren
-
-
-
-
-
-Sprint 3 bouwt daarom een:
-
-pure quality-classification layer
-
-zonder allocatie- of timinglogica.
-
-1.1 Grootste Architecturale Correctie
-OUDE FUNDAMENTAL FILOSOFIE
-fundamentals as trade filter
-NIEUWE FUNDAMENTAL FILOSOFIE
-fundamentals as downstream conviction enrichment
-1.2 Nieuwe Fundamental Doctrine
-
-Fundamentals bepalen uitsluitend:
-
-kwaliteit
-
-Niet:
-
-timing
-2. Sprint Objective
-
-Het doel van Sprint 3 is:
-
-een institutionele kwaliteitsclassificatie-layer bouwen
-
-die:
-
-✅ kwaliteitsprofielen produceert
-✅ balance-sheet kwaliteit classificeert
-✅ profitability kwaliteit classificeert
-✅ conviction downstream verrijkt
-
-Maar NOOIT:
-
-❌ opportunities filtert
-❌ entries bepaalt
-❌ allocation readiness bepaalt
-
-2.1 Strategische Doelstelling
-
-De Fundamental Layer moet:
-
-kwaliteit modelleren
-
-zonder:
-
-timingbeslissingen te simuleren
-3. Strategic Context
-
-Historisch werden fundamentals vaak verkeerd gebruikt als:
-
-hard pre-trade filters
-
-Dat creëert:
-
-premature opportunity destruction
-late momentum detection
-edge truncation
-cross-layer contamination
-
-Institutioneel correcte systemen gebruiken fundamentals eerder als:
-
-conviction modifiers
-
-Niet als:
-
-entry gates
-3.1 Nieuwe Fundamental Filosofie
-
-Fundamentals mogen:
-
-✅ conviction downstream verhogen
-✅ holding tolerance downstream verhogen
-✅ sizing downstream beïnvloeden
-
-Maar NOOIT:
-
-❌ entries triggeren
-❌ momentum overrulen
-❌ VALID_SETUP blokkeren
-
-4. Architectural Context
-
-Sprint 3 implementeert de doctrine:
-
-fundamentals classify quality
-decision engine allocates capital
-
-Zoals expliciet gedefinieerd in:
-
-Functional Analysis v2
-Decision Engine Design v2
-Execution Roadmap v2
-4.1 Nieuwe Fundamental Boundary
-
-Fundamentals mogen:
-
-✅ kwaliteit classificeren
-✅ profitability modelleren
-✅ balance-sheet strength modelleren
-
-Maar NOOIT:
-
-❌ timing bepalen
-❌ BUY/SELL beïnvloeden
-❌ allocation readiness bepalen
-❌ opportunities blokkeren
-
-5. Sprint Scope
-5.1 Nieuwe Fundamental Architecture
-Verplicht bouwen
-profitability_quality
-balance_sheet_quality
-earnings_quality
-capital_efficiency_quality
-quality_score
-quality_bucket
-5.2 Nieuwe Quality Buckets
-Verplicht classificeren
-HIGH_QUALITY
-MEDIUM_QUALITY
-LOW_QUALITY
-SPECULATIVE
-UNCLASSIFIED
-5.3 Nieuwe Quality States
-Verplicht classificeren
-ELITE
-STRONG
-AVERAGE
-WEAK
-DISTRESSED
-5.4 Quality Metadata Infrastructure
-Verplicht toevoegen
-profitability_state
-leverage_state
-liquidity_state
-earnings_stability
-capital_efficiency_state
-5.5 Quality Persistence
-Verplicht toevoegen
-quality persistence tracking
-earnings consistency tracking
-balance-sheet stability tracking
-6. Explicit Non-Scope
-
-Sprint 3 mag NIET:
-
-❌ BUY/SELL logic introduceren
-❌ tradeability bepalen
-❌ conviction engine bouwen
-❌ timing bepalen
-❌ VALID_SETUP beïnvloeden
-❌ context overrulen
-❌ allocation filtering introduceren
-
-7. Required Inputs
-Verplichte documentatie
-Technical_Analysis_v3.md
-Functional_Analysis_v2.md
-Decision Engine Design v2
-execution_roadmap_v2.md
-Vereiste datasets
-financial statement data
-earnings data
-profitability metrics
-balance-sheet metrics
-cashflow metrics
-8. Required Outputs
-8.1 fundamental_profile.csv
-Verplicht schema
-ticker
-date
-quality_score
-quality_bucket
-quality_state
-profitability_quality
-balance_sheet_quality
-earnings_quality
-capital_efficiency_quality
-quality_reason
-quality_persistence
-8.2 Verboden Velden
-
-❌ BUY/SELL fields
-❌ conviction
-❌ tradeability
-❌ allocation_priority
-❌ final_action
-
-9. Data Contracts
-HARD RULE
-
-Fundamentals mogen uitsluitend:
-
-quality metadata
-
-produceren.
-
-HARD RULE
-
-Fundamentals mogen NOOIT:
-
-allocation metadata
-
-produceren.
-
-10. Governance Rules
-HARD RULE
-Fundamentals = quality classification only
-HARD RULE
-No fundamental logic may determine timing.
-HARD RULE
-No fundamental logic may invalidate VALID_SETUP.
-HARD RULE
-Fundamentals may enrich conviction downstream but never trigger entries upstream.
-HARD RULE
-Fundamentals may not collapse opportunity distribution excessively.
-11. Forbidden Logic
-11.1 Verboden Fundamental Logic
-
-❌ BUY/SELL logic
-❌ timing logic
-❌ tradeability logic
-❌ allocation filtering
-❌ pseudo conviction scoring upstream
-❌ hard invalidation
-
-11.2 Verboden Cross-Layer Logic
-
-Fundamentals mogen NOOIT:
-
-❌ context overrulen
-❌ validation overrulen
-❌ timing overrulen
-❌ portfolio interpreteren
-
-11.3 Verboden Quality Behaviour
-
-❌ “slechte fundamentals = invalid setup”
-❌ “goede fundamentals = automatische BUY”
-❌ hard exclusion via quality
-
-12. Technical Requirements
-12.1 build_fundamental_layer.py
-Verplicht bouwen
-
-Bestand:
-
-scripts/core/build_fundamental_layer.py
-12.2 Verplichte Functionaliteit
-quality scoring
-quality classification
-persistence tracking
-deterministic outputs
-fail-fast handling
-missing-data handling
-12.3 CI Enforcement
-Verplicht toevoegen
-grep -R "BUY" scripts/core/build_fundamental_layer.py
-grep -R "SELL" scripts/core/build_fundamental_layer.py
-grep -R "tradeable" scripts/core/build_fundamental_layer.py
-
-Resultaat moet leeg zijn.
-
-13. Functional Requirements
-Fundamentals moeten:
-
-✅ kwaliteit classificeren
-✅ earnings consistency modelleren
-✅ balance-sheet sterkte modelleren
-
-Fundamentals mogen NIET:
-
-❌ entries triggeren
-❌ timing bepalen
-❌ opportunities blokkeren
-
-14. Validation Requirements
-Verplicht aantonen
-Quality distribution
-Quality bucket distribution
-Persistence distribution
-Missing-data distribution
-Cross-sectional quality distribution
-15. Logging Requirements
-Verplicht loggen
-quality distributions
-persistence shifts
-missing-data warnings
-removed legacy filtering
-16. CI / Enforcement Requirements
-Verplicht
-schema enforcement
-forbidden-field detection
-forbidden-keyword scanning
-deterministic output validation
-17. Acceptance Criteria
-Sprint is PAS geslaagd wanneer:
-
-✅ Fundamental Layer uitsluitend kwaliteit classificeert
-✅ Geen timing logic aanwezig is
-✅ Geen allocation leakage aanwezig is
-✅ Geen hidden filtering aanwezig is
-✅ fundamental_profile.csv schema correct is
-✅ Quality buckets correct functioneren
-✅ Logging aanwezig is
-✅ CI checks slagen
-
-18. Definition of Done
-Verplicht
-
-✅ Alle governance rules gerespecteerd
-✅ Geen hidden timing logic
-✅ Geen hidden allocation logic
-✅ Fundamentals volledig deterministic
-✅ Outputs reproduceerbaar
-✅ Quality distributions valide
-✅ Logging aanwezig
-✅ CI enforcement actief
-✅ Technical Lead review geslaagd
-✅ Functional Analyst review geslaagd
-✅ Quant Analyst review geslaagd
-
-19. Risks
-Grootste Risico
-legacy “fundamentals as filter” assumptions
-
-Bijvoorbeeld:
-
-hidden quality gating
-hard exclusion logic
-timing contamination
-conviction simulation upstream
-Verboden Reactie
-
-❌ slechte fundamentals automatisch elimineren
-
-Correcte Reactie
-
-✅ kwaliteit observeren
-✅ conviction downstream verrijken
-✅ allocatie downstream oplossen
-
-20. Migration Notes
-
-Na Sprint 3 zal waarschijnlijk:
-
-de quality distributie breder worden
-
-Dat is EXPECTED.
-
-En institutioneel correct.
-
-Waarom?
-
-Omdat fundamentals niet langer:
-
-hard allocation filtering
-
-uitvoeren.
-
-21. Final Sprint Doctrine
-classify quality
-preserve opportunity distribution
-eliminate hidden filtering
-separate quality from timing
-prepare downstream conviction enrichment
-POST-SPRINT-0 GOVERNANCE INHERITANCE
-
-Status: FUTURE SPRINT PLAN — ACTIVE ONLY UNDER CERTIFIED GOVERNANCE
-
-This sprint plan must inherit Sprint 0 certification:
-
-classification upstream
-allocation downstream
-Decision Engine = ONLY allocation authority
-
-Fundamental work may classify quality only. Any effect on conviction, sizing, tradeability, or allocation must be implemented only through Decision Engine-owned logic.
+# Sprint 3 — Fundamental Quality Layer
+
+## 1. Sprint Status
+
+Status: READY FOR SPRINT 3 GOVERNANCE AUDIT
+
+Sprint 3 is in preparation only. This document does not authorize implementation, runtime code changes, test changes, generated data changes, architecture redesign, strategy optimization, allocation logic, filtering logic, ranking logic, scoring authority, or Decision Engine changes.
+
+Sprint 3 may proceed only through the certified delivery workflow:
+
+audit  
+→ impact analysis  
+→ scoped Technical Lead specification  
+→ developer execution  
+→ validation  
+→ governance review  
+→ closeout
+
+## 2. Governance Inheritance From Sprint 0, Sprint 1, And Sprint 2
+
+Sprint 3 inherits the certified Sprint 0 doctrine:
+
+- classification upstream
+- allocation downstream
+- Decision Engine = ONLY allocation authority
+- upstream layers classify only
+- reporting communicates only
+- no upstream tradeability
+- no hidden filtering
+- no hidden allocation semantics outside Decision Engine
+- no decision semantics outside Decision Engine
+- no ranking authority outside Decision Engine
+- no scoring authority outside Decision Engine
+
+Sprint 3 inherits Sprint 1 Validation certification:
+
+- Validation Layer = structure classification only
+- `structure_state` and `structure_reason` are authoritative
+- `valid_setup` and `validation_reason` are compatibility-only
+- Validation output may not be reinterpreted as tradeability, allocation eligibility, conviction, urgency, ranking, or execution readiness
+
+Sprint 3 inherits Sprint 2 Context certification:
+
+- Context Layer = leadership and relative-strength classification only
+- weak context is not rejection
+- strong or leading context is not tradeability
+- sector-relative context data is enrichment only
+- Context output may not be reinterpreted as allocation, execution readiness, conviction, ranking, or priority
+
+## 3. Sprint Objective
+
+Sprint 3 prepares the Fundamental Quality Layer as a pure classification and enrichment layer.
+
+The sprint objective is to define how business quality and financial quality can be classified without introducing:
+
+- allocation logic
+- filtering-first behavior
+- tradeability semantics
+- urgency semantics
+- conviction semantics
+- execution semantics
+- hidden filtering
+- Decision Engine leakage
+- ranking semantics
+- scoring authority
+- decision semantics
+
+Sprint 3 must preserve upstream opportunity distribution.
+
+## 4. Fundamental Layer Responsibilities
+
+The Fundamental Layer may classify and enrich:
+
+- profitability quality
+- balance-sheet quality
+- earnings quality
+- capital efficiency
+- cash-flow quality
+- stability metrics
+- quality-factor metadata
+- Piotroski-style quality classification
+- Greenblatt-style quality metadata
+- sector-relative quality metadata
+
+The Fundamental Layer may emit descriptive metadata that helps later layers understand business quality. It may not decide what should happen with capital.
+
+## 5. Explicitly Forbidden Fundamental Layer Responsibilities
+
+The Fundamental Layer may not determine:
+
+- tradeability
+- allocation eligibility
+- conviction
+- urgency
+- actionability
+- execution readiness
+- final action
+- portfolio action
+- BUY/SELL/HOLD/TRIM/REMOVE behavior
+- opportunity priority
+- opportunity rank
+- opportunity score
+- capital weight
+- approval or rejection
+
+The Fundamental Layer may not:
+
+- remove opportunities
+- suppress opportunities
+- reorder opportunities
+- prioritize opportunities
+- narrow opportunity distribution
+- become a hard gate
+- become a hidden filter
+- override scanner output
+- override Validation output
+- override Context output
+- create portfolio semantics
+- create execution semantics
+- simulate Decision Engine behavior
+
+## 6. Classification-Only Doctrine
+
+Sprint 3 must keep Fundamentals as quality classification only.
+
+Allowed:
+
+- classify quality profiles
+- classify profitability profiles
+- classify balance-sheet profiles
+- classify earnings quality profiles
+- classify capital-efficiency profiles
+- classify cash-flow profiles
+- expose deterministic quality metadata
+- expose missing-data metadata
+- expose sector-relative quality metadata where available
+- log quality-state distributions
+
+Forbidden:
+
+- trade filtering
+- execution filtering
+- allocation filtering
+- ranking authority
+- scoring authority
+- final-action logic
+- conviction logic
+- urgency logic
+- BUY/SELL/HOLD/TRIM/REMOVE behavior
+
+High quality means high quality classification only. It does not mean tradeability.
+
+Low quality means low quality classification only. It does not mean rejection.
+
+Missing fundamental data means missing-data classification only. It does not mean removal.
+
+## 7. Distribution-Preservation Doctrine
+
+The Fundamental Layer must preserve upstream opportunity distribution.
+
+Fundamentals may enrich every available opportunity with quality metadata, but may never:
+
+- suppress
+- remove
+- reorder
+- prioritize
+- narrow
+- gatekeep
+
+the upstream opportunity universe.
+
+Distribution changes are observability findings, not permission to add hidden filters.
+
+## 8. Governance-Safe Schema Direction
+
+Sprint 3 governance audit should evaluate schema direction before any developer specification.
+
+Governance-safe output names may include:
+
+- `ticker`
+- `date`
+- `quality_profile`
+- `profitability_profile`
+- `balance_sheet_profile`
+- `earnings_quality_profile`
+- `capital_efficiency_profile`
+- `cashflow_profile`
+- `quality_reason`
+- `quality_metadata`
+- `quality_classification`
+- `quality_state`
+- `missing_fundamental_data`
+- `sector_quality_profile`
+
+Any numeric metrics used as source data must remain descriptive metadata. Numeric source metrics may not become ranking authority, scoring authority, allocation weight, priority, conviction, or execution readiness.
+
+## 9. Descriptive Metadata Policy
+
+Fundamental metadata must remain:
+
+- descriptive
+- classificatory
+- deterministic
+- non-allocative
+- non-executory
+- non-decisional
+
+Fundamental metadata may be consumed later by Decision Engine-owned logic, but the Fundamental Layer itself may not decide capital allocation, tradeability, conviction, urgency, ranking, priority, or final actions.
+
+Sector-relative quality metadata may enrich classification where available. Missing sector-quality data must be handled as missing metadata, not as a reason to block or remove an opportunity.
+
+## 10. Forbidden Semantics Matrix
+
+| Forbidden Semantic | Forbidden Fundamental Output Examples | Governance Reason |
+|---|---|---|
+| Tradeability | `tradeable`, `approved`, `buy_candidate` | Decision Engine owns tradeability |
+| Rejection | `rejected`, `invalid_quality`, `blocked` | Upstream layers may not remove opportunities |
+| Conviction | `high_conviction`, `conviction_score` | Decision Engine owns conviction semantics |
+| Priority | `priority`, `allocation_priority`, `best_opportunity` | Decision Engine owns prioritization |
+| Actionability | `actionable`, `execution_ready` | Decision Engine owns execution readiness |
+| Allocation | `allocation_weight`, `capital_weight` | Decision Engine owns allocation |
+| Ranking | `quality_rank`, `opportunity_rank` | Decision Engine owns opportunity ranking authority |
+| Scoring authority | `quality_score`, `composite_score`, `final_score` | Upstream layers may not become scoring authorities |
+| Final actions | `BUY`, `SELL`, `HOLD`, `TRIM`, `REMOVE` | Decision Engine owns final actions |
+| Urgency | `urgency`, `act_now`, `fast_track` | Decision Engine owns urgency semantics |
+
+## 11. Layer Responsibility Matrix
+
+| Layer | Certified Responsibility | Sprint 3 Boundary |
+|---|---|---|
+| Scanner | discovery | Fundamentals may not suppress scanner opportunities |
+| Validation | structure classification | Fundamentals may not override `structure_state` |
+| Context | leadership classification | Fundamentals may not override leadership classification |
+| Fundamentals | quality classification | Fundamentals may classify business and financial quality only |
+| Watchlist | timing-state tracking | Fundamentals may not determine timing state |
+| Portfolio | exposure/risk-state modelling | Fundamentals may not create portfolio semantics |
+| Decision Engine | allocation decisions | Only Decision Engine may allocate, rank, prioritize, score decisions, or create actions |
+| Reporting | communication only | Fundamentals may not create reporting priorities or execution framing |
+
+## 12. Layer Boundary Enforcement
+
+Sprint 3 must protect certified boundaries:
+
+- Validation remains structure-only
+- Context remains leadership-only
+- Fundamentals remain quality-only
+- Watchlist remains timing-state-only
+- Portfolio remains exposure/risk-state-only
+- Decision Engine remains the only allocation authority
+- Reporting remains presentation-only
+
+No Sprint 3 work may create cross-layer shortcuts or hidden interpretations.
+
+## 13. Separation-Of-Concerns Enforcement
+
+Fundamental quality classification must be separable from:
+
+- setup structure
+- leadership context
+- timing state
+- portfolio risk
+- final decisions
+- allocation
+- urgency
+- ranking
+- scoring authority
+
+The Fundamental Layer may classify quality independently, but it may not collapse these classifications into a decision.
+
+## 14. Hidden-Filter Prevention
+
+Sprint 3 audit and any future implementation spec must search for and forbid:
+
+- row drops caused by weak fundamentals
+- missing-data exclusion
+- sector-quality exclusion
+- minimum quality thresholds that remove rows
+- low-quality rejection
+- high-quality fast tracks
+- hard gates on profitability or balance sheet fields
+- quality-derived allocation readiness
+- quality-derived execution readiness
+- quality-derived priority or ranking
+- quality-derived conviction labels
+
+If quality data is unavailable, output should preserve the opportunity with a missing-data classification.
+
+## 15. Decision Engine Protection
+
+The Decision Engine remains the ONLY layer allowed to:
+
+- allocate
+- prioritize
+- rank
+- filter for execution
+- generate actionable decisions
+- create portfolio semantics
+- create urgency semantics
+- create conviction semantics
+- create tradeability semantics
+- create final action semantics
+
+Sprint 3 must not create fields that pre-package these decisions for the Decision Engine.
+
+## 16. Audit Requirements Before Future Implementation
+
+Before any Sprint 3 developer specification, perform a governance audit of:
+
+- existing fundamentals-related code, if present
+- existing fundamentals-related tests, if present
+- current processed data schemas, if present
+- financial data sources and missing-data behavior
+- old documentation references to quality scoring, conviction, ranking, or filtering
+- any proposed `fundamental_profile.csv` schema
+- any proposed logging or observability schema
+
+Required audit questions:
+
+- Does any existing fundamentals logic filter opportunities?
+- Does any existing fundamentals logic rank or score opportunities?
+- Does any existing fundamentals logic imply tradeability, conviction, urgency, actionability, or allocation eligibility?
+- Does missing fundamental data remove opportunities?
+- Are sector-relative quality metrics descriptive only?
+- Are proposed output fields governance-clean?
+- Are tests prepared to enforce classification-only behavior?
+
+## 17. Governance Risks And Controls
+
+| Risk | Severity | Control |
+|---|---|---|
+| Fundamentals become a trade filter | HIGH | Forbid rejection, approval, tradeability, and gate fields |
+| Quality metrics become ranking authority | HIGH | Forbid rank, priority, composite score, and final score outputs |
+| Quality classifications become conviction labels | HIGH | Keep conviction semantics Decision Engine-only |
+| Missing fundamentals remove rows | HIGH | Require missing-data classification and row preservation |
+| Sector-relative quality becomes blocking | MEDIUM | Treat sector-relative data as nullable enrichment |
+| Legacy docs imply downstream conviction enrichment from Fundamentals | MEDIUM | Clarify that only Decision Engine may create conviction semantics |
+| Developer introduces thresholds during implementation | HIGH | Audit-first and Technical Lead specification required before execution |
+| Fundamental Layer overrides Validation or Context | HIGH | Enforce layer responsibility matrix and boundary tests |
+
+## 18. Controls And Enforcement
+
+Future Sprint 3 execution planning should require:
+
+- exact schema assertions
+- forbidden-field assertions
+- row-preservation tests
+- missing-data non-blocking tests
+- sector-relative data non-blocking tests
+- deterministic output validation
+- governance grep checks
+- Technical Lead review
+- Functional Analyst review
+
+Potential forbidden grep terms for future implementation:
+
+```bash
+grep -R "tradeable" scripts tests
+grep -R "approved" scripts tests
+grep -R "rejected" scripts tests
+grep -R "conviction" scripts tests
+grep -R "priority" scripts tests
+grep -R "actionable" scripts tests
+grep -R "execution_ready" scripts tests
+grep -R "allocation" scripts tests
+grep -R "ranking_score" scripts tests
+grep -R "composite_score" scripts tests
+grep -R "final_score" scripts tests
+grep -R "BUY" scripts tests
+grep -R "SELL" scripts tests
+grep -R "REMOVE" scripts tests
+```
+
+Interpretation must distinguish Decision Engine-owned logic, valid portfolio/Telegram command parsing, and test-only absence assertions from upstream governance leakage.
+
+## 19. Acceptance Criteria For Sprint 3 Execution Approval
+
+Sprint 3 may move to Technical Lead specification only when:
+
+- Sprint 3 governance audit is complete
+- Fundamental Layer responsibilities are limited to quality classification
+- forbidden responsibilities are explicit
+- proposed schema direction is governance-clean
+- no ranking, scoring authority, tradeability, allocation, conviction, urgency, actionability, or final-action semantics are present upstream
+- distribution preservation is explicit
+- missing-data behavior is non-blocking
+- sector-relative quality metadata is enrichment-only
+- implementation scope is narrow and inspection-first
+- Technical Lead approves developer-spec readiness
+
+## 20. Out-Of-Scope Items
+
+Out of scope for Sprint 3 preparation:
+
+- runtime implementation
+- test implementation
+- generated data changes
+- architecture redesign
+- strategy optimization
+- threshold tuning
+- new filters
+- allocation logic
+- Decision Engine changes
+- ranking logic
+- scoring authority
+- execution semantics
+- BUY/SELL/HOLD/TRIM/REMOVE behavior
+
+Out of scope for Fundamental Layer generally:
+
+- tradeability
+- allocation eligibility
+- conviction
+- urgency
+- final actions
+- priority
+- ranking
+- scoring authority
+- execution readiness
+
+## 21. Scrum Master Recommendation
+
+READY FOR SPRINT 3 GOVERNANCE AUDIT
