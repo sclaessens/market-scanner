@@ -226,6 +226,12 @@ The developer must choose the least invasive governance-safe option and document
 2. Quarantine or ignore it as a pre-governance legacy artifact.
 3. Document it as a non-runtime legacy risk and schedule cleanup separately.
 
+Sprint 2 developer execution decision:
+
+- selected option: 3
+- rationale: active Context runtime and backfill source are governance-clean; the stale historical CSV is a generated legacy artifact, not active runtime logic
+- action: do not regenerate or commit generated historical data in this sprint; carry the artifact as a non-runtime legacy risk for Technical Lead review and later cleanup scheduling
+
 The chosen option must not:
 
 - rewrite Context strategy logic

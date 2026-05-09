@@ -8,6 +8,34 @@ import pytest
 
 from scripts.core import build_context_layer as context_module
 
+EXPECTED_CONTEXT_COLUMNS = [
+    "ticker",
+    "date",
+    "rs_score",
+    "rs_percentile",
+    "rs_rank",
+    "rs_vs_market",
+    "rs_vs_sector",
+    "context_strength",
+    "context_reason",
+    "leadership_state",
+]
+
+FORBIDDEN_CONTEXT_FIELDS = {
+    "context_tradeable",
+    "tradeability",
+    "conviction",
+    "allocation_priority",
+    "final_action",
+    "urgency",
+    "actionable",
+    "BUY",
+    "SELL",
+    "HOLD",
+    "TRIM",
+    "REMOVE",
+}
+
 
 def _hash_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -185,8 +213,27 @@ def test_context_outputs_classification_columns_only(patch_paths):
 
     df = context_module.build_context_layer()
 
-    forbidden_columns = {"context_" + "trad" + "eable", "context_" + "trad" + "eable_reason"}
-    assert set(df.columns).isdisjoint(forbidden_columns)
+    assert list(df.columns) == EXPECTED_CONTEXT_COLUMNS
+    assert set(df.columns).isdisjoint(FORBIDDEN_CONTEXT_FIELDS)
+
+
+def test_context_output_file_schema_is_exact_and_governance_clean(patch_paths):
+    *_, output_path, _ = patch_paths(
+        scanner_rows=[
+            _scanner_row(ticker="AAA", rs_20d_pct=3.0, sector="Technology"),
+            _scanner_row(ticker="BBB", rs_20d_pct=2.0, sector="Technology"),
+            _scanner_row(ticker="CCC", rs_20d_pct=1.0, sector="Technology"),
+            _scanner_row(ticker="DDD", rs_20d_pct=-1.0, sector="Technology"),
+        ],
+        sector_rows=[_sector_row(sector="TECHNOLOGY", sector_rs_20d_pct=0.5)],
+    )
+
+    context_module.build_context_layer()
+
+    written_df = pd.read_csv(output_path)
+
+    assert list(written_df.columns) == EXPECTED_CONTEXT_COLUMNS
+    assert set(written_df.columns).isdisjoint(FORBIDDEN_CONTEXT_FIELDS)
 
 
 def test_duplicate_ticker_date_fails(patch_paths):
@@ -266,7 +313,7 @@ def test_context_layer_does_not_require_validation_layer(patch_paths):
     df = context_module.build_context_layer()
 
     assert len(df) == 1
-    assert "context_" + "trad" + "eable" not in df.columns
+    assert set(df.columns).isdisjoint(FORBIDDEN_CONTEXT_FIELDS)
 
 
 def test_missing_sector_data_no_crash_and_remains_distribution_only(patch_paths):
@@ -280,3 +327,63 @@ def test_missing_sector_data_no_crash_and_remains_distribution_only(patch_paths)
     assert df.loc[0, "context_strength"] == "LEADING"
     assert df.loc[0, "context_reason"] == "top_decile_leadership"
     assert pd.isna(df.loc[0, "rs_vs_sector"])
+
+
+def test_missing_sector_data_preserves_all_rows(patch_paths):
+    scanner_rows = [
+        _scanner_row(ticker="AAA", rs_20d_pct=3.0, sector="Technology"),
+        _scanner_row(ticker="BBB", rs_20d_pct=2.0, sector="Healthcare"),
+        _scanner_row(ticker="CCC", rs_20d_pct=1.0, sector=None),
+        _scanner_row(ticker="DDD", rs_20d_pct=-1.0, sector="Financials"),
+    ]
+    patch_paths(scanner_rows=scanner_rows, sector_rows=None)
+
+    df = context_module.build_context_layer()
+
+    assert len(df) == len(scanner_rows)
+    assert set(df["ticker"]) == {"AAA", "BBB", "CCC", "DDD"}
+    assert df["rs_vs_sector"].isna().all()
+    assert set(df.columns).isdisjoint(FORBIDDEN_CONTEXT_FIELDS)
+
+
+def test_leadership_states_are_classification_only_and_preserve_distribution(patch_paths):
+    scanner_rows = [
+        _scanner_row(ticker="LEAD", rs_20d_pct=4.0),
+        _scanner_row(ticker="STRONG", rs_20d_pct=3.0),
+        _scanner_row(ticker="NEUTRAL", rs_20d_pct=2.0),
+        _scanner_row(ticker="WEAK", rs_20d_pct=-1.0),
+    ]
+    patch_paths(
+        scanner_rows=scanner_rows,
+        sector_rows=[_sector_row(sector_rs_20d_pct=0.0)],
+    )
+
+    df = context_module.build_context_layer().set_index("ticker")
+
+    assert len(df) == len(scanner_rows)
+    assert df.loc["LEAD", "context_strength"] == "LEADING"
+    assert df.loc["STRONG", "context_strength"] == "STRONG"
+    assert df.loc["NEUTRAL", "context_strength"] == "NEUTRAL"
+    assert df.loc["WEAK", "context_strength"] == "WEAK"
+    assert df["leadership_state"].equals(df["context_strength"])
+    assert set(df.columns).isdisjoint(FORBIDDEN_CONTEXT_FIELDS)
+
+
+def test_context_output_is_deterministic(patch_paths):
+    *_, output_path, _ = patch_paths(
+        scanner_rows=[
+            _scanner_row(ticker="AAA", rs_20d_pct=3.0),
+            _scanner_row(ticker="BBB", rs_20d_pct=2.0),
+            _scanner_row(ticker="CCC", rs_20d_pct=1.0),
+            _scanner_row(ticker="DDD", rs_20d_pct=-1.0),
+        ],
+        sector_rows=[_sector_row(sector_rs_20d_pct=0.0)],
+    )
+
+    first = context_module.build_context_layer()
+    first_hash = _hash_file(output_path)
+    second = context_module.build_context_layer()
+    second_hash = _hash_file(output_path)
+
+    pd.testing.assert_frame_equal(first, second)
+    assert first_hash == second_hash

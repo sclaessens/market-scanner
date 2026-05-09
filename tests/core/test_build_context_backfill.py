@@ -8,6 +8,21 @@ import pytest
 
 from scripts.core import build_context_backfill as b
 
+FORBIDDEN_CONTEXT_FIELDS = {
+    "context_tradeable",
+    "tradeability",
+    "conviction",
+    "allocation_priority",
+    "final_action",
+    "urgency",
+    "actionable",
+    "BUY",
+    "SELL",
+    "HOLD",
+    "TRIM",
+    "REMOVE",
+}
+
 
 def _prices(start="2026-01-01", periods=40, base=100.0, step=1.0):
     idx = pd.bdate_range(start, periods=periods)
@@ -54,6 +69,24 @@ def test_output_row_count_validation():
     b.validate_output(out, expected_rows=1)
     with pytest.raises(ValueError, match="row count mismatch"):
         b.validate_output(out, expected_rows=2)
+
+
+def test_backfill_schema_is_exact_and_governance_clean():
+    assert b.OUTPUT_COLUMNS == [
+        "ticker",
+        "date",
+        "rs_score",
+        "rs_rank",
+        "rs_percentile",
+        "rs_20d",
+        "benchmark_return_20d",
+        "rs_vs_market",
+        "rs_vs_sector",
+        "context_strength",
+        "context_reason",
+        "leadership_state",
+    ]
+    assert set(b.OUTPUT_COLUMNS).isdisjoint(FORBIDDEN_CONTEXT_FIELDS)
 
 
 def test_no_future_candle_usage():
@@ -114,6 +147,7 @@ def test_unknown_missing_price_data_policy(tmp_path: Path, monkeypatch):
     assert row["benchmark_return_20d"] == 0.0
     assert pd.isna(row["rs_vs_market"])
     assert pd.isna(row["rs_vs_sector"])
+    assert set(output.columns).isdisjoint(FORBIDDEN_CONTEXT_FIELDS)
 
 
 def test_allowed_enum_validation_fails():
@@ -137,3 +171,40 @@ def test_allowed_enum_validation_fails():
     )
     with pytest.raises(ValueError, match="Invalid context_strength"):
         b.validate_output(out, expected_rows=1)
+
+
+def test_build_context_backfill_preserves_rows_and_writes_clean_schema(tmp_path: Path, monkeypatch):
+    scans_path = tmp_path / "scans.csv"
+    out_path = tmp_path / "context_strength_historical.csv"
+    log_path = tmp_path / "context_backfill_log.csv"
+
+    pd.DataFrame(
+        {
+            "ticker": ["AAA", "BBB", "CCC"],
+            "scan_date": ["2026-02-25", "2026-02-25", "2026-02-25"],
+            "primary_setup": ["BREAKOUT", "PULLBACK", "BASE"],
+        }
+    ).to_csv(scans_path, index=False)
+
+    def fake_download(symbols, start, end):
+        prices = {
+            "AAA": _prices(periods=45, base=100, step=2),
+            "BBB": _prices(periods=45, base=100, step=1),
+            "CCC": _prices(periods=45, base=100, step=-1),
+            "SPY": _prices(periods=45, base=100, step=0.5),
+        }
+        return {symbol: prices[symbol] for symbol in symbols}, {}
+
+    monkeypatch.setattr(b, "_download_ohlcv", fake_download)
+
+    output = b.build_context_backfill(scans_path, out_path, log_path)
+    written_df = pd.read_csv(out_path)
+
+    assert len(output) == 3
+    assert len(written_df) == 3
+    assert list(output.columns) == b.OUTPUT_COLUMNS
+    assert list(written_df.columns) == b.OUTPUT_COLUMNS
+    assert set(output.columns).isdisjoint(FORBIDDEN_CONTEXT_FIELDS)
+    assert set(written_df.columns).isdisjoint(FORBIDDEN_CONTEXT_FIELDS)
+    assert output["rs_vs_sector"].isna().all()
+    assert set(output["leadership_state"]) == set(output["context_strength"])
