@@ -78,7 +78,7 @@ Lifecycle phases:
 | Sprint 3 | Fundamental Quality Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
 | Sprint 4 | Timing State Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
 | Sprint 5 | Portfolio Intelligence Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | Sprint 6 Preparation |
-| Sprint 6 | Decision Engine Core | PLANNED | NOT STARTED | NOT STARTED | None |
+| Sprint 6 | Decision Engine Core | CLOSED | CLOSED | CERTIFIED COMPLETE | Sprint 7 Preparation |
 | Sprint 7 | Stability & Persistence Layer | PLANNED | NOT STARTED | NOT STARTED | None |
 | Sprint 8 | Reporting Layer | PLANNED | NOT STARTED | NOT STARTED | None |
 
@@ -92,7 +92,7 @@ Lifecycle phases:
 | Sprint 3 | COMPLETE | COMPLETE | COMPLETE | COMPLETE | CERTIFIED | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | CLOSED |
 | Sprint 4 | COMPLETE | COMPLETE | COMPLETE | NOT STARTED | CERTIFIED | COMPLETE | NOT STARTED | COMPLETE | COMPLETE | COMPLETE | COMPLETE | CLOSED |
 | Sprint 5 | COMPLETE | COMPLETE | COMPLETE | NOT STARTED | CERTIFIED | NOT STARTED | NOT STARTED | COMPLETE | COMPLETE | COMPLETE | COMPLETE | CLOSED |
-| Sprint 6 | COMPLETE | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| Sprint 6 | COMPLETE | COMPLETE | COMPLETE | NOT STARTED | CERTIFIED | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | CLOSED |
 | Sprint 7 | COMPLETE | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
 | Sprint 8 | COMPLETE | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
 
@@ -100,7 +100,7 @@ Lifecycle phases:
 
 Current required next action:
 
-Sprint 6 Preparation. Sprint 5 is certified complete and closed.
+Sprint 7 Preparation. Sprint 6 is certified complete and closed.
 
 Sprint 3 closeout inherits:
 
@@ -143,6 +143,29 @@ Sprint 5 preparation inherits:
 - `docs/sprints/sprint_5_closeout.md`
 
 Sprint 5 preparation is complete as a governance-safe, documentation-only planning artifact. Sprint 5 governance audit certified preparation for developer specification. Sprint 5 developer specification is complete. Sprint 5 implementation is complete. Sprint 5 implementation audit is complete and certified for closeout. Sprint 5 closeout is complete. Sprint 5 is certified complete and closed. Sprint 5 implemented a standalone Portfolio Intelligence builder and focused tests, generated approved Sprint 5 artifacts, and did not change Decision Engine, reporting, watchlist, portfolio runtime logic, or certified upstream builder logic.
+
+Sprint 6 preparation inherits:
+
+- `docs/sprints/sprint_6_decision_engine_governance.md`
+- `docs/audits/sprint_6_governance_audit.md`
+- `docs/sprints/sprint_6_execution_plan.md`
+- `docs/audits/sprint_6_execution_review.md`
+- `docs/sprints/sprint_6_developer_spec.md`
+- `scripts/core/decision_engine.py`
+- `tests/core/test_decision_engine.py`
+- `data/processed/final_decisions.csv`
+- `data/logs/decision_engine_log.csv`
+- `docs/audits/sprint_6_implementation_audit.md`
+- `docs/sprints/sprint_6_closeout.md`
+- `docs/sprints/sprint_6_decision_engine_core.md`
+- `docs/technical/decision_engine_design_v2.md`
+- `docs/technical/Technical_Analysis_v3.md`
+- `docs/functional/Functional_Analysis_v2.md`
+- `docs/execution/execution_delivery_framework_v2.md`
+- `docs/sprints/execution_roadmap_v2.md`
+- `docs/sprints/sprint_5_closeout.md`
+
+Sprint 6 preparation is complete as a governance-safe, audit-first planning artifact. Sprint 6 governance audit certified preparation for execution planning. Sprint 6 execution planning is complete as a documentation-only planning artifact. Sprint 6 execution review approved the execution plan for developer specification. Sprint 6 developer specification is complete and recommends implementation. Sprint 6 implementation is complete. Sprint 6 implementation audit certified implementation for closeout. Sprint 6 closeout is complete. Sprint 6 is certified complete and closed. Sprint 7 preparation is the next required action.
 
 ## 8. Status Update Protocol
 
@@ -206,7 +229,7 @@ Status updates must obey these rules:
 | Sprint 3 | `docs/sprints/sprint_3_fundamental_quality.md`; `docs/audits/sprint_3_governance_audit.md`; `docs/audits/sprint_3_reaudit.md`; `docs/sprints/sprint_3_execution_plan.md`; `docs/audits/sprint_3_execution_review.md`; `docs/sprints/sprint_3_developer_spec.md`; `docs/audits/sprint_3_implementation_audit.md`; `docs/sprints/sprint_3_closeout.md` |
 | Sprint 4 | `docs/sprints/sprint_4_timing_state_layer.md`; `docs/sprints/sprint_4_governance_constraints.md`; `docs/sprints/sprint_4_boundary_controls.md`; `docs/sprints/sprint_4_execution_plan.md`; `docs/sprints/sprint_4_execution_planning.md`; `docs/sprints/sprint_4_developer_spec.md`; `docs/audits/sprint_4_governance_audit.md`; `docs/audits/sprint_4_architecture_validation.md`; `docs/audits/sprint_4_implementation_audit.md`; `docs/sprints/sprint_4_closeout.md` |
 | Sprint 5 | `docs/sprints/sprint_5_portfolio_intelligence.md`; `docs/audits/sprint_5_governance_audit.md`; `docs/sprints/sprint_5_developer_spec.md`; `docs/audits/sprint_5_implementation_audit.md`; `docs/sprints/sprint_5_closeout.md`; `docs/sprints/execution_roadmap_v2.md` |
-| Sprint 6 | `docs/sprints/execution_roadmap_v2.md` until sprint-specific preparation exists |
+| Sprint 6 | `docs/sprints/sprint_6_decision_engine_governance.md`; `docs/audits/sprint_6_governance_audit.md`; `docs/sprints/sprint_6_execution_plan.md`; `docs/audits/sprint_6_execution_review.md`; `docs/sprints/sprint_6_developer_spec.md`; `docs/audits/sprint_6_implementation_audit.md`; `docs/sprints/sprint_6_closeout.md`; `docs/sprints/sprint_6_decision_engine_core.md`; `docs/sprints/execution_roadmap_v2.md`; `docs/technical/decision_engine_design_v2.md` |
 | Sprint 7 | `docs/sprints/execution_roadmap_v2.md` until sprint-specific preparation exists |
 | Sprint 8 | `docs/sprints/execution_roadmap_v2.md` until sprint-specific preparation exists |
 

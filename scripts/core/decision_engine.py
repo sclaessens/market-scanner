@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Any
 
 import pandas as pd
 
@@ -12,43 +14,173 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from config.settings import DATA_DIR
 
-SCANNER_FILE = DATA_DIR / "processed" / "scanner_ranked.csv"
-VALIDATION_FILE = DATA_DIR / "processed" / "validation_layer.csv"
-CONTEXT_FILE = DATA_DIR / "processed" / "context_strength.csv"
-WATCHLIST_FILE = DATA_DIR / "watchlist" / "watchlist_status.csv"
-PORTFOLIO_FILE = DATA_DIR / "portfolio" / "portfolio_review.csv"
-MARKET_REGIME_FILE = DATA_DIR / "processed" / "market_regime.csv"
-OUTPUT_FILE = DATA_DIR / "processed" / "final_decisions.csv"
+INPUT_PATH = DATA_DIR / "processed" / "portfolio_intelligence.csv"
+OUTPUT_PATH = DATA_DIR / "processed" / "final_decisions.csv"
+LOG_PATH = DATA_DIR / "logs" / "decision_engine_log.csv"
 
-ACTION_BUY = "BUY"
-ACTION_SELL = "SELL"
-ACTION_HOLD = "HOLD"
-ACTION_WAIT = "WAIT"
-ACTION_TRIM = "TRIM"
-ACTION_REMOVE = "REMOVE"
-ACTION_REVIEW = "REVIEW"
-ACTION_NO_ACTION = "NO_ACTION"
-ACTION_PREPARE = "PREPARE"
+DECISION_CONTRACT_VERSION = "SPRINT_6_DECISION_ENGINE_CORE_V1"
 
-OUTPUT_COLUMNS = [
-    "ticker", "date", "source_layer", "setup_type", "final_action", "tradeability",
-    "conviction", "allocation_priority", "validation_state", "context_strength",
-    "leadership_state", "timing_state", "portfolio_state", "execution_style",
-    "decision_reason", "entry", "stop", "target", "rr", "trigger_price", "regime",
-    "close", "ma20", "ma50", "high_20d",
+REQUIRED_INPUT_COLUMNS = [
+    "ticker",
+    "date",
+    "quality_state",
+    "timing_state",
+    "in_portfolio",
+    "portfolio_position_state",
+    "exposure_state",
+    "diversification_state",
+    "concentration_state",
+    "overlap_state",
+    "sector_exposure_state",
+    "position_context_state",
+    "portfolio_environment",
+    "portfolio_metadata_status",
+    "portfolio_metadata_reason",
 ]
 
+OPTIONAL_PASSTHROUGH_COLUMNS = [
+    "quality_state",
+    "timing_state",
+    "in_portfolio",
+    "portfolio_position_state",
+    "exposure_state",
+    "diversification_state",
+    "concentration_state",
+    "overlap_state",
+    "portfolio_metadata_status",
+]
 
-def read_csv_safe(path: Path) -> pd.DataFrame:
-    if not path.exists():
-        return pd.DataFrame()
-    try:
-        return pd.read_csv(path)
-    except Exception:
-        return pd.DataFrame()
+OUTPUT_COLUMNS = [
+    "ticker",
+    "date",
+    "final_action",
+    "allocation_decision",
+    "execution_decision",
+    "portfolio_decision_state",
+    "opportunity_decision_state",
+    "arbitration_state",
+    "allocation_rationale",
+    "execution_rationale",
+    "arbitration_reason",
+    "conflict_resolution_reason",
+    "source_provenance",
+    "decision_contract_version",
+    "input_row_hash",
+]
+
+LOG_COLUMNS = [
+    "run_id",
+    "generated_at",
+    "input_artifact",
+    "output_artifact",
+    "input_row_count",
+    "output_row_count",
+    "row_count_preserved",
+    "ticker_date_universe_preserved",
+    "input_order_preserved",
+    "upstream_artifacts_mutated",
+    "decision_contract_version",
+    "forbidden_authority_leakage_detected",
+    "hidden_filtering_detected",
+    "silent_suppression_detected",
+    "rationale_completeness_status",
+    "source_provenance_status",
+    "classification_rationale",
+]
+
+FINAL_ACTIONS = {
+    "BUY",
+    "SELL",
+    "HOLD",
+    "TRIM",
+    "WAIT",
+    "REMOVE",
+    "REVIEW",
+    "PREPARE",
+    "NO_ACTION",
+}
+
+ALLOCATION_DECISIONS = {
+    "ALLOCATE",
+    "DO_NOT_ALLOCATE",
+    "MAINTAIN",
+    "REDUCE",
+    "EXIT",
+    "REVIEW_REQUIRED",
+    "NO_ALLOCATION_ACTION",
+}
+
+EXECUTION_DECISIONS = {
+    "EXECUTE",
+    "DO_NOT_EXECUTE",
+    "MONITOR",
+    "REVIEW_REQUIRED",
+    "NO_EXECUTION_ACTION",
+}
+
+ARBITRATION_STATES = {
+    "NO_CONFLICT",
+    "PORTFOLIO_POSITION_CONFLICT",
+    "MISSING_METADATA",
+    "TIMING_CONFLICT",
+    "QUALITY_CONFLICT",
+    "REVIEW_REQUIRED",
+}
+
+FORBIDDEN_OUTPUT_COLUMNS = {
+    "decision_output",
+    "conviction_score",
+    "ranking_score",
+    "portfolio_score",
+    "final_score",
+    "recommended_trade",
+    "recommended_weight",
+    "optimal_weight",
+    "target_weight",
+    "allocation_queue",
+    "execution_urgency",
+    "urgency",
+    "actionable",
+    "execution_ready",
+}
+
+MISSING_VALUES = {
+    "",
+    "UNKNOWN",
+    "UNAVAILABLE",
+    "UNCLASSIFIED",
+    "SOURCE_MISSING",
+    "MISSING",
+    "PARTIAL",
+    "SOURCE_PARTIAL",
+    "INSUFFICIENT_DATA",
+}
+
+READY_TIMING_STATES = {
+    "READY",
+    "CONFIRMED",
+    "PULLBACK",
+    "BREAKOUT_READY",
+    "BREAKOUT_PENDING",
+}
+
+CONFLICT_TIMING_STATES = {
+    "EXTENDED",
+    "STALE",
+    "UNCLASSIFIED",
+    "UNKNOWN",
+    "UNAVAILABLE",
+}
+
+QUALITY_CONFLICT_STATES = {
+    "INSUFFICIENT_DATA",
+    "UNAVAILABLE",
+    "SOURCE_MISSING",
+    "UNKNOWN",
+}
 
 
-def clean_text(value, fallback: str = "") -> str:
+def _clean_text(value: Any, fallback: str = "UNKNOWN") -> str:
     if value is None:
         return fallback
     if isinstance(value, float) and pd.isna(value):
@@ -57,237 +189,260 @@ def clean_text(value, fallback: str = "") -> str:
     return text if text else fallback
 
 
-def safe_float(value) -> Optional[float]:
-    try:
-        if pd.isna(value):
-            return None
-        return float(value)
-    except Exception:
-        return None
+def _clean_state(value: Any, fallback: str = "UNKNOWN") -> str:
+    return _clean_text(value, fallback=fallback).upper()
 
 
-def load_regime() -> str:
-    df = read_csv_safe(MARKET_REGIME_FILE)
-    if df.empty:
-        return "UNKNOWN"
-    last = df.iloc[-1]
-    for col in ["regime", "Regime", "market_regime"]:
-        if col in df.columns:
-            return clean_text(last.get(col), fallback="UNKNOWN").upper()
-    return "UNKNOWN"
+def _read_required_input(path: Path | None = None) -> pd.DataFrame:
+    path = path or INPUT_PATH
+    if not path.exists():
+        raise FileNotFoundError(f"Required Decision Engine input is missing: {path}")
+    return pd.read_csv(path)
 
 
-def normalize_ticker_date(df: pd.DataFrame) -> pd.DataFrame:
-    if df.empty or "ticker" not in df.columns:
-        return df
-    df = df.copy()
-    df["ticker"] = df["ticker"].astype(str).str.upper().str.strip()
-    if "date" in df.columns:
-        df["date"] = pd.to_datetime(df["date"], errors="coerce").dt.strftime("%Y-%m-%d")
-    return df
+def _validate_input_contract(df: pd.DataFrame) -> None:
+    missing_columns = [column for column in REQUIRED_INPUT_COLUMNS if column not in df.columns]
+    if missing_columns:
+        raise ValueError(f"Decision Engine input missing required columns: {missing_columns}")
+
+    if df[["ticker", "date"]].isna().any().any():
+        raise ValueError("Decision Engine input contains missing ticker/date row identity values")
+
+    normalized_keys = (
+        df["ticker"].astype(str).str.upper().str.strip()
+        + "|"
+        + df["date"].astype(str).str.strip()
+    )
+    if normalized_keys.duplicated().any():
+        duplicated = sorted(normalized_keys[normalized_keys.duplicated()].unique().tolist())
+        raise ValueError(f"Decision Engine input contains duplicate ticker/date rows: {duplicated}")
 
 
-def _latest_date(*frames: pd.DataFrame) -> str:
-    dates: list[str] = []
-    for frame in frames:
-        if not frame.empty and "date" in frame.columns:
-            dates.extend(frame["date"].dropna().astype(str).tolist())
-    return max(dates) if dates else pd.Timestamp.today().strftime("%Y-%m-%d")
+def _normalize_input(df: pd.DataFrame) -> pd.DataFrame:
+    normalized = df.copy()
+    normalized["ticker"] = normalized["ticker"].astype(str).str.upper().str.strip()
+    normalized["date"] = normalized["date"].astype(str).str.strip()
+    return normalized
 
 
-def _base_row(ticker: str, date: str, regime: str) -> dict:
-    return {
-        "ticker": ticker, "date": date, "source_layer": "", "setup_type": "",
-        "final_action": ACTION_NO_ACTION, "tradeability": "NOT_ASSESSED",
-        "conviction": "LOW", "allocation_priority": 0, "validation_state": "UNKNOWN",
-        "context_strength": "UNKNOWN", "leadership_state": "UNKNOWN", "timing_state": "UNKNOWN",
-        "portfolio_state": "NONE", "execution_style": "NONE", "decision_reason": "no_decision_inputs",
-        "entry": None, "stop": None, "target": None, "rr": None, "trigger_price": None,
-        "regime": regime, "close": None, "ma20": None, "ma50": None, "high_20d": None,
+def _hash_input_row(row: pd.Series) -> str:
+    payload = {
+        column: None if pd.isna(row[column]) else row[column]
+        for column in row.index
+    }
+    serialized = json.dumps(payload, sort_keys=True, default=str, separators=(",", ":"))
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
+def _has_missing_metadata(row: pd.Series) -> bool:
+    metadata_values = [
+        _clean_state(row.get("quality_state")),
+        _clean_state(row.get("timing_state")),
+        _clean_state(row.get("portfolio_metadata_status")),
+    ]
+    return any(value in MISSING_VALUES for value in metadata_values)
+
+
+def _arbitration_state(row: pd.Series) -> str:
+    if _has_missing_metadata(row):
+        return "MISSING_METADATA"
+    if _clean_state(row.get("in_portfolio")) == "PRESENT":
+        return "PORTFOLIO_POSITION_CONFLICT"
+    if _clean_state(row.get("timing_state")) in CONFLICT_TIMING_STATES:
+        return "TIMING_CONFLICT"
+    if _clean_state(row.get("quality_state")) in QUALITY_CONFLICT_STATES:
+        return "QUALITY_CONFLICT"
+    return "NO_CONFLICT"
+
+
+def _portfolio_decision_state(row: pd.Series, arbitration_state: str) -> str:
+    if _clean_state(row.get("in_portfolio")) == "PRESENT":
+        if arbitration_state == "MISSING_METADATA":
+            return "POSITION_REVIEW_REQUIRED"
+        return "POSITION_MAINTAIN_REVIEW"
+    if arbitration_state == "MISSING_METADATA":
+        return "PORTFOLIO_METADATA_REVIEW_REQUIRED"
+    return "NO_PORTFOLIO_POSITION"
+
+
+def _opportunity_decision_state(row: pd.Series, arbitration_state: str) -> str:
+    if arbitration_state == "MISSING_METADATA":
+        return "INSUFFICIENT_DECISION_METADATA"
+    if arbitration_state == "TIMING_CONFLICT":
+        return "TIMING_REVIEW_REQUIRED"
+    if arbitration_state == "QUALITY_CONFLICT":
+        return "QUALITY_REVIEW_REQUIRED"
+    if _clean_state(row.get("timing_state")) in READY_TIMING_STATES:
+        return "OPPORTUNITY_READY_FOR_DECISION"
+    return "OPPORTUNITY_MONITOR"
+
+
+def _decision_for_row(row: pd.Series) -> dict[str, Any]:
+    arbitration_state = _arbitration_state(row)
+    in_portfolio = _clean_state(row.get("in_portfolio"))
+    timing_state = _clean_state(row.get("timing_state"))
+
+    if arbitration_state == "MISSING_METADATA":
+        final_action = "REVIEW"
+        allocation_decision = "REVIEW_REQUIRED"
+        execution_decision = "REVIEW_REQUIRED"
+    elif in_portfolio == "PRESENT":
+        final_action = "HOLD"
+        allocation_decision = "MAINTAIN"
+        execution_decision = "MONITOR"
+    elif arbitration_state in {"TIMING_CONFLICT", "QUALITY_CONFLICT"}:
+        final_action = "WAIT"
+        allocation_decision = "DO_NOT_ALLOCATE"
+        execution_decision = "MONITOR"
+    elif timing_state in READY_TIMING_STATES:
+        final_action = "PREPARE"
+        allocation_decision = "NO_ALLOCATION_ACTION"
+        execution_decision = "MONITOR"
+    else:
+        final_action = "NO_ACTION"
+        allocation_decision = "NO_ALLOCATION_ACTION"
+        execution_decision = "NO_EXECUTION_ACTION"
+
+    portfolio_decision_state = _portfolio_decision_state(row, arbitration_state)
+    opportunity_decision_state = _opportunity_decision_state(row, arbitration_state)
+    metadata_reason = _clean_text(row.get("portfolio_metadata_reason"), fallback="metadata evaluated")
+    source_provenance = "data/processed/portfolio_intelligence.csv"
+    portfolio_source = _clean_text(row.get("portfolio_source_provenance"), fallback="")
+    if portfolio_source not in {"", "UNKNOWN"}:
+        source_provenance = f"{source_provenance};{portfolio_source}"
+
+    allocation_rationale = (
+        f"decision_engine_allocation={allocation_decision}; "
+        f"arbitration={arbitration_state}; "
+        f"portfolio_state={portfolio_decision_state}"
+    )
+    execution_rationale = (
+        f"decision_engine_execution={execution_decision}; "
+        f"final_action={final_action}; "
+        f"timing_state={timing_state}"
+    )
+    arbitration_reason = (
+        f"arbitration_state={arbitration_state}; "
+        f"metadata_status={_clean_state(row.get('portfolio_metadata_status'))}"
+    )
+    conflict_resolution_reason = (
+        f"conflict_resolution={opportunity_decision_state}; "
+        f"portfolio_metadata_reason={metadata_reason}"
+    )
+
+    output = {
+        "ticker": _clean_state(row.get("ticker")),
+        "date": _clean_text(row.get("date")),
+        "final_action": final_action,
+        "allocation_decision": allocation_decision,
+        "execution_decision": execution_decision,
+        "portfolio_decision_state": portfolio_decision_state,
+        "opportunity_decision_state": opportunity_decision_state,
+        "arbitration_state": arbitration_state,
+        "allocation_rationale": allocation_rationale,
+        "execution_rationale": execution_rationale,
+        "arbitration_reason": arbitration_reason,
+        "conflict_resolution_reason": conflict_resolution_reason,
+        "source_provenance": source_provenance,
+        "decision_contract_version": DECISION_CONTRACT_VERSION,
+        "input_row_hash": _hash_input_row(row),
     }
 
+    for column in OPTIONAL_PASSTHROUGH_COLUMNS:
+        if column in row.index:
+            output[column] = row[column]
 
-def _portfolio_action(risk_state: str) -> tuple[str, str, str, int, str]:
-    if risk_state == "STRUCTURE_BROKEN":
-        return ACTION_SELL, "TRADEABLE", "HIGH", 90, "portfolio_structure_broken"
-    if risk_state == "EXTENDED_PROFIT":
-        return ACTION_TRIM, "TRADEABLE", "MEDIUM", 70, "portfolio_extended_profit"
-    if risk_state in {"STRUCTURE_WEAKENING", "DATA_GAP"}:
-        return ACTION_REVIEW, "REVIEW_REQUIRED", "MEDIUM", 60, "portfolio_requires_review"
-    return ACTION_HOLD, "HELD", "MEDIUM", 40, "portfolio_state_normal"
+    return output
 
 
-def portfolio_rows(portfolio_df: pd.DataFrame, regime: str, date: str) -> list[dict]:
-    rows: list[dict] = []
-    if portfolio_df.empty or "ticker" not in portfolio_df.columns:
-        return rows
-    for _, row in portfolio_df.iterrows():
-        ticker = clean_text(row.get("ticker"), fallback="?").upper()
-        risk_state = clean_text(row.get("risk_state"), fallback="UNKNOWN").upper()
-        final_action, tradeability, conviction, priority, reason = _portfolio_action(risk_state)
-        out = _base_row(ticker, date, regime)
-        out.update({
-            "source_layer": "PORTFOLIO", "final_action": final_action,
-            "tradeability": tradeability, "conviction": conviction,
-            "allocation_priority": priority, "portfolio_state": risk_state,
-            "decision_reason": reason, "close": safe_float(row.get("last_price")),
-            "ma20": safe_float(row.get("ma20")), "ma50": safe_float(row.get("ma50")),
-        })
-        rows.append(out)
-    return rows
+def _build_log(input_df: pd.DataFrame, output_df: pd.DataFrame, input_order: list[str]) -> pd.DataFrame:
+    output_order = (
+        output_df["ticker"].astype(str).str.upper().str.strip()
+        + "|"
+        + output_df["date"].astype(str).str.strip()
+    ).tolist()
+    input_universe = set(input_order)
+    output_universe = set(output_order)
+    rationale_columns = [
+        "allocation_rationale",
+        "execution_rationale",
+        "arbitration_reason",
+        "conflict_resolution_reason",
+    ]
+    rationale_complete = bool(
+        not output_df.empty
+        and output_df[rationale_columns].notna().all().all()
+        and (output_df[rationale_columns].astype(str).apply(lambda col: col.str.strip() != "")).all().all()
+    )
+    provenance_complete = bool(
+        not output_df.empty
+        and output_df["source_provenance"].notna().all()
+        and (output_df["source_provenance"].astype(str).str.strip() != "").all()
+    )
+    row_count_preserved = len(input_df) == len(output_df)
+    universe_preserved = input_universe == output_universe
+    order_preserved = input_order == output_order
 
-
-def _timing_state_from_watchlist(row: pd.Series) -> str:
-    for column in ["timing_state", "status", "state"]:
-        value = clean_text(row.get(column), fallback="").upper()
-        if value:
-            return value
-    return "UNKNOWN"
-
-
-def _scanner_timing_state(row: pd.Series) -> str:
-    extension = safe_float(row.get("extension_atr"))
-    setup_type = clean_text(row.get("primary_setup"), fallback="").upper()
-    if extension is not None and extension >= 2.0:
-        return "EXTENDED"
-    if setup_type == "BREAKOUT":
-        return "BREAKOUT_PENDING"
-    if setup_type == "PULLBACK":
-        return "PULLBACK"
-    return "EARLY"
-
-
-def _conviction_from_context(context_strength: str, validation_state: str, timing_state: str, regime: str) -> tuple[str, int]:
-    score = 0
-    if validation_state == "COHERENT":
-        score += 2
-    if context_strength == "LEADING":
-        score += 3
-    elif context_strength == "STRONG":
-        score += 2
-    elif context_strength == "NEUTRAL":
-        score += 1
-    if timing_state in {"READY", "CONFIRMED", "PULLBACK", "BREAKOUT_PENDING"}:
-        score += 1
-    if regime == "BULLISH":
-        score += 1
-    elif regime == "BEARISH":
-        score -= 1
-    if score >= 6:
-        return "VERY_HIGH", 90
-    if score >= 5:
-        return "HIGH", 75
-    if score >= 3:
-        return "MEDIUM", 50
-    if score >= 1:
-        return "LOW", 25
-    return "VERY_LOW", 10
-
-
-def _allocation_action(validation_state: str, context_strength: str, timing_state: str, portfolio_block: bool, regime: str) -> tuple[str, str, str]:
-    if portfolio_block:
-        return ACTION_WAIT, "NOT_TRADEABLE", "existing_portfolio_position_controls_allocation"
-    if validation_state != "COHERENT":
-        return ACTION_REVIEW, "NOT_TRADEABLE", "structure_not_coherent"
-    if context_strength in {"LEADING", "STRONG"} and timing_state in {"READY", "CONFIRMED", "PULLBACK"} and regime != "BEARISH":
-        return ACTION_BUY, "TRADEABLE", "capital_allocation_ready"
-    if timing_state in {"BREAKOUT_PENDING", "EARLY"}:
-        return ACTION_PREPARE, "WATCH", "opportunity_recognized_timing_pending"
-    if timing_state == "STALE":
-        return ACTION_REMOVE, "NOT_TRADEABLE", "opportunity_no_longer_relevant"
-    return ACTION_WAIT, "WATCH", "classification_recognized_allocation_not_ready"
-
-
-def opportunity_rows(scanner_df: pd.DataFrame, validation_df: pd.DataFrame, context_df: pd.DataFrame, watchlist_df: pd.DataFrame, portfolio_tickers: set[str], regime: str, date: str) -> list[dict]:
-    rows: list[dict] = []
-    if scanner_df.empty and watchlist_df.empty:
-        return rows
-
-    scanner = normalize_ticker_date(scanner_df)
-    validation = normalize_ticker_date(validation_df)
-    context = normalize_ticker_date(context_df)
-    watchlist = normalize_ticker_date(watchlist_df)
-
-    if not scanner.empty:
-        base = scanner.copy()
-    else:
-        base = watchlist[["ticker"]].drop_duplicates().copy()
-        base["date"] = date
-
-    if not validation.empty:
-        validation_cols = [
-            column
-            for column in ["ticker", "date", "structure_state", "structure_reason", "validation_reason"]
-            if column in validation.columns
-        ]
-        base = base.merge(validation[validation_cols], on=["ticker", "date"], how="left")
-    if not context.empty:
-        base = base.merge(context[["ticker", "date", "context_strength", "leadership_state"]], on=["ticker", "date"], how="left")
-    if not watchlist.empty:
-        watch_cols = [column for column in ["ticker", "status", "timing_state", "trigger_price"] if column in watchlist.columns]
-        base = base.merge(watchlist[watch_cols].drop_duplicates(subset=["ticker"]), on="ticker", how="left")
-
-    for _, row in base.iterrows():
-        ticker = clean_text(row.get("ticker"), fallback="?").upper()
-        validation_state = clean_text(row.get("structure_state"), fallback="UNKNOWN").upper()
-        structure_reason = clean_text(row.get("structure_reason", row.get("validation_reason")), fallback="").lower()
-        context_strength = clean_text(row.get("context_strength"), fallback="UNKNOWN").upper()
-        leadership_state = clean_text(row.get("leadership_state"), fallback=context_strength).upper()
-        timing_state = _timing_state_from_watchlist(row) if "status" in row.index or "timing_state" in row.index else _scanner_timing_state(row)
-        conviction, priority = _conviction_from_context(context_strength, validation_state, timing_state, regime)
-        final_action, tradeability, reason = _allocation_action(validation_state, context_strength, timing_state, ticker in portfolio_tickers, regime)
-        out = _base_row(ticker, date, regime)
-        out.update({
-            "source_layer": "WATCHLIST" if timing_state not in {"UNKNOWN", "EARLY"} else "SCANNER",
-            "setup_type": clean_text(row.get("primary_setup", row.get("setup_type")), fallback="").upper(),
-            "final_action": final_action, "tradeability": tradeability, "conviction": conviction,
-            "allocation_priority": priority, "validation_state": validation_state,
-            "context_strength": context_strength, "leadership_state": leadership_state,
-            "timing_state": timing_state, "portfolio_state": "EXISTING" if ticker in portfolio_tickers else "NONE",
-            "execution_style": "AGGRESSIVE" if final_action == ACTION_BUY and conviction in {"VERY_HIGH", "HIGH"} else "PASSIVE",
-            "decision_reason": reason if not structure_reason else f"{reason}:{structure_reason}", "entry": safe_float(row.get("entry")),
-            "stop": safe_float(row.get("stop")), "target": safe_float(row.get("target")),
-            "rr": safe_float(row.get("rr")), "trigger_price": safe_float(row.get("trigger_price", row.get("entry"))),
-            "close": safe_float(row.get("close")), "ma20": safe_float(row.get("ma20")),
-            "ma50": safe_float(row.get("ma50")), "high_20d": safe_float(row.get("high_20d")),
-        })
-        rows.append(out)
-    return rows
+    log_row = {
+        "run_id": DECISION_CONTRACT_VERSION,
+        "generated_at": pd.Timestamp.now("UTC").strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "input_artifact": str(INPUT_PATH),
+        "output_artifact": str(OUTPUT_PATH),
+        "input_row_count": len(input_df),
+        "output_row_count": len(output_df),
+        "row_count_preserved": row_count_preserved,
+        "ticker_date_universe_preserved": universe_preserved,
+        "input_order_preserved": order_preserved,
+        "upstream_artifacts_mutated": False,
+        "decision_contract_version": DECISION_CONTRACT_VERSION,
+        "forbidden_authority_leakage_detected": False,
+        "hidden_filtering_detected": not row_count_preserved,
+        "silent_suppression_detected": not universe_preserved,
+        "rationale_completeness_status": "COMPLETE" if rationale_complete else "INCOMPLETE",
+        "source_provenance_status": "COMPLETE" if provenance_complete else "INCOMPLETE",
+        "classification_rationale": "row-preserving deterministic Decision Engine evaluation from certified Portfolio Intelligence input",
+    }
+    return pd.DataFrame([log_row], columns=LOG_COLUMNS)
 
 
 def build_final_decisions() -> pd.DataFrame:
-    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    regime = load_regime()
-    scanner_df = read_csv_safe(SCANNER_FILE)
-    validation_df = read_csv_safe(VALIDATION_FILE)
-    context_df = read_csv_safe(CONTEXT_FILE)
-    watchlist_df = read_csv_safe(WATCHLIST_FILE)
-    portfolio_df = read_csv_safe(PORTFOLIO_FILE)
-    date = _latest_date(scanner_df, validation_df, context_df)
+    input_df = _read_required_input()
+    _validate_input_contract(input_df)
+    normalized_input = _normalize_input(input_df)
+    input_order = (
+        normalized_input["ticker"].astype(str).str.upper().str.strip()
+        + "|"
+        + normalized_input["date"].astype(str).str.strip()
+    ).tolist()
 
-    portfolio_df = normalize_ticker_date(portfolio_df)
-    portfolio_tickers = set(portfolio_df["ticker"].tolist()) if not portfolio_df.empty and "ticker" in portfolio_df.columns else set()
+    output_rows = [_decision_for_row(row) for _, row in normalized_input.iterrows()]
+    output_columns = OUTPUT_COLUMNS + [
+        column
+        for column in OPTIONAL_PASSTHROUGH_COLUMNS
+        if column in normalized_input.columns and column not in OUTPUT_COLUMNS
+    ]
+    output_df = pd.DataFrame(output_rows, columns=output_columns)
 
-    rows = []
-    rows.extend(portfolio_rows(portfolio_df, regime, date))
-    rows.extend(opportunity_rows(scanner_df, validation_df, context_df, watchlist_df, portfolio_tickers, regime, date))
+    if set(output_df.columns) & FORBIDDEN_OUTPUT_COLUMNS:
+        forbidden = sorted(set(output_df.columns) & FORBIDDEN_OUTPUT_COLUMNS)
+        raise ValueError(f"Decision Engine generated forbidden output columns: {forbidden}")
 
-    final_df = pd.DataFrame(rows, columns=OUTPUT_COLUMNS)
-    if final_df.empty:
-        final_df = pd.DataFrame(columns=OUTPUT_COLUMNS)
-    else:
-        final_df = final_df.sort_values(["allocation_priority", "ticker"], ascending=[False, True]).drop_duplicates(subset=["ticker"], keep="first").reset_index(drop=True)
-        final_df = final_df[OUTPUT_COLUMNS]
-    final_df.to_csv(OUTPUT_FILE, index=False)
-    return final_df
+    log_df = _build_log(normalized_input, output_df, input_order)
+
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    output_df.to_csv(OUTPUT_PATH, index=False)
+    log_df.to_csv(LOG_PATH, index=False)
+    return output_df
 
 
 def main() -> None:
     df = build_final_decisions()
-    print(f"Final decisions written to: {OUTPUT_FILE}")
+    print(f"Final decisions written to: {OUTPUT_PATH}")
+    print(f"Decision Engine log written to: {LOG_PATH}")
     print(f"Rows: {len(df)}")
     if not df.empty:
-        print(df[["ticker", "source_layer", "final_action", "decision_reason"]].to_string(index=False))
+        print(df[["ticker", "date", "final_action", "allocation_decision", "execution_decision"]].to_string(index=False))
 
 
 if __name__ == "__main__":
