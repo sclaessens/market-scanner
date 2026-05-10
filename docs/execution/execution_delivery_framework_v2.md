@@ -25,6 +25,8 @@ Operational sprint lifecycle status is maintained in `docs/sprints/sprint_status
 
 Deferred work is maintained in `docs/sprints/project_backlog.md`. The backlog captures future improvements, optional corrections, technical debt, and research questions, but it does not authorize implementation.
 
+Mandatory Backlog Reconciliation is a lifecycle gate. Every future sprint audit, implementation audit, and sprint closeout must explicitly evaluate whether new deferred work, governance gaps, technical debt, architectural follow-up, operational risks, future sprint candidates, implementation limitations, or non-blocking follow-up work must be added to `docs/sprints/project_backlog.md` before sprint closure.
+
 1. Purpose (REDEFINED)
 
 Dit document definieert het institutionele delivery framework voor het trading system.
@@ -224,13 +226,13 @@ Sprint phase status must be maintained in `docs/sprints/sprint_status_tracker.md
 Every sprint phase transition requires the relevant governance artifact:
 
 - preparation document for governance audit readiness
-- governance audit or re-audit for certification
+- governance audit or re-audit for certification, including Backlog Impact Assessment
 - execution plan for execution review readiness
 - Technical Lead execution review for developer specification readiness
 - approved developer specification for implementation readiness
 - implementation evidence for implementation audit readiness
-- implementation audit approval for closeout readiness
-- closeout certification for CLOSED status
+- implementation audit approval for closeout readiness, including Backlog Impact Assessment
+- closeout certification for CLOSED status, including completed Backlog Impact Assessment
 
 Status changes must not be made casually. Do not mark a sprint phase complete unless the required document exists and contains the required recommendation.
 
@@ -239,6 +241,32 @@ Status changes must not be made casually. Do not mark a sprint phase complete un
 Deferred improvements, optional corrections, technical debt, research questions, test expansion ideas, reporting improvements, operational reliability ideas, and out-of-scope suggestions must be captured in `docs/sprints/project_backlog.md`.
 
 Backlog entries do not authorize implementation. A backlog item may become active work only after analysis, prioritization, sprint proposal, governance review, execution planning, Technical Lead approval, developer specification, and implementation authorization.
+
+4.1.3 Mandatory Backlog Reconciliation
+
+Every future sprint audit, implementation audit, and sprint closeout must include a dedicated section named:
+
+```text
+Backlog Impact Assessment
+```
+
+The section must explicitly conclude exactly one of:
+
+```text
+Backlog impact assessment:
+- No new backlog items identified.
+```
+
+or:
+
+```text
+Backlog impact assessment:
+- New backlog items identified and added to project_backlog.md
+```
+
+If new backlog items exist, they must be added to `docs/sprints/project_backlog.md` before the sprint may be considered fully closed.
+
+This reconciliation must be mandatory, explicit, auditable, deterministic, repeatable, and lifecycle-integrated.
 4.2 Nieuwe Sprinttypes
 Type A — Classification Sprints
 
@@ -574,6 +602,8 @@ Een sprint is PAS klaar wanneer:
 ✅ end-to-end pipeline werkt
 ✅ data contracts gevalideerd zijn
 ✅ After every completed sprint phase or sprint, the relevant sprint status document must be updated before the work can be considered complete.
+✅ Backlog Impact Assessment completed for applicable audit and closeout documents.
+✅ Identified backlog items added to `docs/sprints/project_backlog.md` before CLOSED status.
 
 11. Migration Governance
 11.1 Belangrijkste Migratierisico

@@ -30,6 +30,30 @@ Deferred project work is maintained in:
 
 The backlog is the source of truth for non-blocking improvements, optional corrections, future enhancements, technical debt, research questions, and out-of-scope ideas. Backlog entries require formal sprint governance before implementation and do not authorize runtime, test, data, strategy, architecture, or allocation changes.
 
+Mandatory Backlog Reconciliation is required for all future sprint audits, implementation audits, and closeouts.
+
+Every future audit and closeout document must contain a dedicated section named:
+
+```text
+Backlog Impact Assessment
+```
+
+That section must explicitly conclude exactly one of:
+
+```text
+Backlog impact assessment:
+- No new backlog items identified.
+```
+
+or:
+
+```text
+Backlog impact assessment:
+- New backlog items identified and added to project_backlog.md
+```
+
+If new deferred work, governance gaps, technical debt, architectural follow-up, operational risks, future sprint candidates, implementation limitations, or non-blocking follow-up work are identified, they must be added to `docs/sprints/project_backlog.md` before sprint closure.
+
 Closed sprint certifications:
 
 - Sprint 1: `docs/sprints/sprint_1_closeout.md`

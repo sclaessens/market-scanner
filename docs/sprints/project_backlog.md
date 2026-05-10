@@ -17,6 +17,12 @@ The backlog captures:
 - test expansion ideas
 - non-blocking audit findings
 - deferred out-of-scope ideas
+- governance gaps
+- architectural follow-up
+- operational risks
+- future sprint candidates
+- implementation limitations
+- non-blocking follow-up work
 
 The backlog is a capture mechanism only. It does not authorize implementation.
 
@@ -61,6 +67,43 @@ The tracker answers: what phase is each sprint in?
 The backlog answers: what deferred work, optional improvements, technical debt, and research questions have been captured for future governance review?
 
 Backlog items may support an active sprint, but they do not change sprint status. Sprint phase transitions must still be updated in `docs/sprints/sprint_status_tracker.md`.
+
+## 3.1 Mandatory Backlog Reconciliation
+
+Mandatory Backlog Reconciliation is a required sprint lifecycle control.
+
+Every sprint audit, implementation audit, and sprint closeout must explicitly evaluate whether new deferred work, governance gaps, technical debt, architectural follow-up, operational risks, future sprint candidates, implementation limitations, or non-blocking follow-up work were identified during:
+
+- preparation
+- governance audit
+- developer specification
+- implementation
+- implementation audit
+- closeout
+
+If new backlog items are identified, they must be added to this document before the sprint may be considered fully closed.
+
+Every future sprint audit and closeout document must contain a dedicated section named:
+
+```text
+Backlog Impact Assessment
+```
+
+That section must conclude with exactly one of the following forms:
+
+```text
+Backlog impact assessment:
+- No new backlog items identified.
+```
+
+or:
+
+```text
+Backlog impact assessment:
+- New backlog items identified and added to project_backlog.md
+```
+
+This reconciliation is mandatory, explicit, auditable, deterministic, repeatable, and lifecycle-integrated. It ensures no deferred work disappears, no governance risk remains implicit, no architectural debt remains undocumented, no future sprint candidate remains hidden, and no implementation limitation remains untracked.
 
 ## 4. Relationship to `execution_roadmap_v2.md`
 
@@ -191,6 +234,8 @@ the following must be captured in this backlog unless the item already exists:
 - test expansion opportunities
 - reporting improvements
 - operational reliability improvements
+
+Every future governance audit, implementation audit, and closeout must include the dedicated `Backlog Impact Assessment` section required by section 3.1. A sprint must not be marked fully closed unless the closeout includes one of the two mandatory backlog impact conclusions and all identified backlog items have been added to this document.
 
 When adding an item:
 

@@ -26,6 +26,8 @@ Operational sprint lifecycle status is maintained in `docs/sprints/sprint_status
 
 Deferred improvements, optional corrections, technical debt, research questions, and future enhancement ideas are maintained in `docs/sprints/project_backlog.md`. Backlog items do not modify this roadmap, authorize implementation, or change sprint scope without formal governance.
 
+Mandatory Backlog Reconciliation is active across the sprint lifecycle. Every future sprint audit, implementation audit, and sprint closeout must include a dedicated `Backlog Impact Assessment` section and must add any newly identified deferred work, governance gaps, technical debt, architectural follow-up, operational risks, future sprint candidates, implementation limitations, or non-blocking follow-up work to `docs/sprints/project_backlog.md` before sprint closure.
+
 1. Executive Summary
 
 De originele sprintstructuur was gebaseerd op een architectuur die:
@@ -405,38 +407,53 @@ data/processed/timing_state_layer.csv
 data/logs/timing_state_layer_log.csv
 docs/sprints/sprint_4_closeout.md
 Sprint 5 — Portfolio Intelligence Layer
+
+Status: CERTIFIED COMPLETE / CLOSED. See `docs/sprints/sprint_5_closeout.md`. Sprint 6 may begin only after Sprint 5 certification and explicit Sprint 6 preparation authorization.
+
 Doel
 
-Portfolio pressure modelleren.
+Portfolio awareness descriptively classify and enrich without allocation decisions.
 
 Scope
-Exposure metrics
 
-✅ concentration risk
-✅ sector exposure
-✅ correlation heat
-✅ liquidity pressure
-✅ momentum concentration
+Portfolio Intelligence metadata
 
-Portfolio states
-
-✅ NORMAL
-✅ CONCENTRATED
-✅ OVEREXPOSED
-✅ HIGH_CORRELATION
+✅ in_portfolio
+✅ portfolio_position_state
+✅ exposure_state
+✅ diversification_state
+✅ concentration_state
+✅ overlap_state
+✅ sector_exposure_state
+✅ position_context_state
+✅ portfolio_environment
+✅ portfolio_metadata_status
+✅ portfolio_metadata_reason
+✅ source provenance and classification rationale
 
 Belangrijke Regel
 
-Portfolio mag:
+Portfolio Intelligence mag:
 
-✅ downstream conviction beïnvloeden
+✅ descriptive portfolio-awareness metadata toevoegen
+✅ upstream opportunity universe behouden
+✅ audit-traceable logs schrijven
 
 Maar NOOIT:
 
-❌ upstream opportunities vernietigen
+❌ downstream conviction beïnvloeden
+❌ allocation bepalen
+❌ execution bepalen
+❌ tradeability bepalen
+❌ ranking/scoring/priority creëren
+❌ opportunities vernietigen, filteren, herordenen, suppressen of gatekeepen
 
 Deliverables
-portfolio_state.csv
+scripts/core/build_portfolio_intelligence.py
+tests/core/test_build_portfolio_intelligence.py
+data/processed/portfolio_intelligence.csv
+data/logs/portfolio_intelligence_log.csv
+docs/sprints/sprint_5_closeout.md
 PHASE B — ALLOCATION INFRASTRUCTURE
 Sprint 6 — Decision Engine Core
 Doel
@@ -563,6 +580,7 @@ Technisch Analist moet bevestigen:
 ✅ correcte separation of concerns
 ✅ geen allocation leakage
 ✅ correcte data contracts
+✅ backlog impact assessment completed where the Architect Gate is an audit artifact
 
 4.2 Functional Gate
 
@@ -572,6 +590,7 @@ Functioneel Analist moet bevestigen:
 ✅ correcte state transitions
 ✅ geen implicit decisions
 ✅ geen verborgen gating
+✅ deferred functional follow-up captured in project_backlog.md where identified
 
 4.3 Quant Gate
 
@@ -581,6 +600,7 @@ Financieel Analist moet bevestigen:
 ✅ edge niet vernietigd
 ✅ distributie behouden
 ✅ classificatie institutioneel correct
+✅ deferred quant/research follow-up captured in project_backlog.md where identified
 
 4.4 Scrum Gate
 
@@ -589,6 +609,31 @@ Scrum Master moet bevestigen:
 ✅ sprint scope gerespecteerd
 ✅ geen forbidden logic toegevoegd
 ✅ Definition of Done gehaald
+✅ mandatory backlog reconciliation completed before CLOSED status
+
+4.5 Mandatory Backlog Reconciliation Gate
+
+Every future sprint audit, implementation audit, and sprint closeout must contain a section named:
+
+```text
+Backlog Impact Assessment
+```
+
+The section must conclude exactly one of:
+
+```text
+Backlog impact assessment:
+- No new backlog items identified.
+```
+
+or:
+
+```text
+Backlog impact assessment:
+- New backlog items identified and added to project_backlog.md
+```
+
+No sprint may be considered fully closed until this assessment is complete and any identified backlog items have been added to `docs/sprints/project_backlog.md`.
 
 5. Critical Governance Rules
 HARD RULE
