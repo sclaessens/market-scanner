@@ -10,6 +10,12 @@ Governance-certified institutional market scanner and decision pipeline.
 
 Upstream layers classify and preserve opportunity distribution. They do not determine tradeability, conviction, allocation eligibility, or final actions.
 
+## Repository Language Governance
+
+The repository language standard is English-only. This applies to documentation, sprint and audit artifacts, technical and functional specifications, source code comments, tests, logs, generated reports, CSV schemas, configuration descriptions, CI output, and governance documents.
+
+Dutch is permitted only in direct chat communication with the user and must not be introduced into repository content or generated artifacts.
+
 ## Authoritative Governance Docs
 
 - `AGENTS.md`

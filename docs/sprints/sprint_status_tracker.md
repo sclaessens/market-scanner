@@ -23,8 +23,16 @@ All sprint work inherits the certified governance doctrine:
 - no decision semantics outside Decision Engine
 - no ranking authority outside Decision Engine
 - no scoring authority outside Decision Engine
+- repository content is English-only
+- no Dutch or mixed-language repository artifacts
 
 Status changes in this tracker must be supported by the relevant governance artifact. Do not change sprint status casually.
+
+## 1.1 Repository Language Governance
+
+The permanent repository language standard is English-only. This applies to all future sprint documentation, audits, implementation notes, technical specifications, functional specifications, code comments, tests, logging messages, generated reports, CSV schemas, configuration descriptions, CI output, and governance documents.
+
+Dutch is allowed only in direct chat communication with the user. It must not be introduced into repository files or generated artifacts. If an existing artifact contains mixed-language content, newly added content must be English-only and must not increase language drift.
 
 ## 2. Certified Architecture
 
@@ -77,10 +85,10 @@ Lifecycle phases:
 | Sprint 2 | Cross-Sectional Leadership Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
 | Sprint 3 | Fundamental Quality Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
 | Sprint 4 | Timing State Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
-| Sprint 5 | Portfolio Intelligence Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | Sprint 6 Preparation |
-| Sprint 6 | Decision Engine Core | CLOSED | CLOSED | CERTIFIED COMPLETE | Sprint 7 Preparation |
-| Sprint 7 | Stability & Persistence Layer | PLANNED | NOT STARTED | NOT STARTED | None |
-| Sprint 8 | Reporting Layer | PLANNED | NOT STARTED | NOT STARTED | None |
+| Sprint 5 | Portfolio Intelligence Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
+| Sprint 6 | Decision Engine Core | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
+| Sprint 7 | Stability & Persistence Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
+| Sprint 8 | Reporting Layer | PLANNED | NOT STARTED | NOT STARTED | Sprint 8 Preparation |
 
 ## 6. Sprint-by-Sprint Phase Tracker
 
@@ -93,14 +101,14 @@ Lifecycle phases:
 | Sprint 4 | COMPLETE | COMPLETE | COMPLETE | NOT STARTED | CERTIFIED | COMPLETE | NOT STARTED | COMPLETE | COMPLETE | COMPLETE | COMPLETE | CLOSED |
 | Sprint 5 | COMPLETE | COMPLETE | COMPLETE | NOT STARTED | CERTIFIED | NOT STARTED | NOT STARTED | COMPLETE | COMPLETE | COMPLETE | COMPLETE | CLOSED |
 | Sprint 6 | COMPLETE | COMPLETE | COMPLETE | NOT STARTED | CERTIFIED | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | CLOSED |
-| Sprint 7 | COMPLETE | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| Sprint 7 | COMPLETE | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | COMPLETE | CERTIFIED | COMPLETE | CLOSED |
 | Sprint 8 | COMPLETE | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
 
 ## 7. Required Next Action
 
 Current required next action:
 
-Sprint 7 Preparation. Sprint 6 is certified complete and closed.
+Sprint 8 Preparation. Sprint 7 is certified complete and closed.
 
 Sprint 3 closeout inherits:
 
@@ -165,7 +173,20 @@ Sprint 6 preparation inherits:
 - `docs/sprints/execution_roadmap_v2.md`
 - `docs/sprints/sprint_5_closeout.md`
 
-Sprint 6 preparation is complete as a governance-safe, audit-first planning artifact. Sprint 6 governance audit certified preparation for execution planning. Sprint 6 execution planning is complete as a documentation-only planning artifact. Sprint 6 execution review approved the execution plan for developer specification. Sprint 6 developer specification is complete and recommends implementation. Sprint 6 implementation is complete. Sprint 6 implementation audit certified implementation for closeout. Sprint 6 closeout is complete. Sprint 6 is certified complete and closed. Sprint 7 preparation is the next required action.
+Sprint 6 preparation is complete as a governance-safe, audit-first planning artifact. Sprint 6 governance audit certified preparation for execution planning. Sprint 6 execution planning is complete as a documentation-only planning artifact. Sprint 6 execution review approved the execution plan for developer specification. Sprint 6 developer specification is complete and recommends implementation. Sprint 6 implementation is complete. Sprint 6 implementation audit certified implementation for closeout. Sprint 6 closeout is complete. Sprint 6 is certified complete and closed.
+
+Sprint 7 reconciliation inherits:
+
+- `docs/sprints/sprint_7_stability_persistence.md`
+- `scripts/core/build_stability_layer.py`
+- `tests/core/test_build_stability_layer.py`
+- `data/processed/stability_state.csv`
+- `data/logs/stability_layer_log.csv`
+- `docs/audits/sprint_7_implementation_audit.md`
+- `docs/sprints/sprint_7_closeout.md`
+- `docs/sprints/project_backlog.md`
+
+Sprint 7 was implemented as a governance-safe Stability & Persistence Layer. The implementation audit certified the implementation for closeout after tracker reconciliation, confirmed that the Stability Layer produces persistence metadata only, confirmed no hidden filtering or allocation override, and captured backlog item `BL-0005` for future legacy documentation language normalization. Sprint 7 closeout is complete. Sprint 7 is certified complete and closed. Sprint 8 preparation is the next required action.
 
 ## 8. Status Update Protocol
 
@@ -230,7 +251,7 @@ Status updates must obey these rules:
 | Sprint 4 | `docs/sprints/sprint_4_timing_state_layer.md`; `docs/sprints/sprint_4_governance_constraints.md`; `docs/sprints/sprint_4_boundary_controls.md`; `docs/sprints/sprint_4_execution_plan.md`; `docs/sprints/sprint_4_execution_planning.md`; `docs/sprints/sprint_4_developer_spec.md`; `docs/audits/sprint_4_governance_audit.md`; `docs/audits/sprint_4_architecture_validation.md`; `docs/audits/sprint_4_implementation_audit.md`; `docs/sprints/sprint_4_closeout.md` |
 | Sprint 5 | `docs/sprints/sprint_5_portfolio_intelligence.md`; `docs/audits/sprint_5_governance_audit.md`; `docs/sprints/sprint_5_developer_spec.md`; `docs/audits/sprint_5_implementation_audit.md`; `docs/sprints/sprint_5_closeout.md`; `docs/sprints/execution_roadmap_v2.md` |
 | Sprint 6 | `docs/sprints/sprint_6_decision_engine_governance.md`; `docs/audits/sprint_6_governance_audit.md`; `docs/sprints/sprint_6_execution_plan.md`; `docs/audits/sprint_6_execution_review.md`; `docs/sprints/sprint_6_developer_spec.md`; `docs/audits/sprint_6_implementation_audit.md`; `docs/sprints/sprint_6_closeout.md`; `docs/sprints/sprint_6_decision_engine_core.md`; `docs/sprints/execution_roadmap_v2.md`; `docs/technical/decision_engine_design_v2.md` |
-| Sprint 7 | `docs/sprints/execution_roadmap_v2.md` until sprint-specific preparation exists |
+| Sprint 7 | `docs/sprints/sprint_7_stability_persistence.md`; `docs/audits/sprint_7_implementation_audit.md`; `docs/sprints/sprint_7_closeout.md`; `scripts/core/build_stability_layer.py`; `tests/core/test_build_stability_layer.py`; `data/processed/stability_state.csv`; `data/logs/stability_layer_log.csv`; `docs/sprints/execution_roadmap_v2.md` |
 | Sprint 8 | `docs/sprints/execution_roadmap_v2.md` until sprint-specific preparation exists |
 
 ## 12. Final Scrum Master Status Recommendation

@@ -7,6 +7,16 @@ allocation downstream
 
 Decision Engine = ONLY allocation authority.
 
+## Repository Language Governance
+
+All repository content must remain English-only.
+
+This applies to documentation, markdown files, sprint documents, audit documents, technical specifications, functional specifications, code comments, logging messages, test names, test descriptions, developer-facing text, CSV column names, generated reports, configuration descriptions, CI output messages, and governance documents.
+
+Dutch is allowed only in direct chat communication with the user. It must not be introduced into repository files, generated artifacts, tests, logs, reports, configuration, or developer-facing output.
+
+Future sprints, audits, migrations, refactors, tests, reports, and governance updates inherit this language standard.
+
 ## Hard Rules
 
 No layer outside `scripts/core/decision_engine.py` may:
