@@ -15,10 +15,7 @@ MAX_MESSAGE_LENGTH = 4000
 
 
 def load_env_file(env_path: Path = ENV_FILE) -> None:
-    """
-    Laad een simpele .env file in os.environ.
-    Verwacht lijnen in de vorm KEY=VALUE.
-    """
+    """Load a simple .env file into os.environ using KEY=VALUE lines."""
     if not env_path.exists():
         return
 
@@ -40,8 +37,8 @@ def get_env(name: str) -> str:
     value = os.getenv(name)
     if not value:
         raise RuntimeError(
-            f"Environment variable '{name}' ontbreekt. "
-            f"Controleer je .env bestand."
+            f"Environment variable '{name}' is missing. "
+            f"Check the .env file."
         )
     return value
 
@@ -49,24 +46,21 @@ def get_env(name: str) -> str:
 def read_telegram_message(file_path: Path = TELEGRAM_MESSAGE_FILE) -> str:
     if not file_path.exists():
         raise FileNotFoundError(
-            f"Telegram message file niet gevonden: {file_path}"
+            f"Telegram message file not found: {file_path}"
         )
 
     message = file_path.read_text(encoding="utf-8").strip()
 
     if not message:
         raise ValueError(
-            f"Telegram message file is leeg: {file_path}"
+            f"Telegram message file is empty: {file_path}"
         )
 
     return message
 
 
 def split_message(text: str, max_length: int = MAX_MESSAGE_LENGTH) -> List[str]:
-    """
-    Splits lange berichten op.
-    Probeert eerst op lijnniveau te splitsen.
-    """
+    """Split long messages, preferring line boundaries."""
     if len(text) <= max_length:
         return [text]
 
@@ -113,12 +107,12 @@ def send_message(text: str) -> None:
 
         if response.status_code != 200:
             raise RuntimeError(
-                f"Telegram API fout ({response.status_code}): {response.text}"
+                f"Telegram API error ({response.status_code}): {response.text}"
             )
 
         data = response.json()
         if not data.get("ok"):
-            raise RuntimeError(f"Telegram API gaf fout terug: {data}")
+            raise RuntimeError(f"Telegram API returned an error: {data}")
 
 
 def send_daily_summary() -> None:
@@ -128,4 +122,4 @@ def send_daily_summary() -> None:
 
 if __name__ == "__main__":
     send_daily_summary()
-    print("Telegram bericht succesvol verstuurd.")
+    print("Telegram message sent successfully.")

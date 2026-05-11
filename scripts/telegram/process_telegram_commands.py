@@ -3,7 +3,6 @@ from __future__ import annotations
 import sys
 import os
 
-# 🔥 FIX IMPORT PATH
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 import requests
@@ -12,20 +11,12 @@ from pathlib import Path
 from scripts.portfolio.parse_trade_commands import parse_trade_command
 
 
-# =========================
-# PATHS & CONFIG
-# =========================
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ENV_FILE = PROJECT_ROOT / ".env"
 OFFSET_FILE = PROJECT_ROOT / "data/logs/telegram_offset.txt"
 
 TELEGRAM_API_BASE = "https://api.telegram.org"
 
-
-# =========================
-# ENV LOADER
-# =========================
 
 def load_env():
     if not ENV_FILE.exists():
@@ -45,17 +36,13 @@ def get_env(name: str) -> str:
     return value
 
 
-# =========================
-# OFFSET HANDLING
-# =========================
-
 def load_offset() -> int:
     if not OFFSET_FILE.exists():
         return 0
 
     try:
         return int(OFFSET_FILE.read_text().strip())
-    except:
+    except ValueError:
         return 0
 
 
@@ -63,10 +50,6 @@ def save_offset(offset: int):
     OFFSET_FILE.parent.mkdir(parents=True, exist_ok=True)
     OFFSET_FILE.write_text(str(offset))
 
-
-# =========================
-# TELEGRAM API
-# =========================
 
 def get_updates(offset: int | None = None):
     token = get_env("TELEGRAM_BOT_TOKEN")
@@ -106,10 +89,6 @@ def send_message(text: str):
         print(f"Error sending message: {e}")
 
 
-# =========================
-# CORE LOGIC
-# =========================
-
 def is_trade_command(text: str) -> bool:
     text = text.upper()
     return text.startswith("BUY ") or text.startswith("SELL ")
@@ -143,7 +122,6 @@ def process_commands():
 
         print(f"\nReceived message:\n{text}")
 
-        # 🔥 SPLIT MULTI-LINE COMMANDS
         commands = text.split("\n")
 
         for cmd in commands:
@@ -158,25 +136,19 @@ def process_commands():
                 try:
                     result = parse_trade_command(cmd)
 
-                    send_message(f"✅ {result['message']} verwerkt")
+                    send_message(f"Processed: {result['message']}")
                     print(f"Processed: {cmd}")
 
                 except Exception as e:
-                    error_msg = f"❌ Error: {cmd} → {e}"
+                    error_msg = f"Error: {cmd} -> {e}"
                     send_message(error_msg)
                     print(error_msg)
 
             else:
                 print(f"Ignored: {cmd}")
 
-    # 🔥 CRUCIAAL: offset opslaan NA verwerking
     save_offset(max_update_id)
     print(f"\nNew offset saved: {max_update_id}")
-
-
-# =========================
-# ENTRYPOINT
-# =========================
 
 if __name__ == "__main__":
     process_commands()

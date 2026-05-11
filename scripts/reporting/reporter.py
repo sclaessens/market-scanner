@@ -11,7 +11,7 @@ def format_section(items):
 def build_report(universe_size, liquid_universe_size, regime, vcp, pullbacks, breakouts, weakening):
     today = datetime.now().strftime("%Y-%m-%d")
 
-    return f"""# Market Scan — {today}
+    return f"""# Legacy Market Scan - {today}
 
 Universe size (raw): **{universe_size}**
 Universe size (liquidity-classified): **{liquid_universe_size}**

@@ -88,7 +88,7 @@ Lifecycle phases:
 | Sprint 5 | Portfolio Intelligence Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
 | Sprint 6 | Decision Engine Core | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
 | Sprint 7 | Stability & Persistence Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
-| Sprint 8 | Reporting Layer | PLANNED | NOT STARTED | NOT STARTED | Sprint 8 Preparation |
+| Sprint 8 | Reporting Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
 
 ## 6. Sprint-by-Sprint Phase Tracker
 
@@ -102,13 +102,13 @@ Lifecycle phases:
 | Sprint 5 | COMPLETE | COMPLETE | COMPLETE | NOT STARTED | CERTIFIED | NOT STARTED | NOT STARTED | COMPLETE | COMPLETE | COMPLETE | COMPLETE | CLOSED |
 | Sprint 6 | COMPLETE | COMPLETE | COMPLETE | NOT STARTED | CERTIFIED | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | COMPLETE | CLOSED |
 | Sprint 7 | COMPLETE | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | COMPLETE | CERTIFIED | COMPLETE | CLOSED |
-| Sprint 8 | COMPLETE | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED | NOT STARTED |
+| Sprint 8 | COMPLETE | COMPLETE | CERTIFIED | NOT STARTED | CERTIFIED | COMPLETE | COMPLETE | COMPLETE | COMPLETE | CERTIFIED | COMPLETE | CLOSED |
 
 ## 7. Required Next Action
 
 Current required next action:
 
-Sprint 8 Preparation. Sprint 7 is certified complete and closed.
+None. Sprints 0 through 8 are closed and certified complete.
 
 Sprint 3 closeout inherits:
 
@@ -186,7 +186,36 @@ Sprint 7 reconciliation inherits:
 - `docs/sprints/sprint_7_closeout.md`
 - `docs/sprints/project_backlog.md`
 
-Sprint 7 was implemented as a governance-safe Stability & Persistence Layer. The implementation audit certified the implementation for closeout after tracker reconciliation, confirmed that the Stability Layer produces persistence metadata only, confirmed no hidden filtering or allocation override, and captured backlog item `BL-0005` for future legacy documentation language normalization. Sprint 7 closeout is complete. Sprint 7 is certified complete and closed. Sprint 8 preparation is the next required action.
+Sprint 7 was implemented as a governance-safe Stability & Persistence Layer. The implementation audit certified the implementation for closeout after tracker reconciliation, confirmed that the Stability Layer produces persistence metadata only, confirmed no hidden filtering or allocation override, and captured backlog item `BL-0005` for future legacy documentation language normalization. Sprint 7 closeout is complete. Sprint 7 is certified complete and closed. Sprint 8 preparation followed Sprint 7 closure.
+
+Sprint 8 preparation inherits:
+
+- `docs/sprints/sprint_8_reporting_layer.md`
+- `docs/sprints/sprint_8_reporting_preparation.md`
+- `docs/sprints/sprint_7_closeout.md`
+- `docs/sprints/project_backlog.md`
+- `docs/sprints/execution_roadmap_v2.md`
+- `docs/technical/decision_engine_design_v2.md`
+- `docs/functional/Functional_Analysis_v2.md`
+- `docs/audits/sprint_8_governance_audit.md`
+- `docs/sprints/sprint_8_execution_plan.md`
+- `docs/audits/sprint_8_execution_review.md`
+- `docs/sprints/sprint_8_developer_spec.md`
+- `docs/audits/sprint_8_developer_spec_approval.md`
+- `docs/audits/sprint_8_implementation_audit.md`
+- `docs/sprints/sprint_8_closeout.md`
+- `scripts/reporting/build_reporting_layer.py`
+- `tests/reporting/test_build_reporting_layer.py`
+- `tests/reporting/test_build_telegram_summary.py`
+- `data/processed/reporting_dashboard_data.csv`
+- `data/logs/reporting_layer_log.csv`
+- `reports/daily/telegram_message.txt`
+- `scripts/reporting/build_telegram_summary.py`
+- `scripts/reporting/send_telegram.py`
+- `scripts/reporting/reporter.py`
+- `scripts/telegram/process_telegram_commands.py`
+
+Sprint 8 preparation is complete as a documentation-only governance artifact. It identifies current Reporting and Telegram semantic drift, confirms that reporting must remain communication-only, captures backlog item `BL-0006`, and recommends Sprint 8 governance audit before execution planning. Sprint 8 governance audit is complete and certified preparation with required corrections. Sprint 8 execution planning incorporated the required corrections into concrete reporting contracts, deterministic rules, distribution-preservation rules, auditability controls, observability controls, Telegram boundaries, legacy remediation decisions, and future test requirements. Sprint 8 execution review approved the execution plan and authorized progression to Developer Specification. Sprint 8 Developer Specification is complete and Technical Lead approval authorized implementation under the approved specification. Sprint 8 implementation is complete and produced the authoritative Reporting Layer builder, dashboard artifact, log artifact, Telegram message artifact, compatibility wrapper, delivery-only Telegram hygiene updates, legacy reporter quarantine, inbound Telegram isolation, and reporting tests. Sprint 8 implementation audit certified implementation. Sprint 8 closeout certified Sprint 8 complete and closed.
 
 ## 8. Status Update Protocol
 
@@ -252,7 +281,7 @@ Status updates must obey these rules:
 | Sprint 5 | `docs/sprints/sprint_5_portfolio_intelligence.md`; `docs/audits/sprint_5_governance_audit.md`; `docs/sprints/sprint_5_developer_spec.md`; `docs/audits/sprint_5_implementation_audit.md`; `docs/sprints/sprint_5_closeout.md`; `docs/sprints/execution_roadmap_v2.md` |
 | Sprint 6 | `docs/sprints/sprint_6_decision_engine_governance.md`; `docs/audits/sprint_6_governance_audit.md`; `docs/sprints/sprint_6_execution_plan.md`; `docs/audits/sprint_6_execution_review.md`; `docs/sprints/sprint_6_developer_spec.md`; `docs/audits/sprint_6_implementation_audit.md`; `docs/sprints/sprint_6_closeout.md`; `docs/sprints/sprint_6_decision_engine_core.md`; `docs/sprints/execution_roadmap_v2.md`; `docs/technical/decision_engine_design_v2.md` |
 | Sprint 7 | `docs/sprints/sprint_7_stability_persistence.md`; `docs/audits/sprint_7_implementation_audit.md`; `docs/sprints/sprint_7_closeout.md`; `scripts/core/build_stability_layer.py`; `tests/core/test_build_stability_layer.py`; `data/processed/stability_state.csv`; `data/logs/stability_layer_log.csv`; `docs/sprints/execution_roadmap_v2.md` |
-| Sprint 8 | `docs/sprints/execution_roadmap_v2.md` until sprint-specific preparation exists |
+| Sprint 8 | `docs/sprints/sprint_8_reporting_layer.md`; `docs/sprints/sprint_8_reporting_preparation.md`; `docs/audits/sprint_8_governance_audit.md`; `docs/sprints/sprint_8_execution_plan.md`; `docs/audits/sprint_8_execution_review.md`; `docs/sprints/sprint_8_developer_spec.md`; `docs/audits/sprint_8_developer_spec_approval.md`; `docs/audits/sprint_8_implementation_audit.md`; `docs/sprints/sprint_8_closeout.md`; `scripts/reporting/build_reporting_layer.py`; `scripts/reporting/build_telegram_summary.py`; `scripts/reporting/send_telegram.py`; `scripts/reporting/reporter.py`; `scripts/telegram/process_telegram_commands.py`; `tests/reporting/test_build_reporting_layer.py`; `tests/reporting/test_build_telegram_summary.py`; `data/processed/reporting_dashboard_data.csv`; `data/logs/reporting_layer_log.csv`; `reports/daily/telegram_message.txt`; `docs/sprints/execution_roadmap_v2.md`; `docs/sprints/project_backlog.md`; `docs/technical/decision_engine_design_v2.md`; `docs/functional/Functional_Analysis_v2.md` |
 
 ## 12. Final Scrum Master Status Recommendation
 
