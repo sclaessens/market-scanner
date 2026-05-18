@@ -90,6 +90,21 @@ Lifecycle phases:
 | Sprint 7 | Stability & Persistence Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
 | Sprint 8 | Reporting Layer | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
 
+## 5.1 Operational Sprint Status Table
+
+Operational Sprint 1-4 are lightweight operational sprint planning artifacts for the operational intelligence platform evolution phase. They do not authorize implementation by themselves.
+
+Implementation still requires human review or approval, Governance v2 classification, Codex/local implementation, and local validation.
+
+| Sprint | Theme | Overall Status | Current Phase | Governance Status | Current Next Action |
+|---|---|---|---|---|---|
+| Operational Sprint 1 | Scan Visibility & Operator Feedback | PROPOSED / READY FOR REVIEW | PLANNED | NOT CERTIFIED | Review sprint document and approve Codex handoff if appropriate |
+| Operational Sprint 2 | Data Sufficiency & Historical Storage Baseline | PROPOSED | PLANNED | NOT CERTIFIED | Await Sprint 1 review and sequencing confirmation |
+| Operational Sprint 3 | Telegram UX & Reporting Usability | PROPOSED | PLANNED | NOT CERTIFIED | Await sequencing decision after Sprint 1 and/or Sprint 2 |
+| Operational Sprint 4 | Prediction Tracking & Learning Loop Preparation | PROPOSED | PLANNED | NOT CERTIFIED | Await data sufficiency baseline and research-scope review |
+
+Future operational sprint phase changes should update this table when a sprint is approved for implementation, Codex starts implementation, implementation is completed, validation is reviewed, closeout is completed, or backlog reconciliation identifies new work.
+
 ## 6. Sprint-by-Sprint Phase Tracker
 
 | Sprint | PLANNED | PREPARATION | GOVERNANCE AUDIT | RE-AUDIT | CERTIFIED PREPARATION | EXECUTION PLANNING | EXECUTION REVIEW | DEVELOPER SPECIFICATION | IMPLEMENTATION | IMPLEMENTATION AUDIT | CLOSEOUT | CLOSED |
