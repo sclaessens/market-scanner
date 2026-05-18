@@ -16,8 +16,8 @@ No sprint, implementation task, or delivery shortcut may reintroduce upstream tr
 Authoritative references:
 
 - AGENTS.md
-- docs/sprints/sprint_0_governance_status.md
-- docs/audits/sprint_0_final_governance_audit.md
+- docs/archive/migration/sprint_0_governance_status.md
+- docs/archive/audits/sprint_0_final_governance_audit.md
 - docs/sprints/sprint_status_tracker.md
 - docs/sprints/project_backlog.md
 
@@ -307,7 +307,7 @@ Architecturale fouten elimineren.
 
 Post-Sprint-0 status:
 
-COMPLETE and certified. See `docs/sprints/sprint_0_governance_status.md` and `docs/audits/sprint_0_final_governance_audit.md`.
+COMPLETE and certified. See `docs/archive/migration/sprint_0_governance_status.md` and `docs/archive/audits/sprint_0_final_governance_audit.md`.
 
 Scope
 

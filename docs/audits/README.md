@@ -1,10 +1,16 @@
 # Audit Documents
 
-Audit documents are governance evidence.
+This directory is now a notice-only entry point.
+
+Historical audit documents for certified Sprints 0 through 8 have been moved to:
+
+- `docs/archive/audits/`
+
+Audit documents are governance evidence, but archived audits are not active operational instructions unless explicitly referenced by active documentation.
 
 Current authoritative certification:
 
-- `docs/audits/sprint_0_final_governance_audit.md`
+- `docs/archive/audits/sprint_0_final_governance_audit.md`
 
 Certified doctrine:
 

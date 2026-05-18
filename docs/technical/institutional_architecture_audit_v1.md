@@ -766,8 +766,8 @@ This document is a historical architecture audit that identified issues later re
 
 Current authoritative certification:
 
-- docs/audits/sprint_0_final_governance_audit.md
-- docs/sprints/sprint_0_governance_status.md
+- docs/archive/audits/sprint_0_final_governance_audit.md
+- docs/archive/migration/sprint_0_governance_status.md
 - AGENTS.md
 
 Use this file as historical evidence only. Do not use it as active implementation guidance where it conflicts with certified Sprint 0 governance.
