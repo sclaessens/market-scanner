@@ -35,6 +35,22 @@ Keep edits small and source-of-truth oriented.
 
 Prefer updating active documentation over adding parallel doctrine files. Use archive documents only as historical evidence unless `docs/active/` explicitly references them.
 
+## Before Implementation
+
+Before Codex is used for implementation, the relevant planning, sprint, backlog, or analyst documentation should be reviewed or approved.
+
+Codex is responsible for local implementation and validation. ChatGPT-generated GitHub documentation does not replace local validation.
+
+Required local validation remains:
+
+```bash
+git status
+git diff --stat
+git diff --check
+```
+
+When code is changed, run the relevant tests before review.
+
 ## Before Review
 
 Run:
