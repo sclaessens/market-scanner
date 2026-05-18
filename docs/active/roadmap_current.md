@@ -38,11 +38,15 @@ Persist decision outputs for later analysis without changing Decision Engine aut
 
 ### 6. Prediction Tracking
 
-Track outcomes of decisions and classifications as observational feedback. This must not introduce hidden allocation logic upstream.
+Track outcomes of decisions and classifications as observational feedback. Prediction tracking is research and diagnostics unless a later governed change explicitly routes an approved signal into the Decision Engine.
+
+Prediction tracking must not introduce hidden allocation logic upstream.
 
 ### 7. Feedback Loops
 
 Introduce research and diagnostic loops that help evaluate system behavior while preserving separation between observation and allocation.
+
+Feedback loops and historical performance analysis are observational by default. They may inform future proposals, tests, diagnostics, or Decision Engine design reviews, but they must not create upstream tradeability, hidden filtering, or allocation authority outside the Decision Engine.
 
 ### 8. Portfolio Intelligence Evolution
 

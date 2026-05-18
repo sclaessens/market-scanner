@@ -10,6 +10,19 @@ Governance v2 preserves institutional architecture safety while reducing unneces
 
 The system has completed certified Sprints 0 through 8. The architecture purification phase is complete. Governance now shifts from migration governance to operational governance.
 
+## Scope and Source of Truth
+
+This document defines how changes are classified and reviewed in the operational phase. It does not replace the architecture source of truth, roadmap, backlog, or runtime contracts.
+
+Use these sources for current operational decisions:
+
+- Architecture boundaries: `docs/active/architecture_current_state.md`
+- Governance level and review triggers: `docs/active/governance_v2.md`
+- Repository/documentation navigation: `docs/active/repository_structure.md`
+- Runtime contract overview: `docs/active/contracts/pipeline_contracts.md`
+- Forward planning: `docs/active/roadmap_current.md`
+- Deferred work: `docs/sprints/project_backlog.md`
+
 ## Governance Objective
 
 Preserve:

@@ -10,6 +10,17 @@ The project is now in the operational intelligence platform evolution phase.
 
 Future work should focus on reliability, orchestration, operational visibility, historical decision storage, feedback loops, reporting usability, and production readiness while preserving the certified architecture.
 
+## Start Here
+
+For onboarding or before making changes, read the active source-of-truth documents in this order:
+
+1. `AGENTS.md`
+2. `docs/active/architecture_current_state.md`
+3. `docs/active/governance_v2.md`
+4. `docs/active/repository_structure.md`
+5. `docs/active/roadmap_current.md`
+6. `docs/sprints/project_backlog.md`
+
 ## Core Architecture Doctrine
 
 - classification upstream

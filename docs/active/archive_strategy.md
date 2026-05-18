@@ -10,6 +10,8 @@ The repository must preserve institutional history while reducing active documen
 
 Archiving means removing a document from the operational surface. It does not mean deleting institutional reasoning.
 
+Archived sprint and audit documents are historical evidence. They are not active doctrine unless explicitly referenced by `docs/active/`.
+
 ## Archive Categories
 
 ### Sprint Artifacts

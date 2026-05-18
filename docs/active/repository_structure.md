@@ -47,6 +47,7 @@ The active documentation set is intentionally small:
 
 - `docs/active/architecture_current_state.md`
 - `docs/active/governance_v2.md`
+- `docs/active/contracts/pipeline_contracts.md`
 - `docs/active/operational_development_model.md`
 - `docs/active/simplified_sprint_lifecycle.md`
 - `docs/active/archive_strategy.md`
@@ -55,6 +56,20 @@ The active documentation set is intentionally small:
 - `docs/active/repository_cleanup_recommendations.md`
 - `docs/active/repository_structure.md`
 - `docs/active/roadmap_current.md`
+- `docs/active/runbooks/local_development.md`
+
+## Where To Look Before Changing X
+
+| Change area | Start here |
+|---|---|
+| Architecture or layer responsibility | `docs/active/architecture_current_state.md` |
+| Governance boundary or review level | `docs/active/governance_v2.md` |
+| Runtime contracts or artifact semantics | `docs/active/contracts/pipeline_contracts.md` |
+| Local workflow or development hygiene | `docs/active/runbooks/local_development.md` |
+| Roadmap planning | `docs/active/roadmap_current.md` |
+| Backlog or deferred work | `docs/sprints/project_backlog.md` |
+| Historical sprint or audit evidence | `docs/archive/` |
+| Repository organization | `docs/active/repository_structure.md` |
 
 ## Historical Documentation Handling
 

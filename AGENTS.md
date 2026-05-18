@@ -17,6 +17,12 @@ Dutch is allowed only in direct chat communication with the user. It must not be
 
 Future sprints, audits, migrations, refactors, tests, reports, and governance updates inherit this language standard.
 
+## Active Documentation
+
+Current operational documentation lives in `docs/active/`.
+
+Use `docs/active/architecture_current_state.md`, `docs/active/governance_v2.md`, and `docs/active/repository_structure.md` as the current operational source of truth alongside this file. Historical sprint and audit documents preserve evidence but do not override active documentation unless explicitly referenced by `docs/active/`.
+
 ## Hard Rules
 
 No layer outside `scripts/core/decision_engine.py` may:

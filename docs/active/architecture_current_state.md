@@ -45,6 +45,19 @@ Legacy watchlist and portfolio workflows may exist as supporting inputs or compa
 
 ## Layer Responsibilities
 
+| Layer | Allowed responsibility | Forbidden responsibility | Authoritative downstream relationship |
+|---|---|---|---|
+| Scanner | Discover and preserve opportunity rows | Hidden filtering, tradeability, allocation, conviction, final action | Feeds classification layers without allocation authority |
+| Validation | Classify structure and data coherence | Allocation eligibility, execution quality, urgency, final action | Provides structure metadata for downstream classification and Decision Engine interpretation |
+| Context | Classify leadership and relative context | Blocking opportunities, tradeability, allocation simulation | Provides context metadata only |
+| Fundamental | Classify quality metadata | Ranking, allocation priority, final action, conviction | Provides quality metadata only |
+| Timing State | Classify timing condition and setup state | Execution gating, urgency, tradeability, allocation readiness | Provides timing metadata only |
+| Portfolio Intelligence | Describe portfolio presence, exposure, and portfolio context | BUY/SELL decisions, allocation gating, opportunity destruction | Provides descriptive portfolio metadata to the Decision Engine |
+| Decision Engine | Allocate, arbitrate, and emit final decision semantics | Upstream classification mutation, hidden filtering | Sole authority for allocation, execution, arbitration, and final action outputs |
+| Reporting | Communicate Decision Engine outputs | Reinterpreting urgency, prioritizing allocation, injecting decision logic | Presents source decisions without changing them |
+
+Upstream layers classify only. Portfolio Intelligence is descriptive. The Decision Engine is the only allocation authority. Reporting communicates only.
+
 ### Scanner
 
 The scanner identifies and preserves opportunities. It must not silently remove valid opportunity rows through hidden strategic filtering.
