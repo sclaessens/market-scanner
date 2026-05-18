@@ -35,7 +35,48 @@ FAILED_TICKERS_FILE = DATA_DIR / "logs" / "failed_tickers.csv"
 TELEGRAM_MESSAGE_FILE = REPORTS_DIR / "daily" / "telegram_message.txt"
 MARKET_REGIME_FILE = DATA_DIR / "processed" / "market_regime.csv"
 SCANNER_RANKED_FILE = DATA_DIR / "processed" / "scanner_ranked.csv"
+VALIDATION_LAYER_FILE = DATA_DIR / "processed" / "validation_layer.csv"
+CONTEXT_LAYER_FILE = DATA_DIR / "processed" / "context_strength.csv"
+PORTFOLIO_POSITIONS_FILE = DATA_DIR / "portfolio" / "portfolio_positions.csv"
+PORTFOLIO_REVIEW_FILE = DATA_DIR / "portfolio" / "portfolio_review.csv"
+FINAL_DECISIONS_FILE = DATA_DIR / "processed" / "final_decisions.csv"
 MIN_HISTORY_ROWS = 220
+SCAN_PROGRESS_INTERVAL = 25
+
+
+def format_artifact_message(path: Path, row_count: int | None = None) -> str:
+    if row_count is None:
+        return f"Artifact written: {path}"
+    return f"Artifact written: {path} rows={row_count}"
+
+
+def print_step_started(name: str) -> None:
+    print(f"Pipeline step started: {name}")
+
+
+def print_step_completed(name: str, row_count: int | None = None) -> None:
+    if row_count is None:
+        print(f"Pipeline step completed: {name}")
+        return
+    print(f"Pipeline step completed: {name} rows={row_count}")
+
+
+def print_artifact_written(path: Path, row_count: int | None = None) -> None:
+    print(format_artifact_message(path, row_count=row_count))
+
+
+def print_scan_progress(
+    processed_count: int,
+    total_count: int,
+    setup_count: int,
+    failed_count: int,
+) -> None:
+    print(
+        "Scanner progress: "
+        f"processed={processed_count}/{total_count} "
+        f"setup_rows_collected={setup_count} "
+        f"failed_rows={failed_count}"
+    )
 
 
 def ensure_dirs() -> None:
@@ -117,10 +158,13 @@ def prepare_scanner_output(setups: list[dict]) -> pd.DataFrame:
 def main() -> None:
     ensure_dirs()
 
-    print("Starting market scan...")
+    print("Pipeline run started: market scan")
 
+    print_step_started("Load ticker universe")
     tickers = load_tickers()
+    print_step_completed("Load ticker universe", row_count=len(tickers))
 
+    print_step_started("Classify market regime")
     qqq_df = fetch_ohlcv_data("QQQ")
     spy_df = fetch_ohlcv_data("SPY")
 
@@ -135,16 +179,20 @@ def main() -> None:
         ma200=float(qqq_latest["MA200"]),
     )
 
-    print(f"Market regime: {regime}")
+    print(f"Market regime classified: {regime}")
+    print_step_completed("Classify market regime")
 
     setups = []
     failed_rows = []
 
-    for ticker in tickers:
+    print_step_started("Scan ticker universe")
+    for index, ticker in enumerate(tickers, start=1):
         df = fetch_ohlcv_data(ticker)
 
         if df.empty or len(df) < MIN_HISTORY_ROWS:
             failed_rows.append({"ticker": ticker, "reason": "invalid_data"})
+            if index % SCAN_PROGRESS_INTERVAL == 0 or index == len(tickers):
+                print_scan_progress(index, len(tickers), len(setups), len(failed_rows))
             continue
 
         df = add_indicators(df)
@@ -159,40 +207,66 @@ def main() -> None:
         if result:
             setups.append(result)
 
+        if index % SCAN_PROGRESS_INTERVAL == 0 or index == len(tickers):
+            print_scan_progress(index, len(tickers), len(setups), len(failed_rows))
+
+    print_step_completed("Scan ticker universe", row_count=len(setups))
+
+    print_step_started("Prepare scanner output")
     setups = rank_setups(setups, top_n=TOP_SETUPS_PER_SECTION)
 
     scanner_df = prepare_scanner_output(setups)
+    print_step_completed("Prepare scanner output", row_count=len(scanner_df))
 
-    print("Saving scanner ranked output...")
     scanner_df.to_csv(SCANNER_RANKED_FILE, index=False)
+    print_artifact_written(SCANNER_RANKED_FILE, row_count=len(scanner_df))
 
     if failed_rows:
         pd.DataFrame(failed_rows).to_csv(FAILED_TICKERS_FILE, index=False)
+        print_artifact_written(FAILED_TICKERS_FILE, row_count=len(failed_rows))
+    else:
+        print("Skipped failed ticker artifact: failed_rows=0")
 
-    print("Building validation layer...")
-    build_validation_layer()
+    print_step_started("Build validation layer")
+    validation_df = build_validation_layer()
+    print_artifact_written(VALIDATION_LAYER_FILE, row_count=len(validation_df))
+    print_step_completed("Build validation layer", row_count=len(validation_df))
 
-    print("Building context strength layer...")
-    build_context_layer()
+    print_step_started("Build context layer")
+    context_df = build_context_layer()
+    print_artifact_written(CONTEXT_LAYER_FILE, row_count=len(context_df))
+    print_step_completed("Build context layer", row_count=len(context_df))
 
-    print("Building portfolio...")
-    build_portfolio()
+    print_step_started("Build portfolio state")
+    portfolio_df = build_portfolio()
+    print_artifact_written(PORTFOLIO_POSITIONS_FILE, row_count=len(portfolio_df))
+    print_step_completed("Build portfolio state", row_count=len(portfolio_df))
 
-    print("Evaluating positions...")
-    evaluate_positions()
+    print_step_started("Evaluate portfolio positions")
+    portfolio_review_df = evaluate_positions()
+    print_artifact_written(PORTFOLIO_REVIEW_FILE, row_count=len(portfolio_review_df))
+    print_step_completed("Evaluate portfolio positions", row_count=len(portfolio_review_df))
 
-    print("Building final decisions...")
-    build_final_decisions()
+    print_step_started("Build final decisions")
+    final_decisions_df = build_final_decisions()
+    print_artifact_written(FINAL_DECISIONS_FILE, row_count=len(final_decisions_df))
+    print_step_completed("Build final decisions", row_count=len(final_decisions_df))
 
-    print("Building telegram summary...")
+    print_step_started("Build telegram summary")
     telegram_text = build_telegram_summary_text()
     save_summary(telegram_text)
+    print_artifact_written(TELEGRAM_MESSAGE_FILE)
+    print_step_completed("Build telegram summary")
 
+    print_step_started("Send telegram summary")
     try:
         send_daily_summary()
-        print("Telegram summary succesvol verstuurd.")
+        print_step_completed("Send telegram summary")
     except Exception as exc:
-        print(f"Waarschuwing: Telegram verzending mislukt: {exc}")
+        print(f"Pipeline step failed: Send telegram summary")
+        print(f"Failure context: {exc}")
+
+    print("Pipeline run completed: market scan")
 
 
 if __name__ == "__main__":
