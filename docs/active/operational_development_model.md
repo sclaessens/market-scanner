@@ -37,6 +37,18 @@ Operational development must not casually redesign:
 - runtime output contracts
 - strategy logic
 
+## Operational AI Collaboration Model
+
+ChatGPT may prepare planning, analysis, governance, and documentation directly in GitHub only when the work is documentation-only.
+
+Codex/local execution must handle runtime implementation, code changes, tests, data changes, refactors, file moves, and validation.
+
+ChatGPT-created sprint documentation may include Codex implementation prompts. Codex should receive approved planning, sprint, backlog, or analyst documentation as input for implementation.
+
+This model preserves Codex capacity for technical implementation while allowing ChatGPT to maintain PM, Scrum Master, and analyst documentation.
+
+No documentation-only update may authorize implementation by itself.
+
 ## Default Workflow
 
 1. Define the operational problem.
