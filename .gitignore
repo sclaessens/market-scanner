@@ -32,6 +32,9 @@ data/raw/
 # ========================
 data/processed/*.csv
 
+# Historical evidence artifacts are generated locally.
+data/history/
+
 # ========================
 # MAAR deze core files toelaten
 # ========================
