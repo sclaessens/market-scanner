@@ -23,6 +23,16 @@ Current operational documentation lives in `docs/active/`.
 
 Use `docs/active/architecture_current_state.md`, `docs/active/governance_v2.md`, and `docs/active/repository_structure.md` as the current operational source of truth alongside this file. Historical sprint and audit documents preserve evidence but do not override active documentation unless explicitly referenced by `docs/active/`.
 
+## AI Work Allocation Model
+
+ChatGPT may perform documentation-only work directly in GitHub, including PM documentation, Scrum Master documentation, analyst notes, roadmap updates, backlog updates, sprint planning documents, governance boundary documentation, Codex implementation prompts, and documentation-only GitHub branches or pull requests.
+
+ChatGPT must not directly modify runtime code, tests, generated data, CSV files, reports, GitHub Actions, Decision Engine logic, reporting runtime semantics, pipeline behavior, or file moves and refactors.
+
+Codex/local execution is responsible for code changes, tests, refactors, file moves, runtime implementation, data contract implementation, pipeline behavior, validation commands, local test execution, and implementation commits after human review.
+
+This allocation model preserves the certified project doctrine: classification upstream, allocation downstream, Decision Engine as the only allocation authority, reporting as communication only, no hidden filtering, no upstream tradeability, deterministic architecture, row preservation, auditability, and separation of concerns.
+
 ## Hard Rules
 
 No layer outside `scripts/core/decision_engine.py` may:
