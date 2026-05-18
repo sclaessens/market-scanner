@@ -98,7 +98,7 @@ Implementation still requires human review or approval, Governance v2 classifica
 
 | Sprint | Theme | Overall Status | Current Phase | Governance Status | Current Next Action |
 |---|---|---|---|---|---|
-| Operational Sprint 1 | Scan Visibility & Operator Feedback | IMPLEMENTATION COMPLETE / READY FOR REVIEW | IMPLEMENTATION | VALIDATION PASSED | Review implementation diff and prepare closeout |
+| Operational Sprint 1 | Scan Visibility & Operator Feedback | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
 | Operational Sprint 2 | Data Sufficiency & Historical Storage Baseline | PROPOSED | PLANNED | NOT CERTIFIED | Await Sprint 1 review and sequencing confirmation |
 | Operational Sprint 3 | Telegram UX & Reporting Usability | PROPOSED | PLANNED | NOT CERTIFIED | Await sequencing decision after Sprint 1 and/or Sprint 2 |
 | Operational Sprint 4 | Prediction Tracking & Learning Loop Preparation | PROPOSED | PLANNED | NOT CERTIFIED | Await data sufficiency baseline and research-scope review |
