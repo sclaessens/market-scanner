@@ -14,6 +14,17 @@ Sprints 0 through 8 completed the architecture purification phase and certified 
 
 The next roadmap should focus on operating, observing, hardening, and learning from the certified architecture.
 
+## Operational Sprint Roadmap
+
+The next lightweight operational sprint sequence is:
+
+1. [Operational Sprint 1 — Scan Visibility & Operator Feedback](../sprints/operational_sprint_1_scan_visibility.md)
+2. [Operational Sprint 2 — Data Sufficiency & Historical Storage Baseline](../sprints/operational_sprint_2_data_sufficiency.md)
+3. [Operational Sprint 3 — Telegram UX & Reporting Usability](../sprints/operational_sprint_3_telegram_ux.md)
+4. [Operational Sprint 4 — Prediction Tracking & Learning Loop Preparation](../sprints/operational_sprint_4_prediction_tracking.md)
+
+These sprint documents are planning artifacts only. They do not authorize implementation. Each implementation must still pass Governance v2 classification and local validation.
+
 ## Priority Areas
 
 ### 1. Runtime Reliability
