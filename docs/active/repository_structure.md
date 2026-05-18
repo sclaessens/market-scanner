@@ -56,9 +56,11 @@ The active documentation set is intentionally small:
 - `docs/active/repository_structure.md`
 - `docs/active/roadmap_current.md`
 
-## Legacy Documentation Handling
+## Historical Documentation Handling
 
-Existing `docs/sprints/` and `docs/audits/` files remain preserved as historical evidence of certified Sprints 0 through 8. Their operational authority is superseded by `docs/active/` unless an active document explicitly delegates authority to a legacy file.
+Historical evidence for certified Sprints 0 through 8 is preserved under `docs/archive/`.
+
+The remaining `docs/sprints/` files are operational backlog and sprint status records plus a notice. The remaining `docs/audits/` file is a notice. Archived sprint, audit, migration, and superseded documents are superseded by `docs/active/` unless an active document explicitly delegates authority to an archived file.
 
 ## Source of Truth Rule
 

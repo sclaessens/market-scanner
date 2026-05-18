@@ -1,6 +1,18 @@
 # Sprint Documentation Notice
 
-Sprint documents are living delivery plans and historical execution records.
+This directory is now a small operational holding area, not the primary location for historical sprint records.
+
+Historical sprint documents for certified Sprints 0 through 8 have been moved to:
+
+- `docs/archive/sprints/`
+- `docs/archive/migration/`
+- `docs/archive/superseded/`
+
+The files intentionally left in this directory are:
+
+- `docs/sprints/project_backlog.md`
+- `docs/sprints/sprint_status_tracker.md`
+- `docs/sprints/README.md`
 
 Post-Sprint-0, all sprint work must inherit the certified governance doctrine:
 
@@ -14,8 +26,8 @@ Post-Sprint-0, all sprint work must inherit the certified governance doctrine:
 
 Authoritative Sprint 0 references:
 
-- `docs/sprints/sprint_0_governance_status.md`
-- `docs/audits/sprint_0_final_governance_audit.md`
+- `docs/archive/migration/sprint_0_governance_status.md`
+- `docs/archive/audits/sprint_0_final_governance_audit.md`
 - `AGENTS.md`
 
 Operational sprint lifecycle status is maintained in:
@@ -54,10 +66,6 @@ Backlog impact assessment:
 
 If new deferred work, governance gaps, technical debt, architectural follow-up, operational risks, future sprint candidates, implementation limitations, or non-blocking follow-up work are identified, they must be added to `docs/sprints/project_backlog.md` before sprint closure.
 
-Closed sprint certifications:
-
-- Sprint 1: `docs/sprints/sprint_1_closeout.md`
-- Sprint 2: `docs/sprints/sprint_2_closeout.md`
-- Sprint 3: `docs/sprints/sprint_3_closeout.md`
+Closed sprint certifications are preserved in `docs/archive/sprints/`.
 
 If any older sprint document mentions `tradeable_setup`, `context_tradeable`, upstream conviction, execution gating, or filtering-first behavior, interpret it as a historical problem statement or explicit anti-pattern unless the current Sprint 0 status document says otherwise.

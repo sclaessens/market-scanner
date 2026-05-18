@@ -13,8 +13,8 @@ Decision Engine = ONLY allocation authority
 Authoritative current references:
 
 - AGENTS.md
-- docs/sprints/sprint_0_governance_status.md
-- docs/audits/sprint_0_final_governance_audit.md
+- docs/archive/migration/sprint_0_governance_status.md
+- docs/archive/audits/sprint_0_final_governance_audit.md
 
 Any wording below about fundamentals filtering, context deciding how aggressively to act, or layers validating opportunities should be interpreted as downstream Decision Engine interpretation only.
 

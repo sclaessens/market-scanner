@@ -4,7 +4,7 @@
 
 This document is the operational source of truth for sprint lifecycle status.
 
-The roadmap remains in `docs/sprints/execution_roadmap_v2.md`. The roadmap defines delivery doctrine and sprint sequencing, but it is not the operational status tracker.
+The historical Sprint 0-8 roadmap is preserved in `docs/archive/superseded/execution_roadmap_v2.md`. Current forward planning is maintained in `docs/active/roadmap_current.md`.
 
 Deferred improvements, optional corrections, technical debt, research questions, and future enhancement ideas are maintained in `docs/sprints/project_backlog.md`. The backlog captures deferred work only; it does not authorize implementation or sprint scope changes.
 
@@ -112,98 +112,98 @@ None. Sprints 0 through 8 are closed and certified complete.
 
 Sprint 3 closeout inherits:
 
-- `docs/sprints/sprint_3_fundamental_quality.md`
-- `docs/audits/sprint_3_governance_audit.md`
-- `docs/audits/sprint_3_reaudit.md`
-- `docs/sprints/sprint_3_execution_plan.md`
-- `docs/audits/sprint_3_execution_review.md`
-- `docs/sprints/sprint_3_developer_spec.md`
-- `docs/audits/sprint_3_implementation_audit.md`
-- `docs/sprints/sprint_3_closeout.md`
+- `docs/archive/sprints/sprint_3_fundamental_quality.md`
+- `docs/archive/audits/sprint_3_governance_audit.md`
+- `docs/archive/audits/sprint_3_reaudit.md`
+- `docs/archive/sprints/sprint_3_execution_plan.md`
+- `docs/archive/audits/sprint_3_execution_review.md`
+- `docs/archive/sprints/sprint_3_developer_spec.md`
+- `docs/archive/audits/sprint_3_implementation_audit.md`
+- `docs/archive/sprints/sprint_3_closeout.md`
 
 Sprint 3 closeout is complete. Sprint 3 is certified complete and closed.
 
 Sprint 4 preparation inherits:
 
-- `docs/sprints/sprint_4_timing_state_layer.md`
-- `docs/sprints/sprint_4_governance_constraints.md`
-- `docs/sprints/sprint_4_boundary_controls.md`
-- `docs/sprints/sprint_4_execution_plan.md`
-- `docs/sprints/sprint_4_execution_planning.md`
-- `docs/sprints/sprint_4_developer_spec.md`
-- `docs/audits/sprint_4_governance_audit.md`
-- `docs/audits/sprint_4_architecture_validation.md`
-- `docs/audits/sprint_4_implementation_audit.md`
-- `docs/sprints/sprint_4_closeout.md`
+- `docs/archive/sprints/sprint_4_timing_state_layer.md`
+- `docs/archive/sprints/sprint_4_governance_constraints.md`
+- `docs/archive/sprints/sprint_4_boundary_controls.md`
+- `docs/archive/sprints/sprint_4_execution_plan.md`
+- `docs/archive/sprints/sprint_4_execution_planning.md`
+- `docs/archive/sprints/sprint_4_developer_spec.md`
+- `docs/archive/audits/sprint_4_governance_audit.md`
+- `docs/archive/audits/sprint_4_architecture_validation.md`
+- `docs/archive/audits/sprint_4_implementation_audit.md`
+- `docs/archive/sprints/sprint_4_closeout.md`
 
 Sprint 4 governance audit is complete and certified. Sprint 4 architecture validation is complete. Sprint 4 execution planning is complete. Sprint 4 developer specification is complete. Sprint 4 implementation is complete. Technical Lead implementation audit is complete and certified. Sprint 4 closeout is complete. Sprint 4 is certified complete and closed.
 
 Sprint 5 preparation inherits:
 
-- `docs/sprints/sprint_5_portfolio_intelligence.md`
-- `docs/audits/sprint_5_governance_audit.md`
-- `docs/sprints/sprint_5_developer_spec.md`
+- `docs/archive/sprints/sprint_5_portfolio_intelligence.md`
+- `docs/archive/audits/sprint_5_governance_audit.md`
+- `docs/archive/sprints/sprint_5_developer_spec.md`
 - `scripts/core/build_portfolio_intelligence.py`
 - `tests/core/test_build_portfolio_intelligence.py`
 - `data/processed/portfolio_intelligence.csv`
 - `data/logs/portfolio_intelligence_log.csv`
-- `docs/audits/sprint_5_implementation_audit.md`
-- `docs/sprints/sprint_5_closeout.md`
+- `docs/archive/audits/sprint_5_implementation_audit.md`
+- `docs/archive/sprints/sprint_5_closeout.md`
 
 Sprint 5 preparation is complete as a governance-safe, documentation-only planning artifact. Sprint 5 governance audit certified preparation for developer specification. Sprint 5 developer specification is complete. Sprint 5 implementation is complete. Sprint 5 implementation audit is complete and certified for closeout. Sprint 5 closeout is complete. Sprint 5 is certified complete and closed. Sprint 5 implemented a standalone Portfolio Intelligence builder and focused tests, generated approved Sprint 5 artifacts, and did not change Decision Engine, reporting, watchlist, portfolio runtime logic, or certified upstream builder logic.
 
 Sprint 6 preparation inherits:
 
-- `docs/sprints/sprint_6_decision_engine_governance.md`
-- `docs/audits/sprint_6_governance_audit.md`
-- `docs/sprints/sprint_6_execution_plan.md`
-- `docs/audits/sprint_6_execution_review.md`
-- `docs/sprints/sprint_6_developer_spec.md`
+- `docs/archive/sprints/sprint_6_decision_engine_governance.md`
+- `docs/archive/audits/sprint_6_governance_audit.md`
+- `docs/archive/sprints/sprint_6_execution_plan.md`
+- `docs/archive/audits/sprint_6_execution_review.md`
+- `docs/archive/sprints/sprint_6_developer_spec.md`
 - `scripts/core/decision_engine.py`
 - `tests/core/test_decision_engine.py`
 - `data/processed/final_decisions.csv`
 - `data/logs/decision_engine_log.csv`
-- `docs/audits/sprint_6_implementation_audit.md`
-- `docs/sprints/sprint_6_closeout.md`
-- `docs/sprints/sprint_6_decision_engine_core.md`
+- `docs/archive/audits/sprint_6_implementation_audit.md`
+- `docs/archive/sprints/sprint_6_closeout.md`
+- `docs/archive/sprints/sprint_6_decision_engine_core.md`
 - `docs/technical/decision_engine_design_v2.md`
 - `docs/technical/Technical_Analysis_v3.md`
 - `docs/functional/Functional_Analysis_v2.md`
 - `docs/execution/execution_delivery_framework_v2.md`
-- `docs/sprints/execution_roadmap_v2.md`
-- `docs/sprints/sprint_5_closeout.md`
+- `docs/archive/superseded/execution_roadmap_v2.md`
+- `docs/archive/sprints/sprint_5_closeout.md`
 
 Sprint 6 preparation is complete as a governance-safe, audit-first planning artifact. Sprint 6 governance audit certified preparation for execution planning. Sprint 6 execution planning is complete as a documentation-only planning artifact. Sprint 6 execution review approved the execution plan for developer specification. Sprint 6 developer specification is complete and recommends implementation. Sprint 6 implementation is complete. Sprint 6 implementation audit certified implementation for closeout. Sprint 6 closeout is complete. Sprint 6 is certified complete and closed.
 
 Sprint 7 reconciliation inherits:
 
-- `docs/sprints/sprint_7_stability_persistence.md`
+- `docs/archive/sprints/sprint_7_stability_persistence.md`
 - `scripts/core/build_stability_layer.py`
 - `tests/core/test_build_stability_layer.py`
 - `data/processed/stability_state.csv`
 - `data/logs/stability_layer_log.csv`
-- `docs/audits/sprint_7_implementation_audit.md`
-- `docs/sprints/sprint_7_closeout.md`
+- `docs/archive/audits/sprint_7_implementation_audit.md`
+- `docs/archive/sprints/sprint_7_closeout.md`
 - `docs/sprints/project_backlog.md`
 
 Sprint 7 was implemented as a governance-safe Stability & Persistence Layer. The implementation audit certified the implementation for closeout after tracker reconciliation, confirmed that the Stability Layer produces persistence metadata only, confirmed no hidden filtering or allocation override, and captured backlog item `BL-0005` for future legacy documentation language normalization. Sprint 7 closeout is complete. Sprint 7 is certified complete and closed. Sprint 8 preparation followed Sprint 7 closure.
 
 Sprint 8 preparation inherits:
 
-- `docs/sprints/sprint_8_reporting_layer.md`
-- `docs/sprints/sprint_8_reporting_preparation.md`
-- `docs/sprints/sprint_7_closeout.md`
+- `docs/archive/sprints/sprint_8_reporting_layer.md`
+- `docs/archive/sprints/sprint_8_reporting_preparation.md`
+- `docs/archive/sprints/sprint_7_closeout.md`
 - `docs/sprints/project_backlog.md`
-- `docs/sprints/execution_roadmap_v2.md`
+- `docs/archive/superseded/execution_roadmap_v2.md`
 - `docs/technical/decision_engine_design_v2.md`
 - `docs/functional/Functional_Analysis_v2.md`
-- `docs/audits/sprint_8_governance_audit.md`
-- `docs/sprints/sprint_8_execution_plan.md`
-- `docs/audits/sprint_8_execution_review.md`
-- `docs/sprints/sprint_8_developer_spec.md`
-- `docs/audits/sprint_8_developer_spec_approval.md`
-- `docs/audits/sprint_8_implementation_audit.md`
-- `docs/sprints/sprint_8_closeout.md`
+- `docs/archive/audits/sprint_8_governance_audit.md`
+- `docs/archive/sprints/sprint_8_execution_plan.md`
+- `docs/archive/audits/sprint_8_execution_review.md`
+- `docs/archive/sprints/sprint_8_developer_spec.md`
+- `docs/archive/audits/sprint_8_developer_spec_approval.md`
+- `docs/archive/audits/sprint_8_implementation_audit.md`
+- `docs/archive/sprints/sprint_8_closeout.md`
 - `scripts/reporting/build_reporting_layer.py`
 - `tests/reporting/test_build_reporting_layer.py`
 - `tests/reporting/test_build_telegram_summary.py`
@@ -241,7 +241,7 @@ Any sprint certification, audit, execution review, developer spec approval, impl
 ## 9. Documentation Update Rules
 
 - `docs/sprints/sprint_status_tracker.md` is the operational sprint status source of truth.
-- `docs/sprints/execution_roadmap_v2.md` remains the roadmap and doctrine document.
+- `docs/archive/superseded/execution_roadmap_v2.md` remains the roadmap and doctrine document.
 - `docs/sprints/project_backlog.md` is the deferred-work capture source of truth.
 - The roadmap must not be used as the operational status tracker.
 - The backlog must not be used as implementation authorization.
@@ -273,15 +273,15 @@ Status updates must obey these rules:
 
 | Sprint | Authoritative Documents |
 |---|---|
-| Sprint 0 | `docs/sprints/sprint_0_governance_status.md`; `docs/audits/sprint_0_final_governance_audit.md` |
-| Sprint 1 | `docs/sprints/sprint_1_closeout.md`; `docs/sprints/sprint_1_structure_classification.md`; `docs/sprints/sprint_1_execution_plan.md`; `docs/sprints/sprint_1_developer_spec.md` |
-| Sprint 2 | `docs/sprints/sprint_2_closeout.md`; `docs/sprints/sprint_2_cross_sectional_leadership.md`; `docs/sprints/sprint_2_execution_plan.md`; `docs/sprints/sprint_2_developer_spec.md` |
-| Sprint 3 | `docs/sprints/sprint_3_fundamental_quality.md`; `docs/audits/sprint_3_governance_audit.md`; `docs/audits/sprint_3_reaudit.md`; `docs/sprints/sprint_3_execution_plan.md`; `docs/audits/sprint_3_execution_review.md`; `docs/sprints/sprint_3_developer_spec.md`; `docs/audits/sprint_3_implementation_audit.md`; `docs/sprints/sprint_3_closeout.md` |
-| Sprint 4 | `docs/sprints/sprint_4_timing_state_layer.md`; `docs/sprints/sprint_4_governance_constraints.md`; `docs/sprints/sprint_4_boundary_controls.md`; `docs/sprints/sprint_4_execution_plan.md`; `docs/sprints/sprint_4_execution_planning.md`; `docs/sprints/sprint_4_developer_spec.md`; `docs/audits/sprint_4_governance_audit.md`; `docs/audits/sprint_4_architecture_validation.md`; `docs/audits/sprint_4_implementation_audit.md`; `docs/sprints/sprint_4_closeout.md` |
-| Sprint 5 | `docs/sprints/sprint_5_portfolio_intelligence.md`; `docs/audits/sprint_5_governance_audit.md`; `docs/sprints/sprint_5_developer_spec.md`; `docs/audits/sprint_5_implementation_audit.md`; `docs/sprints/sprint_5_closeout.md`; `docs/sprints/execution_roadmap_v2.md` |
-| Sprint 6 | `docs/sprints/sprint_6_decision_engine_governance.md`; `docs/audits/sprint_6_governance_audit.md`; `docs/sprints/sprint_6_execution_plan.md`; `docs/audits/sprint_6_execution_review.md`; `docs/sprints/sprint_6_developer_spec.md`; `docs/audits/sprint_6_implementation_audit.md`; `docs/sprints/sprint_6_closeout.md`; `docs/sprints/sprint_6_decision_engine_core.md`; `docs/sprints/execution_roadmap_v2.md`; `docs/technical/decision_engine_design_v2.md` |
-| Sprint 7 | `docs/sprints/sprint_7_stability_persistence.md`; `docs/audits/sprint_7_implementation_audit.md`; `docs/sprints/sprint_7_closeout.md`; `scripts/core/build_stability_layer.py`; `tests/core/test_build_stability_layer.py`; `data/processed/stability_state.csv`; `data/logs/stability_layer_log.csv`; `docs/sprints/execution_roadmap_v2.md` |
-| Sprint 8 | `docs/sprints/sprint_8_reporting_layer.md`; `docs/sprints/sprint_8_reporting_preparation.md`; `docs/audits/sprint_8_governance_audit.md`; `docs/sprints/sprint_8_execution_plan.md`; `docs/audits/sprint_8_execution_review.md`; `docs/sprints/sprint_8_developer_spec.md`; `docs/audits/sprint_8_developer_spec_approval.md`; `docs/audits/sprint_8_implementation_audit.md`; `docs/sprints/sprint_8_closeout.md`; `scripts/reporting/build_reporting_layer.py`; `scripts/reporting/build_telegram_summary.py`; `scripts/reporting/send_telegram.py`; `scripts/reporting/reporter.py`; `scripts/telegram/process_telegram_commands.py`; `tests/reporting/test_build_reporting_layer.py`; `tests/reporting/test_build_telegram_summary.py`; `data/processed/reporting_dashboard_data.csv`; `data/logs/reporting_layer_log.csv`; `reports/daily/telegram_message.txt`; `docs/sprints/execution_roadmap_v2.md`; `docs/sprints/project_backlog.md`; `docs/technical/decision_engine_design_v2.md`; `docs/functional/Functional_Analysis_v2.md` |
+| Sprint 0 | `docs/archive/migration/sprint_0_governance_status.md`; `docs/archive/audits/sprint_0_final_governance_audit.md` |
+| Sprint 1 | `docs/archive/sprints/sprint_1_closeout.md`; `docs/archive/sprints/sprint_1_structure_classification.md`; `docs/archive/sprints/sprint_1_execution_plan.md`; `docs/archive/sprints/sprint_1_developer_spec.md` |
+| Sprint 2 | `docs/archive/sprints/sprint_2_closeout.md`; `docs/archive/sprints/sprint_2_cross_sectional_leadership.md`; `docs/archive/sprints/sprint_2_execution_plan.md`; `docs/archive/sprints/sprint_2_developer_spec.md` |
+| Sprint 3 | `docs/archive/sprints/sprint_3_fundamental_quality.md`; `docs/archive/audits/sprint_3_governance_audit.md`; `docs/archive/audits/sprint_3_reaudit.md`; `docs/archive/sprints/sprint_3_execution_plan.md`; `docs/archive/audits/sprint_3_execution_review.md`; `docs/archive/sprints/sprint_3_developer_spec.md`; `docs/archive/audits/sprint_3_implementation_audit.md`; `docs/archive/sprints/sprint_3_closeout.md` |
+| Sprint 4 | `docs/archive/sprints/sprint_4_timing_state_layer.md`; `docs/archive/sprints/sprint_4_governance_constraints.md`; `docs/archive/sprints/sprint_4_boundary_controls.md`; `docs/archive/sprints/sprint_4_execution_plan.md`; `docs/archive/sprints/sprint_4_execution_planning.md`; `docs/archive/sprints/sprint_4_developer_spec.md`; `docs/archive/audits/sprint_4_governance_audit.md`; `docs/archive/audits/sprint_4_architecture_validation.md`; `docs/archive/audits/sprint_4_implementation_audit.md`; `docs/archive/sprints/sprint_4_closeout.md` |
+| Sprint 5 | `docs/archive/sprints/sprint_5_portfolio_intelligence.md`; `docs/archive/audits/sprint_5_governance_audit.md`; `docs/archive/sprints/sprint_5_developer_spec.md`; `docs/archive/audits/sprint_5_implementation_audit.md`; `docs/archive/sprints/sprint_5_closeout.md`; `docs/archive/superseded/execution_roadmap_v2.md` |
+| Sprint 6 | `docs/archive/sprints/sprint_6_decision_engine_governance.md`; `docs/archive/audits/sprint_6_governance_audit.md`; `docs/archive/sprints/sprint_6_execution_plan.md`; `docs/archive/audits/sprint_6_execution_review.md`; `docs/archive/sprints/sprint_6_developer_spec.md`; `docs/archive/audits/sprint_6_implementation_audit.md`; `docs/archive/sprints/sprint_6_closeout.md`; `docs/archive/sprints/sprint_6_decision_engine_core.md`; `docs/archive/superseded/execution_roadmap_v2.md`; `docs/technical/decision_engine_design_v2.md` |
+| Sprint 7 | `docs/archive/sprints/sprint_7_stability_persistence.md`; `docs/archive/audits/sprint_7_implementation_audit.md`; `docs/archive/sprints/sprint_7_closeout.md`; `scripts/core/build_stability_layer.py`; `tests/core/test_build_stability_layer.py`; `data/processed/stability_state.csv`; `data/logs/stability_layer_log.csv`; `docs/archive/superseded/execution_roadmap_v2.md` |
+| Sprint 8 | `docs/archive/sprints/sprint_8_reporting_layer.md`; `docs/archive/sprints/sprint_8_reporting_preparation.md`; `docs/archive/audits/sprint_8_governance_audit.md`; `docs/archive/sprints/sprint_8_execution_plan.md`; `docs/archive/audits/sprint_8_execution_review.md`; `docs/archive/sprints/sprint_8_developer_spec.md`; `docs/archive/audits/sprint_8_developer_spec_approval.md`; `docs/archive/audits/sprint_8_implementation_audit.md`; `docs/archive/sprints/sprint_8_closeout.md`; `scripts/reporting/build_reporting_layer.py`; `scripts/reporting/build_telegram_summary.py`; `scripts/reporting/send_telegram.py`; `scripts/reporting/reporter.py`; `scripts/telegram/process_telegram_commands.py`; `tests/reporting/test_build_reporting_layer.py`; `tests/reporting/test_build_telegram_summary.py`; `data/processed/reporting_dashboard_data.csv`; `data/logs/reporting_layer_log.csv`; `reports/daily/telegram_message.txt`; `docs/archive/superseded/execution_roadmap_v2.md`; `docs/sprints/project_backlog.md`; `docs/technical/decision_engine_design_v2.md`; `docs/functional/Functional_Analysis_v2.md` |
 
 ## 12. Final Scrum Master Status Recommendation
 

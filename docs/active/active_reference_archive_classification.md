@@ -29,15 +29,17 @@ Reference documents explain institutional reasoning and architecture rationale. 
 
 Archive documents preserve historical execution and review evidence. Completed sprint plans, completed sprint reviews, completed sprint closeouts, and historical migration materials belong in this tier.
 
-## Legacy Folder Classification
+## Historical Folder Classification
 
-The existing `docs/sprints/` and `docs/audits/` folders mainly preserve the certified history of Sprints 0 through 8.
+The certified history of Sprints 0 through 8 is preserved under `docs/archive/`.
 
 `docs/sprints/project_backlog.md` remains operationally relevant until backlog content is migrated or mirrored into the active planning structure.
 
 `docs/sprints/sprint_status_tracker.md` remains the historical certification record for Sprints 0 through 8.
 
-`docs/sprints/execution_roadmap_v2.md` is replaced for forward planning by `docs/active/roadmap_current.md`, while remaining useful historical context.
+`docs/archive/superseded/execution_roadmap_v2.md` is replaced for forward planning by `docs/active/roadmap_current.md`, while remaining useful historical context.
+
+`docs/audits/` is retained as a notice-only entry point. Historical audit documents live in `docs/archive/audits/`.
 
 ## Classification Rules
 

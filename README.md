@@ -77,7 +77,14 @@ Governance v2 is maintained in:
 
 Historical sprint and audit documents are preserved for institutional traceability.
 
-The previous `docs/sprints/` and `docs/audits/` folders mainly contain certification history for Sprints 0 through 8. They are no longer the default operational entry point unless explicitly referenced by active documentation.
+Historical sprint, audit, migration, and superseded planning documents are archived under:
+
+- `docs/archive/sprints/`
+- `docs/archive/audits/`
+- `docs/archive/migration/`
+- `docs/archive/superseded/`
+
+The remaining `docs/sprints/` files are intentionally limited to operational backlog and sprint status records plus a notice. The remaining `docs/audits/` file is a notice. Archived documents are no longer the default operational entry point unless explicitly referenced by active documentation.
 
 ## Repository Language Governance
 

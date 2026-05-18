@@ -286,8 +286,8 @@ This document preserves historical entry-quality research and contains outdated 
 Current binding governance:
 
 - AGENTS.md
-- docs/sprints/sprint_0_governance_status.md
-- docs/audits/sprint_0_final_governance_audit.md
+- docs/archive/migration/sprint_0_governance_status.md
+- docs/archive/audits/sprint_0_final_governance_audit.md
 
 Certified doctrine:
 

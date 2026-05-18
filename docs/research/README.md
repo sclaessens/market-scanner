@@ -16,5 +16,5 @@ Implementation must follow the certified Sprint 0 governance:
 Authoritative references:
 
 - `AGENTS.md`
-- `docs/sprints/sprint_0_governance_status.md`
-- `docs/audits/sprint_0_final_governance_audit.md`
+- `docs/archive/migration/sprint_0_governance_status.md`
+- `docs/archive/audits/sprint_0_final_governance_audit.md`
