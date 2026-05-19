@@ -56,6 +56,10 @@ The Decision Engine must preserve its input row count, ticker/date universe, and
 
 Outputs must be deterministic for the same inputs. Any nondeterministic source, ordering rule, generated timestamp, or external dependency must be explicit, traceable, and tested or documented.
 
+## Pipeline Freshness Orchestration
+
+Normal operator pipeline execution must rebuild the required upstream analytical artifacts before the Decision Engine runs. The governed order is scanner, validation, context, fundamental, timing state, portfolio state, portfolio intelligence, Decision Engine, and reporting. This is a Governance Level 2 orchestration guarantee because sequencing affects freshness, auditability, and deterministic rebuild integrity; it does not change layer schemas, allocation authority, Decision Engine semantics, or reporting authority.
+
 ## Reporting Boundary
 
 Reporting may format, group, summarize, truncate, and deliver communications. It must preserve source traceability and must not reinterpret, prioritize, suppress, or override Decision Engine decisions.
