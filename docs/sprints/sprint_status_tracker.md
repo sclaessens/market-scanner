@@ -99,7 +99,7 @@ Implementation still requires human review or approval, Governance v2 classifica
 | Sprint | Theme | Overall Status | Current Phase | Governance Status | Current Next Action |
 |---|---|---|---|---|---|
 | Operational Sprint 1 | Scan Visibility & Operator Feedback | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
-| Operational Sprint 2 | Data Sufficiency & Historical Storage Baseline | PREPARATION COMPLETE / READY FOR REVIEW | PREPARATION | GOVERNANCE REVIEW REQUIRED | Review preparation and approve Codex handoff if appropriate |
+| Operational Sprint 2 | Data Sufficiency & Historical Storage Baseline | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
 | Operational Sprint 3 | Telegram UX & Reporting Usability | PROPOSED | PLANNED | NOT CERTIFIED | Await sequencing decision after Sprint 1 and/or Sprint 2 |
 | Operational Sprint 4 | Prediction Tracking & Learning Loop Preparation | PROPOSED | PLANNED | NOT CERTIFIED | Await data sufficiency baseline and research-scope review |
 
