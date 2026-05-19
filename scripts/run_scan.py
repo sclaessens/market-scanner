@@ -21,6 +21,9 @@ from scripts.core.regime import classify_market_regime
 from scripts.core.scanner import rank_setups, scan_ticker
 from scripts.core.build_validation_layer import build_validation_layer
 from scripts.core.build_context_layer import build_context_layer
+from scripts.core.build_fundamental_layer import build_fundamental_layer
+from scripts.core.build_timing_state_layer import build_timing_state_layer
+from scripts.core.build_portfolio_intelligence import build_portfolio_intelligence
 from scripts.portfolio.build_portfolio import build_portfolio
 from scripts.portfolio.evaluate_positions import evaluate_positions
 from scripts.reporting.build_telegram_summary import (
@@ -37,8 +40,11 @@ MARKET_REGIME_FILE = DATA_DIR / "processed" / "market_regime.csv"
 SCANNER_RANKED_FILE = DATA_DIR / "processed" / "scanner_ranked.csv"
 VALIDATION_LAYER_FILE = DATA_DIR / "processed" / "validation_layer.csv"
 CONTEXT_LAYER_FILE = DATA_DIR / "processed" / "context_strength.csv"
+FUNDAMENTAL_QUALITY_FILE = DATA_DIR / "processed" / "fundamental_quality.csv"
+TIMING_STATE_LAYER_FILE = DATA_DIR / "processed" / "timing_state_layer.csv"
 PORTFOLIO_POSITIONS_FILE = DATA_DIR / "portfolio" / "portfolio_positions.csv"
 PORTFOLIO_REVIEW_FILE = DATA_DIR / "portfolio" / "portfolio_review.csv"
+PORTFOLIO_INTELLIGENCE_FILE = DATA_DIR / "processed" / "portfolio_intelligence.csv"
 FINAL_DECISIONS_FILE = DATA_DIR / "processed" / "final_decisions.csv"
 MIN_HISTORY_ROWS = 220
 SCAN_PROGRESS_INTERVAL = 25
@@ -237,6 +243,16 @@ def main() -> None:
     print_artifact_written(CONTEXT_LAYER_FILE, row_count=len(context_df))
     print_step_completed("Build context layer", row_count=len(context_df))
 
+    print_step_started("Build fundamental layer")
+    fundamental_df = build_fundamental_layer()
+    print_artifact_written(FUNDAMENTAL_QUALITY_FILE, row_count=len(fundamental_df))
+    print_step_completed("Build fundamental layer", row_count=len(fundamental_df))
+
+    print_step_started("Build timing state layer")
+    timing_df = build_timing_state_layer()
+    print_artifact_written(TIMING_STATE_LAYER_FILE, row_count=len(timing_df))
+    print_step_completed("Build timing state layer", row_count=len(timing_df))
+
     print_step_started("Build portfolio state")
     portfolio_df = build_portfolio()
     print_artifact_written(PORTFOLIO_POSITIONS_FILE, row_count=len(portfolio_df))
@@ -246,6 +262,11 @@ def main() -> None:
     portfolio_review_df = evaluate_positions()
     print_artifact_written(PORTFOLIO_REVIEW_FILE, row_count=len(portfolio_review_df))
     print_step_completed("Evaluate portfolio positions", row_count=len(portfolio_review_df))
+
+    print_step_started("Build portfolio intelligence")
+    portfolio_intelligence_df = build_portfolio_intelligence()
+    print_artifact_written(PORTFOLIO_INTELLIGENCE_FILE, row_count=len(portfolio_intelligence_df))
+    print_step_completed("Build portfolio intelligence", row_count=len(portfolio_intelligence_df))
 
     print_step_started("Build final decisions")
     final_decisions_df = build_final_decisions()

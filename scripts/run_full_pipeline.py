@@ -30,7 +30,8 @@ def main() -> None:
 
     Sprint 0 rule:
     - scripts/run_scan.py owns the deterministic end-to-end flow:
-      scanner → validation → context → portfolio state → Decision Engine → reporting.
+      scanner → validation → context → fundamental → timing state →
+      portfolio state → portfolio intelligence → Decision Engine → reporting.
     - Legacy watchlist action-updater steps are intentionally excluded because
       watchlist may only classify timing state, not emit capital actions.
     """
