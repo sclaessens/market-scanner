@@ -100,7 +100,7 @@ Implementation still requires human review or approval, Governance v2 classifica
 |---|---|---|---|---|---|
 | Operational Sprint 1 | Scan Visibility & Operator Feedback | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
 | Operational Sprint 2 | Data Sufficiency & Historical Storage Baseline | CLOSED | CLOSED | CERTIFIED COMPLETE | None |
-| Operational Sprint 3 | Telegram UX & Reporting Usability | PROPOSED | PLANNED | NOT CERTIFIED | Await sequencing decision after Sprint 1 and/or Sprint 2 |
+| Operational Sprint 3 | Telegram UX & Reporting Usability | PREPARATION COMPLETE / READY FOR REVIEW | PREPARATION | GOVERNANCE REVIEW REQUIRED | Review preparation and approve Codex handoff if appropriate |
 | Operational Sprint 4 | Prediction Tracking & Learning Loop Preparation | PROPOSED | PLANNED | NOT CERTIFIED | Await data sufficiency baseline and research-scope review |
 
 Future operational sprint phase changes should update this table when a sprint is approved for implementation, Codex starts implementation, implementation is completed, validation is reviewed, closeout is completed, or backlog reconciliation identifies new work.
@@ -123,7 +123,7 @@ Future operational sprint phase changes should update this table when a sprint i
 
 Current required next action:
 
-None. Sprints 0 through 8 are closed and certified complete.
+Review Operational Sprint 3 preparation and approve Codex handoff if appropriate.
 
 Sprint 3 closeout inherits:
 
