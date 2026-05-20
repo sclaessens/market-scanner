@@ -1,0 +1,11 @@
+ticker,target_date,fundamentals_period,revenue_growth_yoy,eps_growth_yoy,operating_margin,debt_leverage_metric,free_cash_flow_metric,fundamentals_source,fundamentals_source_url,fundamentals_last_updated,fundamentals_collection_status,data_quality_notes
+AAPL,2026-05-19,,,,,,,,,,SOURCE_REQUIRED,
+ABBV,2026-05-19,,,,,,,,,,SOURCE_REQUIRED,
+ADBE,2026-05-19,,,,,,,,,,SOURCE_REQUIRED,
+ADI,2026-05-19,,,,,,,,,,SOURCE_REQUIRED,
+ADP,2026-05-19,,,,,,,,,,SOURCE_REQUIRED,
+ADSK,2026-05-19,,,,,,,,,,SOURCE_REQUIRED,
+AIG,2026-05-19,,,,,,,,,,SOURCE_REQUIRED,
+AKAM,2026-05-19,,,,,,,,,,SOURCE_REQUIRED,
+ALL,2026-05-19,,,,,,,,,,SOURCE_REQUIRED,
+AMAT,2026-05-19,,,,,,,,,,SOURCE_REQUIRED,

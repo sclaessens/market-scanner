@@ -1,0 +1,11 @@
+ticker,target_date,company_name,sector,industry,asset_class,metadata_source,metadata_source_url,metadata_last_updated,metadata_collection_status,data_steward_notes
+AAPL,2026-05-19,,,,,,,,SOURCE_REQUIRED,
+ABBV,2026-05-19,,,,,,,,SOURCE_REQUIRED,
+ADBE,2026-05-19,,,,,,,,SOURCE_REQUIRED,
+ADI,2026-05-19,,,,,,,,SOURCE_REQUIRED,
+ADP,2026-05-19,,,,,,,,SOURCE_REQUIRED,
+ADSK,2026-05-19,,,,,,,,SOURCE_REQUIRED,
+AIG,2026-05-19,,,,,,,,SOURCE_REQUIRED,
+AKAM,2026-05-19,,,,,,,,SOURCE_REQUIRED,
+ALL,2026-05-19,,,,,,,,SOURCE_REQUIRED,
+AMAT,2026-05-19,,,,,,,,SOURCE_REQUIRED,
