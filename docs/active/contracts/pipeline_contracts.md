@@ -60,6 +60,10 @@ Outputs must be deterministic for the same inputs. Any nondeterministic source, 
 
 Normal operator pipeline execution must rebuild the required upstream analytical artifacts before the Decision Engine runs. The governed order is scanner, validation, context, fundamental, timing state, portfolio state, portfolio intelligence, Decision Engine, and reporting. This is a Governance Level 2 orchestration guarantee because sequencing affects freshness, auditability, and deterministic rebuild integrity; it does not change layer schemas, allocation authority, Decision Engine semantics, or reporting authority.
 
+## Portfolio Source Contract
+
+The authoritative local portfolio source is `data/portfolio/portfolio_transactions.csv`. `scripts/portfolio/build_portfolio.py` rebuilds `data/portfolio/portfolio_positions.csv` from that transaction ledger, and Portfolio Intelligence reads the rebuilt positions file as descriptive portfolio presence metadata. `last_action` and `last_action_at` in portfolio files are historical transaction provenance only; they are not current Decision Engine actions, allocation instructions, reporting authority, or Telegram decision semantics. `data/portfolio/portfolio_review.csv` is a generated portfolio review artifact and is not a source of Decision Engine authority.
+
 ## Reporting Boundary
 
 Reporting may format, group, summarize, truncate, and deliver communications. It must preserve source traceability and must not reinterpret, prioritize, suppress, or override Decision Engine decisions.
