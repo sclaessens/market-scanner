@@ -252,7 +252,7 @@ Observed operational behavior:
 
 This rule is operationally important because a local validation attempt with non-matching dates produced `row_missing`, and a later source update date than the opportunity date produced invalid metadata.
 
-If this interpretation is too strict for real provider data, a future governance item is required to define provider reporting-date semantics, as-of matching, and freshness interpretation.
+If this interpretation is too strict for real provider data, a future governance item may be required to define provider reporting-date semantics, as-of matching, and freshness interpretation.
 
 Until then, data coverage expansion must respect the current behavior rather than loosening Fundamental Layer rules ad hoc.
 
@@ -299,7 +299,7 @@ Candidate future tasks:
 - data steward checklist for source artifact updates;
 - documentation of date matching and freshness behavior.
 
-These remain future candidates until separately approved through developer specification and implementation authorization.
+These remain future candidates under existing backlog scope until separately approved through developer specification and implementation authorization.
 
 ## 10. Explicit Forbidden Scope
 
@@ -394,7 +394,7 @@ Generated processed artifacts and logs must not be committed unless separately a
 
 Assess new gaps discovered during coverage expansion.
 
-Add backlog items where needed.
+Add backlog items only if they exceed the existing scope of BL-0017.
 
 Recommend whether the next step should be a coverage audit utility, provider evaluation matrix, data steward runbook, or later analytical feature design.
 
@@ -421,14 +421,18 @@ Operational Sprint 5 is acceptable only if:
 
 ## 14. Backlog Impact Assessment
 
-New backlog items identified and added to `docs/sprints/project_backlog.md`:
+Existing backlog item `BL-0017 — Define governed automated data ingestion strategy for fundamentals and portfolio metadata` is sufficient for this sprint plan.
 
-- BL-0018 — Define operational date semantics for fundamentals source freshness and as-of matching
-- BL-0019 — Create governed data coverage audit and reporting utility
-- BL-0020 — Define provider evaluation matrix for wider data coverage
+The following topics remain captured as candidate work within the Operational Sprint 5 plan and do not require separate backlog IDs at this stage:
+
+- operational date semantics for fundamentals source freshness and as-of matching;
+- governed data coverage audit and reporting utility;
+- provider evaluation matrix for wider coverage.
+
+These topics must be reconsidered during Operational Sprint 5 execution review, implementation audit, or closeout if they exceed the existing scope of BL-0017 or become independently actionable.
 
 Backlog impact assessment:
-- New backlog items identified and added to project_backlog.md
+- No new backlog items identified.
 
 ## 15. Recommended Next Step
 
