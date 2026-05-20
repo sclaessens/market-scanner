@@ -26,9 +26,12 @@ from scripts.core.build_timing_state_layer import build_timing_state_layer
 from scripts.core.build_portfolio_intelligence import build_portfolio_intelligence
 from scripts.portfolio.build_portfolio import build_portfolio
 from scripts.portfolio.evaluate_positions import evaluate_positions
-from scripts.reporting.build_telegram_summary import (
-    build_telegram_summary_text,
-    save_summary,
+from scripts.reporting.build_reporting_layer import (
+    REPORTING_DASHBOARD_FILE,
+    REPORTING_LOG_FILE,
+    TELEGRAM_MESSAGE_FILE as REPORTING_TELEGRAM_MESSAGE_FILE,
+    build_reporting_layer,
+    write_outputs as write_reporting_outputs,
 )
 from scripts.reporting.send_telegram import send_daily_summary
 from scripts.core.decision_engine import build_final_decisions
@@ -273,11 +276,13 @@ def main() -> None:
     print_artifact_written(FINAL_DECISIONS_FILE, row_count=len(final_decisions_df))
     print_step_completed("Build final decisions", row_count=len(final_decisions_df))
 
-    print_step_started("Build telegram summary")
-    telegram_text = build_telegram_summary_text()
-    save_summary(telegram_text)
-    print_artifact_written(TELEGRAM_MESSAGE_FILE)
-    print_step_completed("Build telegram summary")
+    print_step_started("Build reporting layer")
+    reporting_dashboard_df, reporting_log_row, telegram_text = build_reporting_layer()
+    write_reporting_outputs(reporting_dashboard_df, reporting_log_row, telegram_text)
+    print_artifact_written(REPORTING_DASHBOARD_FILE, row_count=len(reporting_dashboard_df))
+    print_artifact_written(REPORTING_LOG_FILE, row_count=1)
+    print_artifact_written(REPORTING_TELEGRAM_MESSAGE_FILE)
+    print_step_completed("Build reporting layer", row_count=len(reporting_dashboard_df))
 
     print_step_started("Send telegram summary")
     try:

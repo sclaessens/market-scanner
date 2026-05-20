@@ -70,7 +70,7 @@ def test_scan_progress_uses_neutral_operational_language(capsys):
     assert "urgency" not in output.lower()
 
 
-def test_run_scan_rebuilds_required_layers_before_final_decisions(monkeypatch, tmp_path: Path):
+def test_run_scan_rebuilds_required_layers_and_reporting_before_delivery(monkeypatch, tmp_path: Path):
     order = []
 
     processed_dir = tmp_path / "data" / "processed"
@@ -162,8 +162,20 @@ def test_run_scan_rebuilds_required_layers_before_final_decisions(monkeypatch, t
         "build_final_decisions",
         lambda: record("final_decisions", [{"ticker": "AAA", "date": "2026-05-19"}]),
     )
-    monkeypatch.setattr(run_scan, "build_telegram_summary_text", lambda: "summary")
-    monkeypatch.setattr(run_scan, "save_summary", lambda text: order.append("reporting"))
+    monkeypatch.setattr(
+        run_scan,
+        "build_reporting_layer",
+        lambda: (
+            record("reporting", [{"ticker": "AAA", "date": "2026-05-19"}]),
+            {"input_status": "SOURCE_AVAILABLE"},
+            "summary",
+        ),
+    )
+    monkeypatch.setattr(
+        run_scan,
+        "write_reporting_outputs",
+        lambda dashboard, log_row, telegram_text: order.append("reporting_outputs"),
+    )
     monkeypatch.setattr(run_scan, "send_daily_summary", lambda: order.append("telegram_delivery"))
 
     run_scan.main()
@@ -178,6 +190,9 @@ def test_run_scan_rebuilds_required_layers_before_final_decisions(monkeypatch, t
         "portfolio_intelligence",
         "final_decisions",
         "reporting",
+        "reporting_outputs",
         "telegram_delivery",
     ]
     assert order.index("portfolio_intelligence") < order.index("final_decisions")
+    assert order.index("final_decisions") < order.index("reporting")
+    assert order.index("reporting_outputs") < order.index("telegram_delivery")
