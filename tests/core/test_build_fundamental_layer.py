@@ -21,6 +21,13 @@ EXPECTED_OUTPUT_COLUMNS = [
     "quality_metadata_status",
     "source_data_status",
     "source_timestamp",
+    "source_name",
+    "source_last_updated",
+    "source_freshness_days",
+    "missing_required_fields",
+    "partial_data_reason",
+    "stale_data_reason",
+    "invalid_data_reason",
     "generated_at",
 ]
 
@@ -88,18 +95,22 @@ FORBIDDEN_VALUES = {
 def patch_paths(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     processed_dir = tmp_path / "data" / "processed"
     logs_dir = tmp_path / "data" / "logs"
+    raw_dir = tmp_path / "data" / "raw"
     processed_dir.mkdir(parents=True, exist_ok=True)
     logs_dir.mkdir(parents=True, exist_ok=True)
+    raw_dir.mkdir(parents=True, exist_ok=True)
 
     context_path = processed_dir / "context_strength.csv"
+    raw_path = raw_dir / "fundamentals.csv"
     output_path = processed_dir / "fundamental_quality.csv"
     log_path = logs_dir / "fundamental_layer_log.csv"
 
     monkeypatch.setattr(fundamental_module, "CONTEXT_PATH", context_path)
+    monkeypatch.setattr(fundamental_module, "RAW_FUNDAMENTALS_PATH", raw_path)
     monkeypatch.setattr(fundamental_module, "OUTPUT_PATH", output_path)
     monkeypatch.setattr(fundamental_module, "LOG_PATH", log_path)
 
-    return context_path, output_path, log_path
+    return context_path, raw_path, output_path, log_path
 
 
 def _context_row(ticker: str, date: str = "2026-05-07", strength: str = "NEUTRAL") -> dict:
@@ -121,9 +132,44 @@ def _write_context(path: Path, rows: list[dict]) -> None:
     pd.DataFrame(rows).to_csv(path, index=False)
 
 
+def _raw_row(ticker: str, as_of_date: str = "2026-05-01", **overrides) -> dict:
+    row = {
+        "ticker": ticker,
+        "as_of_date": as_of_date,
+        "source_name": "manual",
+        "source_last_updated": "2026-05-01",
+        "report_period": "2026Q1",
+        "currency": "USD",
+        "revenue_growth_yoy": "0.12",
+        "eps_growth_yoy": "0.09",
+        "gross_margin": "0.55",
+        "operating_margin": "0.25",
+        "debt_to_equity": "0.35",
+        "free_cash_flow_positive": "true",
+    }
+    row.update(overrides)
+    return row
+
+
+def _write_raw(path: Path, rows: list[dict]) -> None:
+    pd.DataFrame(rows).to_csv(path, index=False)
+
+
 def _build_with_rows(patch_paths, rows: list[dict]) -> tuple[pd.DataFrame, Path, Path]:
-    context_path, output_path, log_path = patch_paths
+    context_path, _, output_path, log_path = patch_paths
     _write_context(context_path, rows)
+    df = fundamental_module.build_fundamental_layer(generated_at="2026-05-09 12:00:00")
+    return df, output_path, log_path
+
+
+def _build_with_context_and_raw(
+    patch_paths,
+    context_rows: list[dict],
+    raw_rows: list[dict],
+) -> tuple[pd.DataFrame, Path, Path]:
+    context_path, raw_path, output_path, log_path = patch_paths
+    _write_context(context_path, context_rows)
+    _write_raw(raw_path, raw_rows)
     df = fundamental_module.build_fundamental_layer(generated_at="2026-05-09 12:00:00")
     return df, output_path, log_path
 
@@ -170,7 +216,7 @@ def test_missing_fundamentals_preserve_rows_with_descriptive_states(patch_paths)
 
 
 def test_duplicate_ticker_date_fails_fast(patch_paths):
-    context_path, _, _ = patch_paths
+    context_path, _, _, _ = patch_paths
     _write_context(
         context_path,
         [
@@ -184,7 +230,7 @@ def test_duplicate_ticker_date_fails_fast(patch_paths):
 
 
 def test_missing_ticker_fails_fast(patch_paths):
-    context_path, _, _ = patch_paths
+    context_path, _, _, _ = patch_paths
     _write_context(context_path, [_context_row("")])
 
     with pytest.raises(ValueError, match="missing ticker"):
@@ -192,7 +238,7 @@ def test_missing_ticker_fails_fast(patch_paths):
 
 
 def test_missing_date_fails_fast(patch_paths):
-    context_path, _, _ = patch_paths
+    context_path, _, _, _ = patch_paths
     _write_context(context_path, [_context_row("AAA", date="")])
 
     with pytest.raises(ValueError, match="missing date"):
@@ -275,3 +321,188 @@ def test_one_row_per_ticker_date_is_enforced(patch_paths):
 
     assert len(df) == 2
     assert not df.duplicated(subset=["ticker", "date"]).any()
+
+
+def test_valid_raw_fundamentals_produce_sufficient_data_with_latest_as_of_match(patch_paths):
+    df, _, _ = _build_with_context_and_raw(
+        patch_paths,
+        [_context_row("AAA", date="2026-05-09")],
+        [
+            _raw_row("AAA", as_of_date="2026-04-01", source_name="older", source_last_updated="2026-04-01"),
+            _raw_row("AAA", as_of_date="2026-05-08", source_name="latest", source_last_updated="2026-05-08"),
+            _raw_row("AAA", as_of_date="2026-05-10", source_name="future", source_last_updated="2026-05-10"),
+            _raw_row("RAWONLY", as_of_date="2026-05-08", source_name="raw-only", source_last_updated="2026-05-08"),
+        ],
+    )
+
+    assert len(df) == 1
+    assert df.loc[0, "ticker"] == "AAA"
+    assert df.loc[0, "date"] == "2026-05-09"
+    assert df.loc[0, "quality_state"] == "SUFFICIENT_DATA"
+    assert df.loc[0, "quality_metadata_status"] == "complete"
+    assert df.loc[0, "source_data_status"] == "source_available"
+    assert df.loc[0, "source_name"] == "latest"
+    assert df.loc[0, "source_last_updated"] == "2026-05-08"
+    assert df.loc[0, "source_freshness_days"] == 1
+    assert "RAWONLY" not in set(df["ticker"])
+
+
+def test_raw_artifact_present_without_matching_row_is_row_missing(patch_paths):
+    df, _, _ = _build_with_context_and_raw(
+        patch_paths,
+        [_context_row("AAA", date="2026-05-09")],
+        [_raw_row("BBB", as_of_date="2026-05-08", source_last_updated="2026-05-08")],
+    )
+
+    assert df.loc[0, "quality_state"] == "INSUFFICIENT_DATA"
+    assert df.loc[0, "quality_metadata_status"] == "row_missing"
+    assert df.loc[0, "source_data_status"] == "row_missing"
+
+
+def test_missing_required_raw_data_fields_produce_partial_data(patch_paths):
+    df, _, _ = _build_with_context_and_raw(
+        patch_paths,
+        [_context_row("AAA", date="2026-05-09")],
+        [
+            _raw_row(
+                "AAA",
+                as_of_date="2026-05-08",
+                source_last_updated="2026-05-08",
+                eps_growth_yoy="",
+            )
+        ],
+    )
+
+    assert df.loc[0, "quality_state"] == "PARTIAL_DATA"
+    assert df.loc[0, "quality_metadata_status"] == "partial"
+    assert df.loc[0, "source_data_status"] == "partial_data"
+    assert df.loc[0, "missing_required_fields"] == "eps_growth_yoy"
+    assert df.loc[0, "partial_data_reason"] == "one or more required fundamental fields are missing"
+
+
+def test_materially_absent_raw_data_fields_are_insufficient(patch_paths):
+    df, _, _ = _build_with_context_and_raw(
+        patch_paths,
+        [_context_row("AAA", date="2026-05-09")],
+        [
+            _raw_row(
+                "AAA",
+                as_of_date="2026-05-08",
+                source_last_updated="2026-05-08",
+                revenue_growth_yoy="",
+                eps_growth_yoy="",
+                gross_margin="",
+                operating_margin="",
+                debt_to_equity="",
+                free_cash_flow_positive="",
+            )
+        ],
+    )
+
+    assert df.loc[0, "quality_state"] == "INSUFFICIENT_DATA"
+    assert df.loc[0, "source_data_status"] == "partial_data"
+    assert df.loc[0, "missing_required_fields"] == "|".join(fundamental_module.RAW_DATA_COLUMNS)
+
+
+def test_stale_raw_source_rows_produce_stale_data(patch_paths):
+    df, _, _ = _build_with_context_and_raw(
+        patch_paths,
+        [_context_row("AAA", date="2026-05-09")],
+        [_raw_row("AAA", as_of_date="2026-05-08", source_last_updated="2026-01-01")],
+    )
+
+    assert df.loc[0, "quality_state"] == "STALE_DATA"
+    assert df.loc[0, "quality_metadata_status"] == "stale"
+    assert df.loc[0, "source_data_status"] == "stale_data"
+    assert df.loc[0, "source_freshness_days"] == 128
+    assert df.loc[0, "stale_data_reason"] == "source_last_updated is older than 120 days"
+
+
+def test_invalid_numeric_values_are_handled_deterministically(patch_paths):
+    df, _, _ = _build_with_context_and_raw(
+        patch_paths,
+        [_context_row("AAA", date="2026-05-09")],
+        [
+            _raw_row(
+                "AAA",
+                as_of_date="2026-05-08",
+                source_last_updated="2026-05-08",
+                gross_margin="not-a-number",
+            )
+        ],
+    )
+
+    assert df.loc[0, "quality_state"] == "PARTIAL_DATA"
+    assert df.loc[0, "quality_metadata_status"] == "invalid"
+    assert df.loc[0, "source_data_status"] == "invalid_data"
+    assert df.loc[0, "invalid_data_reason"] == "invalid required fields: gross_margin"
+
+
+def test_invalid_boolean_values_are_handled_deterministically(patch_paths):
+    df, _, _ = _build_with_context_and_raw(
+        patch_paths,
+        [_context_row("AAA", date="2026-05-09")],
+        [
+            _raw_row(
+                "AAA",
+                as_of_date="2026-05-08",
+                source_last_updated="2026-05-08",
+                free_cash_flow_positive="yes",
+            )
+        ],
+    )
+
+    assert df.loc[0, "quality_state"] == "PARTIAL_DATA"
+    assert df.loc[0, "source_data_status"] == "invalid_data"
+    assert df.loc[0, "invalid_data_reason"] == "invalid required fields: free_cash_flow_positive"
+
+
+def test_duplicate_raw_source_rows_fail_fast_before_output_generation(patch_paths):
+    context_path, raw_path, output_path, _ = patch_paths
+    _write_context(context_path, [_context_row("AAA", date="2026-05-09")])
+    _write_raw(
+        raw_path,
+        [
+            _raw_row("AAA", as_of_date="2026-05-08"),
+            _raw_row("aaa", as_of_date="2026-05-08"),
+        ],
+    )
+
+    with pytest.raises(ValueError, match="duplicate ticker/as_of_date"):
+        fundamental_module.build_fundamental_layer(generated_at="2026-05-09 12:00:00")
+
+    assert not output_path.exists()
+
+
+def test_upstream_row_count_and_identity_are_preserved_with_mixed_raw_states(patch_paths):
+    context_rows = [
+        _context_row("AAA", date="2026-05-09"),
+        _context_row("BBB", date="2026-05-09"),
+        _context_row("CCC", date="2026-05-09"),
+    ]
+    df, _, log_path = _build_with_context_and_raw(
+        patch_paths,
+        context_rows,
+        [
+            _raw_row("AAA", as_of_date="2026-05-08", source_last_updated="2026-05-08"),
+            _raw_row("BBB", as_of_date="2026-05-08", source_last_updated="2026-05-08", eps_growth_yoy=""),
+            _raw_row("RAWONLY", as_of_date="2026-05-08", source_last_updated="2026-05-08"),
+        ],
+    )
+
+    assert len(df) == len(context_rows)
+    assert list(zip(df["ticker"], df["date"], strict=True)) == [
+        (row["ticker"], row["date"]) for row in context_rows
+    ]
+    assert df["quality_state"].tolist() == ["SUFFICIENT_DATA", "PARTIAL_DATA", "INSUFFICIENT_DATA"]
+    assert pd.read_csv(log_path).loc[0, "partial_data_count"] == 1
+
+
+def test_fundamental_layer_does_not_import_decision_reporting_or_telegram_modules():
+    source = Path(fundamental_module.__file__).read_text()
+
+    assert "decision_engine" not in source
+    assert "scripts.reporting" not in source
+    assert "build_reporting_layer" not in source
+    assert "build_telegram_summary" not in source
+    assert "send_telegram" not in source
