@@ -124,25 +124,32 @@ def test_portfolio_metadata_partial_coverage(tmp_path: Path):
 
 def test_fundamentals_sufficient_coverage(tmp_path: Path):
     paths = _paths(tmp_path)
-    _write_csv(paths.fundamentals, [_fundamental_row("AAA")])
+    _write_csv(
+        paths.fundamentals,
+        [_fundamental_row("AAA", as_of_date="2026-05-20", source_last_updated="2026-05-20")],
+    )
 
     result = _audit_explicit(tmp_path)
 
     fundamentals = result["fundamentals"]
     assert fundamentals["fundamentals_sufficient_count"] == 1
     assert fundamentals["ticker_date_match_success_count"] == 1
+    assert fundamentals["date_mismatch_count"] == 0
+    assert fundamentals["diagnostics"][0]["date_match_status"] == "exact_ticker_date_match"
     assert fundamentals["fundamentals_coverage_percentage"] == 100.0
 
 
 def test_fundamentals_partial_coverage(tmp_path: Path):
     paths = _paths(tmp_path)
-    _write_csv(paths.fundamentals, [_fundamental_row("AAA", eps_growth_yoy="")])
+    _write_csv(paths.fundamentals, [_fundamental_row("AAA", eps_growth_yoy="", operating_margin="")])
 
     result = _audit_explicit(tmp_path)
 
     fundamentals = result["fundamentals"]
     assert fundamentals["fundamentals_partial_count"] == 1
+    assert fundamentals["fundamentals_sufficient_count"] == 0
     assert fundamentals["missing_eps_growth_yoy_count"] == 1
+    assert fundamentals["missing_operating_margin_count"] == 1
 
 
 def test_fundamentals_missing_source_rows(tmp_path: Path):
@@ -158,6 +165,20 @@ def test_fundamentals_missing_source_rows(tmp_path: Path):
 
 
 def test_fundamentals_date_mismatch_is_reported(tmp_path: Path):
+    paths = _paths(tmp_path)
+    _write_csv(paths.fundamentals, [_fundamental_row("AAA", as_of_date="2026-05-01")])
+
+    result = _audit_explicit(tmp_path)
+
+    fundamentals = result["fundamentals"]
+    assert fundamentals["ticker_date_match_success_count"] == 1
+    assert fundamentals["date_mismatch_count"] == 1
+    assert fundamentals["diagnostics"][0]["source_as_of_date"] == "2026-05-01"
+    assert fundamentals["diagnostics"][0]["target_date"] == "2026-05-20"
+    assert fundamentals["diagnostics"][0]["date_match_status"] == "source_as_of_before_target_date"
+
+
+def test_fundamentals_future_as_of_date_is_match_failure(tmp_path: Path):
     paths = _paths(tmp_path)
     _write_csv(paths.fundamentals, [_fundamental_row("AAA", as_of_date="2026-06-01")])
 
@@ -206,6 +227,20 @@ def test_explicit_ticker_list_target_universe(tmp_path: Path):
 
     assert result["target_total_tickers"] == 2
     assert result["target_total_ticker_date_rows"] == 2
+    assert result["explicit_target_date_source"] == "operator_provided"
+
+
+def test_explicit_mode_without_target_date_fails_safely(tmp_path: Path):
+    with pytest.raises(ValueError, match="requires --target-date"):
+        audit_module.run_coverage_audit(target_mode="explicit", tickers="AAA", paths=_paths(tmp_path))
+
+
+def test_cli_explicit_mode_without_target_date_reports_clear_failure(capsys):
+    result = audit_module.main(["--target-mode", "explicit", "--tickers", "AAA"])
+
+    output = capsys.readouterr().out
+    assert result == 1
+    assert "explicit target mode requires --target-date" in output
 
 
 def test_scanner_output_target_universe(tmp_path: Path):

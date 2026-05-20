@@ -128,6 +128,8 @@ def load_target_universe(
     paths: AuditPaths | None = None,
 ) -> pd.DataFrame:
     paths = paths or AuditPaths()
+    if target_mode == "explicit" and not as_of_date:
+        raise ValueError("explicit target mode requires --target-date for ticker/date fundamentals coverage")
     default_date = as_of_date or date.today().isoformat()
     if _parse_iso_date(default_date) is None:
         raise ValueError(f"as_of_date must be an ISO date in YYYY-MM-DD form: {default_date}")
@@ -336,6 +338,17 @@ def _select_fundamental_row(
     return selected_row, False, ""
 
 
+def _date_match_status(source_as_of_date: str, opportunity_date: date) -> str:
+    parsed_source_date = _parse_iso_date(source_as_of_date)
+    if parsed_source_date is None:
+        return "invalid_source_as_of_date"
+    if parsed_source_date == opportunity_date:
+        return "exact_ticker_date_match"
+    if parsed_source_date < opportunity_date:
+        return "source_as_of_before_target_date"
+    return "source_as_of_after_target_date"
+
+
 def audit_fundamentals(target_df: pd.DataFrame, fundamentals_path: Path = FUNDAMENTALS_PATH) -> dict[str, Any]:
     total = int(len(target_df))
     base = {
@@ -349,6 +362,7 @@ def audit_fundamentals(target_df: pd.DataFrame, fundamentals_path: Path = FUNDAM
         "duplicate_ticker_date_identity_count": 0,
         "ticker_date_match_success_count": 0,
         "ticker_date_match_failure_count": 0,
+        "date_mismatch_count": 0,
         "missing_revenue_growth_yoy_count": 0,
         "missing_eps_growth_yoy_count": 0,
         "missing_gross_margin_count": 0,
@@ -370,6 +384,10 @@ def audit_fundamentals(target_df: pd.DataFrame, fundamentals_path: Path = FUNDAM
             {
                 "ticker": row["ticker"],
                 "date": row["date"],
+                "target_date": row["date"],
+                "source_as_of_date": "",
+                "source_last_updated": "",
+                "date_match_status": "source_unavailable",
                 "fundamentals_source_row_matched": False,
                 "match_failure_reason": "fundamentals source artifact missing",
             }
@@ -392,6 +410,10 @@ def audit_fundamentals(target_df: pd.DataFrame, fundamentals_path: Path = FUNDAM
         diagnostic = {
             "ticker": ticker,
             "date": target_row["date"],
+            "target_date": target_row["date"],
+            "source_as_of_date": "",
+            "source_last_updated": "",
+            "date_match_status": "unmatched",
             "fundamentals_source_row_matched": row is not None,
             "match_failure_reason": failure_reason,
         }
@@ -410,7 +432,13 @@ def audit_fundamentals(target_df: pd.DataFrame, fundamentals_path: Path = FUNDAM
             continue
 
         base["ticker_date_match_success_count"] += 1
+        source_as_of_date = _clean_text(row["as_of_date"])
         source_last_updated = _parse_iso_date(row["source_last_updated"])
+        diagnostic["source_as_of_date"] = source_as_of_date
+        diagnostic["source_last_updated"] = _clean_text(row["source_last_updated"])
+        diagnostic["date_match_status"] = _date_match_status(source_as_of_date, opportunity_date)
+        if diagnostic["date_match_status"] != "exact_ticker_date_match":
+            base["date_mismatch_count"] += 1
         freshness_days = (opportunity_date - source_last_updated).days if opportunity_date and source_last_updated else None
         if freshness_days is not None and freshness_days < 0:
             base["fundamentals_invalid_count"] += 1
@@ -457,6 +485,7 @@ def run_coverage_audit(
     return {
         "generated_at": _now(),
         "target_mode": target_mode,
+        "explicit_target_date_source": "operator_provided" if target_mode == "explicit" else "artifact_or_default",
         "target_total_tickers": int(target_df["ticker"].nunique()),
         "target_total_ticker_date_rows": int(len(target_df)),
         "portfolio_metadata": metadata,
@@ -470,7 +499,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Audit source data coverage for an explicit target universe.")
     parser.add_argument("--target-mode", required=True, choices=sorted(TARGET_MODES))
     parser.add_argument("--tickers", help="Comma-separated ticker list for explicit target mode.")
-    parser.add_argument("--as-of-date", default=date.today().isoformat(), help="Target opportunity date for modes without dates.")
+    parser.add_argument("--target-date", dest="target_date", help="Required target opportunity date for explicit mode.")
+    parser.add_argument("--as-of-date", dest="as_of_date", help="Compatibility alias for --target-date.")
     parser.add_argument("--portfolio-positions", type=Path, default=PORTFOLIO_POSITIONS_PATH)
     parser.add_argument("--watchlist-active", type=Path, default=WATCHLIST_ACTIVE_PATH)
     parser.add_argument("--scanner-ranked", type=Path, default=SCANNER_RANKED_PATH)
@@ -488,7 +518,7 @@ def main(argv: list[str] | None = None) -> int:
         result = run_coverage_audit(
             target_mode=args.target_mode,
             tickers=args.tickers,
-            as_of_date=args.as_of_date,
+            as_of_date=args.target_date or args.as_of_date,
             paths=paths,
         )
     except Exception as exc:
