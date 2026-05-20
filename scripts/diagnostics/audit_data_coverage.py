@@ -219,6 +219,7 @@ def audit_portfolio_metadata(target_df: pd.DataFrame, metadata_path: Path = PORT
         "missing_currency_count": 0,
         "missing_metadata_source_count": 0,
         "missing_metadata_last_updated_count": 0,
+        "metadata_last_updated_after_target_date_count": 0,
         "metadata_freshness_distribution": {},
         "metadata_coverage_percentage": 0.0,
         "source_status": "unavailable",
@@ -277,10 +278,14 @@ def audit_portfolio_metadata(target_df: pd.DataFrame, metadata_path: Path = PORT
         reference_dates = [value for value in target_dates if value is not None]
         reference_date = max(reference_dates) if reference_dates else None
         freshness_days = (reference_date - updated_at).days if updated_at and reference_date else None
-        bucket = _freshness_bucket(freshness_days, METADATA_STALE_THRESHOLD_DAYS)
+        if freshness_days is not None and freshness_days < 0:
+            bucket = "updated_after_target_date"
+            base["metadata_last_updated_after_target_date_count"] += 1
+        else:
+            bucket = _freshness_bucket(freshness_days, METADATA_STALE_THRESHOLD_DAYS)
         freshness_distribution[bucket] = freshness_distribution.get(bucket, 0) + 1
 
-        if updated_at is None or reference_date is None or (freshness_days is not None and freshness_days < 0):
+        if updated_at is None or reference_date is None:
             base["metadata_invalid_count"] += 1
         elif missing_fields:
             base["metadata_partial_count"] += 1
