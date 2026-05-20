@@ -94,13 +94,42 @@ def _flatten_keys(value: Any) -> set[str]:
 
 def test_portfolio_metadata_complete_coverage(tmp_path: Path):
     paths = _paths(tmp_path)
-    _write_csv(paths.portfolio_metadata, [_metadata_row("AAA")])
+    _write_csv(paths.portfolio_metadata, [_metadata_row("AAA", metadata_last_updated="2026-05-20")])
 
     result = _audit_explicit(tmp_path)
 
     metadata = result["portfolio_metadata"]
     assert metadata["metadata_complete_count"] == 1
+    assert metadata["metadata_invalid_count"] == 0
     assert metadata["metadata_coverage_percentage"] == 100.0
+    assert metadata["metadata_freshness_distribution"]["fresh"] == 1
+
+
+def test_portfolio_metadata_updated_after_target_date_remains_complete_and_reported(tmp_path: Path):
+    paths = _paths(tmp_path)
+    _write_csv(paths.portfolio_metadata, [_metadata_row("AAA", metadata_last_updated="2026-06-01")])
+
+    result = _audit_explicit(tmp_path)
+
+    metadata = result["portfolio_metadata"]
+    assert metadata["metadata_complete_count"] == 1
+    assert metadata["metadata_invalid_count"] == 0
+    assert metadata["metadata_coverage_percentage"] == 100.0
+    assert metadata["metadata_last_updated_after_target_date_count"] == 1
+    assert metadata["metadata_freshness_distribution"]["updated_after_target_date"] == 1
+
+
+def test_malformed_metadata_last_updated_remains_invalid(tmp_path: Path):
+    paths = _paths(tmp_path)
+    _write_csv(paths.portfolio_metadata, [_metadata_row("AAA", metadata_last_updated="not-a-date")])
+
+    result = _audit_explicit(tmp_path)
+
+    metadata = result["portfolio_metadata"]
+    assert metadata["metadata_complete_count"] == 0
+    assert metadata["metadata_invalid_count"] == 1
+    assert metadata["metadata_coverage_percentage"] == 0.0
+    assert metadata["metadata_freshness_distribution"]["invalid"] == 1
 
 
 def test_portfolio_metadata_missing_coverage(tmp_path: Path):
