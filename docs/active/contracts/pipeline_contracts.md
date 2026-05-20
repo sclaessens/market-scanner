@@ -58,7 +58,7 @@ Outputs must be deterministic for the same inputs. Any nondeterministic source, 
 
 ## Pipeline Freshness Orchestration
 
-Normal operator pipeline execution must rebuild the required upstream analytical artifacts before the Decision Engine runs. The governed order is scanner, validation, context, fundamental, timing state, portfolio state, portfolio intelligence, Decision Engine, and reporting. This is a Governance Level 2 orchestration guarantee because sequencing affects freshness, auditability, and deterministic rebuild integrity; it does not change layer schemas, allocation authority, Decision Engine semantics, or reporting authority.
+Normal operator pipeline execution must rebuild the required upstream analytical artifacts before the Decision Engine runs, then rebuild the authoritative Reporting Layer artifacts from fresh final decisions before Telegram delivery. The governed order is scanner, validation, context, fundamental, timing state, portfolio state, portfolio intelligence, Decision Engine, reporting, and Telegram delivery. This is a Governance Level 2 orchestration guarantee because sequencing affects freshness, auditability, and deterministic rebuild integrity; it does not change layer schemas, allocation authority, Decision Engine semantics, reporting semantics, or Telegram delivery semantics.
 
 ## Portfolio Source Contract
 
