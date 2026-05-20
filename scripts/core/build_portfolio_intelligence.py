@@ -2,17 +2,31 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from datetime import date, datetime
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
 INPUT_PATH = Path("data/processed/timing_state_layer.csv")
 PORTFOLIO_PATH = Path("data/portfolio/portfolio_positions.csv")
+PORTFOLIO_METADATA_PATH = Path("data/portfolio/portfolio_metadata.csv")
 OUTPUT_PATH = Path("data/processed/portfolio_intelligence.csv")
 LOG_PATH = Path("data/logs/portfolio_intelligence_log.csv")
+METADATA_STALE_THRESHOLD_DAYS = 365
 
 KEY_COLUMNS = ["ticker"]
 OPTIONAL_DATE_COLUMN = "date"
+METADATA_REQUIRED_COLUMNS = [
+    "ticker",
+    "sector",
+    "industry",
+    "asset_class",
+    "currency",
+    "metadata_source",
+    "metadata_last_updated",
+]
+ACCEPTED_ASSET_CLASSES = {"Equity", "ETF", "Cash", "Other"}
 
 PORTFOLIO_COLUMNS = [
     "in_portfolio",
@@ -59,7 +73,7 @@ ALLOWED_VALUES = {
     "sector_exposure_state": {"NONE", "LOW", "MODERATE", "HIGH", "UNKNOWN_SECTOR", "SOURCE_MISSING", "SOURCE_PARTIAL"},
     "position_context_state": {"PRESENT", "ABSENT", "SOURCE_MISSING", "SOURCE_PARTIAL"},
     "portfolio_environment": {"EMPTY_PORTFOLIO", "POSITIONS_PRESENT", "SOURCE_MISSING", "SOURCE_PARTIAL"},
-    "portfolio_metadata_status": {"AVAILABLE", "PARTIAL", "MISSING"},
+    "portfolio_metadata_status": {"AVAILABLE", "COMPLETE", "PARTIAL", "MISSING"},
 }
 
 
@@ -71,6 +85,15 @@ class PortfolioProfile:
     active_count: int
     sector_counts: dict[str, int]
     has_sector_source: bool
+
+
+@dataclass(frozen=True)
+class MetadataClassification:
+    state: str
+    status: str
+    reason: str
+    sector: str
+    source_provenance: str
 
 
 def _blocked_tokens() -> set[str]:
@@ -137,6 +160,19 @@ def _load_portfolio_csv(path: Path) -> tuple[pd.DataFrame, str]:
         return pd.DataFrame(), "AVAILABLE"
 
 
+def _load_metadata_csv(path: Path) -> pd.DataFrame | None:
+    if not path.exists():
+        return None
+    try:
+        metadata_df = pd.read_csv(path, dtype=str, keep_default_na=False)
+    except pd.errors.EmptyDataError as exc:
+        raise ValueError(f"portfolio_metadata.csv is empty: {path}") from exc
+    missing = [column for column in METADATA_REQUIRED_COLUMNS if column not in metadata_df.columns]
+    if missing:
+        raise ValueError(f"portfolio_metadata.csv is missing required columns: {missing}")
+    return metadata_df
+
+
 def _validate_input(input_df: pd.DataFrame) -> None:
     if "ticker" not in input_df.columns:
         raise ValueError("timing_state_layer.csv is missing required columns: ['ticker']")
@@ -155,6 +191,22 @@ def _normalize_ticker(value: object) -> str:
     if pd.isna(value):
         return ""
     return str(value).upper().strip()
+
+
+def _clean_text(value: Any) -> str:
+    if value is None or pd.isna(value):
+        return ""
+    return str(value).strip()
+
+
+def _parse_iso_date(value: Any) -> date | None:
+    text = _clean_text(value)
+    if len(text) != 10:
+        return None
+    try:
+        return datetime.strptime(text, "%Y-%m-%d").date()
+    except ValueError:
+        return None
 
 
 def _sector_column(columns: pd.Index) -> str | None:
@@ -237,6 +289,45 @@ def _portfolio_profile(portfolio_df: pd.DataFrame, source_status: str) -> Portfo
     )
 
 
+def _normalize_metadata(metadata_df: pd.DataFrame) -> pd.DataFrame:
+    normalized = metadata_df.copy()
+    normalized["_normalized_ticker"] = normalized["ticker"].map(_normalize_ticker)
+
+    missing_ticker = normalized["_normalized_ticker"] == ""
+    if missing_ticker.any():
+        rows = metadata_df.loc[missing_ticker, ["ticker"]].to_dict(orient="records")
+        raise ValueError(f"portfolio_metadata.csv contains missing ticker values: {rows}")
+
+    duplicate_mask = normalized.duplicated(subset=["_normalized_ticker"], keep=False)
+    if duplicate_mask.any():
+        duplicates = metadata_df.loc[duplicate_mask, ["ticker"]].to_dict(orient="records")
+        raise ValueError(f"portfolio_metadata.csv contains duplicate normalized ticker rows: {duplicates}")
+
+    return normalized.sort_values(["_normalized_ticker"], kind="mergesort").reset_index(drop=True)
+
+
+def _metadata_lookup(metadata_df: pd.DataFrame | None) -> dict[str, pd.Series] | None:
+    if metadata_df is None:
+        return None
+    normalized = _normalize_metadata(metadata_df)
+    return {str(row["_normalized_ticker"]): row for _, row in normalized.iterrows()}
+
+
+def _metadata_sector_counts(profile: PortfolioProfile, metadata_lookup: dict[str, pd.Series] | None, reference_date: date | None) -> dict[str, int]:
+    if metadata_lookup is None or reference_date is None:
+        return profile.sector_counts
+
+    counts: dict[str, int] = {}
+    for ticker in profile.active_tickers:
+        metadata_row = metadata_lookup.get(ticker)
+        if metadata_row is None:
+            continue
+        classification = _classify_metadata_row(metadata_row, reference_date)
+        if classification.state == "COMPLETE":
+            counts[classification.sector] = counts.get(classification.sector, 0) + 1
+    return counts
+
+
 def _count_label(count: int) -> str:
     if count <= 0:
         return "NONE"
@@ -265,7 +356,110 @@ def _concentration_label(count: int) -> str:
     return "DIVERSIFIED"
 
 
-def _metadata_for_row(row: pd.Series, profile: PortfolioProfile) -> dict[str, str]:
+def _classify_metadata_row(metadata_row: pd.Series, reference_date: date | None) -> MetadataClassification:
+    missing_fields = [
+        column
+        for column in METADATA_REQUIRED_COLUMNS
+        if _clean_text(metadata_row.get(column)) == ""
+    ]
+    asset_class = _clean_text(metadata_row.get("asset_class"))
+    metadata_date = _parse_iso_date(metadata_row.get("metadata_last_updated"))
+
+    if asset_class and asset_class not in ACCEPTED_ASSET_CLASSES:
+        return MetadataClassification(
+            state="INVALID",
+            status="PARTIAL",
+            reason="portfolio metadata invalid: asset_class",
+            sector="",
+            source_provenance=str(PORTFOLIO_METADATA_PATH),
+        )
+
+    if _clean_text(metadata_row.get("metadata_last_updated")) == "" or metadata_date is None:
+        return MetadataClassification(
+            state="INVALID",
+            status="PARTIAL",
+            reason="portfolio metadata invalid: metadata_last_updated",
+            sector="",
+            source_provenance=str(PORTFOLIO_METADATA_PATH),
+        )
+
+    if reference_date is None:
+        return MetadataClassification(
+            state="INVALID",
+            status="PARTIAL",
+            reason="portfolio metadata invalid: opportunity date unavailable",
+            sector="",
+            source_provenance=str(PORTFOLIO_METADATA_PATH),
+        )
+
+    source_freshness_days = (reference_date - metadata_date).days
+    if source_freshness_days < 0:
+        return MetadataClassification(
+            state="INVALID",
+            status="PARTIAL",
+            reason="portfolio metadata invalid: metadata_last_updated after opportunity date",
+            sector="",
+            source_provenance=str(PORTFOLIO_METADATA_PATH),
+        )
+
+    if missing_fields:
+        return MetadataClassification(
+            state="PARTIAL",
+            status="PARTIAL",
+            reason=f"portfolio metadata partial: missing fields {'|'.join(missing_fields)}",
+            sector=_clean_text(metadata_row.get("sector")).upper(),
+            source_provenance=str(PORTFOLIO_METADATA_PATH),
+        )
+
+    if source_freshness_days > METADATA_STALE_THRESHOLD_DAYS:
+        return MetadataClassification(
+            state="STALE",
+            status="PARTIAL",
+            reason=f"portfolio metadata stale: metadata_last_updated older than {METADATA_STALE_THRESHOLD_DAYS} days",
+            sector=_clean_text(metadata_row.get("sector")).upper(),
+            source_provenance=str(PORTFOLIO_METADATA_PATH),
+        )
+
+    return MetadataClassification(
+        state="COMPLETE",
+        status="COMPLETE",
+        reason="portfolio metadata complete",
+        sector=_clean_text(metadata_row.get("sector")).upper(),
+        source_provenance=str(PORTFOLIO_METADATA_PATH),
+    )
+
+
+def _metadata_classification_for_row(
+    row: pd.Series,
+    metadata_lookup: dict[str, pd.Series] | None,
+) -> MetadataClassification | None:
+    if metadata_lookup is None:
+        return None
+
+    ticker = _normalize_ticker(row["ticker"])
+    metadata_row = metadata_lookup.get(ticker)
+    if metadata_row is None:
+        return MetadataClassification(
+            state="MISSING",
+            status="PARTIAL",
+            reason="portfolio metadata row missing",
+            sector="",
+            source_provenance=str(PORTFOLIO_METADATA_PATH),
+        )
+
+    reference_date = None
+    if OPTIONAL_DATE_COLUMN in row.index:
+        reference_date = _parse_iso_date(row[OPTIONAL_DATE_COLUMN])
+
+    return _classify_metadata_row(metadata_row, reference_date)
+
+
+def _metadata_for_row(
+    row: pd.Series,
+    profile: PortfolioProfile,
+    metadata_lookup: dict[str, pd.Series] | None = None,
+    metadata_sector_counts: dict[str, int] | None = None,
+) -> dict[str, str]:
     ticker = _normalize_ticker(row["ticker"])
 
     if profile.source_status == "SOURCE_MISSING":
@@ -307,25 +501,43 @@ def _metadata_for_row(row: pd.Series, profile: PortfolioProfile) -> dict[str, st
     sector_state = "SOURCE_PARTIAL"
     status = "AVAILABLE"
     reason = "portfolio source available"
+    source_provenance = profile.source_provenance
+    classification_rationale = "portfolio ticker presence and descriptive counts observed; opportunity row preserved"
+    metadata_classification = _metadata_classification_for_row(row, metadata_lookup)
 
-    sector_value = ""
-    for candidate in ["sector", "sector_name", "gics_sector"]:
-        if candidate in row.index:
-            sector_value = "" if pd.isna(row[candidate]) else str(row[candidate]).upper().strip()
-            break
-
-    if profile.active_count == 0:
-        sector_state = "NONE"
-    elif not profile.has_sector_source:
-        sector_state = "SOURCE_PARTIAL"
-        status = "PARTIAL"
-        reason = "portfolio source available with partial sector metadata"
-    elif not sector_value:
-        sector_state = "UNKNOWN_SECTOR"
-        status = "PARTIAL"
-        reason = "portfolio source available with partial sector metadata"
+    if metadata_classification is not None:
+        status = metadata_classification.status
+        reason = metadata_classification.reason
+        source_provenance = f"{profile.source_provenance};{metadata_classification.source_provenance}"
+        classification_rationale = (
+            f"portfolio ticker presence observed; {metadata_classification.reason}; opportunity row preserved"
+        )
+        if profile.active_count == 0:
+            sector_state = "NONE"
+        elif metadata_classification.state == "COMPLETE":
+            counts = metadata_sector_counts or {}
+            sector_state = _count_label(counts.get(metadata_classification.sector, 0))
+        else:
+            sector_state = "SOURCE_PARTIAL"
     else:
-        sector_state = _count_label(profile.sector_counts.get(sector_value, 0))
+        sector_value = ""
+        for candidate in ["sector", "sector_name", "gics_sector"]:
+            if candidate in row.index:
+                sector_value = "" if pd.isna(row[candidate]) else str(row[candidate]).upper().strip()
+                break
+
+        if profile.active_count == 0:
+            sector_state = "NONE"
+        elif not profile.has_sector_source:
+            sector_state = "SOURCE_PARTIAL"
+            status = "PARTIAL"
+            reason = "portfolio source available with partial sector metadata"
+        elif not sector_value:
+            sector_state = "UNKNOWN_SECTOR"
+            status = "PARTIAL"
+            reason = "portfolio source available with partial sector metadata"
+        else:
+            sector_state = _count_label(profile.sector_counts.get(sector_value, 0))
 
     return {
         "in_portfolio": "PRESENT" if present else "ABSENT",
@@ -339,8 +551,8 @@ def _metadata_for_row(row: pd.Series, profile: PortfolioProfile) -> dict[str, st
         "portfolio_environment": environment,
         "portfolio_metadata_status": status,
         "portfolio_metadata_reason": reason,
-        "portfolio_source_provenance": profile.source_provenance,
-        "portfolio_classification_rationale": "portfolio ticker presence and descriptive counts observed; opportunity row preserved",
+        "portfolio_source_provenance": source_provenance,
+        "portfolio_classification_rationale": classification_rationale,
     }
 
 
@@ -428,7 +640,26 @@ def build_portfolio_intelligence() -> pd.DataFrame:
 
     portfolio_df, source_status = _load_portfolio_csv(PORTFOLIO_PATH)
     profile = _portfolio_profile(portfolio_df, source_status)
-    metadata_df = pd.DataFrame([_metadata_for_row(row, profile) for _, row in input_df.iterrows()], columns=PORTFOLIO_COLUMNS)
+    metadata_lookup = _metadata_lookup(_load_metadata_csv(PORTFOLIO_METADATA_PATH))
+    reference_dates = []
+    if metadata_lookup is not None and OPTIONAL_DATE_COLUMN in input_df.columns:
+        reference_dates = [
+            parsed_date
+            for parsed_date in input_df[OPTIONAL_DATE_COLUMN].map(_parse_iso_date).tolist()
+            if parsed_date is not None
+        ]
+    metadata_sector_counts = _metadata_sector_counts(
+        profile,
+        metadata_lookup,
+        max(reference_dates) if reference_dates else None,
+    )
+    metadata_df = pd.DataFrame(
+        [
+            _metadata_for_row(row, profile, metadata_lookup, metadata_sector_counts)
+            for _, row in input_df.iterrows()
+        ],
+        columns=PORTFOLIO_COLUMNS,
+    )
     _validate_metadata_values(metadata_df)
     _validate_forbidden_semantics(metadata_df, "portfolio metadata")
 

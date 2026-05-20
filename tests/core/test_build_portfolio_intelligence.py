@@ -119,11 +119,13 @@ def patch_paths(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
 
     input_path = processed_dir / "timing_state_layer.csv"
     portfolio_path = portfolio_dir / "portfolio_positions.csv"
+    metadata_path = portfolio_dir / "portfolio_metadata.csv"
     output_path = processed_dir / "portfolio_intelligence.csv"
     log_path = logs_dir / "portfolio_intelligence_log.csv"
 
     monkeypatch.setattr(portfolio_module, "INPUT_PATH", input_path)
     monkeypatch.setattr(portfolio_module, "PORTFOLIO_PATH", portfolio_path)
+    monkeypatch.setattr(portfolio_module, "PORTFOLIO_METADATA_PATH", metadata_path)
     monkeypatch.setattr(portfolio_module, "OUTPUT_PATH", output_path)
     monkeypatch.setattr(portfolio_module, "LOG_PATH", log_path)
 
@@ -149,6 +151,24 @@ def _write_timing(path: Path, rows: list[dict]) -> None:
 
 
 def _write_portfolio(path: Path, rows: list[dict]) -> None:
+    pd.DataFrame(rows).to_csv(path, index=False)
+
+
+def _metadata_row(ticker: str, **overrides) -> dict:
+    row = {
+        "ticker": ticker,
+        "sector": "Technology",
+        "industry": "Software",
+        "asset_class": "Equity",
+        "currency": "USD",
+        "metadata_source": "manual",
+        "metadata_last_updated": "2026-05-01",
+    }
+    row.update(overrides)
+    return row
+
+
+def _write_metadata(path: Path, rows: list[dict]) -> None:
     pd.DataFrame(rows).to_csv(path, index=False)
 
 
@@ -287,6 +307,186 @@ def test_sector_metadata_is_descriptive_when_sources_exist(patch_paths):
     assert df.loc[1, "sector_exposure_state"] == "NONE"
 
 
+def test_missing_portfolio_metadata_artifact_preserves_existing_partial_behavior(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    _write_timing(input_path, [_timing_row("AAA")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert df.loc[0, "portfolio_metadata_status"] == "PARTIAL"
+    assert df.loc[0, "portfolio_metadata_reason"] == "portfolio source available with partial sector metadata"
+
+
+def test_complete_portfolio_metadata_can_produce_complete_status(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(metadata_path, [_metadata_row(" aaa ")])
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert df.loc[0, "portfolio_metadata_status"] == "COMPLETE"
+    assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata complete"
+    assert df.loc[0, "sector_exposure_state"] == "LOW"
+    assert "portfolio_metadata.csv" in df.loc[0, "portfolio_source_provenance"]
+
+
+def test_metadata_only_tickers_do_not_create_output_rows(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(
+        metadata_path,
+        [
+            _metadata_row("AAA"),
+            _metadata_row("RAWONLY", sector="Healthcare"),
+        ],
+    )
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert len(df) == 1
+    assert df["ticker"].tolist() == ["AAA"]
+
+
+def test_missing_metadata_row_keeps_metadata_incomplete(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(metadata_path, [_metadata_row("BBB")])
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert df.loc[0, "portfolio_metadata_status"] == "PARTIAL"
+    assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata row missing"
+    assert df.loc[0, "sector_exposure_state"] == "SOURCE_PARTIAL"
+
+
+def test_missing_required_metadata_values_produce_partial_status(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(metadata_path, [_metadata_row("AAA", industry="")])
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert df.loc[0, "portfolio_metadata_status"] == "PARTIAL"
+    assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata partial: missing fields industry"
+
+
+def test_stale_portfolio_metadata_remains_incomplete(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(metadata_path, [_metadata_row("AAA", metadata_last_updated="2025-01-01")])
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert df.loc[0, "portfolio_metadata_status"] == "PARTIAL"
+    assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata stale: metadata_last_updated older than 365 days"
+
+
+def test_empty_sector_metadata_value_is_partial_and_deterministic(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(metadata_path, [_metadata_row("AAA", sector="")])
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert df.loc[0, "portfolio_metadata_status"] == "PARTIAL"
+    assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata partial: missing fields sector"
+
+
+def test_invalid_asset_class_metadata_value_is_invalid_and_incomplete(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(metadata_path, [_metadata_row("AAA", asset_class="Crypto")])
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert df.loc[0, "portfolio_metadata_status"] == "PARTIAL"
+    assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata invalid: asset_class"
+
+
+def test_invalid_metadata_date_is_invalid_and_incomplete(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(metadata_path, [_metadata_row("AAA", metadata_last_updated="2026/05/01")])
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert df.loc[0, "portfolio_metadata_status"] == "PARTIAL"
+    assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata invalid: metadata_last_updated"
+
+
+def test_duplicate_portfolio_metadata_rows_fail_fast_before_output_generation(patch_paths):
+    input_path, portfolio_path, output_path, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(metadata_path, [_metadata_row("AAA"), _metadata_row(" aaa ")])
+
+    with pytest.raises(ValueError, match="duplicate normalized ticker rows"):
+        portfolio_module.build_portfolio_intelligence()
+
+    assert not output_path.exists()
+
+
+def test_missing_required_metadata_schema_fields_fail_fast(patch_paths):
+    input_path, portfolio_path, output_path, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    metadata = _metadata_row("AAA")
+    metadata.pop("asset_class")
+    _write_metadata(metadata_path, [metadata])
+
+    with pytest.raises(ValueError, match="missing required columns"):
+        portfolio_module.build_portfolio_intelligence()
+
+    assert not output_path.exists()
+
+
+def test_complete_metadata_preserves_upstream_row_count_identity_and_order(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    rows = [
+        _timing_row("CCC", date="2026-05-09"),
+        _timing_row("AAA", date="2026-05-09"),
+        _timing_row("BBB", date="2026-05-09"),
+    ]
+    _write_timing(input_path, rows)
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(
+        metadata_path,
+        [
+            _metadata_row("AAA"),
+            _metadata_row("BBB", sector="Healthcare"),
+            _metadata_row("CCC", sector="Industrials"),
+        ],
+    )
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert len(df) == len(rows)
+    assert list(zip(df["ticker"], df["date"], strict=True)) == [
+        (row["ticker"], row["date"]) for row in rows
+    ]
+    assert set(df["portfolio_metadata_status"]) == {"COMPLETE"}
+
+
 def test_missing_input_file_fails_fast(patch_paths):
     with pytest.raises(FileNotFoundError, match="timing_state_layer.csv not found"):
         portfolio_module.build_portfolio_intelligence()
@@ -362,6 +562,15 @@ def test_no_decision_engine_dependency_or_leakage():
     assert "decision_engine" not in source
     assert "final_action" not in source
     assert "allocation_priority" not in source
+
+
+def test_no_reporting_or_telegram_dependency_or_leakage():
+    source = inspect.getsource(portfolio_module)
+
+    assert "scripts.reporting" not in source
+    assert "build_reporting_layer" not in source
+    assert "build_telegram_summary" not in source
+    assert "send_telegram" not in source
 
 
 def test_only_approved_output_files_are_written(patch_paths, tmp_path: Path):
