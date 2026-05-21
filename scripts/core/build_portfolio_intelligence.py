@@ -26,7 +26,17 @@ METADATA_REQUIRED_COLUMNS = [
     "metadata_source",
     "metadata_last_updated",
 ]
+METADATA_REQUIRED_BASE_COLUMNS = [
+    "ticker",
+    "sector",
+    "industry",
+    "asset_class",
+    "currency",
+    "metadata_source",
+]
+METADATA_FRESHNESS_COLUMNS = ["metadata_last_updated", "metadata_freshness_date"]
 ACCEPTED_ASSET_CLASSES = {"Equity", "ETF", "Cash", "Other"}
+SECRET_MARKERS = ("api_key", "apikey", "secret", "token", "password", "credential")
 
 PORTFOLIO_COLUMNS = [
     "in_portfolio",
@@ -167,9 +177,13 @@ def _load_metadata_csv(path: Path) -> pd.DataFrame | None:
         metadata_df = pd.read_csv(path, dtype=str, keep_default_na=False)
     except pd.errors.EmptyDataError as exc:
         raise ValueError(f"portfolio_metadata.csv is empty: {path}") from exc
-    missing = [column for column in METADATA_REQUIRED_COLUMNS if column not in metadata_df.columns]
+    missing = [column for column in METADATA_REQUIRED_BASE_COLUMNS if column not in metadata_df.columns]
+    if not any(column in metadata_df.columns for column in METADATA_FRESHNESS_COLUMNS):
+        missing.append("metadata_last_updated")
     if missing:
         raise ValueError(f"portfolio_metadata.csv is missing required columns: {missing}")
+    if "metadata_last_updated" not in metadata_df.columns:
+        metadata_df["metadata_last_updated"] = metadata_df["metadata_freshness_date"]
     return metadata_df
 
 
@@ -363,7 +377,17 @@ def _classify_metadata_row(metadata_row: pd.Series, reference_date: date | None)
         if _clean_text(metadata_row.get(column)) == ""
     ]
     asset_class = _clean_text(metadata_row.get("asset_class"))
+    metadata_source = _clean_text(metadata_row.get("metadata_source"))
     metadata_date = _parse_iso_date(metadata_row.get("metadata_last_updated"))
+
+    if any(marker in metadata_source.lower() for marker in SECRET_MARKERS):
+        return MetadataClassification(
+            state="INVALID",
+            status="PARTIAL",
+            reason="portfolio metadata invalid: metadata_source",
+            sector="",
+            source_provenance=str(PORTFOLIO_METADATA_PATH),
+        )
 
     if asset_class and asset_class not in ACCEPTED_ASSET_CLASSES:
         return MetadataClassification(
@@ -441,7 +465,7 @@ def _metadata_classification_for_row(
     if metadata_row is None:
         return MetadataClassification(
             state="MISSING",
-            status="PARTIAL",
+            status="MISSING",
             reason="portfolio metadata row missing",
             sector="",
             source_provenance=str(PORTFOLIO_METADATA_PATH),
