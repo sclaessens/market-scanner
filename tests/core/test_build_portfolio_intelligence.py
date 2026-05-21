@@ -361,7 +361,7 @@ def test_missing_metadata_row_keeps_metadata_incomplete(patch_paths):
 
     df = portfolio_module.build_portfolio_intelligence()
 
-    assert df.loc[0, "portfolio_metadata_status"] == "PARTIAL"
+    assert df.loc[0, "portfolio_metadata_status"] == "MISSING"
     assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata row missing"
     assert df.loc[0, "sector_exposure_state"] == "SOURCE_PARTIAL"
 
@@ -429,6 +429,47 @@ def test_invalid_metadata_date_is_invalid_and_incomplete(patch_paths):
 
     assert df.loc[0, "portfolio_metadata_status"] == "PARTIAL"
     assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata invalid: metadata_last_updated"
+
+
+def test_metadata_freshness_date_alias_is_backward_compatible(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    metadata = _metadata_row("AAA")
+    metadata["metadata_freshness_date"] = metadata.pop("metadata_last_updated")
+    _write_metadata(metadata_path, [metadata])
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert df.loc[0, "portfolio_metadata_status"] == "COMPLETE"
+    assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata complete"
+
+
+def test_future_metadata_date_is_invalid_and_incomplete(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(metadata_path, [_metadata_row("AAA", metadata_last_updated="2026-05-10")])
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert df.loc[0, "portfolio_metadata_status"] == "PARTIAL"
+    assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata invalid: metadata_last_updated after opportunity date"
+
+
+def test_metadata_source_secret_marker_is_invalid_and_incomplete(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("AAA", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "AAA", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(metadata_path, [_metadata_row("AAA", metadata_source="token:local")])
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert df.loc[0, "portfolio_metadata_status"] == "PARTIAL"
+    assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata invalid: metadata_source"
 
 
 def test_duplicate_portfolio_metadata_rows_fail_fast_before_output_generation(patch_paths):
