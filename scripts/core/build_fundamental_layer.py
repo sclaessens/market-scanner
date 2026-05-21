@@ -15,17 +15,20 @@ STALE_THRESHOLD_DAYS = 120
 
 INPUT_REQUIRED_COLUMNS = ["ticker", "date"]
 RAW_IDENTITY_COLUMNS = ["ticker", "as_of_date"]
-RAW_METADATA_COLUMNS = ["source_name", "source_last_updated", "report_period", "currency"]
-RAW_NUMERIC_COLUMNS = [
+RAW_PROVENANCE_COLUMNS = ["source_name", "source_reference", "source_freshness_date"]
+RAW_METRIC_COLUMNS = [
     "revenue_growth_yoy",
     "eps_growth_yoy",
     "gross_margin",
     "operating_margin",
+    "net_margin",
+    "free_cash_flow_margin",
     "debt_to_equity",
+    "current_ratio",
+    "return_on_equity",
+    "return_on_invested_capital",
 ]
-RAW_BOOLEAN_COLUMNS = ["free_cash_flow_positive"]
-RAW_DATA_COLUMNS = RAW_NUMERIC_COLUMNS + RAW_BOOLEAN_COLUMNS
-RAW_REQUIRED_COLUMNS = RAW_IDENTITY_COLUMNS + RAW_METADATA_COLUMNS + RAW_DATA_COLUMNS
+RAW_REQUIRED_COLUMNS = RAW_IDENTITY_COLUMNS + RAW_PROVENANCE_COLUMNS
 OUTPUT_COLUMNS = [
     "ticker",
     "date",
@@ -137,11 +140,6 @@ def _parse_number(value: Any) -> bool:
     return True
 
 
-def _parse_boolean(value: Any) -> bool:
-    text = _clean_text(value)
-    return text in {"true", "false", "TRUE", "FALSE", "1", "0"}
-
-
 def _build_unavailable_output(context_df: pd.DataFrame, generated_at: str) -> pd.DataFrame:
     output_df = context_df[INPUT_REQUIRED_COLUMNS].copy()
     output_df["quality_state"] = "INSUFFICIENT_DATA"
@@ -244,22 +242,19 @@ def _metadata_output(
 
 def _classify_raw_match(context_row: pd.Series, raw_row: pd.Series, opportunity_date: date, generated_at: str) -> dict[str, Any]:
     source_name = _clean_text(raw_row.get("source_name"))
-    source_last_updated = _clean_text(raw_row.get("source_last_updated"))
-    report_period = _clean_text(raw_row.get("report_period"))
-    currency = _clean_text(raw_row.get("currency"))
-    source_last_updated_date = _parse_iso_date(source_last_updated)
+    source_reference = _clean_text(raw_row.get("source_reference"))
+    source_freshness_date = _clean_text(raw_row.get("source_freshness_date"))
+    parsed_source_freshness_date = _parse_iso_date(source_freshness_date)
 
     invalid_reasons: list[str] = []
     if source_name == "":
         invalid_reasons.append("source_name is missing")
-    if source_last_updated_date is None:
-        invalid_reasons.append("source_last_updated is invalid")
-    if report_period == "":
-        invalid_reasons.append("report_period is missing")
-    if currency == "":
-        invalid_reasons.append("currency is missing")
+    if source_reference == "":
+        invalid_reasons.append("source_reference is missing")
+    if parsed_source_freshness_date is None:
+        invalid_reasons.append("source_freshness_date is invalid")
 
-    if source_last_updated_date is None or invalid_reasons:
+    if parsed_source_freshness_date is None or invalid_reasons:
         return _metadata_output(
             context_row,
             generated_at,
@@ -268,13 +263,13 @@ def _classify_raw_match(context_row: pd.Series, raw_row: pd.Series, opportunity_
             profile_state="UNAVAILABLE",
             quality_metadata_status="invalid",
             source_data_status="invalid_data",
-            source_timestamp=source_last_updated,
+            source_timestamp=source_freshness_date,
             source_name=source_name,
-            source_last_updated=source_last_updated,
+            source_last_updated=source_freshness_date,
             invalid_data_reason="; ".join(invalid_reasons),
         )
 
-    source_freshness_days = (opportunity_date - source_last_updated_date).days
+    source_freshness_days = (opportunity_date - parsed_source_freshness_date).days
     if source_freshness_days < 0:
         return _metadata_output(
             context_row,
@@ -284,36 +279,35 @@ def _classify_raw_match(context_row: pd.Series, raw_row: pd.Series, opportunity_
             profile_state="UNAVAILABLE",
             quality_metadata_status="invalid",
             source_data_status="invalid_data",
-            source_timestamp=source_last_updated,
+            source_timestamp=source_freshness_date,
             source_name=source_name,
-            source_last_updated=source_last_updated,
+            source_last_updated=source_freshness_date,
             source_freshness_days=source_freshness_days,
-            invalid_data_reason="source_last_updated is after opportunity date",
+            invalid_data_reason="source_freshness_date is after opportunity date",
         )
 
-    missing_fields = [column for column in RAW_DATA_COLUMNS if _clean_text(raw_row.get(column)) == ""]
+    available_metric_columns = [column for column in RAW_METRIC_COLUMNS if column in raw_row.index]
+    missing_fields = [column for column in available_metric_columns if _clean_text(raw_row.get(column)) == ""]
     invalid_fields: list[str] = []
-    for column in RAW_NUMERIC_COLUMNS:
+    for column in available_metric_columns:
         if _clean_text(raw_row.get(column)) != "" and not _parse_number(raw_row.get(column)):
-            invalid_fields.append(column)
-    for column in RAW_BOOLEAN_COLUMNS:
-        if _clean_text(raw_row.get(column)) != "" and not _parse_boolean(raw_row.get(column)):
             invalid_fields.append(column)
 
     valid_data_count = 0
-    for column in RAW_NUMERIC_COLUMNS:
+    for column in available_metric_columns:
         if _parse_number(raw_row.get(column)):
-            valid_data_count += 1
-    for column in RAW_BOOLEAN_COLUMNS:
-        if _parse_boolean(raw_row.get(column)):
             valid_data_count += 1
 
     invalid_data_reason = ""
     if invalid_fields:
         invalid_data_reason = f"invalid required fields: {'|'.join(invalid_fields)}"
 
-    if valid_data_count == 0:
-        reason = "all required fundamental data fields are missing or invalid"
+    if not available_metric_columns or valid_data_count == 0:
+        reason = (
+            "no fundamental metric columns are present"
+            if not available_metric_columns
+            else "all available fundamental metric fields are missing or invalid"
+        )
         return _metadata_output(
             context_row,
             generated_at,
@@ -322,9 +316,9 @@ def _classify_raw_match(context_row: pd.Series, raw_row: pd.Series, opportunity_
             profile_state="UNAVAILABLE",
             quality_metadata_status="invalid" if invalid_fields else "partial",
             source_data_status="invalid_data" if invalid_fields else "partial_data",
-            source_timestamp=source_last_updated,
+            source_timestamp=source_freshness_date,
             source_name=source_name,
-            source_last_updated=source_last_updated,
+            source_last_updated=source_freshness_date,
             source_freshness_days=source_freshness_days,
             missing_required_fields=missing_fields,
             partial_data_reason=reason,
@@ -332,7 +326,7 @@ def _classify_raw_match(context_row: pd.Series, raw_row: pd.Series, opportunity_
         )
 
     if source_freshness_days > STALE_THRESHOLD_DAYS:
-        stale_reason = f"source_last_updated is older than {STALE_THRESHOLD_DAYS} days"
+        stale_reason = f"source_freshness_date is older than {STALE_THRESHOLD_DAYS} days"
         return _metadata_output(
             context_row,
             generated_at,
@@ -341,9 +335,9 @@ def _classify_raw_match(context_row: pd.Series, raw_row: pd.Series, opportunity_
             profile_state="STALE",
             quality_metadata_status="stale",
             source_data_status="stale_data",
-            source_timestamp=source_last_updated,
+            source_timestamp=source_freshness_date,
             source_name=source_name,
-            source_last_updated=source_last_updated,
+            source_last_updated=source_freshness_date,
             source_freshness_days=source_freshness_days,
             missing_required_fields=missing_fields,
             stale_data_reason=stale_reason,
@@ -359,9 +353,9 @@ def _classify_raw_match(context_row: pd.Series, raw_row: pd.Series, opportunity_
             profile_state="PARTIAL",
             quality_metadata_status="invalid",
             source_data_status="invalid_data",
-            source_timestamp=source_last_updated,
+            source_timestamp=source_freshness_date,
             source_name=source_name,
-            source_last_updated=source_last_updated,
+            source_last_updated=source_freshness_date,
             source_freshness_days=source_freshness_days,
             missing_required_fields=missing_fields,
             partial_data_reason="one or more required fundamental fields are invalid",
@@ -377,9 +371,9 @@ def _classify_raw_match(context_row: pd.Series, raw_row: pd.Series, opportunity_
             profile_state="PARTIAL",
             quality_metadata_status="partial",
             source_data_status="partial_data",
-            source_timestamp=source_last_updated,
+            source_timestamp=source_freshness_date,
             source_name=source_name,
-            source_last_updated=source_last_updated,
+            source_last_updated=source_freshness_date,
             source_freshness_days=source_freshness_days,
             missing_required_fields=missing_fields,
             partial_data_reason="one or more required fundamental fields are missing",
@@ -393,9 +387,9 @@ def _classify_raw_match(context_row: pd.Series, raw_row: pd.Series, opportunity_
         profile_state="OBSERVED",
         quality_metadata_status="complete",
         source_data_status="source_available",
-        source_timestamp=source_last_updated,
+        source_timestamp=source_freshness_date,
         source_name=source_name,
-        source_last_updated=source_last_updated,
+        source_last_updated=source_freshness_date,
         source_freshness_days=source_freshness_days,
     )
 
