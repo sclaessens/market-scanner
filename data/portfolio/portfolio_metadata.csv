@@ -1,7 +1,7 @@
 ticker,sector,industry,asset_class,currency,metadata_source,metadata_last_updated,sector_taxonomy,industry_group,country,region,exchange,notes
-C,Financials,Banks,Equity,USD,manual_test,2026-05-20,,,,,,
-GM,Consumer Discretionary,Automobiles,Equity,USD,manual_test,2026-05-20,,,,,,
-GS,Financials,Capital Markets,Equity,USD,manual_test,2026-05-20,,,,,,
-PLD,Real Estate,Industrial REITs,Equity,USD,manual_test,2026-05-20,,,,,,
-TT,Industrials,Building Products,Equity,USD,manual_test,2026-05-20,,,,,,
-WELL,Real Estate,Health Care REITs,Equity,USD,manual_test,2026-05-20,,,,,,
+C,Financial Services,Banks - Diversified,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists C as Banks - Diversified / Financial Services.
+GM,Consumer Cyclical,Auto Manufacturers,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists GM as Auto Manufacturers / Consumer Cyclical.
+GS,Financial Services,Capital Markets,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists GS as Capital Markets / Financial Services.
+PLD,Real Estate,REIT - Industrial,REIT,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists PLD as REIT - Industrial / Real Estate.
+TT,Industrials,Building Products & Equipment,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists TT as Building Products & Equipment / Industrials.
+WELL,Real Estate,REIT - Healthcare Facilities,REIT,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists WELL as REIT - Healthcare Facilities / Real Estate. Dash normalized for CSV consistency.
