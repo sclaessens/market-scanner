@@ -35,7 +35,7 @@ METADATA_REQUIRED_BASE_COLUMNS = [
     "metadata_source",
 ]
 METADATA_FRESHNESS_COLUMNS = ["metadata_last_updated", "metadata_freshness_date"]
-ACCEPTED_ASSET_CLASSES = {"Equity", "ETF", "Cash", "Other"}
+ACCEPTED_ASSET_CLASSES = {"Equity", "ETF", "REIT", "Cash", "Other"}
 SECRET_MARKERS = ("api_key", "apikey", "secret", "token", "password", "credential")
 
 PORTFOLIO_COLUMNS = [

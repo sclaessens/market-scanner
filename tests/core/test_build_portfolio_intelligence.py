@@ -333,6 +333,31 @@ def test_complete_portfolio_metadata_can_produce_complete_status(patch_paths):
     assert "portfolio_metadata.csv" in df.loc[0, "portfolio_source_provenance"]
 
 
+def test_reit_asset_class_metadata_can_produce_complete_status(patch_paths):
+    input_path, portfolio_path, _, _ = patch_paths
+    metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
+    _write_timing(input_path, [_timing_row("REIT1", date="2026-05-09")])
+    _write_portfolio(portfolio_path, [{"ticker": "REIT1", "quantity": 1, "status": "OPEN"}])
+    _write_metadata(
+        metadata_path,
+        [
+            _metadata_row(
+                "REIT1",
+                sector="Real Estate",
+                industry="REIT - Industrial",
+                asset_class="REIT",
+            )
+        ],
+    )
+
+    df = portfolio_module.build_portfolio_intelligence()
+
+    assert df.loc[0, "portfolio_metadata_status"] == "COMPLETE"
+    assert df.loc[0, "portfolio_metadata_reason"] == "portfolio metadata complete"
+    assert "portfolio metadata complete" in df.loc[0, "portfolio_classification_rationale"]
+    assert df.loc[0, "sector_exposure_state"] == "LOW"
+
+
 def test_metadata_only_tickers_do_not_create_output_rows(patch_paths):
     input_path, portfolio_path, _, _ = patch_paths
     metadata_path = portfolio_path.with_name("portfolio_metadata.csv")
