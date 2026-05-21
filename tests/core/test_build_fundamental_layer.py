@@ -137,15 +137,20 @@ def _raw_row(ticker: str, as_of_date: str = "2026-05-01", **overrides) -> dict:
         "ticker": ticker,
         "as_of_date": as_of_date,
         "source_name": "manual",
-        "source_last_updated": "2026-05-01",
-        "report_period": "2026Q1",
+        "source_reference": "manual-reference",
+        "source_freshness_date": "2026-05-01",
         "currency": "USD",
         "revenue_growth_yoy": "0.12",
         "eps_growth_yoy": "0.09",
         "gross_margin": "0.55",
         "operating_margin": "0.25",
+        "net_margin": "0.18",
+        "free_cash_flow_margin": "0.14",
         "debt_to_equity": "0.35",
-        "free_cash_flow_positive": "true",
+        "current_ratio": "1.40",
+        "return_on_equity": "0.20",
+        "return_on_invested_capital": "0.16",
+        "fundamental_notes": "",
     }
     row.update(overrides)
     return row
@@ -213,6 +218,25 @@ def test_missing_fundamentals_preserve_rows_with_descriptive_states(patch_paths)
     assert set(df["quality_metadata_status"]) == {"source_missing"}
     assert set(df["source_data_status"]) == {"source_missing"}
     assert len(df) == 2
+
+
+def test_raw_source_missing_required_columns_fails_fast(patch_paths):
+    context_path, raw_path, output_path, _ = patch_paths
+    _write_context(context_path, [_context_row("AAA")])
+    pd.DataFrame(
+        [
+            {
+                "ticker": "AAA",
+                "as_of_date": "2026-05-01",
+                "source_name": "manual",
+            }
+        ]
+    ).to_csv(raw_path, index=False)
+
+    with pytest.raises(ValueError, match="missing required columns"):
+        fundamental_module.build_fundamental_layer(generated_at="2026-05-09 12:00:00")
+
+    assert not output_path.exists()
 
 
 def test_duplicate_ticker_date_fails_fast(patch_paths):
@@ -328,10 +352,10 @@ def test_valid_raw_fundamentals_produce_sufficient_data_with_latest_as_of_match(
         patch_paths,
         [_context_row("AAA", date="2026-05-09")],
         [
-            _raw_row("AAA", as_of_date="2026-04-01", source_name="older", source_last_updated="2026-04-01"),
-            _raw_row("AAA", as_of_date="2026-05-08", source_name="latest", source_last_updated="2026-05-08"),
-            _raw_row("AAA", as_of_date="2026-05-10", source_name="future", source_last_updated="2026-05-10"),
-            _raw_row("RAWONLY", as_of_date="2026-05-08", source_name="raw-only", source_last_updated="2026-05-08"),
+            _raw_row("AAA", as_of_date="2026-04-01", source_name="older", source_freshness_date="2026-04-01"),
+            _raw_row("AAA", as_of_date="2026-05-08", source_name="latest", source_freshness_date="2026-05-08"),
+            _raw_row("AAA", as_of_date="2026-05-10", source_name="future", source_freshness_date="2026-05-10"),
+            _raw_row("RAWONLY", as_of_date="2026-05-08", source_name="raw-only", source_freshness_date="2026-05-08"),
         ],
     )
 
@@ -351,7 +375,7 @@ def test_raw_artifact_present_without_matching_row_is_row_missing(patch_paths):
     df, _, _ = _build_with_context_and_raw(
         patch_paths,
         [_context_row("AAA", date="2026-05-09")],
-        [_raw_row("BBB", as_of_date="2026-05-08", source_last_updated="2026-05-08")],
+        [_raw_row("BBB", as_of_date="2026-05-08", source_freshness_date="2026-05-08")],
     )
 
     assert df.loc[0, "quality_state"] == "INSUFFICIENT_DATA"
@@ -359,7 +383,20 @@ def test_raw_artifact_present_without_matching_row_is_row_missing(patch_paths):
     assert df.loc[0, "source_data_status"] == "row_missing"
 
 
-def test_missing_required_raw_data_fields_produce_partial_data(patch_paths):
+def test_source_metadata_missing_is_not_sufficient(patch_paths):
+    df, _, _ = _build_with_context_and_raw(
+        patch_paths,
+        [_context_row("AAA", date="2026-05-09")],
+        [_raw_row("AAA", as_of_date="2026-05-08", source_reference="")],
+    )
+
+    assert df.loc[0, "quality_state"] == "INSUFFICIENT_DATA"
+    assert df.loc[0, "quality_metadata_status"] == "invalid"
+    assert df.loc[0, "source_data_status"] == "invalid_data"
+    assert df.loc[0, "invalid_data_reason"] == "source_reference is missing"
+
+
+def test_missing_optional_metric_fields_produce_partial_data(patch_paths):
     df, _, _ = _build_with_context_and_raw(
         patch_paths,
         [_context_row("AAA", date="2026-05-09")],
@@ -367,7 +404,7 @@ def test_missing_required_raw_data_fields_produce_partial_data(patch_paths):
             _raw_row(
                 "AAA",
                 as_of_date="2026-05-08",
-                source_last_updated="2026-05-08",
+                source_freshness_date="2026-05-08",
                 eps_growth_yoy="",
             )
         ],
@@ -380,7 +417,7 @@ def test_missing_required_raw_data_fields_produce_partial_data(patch_paths):
     assert df.loc[0, "partial_data_reason"] == "one or more required fundamental fields are missing"
 
 
-def test_materially_absent_raw_data_fields_are_insufficient(patch_paths):
+def test_materially_absent_metric_fields_are_insufficient(patch_paths):
     df, _, _ = _build_with_context_and_raw(
         patch_paths,
         [_context_row("AAA", date="2026-05-09")],
@@ -388,34 +425,51 @@ def test_materially_absent_raw_data_fields_are_insufficient(patch_paths):
             _raw_row(
                 "AAA",
                 as_of_date="2026-05-08",
-                source_last_updated="2026-05-08",
+                source_freshness_date="2026-05-08",
                 revenue_growth_yoy="",
                 eps_growth_yoy="",
                 gross_margin="",
                 operating_margin="",
+                net_margin="",
+                free_cash_flow_margin="",
                 debt_to_equity="",
-                free_cash_flow_positive="",
+                current_ratio="",
+                return_on_equity="",
+                return_on_invested_capital="",
             )
         ],
     )
 
     assert df.loc[0, "quality_state"] == "INSUFFICIENT_DATA"
     assert df.loc[0, "source_data_status"] == "partial_data"
-    assert df.loc[0, "missing_required_fields"] == "|".join(fundamental_module.RAW_DATA_COLUMNS)
+    assert df.loc[0, "missing_required_fields"] == "|".join(fundamental_module.RAW_METRIC_COLUMNS)
 
 
 def test_stale_raw_source_rows_produce_stale_data(patch_paths):
     df, _, _ = _build_with_context_and_raw(
         patch_paths,
         [_context_row("AAA", date="2026-05-09")],
-        [_raw_row("AAA", as_of_date="2026-05-08", source_last_updated="2026-01-01")],
+        [_raw_row("AAA", as_of_date="2026-05-08", source_freshness_date="2026-01-01")],
     )
 
     assert df.loc[0, "quality_state"] == "STALE_DATA"
     assert df.loc[0, "quality_metadata_status"] == "stale"
     assert df.loc[0, "source_data_status"] == "stale_data"
     assert df.loc[0, "source_freshness_days"] == 128
-    assert df.loc[0, "stale_data_reason"] == "source_last_updated is older than 120 days"
+    assert df.loc[0, "stale_data_reason"] == "source_freshness_date is older than 120 days"
+
+
+def test_future_freshness_date_is_invalid(patch_paths):
+    df, _, _ = _build_with_context_and_raw(
+        patch_paths,
+        [_context_row("AAA", date="2026-05-09")],
+        [_raw_row("AAA", as_of_date="2026-05-08", source_freshness_date="2026-05-10")],
+    )
+
+    assert df.loc[0, "quality_state"] == "INSUFFICIENT_DATA"
+    assert df.loc[0, "quality_metadata_status"] == "invalid"
+    assert df.loc[0, "source_data_status"] == "invalid_data"
+    assert df.loc[0, "invalid_data_reason"] == "source_freshness_date is after opportunity date"
 
 
 def test_invalid_numeric_values_are_handled_deterministically(patch_paths):
@@ -426,7 +480,7 @@ def test_invalid_numeric_values_are_handled_deterministically(patch_paths):
             _raw_row(
                 "AAA",
                 as_of_date="2026-05-08",
-                source_last_updated="2026-05-08",
+                source_freshness_date="2026-05-08",
                 gross_margin="not-a-number",
             )
         ],
@@ -438,7 +492,30 @@ def test_invalid_numeric_values_are_handled_deterministically(patch_paths):
     assert df.loc[0, "invalid_data_reason"] == "invalid required fields: gross_margin"
 
 
-def test_invalid_boolean_values_are_handled_deterministically(patch_paths):
+def test_no_metric_columns_are_handled_deterministically(patch_paths):
+    context_path, raw_path, _, _ = patch_paths
+    _write_context(context_path, [_context_row("AAA", date="2026-05-09")])
+    _write_raw(
+        raw_path,
+        [
+            {
+                "ticker": "AAA",
+                "as_of_date": "2026-05-08",
+                "source_name": "manual",
+                "source_reference": "manual-reference",
+                "source_freshness_date": "2026-05-08",
+            }
+        ],
+    )
+
+    df = fundamental_module.build_fundamental_layer(generated_at="2026-05-09 12:00:00")
+
+    assert df.loc[0, "quality_state"] == "INSUFFICIENT_DATA"
+    assert df.loc[0, "source_data_status"] == "partial_data"
+    assert df.loc[0, "partial_data_reason"] == "no fundamental metric columns are present"
+
+
+def test_invalid_metric_values_are_handled_deterministically(patch_paths):
     df, _, _ = _build_with_context_and_raw(
         patch_paths,
         [_context_row("AAA", date="2026-05-09")],
@@ -446,15 +523,15 @@ def test_invalid_boolean_values_are_handled_deterministically(patch_paths):
             _raw_row(
                 "AAA",
                 as_of_date="2026-05-08",
-                source_last_updated="2026-05-08",
-                free_cash_flow_positive="yes",
+                source_freshness_date="2026-05-08",
+                free_cash_flow_margin="not-a-number",
             )
         ],
     )
 
     assert df.loc[0, "quality_state"] == "PARTIAL_DATA"
     assert df.loc[0, "source_data_status"] == "invalid_data"
-    assert df.loc[0, "invalid_data_reason"] == "invalid required fields: free_cash_flow_positive"
+    assert df.loc[0, "invalid_data_reason"] == "invalid required fields: free_cash_flow_margin"
 
 
 def test_duplicate_raw_source_rows_fail_fast_before_output_generation(patch_paths):
@@ -484,9 +561,9 @@ def test_upstream_row_count_and_identity_are_preserved_with_mixed_raw_states(pat
         patch_paths,
         context_rows,
         [
-            _raw_row("AAA", as_of_date="2026-05-08", source_last_updated="2026-05-08"),
-            _raw_row("BBB", as_of_date="2026-05-08", source_last_updated="2026-05-08", eps_growth_yoy=""),
-            _raw_row("RAWONLY", as_of_date="2026-05-08", source_last_updated="2026-05-08"),
+            _raw_row("AAA", as_of_date="2026-05-08", source_freshness_date="2026-05-08"),
+            _raw_row("BBB", as_of_date="2026-05-08", source_freshness_date="2026-05-08", eps_growth_yoy=""),
+            _raw_row("RAWONLY", as_of_date="2026-05-08", source_freshness_date="2026-05-08"),
         ],
     )
 
