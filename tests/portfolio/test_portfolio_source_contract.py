@@ -12,6 +12,31 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ACTIVE_TRANSACTIONS = PROJECT_ROOT / "data" / "portfolio" / "portfolio_transactions.csv"
 ACTIVE_POSITIONS = PROJECT_ROOT / "data" / "portfolio" / "portfolio_positions.csv"
 
+TRANSACTION_DERIVED_COLUMNS = [
+    "ticker",
+    "quantity",
+    "avg_cost",
+    "status",
+    "last_action",
+    "last_action_at",
+]
+
+DESCRIPTIVE_ENRICHMENT_COLUMNS = [
+    "last_price",
+    "market_value",
+    "unrealized_pnl",
+    "pnl_pct",
+]
+
+PORTFOLIO_DECISION_AUTHORITY_COLUMNS = [
+    "portfolio_action",
+    "allocation_decision",
+    "buy_decision",
+    "sell_decision",
+    "trim_recommendation",
+    "add_recommendation",
+]
+
 
 def test_active_positions_are_rebuildable_from_transaction_source(monkeypatch, tmp_path: Path):
     output_path = tmp_path / "portfolio_positions.csv"
@@ -23,12 +48,36 @@ def test_active_positions_are_rebuildable_from_transaction_source(monkeypatch, t
     active = pd.read_csv(ACTIVE_POSITIONS)
 
     pd.testing.assert_frame_equal(
-        active.reset_index(drop=True),
-        rebuilt.reset_index(drop=True),
+        active[TRANSACTION_DERIVED_COLUMNS].reset_index(drop=True),
+        rebuilt[TRANSACTION_DERIVED_COLUMNS].reset_index(drop=True),
         check_dtype=False,
     )
     assert active["ticker"].tolist() == ["COST", "MRVL", "ON", "TECK"]
     assert set(active["status"]) == {"OPEN"}
+    assert active["ticker"].is_unique
+    assert rebuilt["ticker"].is_unique
+    assert len(active) == len(rebuilt)
+
+
+def test_last_price_is_optional_descriptive_enrichment(monkeypatch, tmp_path: Path):
+    output_path = tmp_path / "portfolio_positions.csv"
+    monkeypatch.setattr(build_portfolio, "TRANSACTIONS_FILE", str(ACTIVE_TRANSACTIONS))
+    monkeypatch.setattr(build_portfolio, "POSITIONS_FILE", str(output_path))
+    monkeypatch.setattr(build_portfolio, "PROCESSED_DIR", str(PROJECT_ROOT / "data" / "processed"))
+
+    rebuilt = build_portfolio.build_portfolio()
+    active = pd.read_csv(ACTIVE_POSITIONS)
+
+    for column in DESCRIPTIVE_ENRICHMENT_COLUMNS:
+        assert column in active.columns
+        assert column in rebuilt.columns
+
+    assert set(DESCRIPTIVE_ENRICHMENT_COLUMNS).isdisjoint(TRANSACTION_DERIVED_COLUMNS)
+    assert active["last_price"].isna().all()
+
+    for column in PORTFOLIO_DECISION_AUTHORITY_COLUMNS:
+        assert column not in active.columns
+        assert column not in rebuilt.columns
 
 
 def test_last_action_is_not_portfolio_intelligence_authority(monkeypatch, tmp_path: Path):
