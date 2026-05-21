@@ -5,3 +5,18 @@ GS,Financial Services,Capital Markets,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Y
 PLD,Real Estate,REIT - Industrial,REIT,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists PLD as REIT - Industrial / Real Estate.
 TT,Industrials,Building Products & Equipment,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists TT as Building Products & Equipment / Industrials.
 WELL,Real Estate,REIT - Healthcare Facilities,REIT,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists WELL as REIT - Healthcare Facilities / Real Estate. Dash normalized for CSV consistency.
+AAPL,Technology,Consumer Electronics,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists AAPL as Consumer Electronics / Technology.
+ALL,Financial Services,Insurance - Property & Casualty,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists ALL as Insurance - Property & Casualty / Financial Services.
+AMD,Technology,Semiconductors,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists AMD as Semiconductors / Technology.
+BKR,Energy,Oil & Gas Equipment & Services,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists BKR as Oil & Gas Equipment & Services / Energy.
+BMY,Healthcare,Drug Manufacturers - General,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists BMY as Drug Manufacturers - General / Healthcare.
+CB,Financial Services,Insurance - Property & Casualty,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists CB as Insurance - Property & Casualty / Financial Services.
+CL,Consumer Defensive,Household & Personal Products,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists CL as Household & Personal Products / Consumer Defensive.
+CRWD,Technology,Software - Infrastructure,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists CRWD as Software - Infrastructure / Technology.
+CSCO,Technology,Communication Equipment,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists CSCO as Communication Equipment / Technology.
+CSX,Industrials,Railroads,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists CSX as Railroads / Industrials.
+D,Utilities,Utilities - Regulated Electric,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists D as Utilities - Regulated Electric / Utilities.
+DDOG,Technology,Software - Application,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists DDOG as Software - Application / Technology.
+DVN,Energy,Oil & Gas E&P,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists DVN as Oil & Gas E&P / Energy.
+DXCM,Healthcare,Medical Devices,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists DXCM as Medical Devices / Healthcare.
+EBAY,Consumer Cyclical,Internet Retail,Equity,USD,Yahoo Finance,2026-05-21,,,,,,Yahoo Finance lists EBAY as Internet Retail / Consumer Cyclical.
