@@ -67,6 +67,11 @@ The selected metrics test revenue growth and margin consistency without introduc
 
 The pilot did not expand beyond these three tickers and four metrics.
 
+Scaling alignment note:
+
+- `docs/sprints/numerical_fundamentals_contract_scaling_alignment.md` converts the Pilot 1 learning into the current scaling contract.
+- `net_margin` remains candidate/future until schema support is implemented.
+
 ## Source Method Used
 
 Manual approved-source extraction was used.
