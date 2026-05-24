@@ -75,6 +75,12 @@ MVP metrics for this preview:
 - `return_on_equity`
 - `free_cash_flow_margin`
 
+Alignment note:
+
+- `docs/sprints/numerical_fundamentals_contract_scaling_alignment.md` supersedes this broad exploratory list for scaling.
+- Current source-data scaling may write only the writable MVP metrics supported by the current raw fundamentals schema.
+- `net_margin`, `return_on_equity`, and `free_cash_flow_margin` remain candidate/future metrics until explicitly supported.
+
 Percentage metrics use decimal convention when eventually approved.
 
 Examples:

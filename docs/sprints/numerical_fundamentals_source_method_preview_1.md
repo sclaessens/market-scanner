@@ -132,6 +132,11 @@ No value may be invented.
 
 No scoring or ranking is introduced.
 
+Alignment note:
+
+- `docs/sprints/numerical_fundamentals_contract_scaling_alignment.md` narrows the current writable MVP set to the raw schema columns available now.
+- `net_margin`, `return_on_equity`, and `free_cash_flow_margin` remain candidate/future metrics until the raw fundamentals schema and Fundamental Layer contract explicitly support them.
+
 | metric | purpose | expected value type | allowed unit | expected period | blank allowed | calculated values allowed | review trigger |
 |---|---|---|---|---|---|---|---|
 | `revenue_growth_yoy` | Describes top-line growth. | Numeric decimal. | Percent as decimal. | Most recent completed fiscal year, or trailing twelve months only when explicitly sourced. | Yes | No, unless calculation method and source inputs are explicitly governed. | Missing period, conflicting annual/TTM values, unclear source definition, non-numeric value. |
