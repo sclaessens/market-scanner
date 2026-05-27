@@ -14,7 +14,7 @@ The repository is transitioning from architecture purification to operational in
 
 Location: `docs/active/`
 
-Active documentation is authoritative for current development and operations. These files define the current architecture, governance model, runtime contracts, operational workflow, and roadmap.
+Active documentation is authoritative for current development and operations. These files define the current architecture, governance model, runtime contracts, operational workflow, calculation governance, backlog/sprint operating model, and roadmap.
 
 Active documents must be:
 
@@ -48,6 +48,9 @@ The active documentation set is intentionally small:
 - `docs/active/architecture_current_state.md`
 - `docs/active/governance_v2.md`
 - `docs/active/contracts/pipeline_contracts.md`
+- `docs/active/backlog_and_sprint_operating_model.md`
+- `docs/active/logic/calculation_registry.md`
+- `docs/active/roles_and_responsibilities.md`
 - `docs/active/operational_development_model.md`
 - `docs/active/simplified_sprint_lifecycle.md`
 - `docs/active/archive_strategy.md`
@@ -58,6 +61,17 @@ The active documentation set is intentionally small:
 - `docs/active/roadmap_current.md`
 - `docs/active/runbooks/local_development.md`
 
+Active specialized documents may also exist under:
+
+- `docs/active/analysis/`
+- `docs/active/contracts/`
+- `docs/active/inventory/`
+- `docs/active/logic/`
+- `docs/active/specs/`
+- `docs/active/runbooks/`
+
+These folders should remain focused. Do not create new active documents if an existing active document can be updated cleanly.
+
 ## Where To Look Before Changing X
 
 | Change area | Start here |
@@ -65,6 +79,9 @@ The active documentation set is intentionally small:
 | Architecture or layer responsibility | `docs/active/architecture_current_state.md` |
 | Governance boundary or review level | `docs/active/governance_v2.md` |
 | Runtime contracts or artifact semantics | `docs/active/contracts/pipeline_contracts.md` |
+| Backlog triage, sprint capacity, sprint closeout discipline | `docs/active/backlog_and_sprint_operating_model.md` |
+| Calculation placement, formula ownership, logic review | `docs/active/logic/calculation_registry.md` |
+| Role ownership and handoff boundaries | `docs/active/roles_and_responsibilities.md` |
 | Local workflow or development hygiene | `docs/active/runbooks/local_development.md` |
 | Roadmap planning | `docs/active/roadmap_current.md` |
 | Backlog or deferred work | `docs/sprints/project_backlog.md` |
@@ -73,9 +90,9 @@ The active documentation set is intentionally small:
 
 ## Historical Documentation Handling
 
-Historical evidence for certified Sprints 0 through 8 is preserved under `docs/archive/`.
+Historical evidence for certified Sprints 0 through 8 and completed operational sprint planning is preserved under `docs/archive/`.
 
-The remaining `docs/sprints/` files are operational backlog and sprint status records plus a notice. The remaining `docs/audits/` file is a notice. Archived sprint, audit, migration, and superseded documents are superseded by `docs/active/` unless an active document explicitly delegates authority to an archived file.
+The remaining `docs/sprints/` files are operational backlog, sprint status, current simplification sprint planning, and recent simplification audit records. The remaining `docs/audits/` file is a notice. Archived sprint, audit, migration, and superseded documents are superseded by `docs/active/` unless an active document explicitly delegates authority to an archived file.
 
 ## Source of Truth Rule
 
@@ -84,8 +101,10 @@ When files conflict:
 1. `AGENTS.md` remains the repository-level AI governance authority.
 2. `docs/active/architecture_current_state.md` is the architecture source of truth.
 3. `docs/active/governance_v2.md` is the operational governance source of truth.
-4. `docs/active/*` supersedes legacy sprint, audit, and migration documents for operational development.
-5. Archived and historical documents preserve context but do not authorize implementation.
+4. `docs/active/backlog_and_sprint_operating_model.md` is the backlog triage, sprint capacity, and sprint closeout operating source of truth.
+5. `docs/active/logic/calculation_registry.md` is the calculation placement and calculation-governance starting point.
+6. `docs/active/*` supersedes legacy sprint, audit, and migration documents for operational development.
+7. Archived and historical documents preserve context but do not authorize implementation.
 
 ## Runtime Scope
 
