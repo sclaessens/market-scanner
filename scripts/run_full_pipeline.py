@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -24,7 +25,26 @@ def run_step(name: str, command: list[str]) -> None:
     print(f"Pipeline step completed: {name}")
 
 
-def main() -> None:
+def _build_run_scan_command(args: argparse.Namespace) -> list[str]:
+    command = [sys.executable, "scripts/run_scan.py"]
+    if args.fundamentals_history_path:
+        command.extend(["--fundamentals-history-path", args.fundamentals_history_path])
+    if args.fundamental_metrics_output_path:
+        command.extend(["--fundamental-metrics-output-path", args.fundamental_metrics_output_path])
+    if args.fundamental_analysis_output_path:
+        command.extend(["--fundamental-analysis-output-path", args.fundamental_analysis_output_path])
+    return command
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run the governed full market-scanner pipeline.")
+    parser.add_argument("--fundamentals-history-path", help="Optional raw fundamentals history input path.")
+    parser.add_argument("--fundamental-metrics-output-path", help="Optional generated fundamental metrics output path.")
+    parser.add_argument("--fundamental-analysis-output-path", help="Optional generated fundamental analysis output path.")
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
     """
     Governance-clean full pipeline wrapper.
 
@@ -40,9 +60,10 @@ def main() -> None:
     print("Pipeline run started: full pipeline")
     print(f"Started at: {started_at}")
 
+    args = parse_args(argv if argv is not None else [])
     run_step(
         "1. Core end-to-end pipeline",
-        [sys.executable, "scripts/run_scan.py"],
+        _build_run_scan_command(args),
     )
 
     completed_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -51,4 +72,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
