@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from scripts.core.build_fundamental_analysis import ANALYSIS_COLUMNS, build_fundamental_analysis
+from scripts.fundamentals.build_analysis import ANALYSIS_COLUMNS, build_fundamental_analysis
 
 FORBIDDEN_TERMS = {
     "buy",

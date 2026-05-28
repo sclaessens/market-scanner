@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from scripts.core.build_fundamental_metrics import (
+from scripts.fundamentals.build_metrics import (
     HELPER_COLUMNS,
     IDENTITY_COLUMNS,
     METRIC_COLUMNS,
