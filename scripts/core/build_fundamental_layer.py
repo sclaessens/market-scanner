@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import argparse
 import json
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
+
+from scripts.core.build_fundamental_metrics import HELPER_COLUMNS, IDENTITY_COLUMNS, METRIC_COLUMNS
+from scripts.core.build_fundamentals_history_intake import validate_fundamentals_history
 
 CONTEXT_PATH = Path("data/processed/context_strength.csv")
 RAW_FUNDAMENTALS_PATH = Path("data/raw/fundamentals.csv")
@@ -29,6 +33,7 @@ RAW_METRIC_COLUMNS = [
     "return_on_invested_capital",
 ]
 RAW_REQUIRED_COLUMNS = RAW_IDENTITY_COLUMNS + RAW_PROVENANCE_COLUMNS
+METRICS_REQUIRED_COLUMNS = IDENTITY_COLUMNS + METRIC_COLUMNS + HELPER_COLUMNS
 OUTPUT_COLUMNS = [
     "ticker",
     "date",
@@ -440,6 +445,216 @@ def _build_from_raw_fundamentals(context_df: pd.DataFrame, raw_df: pd.DataFrame,
     return pd.DataFrame(output_rows, columns=OUTPUT_COLUMNS)
 
 
+def _load_fundamentals_history(path: Path) -> pd.DataFrame:
+    validation_result = validate_fundamentals_history(path)
+    if validation_result["status"] != "VALID":
+        rendered_result = json.dumps(validation_result, sort_keys=True)
+        raise ValueError(f"fundamentals_history.csv validation failed: {rendered_result}")
+    return pd.read_csv(path, dtype=str, keep_default_na=False)
+
+
+def _load_fundamental_metrics(path: Path) -> pd.DataFrame:
+    try:
+        metrics_df = pd.read_csv(path, dtype=str, keep_default_na=False)
+    except pd.errors.EmptyDataError as exc:
+        raise ValueError(f"fundamental_metrics.csv is empty: {path}") from exc
+    _validate_columns(metrics_df, METRICS_REQUIRED_COLUMNS, "fundamental_metrics.csv")
+    duplicate_mask = metrics_df.duplicated(subset=["ticker", "fiscal_year", "fiscal_period"], keep=False)
+    if duplicate_mask.any():
+        duplicates = metrics_df.loc[duplicate_mask, ["ticker", "fiscal_year", "fiscal_period"]].to_dict(orient="records")
+        raise ValueError(f"fundamental_metrics.csv contains duplicate ticker/fiscal_year/fiscal_period rows: {duplicates}")
+    return metrics_df
+
+
+def _latest_history_by_ticker(history_df: pd.DataFrame) -> dict[str, pd.Series]:
+    normalized = history_df.copy()
+    normalized["_normalized_ticker"] = normalized["ticker"].map(_normalize_ticker)
+    normalized["_source_freshness_date"] = normalized["source_freshness_date"].map(_parse_iso_date)
+    normalized = normalized.sort_values(
+        ["_normalized_ticker", "_source_freshness_date", "fiscal_year", "fiscal_period"],
+        kind="mergesort",
+    )
+    latest: dict[str, pd.Series] = {}
+    for _, row in normalized.iterrows():
+        latest[row["_normalized_ticker"]] = row
+    return latest
+
+
+def _latest_metrics_by_ticker(metrics_df: pd.DataFrame) -> dict[str, pd.Series]:
+    normalized = metrics_df.copy()
+    normalized["_normalized_ticker"] = normalized["ticker"].map(_normalize_ticker)
+    normalized["_source_freshness_date"] = normalized["source_freshness_date"].map(_parse_iso_date)
+    normalized = normalized.sort_values(
+        ["_normalized_ticker", "_source_freshness_date", "fiscal_year", "fiscal_period"],
+        kind="mergesort",
+    )
+    latest: dict[str, pd.Series] = {}
+    for _, row in normalized.iterrows():
+        latest[row["_normalized_ticker"]] = row
+    return latest
+
+
+def _metric_missing_fields(metrics_row: pd.Series | None) -> list[str]:
+    if metrics_row is None:
+        return METRIC_COLUMNS.copy()
+    return [column for column in METRIC_COLUMNS if _clean_text(metrics_row.get(column)) == ""]
+
+
+def _build_from_compatibility_inputs(
+    context_df: pd.DataFrame,
+    history_df: pd.DataFrame | None,
+    metrics_df: pd.DataFrame | None,
+    generated_at: str,
+) -> pd.DataFrame:
+    history_by_ticker = _latest_history_by_ticker(history_df) if history_df is not None else {}
+    metrics_by_ticker = _latest_metrics_by_ticker(metrics_df) if metrics_df is not None else {}
+    output_rows: list[dict[str, Any]] = []
+
+    for _, context_row in context_df.iterrows():
+        opportunity_date = _parse_iso_date(context_row["date"])
+        if opportunity_date is None:
+            output_rows.append(
+                _metadata_output(
+                    context_row,
+                    generated_at,
+                    quality_state="INSUFFICIENT_DATA",
+                    quality_reason="opportunity date invalid",
+                    profile_state="UNAVAILABLE",
+                    quality_metadata_status="invalid",
+                    source_data_status="invalid_data",
+                    invalid_data_reason="opportunity date is invalid",
+                )
+            )
+            continue
+
+        ticker = _normalize_ticker(context_row["ticker"])
+        history_row = history_by_ticker.get(ticker)
+        metrics_row = metrics_by_ticker.get(ticker)
+
+        if history_row is None and metrics_row is None:
+            output_rows.append(
+                _metadata_output(
+                    context_row,
+                    generated_at,
+                    quality_state="INSUFFICIENT_DATA",
+                    quality_reason="fundamental source row unavailable",
+                    profile_state="UNAVAILABLE",
+                    quality_metadata_status="row_missing",
+                    source_data_status="row_missing",
+                )
+            )
+            continue
+
+        source_row = metrics_row if metrics_row is not None else history_row
+        source_name = _clean_text(source_row.get("source_name"))
+        source_freshness_date = _clean_text(source_row.get("source_freshness_date"))
+        parsed_source_freshness_date = _parse_iso_date(source_freshness_date)
+        source_freshness_days: int | str = ""
+        if parsed_source_freshness_date is not None:
+            source_freshness_days = (opportunity_date - parsed_source_freshness_date).days
+
+        invalid_reasons: list[str] = []
+        if parsed_source_freshness_date is None:
+            invalid_reasons.append("source_freshness_date is invalid")
+        if isinstance(source_freshness_days, int) and source_freshness_days < 0:
+            invalid_reasons.append("source_freshness_date is after opportunity date")
+        if invalid_reasons:
+            output_rows.append(
+                _metadata_output(
+                    context_row,
+                    generated_at,
+                    quality_state="INSUFFICIENT_DATA",
+                    quality_reason="fundamental source metadata invalid",
+                    profile_state="UNAVAILABLE",
+                    quality_metadata_status="invalid",
+                    source_data_status="invalid_data",
+                    source_timestamp=source_freshness_date,
+                    source_name=source_name,
+                    source_last_updated=source_freshness_date,
+                    source_freshness_days=source_freshness_days,
+                    invalid_data_reason="; ".join(invalid_reasons),
+                )
+            )
+            continue
+
+        missing_metric_fields = _metric_missing_fields(metrics_row)
+        metric_status = _clean_text(metrics_row.get("metric_status")) if metrics_row is not None else ""
+        metric_warnings = _clean_text(metrics_row.get("metric_warnings")) if metrics_row is not None else ""
+
+        if isinstance(source_freshness_days, int) and source_freshness_days > STALE_THRESHOLD_DAYS:
+            output_rows.append(
+                _metadata_output(
+                    context_row,
+                    generated_at,
+                    quality_state="STALE_DATA",
+                    quality_reason="fundamental source data stale",
+                    profile_state="STALE",
+                    quality_metadata_status="stale",
+                    source_data_status="stale_data",
+                    source_timestamp=source_freshness_date,
+                    source_name=source_name,
+                    source_last_updated=source_freshness_date,
+                    source_freshness_days=source_freshness_days,
+                    missing_required_fields=missing_metric_fields,
+                    stale_data_reason=f"source_freshness_date is older than {STALE_THRESHOLD_DAYS} days",
+                )
+            )
+        elif metrics_row is None:
+            output_rows.append(
+                _metadata_output(
+                    context_row,
+                    generated_at,
+                    quality_state="PARTIAL_DATA",
+                    quality_reason="fundamental source data partially available",
+                    profile_state="PARTIAL",
+                    quality_metadata_status="partial",
+                    source_data_status="partial_data",
+                    source_timestamp=source_freshness_date,
+                    source_name=source_name,
+                    source_last_updated=source_freshness_date,
+                    source_freshness_days=source_freshness_days,
+                    missing_required_fields=missing_metric_fields,
+                    partial_data_reason="raw history present without metrics evidence",
+                )
+            )
+        elif missing_metric_fields or metric_status != "complete":
+            output_rows.append(
+                _metadata_output(
+                    context_row,
+                    generated_at,
+                    quality_state="PARTIAL_DATA",
+                    quality_reason="fundamental metrics partially available",
+                    profile_state="PARTIAL",
+                    quality_metadata_status="partial",
+                    source_data_status="partial_data",
+                    source_timestamp=source_freshness_date,
+                    source_name=source_name,
+                    source_last_updated=source_freshness_date,
+                    source_freshness_days=source_freshness_days,
+                    missing_required_fields=missing_metric_fields,
+                    partial_data_reason=metric_warnings or "one or more required fundamental metrics are missing",
+                )
+            )
+        else:
+            output_rows.append(
+                _metadata_output(
+                    context_row,
+                    generated_at,
+                    quality_state="SUFFICIENT_DATA",
+                    quality_reason="fundamental metrics available",
+                    profile_state="OBSERVED",
+                    quality_metadata_status="complete",
+                    source_data_status="source_available",
+                    source_timestamp=source_freshness_date,
+                    source_name=source_name,
+                    source_last_updated=source_freshness_date,
+                    source_freshness_days=source_freshness_days,
+                )
+            )
+
+    return pd.DataFrame(output_rows, columns=OUTPUT_COLUMNS)
+
+
 def _write_log(context_df: pd.DataFrame, output_df: pd.DataFrame, generated_at: str, duplicate_count: int) -> None:
     log_row = {
         "generated_at": generated_at,
@@ -458,7 +673,11 @@ def _write_log(context_df: pd.DataFrame, output_df: pd.DataFrame, generated_at: 
     pd.DataFrame([log_row], columns=LOG_COLUMNS).to_csv(LOG_PATH, index=False)
 
 
-def build_fundamental_layer(generated_at: str | None = None) -> pd.DataFrame:
+def build_fundamental_layer(
+    generated_at: str | None = None,
+    fundamentals_history_path: str | Path | None = None,
+    fundamental_metrics_path: str | Path | None = None,
+) -> pd.DataFrame:
     context_df = _load_required_csv(CONTEXT_PATH, "context_strength.csv")
     _validate_columns(context_df, INPUT_REQUIRED_COLUMNS, "context_strength.csv")
     _validate_required_values(context_df, "context_strength.csv")
@@ -466,11 +685,16 @@ def build_fundamental_layer(generated_at: str | None = None) -> pd.DataFrame:
     _validate_no_duplicate_keys(context_df, "context_strength.csv")
 
     run_timestamp = generated_at or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    raw_df = _load_raw_fundamentals(RAW_FUNDAMENTALS_PATH)
-    if raw_df is None:
-        output_df = _build_unavailable_output(context_df, run_timestamp)
+    if fundamentals_history_path is not None or fundamental_metrics_path is not None:
+        history_df = _load_fundamentals_history(Path(fundamentals_history_path)) if fundamentals_history_path else None
+        metrics_df = _load_fundamental_metrics(Path(fundamental_metrics_path)) if fundamental_metrics_path else None
+        output_df = _build_from_compatibility_inputs(context_df, history_df, metrics_df, run_timestamp)
     else:
-        output_df = _build_from_raw_fundamentals(context_df, raw_df, run_timestamp)
+        raw_df = _load_raw_fundamentals(RAW_FUNDAMENTALS_PATH)
+        if raw_df is None:
+            output_df = _build_unavailable_output(context_df, run_timestamp)
+        else:
+            output_df = _build_from_raw_fundamentals(context_df, raw_df, run_timestamp)
 
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     output_df.to_csv(OUTPUT_PATH, index=False)
@@ -480,5 +704,18 @@ def build_fundamental_layer(generated_at: str | None = None) -> pd.DataFrame:
     return output_df
 
 
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Build the compatible Fundamental Layer quality artifact.")
+    parser.add_argument("--fundamentals-history-path", help="Optional validated raw fundamentals history input path.")
+    parser.add_argument("--fundamental-metrics-path", help="Optional fundamental metrics input path.")
+    args = parser.parse_args()
+
+    build_fundamental_layer(
+        fundamentals_history_path=args.fundamentals_history_path,
+        fundamental_metrics_path=args.fundamental_metrics_path,
+    )
+    return 0
+
+
 if __name__ == "__main__":
-    build_fundamental_layer()
+    raise SystemExit(main())

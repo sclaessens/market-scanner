@@ -160,6 +160,61 @@ def _write_raw(path: Path, rows: list[dict]) -> None:
     pd.DataFrame(rows).to_csv(path, index=False)
 
 
+def _history_row(ticker: str, fiscal_year: str = "2025", fiscal_period: str = "FY", **overrides) -> dict:
+    row = {
+        "ticker": ticker,
+        "fiscal_year": fiscal_year,
+        "fiscal_period": fiscal_period,
+        "period_end_date": "2025-12-31",
+        "report_date": "2026-02-15",
+        "currency": "USD",
+        "revenue": "1000",
+        "gross_profit": "600",
+        "operating_income": "300",
+        "net_income": "200",
+        "diluted_eps": "5",
+        "total_debt": "150",
+        "total_equity": "500",
+        "free_cash_flow": "250",
+        "source_name": "company filing",
+        "source_reference": "FY2025 filing",
+        "source_freshness_date": "2026-05-08",
+        "extraction_date": "2026-05-08",
+        "notes": "",
+    }
+    row.update(overrides)
+    return row
+
+
+def _metrics_row(ticker: str, fiscal_year: str = "2025", fiscal_period: str = "FY", **overrides) -> dict:
+    row = {
+        "ticker": ticker,
+        "fiscal_year": fiscal_year,
+        "fiscal_period": fiscal_period,
+        "period_end_date": "2025-12-31",
+        "report_date": "2026-02-15",
+        "currency": "USD",
+        "source_name": "company filing",
+        "source_reference": "FY2025 filing",
+        "source_freshness_date": "2026-05-08",
+        "extraction_date": "2026-05-08",
+        "gross_margin": "0.6",
+        "operating_margin": "0.3",
+        "net_margin": "0.2",
+        "free_cash_flow_margin": "0.25",
+        "debt_to_equity": "0.3",
+        "return_on_equity": "0.4",
+        "revenue_yoy_growth": "0.1",
+        "eps_yoy_growth": "0.2",
+        "free_cash_flow_yoy_growth": "0.3",
+        "metric_status": "complete",
+        "metric_missing_inputs": "",
+        "metric_warnings": "",
+    }
+    row.update(overrides)
+    return row
+
+
 def _build_with_rows(patch_paths, rows: list[dict]) -> tuple[pd.DataFrame, Path, Path]:
     context_path, _, output_path, log_path = patch_paths
     _write_context(context_path, rows)
@@ -583,3 +638,167 @@ def test_fundamental_layer_does_not_import_decision_reporting_or_telegram_module
     assert "build_reporting_layer" not in source
     assert "build_telegram_summary" not in source
     assert "send_telegram" not in source
+
+
+def test_default_behavior_remains_unchanged_when_optional_paths_are_absent(patch_paths):
+    df, _, _ = _build_with_rows(patch_paths, [_context_row("AAA")])
+
+    assert list(df.columns) == EXPECTED_OUTPUT_COLUMNS
+    assert df.loc[0, "quality_state"] == "INSUFFICIENT_DATA"
+    assert df.loc[0, "quality_reason"] == "fundamental data unavailable"
+    assert df.loc[0, "quality_metadata_status"] == "source_missing"
+    assert df.loc[0, "source_data_status"] == "source_missing"
+
+
+def test_optional_raw_history_marks_source_presence_without_changing_row_count(patch_paths, tmp_path: Path):
+    context_path, _, output_path, _ = patch_paths
+    history_path = tmp_path / "fundamentals_history.csv"
+    _write_context(
+        context_path,
+        [
+            _context_row("AAA", date="2026-05-09"),
+            _context_row("BBB", date="2026-05-09"),
+        ],
+    )
+    _write_raw(history_path, [_history_row("AAA")])
+
+    df = fundamental_module.build_fundamental_layer(
+        generated_at="2026-05-09 12:00:00",
+        fundamentals_history_path=history_path,
+    )
+
+    assert len(df) == 2
+    assert list(df.columns) == EXPECTED_OUTPUT_COLUMNS
+    assert output_path.exists()
+    assert df.loc[0, "ticker"] == "AAA"
+    assert df.loc[0, "quality_state"] == "PARTIAL_DATA"
+    assert df.loc[0, "quality_metadata_status"] == "partial"
+    assert df.loc[0, "source_data_status"] == "partial_data"
+    assert df.loc[0, "partial_data_reason"] == "raw history present without metrics evidence"
+    assert df.loc[1, "ticker"] == "BBB"
+    assert df.loc[1, "quality_state"] == "INSUFFICIENT_DATA"
+    assert df.loc[1, "source_data_status"] == "row_missing"
+
+
+def test_optional_metrics_can_mark_sufficient_data_without_changing_row_count(patch_paths, tmp_path: Path):
+    context_path, _, _, _ = patch_paths
+    metrics_path = tmp_path / "fundamental_metrics.csv"
+    _write_context(
+        context_path,
+        [
+            _context_row("AAA", date="2026-05-09"),
+            _context_row("BBB", date="2026-05-09"),
+        ],
+    )
+    _write_raw(metrics_path, [_metrics_row("AAA")])
+
+    df = fundamental_module.build_fundamental_layer(
+        generated_at="2026-05-09 12:00:00",
+        fundamental_metrics_path=metrics_path,
+    )
+
+    assert len(df) == 2
+    assert list(df.columns) == EXPECTED_OUTPUT_COLUMNS
+    assert df.loc[0, "quality_state"] == "SUFFICIENT_DATA"
+    assert df.loc[0, "quality_reason"] == "fundamental metrics available"
+    assert df.loc[0, "quality_metadata_status"] == "complete"
+    assert df.loc[0, "source_data_status"] == "source_available"
+    assert df.loc[0, "source_name"] == "company filing"
+    assert df.loc[1, "quality_state"] == "INSUFFICIENT_DATA"
+    assert df.loc[1, "source_data_status"] == "row_missing"
+
+
+def test_optional_metrics_partial_status_maps_to_partial_data(patch_paths, tmp_path: Path):
+    context_path, _, _, _ = patch_paths
+    metrics_path = tmp_path / "fundamental_metrics.csv"
+    _write_context(context_path, [_context_row("AAA", date="2026-05-09")])
+    _write_raw(
+        metrics_path,
+        [
+            _metrics_row(
+                "AAA",
+                free_cash_flow_yoy_growth="",
+                metric_status="partial",
+                metric_warnings="free_cash_flow_yoy_growth:missing:prior_free_cash_flow",
+            )
+        ],
+    )
+
+    df = fundamental_module.build_fundamental_layer(
+        generated_at="2026-05-09 12:00:00",
+        fundamental_metrics_path=metrics_path,
+    )
+
+    assert df.loc[0, "quality_state"] == "PARTIAL_DATA"
+    assert df.loc[0, "quality_metadata_status"] == "partial"
+    assert df.loc[0, "source_data_status"] == "partial_data"
+    assert df.loc[0, "missing_required_fields"] == "free_cash_flow_yoy_growth"
+    assert df.loc[0, "partial_data_reason"] == "free_cash_flow_yoy_growth:missing:prior_free_cash_flow"
+
+
+def test_invalid_optional_raw_history_input_fails_via_e1_validation(patch_paths, tmp_path: Path):
+    context_path, _, output_path, _ = patch_paths
+    history_path = tmp_path / "fundamentals_history.csv"
+    bad_row = _history_row("AAA")
+    bad_row.pop("source_reference")
+    _write_context(context_path, [_context_row("AAA", date="2026-05-09")])
+    _write_raw(history_path, [bad_row])
+
+    with pytest.raises(ValueError, match="fundamentals_history.csv validation failed"):
+        fundamental_module.build_fundamental_layer(
+            generated_at="2026-05-09 12:00:00",
+            fundamentals_history_path=history_path,
+        )
+
+    assert not output_path.exists()
+
+
+def test_duplicate_optional_raw_history_keys_fail_via_e1_validation(patch_paths, tmp_path: Path):
+    context_path, _, output_path, _ = patch_paths
+    history_path = tmp_path / "fundamentals_history.csv"
+    _write_context(context_path, [_context_row("AAA", date="2026-05-09")])
+    _write_raw(history_path, [_history_row("AAA"), _history_row("aaa")])
+
+    with pytest.raises(ValueError, match="duplicate_key_count"):
+        fundamental_module.build_fundamental_layer(
+            generated_at="2026-05-09 12:00:00",
+            fundamentals_history_path=history_path,
+        )
+
+    assert not output_path.exists()
+
+
+def test_optional_metrics_missing_required_columns_fails_deterministically(patch_paths, tmp_path: Path):
+    context_path, _, output_path, _ = patch_paths
+    metrics_path = tmp_path / "fundamental_metrics.csv"
+    row = _metrics_row("AAA")
+    row.pop("metric_status")
+    _write_context(context_path, [_context_row("AAA", date="2026-05-09")])
+    _write_raw(metrics_path, [row])
+
+    with pytest.raises(ValueError, match="fundamental_metrics.csv is missing required columns"):
+        fundamental_module.build_fundamental_layer(
+            generated_at="2026-05-09 12:00:00",
+            fundamental_metrics_path=metrics_path,
+        )
+
+    assert not output_path.exists()
+
+
+def test_optional_compatibility_output_has_no_new_decision_reporting_telegram_or_category_fields(patch_paths, tmp_path: Path):
+    context_path, _, _, _ = patch_paths
+    metrics_path = tmp_path / "fundamental_metrics.csv"
+    _write_context(context_path, [_context_row("AAA", date="2026-05-09")])
+    _write_raw(metrics_path, [_metrics_row("AAA")])
+
+    df = fundamental_module.build_fundamental_layer(
+        generated_at="2026-05-09 12:00:00",
+        fundamental_metrics_path=metrics_path,
+    )
+
+    normalized_columns = {column.lower() for column in df.columns}
+    assert list(df.columns) == EXPECTED_OUTPUT_COLUMNS
+    assert normalized_columns.isdisjoint(FORBIDDEN_FIELDS)
+    assert "category" not in " ".join(normalized_columns)
+    assert "telegram" not in " ".join(normalized_columns)
+    assert "reporting" not in " ".join(normalized_columns)
