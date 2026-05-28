@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -22,6 +23,9 @@ from scripts.core.scanner import rank_setups, scan_ticker
 from scripts.core.build_validation_layer import build_validation_layer
 from scripts.core.build_context_layer import build_context_layer
 from scripts.core.build_fundamental_layer import build_fundamental_layer
+from scripts.core.build_fundamental_metrics import build_fundamental_metrics
+from scripts.core.build_fundamental_analysis import build_fundamental_analysis
+from scripts.core.build_fundamentals_history_intake import validate_fundamentals_history
 from scripts.core.build_timing_state_layer import build_timing_state_layer
 from scripts.core.build_portfolio_intelligence import build_portfolio_intelligence
 from scripts.portfolio.build_portfolio import build_portfolio
@@ -44,6 +48,8 @@ SCANNER_RANKED_FILE = DATA_DIR / "processed" / "scanner_ranked.csv"
 VALIDATION_LAYER_FILE = DATA_DIR / "processed" / "validation_layer.csv"
 CONTEXT_LAYER_FILE = DATA_DIR / "processed" / "context_strength.csv"
 FUNDAMENTAL_QUALITY_FILE = DATA_DIR / "processed" / "fundamental_quality.csv"
+FUNDAMENTAL_METRICS_FILE = DATA_DIR / "processed" / "fundamental_metrics.csv"
+FUNDAMENTAL_ANALYSIS_FILE = DATA_DIR / "processed" / "fundamental_analysis.csv"
 TIMING_STATE_LAYER_FILE = DATA_DIR / "processed" / "timing_state_layer.csv"
 PORTFOLIO_POSITIONS_FILE = DATA_DIR / "portfolio" / "portfolio_positions.csv"
 PORTFOLIO_REVIEW_FILE = DATA_DIR / "portfolio" / "portfolio_review.csv"
@@ -74,6 +80,14 @@ def print_artifact_written(path: Path, row_count: int | None = None) -> None:
     print(format_artifact_message(path, row_count=row_count))
 
 
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run the governed market scan pipeline.")
+    parser.add_argument("--fundamentals-history-path", help="Optional raw fundamentals history input path.")
+    parser.add_argument("--fundamental-metrics-output-path", help="Optional generated fundamental metrics output path.")
+    parser.add_argument("--fundamental-analysis-output-path", help="Optional generated fundamental analysis output path.")
+    return parser.parse_args(argv)
+
+
 def print_scan_progress(
     processed_count: int,
     total_count: int,
@@ -96,6 +110,37 @@ def ensure_dirs() -> None:
     SCANS_LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
     MARKET_REGIME_FILE.parent.mkdir(parents=True, exist_ok=True)
     SCANNER_RANKED_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+
+def build_fundamentals_pipeline(
+    fundamentals_history_path: str | Path | None = None,
+    fundamental_metrics_output_path: str | Path | None = None,
+    fundamental_analysis_output_path: str | Path | None = None,
+) -> tuple[pd.DataFrame, pd.DataFrame | None, pd.DataFrame | None]:
+    if fundamentals_history_path is None:
+        return build_fundamental_layer(), None, None
+
+    history_path = Path(fundamentals_history_path)
+    metrics_path = Path(fundamental_metrics_output_path) if fundamental_metrics_output_path else FUNDAMENTAL_METRICS_FILE
+    analysis_path = Path(fundamental_analysis_output_path) if fundamental_analysis_output_path else FUNDAMENTAL_ANALYSIS_FILE
+
+    validation_result = validate_fundamentals_history(history_path)
+    if validation_result["status"] != "VALID":
+        raise ValueError(f"fundamentals history validation failed: {validation_result}")
+
+    metrics_df = build_fundamental_metrics(history_path, metrics_path)
+    quality_df = build_fundamental_layer(
+        fundamentals_history_path=history_path,
+        fundamental_metrics_path=metrics_path,
+    )
+
+    analysis_df: pd.DataFrame | None = None
+    try:
+        analysis_df = build_fundamental_analysis(FUNDAMENTAL_QUALITY_FILE, metrics_path, analysis_path)
+    except Exception as exc:
+        print(f"Optional fundamental analysis skipped: {exc}")
+
+    return quality_df, metrics_df, analysis_df
 
 
 def prepare_scanner_output(setups: list[dict]) -> pd.DataFrame:
@@ -164,7 +209,8 @@ def prepare_scanner_output(setups: list[dict]) -> pd.DataFrame:
     return scanner_df
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv if argv is not None else [])
     ensure_dirs()
 
     print("Pipeline run started: market scan")
@@ -247,8 +293,26 @@ def main() -> None:
     print_step_completed("Build context layer", row_count=len(context_df))
 
     print_step_started("Build fundamental layer")
-    fundamental_df = build_fundamental_layer()
+    fundamental_df, metrics_df, analysis_df = build_fundamentals_pipeline(
+        fundamentals_history_path=args.fundamentals_history_path,
+        fundamental_metrics_output_path=args.fundamental_metrics_output_path,
+        fundamental_analysis_output_path=args.fundamental_analysis_output_path,
+    )
+    if metrics_df is not None:
+        metrics_path = (
+            Path(args.fundamental_metrics_output_path)
+            if args.fundamental_metrics_output_path
+            else FUNDAMENTAL_METRICS_FILE
+        )
+        print_artifact_written(metrics_path, row_count=len(metrics_df))
     print_artifact_written(FUNDAMENTAL_QUALITY_FILE, row_count=len(fundamental_df))
+    if analysis_df is not None:
+        analysis_path = (
+            Path(args.fundamental_analysis_output_path)
+            if args.fundamental_analysis_output_path
+            else FUNDAMENTAL_ANALYSIS_FILE
+        )
+        print_artifact_written(analysis_path, row_count=len(analysis_df))
     print_step_completed("Build fundamental layer", row_count=len(fundamental_df))
 
     print_step_started("Build timing state layer")
@@ -296,4 +360,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
