@@ -109,3 +109,20 @@ When files conflict:
 ## Runtime Scope
 
 This restructuring changes documentation and governance organization only. It does not change runtime code, pipeline outputs, allocation semantics, reporting semantics, data contracts, or Decision Engine authority.
+
+## Python Runtime Organization
+
+Fundamentals-specific runtime builders live under:
+
+- `scripts/fundamentals/`
+
+Compatibility wrappers remain under `scripts/core/` for established import and script paths. The active fundamentals organization is:
+
+| Runtime area | Primary implementation | Compatibility path |
+|---|---|---|
+| Raw fundamentals history validation | `scripts/fundamentals/build_history_intake.py` | `scripts/core/build_fundamentals_history_intake.py` |
+| Fundamental metrics | `scripts/fundamentals/build_metrics.py` | `scripts/core/build_fundamental_metrics.py` |
+| Fundamental quality compatibility | `scripts/fundamentals/build_quality.py` | `scripts/core/build_fundamental_layer.py` |
+| Fundamental analysis | `scripts/fundamentals/build_analysis.py` | `scripts/core/build_fundamental_analysis.py` |
+
+The compatibility wrappers must remain behavior-preserving unless a later governed cleanup explicitly removes or replaces them.

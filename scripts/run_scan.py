@@ -22,10 +22,10 @@ from scripts.core.regime import classify_market_regime
 from scripts.core.scanner import rank_setups, scan_ticker
 from scripts.core.build_validation_layer import build_validation_layer
 from scripts.core.build_context_layer import build_context_layer
-from scripts.core.build_fundamental_layer import build_fundamental_layer
-from scripts.core.build_fundamental_metrics import build_fundamental_metrics
-from scripts.core.build_fundamental_analysis import build_fundamental_analysis
-from scripts.core.build_fundamentals_history_intake import validate_fundamentals_history
+from scripts.fundamentals.build_quality import build_fundamental_layer
+from scripts.fundamentals.build_metrics import build_fundamental_metrics
+from scripts.fundamentals.build_analysis import build_fundamental_analysis
+from scripts.fundamentals.build_history_intake import validate_fundamentals_history
 from scripts.core.build_timing_state_layer import build_timing_state_layer
 from scripts.core.build_portfolio_intelligence import build_portfolio_intelligence
 from scripts.portfolio.build_portfolio import build_portfolio

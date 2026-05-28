@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from scripts.core import build_fundamental_layer as fundamental_module
+from scripts.fundamentals import build_quality as fundamental_module
 
 EXPECTED_OUTPUT_COLUMNS = [
     "ticker",

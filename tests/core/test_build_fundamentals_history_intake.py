@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from scripts.core.build_fundamentals_history_intake import (
+from scripts.fundamentals.build_history_intake import (
     REQUIRED_COLUMNS,
     validate_fundamentals_history,
 )
