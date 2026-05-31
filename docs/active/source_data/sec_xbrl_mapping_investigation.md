@@ -94,15 +94,96 @@ These statuses are descriptive only and do not imply ranking, scoring, eligibili
 - total_equity: Use stockholders' equity as the primary candidate with alternates reviewed for noncontrolling interest or entity type.
 - free_cash_flow: Treat free cash flow as a derived field requiring approved operating cash flow and capital expenditure rules.
 
-## SEC-4D Handoff
+## Derived-Field Policy
 
-SEC-4D should cover:
+Derived fields are allowed only when all required source components are traceable.
 
-- derived-field policy;
-- approved derivation formulas;
-- duplicate/amended fact handling;
-- unit and period conflict policy;
-- SEC-5 analysis-rationalization handoff.
+Derived fields must:
+
+- preserve source evidence for every component;
+- not be guessed from missing data;
+- not mix annual and quarterly contexts;
+- not mix different units;
+- not mix amended and non-amended facts without explicit review;
+- not create allocation, ranking, scoring, eligibility, urgency, conviction, tradeability, buy/sell, final-action, or hidden filtering semantics;
+- have formulas approved before SEC-6 implementation.
+
+### total_debt
+
+`total_debt` is not approved as a simple direct single-tag field yet.
+
+It likely requires a controlled derivation rule. Candidate components include current debt, noncurrent debt, short-term borrowings, and finance lease liabilities when those components are source-supported and non-overlapping.
+
+The derivation must avoid double-counting lease-inclusive and lease-exclusive debt tags. Missing components must remain missing or review-required rather than inferred.
+
+Final formula approval belongs before SEC-6.
+
+### free_cash_flow
+
+`free_cash_flow` is not approved as a direct SEC XBRL field.
+
+It likely requires operating cash flow minus capital expenditures. Operating cash flow and capital expenditure components must be source-supported.
+
+Capex sign conventions must be reviewed before implementation. Missing capex must not be treated as zero.
+
+Final formula approval belongs before SEC-6.
+
+## Duplicate and Amended Fact Handling Policy
+
+Multiple facts for the same tag and period require documented review or a future deterministic selection rule before transformation.
+
+The following cases must be treated as review-required until explicit handling rules are approved:
+
+- multiple facts for the same tag and period;
+- amended filings;
+- different units;
+- different forms;
+- different frame values;
+- company-specific extension tags;
+- restatements;
+- conflicting facts.
+
+No silent winner should be selected without a documented deterministic rule. Amended facts require explicit handling before transformation. Company-specific extension tags require review before mapping.
+
+## Unit and Period Conflict Policy
+
+- monetary fields require compatible currency units;
+- EPS fields require per-share units;
+- instant balance-sheet facts must align to period end;
+- duration income and cash-flow facts must align to fiscal period;
+- annual and quarterly contexts must not be mixed silently;
+- TTM must not be invented unless a future sprint explicitly approves it;
+- unit or period conflicts must produce review-required mapping behavior.
+
+## Source Evidence Requirements
+
+Every transformed value must retain source tag, source accession or source reference where available, unit, period, and extraction metadata.
+
+Derived values must retain evidence for each component. Notes must describe derivation and review caveats. Missing components must be explicit.
+
+## SEC-5 Analysis-Rationalization Handoff
+
+SEC-5 should:
+
+- compare existing fundamental analysis assumptions against SEC-supported fields;
+- decide which metrics remain core;
+- decide which metrics become optional;
+- decide which metrics remain review-required;
+- decide whether `gross_profit`, `diluted_eps`, `total_debt`, and `free_cash_flow` need conditional handling;
+- simplify analysis where reliable SEC coverage is weak;
+- not implement runtime changes unless separately approved.
+
+## SEC-6 Transformation Blocking Conditions
+
+SEC-6 must not start transformation until:
+
+- SEC-4 mapping is reviewed;
+- SEC-5 rationalization is complete;
+- derived formulas are approved;
+- duplicate/amended fact rules are specified;
+- unit and period conflict behavior is specified;
+- missing/ambiguous tag behavior is specified;
+- generated output policy is confirmed.
 
 ## No-Runtime-Change Confirmation
 
@@ -121,3 +202,5 @@ SEC-4D should cover:
 SEC-4B changed documentation only and did not change code, tests, data, generated files, SEC access, pipeline behavior, or downstream runtime behavior.
 
 SEC-4C changed documentation only and did not change code, tests, data, generated files, SEC access, pipeline behavior, or downstream runtime behavior.
+
+SEC-4D changed documentation only and did not change code, tests, data, generated files, SEC access, pipeline behavior, or downstream runtime behavior.
