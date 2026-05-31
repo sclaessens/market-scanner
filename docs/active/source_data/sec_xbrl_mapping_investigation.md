@@ -65,6 +65,20 @@ These statuses are descriptive only and do not imply ranking, scoring, eligibili
 | operating_income | us-gaap:OperatingIncomeLoss | PRIMARY_CANDIDATE | monetary | duration | no | CORE_IF_AVAILABLE | Review sign conventions and issuer-specific definitions before implementation. | INVESTIGATION_ONLY |
 | net_income | us-gaap:NetIncomeLoss | PRIMARY_CANDIDATE | monetary | duration | no | CORE_WITH_ALTERNATES | Primary net income candidate, subject to review of issuer presentation and sign conventions. | INVESTIGATION_ONLY |
 | net_income | us-gaap:ProfitLoss | ALTERNATE_CANDIDATE | monetary | duration | no | CORE_WITH_ALTERNATES | Alternate candidate requiring review before any runtime mapping decision. | INVESTIGATION_ONLY |
+| diluted_eps | us-gaap:EarningsPerShareDiluted | PRIMARY_CANDIDATE | per-share | duration | no | REVIEW_REQUIRED | EPS uses per-share units, must not be mixed with monetary facts, and requires careful annual versus quarterly context review. | INVESTIGATION_ONLY |
+| total_debt | us-gaap:DebtCurrent | DERIVED_COMPONENT | monetary | instant | yes | DERIVED_REQUIRES_RULES | Current debt component; controlled derivation rules are required to avoid double-counting and missing-component inference. | INVESTIGATION_ONLY |
+| total_debt | us-gaap:LongTermDebtCurrent | DERIVED_COMPONENT | monetary | instant | yes | DERIVED_REQUIRES_RULES | Current portion of long-term debt; review overlap with other current debt concepts before derivation. | INVESTIGATION_ONLY |
+| total_debt | us-gaap:LongTermDebtNoncurrent | DERIVED_COMPONENT | monetary | instant | yes | DERIVED_REQUIRES_RULES | Noncurrent long-term debt component; derivation rules must define inclusion boundaries. | INVESTIGATION_ONLY |
+| total_debt | us-gaap:LongTermDebtAndFinanceLeaseObligationsCurrent | DERIVED_COMPONENT | monetary | instant | yes | DERIVED_REQUIRES_RULES | Lease-inclusive current component; do not mix with lease-exclusive debt tags without explicit rules. | INVESTIGATION_ONLY |
+| total_debt | us-gaap:LongTermDebtAndFinanceLeaseObligationsNoncurrent | DERIVED_COMPONENT | monetary | instant | yes | DERIVED_REQUIRES_RULES | Lease-inclusive noncurrent component; requires review before combining with other debt concepts. | INVESTIGATION_ONLY |
+| total_debt | us-gaap:ShortTermBorrowings | DERIVED_COMPONENT | monetary | instant | yes | DERIVED_REQUIRES_RULES | Short-term borrowing component; derivation rules must prevent overlap with current debt tags. | INVESTIGATION_ONLY |
+| total_debt | us-gaap:FinanceLeaseLiabilityCurrent | DERIVED_COMPONENT | monetary | instant | yes | DERIVED_REQUIRES_RULES | Current finance lease liability component; lease treatment must be explicitly approved. | INVESTIGATION_ONLY |
+| total_debt | us-gaap:FinanceLeaseLiabilityNoncurrent | DERIVED_COMPONENT | monetary | instant | yes | DERIVED_REQUIRES_RULES | Noncurrent finance lease liability component; lease treatment must be explicitly approved. | INVESTIGATION_ONLY |
+| total_equity | us-gaap:StockholdersEquity | PRIMARY_CANDIDATE | monetary | instant | no | CORE_WITH_ALTERNATES | Primary equity candidate for corporate issuers; equity is an instant balance-sheet fact. | INVESTIGATION_ONLY |
+| total_equity | us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest | ALTERNATE_CANDIDATE | monetary | instant | no | CORE_WITH_ALTERNATES | Alternate equity candidate requiring review of noncontrolling interest treatment. | INVESTIGATION_ONLY |
+| total_equity | us-gaap:PartnersCapital | ALTERNATE_CANDIDATE | monetary | instant | no | CORE_WITH_ALTERNATES | Alternate candidate for partnerships and similar entities requiring special review. | INVESTIGATION_ONLY |
+| free_cash_flow | us-gaap:NetCashProvidedByUsedInOperatingActivities | DERIVED_COMPONENT | monetary | duration | yes | DERIVED_REQUIRES_RULES | Operating cash flow component; free cash flow requires approved derivation rules before implementation. | INVESTIGATION_ONLY |
+| free_cash_flow | us-gaap:PaymentsToAcquirePropertyPlantAndEquipment | DERIVED_COMPONENT | monetary | duration | yes | DERIVED_REQUIRES_RULES | Capital expenditure component; signs must be reviewed carefully and no formula is implemented in SEC-4C. | INVESTIGATION_ONLY |
 
 ## Income Statement Field Recommendations
 
@@ -73,14 +87,22 @@ These statuses are descriptive only and do not imply ranking, scoring, eligibili
 - operating_income: Use operating income or loss as the primary candidate after sign convention and definition review.
 - net_income: Use net income or loss as the primary candidate, with profit or loss retained as a reviewed alternate.
 
-## SEC-4C Handoff
+## Balance Sheet, EPS, and Cash-Flow Field Recommendations
 
-SEC-4C should cover:
+- diluted_eps: Treat diluted EPS as a reviewed per-share duration fact and keep it separate from monetary mappings.
+- total_debt: Treat total debt as a derived field that requires approved component and double-counting rules.
+- total_equity: Use stockholders' equity as the primary candidate with alternates reviewed for noncontrolling interest or entity type.
+- free_cash_flow: Treat free cash flow as a derived field requiring approved operating cash flow and capital expenditure rules.
 
-- diluted_eps
-- total_debt
-- total_equity
-- free_cash_flow
+## SEC-4D Handoff
+
+SEC-4D should cover:
+
+- derived-field policy;
+- approved derivation formulas;
+- duplicate/amended fact handling;
+- unit and period conflict policy;
+- SEC-5 analysis-rationalization handoff.
 
 ## No-Runtime-Change Confirmation
 
@@ -97,3 +119,5 @@ SEC-4C should cover:
 - no scraping performed.
 
 SEC-4B changed documentation only and did not change code, tests, data, generated files, SEC access, pipeline behavior, or downstream runtime behavior.
+
+SEC-4C changed documentation only and did not change code, tests, data, generated files, SEC access, pipeline behavior, or downstream runtime behavior.
