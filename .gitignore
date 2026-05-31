@@ -35,6 +35,9 @@ data/processed/*.csv
 # Historical evidence artifacts are generated locally.
 data/history/
 
+# Local SEC EDGAR cache artifacts are generated locally.
+data/local/
+
 # ========================
 # MAAR deze core files toelaten
 # ========================
