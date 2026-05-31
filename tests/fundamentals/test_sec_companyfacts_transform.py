@@ -347,26 +347,155 @@ def test_derived_source_evidence_and_notes_are_recorded() -> None:
     assert "free_cash_flow: derived by subtracting positive capex outflow" in "|".join(notes["review_notes"])
 
 
-def test_unit_conflict_fails_clearly() -> None:
+def test_missing_fiscal_year_fact_does_not_fail_whole_ticker() -> None:
+    payload = _companyfacts_payload(
+        {
+            "Revenues": {
+                "USD": [
+                    _fact(999, unit_fields={"fy": None}),
+                    _fact(1000),
+                ]
+            },
+        }
+    )
+
+    row = _transform(payload).iloc[0]
+    notes = json.loads(row["notes"])
+
+    assert row["revenue"] == "1000"
+    assert "missing fiscal year" in "|".join(notes["review_notes"])
+    assert notes["evidence"]["skipped_facts"][0]["source_tag"] == "us-gaap:Revenues"
+
+
+def test_invalid_fiscal_period_fact_does_not_fail_whole_ticker() -> None:
+    payload = _companyfacts_payload(
+        {
+            "Revenues": {
+                "USD": [
+                    _fact(999, fp="BAD"),
+                    _fact(1000),
+                ]
+            },
+        }
+    )
+
+    row = _transform(payload).iloc[0]
+    notes = json.loads(row["notes"])
+
+    assert row["revenue"] == "1000"
+    assert "fiscal period is unsupported" in "|".join(notes["review_notes"])
+
+
+def test_missing_period_end_date_fact_does_not_fail_whole_ticker() -> None:
+    payload = _companyfacts_payload(
+        {
+            "Revenues": {
+                "USD": [
+                    _fact(999, unit_fields={"end": ""}),
+                    _fact(1000),
+                ]
+            },
+        }
+    )
+
+    row = _transform(payload).iloc[0]
+    notes = json.loads(row["notes"])
+
+    assert row["period_end_date"] == "2024-12-31"
+    assert row["revenue"] == "1000"
+    assert "missing period end date" in "|".join(notes["review_notes"])
+
+
+def test_unit_conflict_marks_field_review_required_without_failing_ticker() -> None:
     payload = _companyfacts_payload(
         {
             "Revenues": {"USD": [_fact(1000)], "CAD": [_fact(1000)]},
+            "OperatingIncomeLoss": {"USD": [_fact(210)]},
         }
     )
 
-    with pytest.raises(ValueError, match="unit conflict"):
-        _transform(payload)
+    row = _transform(payload).iloc[0]
+    notes = json.loads(row["notes"])
+
+    assert row["revenue"] == ""
+    assert row["operating_income"] == "210"
+    assert "unit conflict for revenue" in "|".join(notes["review_notes"])
+    assert notes["evidence"]["review_required_fields"]["revenue"][0]["reason"].startswith("unit conflict")
 
 
-def test_conflicting_same_tag_period_unit_facts_fail_clearly() -> None:
+def test_conflicting_same_tag_period_unit_facts_mark_field_review_required_without_failing_ticker() -> None:
     payload = _companyfacts_payload(
         {
             "Revenues": {"USD": [_fact(1000), _fact(1001)]},
+            "OperatingIncomeLoss": {"USD": [_fact(210)]},
         }
     )
 
-    with pytest.raises(ValueError, match="conflicting SEC facts"):
-        _transform(payload)
+    row = _transform(payload).iloc[0]
+    notes = json.loads(row["notes"])
+
+    assert row["revenue"] == ""
+    assert row["operating_income"] == "210"
+    assert "conflicting SEC facts for revenue" in "|".join(notes["review_notes"])
+    assert notes["evidence"]["review_required_fields"]["revenue"][0]["reason"].startswith("conflicting SEC facts")
+
+
+def test_clean_period_remains_transformed_when_old_period_conflicts() -> None:
+    payload = _companyfacts_payload(
+        {
+            "Revenues": {
+                "USD": [
+                    _fact(800, fy=2023, end="2023-12-31"),
+                    _fact(801, fy=2023, end="2023-12-31"),
+                    _fact(1000, fy=2024, end="2024-12-31"),
+                ]
+            },
+            "OperatingIncomeLoss": {"USD": [_fact(210, fy=2024, end="2024-12-31")]},
+        }
+    )
+
+    df = _transform(payload)
+    old_period = df.loc[df["fiscal_year"] == "2023"].iloc[0]
+    clean_period = df.loc[df["fiscal_year"] == "2024"].iloc[0]
+
+    assert old_period["revenue"] == ""
+    assert "conflicting SEC facts for revenue" in "|".join(json.loads(old_period["notes"])["review_notes"])
+    assert clean_period["revenue"] == "1000"
+    assert clean_period["operating_income"] == "210"
+
+
+def test_duplicate_same_value_facts_remain_deterministic() -> None:
+    payload = _companyfacts_payload(
+        {
+            "Revenues": {"USD": [_fact(1000), _fact(1000, unit_fields={"accn": "0000000000-2024-000002"})]},
+        }
+    )
+
+    row = _transform(payload).iloc[0]
+
+    assert row["revenue"] == "1000"
+    assert "duplicate same-value facts present" in "|".join(json.loads(row["notes"])["review_notes"])
+
+
+def test_conflicting_derived_components_remain_blank_with_review_notes() -> None:
+    payload = _companyfacts_payload(
+        {
+            "DebtCurrent": {"USD": [_fact(100), _fact(101)]},
+            "LongTermDebtNoncurrent": {"USD": [_fact(900)]},
+            "NetCashProvidedByUsedInOperatingActivities": {"USD": [_fact(222)]},
+            "PaymentsToAcquirePropertyPlantAndEquipment": {"USD": [_fact(33), _fact(34)]},
+        }
+    )
+
+    row = _transform(payload).iloc[0]
+    notes = json.loads(row["notes"])
+
+    assert row["total_debt"] == ""
+    assert row["free_cash_flow"] == ""
+    rendered_notes = "|".join(notes["review_notes"])
+    assert "conflicting SEC facts for debt_current" in rendered_notes
+    assert "conflicting SEC facts for capital_expenditures" in rendered_notes
+    assert "review_required_derived_components" in notes["evidence"]
 
 
 def test_no_live_sec_network_call_on_import(monkeypatch: pytest.MonkeyPatch) -> None:
