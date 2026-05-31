@@ -54,19 +54,33 @@ These statuses are descriptive only and do not imply ranking, scoring, eligibili
 - REVIEW_REQUIRED: The field requires further review before reliability can be classified.
 - UNSUPPORTED_UNTIL_FURTHER_REVIEW: The field remains unsupported until additional review is completed.
 
-## Empty Mapping Table Template
+## Mapping Table
 
 | internal_field | candidate_tag | candidate_role | unit_expectation | period_type | derivation_needed | reliability_classification | review_notes | implementation_status |
 |---|---|---|---|---|---|---|---|---|
+| revenue | us-gaap:Revenues | PRIMARY_CANDIDATE | monetary | duration | no | CORE_WITH_ALTERNATES | Review issuer wording and whether the reported concept represents total revenue. | INVESTIGATION_ONLY |
+| revenue | us-gaap:SalesRevenueNet | ALTERNATE_CANDIDATE | monetary | duration | no | CORE_WITH_ALTERNATES | Use as an alternate revenue candidate where issuer reporting uses sales revenue terminology. | INVESTIGATION_ONLY |
+| revenue | us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax | ALTERNATE_CANDIDATE | monetary | duration | no | CORE_WITH_ALTERNATES | Review applicability under revenue recognition disclosures and issuer-specific presentation. | INVESTIGATION_ONLY |
+| gross_profit | us-gaap:GrossProfit | PRIMARY_CANDIDATE | monetary | duration | no | CORE_IF_AVAILABLE | Primary candidate when reported, but availability may vary by issuer and statement presentation. | INVESTIGATION_ONLY |
+| operating_income | us-gaap:OperatingIncomeLoss | PRIMARY_CANDIDATE | monetary | duration | no | CORE_IF_AVAILABLE | Review sign conventions and issuer-specific definitions before implementation. | INVESTIGATION_ONLY |
+| net_income | us-gaap:NetIncomeLoss | PRIMARY_CANDIDATE | monetary | duration | no | CORE_WITH_ALTERNATES | Primary net income candidate, subject to review of issuer presentation and sign conventions. | INVESTIGATION_ONLY |
+| net_income | us-gaap:ProfitLoss | ALTERNATE_CANDIDATE | monetary | duration | no | CORE_WITH_ALTERNATES | Alternate candidate requiring review before any runtime mapping decision. | INVESTIGATION_ONLY |
 
-## SEC-4B Handoff
+## Income Statement Field Recommendations
 
-SEC-4B should add candidate tag mappings for income statement fields only:
+- revenue: Use a reviewed primary revenue candidate with alternate candidates available for issuer-specific reporting patterns.
+- gross_profit: Treat as core when available, with review required for issuers that do not report gross profit consistently.
+- operating_income: Use operating income or loss as the primary candidate after sign convention and definition review.
+- net_income: Use net income or loss as the primary candidate, with profit or loss retained as a reviewed alternate.
 
-- revenue
-- gross_profit
-- operating_income
-- net_income
+## SEC-4C Handoff
+
+SEC-4C should cover:
+
+- diluted_eps
+- total_debt
+- total_equity
+- free_cash_flow
 
 ## No-Runtime-Change Confirmation
 
@@ -81,3 +95,5 @@ SEC-4B should add candidate tag mappings for income statement fields only:
 - no SEC/network calls performed;
 - no SEC data downloaded;
 - no scraping performed.
+
+SEC-4B changed documentation only and did not change code, tests, data, generated files, SEC access, pipeline behavior, or downstream runtime behavior.
