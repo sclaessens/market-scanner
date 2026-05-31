@@ -1,7 +1,7 @@
  # SEC-7A — Controlled Review Ticker Input Preparation
 
-Status: DOCUMENTATION-ONLY PREPARATION  
-Backlog context: BL-0015 / BL-0017  
+Status: DOCUMENTATION-ONLY PREPARATION
+Backlog context: BL-0015 / BL-0017
 Date: 2026-05-31
 
 ## Purpose
