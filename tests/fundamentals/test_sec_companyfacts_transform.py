@@ -150,14 +150,21 @@ def test_total_debt_remains_blank_and_is_not_derived() -> None:
     row = _transform(_base_payload()).iloc[0]
 
     assert row["total_debt"] == ""
-    assert json.loads(row["notes"])["blocked_fields"]["total_debt"].startswith("blocked in SEC-6A")
+    assert "missing current or noncurrent simple debt component" in "|".join(json.loads(row["notes"])["review_notes"])
 
 
-def test_free_cash_flow_remains_blank_and_is_not_derived() -> None:
-    row = _transform(_base_payload()).iloc[0]
+def test_free_cash_flow_not_derived_when_capex_is_missing() -> None:
+    payload = _companyfacts_payload(
+        {
+            "Revenues": {"USD": [_fact(1000)]},
+            "NetCashProvidedByUsedInOperatingActivities": {"USD": [_fact(222)]},
+        }
+    )
+
+    row = _transform(payload).iloc[0]
 
     assert row["free_cash_flow"] == ""
-    assert json.loads(row["notes"])["blocked_fields"]["free_cash_flow"].startswith("blocked in SEC-6A")
+    assert "free_cash_flow: missing capital expenditure component" in "|".join(json.loads(row["notes"])["review_notes"])
 
 
 def test_missing_values_are_not_treated_as_zero() -> None:
@@ -169,6 +176,122 @@ def test_missing_values_are_not_treated_as_zero() -> None:
     assert row["gross_profit"] == ""
     assert row["total_debt"] == ""
     assert row["free_cash_flow"] == ""
+
+
+def test_total_debt_derived_from_clean_current_and_noncurrent_debt_fixture() -> None:
+    payload = _companyfacts_payload(
+        {
+            "DebtCurrent": {"USD": [_fact(100)]},
+            "LongTermDebtNoncurrent": {"USD": [_fact(900)]},
+        }
+    )
+
+    row = _transform(payload).iloc[0]
+    notes = json.loads(row["notes"])
+
+    assert row["total_debt"] == "1000"
+    assert notes["evidence"]["total_debt"]["formula_version"] == "SEC-6C_TOTAL_DEBT_SIMPLE_V1"
+    assert notes["evidence"]["total_debt"]["components"]["current_debt"]["source_tag"] == "us-gaap:DebtCurrent"
+    assert notes["evidence"]["total_debt"]["components"]["noncurrent_debt"]["source_tag"] == "us-gaap:LongTermDebtNoncurrent"
+
+
+def test_total_debt_derived_from_clean_lease_inclusive_current_and_noncurrent_debt_fixture() -> None:
+    payload = _companyfacts_payload(
+        {
+            "LongTermDebtAndFinanceLeaseObligationsCurrent": {"USD": [_fact(125)]},
+            "LongTermDebtAndFinanceLeaseObligationsNoncurrent": {"USD": [_fact(875)]},
+        }
+    )
+
+    row = _transform(payload).iloc[0]
+    notes = json.loads(row["notes"])
+
+    assert row["total_debt"] == "1000"
+    assert notes["evidence"]["total_debt"]["formula_version"] == "SEC-6C_TOTAL_DEBT_LEASE_INCLUSIVE_V1"
+    assert (
+        notes["evidence"]["total_debt"]["components"]["lease_inclusive_current_debt"]["source_tag"]
+        == "us-gaap:LongTermDebtAndFinanceLeaseObligationsCurrent"
+    )
+
+
+def test_total_debt_blocked_when_lease_inclusive_and_lease_exclusive_families_overlap() -> None:
+    payload = _companyfacts_payload(
+        {
+            "DebtCurrent": {"USD": [_fact(100)]},
+            "LongTermDebtNoncurrent": {"USD": [_fact(900)]},
+            "LongTermDebtAndFinanceLeaseObligationsCurrent": {"USD": [_fact(125)]},
+            "LongTermDebtAndFinanceLeaseObligationsNoncurrent": {"USD": [_fact(875)]},
+        }
+    )
+
+    row = _transform(payload).iloc[0]
+
+    assert row["total_debt"] == ""
+    assert "simple and lease-inclusive debt component families overlap" in "|".join(json.loads(row["notes"])["review_notes"])
+
+
+def test_total_debt_not_derived_when_components_are_insufficient() -> None:
+    payload = _companyfacts_payload({"LongTermDebtNoncurrent": {"USD": [_fact(900)]}})
+
+    row = _transform(payload).iloc[0]
+
+    assert row["total_debt"] == ""
+    assert "missing current or noncurrent simple debt component" in "|".join(json.loads(row["notes"])["review_notes"])
+
+
+def test_short_term_borrowings_and_finance_leases_are_not_silently_mixed_into_debt() -> None:
+    payload = _companyfacts_payload(
+        {
+            "DebtCurrent": {"USD": [_fact(100)]},
+            "LongTermDebtNoncurrent": {"USD": [_fact(900)]},
+            "ShortTermBorrowings": {"USD": [_fact(50)]},
+            "FinanceLeaseLiabilityCurrent": {"USD": [_fact(25)]},
+            "FinanceLeaseLiabilityNoncurrent": {"USD": [_fact(75)]},
+        }
+    )
+
+    row = _transform(payload).iloc[0]
+    review_notes = "|".join(json.loads(row["notes"])["review_notes"])
+
+    assert row["total_debt"] == ""
+    assert "review-required components present and not mixed automatically" in review_notes
+
+
+def test_free_cash_flow_derived_from_operating_cash_flow_and_positive_capex_outflow() -> None:
+    row = _transform(_base_payload()).iloc[0]
+    notes = json.loads(row["notes"])
+
+    assert row["free_cash_flow"] == "189"
+    assert notes["evidence"]["free_cash_flow"]["formula_version"] == "SEC-6C_FREE_CASH_FLOW_V1"
+    assert notes["evidence"]["free_cash_flow"]["components"]["operating_cash_flow"]["source_tag"] == (
+        "us-gaap:NetCashProvidedByUsedInOperatingActivities"
+    )
+    assert notes["evidence"]["free_cash_flow"]["components"]["capital_expenditures"]["source_tag"] == (
+        "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment"
+    )
+
+
+def test_free_cash_flow_negative_capex_is_treated_as_already_signed_cash_flow() -> None:
+    payload = _companyfacts_payload(
+        {
+            "NetCashProvidedByUsedInOperatingActivities": {"USD": [_fact(222)]},
+            "PaymentsToAcquirePropertyPlantAndEquipment": {"USD": [_fact(-33)]},
+        }
+    )
+
+    row = _transform(payload).iloc[0]
+
+    assert row["free_cash_flow"] == "189"
+    assert "already signed negative capex" in "|".join(json.loads(row["notes"])["review_notes"])
+
+
+def test_free_cash_flow_not_derived_when_operating_cash_flow_is_missing() -> None:
+    payload = _companyfacts_payload({"PaymentsToAcquirePropertyPlantAndEquipment": {"USD": [_fact(33)]}})
+
+    row = _transform(payload).iloc[0]
+
+    assert row["free_cash_flow"] == ""
+    assert "missing operating cash flow component" in "|".join(json.loads(row["notes"])["review_notes"])
 
 
 def test_deterministic_output_ordering() -> None:
@@ -203,6 +326,25 @@ def test_source_evidence_is_recorded() -> None:
     assert notes["evidence"]["revenue"]["fiscal_year"] == 2024
     assert row["source_freshness_date"] == "2026-05-31"
     assert row["extraction_date"] == "2026-05-31"
+
+
+def test_derived_source_evidence_and_notes_are_recorded() -> None:
+    row = _transform(
+        _companyfacts_payload(
+            {
+                "DebtCurrent": {"USD": [_fact(100)]},
+                "LongTermDebtNoncurrent": {"USD": [_fact(900)]},
+                "NetCashProvidedByUsedInOperatingActivities": {"USD": [_fact(222)]},
+                "PaymentsToAcquirePropertyPlantAndEquipment": {"USD": [_fact(33)]},
+            }
+        )
+    ).iloc[0]
+
+    notes = json.loads(row["notes"])
+    assert notes["evidence"]["total_debt"]["formula"] == "current_debt + noncurrent_debt"
+    assert notes["evidence"]["free_cash_flow"]["formula"] == "operating_cash_flow - positive_capex_outflow"
+    assert "total_debt: derived from clean simple current and noncurrent debt components" in "|".join(notes["review_notes"])
+    assert "free_cash_flow: derived by subtracting positive capex outflow" in "|".join(notes["review_notes"])
 
 
 def test_unit_conflict_fails_clearly() -> None:
