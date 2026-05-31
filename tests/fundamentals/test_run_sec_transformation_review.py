@@ -52,25 +52,38 @@ def _companyfacts_missing_derived_payload() -> dict:
     return payload
 
 
+def _companyfacts_messy_payload() -> dict:
+    payload = _companyfacts_payload()
+    payload["facts"]["us-gaap"]["Revenues"]["units"]["USD"] = [
+        _fact(900, fy=2023, end="2023-12-31"),
+        _fact(901, fy=2023, end="2023-12-31"),
+        _fact(1000),
+        _fact(999, fy="", end="2024-12-31"),
+    ]
+    return payload
+
+
 def _write_fixture_inputs(tmp_path: Path) -> tuple[Path, Path, Path]:
     project_tickers = tmp_path / "project_tickers.csv"
     ticker_source = tmp_path / "company_tickers.json"
     companyfacts_dir = tmp_path / "companyfacts"
     companyfacts_dir.mkdir()
 
-    pd.DataFrame({"ticker": ["FULL", "NOMAP", "NOFACTS", "PARTIAL"]}).to_csv(project_tickers, index=False)
+    pd.DataFrame({"ticker": ["FULL", "NOMAP", "NOFACTS", "PARTIAL", "MESSY"]}).to_csv(project_tickers, index=False)
     ticker_source.write_text(
         json.dumps(
             {
                 "0": {"ticker": "FULL", "cik_str": 320193, "title": "Synthetic Full"},
                 "1": {"ticker": "NOFACTS", "cik_str": 789019, "title": "Synthetic Missing Facts"},
                 "2": {"ticker": "PARTIAL", "cik_str": 111111, "title": "Synthetic Partial"},
+                "3": {"ticker": "MESSY", "cik_str": 222222, "title": "Synthetic Messy Facts"},
             }
         ),
         encoding="utf-8",
     )
     (companyfacts_dir / "CIK0000320193.json").write_text(json.dumps(_companyfacts_payload()), encoding="utf-8")
     (companyfacts_dir / "CIK0000111111.json").write_text(json.dumps(_companyfacts_missing_derived_payload()), encoding="utf-8")
+    (companyfacts_dir / "CIK0000222222.json").write_text(json.dumps(_companyfacts_messy_payload()), encoding="utf-8")
     return project_tickers, ticker_source, companyfacts_dir
 
 
@@ -89,7 +102,7 @@ def _run_review(tmp_path: Path, *, output_path: Path | None = None) -> pd.DataFr
 def test_controlled_review_runner_works_with_explicit_local_fixture_inputs(tmp_path: Path) -> None:
     review_df = _run_review(tmp_path)
 
-    assert list(review_df["ticker"]) == ["FULL", "NOMAP", "NOFACTS", "PARTIAL"]
+    assert list(review_df["ticker"]) == ["FULL", "NOMAP", "NOFACTS", "PARTIAL", "MESSY", "MESSY"]
     assert set(review.REVIEW_COLUMNS).issubset(review_df.columns)
 
 
@@ -170,6 +183,21 @@ def test_missing_derived_components_remain_blank_with_review_notes(tmp_path: Pat
     assert "free_cash_flow: missing capital expenditure component" in "|".join(notes["review_notes"])
 
 
+def test_messy_companyfacts_preserve_clean_periods_without_whole_ticker_failure(tmp_path: Path) -> None:
+    messy_rows = _run_review(tmp_path).loc[lambda df: df["ticker"] == "MESSY"]
+
+    assert set(messy_rows["transformation_status"]) == {"TRANSFORMED"}
+    clean_row = messy_rows.loc[messy_rows["fiscal_year"] == "2024"].iloc[0]
+    old_row = messy_rows.loc[messy_rows["fiscal_year"] == "2023"].iloc[0]
+    clean_notes = json.loads(clean_row["notes"])
+    old_notes = json.loads(old_row["notes"])
+
+    assert clean_row["revenue"] == "1000"
+    assert old_row["revenue"] == ""
+    assert "missing fiscal year" in "|".join(clean_notes["review_notes"])
+    assert "conflicting SEC facts for revenue" in "|".join(old_notes["review_notes"])
+
+
 def test_review_only_columns_do_not_contain_allocation_trade_or_action_semantics(tmp_path: Path) -> None:
     review_df = _run_review(tmp_path)
     forbidden = [
@@ -229,6 +257,6 @@ def test_validate_only_cli_does_not_write_output(tmp_path: Path, capsys: pytest.
 
     captured = json.loads(capsys.readouterr().out)
     assert exit_code == 0
-    assert captured["row_count"] == 4
+    assert captured["row_count"] == 6
     assert captured["output_path"] == ""
     assert not output_path.exists()

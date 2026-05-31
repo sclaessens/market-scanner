@@ -67,6 +67,13 @@ class SelectedFact:
     accn: str
 
 
+@dataclass(frozen=True)
+class FactSelectionOutcome:
+    fact: SelectedFact | None
+    notes: list[str]
+    review_evidence: list[dict[str, Any]]
+
+
 def load_companyfacts_json(path: str | Path) -> dict[str, Any]:
     source_path = Path(path)
     if not source_path.exists():
@@ -128,7 +135,41 @@ def _validate_unit_for_field(field: str, unit: str) -> None:
         raise ValueError(f"{field} requires a monetary unit, got: {unit}")
 
 
-def _iter_tag_facts(payload: dict[str, Any], tags: list[str], *, field: str) -> list[SelectedFact]:
+def _skipped_fact_evidence(*, tag: str, unit: str, fact: dict[str, Any], reason: str) -> dict[str, Any]:
+    return {
+        "source_tag": tag,
+        "unit": _clean_text(unit),
+        "value": _format_value(fact.get("val")),
+        "fiscal_year": _clean_text(fact.get("fy")),
+        "fiscal_period": _clean_text(fact.get("fp")),
+        "period_end_date": _clean_text(fact.get("end")),
+        "filed": _clean_text(fact.get("filed")),
+        "form": _clean_text(fact.get("form")),
+        "frame": _clean_text(fact.get("frame")),
+        "accession": _clean_text(fact.get("accn")),
+        "reason": reason,
+    }
+
+
+def _format_skipped_fact_note(skipped_fact: dict[str, Any]) -> str:
+    return (
+        "skipped fact: "
+        f"{skipped_fact['source_tag']} "
+        f"{skipped_fact['unit'] or '<missing-unit>'} "
+        f"fy={skipped_fact['fiscal_year'] or '<missing>'} "
+        f"fp={skipped_fact['fiscal_period'] or '<missing>'} "
+        f"end={skipped_fact['period_end_date'] or '<missing>'} "
+        f"reason={skipped_fact['reason']}"
+    )
+
+
+def _iter_tag_facts(
+    payload: dict[str, Any],
+    tags: list[str],
+    *,
+    field: str,
+    skipped_facts: list[dict[str, Any]],
+) -> list[SelectedFact]:
     facts_root = payload.get("facts", {})
     if not isinstance(facts_root, dict):
         raise ValueError("SEC Company Facts payload is missing a facts object.")
@@ -143,13 +184,23 @@ def _iter_tag_facts(payload: dict[str, Any], tags: list[str], *, field: str) -> 
         if not isinstance(units, dict):
             continue
         for unit, unit_facts in units.items():
-            _validate_unit_for_field(field, unit)
             if not isinstance(unit_facts, list):
+                continue
+            try:
+                _validate_unit_for_field(field, unit)
+            except ValueError as exc:
+                for fact in unit_facts:
+                    if isinstance(fact, dict):
+                        skipped_facts.append(_skipped_fact_evidence(tag=tag, unit=unit, fact=fact, reason=str(exc)))
                 continue
             for fact in unit_facts:
                 if not isinstance(fact, dict):
                     continue
-                fy, fp, end = _fact_period_key(fact, tag=tag)
+                try:
+                    fy, fp, end = _fact_period_key(fact, tag=tag)
+                except ValueError as exc:
+                    skipped_facts.append(_skipped_fact_evidence(tag=tag, unit=unit, fact=fact, reason=str(exc)))
+                    continue
                 selected.append(
                     SelectedFact(
                         field=field,
@@ -168,20 +219,25 @@ def _iter_tag_facts(payload: dict[str, Any], tags: list[str], *, field: str) -> 
     return selected
 
 
-def _iter_allowed_facts(payload: dict[str, Any]) -> list[SelectedFact]:
+def _iter_allowed_facts(payload: dict[str, Any]) -> tuple[list[SelectedFact], list[dict[str, Any]]]:
     selected: list[SelectedFact] = []
+    skipped_facts: list[dict[str, Any]] = []
     for field, tags in DIRECT_FIELD_CANDIDATES.items():
-        selected.extend(_iter_tag_facts(payload, tags, field=field))
+        selected.extend(_iter_tag_facts(payload, tags, field=field, skipped_facts=skipped_facts))
     for component, tags in DERIVED_COMPONENT_CANDIDATES.items():
-        selected.extend(_iter_tag_facts(payload, tags, field=component))
-    return selected
+        selected.extend(_iter_tag_facts(payload, tags, field=component, skipped_facts=skipped_facts))
+    return selected, skipped_facts
 
 
 def _canonical_value(value: Any) -> str:
     return _clean_text(value)
 
 
-def _select_one_fact(field: str, facts: list[SelectedFact]) -> tuple[SelectedFact, list[str]]:
+def _selection_review_evidence(reason: str, facts: list[SelectedFact]) -> list[dict[str, Any]]:
+    return [{**_derived_evidence(fact), "reason": reason} for fact in sorted(facts, key=lambda fact: (fact.tag, fact.unit, fact.filed, fact.form, fact.accn, _canonical_value(fact.value)))]
+
+
+def _select_one_fact(field: str, facts: list[SelectedFact]) -> FactSelectionOutcome:
     grouped_by_tag_unit: dict[tuple[str, str], list[SelectedFact]] = {}
     for fact in facts:
         grouped_by_tag_unit.setdefault((fact.tag, fact.unit), []).append(fact)
@@ -189,11 +245,13 @@ def _select_one_fact(field: str, facts: list[SelectedFact]) -> tuple[SelectedFac
     for (tag, unit), grouped in grouped_by_tag_unit.items():
         distinct_values = {_canonical_value(fact.value) for fact in grouped}
         if len(distinct_values) > 1:
-            raise ValueError(f"conflicting SEC facts for {field} {tag} {unit} {grouped[0].fy} {grouped[0].fp} {grouped[0].end}")
+            reason = f"conflicting SEC facts for {field} {tag} {unit} {grouped[0].fy} {grouped[0].fp} {grouped[0].end}"
+            return FactSelectionOutcome(None, [f"{field}: {reason}; field left blank for review"], _selection_review_evidence(reason, grouped))
 
     distinct_units = {fact.unit for fact in facts}
     if len(distinct_units) > 1:
-        raise ValueError(f"unit conflict for {field} {facts[0].fy} {facts[0].fp} {facts[0].end}: {sorted(distinct_units)}")
+        reason = f"unit conflict for {field} {facts[0].fy} {facts[0].fp} {facts[0].end}: {sorted(distinct_units)}"
+        return FactSelectionOutcome(None, [f"{field}: {reason}; field left blank for review"], _selection_review_evidence(reason, facts))
 
     ordered = sorted(
         facts,
@@ -215,10 +273,10 @@ def _select_one_fact(field: str, facts: list[SelectedFact]) -> tuple[SelectedFac
         notes.append(f"{field}: duplicate same-value facts present for {chosen.tag}; deterministic first filed/form/accession order used")
     if field == "diluted_eps":
         notes.append("diluted_eps: review-required per-share field preserved with explicit unit and period evidence")
-    return chosen, notes
+    return FactSelectionOutcome(chosen, notes, [])
 
 
-def _select_component_fact(component: str, facts: list[SelectedFact]) -> tuple[SelectedFact, list[str]]:
+def _select_component_fact(component: str, facts: list[SelectedFact]) -> FactSelectionOutcome:
     grouped_by_tag_unit: dict[tuple[str, str], list[SelectedFact]] = {}
     for fact in facts:
         grouped_by_tag_unit.setdefault((fact.tag, fact.unit), []).append(fact)
@@ -226,17 +284,18 @@ def _select_component_fact(component: str, facts: list[SelectedFact]) -> tuple[S
     for (tag, unit), grouped in grouped_by_tag_unit.items():
         distinct_values = {_canonical_value(fact.value) for fact in grouped}
         if len(distinct_values) > 1:
-            raise ValueError(f"conflicting SEC facts for {component} {tag} {unit} {grouped[0].fy} {grouped[0].fp} {grouped[0].end}")
+            reason = f"conflicting SEC facts for {component} {tag} {unit} {grouped[0].fy} {grouped[0].fp} {grouped[0].end}"
+            return FactSelectionOutcome(None, [f"{component}: {reason}; component left blank for review"], _selection_review_evidence(reason, grouped))
 
     distinct_units = {fact.unit for fact in facts}
     if len(distinct_units) > 1:
-        raise ValueError(f"unit conflict for {component} {facts[0].fy} {facts[0].fp} {facts[0].end}: {sorted(distinct_units)}")
+        reason = f"unit conflict for {component} {facts[0].fy} {facts[0].fp} {facts[0].end}: {sorted(distinct_units)}"
+        return FactSelectionOutcome(None, [f"{component}: {reason}; component left blank for review"], _selection_review_evidence(reason, facts))
 
     distinct_tags = {fact.tag for fact in facts}
     if component == "debt_current" and len(distinct_tags) > 1:
-        raise ValueError(
-            f"component overlap for total_debt current debt {facts[0].fy} {facts[0].fp} {facts[0].end}: {sorted(distinct_tags)}"
-        )
+        reason = f"component overlap for total_debt current debt {facts[0].fy} {facts[0].fp} {facts[0].end}: {sorted(distinct_tags)}"
+        return FactSelectionOutcome(None, [f"{component}: {reason}; component left blank for review"], _selection_review_evidence(reason, facts))
 
     ordered = sorted(
         facts,
@@ -253,7 +312,7 @@ def _select_component_fact(component: str, facts: list[SelectedFact]) -> tuple[S
     duplicate_count = len([fact for fact in ordered if fact.tag == chosen.tag and fact.unit == chosen.unit])
     if duplicate_count > 1:
         notes.append(f"{component}: duplicate same-value facts present for {chosen.tag}; deterministic first filed/form/accession order used")
-    return chosen, notes
+    return FactSelectionOutcome(chosen, notes, [])
 
 
 def _fact_to_float(fact: SelectedFact) -> float:
@@ -345,17 +404,28 @@ def _derive_total_debt(
         if not simple_current or not simple_noncurrent:
             review_notes.append("total_debt: missing current or noncurrent simple debt component; value not inferred")
             return ""
-        current, current_notes = _select_component_fact("debt_current", simple_current)
-        noncurrent, noncurrent_notes = _select_component_fact("debt_noncurrent", simple_noncurrent)
-        review_notes.extend(current_notes)
-        review_notes.extend(noncurrent_notes)
-        total = _fact_to_float(current) + _fact_to_float(noncurrent)
+        current = _select_component_fact("debt_current", simple_current)
+        noncurrent = _select_component_fact("debt_noncurrent", simple_noncurrent)
+        review_notes.extend(current.notes)
+        review_notes.extend(noncurrent.notes)
+        if current.review_evidence or noncurrent.review_evidence:
+            evidence.setdefault("review_required_derived_components", {}).setdefault("total_debt", []).extend(
+                current.review_evidence + noncurrent.review_evidence
+            )
+        if current.fact is None or noncurrent.fact is None:
+            review_notes.append("total_debt: blocked because one or more simple debt components require review")
+            return ""
+        try:
+            total = _fact_to_float(current.fact) + _fact_to_float(noncurrent.fact)
+        except ValueError as exc:
+            review_notes.append(f"total_debt: {exc}; value left blank for review")
+            return ""
         evidence["total_debt"] = {
             "formula": "current_debt + noncurrent_debt",
             "formula_version": "SEC-6C_TOTAL_DEBT_SIMPLE_V1",
             "components": {
-                "current_debt": _derived_evidence(current),
-                "noncurrent_debt": _derived_evidence(noncurrent),
+                "current_debt": _derived_evidence(current.fact),
+                "noncurrent_debt": _derived_evidence(noncurrent.fact),
             },
         }
         review_notes.append("total_debt: derived from clean simple current and noncurrent debt components")
@@ -365,17 +435,28 @@ def _derive_total_debt(
         if not lease_current or not lease_noncurrent:
             review_notes.append("total_debt: missing current or noncurrent lease-inclusive debt component; value not inferred")
             return ""
-        current, current_notes = _select_component_fact("debt_lease_inclusive_current", lease_current)
-        noncurrent, noncurrent_notes = _select_component_fact("debt_lease_inclusive_noncurrent", lease_noncurrent)
-        review_notes.extend(current_notes)
-        review_notes.extend(noncurrent_notes)
-        total = _fact_to_float(current) + _fact_to_float(noncurrent)
+        current = _select_component_fact("debt_lease_inclusive_current", lease_current)
+        noncurrent = _select_component_fact("debt_lease_inclusive_noncurrent", lease_noncurrent)
+        review_notes.extend(current.notes)
+        review_notes.extend(noncurrent.notes)
+        if current.review_evidence or noncurrent.review_evidence:
+            evidence.setdefault("review_required_derived_components", {}).setdefault("total_debt", []).extend(
+                current.review_evidence + noncurrent.review_evidence
+            )
+        if current.fact is None or noncurrent.fact is None:
+            review_notes.append("total_debt: blocked because one or more lease-inclusive debt components require review")
+            return ""
+        try:
+            total = _fact_to_float(current.fact) + _fact_to_float(noncurrent.fact)
+        except ValueError as exc:
+            review_notes.append(f"total_debt: {exc}; value left blank for review")
+            return ""
         evidence["total_debt"] = {
             "formula": "lease_inclusive_current_debt + lease_inclusive_noncurrent_debt",
             "formula_version": "SEC-6C_TOTAL_DEBT_LEASE_INCLUSIVE_V1",
             "components": {
-                "lease_inclusive_current_debt": _derived_evidence(current),
-                "lease_inclusive_noncurrent_debt": _derived_evidence(noncurrent),
+                "lease_inclusive_current_debt": _derived_evidence(current.fact),
+                "lease_inclusive_noncurrent_debt": _derived_evidence(noncurrent.fact),
             },
         }
         review_notes.append("total_debt: derived from clean lease-inclusive current and noncurrent debt components")
@@ -399,13 +480,24 @@ def _derive_free_cash_flow(
         review_notes.append("free_cash_flow: missing capital expenditure component; value not inferred")
         return ""
 
-    operating_cash_flow, operating_notes = _select_component_fact("operating_cash_flow", operating_cash_flow_facts)
-    capex, capex_notes = _select_component_fact("capital_expenditures", capex_facts)
-    review_notes.extend(operating_notes)
-    review_notes.extend(capex_notes)
+    operating_cash_flow = _select_component_fact("operating_cash_flow", operating_cash_flow_facts)
+    capex = _select_component_fact("capital_expenditures", capex_facts)
+    review_notes.extend(operating_cash_flow.notes)
+    review_notes.extend(capex.notes)
+    if operating_cash_flow.review_evidence or capex.review_evidence:
+        evidence.setdefault("review_required_derived_components", {}).setdefault("free_cash_flow", []).extend(
+            operating_cash_flow.review_evidence + capex.review_evidence
+        )
+    if operating_cash_flow.fact is None or capex.fact is None:
+        review_notes.append("free_cash_flow: blocked because one or more components require review")
+        return ""
 
-    operating_value = _fact_to_float(operating_cash_flow)
-    capex_value = _fact_to_float(capex)
+    try:
+        operating_value = _fact_to_float(operating_cash_flow.fact)
+        capex_value = _fact_to_float(capex.fact)
+    except ValueError as exc:
+        review_notes.append(f"free_cash_flow: {exc}; value left blank for review")
+        return ""
     if capex_value >= 0:
         free_cash_flow = operating_value - capex_value
         formula = "operating_cash_flow - positive_capex_outflow"
@@ -419,8 +511,8 @@ def _derive_free_cash_flow(
         "formula": formula,
         "formula_version": "SEC-6C_FREE_CASH_FLOW_V1",
         "components": {
-            "operating_cash_flow": _derived_evidence(operating_cash_flow),
-            "capital_expenditures": _derived_evidence(capex),
+            "operating_cash_flow": _derived_evidence(operating_cash_flow.fact),
+            "capital_expenditures": _derived_evidence(capex.fact),
         },
     }
     return _format_derived_value(free_cash_flow)
@@ -438,7 +530,7 @@ def transform_companyfacts_payload(
     if not normalized_ticker:
         raise ValueError("ticker is required.")
     normalized_cik = normalize_cik(cik)
-    selected_facts = _iter_allowed_facts(payload)
+    selected_facts, skipped_facts = _iter_allowed_facts(payload)
 
     by_period: dict[tuple[int, str, str], dict[str, list[SelectedFact]]] = {}
     for fact in selected_facts:
@@ -465,7 +557,9 @@ def transform_companyfacts_payload(
         )
 
         evidence: dict[str, Any] = {}
-        review_notes: list[str] = []
+        review_notes: list[str] = [_format_skipped_fact_note(skipped_fact) for skipped_fact in skipped_facts]
+        if skipped_facts:
+            evidence["skipped_facts"] = skipped_facts
         monetary_units: set[str] = set()
         first_fact: SelectedFact | None = None
         report_dates: list[str] = []
@@ -476,14 +570,19 @@ def transform_companyfacts_payload(
                 if field in {"gross_profit", "diluted_eps"}:
                     review_notes.append(f"{field}: missing optional or review-required direct field")
                 continue
-            chosen, notes = _select_one_fact(field, facts)
+            selection = _select_one_fact(field, facts)
+            review_notes.extend(selection.notes)
+            if selection.review_evidence:
+                evidence.setdefault("review_required_fields", {})[field] = selection.review_evidence
+            if selection.fact is None:
+                continue
+            chosen = selection.fact
             first_fact = first_fact or chosen
             row[field] = _format_value(chosen.value)
             if field != "diluted_eps":
                 monetary_units.add(chosen.unit)
             if chosen.filed:
                 report_dates.append(chosen.filed)
-            review_notes.extend(notes)
             evidence[field] = {
                 "source_tag": chosen.tag,
                 "unit": chosen.unit,
@@ -500,8 +599,11 @@ def transform_companyfacts_payload(
         row["free_cash_flow"] = _derive_free_cash_flow(field_facts, evidence, review_notes)
 
         if len(monetary_units) > 1:
-            raise ValueError(f"currency unit conflict for {normalized_ticker} {fy} {fp} {end}: {sorted(monetary_units)}")
-        row["currency"] = sorted(monetary_units)[0] if monetary_units else ""
+            review_notes.append(f"currency unit conflict for {normalized_ticker} {fy} {fp} {end}: {sorted(monetary_units)}")
+            evidence["currency_unit_conflict"] = sorted(monetary_units)
+            row["currency"] = ""
+        else:
+            row["currency"] = sorted(monetary_units)[0] if monetary_units else ""
         row["report_date"] = max(report_dates) if report_dates else ""
         row["source_reference"] = _source_reference(normalized_cik, first_fact)
         row["notes"] = _row_notes(evidence, sorted(set(review_notes)))
