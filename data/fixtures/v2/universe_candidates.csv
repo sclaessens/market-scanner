@@ -1,0 +1,3 @@
+candidate_id,symbol,company_name,source_kind,source_reference,discovered_at,row_identity,inclusion_reason
+candidate-001,ALFA,Alfa Systems PLC,synthetic_universe,reset_4_fixture,2026-01-15,candidate-001,synthetic_contract_candidate
+candidate-002,BRVO,Bravo Industrial NV,synthetic_universe,reset_4_fixture,2026-01-15,candidate-002,synthetic_contract_candidate

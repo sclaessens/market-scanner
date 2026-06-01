@@ -1,0 +1,3 @@
+transaction_id,portfolio_account,symbol,transaction_kind,quantity_delta,cash_amount,currency,occurred_at,source_reference
+txn-001,synthetic-main,ALFA,opening_position,10,-1000.00,EUR,2026-01-10,reset_4_fixture
+txn-002,synthetic-main,BRVO,cash_contribution,0,500.00,EUR,2026-01-11,reset_4_fixture
