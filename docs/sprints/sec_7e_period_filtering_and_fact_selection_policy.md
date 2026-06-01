@@ -5,9 +5,9 @@ Branch: codex/sec-7e-period-filtering-fact-selection-policy
 
 ## Purpose
 
-SEC-7E defines explicit policy for SEC Company Facts period filtering, annual versus quarterly review modes, skipped-fact summarization, and deterministic fact-selection behavior before SEC output can be considered for pipeline integration.
+SEC-7E defines explicit policy for SEC Company Facts period filtering, annual versus quarterly review modes, skipped-fact summarization, deterministic fact-selection behavior, and the deeper review-model semantics required before SEC output can be considered for pipeline integration.
 
-This sprint is documentation-only. It does not implement period filtering, fact-selection changes, pipeline integration, or generated output changes.
+This sprint is documentation-only. It does not implement period filtering, fact-selection changes, pipeline integration, generated output changes, or runtime review-model changes.
 
 ## Source Inputs
 
@@ -77,6 +77,7 @@ This sprint covers:
 - skipped-fact note summarization policy;
 - deterministic fact-selection policy;
 - review-required policy;
+- structured review-model framing for SEC-7F;
 - generated-output and safe-summary policy;
 - pipeline integration readiness assessment;
 - future implementation handoff.
@@ -103,12 +104,49 @@ SEC-7E does not include:
 - fundamental quality runtime changes;
 - fundamental analysis runtime changes.
 
+## Structural Review-Model Finding For SEC-7F
+
+SEC-7F must not be limited to simple period filtering or cosmetic note summarization.
+
+The deeper architectural issue is that the current SEC review output does not yet expose a sufficiently explicit review model. SEC-7C made the transformer more tolerant of messy individual facts, and SEC-7D proved that broad local transformation now preserves many rows. However, the remaining output still combines several different evidence levels into row notes. That makes the diagnostic safe but too noisy for governed interpretation.
+
+The structural problem is not only:
+
+- too many periods;
+- too many review-required rows;
+- too much skipped-fact noise.
+
+The root problem is missing review semantics. SEC output needs a model that separates:
+
+- accepted facts that can support a field value;
+- rejected or skipped facts that cannot support a field value;
+- fact-level review evidence;
+- period-level review evidence;
+- row-level review evidence;
+- ticker-level review evidence;
+- run-level diagnostic summaries;
+- explicit review-mode period selection.
+
+Current known issue:
+
+- skipped facts are collected globally at payload level;
+- the global skipped-fact list is then repeated into every transformed output row's notes/evidence;
+- this is safe because it does not hide evidence;
+- it is noisy because every row can look affected by facts that may not belong to that row or period.
+
+SEC-7F must therefore implement or prepare a structured local SEC review model rather than building around the limitation. Filtering and summaries are still needed, but they must be outputs of the review model, not substitutes for the model.
+
 ## Period Filtering Policy
 
 SEC review and future transformation should support explicit review modes instead of implicit filtering.
 
 Approved policy direction:
 
+- parse and classify SEC facts before filtering;
+- build a review model that knows accepted facts, rejected facts, period evidence, ticker evidence, and run evidence;
+- apply explicit `review_mode` selection after fact classification and review-model construction;
+- emit selected review rows according to the requested mode;
+- emit or compute run-level diagnostic summaries for excluded, skipped, or rejected evidence;
 - keep raw local review capable of broad transformation;
 - do not hide facts silently;
 - preserve evidence for excluded or skipped facts through local diagnostics or review summaries;
@@ -119,11 +157,13 @@ Approved future review modes:
 
 | review_mode | Purpose | Pipeline readiness |
 |---|---|---|
-| ALL_PERIODS_REVIEW | Broad local review of all transformable periods for audit, diagnostics, and source-data understanding. | Not suitable for first pipeline integration. |
-| RECENT_ANNUAL_REVIEW | Annual-only review for a recent bounded fiscal-year window. | Preferred candidate mode for first future integration specification. |
+| ALL_PERIODS_REVIEW | Broad local review of all transformable periods for audit, diagnostics, source-data understanding, and review-model validation. | Not pipeline-ready. |
+| RECENT_ANNUAL_REVIEW | Annual-only review for a recent bounded fiscal-year window using explicit `min_fiscal_year` and/or `max_annual_periods`. | First future candidate for fundamentals history, but not automatically pipeline-ready. |
 | RECENT_MIXED_REVIEW | Recent annual and quarterly review for diagnostics where quarterly behavior is explicitly being evaluated. | Review-only until a quarterly policy is separately approved. |
 
 Default future local review behavior may remain broad, but any future operational candidate must use an explicit limited mode. The first pipeline-integration candidate should not consume every historical and quarterly period from broad review output.
+
+`RECENT_ANNUAL_REVIEW` is not a workaround to hide bad rows. It is an explicit review contract for annual-only source-data evaluation. It narrows the period set only after facts have been parsed, classified, and summarized, and it must preserve evidence for excluded or rejected facts at the correct summary level.
 
 ## Annual Versus Quarterly Policy
 
@@ -151,7 +191,9 @@ Approved policy direction:
 - support `max_annual_periods` for annual-focused review runs;
 - optionally support `max_periods` only for diagnostics where annual and quarterly periods are intentionally mixed;
 - keep the exact period window as a policy parameter, not a hardcoded rule in unrelated layers;
-- never silently drop excluded periods without run-level summary evidence.
+- never silently drop excluded periods without run-level summary evidence;
+- never filter old periods before facts are classified;
+- summarize excluded older periods at run level and, where useful, ticker level.
 
 Recommended default for first implementation:
 
@@ -164,16 +206,17 @@ A three-year window may be useful for minimum metric coverage, but five fiscal y
 
 ## Skipped-Fact Note Summarization Policy
 
-Skipped-fact evidence must not be discarded, but it should not be repeated noisily in every review row when a run-level summary can preserve auditability more clearly.
+Skipped-fact evidence must not be discarded, but it should not be repeated noisily in every review row when a run-level or ticker-level summary can preserve auditability more clearly.
 
 Approved policy direction:
 
 - local generated diagnostics may preserve full skipped-fact details;
 - committed documentation should use aggregate reason categories only;
-- future review output should separate row-level notes from run-level diagnostic summaries when practical;
+- future review output should separate row-level notes from period-level, ticker-level, and run-level diagnostic summaries;
 - skipped facts with identifiable period metadata may be attached to affected periods;
-- skipped facts without enough period metadata should be summarized at run level and, where useful, ticker level;
-- row-level notes should include skipped-fact details only when the skipped fact can be tied to that row or period;
+- skipped facts without usable period metadata should be summarized at run level and, where useful, ticker level;
+- row-level notes should contain only evidence relevant to that row or period;
+- skipped facts must not be repeated across unrelated rows;
 - future generated summaries must not be committed by default.
 
 Recommended future summary categories:
@@ -187,6 +230,8 @@ Recommended future summary categories:
 - derived component conflict;
 - mixed component family;
 - capex sign review;
+- excluded by review mode;
+- older than selected period window;
 - other review-required fact issue.
 
 ## Deterministic Fact-Selection Policy
@@ -228,7 +273,7 @@ Never allowed:
 
 Review-required output is a source-data readiness signal only.
 
-Review-required must be used when source evidence is incomplete, ambiguous, conflicting, unsupported, or outside approved period and unit policy.
+Review-required must be used when source evidence is incomplete, ambiguous, conflicting, unsupported, outside approved period and unit policy, or excluded from the selected review mode while still needing audit visibility.
 
 Review-required must not:
 
@@ -241,11 +286,63 @@ Review-required must not:
 
 Future review output should distinguish:
 
+- fact-level review-required states, such as invalid unit, unsupported period, or missing metadata;
+- row-level review-required states, such as missing fields in the emitted period row;
+- period-level review-required states, such as conflicting field evidence for a fiscal period;
 - ticker-level review-required states, such as missing CIK or missing Company Facts file;
-- period-level review-required states, such as missing or ambiguous period metadata;
-- field-level review-required states, such as conflicting direct facts;
-- derived-component review-required states, such as mixed debt component families or capex ambiguity;
-- run-level review-required summaries, such as skipped facts without usable period metadata.
+- run-level review-required summaries, such as skipped facts without usable period metadata or excluded older periods.
+
+## Review Model Direction For SEC-7F
+
+SEC-7F should implement a structured local SEC review model that separates at least conceptually:
+
+```text
+AcceptedFact
+RejectedFact
+PeriodReviewResult
+RunReviewSummary
+```
+
+Exact implementation names may differ, but the design intent must remain clear.
+
+Fact lifecycle:
+
+```text
+raw SEC fact
+-> parsed candidate fact
+-> accepted fact OR rejected/skipped fact
+-> period assignment where possible
+-> field/component selection
+-> review-required classification where needed
+-> row-level evidence OR period-level/ticker-level/run-level summary
+```
+
+Filtering lifecycle:
+
+```text
+parse/classify facts first
+-> build review model
+-> apply explicit review_mode selection
+-> emit selected review rows
+-> emit or compute run-level diagnostic summary
+```
+
+This preserves source-data auditability while allowing `RECENT_ANNUAL_REVIEW` to produce a narrower, more interpretable review output.
+
+## Anti-Patterns Explicitly Rejected
+
+SEC-7E rejects the following implementation directions for SEC-7F and later work:
+
+- filtering old periods before classifying facts;
+- hiding excluded facts silently;
+- repeating all skipped facts on every row;
+- treating review-required as business weakness;
+- treating missing values as zero;
+- silently selecting winners for conflicting facts;
+- mixing annual and quarterly periods implicitly;
+- using filtering to make the output look clean;
+- feeding SEC output into the pipeline before review semantics are stable;
+- adding allocation, tradeability, eligibility, ranking, urgency, conviction, buy/sell, or final-action semantics to SEC review output.
 
 ## Generated-Output and Safe-Summary Policy
 
@@ -279,24 +376,27 @@ Is SEC output ready for pipeline integration?
 No.
 ```
 
-SEC output is not ready for pipeline integration because the project still needs approved implementation of explicit period filtering and review-summary behavior, followed by a controlled re-run that demonstrates stable transformable coverage and acceptable review-required patterns.
+SEC output is not ready for pipeline integration because the project still needs an approved implementation of structured review semantics, explicit review-mode period selection, row-level versus run-level note separation, and controlled local summary behavior. A later controlled re-run must demonstrate stable transformable coverage and acceptable review-required patterns before any separate pipeline-integration specification can be considered.
 
-SEC-7E does not approve pipeline integration. Any future pipeline integration must be handled by a separate specification sprint after local review-mode filtering and summary behavior are implemented and reviewed.
+SEC-7E does not approve pipeline integration. Any future pipeline integration must be handled by a separate specification sprint after local review-model behavior is implemented and reviewed.
 
 ## Future Implementation Handoff
 
 Recommended implementation target:
 
 ```text
-SEC-7F — Period Filtering and Review Summary Implementation
+SEC-7F — SEC Review Model and Period Selection Implementation
 ```
 
 Allowed future implementation scope:
 
-- add explicit local review-mode filtering to the SEC transformation or review utility;
+- implement a structured local SEC review model;
+- separate accepted facts from rejected or skipped facts;
+- separate fact-level, period-level, row-level, ticker-level, and run-level evidence;
+- add explicit local review-mode selection to the SEC transformation or review utility;
 - support `ALL_PERIODS_REVIEW`, `RECENT_ANNUAL_REVIEW`, and `RECENT_MIXED_REVIEW`;
 - support `min_fiscal_year` and `max_annual_periods`;
-- add local review summary generation for aggregate skipped-fact and review-required categories;
+- add local review summary generation or computable summary structures for aggregate skipped-fact and review-required categories;
 - preserve existing broad review behavior when explicitly requested;
 - keep all outputs local or temp-path only unless explicitly provided by the operator.
 
@@ -308,7 +408,7 @@ Likely allowed files for SEC-7F:
 - `tests/fundamentals/test_sec_companyfacts_transform.py`
 - `tests/fundamentals/test_run_sec_transformation_review.py`
 - optional focused test for any summary helper
-- `docs/sprints/sec_7f_period_filtering_and_review_summary_implementation.md`
+- `docs/sprints/sec_7f_sec_review_model_and_period_selection_implementation.md`
 
 Forbidden future implementation scope:
 
@@ -326,12 +426,17 @@ Forbidden future implementation scope:
 
 Required SEC-7F tests:
 
+- accepted facts are represented in row-level evidence;
+- rejected/skipped facts with period metadata are attached only to relevant period evidence;
+- rejected/skipped facts without usable period metadata are not repeated on every row;
+- run-level skipped fact summary is produced or computable;
 - explicit `ALL_PERIODS_REVIEW` preserves broad behavior;
-- `RECENT_ANNUAL_REVIEW` includes only annual periods in the configured recent window;
-- `RECENT_MIXED_REVIEW` includes recent annual and quarterly periods only when explicitly requested;
-- `min_fiscal_year` excludes older periods with run-level summary evidence;
+- `RECENT_ANNUAL_REVIEW` includes only recent FY rows;
+- `RECENT_MIXED_REVIEW` includes recent annual and quarterly rows only when explicitly requested;
+- `min_fiscal_year` excludes older rows with summary evidence;
 - `max_annual_periods` is deterministic;
-- skipped facts are summarized without being repeated on unrelated rows;
+- conflicts remain review-required;
+- missing values are not treated as zero;
 - missing CIK and missing Company Facts row preservation remains intact;
 - generated outputs write only to provided temp paths;
 - no live SEC calls;
@@ -381,7 +486,7 @@ BL-0015 and BL-0017 still cover the current SEC source-data, quality classificat
 Recommended next sprint:
 
 ```text
-SEC-7F — Period Filtering and Review Summary Implementation
+SEC-7F — SEC Review Model and Period Selection Implementation
 ```
 
-SEC-7F should implement explicit local review modes, recent annual period filtering, configurable period windows, and aggregate review-summary behavior. It must remain isolated from pipeline integration and generated operational outputs.
+SEC-7F should implement a structured local SEC review model, explicit review modes, recent annual period selection, configurable period windows, and aggregate review-summary behavior. It must remain isolated from pipeline integration and generated operational outputs.
