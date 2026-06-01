@@ -1,5 +1,5 @@
 ticker,quantity,avg_cost,last_price,pnl_pct,ma20,ma50,ma200,exposure_state,drawdown_state,risk_state,portfolio_reason,reviewed_at
-COST,2.0,1026.0,,,,,,OPEN,UNKNOWN,DATA_GAP,missing_price_data,2026-05-29 22:08:57
-MRVL,15.0,136.93,,,,,,OPEN,UNKNOWN,DATA_GAP,missing_price_data,2026-05-29 22:08:57
-ON,25.0,81.01,,,,,,OPEN,UNKNOWN,DATA_GAP,missing_price_data,2026-05-29 22:08:57
-TECK,40.0,59.02,,,,,,OPEN,UNKNOWN,DATA_GAP,missing_price_data,2026-05-29 22:08:57
+COST,2.0,1026.0,,,,,,OPEN,UNKNOWN,DATA_GAP,missing_price_data,2026-06-01 22:39:05
+MRVL,15.0,136.93,,,,,,OPEN,UNKNOWN,DATA_GAP,missing_price_data,2026-06-01 22:39:05
+ON,25.0,81.01,,,,,,OPEN,UNKNOWN,DATA_GAP,missing_price_data,2026-06-01 22:39:05
+TECK,40.0,59.02,,,,,,OPEN,UNKNOWN,DATA_GAP,missing_price_data,2026-06-01 22:39:05
