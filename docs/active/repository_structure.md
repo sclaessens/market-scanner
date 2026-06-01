@@ -1,128 +1,100 @@
-# Repository Structure v2
+# Repository Structure
 
 Status: ACTIVE
+Reset stage: RESET-1
 
-This document defines the active documentation structure for the operational phase of the market-scanner repository.
+## Purpose
 
-## Objective
+This document defines the intended v2 repository structure. RESET-1 does not move, delete, archive, or refactor files. This document is the planning baseline for RESET-2 and later.
 
-The repository is transitioning from architecture purification to operational intelligence platform evolution. The documentation structure must preserve institutional traceability while reducing governance noise and making current-state development easier.
+## Current Rule
 
-## Documentation Tiers
+Until RESET-2 approves a structure and archive plan, existing files remain in place. Old files are reference material unless explicitly carried forward into the new canonical set.
 
-### Active documentation
+## Proposed V2 Structure
 
-Location: `docs/active/`
+```text
+docs/
+  active/
+    project_charter.md
+    product_vision.md
+    roles_and_responsibilities.md
+    pm_operating_model.md
+    functional_analysis.md
+    technical_architecture.md
+    data_architecture.md
+    source_data_strategy.md
+    pipeline_contract.md
+    decision_engine_contract.md
+    reporting_contract.md
+    testing_strategy.md
+    repository_structure.md
+    backlog.md
+    roadmap.md
+  legacy/
+    sprints/
+    audits/
+    superseded/
+    source_data/
+  resets/
+    reset_0_full_repository_knowledge_extraction_and_rebuild_decision.md
+    reset_1_canonical_documentation_rewrite_closeout.md
+src/
+  market_scanner/
+    discovery/
+    validation/
+    context/
+    fundamentals/
+    timing/
+    portfolio/
+    decisions/
+    reporting/
+    orchestration/
+    shared/
+tests/
+  contract/
+  unit/
+  integration/
+  fixtures/
+data/
+  input/
+    portfolio/
+    universe/
+  fixtures/
+  generated/
+    processed/
+    logs/
+reports/
+  generated/
+```
 
-Active documentation is authoritative for current development and operations. These files define the current architecture, governance model, runtime contracts, operational workflow, calculation governance, backlog/sprint operating model, and roadmap.
+## Tracking Policy
 
-Active documents must be:
+Track:
 
-- current-state first
-- concise
-- operationally actionable
-- free of historical sprint ceremony
-- free of duplicated doctrine
-- aligned with certified architecture principles
+- canonical documentation;
+- newly written v2 source code after approval;
+- approved fixtures;
+- minimal configuration needed for reproducible development and CI.
 
-### Reference documentation
+Ignore by default:
 
-Location: `docs/reference/`
+- generated CSV outputs;
+- logs;
+- reports;
+- provider caches;
+- SEC cache files;
+- local diagnostics;
+- temporary run outputs.
 
-Reference documentation preserves institutional rationale. These files explain why the system uses its certified architecture, governance model, separation of concerns, and deterministic pipeline design.
+## Legacy Policy
 
-Reference documents are explanatory, not operationally authoritative.
+Legacy files must not be deleted during RESET-1. RESET-2 should classify old active, sprint, audit, archive, code, test, data, and workflow paths before any movement happens.
 
-### Archive documentation
+## V2 Code Placement
 
-Location: `docs/archive/`
+New v2 Python code should live under `src/market_scanner/` after RESET-3. Old `scripts/` files remain reference-only and legacy-run surfaces until a governed cutover.
 
-Archive documentation preserves historical sprint artifacts, audits, migration documents, deprecated plans, and superseded governance material.
+## V2 Test Placement
 
-Archive documents are historical records. They must not be treated as active implementation instructions unless explicitly referenced by an active document.
-
-## Active Documentation Map
-
-The active documentation set is intentionally small:
-
-- `docs/active/architecture_current_state.md`
-- `docs/active/governance_v2.md`
-- `docs/active/contracts/pipeline_contracts.md`
-- `docs/active/backlog_and_sprint_operating_model.md`
-- `docs/active/logic/calculation_registry.md`
-- `docs/active/roles_and_responsibilities.md`
-- `docs/active/operational_development_model.md`
-- `docs/active/simplified_sprint_lifecycle.md`
-- `docs/active/archive_strategy.md`
-- `docs/active/active_reference_archive_classification.md`
-- `docs/active/operational_phase_preparation.md`
-- `docs/active/repository_cleanup_recommendations.md`
-- `docs/active/repository_structure.md`
-- `docs/active/roadmap_current.md`
-- `docs/active/runbooks/local_development.md`
-
-Active specialized documents may also exist under:
-
-- `docs/active/analysis/`
-- `docs/active/contracts/`
-- `docs/active/inventory/`
-- `docs/active/logic/`
-- `docs/active/specs/`
-- `docs/active/runbooks/`
-
-These folders should remain focused. Do not create new active documents if an existing active document can be updated cleanly.
-
-## Where To Look Before Changing X
-
-| Change area | Start here |
-|---|---|
-| Architecture or layer responsibility | `docs/active/architecture_current_state.md` |
-| Governance boundary or review level | `docs/active/governance_v2.md` |
-| Runtime contracts or artifact semantics | `docs/active/contracts/pipeline_contracts.md` |
-| Backlog triage, sprint capacity, sprint closeout discipline | `docs/active/backlog_and_sprint_operating_model.md` |
-| Calculation placement, formula ownership, logic review | `docs/active/logic/calculation_registry.md` |
-| Role ownership and handoff boundaries | `docs/active/roles_and_responsibilities.md` |
-| Local workflow or development hygiene | `docs/active/runbooks/local_development.md` |
-| Roadmap planning | `docs/active/roadmap_current.md` |
-| Backlog or deferred work | `docs/sprints/project_backlog.md` |
-| Historical sprint or audit evidence | `docs/archive/` |
-| Repository organization | `docs/active/repository_structure.md` |
-
-## Historical Documentation Handling
-
-Historical evidence for certified Sprints 0 through 8 and completed operational sprint planning is preserved under `docs/archive/`.
-
-The remaining `docs/sprints/` files are operational backlog, sprint status, current simplification sprint planning, and recent simplification audit records. The remaining `docs/audits/` file is a notice. Archived sprint, audit, migration, and superseded documents are superseded by `docs/active/` unless an active document explicitly delegates authority to an archived file.
-
-## Source of Truth Rule
-
-When files conflict:
-
-1. `AGENTS.md` remains the repository-level AI governance authority.
-2. `docs/active/architecture_current_state.md` is the architecture source of truth.
-3. `docs/active/governance_v2.md` is the operational governance source of truth.
-4. `docs/active/backlog_and_sprint_operating_model.md` is the backlog triage, sprint capacity, and sprint closeout operating source of truth.
-5. `docs/active/logic/calculation_registry.md` is the calculation placement and calculation-governance starting point.
-6. `docs/active/*` supersedes legacy sprint, audit, and migration documents for operational development.
-7. Archived and historical documents preserve context but do not authorize implementation.
-
-## Runtime Scope
-
-This restructuring changes documentation and governance organization only. It does not change runtime code, pipeline outputs, allocation semantics, reporting semantics, data contracts, or Decision Engine authority.
-
-## Python Runtime Organization
-
-Fundamentals-specific runtime builders live under:
-
-- `scripts/fundamentals/`
-
-Compatibility wrappers remain under `scripts/core/` for established import and script paths. The active fundamentals organization is:
-
-| Runtime area | Primary implementation | Compatibility path |
-|---|---|---|
-| Raw fundamentals history validation | `scripts/fundamentals/build_history_intake.py` | `scripts/core/build_fundamentals_history_intake.py` |
-| Fundamental metrics | `scripts/fundamentals/build_metrics.py` | `scripts/core/build_fundamental_metrics.py` |
-| Fundamental quality compatibility | `scripts/fundamentals/build_quality.py` | `scripts/core/build_fundamental_layer.py` |
-| Fundamental analysis | `scripts/fundamentals/build_analysis.py` | `scripts/core/build_fundamental_analysis.py` |
-
-The compatibility wrappers must remain behavior-preserving unless a later governed cleanup explicitly removes or replaces them.
+New v2 tests should live under contract, unit, integration, and fixture-focused groups. Old tests are reference material and should not force old implementation paths into v2.
