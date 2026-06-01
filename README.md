@@ -1,25 +1,36 @@
 # Market Scanner
 
-Governance-certified institutional market scanner and decision pipeline.
+Governance-certified institutional market scanner and decision-support project.
 
 ## Current Phase
 
-The repository has completed certified architecture purification across Sprints 0 through 8.
+The project is in the reset and controlled clean rebuild phase.
 
-The project is now in the operational intelligence platform evolution phase.
+RESET-0 decided to proceed with a controlled rebuild. RESET-1 created the canonical v2 documentation baseline. RESET-2 defined the staged repository structure and archive plan. Batch A detaches superseded active documentation from the active source-of-truth path.
 
-Future work should focus on reliability, orchestration, operational visibility, historical decision storage, feedback loops, reporting usability, and production readiness while preserving the certified architecture.
+New feature work on the old active architecture is paused. Old code, old tests, old generated artifacts, and legacy documentation are preserved as reference material only unless explicitly carried forward by canonical v2 documentation.
 
 ## Start Here
 
-For onboarding or before making changes, read the active source-of-truth documents in this order:
+For onboarding or before making changes, read the current source-of-truth documents in this order:
 
 1. `AGENTS.md`
-2. `docs/active/architecture_current_state.md`
-3. `docs/active/governance_v2.md`
-4. `docs/active/repository_structure.md`
-5. `docs/active/roadmap_current.md`
-6. `docs/sprints/project_backlog.md`
+2. `docs/active/project_charter.md`
+3. `docs/active/product_vision.md`
+4. `docs/active/roles_and_responsibilities.md`
+5. `docs/active/pm_operating_model.md`
+6. `docs/active/technical_architecture.md`
+7. `docs/active/data_architecture.md`
+8. `docs/active/source_data_strategy.md`
+9. `docs/active/pipeline_contract.md`
+10. `docs/active/decision_engine_contract.md`
+11. `docs/active/reporting_contract.md`
+12. `docs/active/testing_strategy.md`
+13. `docs/active/repository_structure.md`
+14. `docs/active/backlog.md`
+15. `docs/active/roadmap.md`
+
+Reset records are preserved in `docs/resets/`.
 
 ## Core Architecture Doctrine
 
@@ -29,77 +40,29 @@ For onboarding or before making changes, read the active source-of-truth documen
 - reporting communicates only
 - no hidden filtering
 - no upstream tradeability
-- deterministic architecture
-- row preservation
+- deterministic behavior
+- row preservation where contractually required
 - auditability
+- explicit contracts before implementation
 - separation of concerns
 
-Upstream layers classify and preserve opportunity distribution. They do not determine tradeability, conviction, allocation eligibility, or final actions.
+## Active V2 Planning Baseline
 
-## Active Architecture
+The active v2 planning baseline is the RESET-1 canonical documentation set under `docs/active/`.
 
-The certified active pipeline is:
+The intended v2 architecture is contract-first and should be implemented only after the relevant reset stage is approved. Old Python files under `scripts/` are reference-only for v2 and must not be used as the v2 implementation base.
 
-```text
-scanner
-  -> validation_layer
-  -> context_layer
-  -> fundamental_layer
-  -> timing_state_layer
-  -> portfolio_intelligence_layer
-  -> decision_engine
-  -> reporting
-```
+## Legacy Documentation
 
-Detailed current-state architecture is maintained in:
+Superseded active documentation is preserved under:
 
-- `docs/active/architecture_current_state.md`
+- `docs/legacy/active_superseded/`
 
-## Active Documentation
-
-The operational documentation entry point is:
-
-- `docs/active/`
-
-Key active documents:
-
-- `docs/active/repository_structure.md`
-- `docs/active/architecture_current_state.md`
-- `docs/active/governance_v2.md`
-- `docs/active/simplified_sprint_lifecycle.md`
-- `docs/active/operational_development_model.md`
-- `docs/active/archive_strategy.md`
-- `docs/active/active_reference_archive_classification.md`
-- `docs/active/roadmap_current.md`
-- `docs/active/repository_cleanup_recommendations.md`
-- `docs/active/operational_phase_preparation.md`
-
-## Governance v2
-
-Governance has moved from migration governance to operational governance.
-
-Standard operational changes should use lightweight governance. Architecture review is event-driven and required only when changes may affect authority boundaries, runtime contracts, reporting neutrality, deterministic behavior, or row preservation.
-
-Governance v2 is maintained in:
-
-- `docs/active/governance_v2.md`
-
-## Historical Documentation
-
-Historical sprint and audit documents are preserved for institutional traceability.
-
-Historical sprint, audit, migration, and superseded planning documents are archived under:
-
-- `docs/archive/sprints/`
-- `docs/archive/audits/`
-- `docs/archive/migration/`
-- `docs/archive/superseded/`
-
-The remaining `docs/sprints/` files are intentionally limited to operational backlog and sprint status records plus a notice. The remaining `docs/audits/` file is a notice. Archived documents are no longer the default operational entry point unless explicitly referenced by active documentation.
+Historical sprint, audit, migration, and archive documents remain preserved for traceability. They do not override the canonical v2 documentation unless a current active document explicitly carries them forward.
 
 ## Repository Language Governance
 
-The repository language standard is English-only. This applies to documentation, sprint and audit artifacts, technical and functional specifications, source code comments, tests, logs, generated reports, CSV schemas, configuration descriptions, CI output, and governance documents.
+Repository content must remain English-only. This applies to documentation, sprint and audit artifacts, technical and functional specifications, source code comments, tests, logs, generated reports, CSV schemas, configuration descriptions, CI output, and governance documents.
 
 Dutch is permitted only in direct chat communication with the user and must not be introduced into repository content or generated artifacts.
 
@@ -107,8 +70,8 @@ Dutch is permitted only in direct chat communication with the user and must not 
 
 When documentation conflicts:
 
-1. `AGENTS.md` remains the repository-level AI governance authority.
-2. `docs/active/architecture_current_state.md` defines current architecture.
-3. `docs/active/governance_v2.md` defines current governance.
-4. Other `docs/active/` documents define operational workflow and planning.
-5. Historical sprint, audit, migration, and archive documents preserve traceability but do not override active documentation.
+1. `AGENTS.md` remains the repository-level AI governance authority until explicitly updated.
+2. RESET-1 canonical documents in `docs/active/` define current v2 planning authority.
+3. `docs/resets/` preserves reset decisions and closeout records.
+4. `docs/legacy/active_superseded/` and older historical documents preserve traceability only.
+5. Old code, tests, generated data, reports, workflows, sprint docs, and audit docs do not authorize v2 implementation by themselves.
