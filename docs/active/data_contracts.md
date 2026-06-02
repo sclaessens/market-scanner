@@ -126,3 +126,19 @@ Reports are generated communication artifacts. They may summarize traceability a
 ## RESET-5 Readiness
 
 RESET-5 may use the approved fixtures to build minimal contract validation and pipeline-core scaffolding. It must not expand fixture semantics into allocation, execution, or final-action behavior.
+
+## V2 Validation Contract Alignment
+
+RESET-9C2A translates safe legacy validation-test knowledge into v2 contract metadata only.
+
+The v2 validation contract defines:
+
+- required candidate identity fields: `ticker`, `date`;
+- required candidate input fields needed for structure classification;
+- explicit issue metadata for missing fields, missing values, invalid numeric values, non-positive required metrics, and forbidden upstream decision fields;
+- validation classification fields that preserve row identity and communicate structure metadata;
+- no file input/output, no generated-output dependency, no legacy `scripts` import, and no provider access.
+
+Validation contract helpers must preserve row identity conceptually and report issues explicitly. They must not filter rows, treat missing numeric values as zero, create final actions, create allocation or execution semantics, or read from legacy generated CSVs.
+
+RESET-9C2A does not implement a full validation runtime. It establishes the first v2 validation contract surface for later pipeline work.
