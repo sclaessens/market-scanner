@@ -307,6 +307,14 @@ Expected future separation:
 manual portfolio source -> normalized portfolio input -> portfolio classification output -> Decision Engine
 ```
 
+RESET-10C formalizes this boundary in `docs/active/portfolio_source_of_truth.md`.
+
+Manual portfolio source transactions and manual portfolio source positions are the only portfolio source-of-truth roles approved by RESET-10C.
+
+Generated portfolio review, generated portfolio intelligence, reporting display input, Telegram message text, and report output must not become portfolio source data.
+
+Portfolio display fields needed by Telegram, including profit/loss, current price, target price, and action/status, must be supplied by approved upstream records. Reporting and Telegram may format those fields but must not calculate them or write them back as source truth.
+
 ## 8. Source-Data Readiness
 
 Source-data readiness describes whether data is usable for the next step.

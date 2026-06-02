@@ -159,6 +159,29 @@ Portfolio contracts must distinguish manual source input from generated portfoli
 
 RESET-9C2B does not implement transaction ingestion, broker integration, portfolio review generation, or a full portfolio runtime. It establishes the first v2 portfolio contract surface for later pipeline work.
 
+## V2 Portfolio Source-of-Truth Contract Alignment
+
+RESET-10C defines the active portfolio source-of-truth boundary in `docs/active/portfolio_source_of_truth.md`.
+
+The portfolio source-of-truth contract separates:
+
+- manual source transactions;
+- manual source positions;
+- normalized portfolio positions;
+- generated portfolio review and intelligence outputs;
+- reporting display input;
+- Telegram/report communication.
+
+Manual source transactions and manual source positions are the only source-of-truth roles approved by RESET-10C.
+
+Generated portfolio review, generated portfolio intelligence, reporting display input, and Telegram output are not source-of-truth.
+
+Portfolio display fields such as profit/loss, current price, target price, and action/status must be supplied by approved upstream records. Reporting and Telegram may format these fields, but must not calculate them or write them back as portfolio source data.
+
+Missing portfolio values must remain explicit and must not be converted to zero.
+
+RESET-10C does not implement broker integration, transaction ingestion, real profit/loss calculation, target price calculation, generated portfolio outputs, report generation, Telegram delivery, or portfolio allocation behavior.
+
 ## V2 Fundamentals and Source-Data Contract Alignment
 
 RESET-9C2C translates safe legacy fundamentals and source-data test knowledge into v2 contract metadata only.
