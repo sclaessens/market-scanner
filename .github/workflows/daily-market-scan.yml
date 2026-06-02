@@ -2,9 +2,8 @@ name: Daily Market Scan
 
 on:
   workflow_dispatch:
-  schedule:
-    # Maandag t.e.m. vrijdag om 20:17 UTC
-    - cron: "17 20 * * 1-5"
+  # Scheduled legacy daily scan paused during v2 cutover.
+  # Re-enable only after explicit governance approval.
 
 permissions:
   contents: write
