@@ -49,6 +49,23 @@ Reporting outputs are generated communication artifacts. They are not source-of-
 
 Telegram delivery is a transport surface. It must not alter reporting semantics or decision semantics. Network/API behavior should remain isolated from reporting logic.
 
+## Telegram UX Contract Baseline
+
+The active v2 Telegram UX baseline is defined in `docs/active/reporting_telegram_ux.md`.
+
+RESET-9C2D translates that baseline into reporting/Telegram contract metadata only.
+
+The v2 Telegram contract must remain:
+
+- portfolio-first;
+- compact;
+- grouped into Portfolio, Buy now, Buy on pullback, Buy on breakout, and Data status sections;
+- explicit about missing profit/loss, target price, threshold, and source-data status values;
+- dependent only on upstream-approved display fields;
+- free of Telegram delivery, inbound Telegram command handling, report generation, file writes, and network/API behavior.
+
+Reporting and Telegram contracts must not calculate target prices, buy thresholds, breakout thresholds, rankings, urgency, conviction, tradeability, allocation, execution instructions, or final actions. The Decision Engine remains the only final-action authority.
+
 ## Testing Expectations
 
 v2 reporting tests must prove that reporting preserves source final decisions, represents omitted or truncated content explicitly, and never creates allocation authority.
