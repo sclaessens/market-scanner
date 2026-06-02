@@ -142,3 +142,19 @@ The v2 validation contract defines:
 Validation contract helpers must preserve row identity conceptually and report issues explicitly. They must not filter rows, treat missing numeric values as zero, create final actions, create allocation or execution semantics, or read from legacy generated CSVs.
 
 RESET-9C2A does not implement a full validation runtime. It establishes the first v2 validation contract surface for later pipeline work.
+
+## V2 Portfolio Contract Alignment
+
+RESET-9C2B translates safe legacy portfolio-test knowledge into v2 contract metadata only.
+
+The v2 portfolio contract defines:
+
+- manual portfolio transaction input fields aligned with the approved synthetic `portfolio_transactions.csv` fixture;
+- normalized portfolio position identity fields: `portfolio_account`, `symbol`;
+- generated portfolio review and generated portfolio classification dataset types as generated-output roles, not source records;
+- explicit issue metadata for missing fields, missing values, invalid numeric values, and forbidden portfolio authority fields;
+- no file input/output, no generated-output dependency, no legacy `scripts` import, no broker access, and no provider access.
+
+Portfolio contracts must distinguish manual source input from generated portfolio outputs. They may describe portfolio presence, source provenance, and metadata readiness in later layers, but they must not create final actions, allocation instructions, execution semantics, tradeability, conviction, urgency, rankings, or hidden filtering.
+
+RESET-9C2B does not implement transaction ingestion, broker integration, portfolio review generation, or a full portfolio runtime. It establishes the first v2 portfolio contract surface for later pipeline work.
