@@ -158,3 +158,20 @@ The v2 portfolio contract defines:
 Portfolio contracts must distinguish manual source input from generated portfolio outputs. They may describe portfolio presence, source provenance, and metadata readiness in later layers, but they must not create final actions, allocation instructions, execution semantics, tradeability, conviction, urgency, rankings, or hidden filtering.
 
 RESET-9C2B does not implement transaction ingestion, broker integration, portfolio review generation, or a full portfolio runtime. It establishes the first v2 portfolio contract surface for later pipeline work.
+
+## V2 Fundamentals and Source-Data Contract Alignment
+
+RESET-9C2C translates safe legacy fundamentals and source-data test knowledge into v2 contract metadata only.
+
+The v2 fundamentals/source-data contract defines:
+
+- source-readiness fields aligned with the approved synthetic `source_data_readiness.csv` fixture;
+- normalized fundamentals-history identity fields: `ticker`, `fiscal_year`, `fiscal_period`;
+- raw source capture, normalized source-readiness, normalized fundamentals-history, generated classification, generated analysis, and local-only review dataset roles;
+- explicit readiness states for available, missing, source-missing, row-missing, partial, stale, invalid, unavailable, and review-required source data;
+- explicit issue metadata for missing fields, missing values, invalid numeric values, invalid readiness states, and forbidden fundamentals authority fields;
+- no file input/output, no generated-output dependency, no legacy `scripts` import, no SEC access, no provider access, and no network access.
+
+Fundamentals and source-data contracts must distinguish source-data readiness from investment quality. They may describe source provenance, period metadata, freshness, missing values, partial data, stale data, unavailable data, and review-required conditions, but they must not create quality scores, final actions, allocation instructions, execution semantics, tradeability, conviction, urgency, rankings, or hidden filtering.
+
+RESET-9C2C does not implement SEC ingestion, provider integration, raw-to-normalized transformation, financial scoring, investment-quality analysis, generated fundamentals outputs, or a full fundamentals runtime. It establishes the next v2 contract surface for later source-data work.
