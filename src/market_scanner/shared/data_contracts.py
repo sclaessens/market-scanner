@@ -4,11 +4,23 @@ from __future__ import annotations
 
 import csv
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 V2_FIXTURE_ROOT = REPOSITORY_ROOT / "data" / "fixtures" / "v2"
+
+
+class DataLifecycleStage(str, Enum):
+    """Lifecycle stages defined by the v2 data lifecycle contract."""
+
+    RAW_SOURCE = "raw_source"
+    NORMALIZED_INPUT = "normalized_input"
+    FIXTURE_INPUT = "fixture_input"
+    GENERATED_OUTPUT = "generated_output"
+    REPORTING_OUTPUT = "reporting_output"
+    LOCAL_ONLY = "local_only"
 
 
 @dataclass(frozen=True)
@@ -18,6 +30,7 @@ class FixtureContract:
     name: str
     relative_path: str
     required_columns: tuple[str, ...]
+    lifecycle_stage: DataLifecycleStage = DataLifecycleStage.FIXTURE_INPUT
     classification: str = "approved_fixture"
     source: str = "synthetic"
 

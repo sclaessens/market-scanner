@@ -23,42 +23,50 @@ data/scans_log.csv
 *.log
 
 # ========================
-# Raw data (altijd gegenereerd)
+# V2 data lifecycle local/private/generated data
 # ========================
-data/raw/
+data/local/*
+!data/local/.gitkeep
+
+data/raw/*
+!data/raw/.gitkeep
+
+data/generated/*
+!data/generated/.gitkeep
+
+# Normalized production-like inputs require explicit approval before tracking
+data/normalized/*
+!data/normalized/.gitkeep
 
 # ========================
-# Processed data (alle ticker files blokkeren)
+# Processed data (block all ticker files)
 # ========================
 data/processed/*.csv
 
 # Historical evidence artifacts are generated locally.
 data/history/
 
-# Local SEC EDGAR cache artifacts are generated locally.
-data/local/
-
 # ========================
-# MAAR deze core files toelaten
+# Allow these core files
 # ========================
 !data/processed/market_regime.csv
 !data/processed/scanner_ranked.csv
 
-# (optioneel later toevoegen indien nodig)
+# (optionally add later if needed)
 # !data/processed/validation_summary.csv
 
 # ========================
-# Watchlist data (state = WEL bewaren)
+# Watchlist data (state = preserved)
 # ========================
-# NIET negeren → hoort bij je systeem state
+# Do not ignore: belongs to system state
 
 # ========================
-# Portfolio data (state = WEL bewaren)
+# Portfolio data (state = preserved)
 # ========================
-# NIET negeren → hoort bij je systeem state
+# Do not ignore: belongs to system state
 
 # ========================
-# Reports (gegenereerd)
+# Reports (generated)
 # ========================
 reports/daily/
 reports/archive/
