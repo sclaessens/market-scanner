@@ -70,3 +70,18 @@ Real SEC cache files, provider dumps, broad review outputs, and run-level diagno
 ## Integration Rule
 
 No source-data output enters the v2 pipeline until the Data Steward, Financial Analyst, Technical Analyst, and Governance Auditor confirm readiness under an approved contract.
+
+## RESET-9C2C Contract Translation Boundary
+
+RESET-9C2C establishes fundamentals/source-data contract metadata without reintroducing SEC or provider runtime behavior.
+
+The translated contract boundary is:
+
+- source-data readiness is a governance state only;
+- raw source capture, normalized input, generated classification output, generated analysis output, and local-only review artifacts are separate dataset roles;
+- missing, source-missing, row-missing, partial, stale, invalid, unavailable, and review-required states must remain explicit;
+- missing numeric values must not be converted to zero;
+- source availability must not imply investment quality;
+- contract helpers must not read legacy generated CSVs, write files, import legacy `scripts`, call SEC/provider/network services, or create final decisions.
+
+Formula knowledge, SEC fact selection, provider ingestion, raw-to-normalized transformation, and investment-quality analysis require later explicit approval.
