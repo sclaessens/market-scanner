@@ -1,7 +1,7 @@
 # Data Contracts
 
 Status: ACTIVE
-Reset stage: RESET-4
+Reset stage: RESET-4, updated by RESET-10B
 
 ## Purpose
 
@@ -29,6 +29,47 @@ RESET-4 does not implement pipeline behavior. It only defines the first governed
 | Local-only data | Provider caches, raw dumps, local diagnostics, secrets, and machine-specific files | Ignore | Not source-of-truth |
 | Raw/source data requiring reapproval | External data or transformed source evidence without a v2 contract | Ignore unless sanitized and approved | Not source-of-truth until approved |
 | Report artifact | Generated communication artifact | Ignore by default | Communication only |
+
+## Lifecycle Stage Alignment
+
+RESET-10B aligns data contracts with the canonical v2 lifecycle:
+
+```text
+external source
+  -> raw source data
+  -> normalized program-ready input
+  -> analytical classification output
+  -> Decision Engine output
+  -> reporting output
+```
+
+Mandatory separation:
+
+```text
+raw source data != normalized input != generated output != report
+```
+
+Contract metadata may use these lifecycle stages:
+
+| Lifecycle stage | Meaning | Default repository policy |
+|---|---|---|
+| `RAW_SOURCE` | Original or near-original source evidence | Ignore by default except placeholders unless explicitly sanitized and approved |
+| `NORMALIZED_INPUT` | Program-ready contract-compliant input | Ignore by default except placeholders until an approved normalized input policy exists |
+| `FIXTURE_INPUT` | Small deterministic synthetic or explicitly approved fixture input | Track intentionally under `data/fixtures/v2/` |
+| `GENERATED_OUTPUT` | Runtime output from analysis, pipeline, or Decision Engine execution | Ignore by default; not source-of-truth |
+| `REPORTING_OUTPUT` | Communication artifact derived from approved records | Ignore by default; communication only |
+| `LOCAL_ONLY` | Private local data, provider caches, diagnostics, secrets-adjacent artifacts, or machine-specific files | Ignore; not canonical |
+
+Rules:
+
+- raw source data is evidence, not program-ready input;
+- normalized input is contract-compliant program input;
+- fixtures are synthetic and tracked for tests;
+- generated output is not source-of-truth unless explicitly reclassified and approved;
+- reports are communication only and must not become input authority;
+- local data is private or machine-specific and is not canonical.
+
+Approved RESET-4 fixture contracts are lifecycle stage `FIXTURE_INPUT`.
 
 ## Approved RESET-4 Fixture Baseline
 
