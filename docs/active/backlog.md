@@ -131,9 +131,11 @@ Governance risk: HIGH
 
 Owner role: Data Steward / Technical Analyst / Financial Analyst
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL2
 
-Proposed next step: Document raw evidence fields, normalized fundamentals mapping, provenance requirements, missing-value behavior, and readiness rules following the primary-first, provenance-first decision in `docs/active/v2_provider_approval_decision.md`.
+Design record: `docs/active/v2_provider_integration_design.md`
+
+Proposed next step: Proceed to `RESET-10L-BL3 — Synthetic Provider Contract Tests`.
 
 ### RESET-10L-BL3 — Synthetic Provider Contract Tests
 
@@ -145,9 +147,9 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Data Steward / Governance Auditor
 
-Status: BLOCKED BY RESET-10L-BL2
+Status: CANDIDATE NEXT STAGE
 
-Proposed next step: Define synthetic raw provider records, normalized fundamentals expectations, explicit missing-value cases, and source-data readiness cases.
+Proposed next step: Define synthetic raw provider records, normalized fundamentals expectations, explicit missing-value cases, and source-data readiness cases using `docs/active/v2_provider_integration_design.md`.
 
 ### RESET-10L-BL4 — Real Provider Implementation
 
