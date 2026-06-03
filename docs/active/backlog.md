@@ -321,9 +321,13 @@ Governance risk: HIGH
 
 Owner role: Data Steward / Technical Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL9
 
-Proposed next step: Review one local real-source smoke result using the BL8 execution guide and commit only a summary-level governance review if needed.
+Review record: `docs/active/v2_local_real_source_smoke_result_review.md`
+
+Review result: The governance-safe local smoke result review process is now documented. It defines the summary-only review scope, allowed redacted fields, pass/fail criteria, post-review safety checks, and no-commit/no-write guardrails. No live provider/source call was made or committed.
+
+Proposed next step: Proceed to `RESET-10L-BL10 — First Local Real-Source Smoke Execution Summary`.
 
 Guardrails:
 
@@ -339,6 +343,35 @@ Guardrails:
 - no Decision Engine investment logic;
 - no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, or recommendation behavior;
 - summary-only review if anything is committed.
+
+### RESET-10L-BL10 — First Local Real-Source Smoke Execution Summary
+
+Category: Source Data / Verification
+
+Rationale: After the review template exists, one local-only real-source smoke execution may be summarized manually without committing credentials, raw live payloads, generated files, reports, Telegram artifacts, or production behavior.
+
+Governance risk: HIGH
+
+Owner role: Data Steward / Technical Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Execute one local manual smoke review and commit only a redacted summary if it passes the BL9 review criteria.
+
+Guardrails:
+
+- manual-only;
+- local-only;
+- one ticker and one source;
+- no committed credentials;
+- no committed raw live payload;
+- no data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, target-price, or recommendation behavior;
+- redacted summary-only review if anything is committed.
 
 ## Relationship to Existing Backlog
 
