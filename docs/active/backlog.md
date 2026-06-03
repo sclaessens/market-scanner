@@ -163,9 +163,18 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL4
 
-Proposed next step: Open a separate implementation sprint only after approval. BL4 may only begin after the synthetic provider contract tests pass and must still avoid Decision Engine authority expansion unless separately approved.
+Implementation records:
+
+- `src/market_scanner/fundamentals/fundamentals_provider_contracts.py`
+- `src/market_scanner/fundamentals/fundamentals_provider_adapter.py`
+- `tests/contract/test_v2_fundamentals_provider_contracts.py`
+- `tests/unit/test_v2_fundamentals_provider_adapter.py`
+
+Implementation result: A v2-only, dependency-injected provider boundary now accepts governed provider/source responses, preserves raw source evidence, maps supported raw fields into normalized program-ready fundamentals records, and emits neutral source-data readiness. Tests use fake provider responses only.
+
+Proposed next step: Proceed to `RESET-10L-BL5 — Real Provider Dry-Run Fixture Review`.
 
 Guardrails:
 
@@ -174,6 +183,29 @@ Guardrails:
 - no production pipeline execution in tests;
 - no missing-to-zero conversion;
 - no allocation, tradeability, conviction, urgency, or recommendation behavior outside approved authority.
+
+### RESET-10L-BL5 — Real Provider Dry-Run Fixture Review
+
+Category: Source Data / Verification
+
+Rationale: The provider boundary should be reviewed with a governed dry-run fixture before any live provider client, file writing, production pipeline integration, or downstream Decision Engine use is considered.
+
+Governance risk: HIGH
+
+Owner role: Data Steward / Technical Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Define a manually reviewed official-source fixture response and verify that the v2 provider adapter preserves provenance, missing values, and neutral readiness without writing data files or making live calls.
+
+Guardrails:
+
+- no live provider, SEC, EDGAR, broker, network, or Telegram calls;
+- no production data file creation or modification;
+- no report generation;
+- no Decision Engine authority expansion;
+- no missing-to-zero conversion;
+- no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, or recommendation behavior.
 
 ## Relationship to Existing Backlog
 
