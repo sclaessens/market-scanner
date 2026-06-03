@@ -289,9 +289,13 @@ Governance risk: HIGH
 
 Owner role: Data Steward / Technical Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL8
 
-Proposed next step: Manually execute one approved source/ticker smoke review using the BL6 harness and BL7 review checklist, then document only the governance-safe outcome without committing credentials, live payloads, or generated files.
+Execution guide: `docs/active/v2_manual_real_source_smoke_execution.md`
+
+Execution enablement result: The manual local invocation path is now documented for both explicit `ProviderSourceResponse` review and injected source-client review. The guidance includes terminal-only examples, operator commands, review checklist, post-run safety checks, and no-commit/no-write guardrails. No live provider/source call was made or committed.
+
+Proposed next step: Proceed to `RESET-10L-BL9 — Local Real-Source Smoke Result Review`.
 
 Guardrails:
 
@@ -306,6 +310,35 @@ Guardrails:
 - no Telegram delivery;
 - no Decision Engine investment logic;
 - no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, or recommendation behavior.
+
+### RESET-10L-BL9 — Local Real-Source Smoke Result Review
+
+Category: Source Data / Verification
+
+Rationale: After the manual execution path is documented, one local-only smoke result may be reviewed as a governance-safe summary without committing credentials, raw live payloads, generated files, reports, Telegram artifacts, or production behavior.
+
+Governance risk: HIGH
+
+Owner role: Data Steward / Technical Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Review one local real-source smoke result using the BL8 execution guide and commit only a summary-level governance review if needed.
+
+Guardrails:
+
+- manual-only;
+- local-only;
+- one ticker and one source;
+- no committed credentials;
+- no committed raw live payload;
+- no data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, or recommendation behavior;
+- summary-only review if anything is committed.
 
 ## Relationship to Existing Backlog
 
