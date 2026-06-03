@@ -85,3 +85,19 @@ The translated contract boundary is:
 - contract helpers must not read legacy generated CSVs, write files, import legacy `scripts`, call SEC/provider/network services, or create final decisions.
 
 Formula knowledge, SEC fact selection, provider ingestion, raw-to-normalized transformation, and investment-quality analysis require later explicit approval.
+
+## RESET-10D Raw-to-Normalized Boundary
+
+RESET-10D defines the fundamentals raw-to-normalized contract without adding provider, SEC, EDGAR, or network behavior.
+
+The approved source-data boundary is:
+
+- raw source capture preserves provider/source evidence and provenance;
+- normalized fundamentals input is program-ready metric data with source traceability;
+- source-data readiness describes availability, completeness, freshness, and review needs only;
+- generated fundamentals outputs are downstream artifacts and must not overwrite raw or normalized inputs;
+- reporting and Telegram display inputs are communication inputs and must not become source-data authority.
+
+Source-data readiness remains separate from investment quality. Missing metric values and missing count fields remain explicit and must not be converted to zero.
+
+Future provider ingestion, SEC parsing, raw-to-normalized runtime transformation, financial scoring, and downstream reporting integration require separate approval.

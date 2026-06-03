@@ -220,3 +220,25 @@ The v2 fundamentals/source-data contract defines:
 Fundamentals and source-data contracts must distinguish source-data readiness from investment quality. They may describe source provenance, period metadata, freshness, missing values, partial data, stale data, unavailable data, and review-required conditions, but they must not create quality scores, final actions, allocation instructions, execution semantics, tradeability, conviction, urgency, rankings, or hidden filtering.
 
 RESET-9C2C does not implement SEC ingestion, provider integration, raw-to-normalized transformation, financial scoring, investment-quality analysis, generated fundamentals outputs, or a full fundamentals runtime. It establishes the next v2 contract surface for later source-data work.
+
+## V2 Fundamentals Raw-to-Normalized Contract Alignment
+
+RESET-10D defines the active raw-to-normalized fundamentals boundary in `docs/active/fundamentals_raw_to_normalized.md`.
+
+The fundamentals raw-to-normalized contract separates:
+
+- raw source capture;
+- normalized fundamentals input;
+- source-data readiness;
+- generated fundamentals quality and analysis outputs;
+- reporting display input.
+
+Raw source capture is immutable evidence with provenance. Normalized fundamentals input is program-ready metric data, not investment quality and not a final decision. Source-data readiness describes availability, completeness, freshness, and review needs only.
+
+Every normalized fundamentals record must preserve traceability through source provider, source reference, and source record identity.
+
+Missing metric values and missing count fields must remain explicit and must not be converted to zero.
+
+Generated fundamentals outputs, reporting display input, and Telegram output must not overwrite raw source capture or normalized fundamentals input.
+
+RESET-10D does not implement provider ingestion, SEC or EDGAR ingestion, file loading, file writing, runtime normalization, financial scoring, target price calculation, threshold calculation, report generation, Telegram delivery, or Decision Engine behavior.

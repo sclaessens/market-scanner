@@ -425,7 +425,24 @@ Every normalized input dataset should eventually define:
 - validation rules;
 - whether the dataset may be tracked in Git.
 
-## 15. Future Implementation Sequence
+## 15. Fundamentals Raw-to-Normalized Boundary
+
+RESET-10D formalizes the fundamentals raw-to-normalized boundary.
+
+The approved boundary is:
+
+```text
+raw source capture
+-> normalized fundamentals input
+-> source-data readiness
+-> downstream classification and communication inputs
+```
+
+Raw source capture is evidence. Normalized fundamentals input is program-ready input. Source-data readiness is a data governance state. Generated fundamentals outputs and reporting outputs are downstream artifacts and must not overwrite raw or normalized inputs.
+
+The boundary does not authorize provider ingestion, SEC or EDGAR ingestion, file loading, file writing, runtime normalization, financial scoring, or Decision Engine behavior.
+
+## 16. Future Implementation Sequence
 
 Recommended implementation sequence:
 
@@ -440,7 +457,7 @@ Recommended implementation sequence:
 9. only later reintroduce provider or SEC ingestion;
 10. only after that connect normalized inputs to analytical classification and the Decision Engine.
 
-## 16. Explicit Non-Goals
+## 17. Explicit Non-Goals
 
 This document does not implement:
 
@@ -459,7 +476,7 @@ This document does not implement:
 
 Those require later approved implementation steps.
 
-## 17. Recommended Next Action
+## 18. Recommended Next Action
 
 Recommended next action:
 
