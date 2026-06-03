@@ -354,9 +354,13 @@ Governance risk: HIGH
 
 Owner role: Data Steward / Technical Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL10
 
-Proposed next step: Execute one local manual smoke review and commit only a redacted summary if it passes the BL9 review criteria.
+Summary record: `docs/active/v2_first_local_real_source_smoke_execution_summary.md`
+
+Summary result: A local manual `ProviderSourceResponse` smoke execution was reviewed through the existing v2 smoke harness. The result confirmed raw evidence capture, normalized program-ready fundamentals, neutral source-data readiness, explicit missing values, no missing-to-zero conversion, and no side effects. The result remained `review_required` and `partial` because the manually supplied response intentionally used redacted placeholder values and explicit missing fields. No live provider call, credentials, raw live payload, data files, reports, Telegram artifacts, production pipeline behavior, or Decision Engine investment logic were committed.
+
+Proposed next step: Proceed to `RESET-10L-BL11 — Real-Source Capture Persistence Design`.
 
 Guardrails:
 
@@ -372,6 +376,33 @@ Guardrails:
 - no Decision Engine investment logic;
 - no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, target-price, or recommendation behavior;
 - redacted summary-only review if anything is committed.
+
+### RESET-10L-BL11 — Real-Source Capture Persistence Design
+
+Category: Source Data / Architecture
+
+Rationale: After the first local smoke execution summary, the project must design how real source capture and normalized fundamentals may be persisted without violating raw-to-normalized separation, provenance requirements, missing-value behavior, data-write guardrails, or Decision Engine authority boundaries.
+
+Governance risk: HIGH
+
+Owner role: Data Steward / Technical Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Design the approved persistence boundary for raw source evidence, normalized fundamentals, and neutral source-data readiness.
+
+Guardrails:
+
+- design-only unless separately approved;
+- no automatic provider execution;
+- no committed credentials;
+- no committed raw live payload;
+- no production data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, target-price, or recommendation behavior.
 
 ## Relationship to Existing Backlog
 
