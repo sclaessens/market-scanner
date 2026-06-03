@@ -147,9 +147,11 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Data Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL3
 
-Proposed next step: Define synthetic raw provider records, normalized fundamentals expectations, explicit missing-value cases, and source-data readiness cases using `docs/active/v2_provider_integration_design.md`.
+Test record: `tests/contract/test_v2_provider_synthetic_contracts.py`
+
+Proposed next step: Proceed to `RESET-10L-BL4 — Real Provider Implementation` only after the synthetic provider contract tests pass.
 
 ### RESET-10L-BL4 — Real Provider Implementation
 
@@ -161,9 +163,9 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
 
-Status: BLOCKED BY RESET-10L-BL1, RESET-10L-BL2, AND RESET-10L-BL3
+Status: CANDIDATE NEXT STAGE
 
-Proposed next step: Open a separate implementation sprint only after approval.
+Proposed next step: Open a separate implementation sprint only after approval. BL4 may only begin after the synthetic provider contract tests pass and must still avoid Decision Engine authority expansion unless separately approved.
 
 Guardrails:
 
