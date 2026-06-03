@@ -99,6 +99,74 @@ Owner role: Documentation Steward / PM / Technical Analyst
 
 Status: DEFERRED TO RESET-9
 
+## RESET-10L Provider Approval Backlog
+
+These backlog items are documentation and governance items. They do not authorize provider integration, provider calls, data fetching, runtime code, report generation, Telegram delivery, Decision Engine behavior, or production pipeline execution.
+
+### RESET-10L-BL1 — Provider Approval Decision
+
+Category: Source Data / Governance
+
+Rationale: The first real fundamentals provider or provider strategy must be selected and approved before implementation begins.
+
+Governance risk: HIGH
+
+Owner role: Data Steward / Financial Analyst / Governance Auditor
+
+Status: CANDIDATE FUTURE STAGE
+
+Proposed next step: Compare candidate provider categories against `docs/active/v2_data_provider_selection_and_approval.md`.
+
+### RESET-10L-BL2 — Provider Integration Design
+
+Category: Source Data / Architecture
+
+Rationale: Raw capture and normalization mapping must be designed for the approved provider before implementation begins.
+
+Governance risk: HIGH
+
+Owner role: Data Steward / Technical Analyst / Financial Analyst
+
+Status: BLOCKED BY RESET-10L-BL1
+
+Proposed next step: Document raw evidence fields, normalized fundamentals mapping, provenance requirements, missing-value behavior, and readiness rules.
+
+### RESET-10L-BL3 — Synthetic Provider Contract Tests
+
+Category: Source Data / Testing
+
+Rationale: Approved provider mapping must be translated into synthetic contract tests before live provider integration.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Data Steward / Governance Auditor
+
+Status: BLOCKED BY RESET-10L-BL2
+
+Proposed next step: Define synthetic raw provider records, normalized fundamentals expectations, explicit missing-value cases, and source-data readiness cases.
+
+### RESET-10L-BL4 — Real Provider Implementation
+
+Category: Source Data / Implementation
+
+Rationale: Provider integration may begin only after provider approval, mapping design, and synthetic provider contract tests exist.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
+
+Status: BLOCKED BY RESET-10L-BL1, RESET-10L-BL2, AND RESET-10L-BL3
+
+Proposed next step: Open a separate implementation sprint only after approval.
+
+Guardrails:
+
+- no Decision Engine investment logic;
+- no reporting or Telegram delivery side effects;
+- no production pipeline execution in tests;
+- no missing-to-zero conversion;
+- no allocation, tradeability, conviction, urgency, or recommendation behavior outside approved authority.
+
 ## Relationship to Existing Backlog
 
 The historical `docs/sprints/project_backlog.md` remains preserved as legacy planning evidence until RESET-2 decides how to reconcile or archive it. This document is the v2 reset-facing backlog baseline.
