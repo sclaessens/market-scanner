@@ -387,13 +387,44 @@ Governance risk: HIGH
 
 Owner role: Data Steward / Technical Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL11
 
-Proposed next step: Design the approved persistence boundary for raw source evidence, normalized fundamentals, and neutral source-data readiness.
+Design record: `docs/active/v2_real_source_capture_persistence_design.md`
+
+Design result: The proposed persistence boundary is now documented for raw source evidence, normalized program-ready fundamentals, and neutral source-data readiness. The design preserves raw-to-normalized separation, provenance linkage, explicit missing values, neutral readiness, write authorization requirements, failure handling, and Decision Engine authority boundaries. No implementation, provider calls, production data writes, reports, Telegram artifacts, or investment logic were authorized.
+
+Proposed next step: Proceed to `RESET-10L-BL12 — Persistence Contract and Fixture Design`.
 
 Guardrails:
 
-- design-only unless separately approved;
+- design-only;
+- no automatic provider execution;
+- no committed credentials;
+- no committed raw live payload;
+- no production data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, target-price, or recommendation behavior.
+
+### RESET-10L-BL12 — Persistence Contract and Fixture Design
+
+Category: Source Data / Testing
+
+Rationale: After persistence design, the project must translate the raw evidence, normalized fundamentals, and readiness persistence boundaries into explicit schemas, fixtures, and contract-test requirements before any production write function is implemented.
+
+Governance risk: HIGH
+
+Owner role: Data Steward / Technical Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Define synthetic persistence schemas, fixtures, and contract-test requirements for raw source evidence, normalized fundamentals, and neutral source-data readiness.
+
+Guardrails:
+
+- design and test-contract planning only unless separately approved;
 - no automatic provider execution;
 - no committed credentials;
 - no committed raw live payload;
