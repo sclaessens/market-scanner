@@ -1,0 +1,91 @@
+{
+  "provider_name": "Official Filing Dry-Run Fixture",
+  "provider_category": "regulatory_filing",
+  "provider_record_id": "ASML-FY-2025-DRY-RUN",
+  "original_source_reference": "official-filing-fixture://ASML/FY/2025",
+  "ticker": "ASML",
+  "symbol": "ASML",
+  "entity_identifier": "ASML-HOLDING-NV-FIXTURE",
+  "source_timestamp": "2026-02-11T08:00:00Z",
+  "retrieval_timestamp": "2026-06-03T00:00:00Z",
+  "reported_period": "FY",
+  "fiscal_year": "2025",
+  "fiscal_quarter": "",
+  "provider_status": "available",
+  "provider_error_status": "",
+  "missing_field_evidence": [
+    "GrossProfit",
+    "FreeCashFlow"
+  ],
+  "provenance_metadata": "Static dry-run fixture shaped like official regulatory source evidence. Values are manually curated examples for contract review only.",
+  "raw_payload_hash": "sha256:asml-provider-dry-run-fixture",
+  "capture_version": "v2-provider-dry-run-fixture-v1",
+  "raw_fields": [
+    {
+      "original_field_name": "Revenues",
+      "original_field_value": "28000000000",
+      "original_currency": "EUR",
+      "original_unit": "EUR"
+    },
+    {
+      "original_field_name": "OperatingIncomeLoss",
+      "original_field_value": "9200000000",
+      "original_currency": "EUR",
+      "original_unit": "EUR"
+    },
+    {
+      "original_field_name": "NetIncomeLoss",
+      "original_field_value": "7600000000",
+      "original_currency": "EUR",
+      "original_unit": "EUR"
+    },
+    {
+      "original_field_name": "EarningsPerShareDiluted",
+      "original_field_value": "19.25",
+      "original_currency": "EUR",
+      "original_unit": "EUR per share"
+    },
+    {
+      "original_field_name": "Assets",
+      "original_field_value": "42000000000",
+      "original_currency": "EUR",
+      "original_unit": "EUR"
+    },
+    {
+      "original_field_name": "Liabilities",
+      "original_field_value": "16000000000",
+      "original_currency": "EUR",
+      "original_unit": "EUR"
+    },
+    {
+      "original_field_name": "StockholdersEquity",
+      "original_field_value": "26000000000",
+      "original_currency": "EUR",
+      "original_unit": "EUR"
+    },
+    {
+      "original_field_name": "CashAndCashEquivalentsAtCarryingValue",
+      "original_field_value": "6800000000",
+      "original_currency": "EUR",
+      "original_unit": "EUR"
+    },
+    {
+      "original_field_name": "NetCashProvidedByUsedInOperatingActivities",
+      "original_field_value": "8900000000",
+      "original_currency": "EUR",
+      "original_unit": "EUR"
+    },
+    {
+      "original_field_name": "PaymentsToAcquirePropertyPlantAndEquipment",
+      "original_field_value": "1100000000",
+      "original_currency": "EUR",
+      "original_unit": "EUR"
+    },
+    {
+      "original_field_name": "ProviderUnavailableExample",
+      "original_field_value": null,
+      "original_currency": "EUR",
+      "original_unit": "EUR"
+    }
+  ]
+}
