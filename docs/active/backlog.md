@@ -258,14 +258,46 @@ Governance risk: HIGH
 
 Owner role: Data Steward / Technical Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL7
 
-Proposed next step: Define the local-only manual execution procedure, required parameters, credential handling, no-write policy, and review checklist for one approved source path.
+Review record: `docs/active/v2_manual_real_source_smoke_execution_review.md`
+
+Review result: The local-only manual execution procedure, pre-run checklist, safe one-ticker/source target pattern, review checklist, no-write policy, allowed local-only output rules, pass/fail criteria, and post-run validation checks are now documented. No live provider/source execution was performed or committed.
+
+Proposed next step: Proceed to `RESET-10L-BL8 — Manual Real-Source Smoke Execution`.
 
 Guardrails:
 
 - manual-only;
 - local-only;
+- no committed credentials;
+- no committed live output;
+- no data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, or recommendation behavior.
+
+### RESET-10L-BL8 — Manual Real-Source Smoke Execution
+
+Category: Source Data / Verification
+
+Rationale: After the manual execution review procedure exists, one local-only controlled real-source smoke execution may be reviewed under explicit no-write and no-commit guardrails.
+
+Governance risk: HIGH
+
+Owner role: Data Steward / Technical Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Manually execute one approved source/ticker smoke review using the BL6 harness and BL7 review checklist, then document only the governance-safe outcome without committing credentials, live payloads, or generated files.
+
+Guardrails:
+
+- manual-only;
+- local-only;
+- one ticker and one source;
 - no committed credentials;
 - no committed live output;
 - no data writes unless separately approved;
