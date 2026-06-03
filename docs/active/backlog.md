@@ -113,9 +113,13 @@ Governance risk: HIGH
 
 Owner role: Data Steward / Financial Analyst / Governance Auditor
 
-Status: CANDIDATE FUTURE STAGE
+Status: COMPLETED BY RESET-10L-BL1
 
-Proposed next step: Compare candidate provider categories against `docs/active/v2_data_provider_selection_and_approval.md`.
+Decision: The first approved v2 fundamentals provider strategy is primary-first and provenance-first.
+
+Decision record: `docs/active/v2_provider_approval_decision.md`
+
+Proposed next step: Proceed to `RESET-10L-BL2 — Provider Integration Design`.
 
 ### RESET-10L-BL2 — Provider Integration Design
 
@@ -127,9 +131,9 @@ Governance risk: HIGH
 
 Owner role: Data Steward / Technical Analyst / Financial Analyst
 
-Status: BLOCKED BY RESET-10L-BL1
+Status: CANDIDATE NEXT STAGE
 
-Proposed next step: Document raw evidence fields, normalized fundamentals mapping, provenance requirements, missing-value behavior, and readiness rules.
+Proposed next step: Document raw evidence fields, normalized fundamentals mapping, provenance requirements, missing-value behavior, and readiness rules following the primary-first, provenance-first decision in `docs/active/v2_provider_approval_decision.md`.
 
 ### RESET-10L-BL3 — Synthetic Provider Contract Tests
 
