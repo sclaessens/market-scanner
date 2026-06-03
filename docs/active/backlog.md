@@ -194,9 +194,17 @@ Governance risk: HIGH
 
 Owner role: Data Steward / Technical Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL5
 
-Proposed next step: Define a manually reviewed official-source fixture response and verify that the v2 provider adapter preserves provenance, missing values, and neutral readiness without writing data files or making live calls.
+Review records:
+
+- `tests/fixtures/fundamentals/provider_dry_run_fixture.json`
+- `tests/contract/test_v2_provider_dry_run_fixture_review.py`
+- `docs/active/v2_provider_dry_run_fixture_review.md`
+
+Review result: A static ASML-shaped official/regulatory source fixture can move through the v2 provider boundary from provider/source response to raw evidence, normalized fundamentals, and neutral source-data readiness without live calls, data writes, reports, Telegram, pipeline execution, or investment logic.
+
+Proposed next step: Proceed to `RESET-10L-BL6 — Controlled Real-Source Smoke Test`.
 
 Guardrails:
 
@@ -206,6 +214,31 @@ Guardrails:
 - no Decision Engine authority expansion;
 - no missing-to-zero conversion;
 - no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, or recommendation behavior.
+
+### RESET-10L-BL6 — Controlled Real-Source Smoke Test
+
+Category: Source Data / Verification
+
+Rationale: After the dry-run fixture review, the next step is a separately approved, manually invoked smoke test for controlled real-source access using the v2 provider boundary.
+
+Governance risk: HIGH
+
+Owner role: Data Steward / Technical Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Define a controlled smoke-test plan for one approved source path. The smoke test must be manually invoked, must not run in the production pipeline, and must not write production data files unless separately approved.
+
+Guardrails:
+
+- no automatic provider execution;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no Decision Engine authority expansion;
+- no credentials committed;
+- no data writes unless separately approved;
+- no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, or recommendation behavior.
 
 ## Relationship to Existing Backlog
 
