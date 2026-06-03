@@ -225,9 +225,17 @@ Governance risk: HIGH
 
 Owner role: Data Steward / Technical Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL6
 
-Proposed next step: Define a controlled smoke-test plan for one approved source path. The smoke test must be manually invoked, must not run in the production pipeline, and must not write production data files unless separately approved.
+Smoke-test records:
+
+- `src/market_scanner/fundamentals/fundamentals_real_source_smoke.py`
+- `tests/unit/test_v2_fundamentals_real_source_smoke.py`
+- `docs/active/v2_controlled_real_source_smoke_test.md`
+
+Smoke-test result: A manual-only, dependency-injected v2 smoke harness can pass an explicitly invoked source response through raw evidence capture, normalized fundamentals, neutral source-data readiness, and an in-memory smoke result without automatic execution, live calls in tests, data writes, reports, Telegram, production pipeline behavior, or investment logic.
+
+Proposed next step: Proceed to `RESET-10L-BL7 — Manual Real-Source Smoke Execution Review`.
 
 Guardrails:
 
@@ -238,6 +246,33 @@ Guardrails:
 - no Decision Engine authority expansion;
 - no credentials committed;
 - no data writes unless separately approved;
+- no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, or recommendation behavior.
+
+### RESET-10L-BL7 — Manual Real-Source Smoke Execution Review
+
+Category: Source Data / Verification
+
+Rationale: After the controlled smoke harness exists, a separate review must define and, if approved, manually execute one controlled real-source smoke run without committing credentials, live output, data files, reports, or production behavior.
+
+Governance risk: HIGH
+
+Owner role: Data Steward / Technical Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Define the local-only manual execution procedure, required parameters, credential handling, no-write policy, and review checklist for one approved source path.
+
+Guardrails:
+
+- manual-only;
+- local-only;
+- no committed credentials;
+- no committed live output;
+- no data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no Decision Engine investment logic;
 - no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, or recommendation behavior.
 
 ## Relationship to Existing Backlog
