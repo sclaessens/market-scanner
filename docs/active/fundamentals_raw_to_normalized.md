@@ -130,3 +130,5 @@ Reporting display input must not become source-of-truth. Telegram output must no
 Future raw-to-normalized implementation must proceed through a separate approved sprint.
 
 That future work must define explicit fixture strategy, provenance checks, missing-value behavior, deterministic transformation rules, and local-data boundaries before provider or SEC integration can be considered.
+
+Synthetic in-memory adapters may be used to prove this contract boundary. They must accept explicit synthetic records, preserve provenance, keep missing values explicit, avoid file input/output, and avoid provider, SEC, EDGAR, network, scoring, Decision Engine, reporting runtime, and Telegram behavior.
