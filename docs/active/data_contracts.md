@@ -182,6 +182,28 @@ Missing portfolio values must remain explicit and must not be converted to zero.
 
 RESET-10C does not implement broker integration, transaction ingestion, real profit/loss calculation, target price calculation, generated portfolio outputs, report generation, Telegram delivery, or portfolio allocation behavior.
 
+## V2 Reporting Input Aggregation Contract Alignment
+
+RESET-10H defines the active reporting input aggregation boundary in `docs/active/reporting_input_aggregation.md`.
+
+The reporting input aggregation contract separates:
+
+- portfolio display input;
+- candidate display input;
+- Decision Engine status input;
+- source-data status input;
+- data warning input;
+- Telegram renderer input;
+- source-of-truth records.
+
+Reporting input aggregation may assemble approved upstream display records for communication, but it must not create source truth, decisions, target prices, thresholds, profit/loss values, rankings, scores, allocation instructions, execution instructions, urgency, conviction, tradeability, or recommendations.
+
+Every reporting input record must preserve traceability through source role, source reference, and aggregation contract version.
+
+Telegram renderer input is downstream of reporting input aggregation and must not become source-of-truth.
+
+RESET-10H does not implement real aggregation runtime, file loading, file writing, report generation, Telegram delivery, provider integration, broker integration, portfolio calculations, target price calculation, threshold calculation, or Decision Engine behavior.
+
 ## V2 Fundamentals and Source-Data Contract Alignment
 
 RESET-9C2C translates safe legacy fundamentals and source-data test knowledge into v2 contract metadata only.

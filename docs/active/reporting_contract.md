@@ -41,6 +41,16 @@ Reporting must not:
 
 v2 Reporting may consume final Decision Engine outputs and approved optional stability or persistence metadata. It must not consume upstream artifacts in a way that bypasses the Decision Engine.
 
+RESET-10H defines the v2 Reporting Input Aggregation Contract in `docs/active/reporting_input_aggregation.md`.
+
+Reporting input aggregation may assemble approved upstream display inputs for communication, including portfolio display input, candidate display input, Decision Engine status input, source-data status input, and data warning input.
+
+It must preserve traceability through source role, source reference, and aggregation contract version.
+
+It must not create source truth, decisions, target prices, thresholds, profit/loss values, rankings, scores, allocation instructions, execution instructions, urgency, conviction, tradeability, or recommendations.
+
+Telegram renderer input is downstream of reporting input aggregation and is not source-of-truth.
+
 ## Reporting Outputs
 
 Reporting outputs are generated communication artifacts. They are not source-of-truth inputs for future runs unless explicitly approved under a separate contract.
