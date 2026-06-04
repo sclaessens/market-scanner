@@ -527,9 +527,16 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL15
 
-Proposed next step: Implement the approved v2-only synthetic persistence boundary with pure validators, synthetic-only temporary write support, BL13 fixture coverage, and no production writes.
+Implementation records:
+
+- `src/market_scanner/fundamentals/fundamentals_persistence.py`
+- `tests/unit/test_v2_fundamentals_persistence.py`
+
+Implementation result: The controlled v2 synthetic persistence boundary now validates raw evidence, normalized fundamentals, and readiness records; preserves provenance linkage and explicit missing-value behavior; rejects forbidden production/report/Telegram paths; supports synthetic-only temporary writes; and remains disconnected from provider calls, production data paths, reports, Telegram, pipeline execution, and Decision Engine investment logic.
+
+Proposed next step: Proceed to `RESET-10L-BL16 — Persistence Integration Review`.
 
 Guardrails:
 
@@ -541,6 +548,34 @@ Guardrails:
 - no committed raw live payload;
 - no production data writes;
 - no writes under `data/`;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL16 — Persistence Integration Review
+
+Category: Source Data / Review
+
+Rationale: After the controlled synthetic persistence boundary exists, the next step should review integration readiness, guardrail coverage, and any remaining approval requirements before production persistence or runtime integration is considered.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Data Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Review the controlled synthetic persistence boundary against BL11-BL15 documentation, fixture coverage, no-side-effect behavior, and future approval requirements.
+
+Guardrails:
+
+- review-only unless separately approved;
+- no live provider calls;
+- no SEC, EDGAR, broker, or network calls;
+- no committed credentials;
+- no committed raw live payload;
+- no production data writes unless separately approved;
 - no production pipeline execution;
 - no report generation;
 - no Telegram delivery;
