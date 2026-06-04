@@ -699,9 +699,13 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Data Steward / Financial Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL20
 
-Proposed next step: Run a controlled one-ticker NVDA real fundamental analysis review using the redacted smoke findings and explicit missing-field state as input.
+Analysis record: `docs/active/v2_nvda_first_real_fundamental_analysis_review.md`
+
+Analysis result: A controlled NVDA one-ticker real fundamental analysis review was executed using the BL19 real-source smoke findings. The review carried FreeCashFlow missingness forward explicitly, observed readiness behavior, documented analysis behavior, and did not produce final BUY/SELL/HOLD, portfolio action, reports, Telegram artifacts, production pipeline execution, or Decision Engine investment behavior.
+
+Proposed next step: Proceed to `RESET-10L-BL21 — Govern FreeCashFlow Derivation or Missingness Policy`.
 
 Guardrails:
 
@@ -714,6 +718,36 @@ Guardrails:
 - no portfolio or watchlist modification;
 - no production data writes unless separately approved;
 - no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior unless explicitly part of an approved analysis review.
+
+### RESET-10L-BL21 — Govern FreeCashFlow Derivation or Missingness Policy
+
+Category: Fundamentals / Data Governance
+
+Rationale: The first controlled NVDA real fundamental analysis review showed that useful cash-flow analysis remains limited when direct FreeCashFlow is absent, even when operating cash flow and capital expenditures are available. The project needs a governed rule before any derivation may be added.
+
+Governance risk: HIGH
+
+Owner role: Data Steward / Financial Analyst / Governance Auditor / Developer
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Decide whether v2 may derive FreeCashFlow from operating cash flow minus capital expenditures, or whether direct-source FreeCashFlow missingness must continue to block cash-flow analysis.
+
+Guardrails:
+
+- one ticker evidence review may use the BL19/BL20 NVDA findings;
+- design and policy first unless separately approved for implementation;
+- no silent FreeCashFlow derivation;
+- no missing-to-zero conversion;
+- no committed credentials;
+- no committed raw unredacted live payload;
+- no production data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist integration;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
 ## Relationship to Existing Backlog
 
