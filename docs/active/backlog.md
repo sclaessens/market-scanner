@@ -622,28 +622,62 @@ Guardrails:
 - no Decision Engine investment logic;
 - no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
-### RESET-10L-BL18 — Production Persistence Readiness Review
+### RESET-10L-BL18 — Approve One-Ticker Real-Source Data Capture
 
-Category: Source Data / Review
+Category: Source Data / Governance
 
-Rationale: After synthetic provider-to-persistence integration contracts exist, the next step should review whether any production persistence path can be considered and what approvals, path policy, audit controls, and no-side-effect requirements remain.
+Rationale: After synthetic provider-to-persistence integration contracts, the project should stop adding broad readiness layers and approve one controlled real-source data capture target so the application can start learning from real fundamentals.
 
 Governance risk: HIGH
 
-Owner role: Technical Analyst / Data Steward / Governance Auditor
+Owner role: Data Steward / Technical Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL18
 
-Proposed next step: Review production persistence readiness, remaining governance approvals, path policy, append/version semantics, rollback design, audit retention, and downstream no-side-effect guardrails.
+Approval record: `docs/active/v2_one_ticker_real_source_data_capture_approval.md`
+
+Approval result: One controlled real-source data capture target is approved for the next sprint. The approved ticker is `NVDA` / NVIDIA Corporation. The approval is limited to one ticker, one source family, and one controlled local execution path. It does not authorize broad provider integration, automatic execution, multi-ticker capture, production pipeline execution, reports, Telegram delivery, portfolio/watchlist updates, or Decision Engine investment behavior.
+
+Proposed next step: Proceed to `RESET-10L-BL19 — Execute One-Ticker Real-Source Persistence Smoke`.
 
 Guardrails:
 
-- review-only unless separately approved;
-- no live provider calls;
-- no SEC, EDGAR, broker, or network calls;
+- one ticker only: `NVDA`;
+- one source family only;
+- controlled local smoke only;
 - no committed credentials;
-- no committed raw live payload;
-- no production data writes unless separately approved;
+- no committed raw live payload unless separately redacted and explicitly approved;
+- no broad production persistence;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist integration;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL19 — Execute One-Ticker Real-Source Persistence Smoke
+
+Category: Source Data / Verification
+
+Rationale: After one-ticker real-source data capture approval, the project may execute a controlled NVDA real-source persistence smoke to determine whether real fundamentals can move through the provider/source, normalization, readiness, and persistence boundaries without triggering downstream behavior.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Execute one controlled NVDA real-source persistence smoke and commit only governance-safe redacted summaries or approved controlled outputs.
+
+Guardrails:
+
+- one ticker only: `NVDA`;
+- one source family only;
+- explicit local invocation only;
+- no committed credentials;
+- no committed raw unredacted live payload;
+- no multi-ticker capture;
+- no automatic provider scheduling;
 - no production pipeline execution;
 - no report generation;
 - no Telegram delivery;
