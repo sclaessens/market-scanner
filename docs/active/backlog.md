@@ -1140,9 +1140,21 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL32
 
-Proposed next step: Establish the canonical v2 Decision Review boundary without production data writes, report generation, Telegram delivery, portfolio/watchlist updates, or unapproved Decision Engine investment behavior.
+Implementation records:
+
+- `src/market_scanner/app.py`
+- `src/market_scanner/decision/__init__.py`
+- `src/market_scanner/decision/decision_contracts.py`
+- `src/market_scanner/decision/decision_boundary.py`
+- `tests/unit/test_v2_canonical_app.py`
+- `tests/unit/test_v2_canonical_decision.py`
+- `docs/active/v2_decision_review_runtime_boundary_migration.md`
+
+Result summary: Decision/review runtime migration has started. The canonical v2 decision/review boundary is now established and integrated into the side-effect-free canonical app dry-run plan. Legacy runtime scripts and legacy Decision Engine logic remain present but are not canonical decision/review authorities and remain migration/archive candidates under the legacy decoupling policy. The new boundary explicitly blocks final recommendation semantics.
+
+Proposed next step: Proceed to `RESET-10L-BL33 — Migrate Message Composition Runtime Logic to Canonical V2 Boundary`.
 
 Guardrails:
 
@@ -1158,6 +1170,35 @@ Guardrails:
 - no final BUY, SELL, or HOLD recommendation;
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior outside the approved Decision Engine authority;
 - legacy runner and legacy analysis authority must not be expanded.
+
+### RESET-10L-BL33 — Migrate Message Composition Runtime Logic to Canonical V2 Boundary
+
+Category: Architecture / Cleanup Implementation
+
+Rationale: After canonical app, scanner, analysis, and decision/review boundaries are established, the next migration target is message composition. This step should separate message composition from report generation and delivery while keeping Telegram delivery and production reports disconnected unless separately approved.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Establish the canonical v2 message composition boundary without production data writes, report generation, Telegram delivery, portfolio/watchlist updates, or investment recommendation behavior.
+
+Guardrails:
+
+- update existing Python files first unless BL28-approved canonical ownership requires a new file;
+- no one-off migration helper files committed to the repository;
+- no file deletion or archival unless separately approved;
+- no live provider calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation unless separately approved;
+- no Telegram delivery unless separately approved;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- legacy runner, legacy Decision Engine, legacy reporting, and legacy Telegram authority must not be expanded.
 
 ## Relationship to Existing Backlog
 

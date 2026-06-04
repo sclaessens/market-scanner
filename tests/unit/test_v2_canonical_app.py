@@ -15,6 +15,10 @@ from market_scanner.analysis.analysis_boundary import (
     ANALYSIS_CANONICAL_OWNER,
     build_analysis_plan,
 )
+from market_scanner.decision.decision_boundary import (
+    DECISION_CANONICAL_OWNER,
+    build_decision_review_plan,
+)
 from market_scanner.scanner.scanner_boundary import (
     SCANNER_CANONICAL_OWNER,
     build_scanner_plan,
@@ -46,12 +50,19 @@ FORBIDDEN_OUTPUT_TERMS = {
     "recommendation",
 }
 
+BLOCKED_POLICY_FIELDS = {
+    "blocked_final_state_codes",
+    "blocked_behavior_codes",
+}
+
 
 def _flatten_values(value):
     if is_dataclass(value):
         yield from _flatten_values(asdict(value))
     elif isinstance(value, dict):
         for key, item in value.items():
+            if key in BLOCKED_POLICY_FIELDS:
+                continue
             yield str(key)
             yield from _flatten_values(item)
     elif isinstance(value, (tuple, list)):
@@ -81,7 +92,7 @@ def test_canonical_runtime_plan_marks_all_stages_side_effect_free_by_default():
         "provider_source_access": "canonical_boundary_available",
         "fundamentals_normalization_evidence": "canonical_boundary_available",
         "analysis": "canonical_boundary_established",
-        "decision_review_boundary": "planned_for_migration",
+        "decision_review_boundary": "canonical_boundary_established",
         "message_composition": "planned_for_migration",
         "report_generation_where_approved": "approval_required",
         "delivery_telegram_where_approved": "approval_required",
@@ -95,6 +106,7 @@ def test_canonical_app_dry_run_returns_side_effect_guarantees():
     assert result.runtime_plan == build_canonical_runtime_plan()
     assert result.runtime_plan.scanner_plan == build_scanner_plan()
     assert result.runtime_plan.analysis_plan == build_analysis_plan()
+    assert result.runtime_plan.decision_review_plan == build_decision_review_plan()
     assert result.side_effect_guarantees.provider_calls_made is False
     assert result.side_effect_guarantees.production_data_writes is False
     assert result.side_effect_guarantees.reports_generated is False
@@ -161,6 +173,19 @@ def test_canonical_app_references_canonical_analysis_boundary():
     assert analysis_stage.canonical_owner == ANALYSIS_CANONICAL_OWNER
     assert build_canonical_runtime_plan().analysis_plan.canonical_owner == (
         ANALYSIS_CANONICAL_OWNER
+    )
+
+
+def test_canonical_app_references_canonical_decision_review_boundary():
+    decision_stage = next(
+        stage
+        for stage in build_canonical_runtime_plan().stages
+        if stage.name == "decision_review_boundary"
+    )
+
+    assert decision_stage.canonical_owner == DECISION_CANONICAL_OWNER
+    assert build_canonical_runtime_plan().decision_review_plan.canonical_owner == (
+        DECISION_CANONICAL_OWNER
     )
 
 
