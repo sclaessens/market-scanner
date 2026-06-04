@@ -16,6 +16,7 @@ from market_scanner.fundamentals.fundamentals_normalization_contracts import (
 )
 from market_scanner.fundamentals.fundamentals_provider_contracts import (
     ProviderContractIssue,
+    ProviderPriorYearGrowthEvidenceRecord,
     ProviderRawEvidenceRecord,
     ProviderRawFieldEvidence,
     ProviderSourceDataReadinessRecord,
@@ -83,6 +84,17 @@ DEFAULT_PROVIDER_METRIC_MAPPINGS: Mapping[str, tuple[str, ...]] = {
 
 FREE_CASH_FLOW_FORMULA = (
     "free_cash_flow = operating_cash_flow - capital_expenditures"
+)
+
+PRIOR_YEAR_GROWTH_FORMULA = (
+    "growth_rate = (current_value - prior_value) / abs(prior_value)"
+)
+
+DEFAULT_PRIOR_YEAR_GROWTH_METRICS: tuple[str, ...] = (
+    "revenue",
+    "free_cash_flow",
+    "net_income",
+    "operating_income",
 )
 
 
@@ -250,6 +262,299 @@ def build_provider_source_data_readiness(
     )
 
 
+def build_prior_year_growth_evidence(
+    current_records: Sequence[ProviderNormalizedFundamentalRecord],
+    prior_records: Sequence[ProviderNormalizedFundamentalRecord],
+    *,
+    metric_names: Sequence[str] = DEFAULT_PRIOR_YEAR_GROWTH_METRICS,
+) -> tuple[ProviderPriorYearGrowthEvidenceRecord, ...]:
+    """Build governed growth evidence from comparable normalized records."""
+
+    current_by_metric = {record.metric_name: record for record in current_records}
+    prior_by_metric = {record.metric_name: record for record in prior_records}
+    return tuple(
+        build_prior_year_growth_evidence_record(
+            current_by_metric.get(metric_name),
+            prior_by_metric.get(metric_name),
+            metric_name=metric_name,
+        )
+        for metric_name in metric_names
+    )
+
+
+def build_prior_year_growth_evidence_record(
+    current_record: ProviderNormalizedFundamentalRecord | None,
+    prior_record: ProviderNormalizedFundamentalRecord | None,
+    *,
+    metric_name: str | None = None,
+) -> ProviderPriorYearGrowthEvidenceRecord:
+    """Build one explicit current/prior growth evidence record."""
+
+    resolved_metric_name = (
+        metric_name
+        or (current_record.metric_name if current_record is not None else "")
+        or (prior_record.metric_name if prior_record is not None else "")
+    )
+    base_record = current_record or prior_record
+    ticker = base_record.ticker if base_record is not None else ""
+    fiscal_period = current_record.fiscal_period if current_record is not None else ""
+    fiscal_quarter = (
+        current_record.fiscal_quarter if current_record is not None else ""
+    )
+
+    status, warnings, growth_rate = _prior_year_growth_result(
+        current_record,
+        prior_record,
+        metric_name=resolved_metric_name,
+    )
+
+    return ProviderPriorYearGrowthEvidenceRecord(
+        ticker=ticker,
+        metric_name=resolved_metric_name,
+        current_period_value=(
+            current_record.metric_value if current_record is not None else None
+        ),
+        prior_period_value=(
+            prior_record.metric_value if prior_record is not None else None
+        ),
+        current_period_reference=_period_reference_for(current_record),
+        prior_period_reference=_period_reference_for(prior_record),
+        current_fiscal_year=(
+            current_record.fiscal_year if current_record is not None else ""
+        ),
+        prior_fiscal_year=prior_record.fiscal_year if prior_record is not None else "",
+        fiscal_period=fiscal_period,
+        fiscal_quarter=fiscal_quarter,
+        currency=_shared_value(current_record, prior_record, "currency"),
+        unit=_shared_value(current_record, prior_record, "metric_unit"),
+        current_source_reference=(
+            current_record.source_reference if current_record is not None else ""
+        ),
+        prior_source_reference=(
+            prior_record.source_reference if prior_record is not None else ""
+        ),
+        current_source_record_identity=(
+            current_record.source_record_identity
+            if current_record is not None
+            else ""
+        ),
+        prior_source_record_identity=(
+            prior_record.source_record_identity if prior_record is not None else ""
+        ),
+        current_source_field_names=(
+            current_record.source_field_names if current_record is not None else ()
+        ),
+        prior_source_field_names=(
+            prior_record.source_field_names if prior_record is not None else ()
+        ),
+        comparison_formula=PRIOR_YEAR_GROWTH_FORMULA,
+        growth_rate=growth_rate,
+        growth_status=status,
+        validation_warnings=warnings,
+    )
+
+
+def _prior_year_growth_result(
+    current_record: ProviderNormalizedFundamentalRecord | None,
+    prior_record: ProviderNormalizedFundamentalRecord | None,
+    *,
+    metric_name: str,
+) -> tuple[str, tuple[str, ...], str | None]:
+    if current_record is None:
+        return (
+            "growth_missing_current_period",
+            (f"{metric_name}:growth_missing_current_period",),
+            None,
+        )
+    if prior_record is None:
+        return (
+            "growth_missing_prior_period",
+            (f"{metric_name}:growth_missing_prior_period",),
+            None,
+        )
+
+    if current_record.metric_name != prior_record.metric_name:
+        return (
+            "growth_not_comparable",
+            (
+                f"{metric_name}:growth_not_comparable",
+                f"{metric_name}:growth_metric_mismatch",
+            ),
+            None,
+        )
+
+    if current_record.metric_name != metric_name:
+        return (
+            "growth_not_comparable",
+            (
+                f"{metric_name}:growth_not_comparable",
+                f"{metric_name}:growth_metric_mismatch",
+            ),
+            None,
+        )
+
+    if not _has_growth_provenance(current_record) or not _has_growth_provenance(
+        prior_record
+    ):
+        return (
+            "growth_provenance_gap",
+            (f"{metric_name}:growth_provenance_gap",),
+            None,
+        )
+
+    if current_record.currency != prior_record.currency:
+        return (
+            "growth_currency_mismatch",
+            (f"{metric_name}:growth_currency_mismatch",),
+            None,
+        )
+
+    if current_record.metric_unit != prior_record.metric_unit:
+        return (
+            "growth_unit_mismatch",
+            (f"{metric_name}:growth_unit_mismatch",),
+            None,
+        )
+
+    if (
+        current_record.fiscal_period != prior_record.fiscal_period
+        or current_record.fiscal_quarter != prior_record.fiscal_quarter
+        or not _is_previous_fiscal_year(current_record, prior_record)
+    ):
+        return (
+            "growth_period_mismatch",
+            (f"{metric_name}:growth_period_mismatch",),
+            None,
+        )
+
+    if current_record.metric_value in (None, ""):
+        return (
+            "growth_missing_current_period",
+            (f"{metric_name}:growth_missing_current_period",),
+            None,
+        )
+    if prior_record.metric_value in (None, ""):
+        return (
+            "growth_missing_prior_period",
+            (f"{metric_name}:growth_missing_prior_period",),
+            None,
+        )
+
+    parsed_current_value, current_warning = _parse_record_decimal_status(
+        current_record
+    )
+    parsed_prior_value, prior_warning = _parse_record_decimal_status(prior_record)
+    if current_warning == "invalid":
+        return (
+            "growth_invalid_current_period",
+            (f"{metric_name}:growth_invalid_current_period",),
+            None,
+        )
+    if prior_warning == "invalid":
+        return (
+            "growth_invalid_prior_period",
+            (f"{metric_name}:growth_invalid_prior_period",),
+            None,
+        )
+    if parsed_current_value is None:
+        return (
+            "growth_not_parseable",
+            (f"{metric_name}:growth_not_parseable:current_period",),
+            None,
+        )
+    if parsed_prior_value is None:
+        return (
+            "growth_not_parseable",
+            (f"{metric_name}:growth_not_parseable:prior_period",),
+            None,
+        )
+
+    if parsed_prior_value == 0:
+        return (
+            "growth_not_comparable",
+            (
+                f"{metric_name}:growth_not_comparable",
+                f"{metric_name}:prior_value_zero",
+            ),
+            None,
+        )
+
+    growth_rate = (parsed_current_value - parsed_prior_value) / abs(
+        parsed_prior_value
+    )
+    return (
+        "growth_available",
+        (
+            f"{metric_name}:growth_available",
+            f"{metric_name}:governed_prior_year_growth",
+        ),
+        _format_decimal(growth_rate),
+    )
+
+
+def _parse_record_decimal_status(
+    record: ProviderNormalizedFundamentalRecord,
+) -> tuple[Decimal | None, str]:
+    value = record.metric_value
+    if value is None or value == "":
+        return None, "missing"
+    if isinstance(value, bool):
+        return None, "invalid"
+    try:
+        return Decimal(str(value)), ""
+    except (InvalidOperation, ValueError):
+        return None, "not_parseable"
+
+
+def _has_growth_provenance(record: ProviderNormalizedFundamentalRecord) -> bool:
+    return bool(
+        record.source_reference
+        and record.source_record_identity
+        and record.source_field_names
+    )
+
+
+def _is_previous_fiscal_year(
+    current_record: ProviderNormalizedFundamentalRecord,
+    prior_record: ProviderNormalizedFundamentalRecord,
+) -> bool:
+    try:
+        current_year = int(current_record.fiscal_year)
+        prior_year = int(prior_record.fiscal_year)
+    except ValueError:
+        return False
+    return current_year == prior_year + 1
+
+
+def _period_reference_for(
+    record: ProviderNormalizedFundamentalRecord | None,
+) -> str:
+    if record is None:
+        return ""
+    parts = [record.fiscal_year, record.fiscal_period]
+    if record.fiscal_quarter:
+        parts.append(record.fiscal_quarter)
+    return "|".join(parts)
+
+
+def _shared_value(
+    current_record: ProviderNormalizedFundamentalRecord | None,
+    prior_record: ProviderNormalizedFundamentalRecord | None,
+    attribute_name: str,
+) -> str:
+    current_value = (
+        str(getattr(current_record, attribute_name))
+        if current_record is not None
+        else ""
+    )
+    prior_value = (
+        str(getattr(prior_record, attribute_name))
+        if prior_record is not None
+        else ""
+    )
+    return current_value if current_value == prior_value else ""
+
+
 def _first_matching_field(
     raw_fields_by_name: Mapping[str, ProviderRawFieldEvidence],
     candidate_field_names: Sequence[str],
@@ -274,9 +579,21 @@ def _normalized_record_for(
 
     return ProviderNormalizedFundamentalRecord(
         ticker=raw_evidence.ticker,
-        fiscal_period=raw_evidence.reported_period,
-        fiscal_year=raw_evidence.fiscal_year,
-        fiscal_quarter=raw_evidence.fiscal_quarter,
+        fiscal_period=(
+            raw_field.reported_period
+            if raw_field is not None and raw_field.reported_period
+            else raw_evidence.reported_period
+        ),
+        fiscal_year=(
+            raw_field.fiscal_year
+            if raw_field is not None and raw_field.fiscal_year
+            else raw_evidence.fiscal_year
+        ),
+        fiscal_quarter=(
+            raw_field.fiscal_quarter
+            if raw_field is not None and raw_field.fiscal_quarter
+            else raw_evidence.fiscal_quarter
+        ),
         metric_name=metric_name,
         metric_value=(
             raw_field.original_field_value if raw_field is not None else None
@@ -422,9 +739,13 @@ def _free_cash_flow_record_for(
     derived_value = parsed_operating_cash_flow - parsed_capital_expenditures
     return ProviderNormalizedFundamentalRecord(
         ticker=raw_evidence.ticker,
-        fiscal_period=raw_evidence.reported_period,
-        fiscal_year=raw_evidence.fiscal_year,
-        fiscal_quarter=raw_evidence.fiscal_quarter,
+        fiscal_period=(
+            operating_cash_flow.reported_period or raw_evidence.reported_period
+        ),
+        fiscal_year=operating_cash_flow.fiscal_year or raw_evidence.fiscal_year,
+        fiscal_quarter=(
+            operating_cash_flow.fiscal_quarter or raw_evidence.fiscal_quarter
+        ),
         metric_name="free_cash_flow",
         metric_value=_format_decimal(derived_value),
         metric_unit=operating_cash_flow.original_unit,

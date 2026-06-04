@@ -152,6 +152,34 @@ class ProviderSourceDataReadinessRecord:
     readiness_warnings: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class ProviderPriorYearGrowthEvidenceRecord:
+    """Governed current/prior growth evidence with explicit provenance."""
+
+    ticker: str
+    metric_name: str
+    current_period_value: object
+    prior_period_value: object
+    current_period_reference: str
+    prior_period_reference: str
+    current_fiscal_year: str
+    prior_fiscal_year: str
+    fiscal_period: str
+    fiscal_quarter: str
+    currency: str
+    unit: str
+    current_source_reference: str
+    prior_source_reference: str
+    current_source_record_identity: str
+    prior_source_record_identity: str
+    current_source_field_names: tuple[str, ...]
+    prior_source_field_names: tuple[str, ...]
+    comparison_formula: str
+    growth_rate: object
+    growth_status: str
+    validation_warnings: tuple[str, ...] = ()
+
+
 REQUIRED_PROVIDER_RESPONSE_FIELDS: tuple[str, ...] = (
     "provider_name",
     "provider_category",

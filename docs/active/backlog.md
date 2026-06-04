@@ -876,9 +876,19 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Data Steward / Financial Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL25
 
-Proposed next step: Implement governed prior-year growth evidence in existing modules where possible, covering available, missing, invalid, not-comparable, mismatch, and provenance-gap states.
+Implementation records:
+
+- `src/market_scanner/fundamentals/fundamentals_provider_contracts.py`
+- `src/market_scanner/fundamentals/fundamentals_provider_adapter.py`
+- `tests/unit/test_v2_fundamentals_provider_adapter.py`
+- `tests/contract/test_v2_fundamentals_provider_contracts.py`
+- `docs/active/v2_prior_year_growth_evidence_implementation.md`
+
+Result summary: Governed prior-year growth evidence is implemented. The v2 fundamentals/analysis path now supports explicit growth evidence states for comparable current/prior metric values, preserves current and prior provenance, computes growth only when values are valid and comparable, and fails closed for missing, zero, invalid, not-parseable, mismatched, or provenance-gap inputs without missing-to-zero conversion or investment behavior.
+
+Proposed next step: Proceed to `RESET-10L-BL26 — Re-run NVDA Real Analysis with Governed Growth Evidence`.
 
 Guardrails:
 
@@ -896,6 +906,37 @@ Guardrails:
 - no Telegram delivery;
 - no portfolio or watchlist integration;
 - no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL26 — Re-run NVDA Real Analysis with Governed Growth Evidence
+
+Category: Fundamentals / Analysis Review
+
+Rationale: After governed prior-year growth evidence is implemented, the project should re-run the controlled NVDA real analysis path to determine whether the remaining LIMITED_ANALYSIS blocker is resolved.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Data Steward / Financial Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Re-run the controlled NVDA one-ticker real analysis review using governed derived FreeCashFlow and governed prior-year growth evidence.
+
+Guardrails:
+
+- one ticker only: `NVDA`;
+- controlled local execution only;
+- no multi-ticker run;
+- no automated scheduling;
+- no committed credentials;
+- no committed raw unredacted live payload;
+- no production data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no missing-to-zero conversion;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
 ## Relationship to Existing Backlog
 
