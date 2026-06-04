@@ -418,17 +418,49 @@ Governance risk: HIGH
 
 Owner role: Data Steward / Technical Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL12
 
-Proposed next step: Define synthetic persistence schemas, fixtures, and contract-test requirements for raw source evidence, normalized fundamentals, and neutral source-data readiness.
+Design record: `docs/active/v2_persistence_contract_and_fixture_design.md`
+
+Design result: The persistence contract and fixture design now defines raw evidence, normalized fundamentals, and readiness schema expectations; synthetic fixture families; future fixture and contract-test path candidates; acceptance criteria for synthetic persistence contract tests; and guardrails that prohibit provider calls, production data writes, reports, Telegram artifacts, pipeline execution, Decision Engine behavior, and investment semantics.
+
+Proposed next step: Proceed to `RESET-10L-BL13 — Synthetic Persistence Contract Tests`.
 
 Guardrails:
 
-- design and test-contract planning only unless separately approved;
+- design and test-contract planning only;
 - no automatic provider execution;
 - no committed credentials;
 - no committed raw live payload;
 - no production data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, target-price, or recommendation behavior.
+
+### RESET-10L-BL13 — Synthetic Persistence Contract Tests
+
+Category: Source Data / Testing
+
+Rationale: After persistence contract and fixture design, the project may add synthetic persistence fixtures and contract tests that prove raw evidence, normalized fundamentals, and readiness persistence expectations without production writes.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Add synthetic persistence fixtures and contract tests for raw evidence, normalized fundamentals, readiness, provenance linkage, missing-value preservation, and no-side-effect guardrails.
+
+Guardrails:
+
+- synthetic fixtures and contract tests only;
+- no live provider calls;
+- no SEC, EDGAR, broker, or network calls;
+- no committed credentials;
+- no committed raw live payload;
+- no production data writes;
 - no production pipeline execution;
 - no report generation;
 - no Telegram delivery;
