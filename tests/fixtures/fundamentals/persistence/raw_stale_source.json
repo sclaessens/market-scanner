@@ -1,0 +1,105 @@
+{
+  "fixture_metadata": {
+    "fixture_name": "raw_stale_source",
+    "fixture_family": "stale synthetic source",
+    "reset_stage": "RESET-10L-BL13",
+    "is_synthetic": true,
+    "no_live_payload": true,
+    "no_credentials": true,
+    "no_production_data": true,
+    "description": "Stale synthetic source evidence with traceable old source timestamp."
+  },
+  "raw_evidence": {
+    "raw_evidence_id": "synthetic-raw-stale-asml-fy-2021",
+    "provider_name": "Synthetic Official Filing Fixture",
+    "provider_category": "regulatory_filing",
+    "provider_record_id": "ASML-FY-2021-SYNTHETIC-STALE",
+    "original_source_reference": "synthetic-official-filing://ASML/FY/2021/stale",
+    "ticker": "ASML",
+    "symbol": "ASML",
+    "entity_identifier": "ASML-HOLDING-NV-SYNTHETIC",
+    "source_timestamp": "2022-02-09T08:00:00Z",
+    "retrieval_timestamp": "2026-06-03T00:00:00Z",
+    "reported_period": "FY",
+    "fiscal_year": "2021",
+    "fiscal_quarter": "",
+    "currency": "EUR",
+    "unit": "EUR",
+    "raw_fields": {
+      "Revenues": "18000000000",
+      "NetIncomeLoss": "5800000000"
+    },
+    "missing_field_evidence": [],
+    "provenance_metadata": {
+      "source_type": "synthetic_fixture",
+      "capture_method": "static_contract_fixture",
+      "source_reference_preserved": true,
+      "raw_field_names_preserved": true
+    },
+    "raw_payload_hash": "sha256:synthetic-raw-stale-asml-fy-2021",
+    "capture_version": "v2-persistence-contract-fixture-v1",
+    "validation_warnings": [
+      "source_timestamp_outside_freshness_window"
+    ]
+  },
+  "expected_contract": {
+    "raw_evidence": {
+      "required_fields_present": true,
+      "old_source_timestamp_preserved": true,
+      "raw_evidence_traceable": true,
+      "missing_values_converted_to_zero": false,
+      "forbidden_semantics_present": false
+    },
+    "normalized_fundamentals": {
+      "normalized_record_set_id": "synthetic-normalized-stale-asml-fy-2021",
+      "normalization_version": "v2-persistence-normalization-contract-v1",
+      "records": [
+        {
+          "normalized_record_id": "norm-stale-revenue",
+          "raw_evidence_id": "synthetic-raw-stale-asml-fy-2021",
+          "provider_name": "Synthetic Official Filing Fixture",
+          "original_source_reference": "synthetic-official-filing://ASML/FY/2021/stale",
+          "ticker": "ASML",
+          "entity_identifier": "ASML-HOLDING-NV-SYNTHETIC",
+          "metric_name": "revenue",
+          "metric_value": "18000000000",
+          "metric_value_status": "reported",
+          "currency": "EUR",
+          "currency_status": "reported",
+          "unit": "EUR",
+          "unit_status": "reported",
+          "reported_period": "FY",
+          "fiscal_year": "2021",
+          "fiscal_quarter": "",
+          "source_timestamp": "2022-02-09T08:00:00Z",
+          "retrieval_timestamp": "2026-06-03T00:00:00Z",
+          "normalization_version": "v2-persistence-normalization-contract-v1",
+          "validation_warnings": [
+            "source_timestamp_outside_freshness_window"
+          ]
+        }
+      ]
+    },
+    "readiness": {
+      "readiness_record_id": "readiness-stale-asml-fy-2021",
+      "raw_evidence_id": "synthetic-raw-stale-asml-fy-2021",
+      "normalized_record_set_id": "synthetic-normalized-stale-asml-fy-2021",
+      "ticker": "ASML",
+      "provider_name": "Synthetic Official Filing Fixture",
+      "readiness_state": "stale",
+      "source_data_status": "stale",
+      "missing_fundamentals_count": 0,
+      "partial_data_count": 0,
+      "stale_data_count": 1,
+      "invalid_data_count": 0,
+      "provenance_status": "complete",
+      "parseability_status": "parseable",
+      "consistency_status": "consistent",
+      "freshness_status": "stale",
+      "readiness_warnings": [
+        "source_timestamp_outside_freshness_window"
+      ],
+      "readiness_version": "v2-persistence-readiness-contract-v1"
+    }
+  }
+}
