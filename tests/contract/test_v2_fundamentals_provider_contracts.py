@@ -6,6 +6,7 @@ from market_scanner.fundamentals.fundamentals_provider_contracts import (
     ProviderCategory,
     ProviderContractIssue,
     ProviderContractIssueCode,
+    ProviderPriorYearGrowthEvidenceRecord,
     ProviderRawFieldEvidence,
     ProviderSourceResponse,
     ProviderSourceStatus,
@@ -186,6 +187,7 @@ def test_provider_contract_records_do_not_define_investment_authority_fields():
     contract_fields = (
         set(ProviderSourceResponse.__dataclass_fields__)
         | set(ProviderRawFieldEvidence.__dataclass_fields__)
+        | set(ProviderPriorYearGrowthEvidenceRecord.__dataclass_fields__)
     )
 
     assert contract_fields.isdisjoint(FORBIDDEN_AUTHORITY_FIELDS)

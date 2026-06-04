@@ -1,8 +1,12 @@
+from dataclasses import replace
 from importlib import reload
 from pathlib import Path
 
 from market_scanner.fundamentals import fundamentals_provider_adapter
 from market_scanner.fundamentals.fundamentals_provider_adapter import (
+    PRIOR_YEAR_GROWTH_FORMULA,
+    build_prior_year_growth_evidence,
+    build_prior_year_growth_evidence_record,
     ingest_provider_fundamentals,
     ingest_provider_fundamentals_from_client,
 )
@@ -112,6 +116,60 @@ def _response(**overrides) -> ProviderSourceResponse:
 
 def _metric_map(result):
     return {record.metric_name: record for record in result.normalized_records}
+
+
+def _growth_map(records):
+    return {record.metric_name: record for record in records}
+
+
+def _current_growth_result(**overrides):
+    values = {
+        "provider_record_id": "CIK0000320193-FY-2025",
+        "original_source_reference": "sec-companyfacts:CIK0000320193/FY/2025",
+        "fiscal_year": "2025",
+        "raw_fields": {
+            "Revenues": _field("Revenues", "1200"),
+            "NetIncomeLoss": _field("NetIncomeLoss", "200"),
+            "OperatingIncomeLoss": _field("OperatingIncomeLoss", "300"),
+            "NetCashProvidedByUsedInOperatingActivities": _field(
+                "NetCashProvidedByUsedInOperatingActivities",
+                "260",
+            ),
+            "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                "PaymentsToAcquirePropertyPlantAndEquipment",
+                "40",
+            ),
+        },
+    }
+    values.update(overrides)
+    return ingest_provider_fundamentals(
+        _response(**values)
+    )
+
+
+def _prior_growth_result(**overrides):
+    values = {
+        "provider_record_id": "CIK0000320193-FY-2024",
+        "original_source_reference": "sec-companyfacts:CIK0000320193/FY/2024",
+        "fiscal_year": "2024",
+        "raw_fields": {
+            "Revenues": _field("Revenues", "1000"),
+            "NetIncomeLoss": _field("NetIncomeLoss", "160"),
+            "OperatingIncomeLoss": _field("OperatingIncomeLoss", "250"),
+            "NetCashProvidedByUsedInOperatingActivities": _field(
+                "NetCashProvidedByUsedInOperatingActivities",
+                "220",
+            ),
+            "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                "PaymentsToAcquirePropertyPlantAndEquipment",
+                "20",
+            ),
+        },
+    }
+    values.update(overrides)
+    return ingest_provider_fundamentals(
+        _response(**values)
+    )
 
 
 def test_injected_provider_response_becomes_raw_evidence():
@@ -581,6 +639,358 @@ def test_nvda_shaped_input_derives_free_cash_flow_from_valid_cash_flow_inputs():
     assert result.readiness_record.readiness_warnings == (
         "free_cash_flow:source_derived",
     )
+
+
+def test_valid_revenue_prior_year_growth_produces_growth_available():
+    current = _current_growth_result()
+    prior = _prior_growth_result()
+
+    growth = _growth_map(
+        build_prior_year_growth_evidence(
+            current.normalized_records,
+            prior.normalized_records,
+            metric_names=("revenue",),
+        )
+    )["revenue"]
+
+    assert growth.growth_status == "growth_available"
+    assert growth.growth_rate == "0.2"
+    assert growth.comparison_formula == PRIOR_YEAR_GROWTH_FORMULA
+    assert growth.current_period_value == "1200"
+    assert growth.prior_period_value == "1000"
+    assert growth.current_period_reference == "2025|FY"
+    assert growth.prior_period_reference == "2024|FY"
+    assert growth.current_source_field_names == ("Revenues",)
+    assert growth.prior_source_field_names == ("Revenues",)
+    assert "revenue:governed_prior_year_growth" in growth.validation_warnings
+
+
+def test_valid_free_cash_flow_prior_year_growth_produces_growth_available():
+    current = _current_growth_result()
+    prior = _prior_growth_result()
+
+    growth = _growth_map(
+        build_prior_year_growth_evidence(
+            current.normalized_records,
+            prior.normalized_records,
+            metric_names=("free_cash_flow",),
+        )
+    )["free_cash_flow"]
+
+    assert growth.growth_status == "growth_available"
+    assert growth.growth_rate == "0.1"
+    assert growth.current_period_value == "220"
+    assert growth.prior_period_value == "200"
+    assert growth.current_source_field_names == (
+        "NetCashProvidedByUsedInOperatingActivities",
+        "PaymentsToAcquirePropertyPlantAndEquipment",
+    )
+    assert growth.prior_source_field_names == (
+        "NetCashProvidedByUsedInOperatingActivities",
+        "PaymentsToAcquirePropertyPlantAndEquipment",
+    )
+
+
+def test_prior_year_growth_formula_uses_absolute_prior_value():
+    current = _current_growth_result(
+        raw_fields={"Revenues": _field("Revenues", "-50")}
+    )
+    prior = _prior_growth_result(raw_fields={"Revenues": _field("Revenues", "-100")})
+
+    growth = build_prior_year_growth_evidence(
+        current.normalized_records,
+        prior.normalized_records,
+        metric_names=("revenue",),
+    )[0]
+
+    assert growth.growth_status == "growth_available"
+    assert growth.growth_rate == "0.5"
+
+
+def test_missing_prior_period_growth_fails_closed_without_zero_fallback():
+    current = _current_growth_result()
+
+    growth = build_prior_year_growth_evidence(
+        current.normalized_records,
+        (),
+        metric_names=("revenue",),
+    )[0]
+
+    assert growth.growth_status == "growth_missing_prior_period"
+    assert growth.growth_rate is None
+    assert growth.growth_rate not in ZERO_LIKE_MISSING_VALUES
+    assert "revenue:growth_missing_prior_period" in growth.validation_warnings
+
+
+def test_missing_current_period_growth_fails_closed_without_zero_fallback():
+    prior = _prior_growth_result()
+
+    growth = build_prior_year_growth_evidence(
+        (),
+        prior.normalized_records,
+        metric_names=("revenue",),
+    )[0]
+
+    assert growth.growth_status == "growth_missing_current_period"
+    assert growth.growth_rate is None
+    assert growth.growth_rate not in ZERO_LIKE_MISSING_VALUES
+    assert "revenue:growth_missing_current_period" in growth.validation_warnings
+
+
+def test_invalid_current_period_growth_fails_closed():
+    current = _current_growth_result(
+        raw_fields={"Revenues": _field("Revenues", False)}
+    )
+    prior = _prior_growth_result()
+
+    growth = build_prior_year_growth_evidence(
+        current.normalized_records,
+        prior.normalized_records,
+        metric_names=("revenue",),
+    )[0]
+
+    assert growth.growth_status == "growth_invalid_current_period"
+    assert growth.growth_rate is None
+    assert "revenue:growth_invalid_current_period" in growth.validation_warnings
+
+
+def test_invalid_prior_period_growth_fails_closed():
+    current = _current_growth_result()
+    prior = _prior_growth_result(raw_fields={"Revenues": _field("Revenues", False)})
+
+    growth = build_prior_year_growth_evidence(
+        current.normalized_records,
+        prior.normalized_records,
+        metric_names=("revenue",),
+    )[0]
+
+    assert growth.growth_status == "growth_invalid_prior_period"
+    assert growth.growth_rate is None
+    assert "revenue:growth_invalid_prior_period" in growth.validation_warnings
+
+
+def test_not_parseable_current_period_growth_fails_closed():
+    current = _current_growth_result(
+        raw_fields={"Revenues": _field("Revenues", "not available")}
+    )
+    prior = _prior_growth_result()
+
+    growth = build_prior_year_growth_evidence(
+        current.normalized_records,
+        prior.normalized_records,
+        metric_names=("revenue",),
+    )[0]
+
+    assert growth.growth_status == "growth_not_parseable"
+    assert growth.growth_rate is None
+    assert "revenue:growth_not_parseable:current_period" in growth.validation_warnings
+
+
+def test_not_parseable_prior_period_growth_fails_closed():
+    current = _current_growth_result()
+    prior = _prior_growth_result(
+        raw_fields={"Revenues": _field("Revenues", "not available")}
+    )
+
+    growth = build_prior_year_growth_evidence(
+        current.normalized_records,
+        prior.normalized_records,
+        metric_names=("revenue",),
+    )[0]
+
+    assert growth.growth_status == "growth_not_parseable"
+    assert growth.growth_rate is None
+    assert "revenue:growth_not_parseable:prior_period" in growth.validation_warnings
+
+
+def test_zero_prior_value_growth_fails_closed_as_not_comparable():
+    current = _current_growth_result()
+    prior = _prior_growth_result(raw_fields={"Revenues": _field("Revenues", "0")})
+
+    growth = build_prior_year_growth_evidence(
+        current.normalized_records,
+        prior.normalized_records,
+        metric_names=("revenue",),
+    )[0]
+
+    assert growth.growth_status == "growth_not_comparable"
+    assert growth.growth_rate is None
+    assert "revenue:prior_value_zero" in growth.validation_warnings
+
+
+def test_growth_currency_mismatch_fails_closed():
+    current = _current_growth_result(raw_fields={"Revenues": _field("Revenues", "1200", currency="USD")})
+    prior = _prior_growth_result(raw_fields={"Revenues": _field("Revenues", "1000", currency="EUR")})
+
+    growth = build_prior_year_growth_evidence(
+        current.normalized_records,
+        prior.normalized_records,
+        metric_names=("revenue",),
+    )[0]
+
+    assert growth.growth_status == "growth_currency_mismatch"
+    assert growth.growth_rate is None
+    assert "revenue:growth_currency_mismatch" in growth.validation_warnings
+
+
+def test_growth_unit_mismatch_fails_closed():
+    current = _current_growth_result(raw_fields={"Revenues": _field("Revenues", "1200", unit="USD")})
+    prior = _prior_growth_result(raw_fields={"Revenues": _field("Revenues", "1000", unit="USD millions")})
+
+    growth = build_prior_year_growth_evidence(
+        current.normalized_records,
+        prior.normalized_records,
+        metric_names=("revenue",),
+    )[0]
+
+    assert growth.growth_status == "growth_unit_mismatch"
+    assert growth.growth_rate is None
+    assert "revenue:growth_unit_mismatch" in growth.validation_warnings
+
+
+def test_growth_period_mismatch_fails_closed():
+    current = _current_growth_result(
+        raw_fields={"Revenues": _field("Revenues", "1200", reported_period="FY")}
+    )
+    prior = _prior_growth_result(
+        raw_fields={"Revenues": _field("Revenues", "1000", reported_period="Q4")}
+    )
+
+    growth = build_prior_year_growth_evidence(
+        current.normalized_records,
+        prior.normalized_records,
+        metric_names=("revenue",),
+    )[0]
+
+    assert growth.growth_status == "growth_period_mismatch"
+    assert growth.growth_rate is None
+    assert "revenue:growth_period_mismatch" in growth.validation_warnings
+
+
+def test_growth_fiscal_year_mismatch_fails_closed():
+    current = _current_growth_result()
+    prior = _prior_growth_result(fiscal_year="2023")
+
+    growth = build_prior_year_growth_evidence(
+        current.normalized_records,
+        prior.normalized_records,
+        metric_names=("revenue",),
+    )[0]
+
+    assert growth.growth_status == "growth_period_mismatch"
+    assert growth.growth_rate is None
+    assert "revenue:growth_period_mismatch" in growth.validation_warnings
+
+
+def test_growth_metric_mismatch_fails_closed():
+    current = _metric_map(_current_growth_result())["revenue"]
+    prior = _metric_map(_prior_growth_result())["net_income"]
+
+    growth = build_prior_year_growth_evidence_record(
+        current,
+        prior,
+        metric_name="revenue",
+    )
+
+    assert growth.growth_status == "growth_not_comparable"
+    assert growth.growth_rate is None
+    assert "revenue:growth_metric_mismatch" in growth.validation_warnings
+
+
+def test_growth_missing_current_provenance_fails_closed():
+    current = replace(
+        _metric_map(_current_growth_result())["revenue"],
+        source_reference="",
+    )
+    prior = _metric_map(_prior_growth_result())["revenue"]
+
+    growth = build_prior_year_growth_evidence_record(
+        current,
+        prior,
+        metric_name="revenue",
+    )
+
+    assert growth.growth_status == "growth_provenance_gap"
+    assert growth.growth_rate is None
+    assert "revenue:growth_provenance_gap" in growth.validation_warnings
+
+
+def test_growth_missing_prior_provenance_fails_closed():
+    current = _metric_map(_current_growth_result())["revenue"]
+    prior = replace(
+        _metric_map(_prior_growth_result())["revenue"],
+        source_field_names=(),
+    )
+
+    growth = build_prior_year_growth_evidence_record(
+        current,
+        prior,
+        metric_name="revenue",
+    )
+
+    assert growth.growth_status == "growth_provenance_gap"
+    assert growth.growth_rate is None
+    assert "revenue:growth_provenance_gap" in growth.validation_warnings
+
+
+def test_nvda_shaped_source_derived_free_cash_flow_growth_is_available():
+    current = _current_growth_result(
+        provider_record_id="CIK0001045810-FY-2025",
+        original_source_reference="sec-edgar-form-10-k:0001045810-25-000023/FY/2025",
+        ticker="NVDA",
+        symbol="NVDA",
+        entity_identifier="CIK0001045810",
+        raw_fields={
+            "NetCashProvidedByUsedInOperatingActivities": _field(
+                "NetCashProvidedByUsedInOperatingActivities",
+                "900",
+            ),
+            "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                "PaymentsToAcquirePropertyPlantAndEquipment",
+                "100",
+            ),
+        },
+    )
+    prior = _prior_growth_result(
+        provider_record_id="CIK0001045810-FY-2024",
+        original_source_reference="sec-edgar-form-10-k:0001045810-25-000023/FY/2024",
+        ticker="NVDA",
+        symbol="NVDA",
+        entity_identifier="CIK0001045810",
+        raw_fields={
+            "NetCashProvidedByUsedInOperatingActivities": _field(
+                "NetCashProvidedByUsedInOperatingActivities",
+                "500",
+            ),
+            "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                "PaymentsToAcquirePropertyPlantAndEquipment",
+                "100",
+            ),
+        },
+    )
+
+    growth = build_prior_year_growth_evidence(
+        current.normalized_records,
+        prior.normalized_records,
+        metric_names=("free_cash_flow",),
+    )[0]
+
+    assert _metric_map(current)["free_cash_flow"].normalization_status == "source_derived"
+    assert _metric_map(prior)["free_cash_flow"].normalization_status == "source_derived"
+    assert growth.metric_name == "free_cash_flow"
+    assert growth.growth_status == "growth_available"
+    assert growth.growth_rate == "1"
+    assert growth.current_period_value == "800"
+    assert growth.prior_period_value == "400"
+    assert growth.current_source_field_names == (
+        "NetCashProvidedByUsedInOperatingActivities",
+        "PaymentsToAcquirePropertyPlantAndEquipment",
+    )
+    assert growth.prior_source_field_names == (
+        "NetCashProvidedByUsedInOperatingActivities",
+        "PaymentsToAcquirePropertyPlantAndEquipment",
+    )
+    assert "recommendation" not in growth.__dataclass_fields__
 
 
 def test_provider_errors_become_neutral_invalid_readiness():
