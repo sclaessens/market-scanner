@@ -495,18 +495,52 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL14
 
-Proposed next step: Define design-only controlled persistence implementation boundaries, write authorization rules, no-side-effect requirements, rollback expectations, and schema-to-test traceability.
+Design record: `docs/active/v2_controlled_persistence_implementation_design.md`
+
+Design result: The controlled persistence implementation boundary is now documented. The design defines a future v2-only persistence module boundary, pure validators, synthetic-only temporary write support, forbidden production paths, missing-value behavior, forbidden semantics guardrails, failure behavior, write authorization rules, no-side-effect requirements, rollback expectations, schema-to-test traceability, and required future test coverage. No code, tests, fixtures, provider calls, production data writes, reports, Telegram artifacts, pipeline behavior, or Decision Engine investment logic were authorized.
+
+Proposed next step: Proceed to `RESET-10L-BL15 — Controlled Synthetic Persistence Implementation`.
 
 Guardrails:
 
-- design-only unless separately approved;
+- design-only;
 - no live provider calls;
 - no SEC, EDGAR, broker, or network calls;
 - no committed credentials;
 - no committed raw live payload;
 - no production data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL15 — Controlled Synthetic Persistence Implementation
+
+Category: Source Data / Implementation
+
+Rationale: After controlled persistence implementation design, the project may implement a v2-only synthetic persistence boundary that validates and writes only synthetic/test records to pytest-managed temporary directories.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Implement the approved v2-only synthetic persistence boundary with pure validators, synthetic-only temporary write support, BL13 fixture coverage, and no production writes.
+
+Guardrails:
+
+- synthetic-only implementation;
+- tests must use pytest temporary directories only;
+- no live provider calls;
+- no SEC, EDGAR, broker, or network calls;
+- no committed credentials;
+- no committed raw live payload;
+- no production data writes;
+- no writes under `data/`;
 - no production pipeline execution;
 - no report generation;
 - no Telegram delivery;
