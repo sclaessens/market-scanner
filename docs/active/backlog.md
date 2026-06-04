@@ -1099,9 +1099,21 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL31
 
-Proposed next step: Establish the canonical v2 analysis boundary without production data writes, report generation, Telegram delivery, portfolio/watchlist updates, or Decision Engine investment behavior.
+Implementation records:
+
+- `src/market_scanner/app.py`
+- `src/market_scanner/analysis/__init__.py`
+- `src/market_scanner/analysis/analysis_contracts.py`
+- `src/market_scanner/analysis/analysis_boundary.py`
+- `tests/unit/test_v2_canonical_app.py`
+- `tests/unit/test_v2_canonical_analysis.py`
+- `docs/active/v2_analysis_runtime_boundary_migration.md`
+
+Result summary: Analysis runtime migration has started. The canonical v2 analysis boundary is now established and integrated into the side-effect-free canonical app dry-run plan. Legacy runtime scripts and scattered analysis logic remain present but are not canonical analysis authorities and remain migration/archive candidates under the legacy decoupling policy.
+
+Proposed next step: Proceed to `RESET-10L-BL32 — Migrate Decision Review Runtime Logic to Canonical V2 Boundary`.
 
 Guardrails:
 
@@ -1117,6 +1129,35 @@ Guardrails:
 - no final BUY, SELL, or HOLD recommendation;
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
 - legacy runner authority must not be expanded.
+
+### RESET-10L-BL32 — Migrate Decision Review Runtime Logic to Canonical V2 Boundary
+
+Category: Architecture / Cleanup Implementation
+
+Rationale: After canonical app, scanner, and analysis boundaries are established, the next migration target is the decision/review runtime boundary. This step should keep Decision Engine allocation authority isolated while defining the canonical review boundary that receives analysis evidence without producing unapproved investment behavior.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Establish the canonical v2 Decision Review boundary without production data writes, report generation, Telegram delivery, portfolio/watchlist updates, or unapproved Decision Engine investment behavior.
+
+Guardrails:
+
+- update existing Python files first unless BL28-approved canonical ownership requires a new file;
+- no one-off migration helper files committed to the repository;
+- no file deletion or archival unless separately approved;
+- no live provider calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior outside the approved Decision Engine authority;
+- legacy runner and legacy analysis authority must not be expanded.
 
 ## Relationship to Existing Backlog
 

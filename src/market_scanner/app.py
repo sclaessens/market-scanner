@@ -9,6 +9,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from market_scanner.analysis.analysis_boundary import (
+    ANALYSIS_CANONICAL_OWNER,
+    build_analysis_plan,
+)
+from market_scanner.analysis.analysis_contracts import AnalysisPlan
+
 from market_scanner.scanner.scanner_boundary import (
     SCANNER_CANONICAL_OWNER,
     build_scanner_plan,
@@ -45,6 +51,7 @@ class CanonicalRuntimePlan:
     entrypoint: str
     stages: tuple[RuntimeStage, ...]
     scanner_plan: ScannerPlan
+    analysis_plan: AnalysisPlan
     legacy_runtime_authorities: tuple[str, ...]
     migration_status: str
 
@@ -92,8 +99,8 @@ CANONICAL_RUNTIME_STAGES = (
     ),
     RuntimeStage(
         name="analysis",
-        canonical_owner="src/market_scanner/analysis/",
-        status="planned_for_migration",
+        canonical_owner=ANALYSIS_CANONICAL_OWNER,
+        status="canonical_boundary_established",
         side_effects_allowed=False,
     ),
     RuntimeStage(
@@ -130,8 +137,11 @@ def build_canonical_runtime_plan() -> CanonicalRuntimePlan:
         entrypoint=CANONICAL_ENTRYPOINT,
         stages=CANONICAL_RUNTIME_STAGES,
         scanner_plan=build_scanner_plan(),
+        analysis_plan=build_analysis_plan(),
         legacy_runtime_authorities=LEGACY_RUNTIME_AUTHORITIES,
-        migration_status="canonical_entrypoint_and_scanner_boundary_established",
+        migration_status=(
+            "canonical_entrypoint_scanner_and_analysis_boundary_established"
+        ),
     )
 
 
