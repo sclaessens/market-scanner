@@ -917,9 +917,13 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Data Steward / Financial Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL26
 
-Proposed next step: Re-run the controlled NVDA one-ticker real analysis review using governed derived FreeCashFlow and governed prior-year growth evidence.
+Analysis record: `docs/active/v2_nvda_real_analysis_rerun_with_growth_evidence.md`
+
+Analysis result: The controlled NVDA real analysis re-run used governed source_derived FreeCashFlow and governed prior-year growth evidence, but LIMITED_ANALYSIS remains. The remaining blocker is documented in `docs/active/v2_nvda_real_analysis_rerun_with_growth_evidence.md`. No final recommendation, portfolio action, reports, Telegram artifacts, production pipeline execution, production data writes, or Decision Engine investment behavior were produced.
+
+Proposed next step: Proceed to `RESET-10L-BL27 — Real Analysis Remaining Evidence Gap Review`.
 
 Guardrails:
 
@@ -935,6 +939,34 @@ Guardrails:
 - no Telegram delivery;
 - no portfolio or watchlist updates;
 - no final BUY, SELL, or HOLD recommendation;
+- no missing-to-zero conversion;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL27 — Real Analysis Remaining Evidence Gap Review
+
+Category: Fundamentals / Analysis Review
+
+Rationale: After governed growth evidence improved the NVDA real analysis output, the analysis still remains LIMITED_ANALYSIS because EPS YoY growth is not governed and the existing analysis metrics schema treats the row as partial.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Data Steward / Financial Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Review whether EPS YoY needs governed prior-year growth evidence and whether the real-analysis input schema should consume governed growth evidence records directly.
+
+Guardrails:
+
+- review-only unless separately approved;
+- one ticker only unless separately approved;
+- no final BUY, SELL, or HOLD recommendation;
+- no portfolio or watchlist updates;
+- no production data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no credentials or raw live payloads committed;
 - no missing-to-zero conversion;
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
