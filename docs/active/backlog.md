@@ -767,9 +767,21 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL22
 
-Proposed next step: Implement governed FreeCashFlow derivation in existing provider, normalization, readiness, or fundamentals modules where possible, with tests covering source_reported, source_derived, missing, invalid, not_parseable, and not_derivable states.
+Implementation records:
+
+- `src/market_scanner/fundamentals/fundamentals_provider_contracts.py`
+- `src/market_scanner/fundamentals/fundamentals_provider_adapter.py`
+- `tests/unit/test_v2_fundamentals_provider_adapter.py`
+- `tests/unit/test_v2_fundamentals_real_source_smoke.py`
+- `tests/contract/test_v2_provider_dry_run_fixture_review.py`
+- `tests/contract/test_v2_provider_to_persistence_integration_contracts.py`
+- `docs/active/v2_free_cash_flow_derivation_implementation.md`
+
+Result summary: Governed FreeCashFlow derivation is implemented. The v2 fundamentals mapping now supports directly sourced FreeCashFlow as source_reported and derived FreeCashFlow as source_derived when operating cash flow and capital expenditures are valid, same-period, same-currency, same-unit, provenance-linked, and sign-convention safe. Missing, invalid, mismatched, or ambiguous inputs fail closed without missing-to-zero conversion or investment behavior.
+
+Proposed next step: Proceed to `RESET-10L-BL23 — Re-run NVDA One-Ticker Real Fundamental Analysis with Derived FreeCashFlow`.
 
 Guardrails:
 
@@ -785,6 +797,36 @@ Guardrails:
 - no Telegram delivery;
 - no portfolio or watchlist integration;
 - no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL23 — Re-run NVDA One-Ticker Real Fundamental Analysis with Derived FreeCashFlow
+
+Category: Fundamentals / Analysis Review
+
+Rationale: After governed FreeCashFlow derivation is implemented, the project should re-run the controlled one-ticker NVDA analysis review to determine whether NVDA can move beyond CASH_FLOW_UNKNOWN while preserving source-data readiness, provenance, and non-recommendation guardrails.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Data Steward / Financial Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Re-run the controlled NVDA one-ticker real fundamental analysis review using the BL19/BL20 source-shaped findings and the BL22 governed FreeCashFlow derivation behavior.
+
+Guardrails:
+
+- one ticker only: `NVDA`;
+- controlled local execution only;
+- no multi-ticker run;
+- no automated scheduling;
+- no committed credentials;
+- no committed raw unredacted live payload;
+- no production data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
 ## Relationship to Existing Backlog
 

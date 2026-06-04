@@ -180,7 +180,7 @@ def test_fake_real_source_response_passes_through_provider_boundary():
     assert result.ingestion_result.normalized_records
     assert result.ingestion_result.readiness_record.readiness_state == "partial"
     assert result.missing_field_summary == ("GrossProfit", "FreeCashFlow")
-    assert "missing_fundamentals:2" in result.warnings
+    assert "missing_fundamentals:1" in result.warnings
 
 
 def test_smoke_result_raw_evidence_preserves_provenance():
@@ -233,7 +233,15 @@ def test_smoke_missing_values_remain_explicit_and_not_zero():
 
     assert metrics["gross_profit"].metric_value is None
     assert metrics["gross_profit"].metric_value not in ZERO_LIKE_MISSING_VALUES
-    assert metrics["free_cash_flow"].metric_value is None
+    assert metrics["free_cash_flow"].metric_value == "7800000000"
+    assert metrics["free_cash_flow"].normalization_status == "source_derived"
+    assert metrics["free_cash_flow"].derivation_formula == (
+        "free_cash_flow = operating_cash_flow - capital_expenditures"
+    )
+    assert metrics["free_cash_flow"].source_field_names == (
+        "NetCashProvidedByUsedInOperatingActivities",
+        "PaymentsToAcquirePropertyPlantAndEquipment",
+    )
     assert metrics["free_cash_flow"].metric_value not in ZERO_LIKE_MISSING_VALUES
 
 
@@ -247,7 +255,8 @@ def test_smoke_readiness_remains_neutral():
 
     assert readiness.readiness_state == "partial"
     assert readiness.source_data_status == "partial"
-    assert readiness.missing_fundamentals_count == 2
+    assert readiness.missing_fundamentals_count == 1
+    assert "free_cash_flow:source_derived" in readiness.readiness_warnings
     assert set(readiness.__dataclass_fields__).isdisjoint(FORBIDDEN_RESULT_FIELDS)
     _assert_no_authority_text(readiness)
 
