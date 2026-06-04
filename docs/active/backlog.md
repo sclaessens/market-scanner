@@ -564,13 +564,17 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Data Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL16
 
-Proposed next step: Review the controlled synthetic persistence boundary against BL11-BL15 documentation, fixture coverage, no-side-effect behavior, and future approval requirements.
+Review record: `docs/active/v2_persistence_integration_review.md`
+
+Review result: The controlled synthetic persistence boundary is suitable for a future separately approved synthetic provider-to-persistence integration contract step. The review confirms that BL15 remains a persistence safety boundary only and is not yet approved for production data writes, live provider execution, reports, Telegram delivery, pipeline integration, portfolio/watchlist integration, or Decision Engine investment use.
+
+Proposed next step: Proceed to `RESET-10L-BL17 — Synthetic Provider-to-Persistence Integration Contracts`.
 
 Guardrails:
 
-- review-only unless separately approved;
+- review-only;
 - no live provider calls;
 - no SEC, EDGAR, broker, or network calls;
 - no committed credentials;
@@ -579,6 +583,38 @@ Guardrails:
 - no production pipeline execution;
 - no report generation;
 - no Telegram delivery;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL17 — Synthetic Provider-to-Persistence Integration Contracts
+
+Category: Source Data / Testing
+
+Rationale: After persistence integration review, the project may add synthetic integration contracts proving that fake provider-boundary output can be handed to the controlled persistence boundary while preserving provenance, explicit missing-value behavior, neutral readiness, and no-side-effect guardrails.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Add synthetic provider-to-persistence integration tests using fake provider output, in-memory handoff, and pytest temporary directories only.
+
+Guardrails:
+
+- synthetic integration contracts only;
+- fake provider output only;
+- pytest temporary directories only;
+- no live provider calls;
+- no SEC, EDGAR, broker, or network calls;
+- no committed credentials;
+- no committed raw live payload;
+- no production data writes;
+- no writes under `data/`;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist integration;
 - no Decision Engine investment logic;
 - no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
