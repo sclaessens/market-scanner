@@ -842,23 +842,60 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Data Steward / Financial Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL24
 
-Proposed next step: Review the real analysis output path and document the minimum governed metric-history requirements needed before broader real analysis readiness can be considered.
+Review record: `docs/active/v2_real_analysis_output_defect_review.md`
+
+Review result: The NVDA real analysis path improved after governed derived FreeCashFlow. `CASH_FLOW_UNKNOWN` is resolved, the cash-flow profile moved to `CASH_FLOW_POSITIVE`, source-data readiness is available, and `missing_fundamentals_count = 0`. The remaining blocker is `LIMITED_ANALYSIS` caused by missing governed prior-year growth evidence. The blocker is classified as `MISSING_GOVERNED_PRIOR_YEAR_GROWTH_EVIDENCE`.
+
+Proposed next step: Proceed to `RESET-10L-BL25 — Implement Governed Prior-Year Growth Evidence`.
 
 Guardrails:
 
-- review-only unless separately approved;
-- one ticker only unless separately approved;
-- no final BUY, SELL, or HOLD recommendation;
-- no portfolio or watchlist updates;
-- no production data writes unless separately approved;
+- review/documentation-only;
+- no code changes;
+- no test changes;
+- no provider calls;
+- no production data writes;
 - no production pipeline execution;
 - no report generation;
 - no Telegram delivery;
-- no credentials or raw live payloads committed;
+- no portfolio or watchlist integration;
+- no Decision Engine investment logic;
+- no final BUY, SELL, or HOLD recommendation;
 - no missing-to-zero conversion;
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL25 — Implement Governed Prior-Year Growth Evidence
+
+Category: Fundamentals / Implementation
+
+Rationale: After the real analysis output defect review, the next blocker is governed prior-year growth evidence. The project may implement a narrow evidence layer so real analysis can compare current and prior comparable periods without missing-to-zero conversion or recommendation behavior.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Data Steward / Financial Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Implement governed prior-year growth evidence in existing modules where possible, covering available, missing, invalid, not-comparable, mismatch, and provenance-gap states.
+
+Guardrails:
+
+- update existing Python files first;
+- no new Python file unless formally justified under `docs/active/v2_python_file_creation_policy.md`;
+- no one-off ticker-specific Python files;
+- no silent growth inference;
+- no missing-to-zero conversion;
+- prior-year growth evidence must preserve current and prior value provenance;
+- zero, missing, invalid, not-parseable, mismatched, or provenance-gap inputs must fail closed;
+- no investment recommendation behavior;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist integration;
+- no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
 ## Relationship to Existing Backlog
 
