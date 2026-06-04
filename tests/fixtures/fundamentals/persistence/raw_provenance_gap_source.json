@@ -1,0 +1,117 @@
+{
+  "fixture_metadata": {
+    "fixture_name": "raw_provenance_gap_source",
+    "fixture_family": "provenance gap synthetic source",
+    "reset_stage": "RESET-10L-BL13",
+    "is_synthetic": true,
+    "no_live_payload": true,
+    "no_credentials": true,
+    "no_production_data": true,
+    "description": "Synthetic source evidence with incomplete provenance that must fail closed."
+  },
+  "raw_evidence": {
+    "raw_evidence_id": "synthetic-raw-provenance-gap-asml-fy-2025",
+    "provider_name": "",
+    "provider_category": "regulatory_filing",
+    "provider_record_id": "ASML-FY-2025-SYNTHETIC-PROVENANCE-GAP",
+    "original_source_reference": "",
+    "ticker": "ASML",
+    "symbol": "ASML",
+    "entity_identifier": "ASML-HOLDING-NV-SYNTHETIC",
+    "source_timestamp": "",
+    "retrieval_timestamp": "2026-06-03T00:00:00Z",
+    "reported_period": "FY",
+    "fiscal_year": "2025",
+    "fiscal_quarter": "",
+    "currency": "EUR",
+    "unit": "EUR",
+    "raw_fields": {
+      "Revenues": "28000000000",
+      "NetIncomeLoss": "7600000000"
+    },
+    "missing_field_evidence": [
+      {
+        "field_name": "original_source_reference",
+        "missing_state": "provenance_missing"
+      },
+      {
+        "field_name": "source_timestamp",
+        "missing_state": "provenance_missing"
+      },
+      {
+        "field_name": "provider_name",
+        "missing_state": "provenance_missing"
+      }
+    ],
+    "provenance_metadata": {
+      "source_type": "synthetic_fixture",
+      "capture_method": "static_contract_fixture",
+      "source_reference_preserved": false,
+      "raw_field_names_preserved": true
+    },
+    "raw_payload_hash": "sha256:synthetic-raw-provenance-gap-asml-fy-2025",
+    "capture_version": "v2-persistence-contract-fixture-v1",
+    "validation_warnings": [
+      "provenance_gap"
+    ]
+  },
+  "expected_contract": {
+    "raw_evidence": {
+      "required_fields_present": true,
+      "provenance_gap_present": true,
+      "missing_values_converted_to_zero": false,
+      "forbidden_semantics_present": false
+    },
+    "normalized_fundamentals": {
+      "normalized_record_set_id": "synthetic-normalized-provenance-gap-asml-fy-2025",
+      "normalization_version": "v2-persistence-normalization-contract-v1",
+      "records": [
+        {
+          "normalized_record_id": "norm-provenance-gap-revenue",
+          "raw_evidence_id": "synthetic-raw-provenance-gap-asml-fy-2025",
+          "provider_name": "",
+          "original_source_reference": "",
+          "ticker": "ASML",
+          "entity_identifier": "ASML-HOLDING-NV-SYNTHETIC",
+          "metric_name": "revenue",
+          "metric_value": null,
+          "metric_value_status": "blocked_by_provenance_gap",
+          "currency": "EUR",
+          "currency_status": "reported",
+          "unit": "EUR",
+          "unit_status": "reported",
+          "reported_period": "FY",
+          "fiscal_year": "2025",
+          "fiscal_quarter": "",
+          "source_timestamp": "",
+          "retrieval_timestamp": "2026-06-03T00:00:00Z",
+          "normalization_version": "v2-persistence-normalization-contract-v1",
+          "validation_warnings": [
+            "provenance_gap"
+          ]
+        }
+      ]
+    },
+    "readiness": {
+      "readiness_record_id": "readiness-provenance-gap-asml-fy-2025",
+      "raw_evidence_id": "synthetic-raw-provenance-gap-asml-fy-2025",
+      "normalized_record_set_id": "synthetic-normalized-provenance-gap-asml-fy-2025",
+      "ticker": "ASML",
+      "provider_name": "",
+      "readiness_state": "fail_closed",
+      "source_data_status": "provenance_gap",
+      "missing_fundamentals_count": 0,
+      "partial_data_count": 0,
+      "stale_data_count": 0,
+      "invalid_data_count": 0,
+      "provenance_status": "incomplete",
+      "parseability_status": "parseable",
+      "consistency_status": "blocked_by_provenance_gap",
+      "freshness_status": "unknown",
+      "readiness_warnings": [
+        "provenance_gap"
+      ],
+      "readiness_version": "v2-persistence-readiness-contract-v1"
+    }
+  }
+}

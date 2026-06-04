@@ -1,0 +1,139 @@
+{
+  "fixture_metadata": {
+    "fixture_name": "raw_partial_source",
+    "fixture_family": "partial synthetic source",
+    "reset_stage": "RESET-10L-BL13",
+    "is_synthetic": true,
+    "no_live_payload": true,
+    "no_credentials": true,
+    "no_production_data": true,
+    "description": "Partial ASML-shaped synthetic source evidence with explicit missing values."
+  },
+  "raw_evidence": {
+    "raw_evidence_id": "synthetic-raw-partial-asml-fy-2025",
+    "provider_name": "Synthetic Official Filing Fixture",
+    "provider_category": "regulatory_filing",
+    "provider_record_id": "ASML-FY-2025-SYNTHETIC-PARTIAL",
+    "original_source_reference": "synthetic-official-filing://ASML/FY/2025/partial",
+    "ticker": "ASML",
+    "symbol": "ASML",
+    "entity_identifier": "ASML-HOLDING-NV-SYNTHETIC",
+    "source_timestamp": "2026-02-11T08:00:00Z",
+    "retrieval_timestamp": "2026-06-03T00:00:00Z",
+    "reported_period": "FY",
+    "fiscal_year": "2025",
+    "fiscal_quarter": "",
+    "currency": "EUR",
+    "unit": "EUR",
+    "raw_fields": {
+      "Revenues": "28000000000",
+      "GrossProfit": null,
+      "OperatingIncomeLoss": "9200000000",
+      "NetIncomeLoss": "7600000000",
+      "FreeCashFlow": null
+    },
+    "missing_field_evidence": [
+      {
+        "field_name": "GrossProfit",
+        "missing_state": "source_field_missing"
+      },
+      {
+        "field_name": "FreeCashFlow",
+        "missing_state": "source_field_missing"
+      }
+    ],
+    "provenance_metadata": {
+      "source_type": "synthetic_fixture",
+      "capture_method": "static_contract_fixture",
+      "source_reference_preserved": true,
+      "raw_field_names_preserved": true
+    },
+    "raw_payload_hash": "sha256:synthetic-raw-partial-asml-fy-2025",
+    "capture_version": "v2-persistence-contract-fixture-v1",
+    "validation_warnings": [
+      "explicit_missing_source_fields"
+    ]
+  },
+  "expected_contract": {
+    "raw_evidence": {
+      "required_fields_present": true,
+      "explicit_missing_state": true,
+      "missing_count_expectation": 2,
+      "missing_values_converted_to_zero": false,
+      "forbidden_semantics_present": false
+    },
+    "normalized_fundamentals": {
+      "normalized_record_set_id": "synthetic-normalized-partial-asml-fy-2025",
+      "normalization_version": "v2-persistence-normalization-contract-v1",
+      "records": [
+        {
+          "normalized_record_id": "norm-partial-revenue",
+          "raw_evidence_id": "synthetic-raw-partial-asml-fy-2025",
+          "provider_name": "Synthetic Official Filing Fixture",
+          "original_source_reference": "synthetic-official-filing://ASML/FY/2025/partial",
+          "ticker": "ASML",
+          "entity_identifier": "ASML-HOLDING-NV-SYNTHETIC",
+          "metric_name": "revenue",
+          "metric_value": "28000000000",
+          "metric_value_status": "reported",
+          "currency": "EUR",
+          "currency_status": "reported",
+          "unit": "EUR",
+          "unit_status": "reported",
+          "reported_period": "FY",
+          "fiscal_year": "2025",
+          "fiscal_quarter": "",
+          "source_timestamp": "2026-02-11T08:00:00Z",
+          "retrieval_timestamp": "2026-06-03T00:00:00Z",
+          "normalization_version": "v2-persistence-normalization-contract-v1",
+          "validation_warnings": []
+        },
+        {
+          "normalized_record_id": "norm-partial-gross-profit",
+          "raw_evidence_id": "synthetic-raw-partial-asml-fy-2025",
+          "provider_name": "Synthetic Official Filing Fixture",
+          "original_source_reference": "synthetic-official-filing://ASML/FY/2025/partial",
+          "ticker": "ASML",
+          "entity_identifier": "ASML-HOLDING-NV-SYNTHETIC",
+          "metric_name": "gross_profit",
+          "metric_value": null,
+          "metric_value_status": "missing_source_field",
+          "currency": "EUR",
+          "currency_status": "reported",
+          "unit": "EUR",
+          "unit_status": "reported",
+          "reported_period": "FY",
+          "fiscal_year": "2025",
+          "fiscal_quarter": "",
+          "source_timestamp": "2026-02-11T08:00:00Z",
+          "retrieval_timestamp": "2026-06-03T00:00:00Z",
+          "normalization_version": "v2-persistence-normalization-contract-v1",
+          "validation_warnings": [
+            "metric_value_missing"
+          ]
+        }
+      ]
+    },
+    "readiness": {
+      "readiness_record_id": "readiness-partial-asml-fy-2025",
+      "raw_evidence_id": "synthetic-raw-partial-asml-fy-2025",
+      "normalized_record_set_id": "synthetic-normalized-partial-asml-fy-2025",
+      "ticker": "ASML",
+      "provider_name": "Synthetic Official Filing Fixture",
+      "readiness_state": "partial",
+      "source_data_status": "partial",
+      "missing_fundamentals_count": 2,
+      "partial_data_count": 1,
+      "stale_data_count": 0,
+      "invalid_data_count": 0,
+      "provenance_status": "complete",
+      "parseability_status": "parseable",
+      "consistency_status": "consistent_with_missing_fields",
+      "freshness_status": "fresh",
+      "readiness_warnings": [
+        "missing_source_fields"
+      ],
+      "readiness_version": "v2-persistence-readiness-contract-v1"
+    }
+  }
+}

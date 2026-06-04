@@ -449,9 +449,27 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL13
 
-Proposed next step: Add synthetic persistence fixtures and contract tests for raw evidence, normalized fundamentals, readiness, provenance linkage, missing-value preservation, and no-side-effect guardrails.
+Fixture records:
+
+- `tests/fixtures/fundamentals/persistence/raw_complete_source.json`
+- `tests/fixtures/fundamentals/persistence/raw_partial_source.json`
+- `tests/fixtures/fundamentals/persistence/raw_invalid_source.json`
+- `tests/fixtures/fundamentals/persistence/raw_stale_source.json`
+- `tests/fixtures/fundamentals/persistence/raw_provenance_gap_source.json`
+- `tests/fixtures/fundamentals/persistence/raw_forbidden_semantics_source.json`
+
+Test records:
+
+- `tests/contract/test_v2_persistence_raw_evidence_contracts.py`
+- `tests/contract/test_v2_persistence_normalized_fundamentals_contracts.py`
+- `tests/contract/test_v2_persistence_readiness_contracts.py`
+- `tests/contract/test_v2_persistence_fixture_contracts.py`
+
+Test result: Synthetic persistence contract tests now verify raw evidence schema expectations, normalized fundamentals expectations, neutral readiness expectations, raw-to-normalized provenance linkage, explicit missing-value preservation, no missing-to-zero conversion, neutral partial/invalid/stale/provenance-gap handling, controlled forbidden-semantics isolation, fixture safety metadata, and no-side-effect guardrails. Tests use synthetic static fixture inspection only.
+
+Proposed next step: Proceed to `RESET-10L-BL14 — Controlled Persistence Implementation Design`.
 
 Guardrails:
 
@@ -466,6 +484,34 @@ Guardrails:
 - no Telegram delivery;
 - no Decision Engine investment logic;
 - no BUY, SELL, HOLD, allocation, tradeability, conviction, urgency, scoring, target-price, or recommendation behavior.
+
+### RESET-10L-BL14 — Controlled Persistence Implementation Design
+
+Category: Source Data / Architecture
+
+Rationale: After synthetic persistence fixtures and contract tests exist, the next safer step is to design controlled persistence implementation boundaries before any production write function is approved.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Define design-only controlled persistence implementation boundaries, write authorization rules, no-side-effect requirements, rollback expectations, and schema-to-test traceability.
+
+Guardrails:
+
+- design-only unless separately approved;
+- no live provider calls;
+- no SEC, EDGAR, broker, or network calls;
+- no committed credentials;
+- no committed raw live payload;
+- no production data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
 ## Relationship to Existing Backlog
 
