@@ -986,15 +986,19 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL28
 
-Proposed next step: Define the single official v2 app entrypoint, scanner flow, fundamentals analysis flow, message composition flow, report artifact boundary, delivery boundary, configuration owner, and Decision Engine migration boundary before migration, archival, deletion, or runtime cleanup begins.
+Architecture record: `docs/active/v2_canonical_runtime_architecture.md`
+
+Architecture result: The canonical v2 runtime architecture is now defined. The project must converge toward a single official application entrypoint, scanner/universe flow, fundamentals/provider/evidence layer, analysis layer, decision/review boundary, message composition layer, report artifact boundary, delivery/Telegram boundary, configuration owner, and shared utilities boundary. Legacy runners such as `scripts/run_scan.py` and `scripts/run_full_pipeline.py` are not approved as permanent canonical runtime authorities and must be treated as migration targets.
+
+Proposed next step: Proceed to `RESET-10L-BL29 — Migrate Legacy Runtime Entrypoint Logic`.
 
 Guardrails:
 
-- design/review-only unless separately approved;
-- no Python code changes unless separately approved;
-- no test changes unless separately approved;
+- documentation/governance-only;
+- no Python code changes;
+- no test changes;
 - no file moves or deletions;
 - no provider calls;
 - no production data writes;
@@ -1003,6 +1007,36 @@ Guardrails:
 - no Telegram delivery;
 - no portfolio or watchlist updates;
 - no Decision Engine investment behavior changes;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL29 — Migrate Legacy Runtime Entrypoint Logic
+
+Category: Architecture / Cleanup Implementation
+
+Rationale: After canonical v2 runtime ownership is defined, the project may begin decoupling runtime entrypoint authority from legacy runners and migrating required logic toward the canonical v2 application entrypoint.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Start a narrow migration of runtime entrypoint authority away from legacy scripts and toward the canonical v2 application entrypoint, or produce an executable migration plan with import and test gates if implementation risk is too high.
+
+Guardrails:
+
+- update existing Python files first;
+- no new Python file unless formally justified under `docs/active/v2_python_file_creation_policy.md`;
+- no one-off migration helper files committed to the repository;
+- no file deletion or archival in this sprint unless separately approved;
+- no scanner, analysis, reporting, Telegram, or Decision Engine behavior expansion;
+- no provider calls;
+- no production data writes;
+- no production pipeline execution unless explicitly safe and approved;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist updates;
 - no final BUY, SELL, or HOLD recommendation;
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
