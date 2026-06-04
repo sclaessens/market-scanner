@@ -11,6 +11,10 @@ from market_scanner.app import (
     build_canonical_runtime_plan,
     run_canonical_app,
 )
+from market_scanner.scanner.scanner_boundary import (
+    SCANNER_CANONICAL_OWNER,
+    build_scanner_plan,
+)
 
 
 APPROVED_STAGE_ORDER = (
@@ -69,7 +73,7 @@ def test_canonical_runtime_plan_marks_all_stages_side_effect_free_by_default():
         stage.name: stage.status for stage in plan.stages
     } == {
         "application_entrypoint": "canonical_boundary_established",
-        "scanner_universe_selection": "planned_for_migration",
+        "scanner_universe_selection": "canonical_boundary_established",
         "provider_source_access": "canonical_boundary_available",
         "fundamentals_normalization_evidence": "canonical_boundary_available",
         "analysis": "planned_for_migration",
@@ -85,6 +89,7 @@ def test_canonical_app_dry_run_returns_side_effect_guarantees():
 
     assert result.mode == "dry_run"
     assert result.runtime_plan == build_canonical_runtime_plan()
+    assert result.runtime_plan.scanner_plan == build_scanner_plan()
     assert result.side_effect_guarantees.provider_calls_made is False
     assert result.side_effect_guarantees.production_data_writes is False
     assert result.side_effect_guarantees.reports_generated is False
@@ -128,6 +133,19 @@ def test_canonical_app_boundary_does_not_import_legacy_scripts():
     }
 
     assert scripts_modules_after == scripts_modules_before
+
+
+def test_canonical_app_references_canonical_scanner_boundary():
+    scanner_stage = next(
+        stage
+        for stage in build_canonical_runtime_plan().stages
+        if stage.name == "scanner_universe_selection"
+    )
+
+    assert scanner_stage.canonical_owner == SCANNER_CANONICAL_OWNER
+    assert build_canonical_runtime_plan().scanner_plan.canonical_owner == (
+        SCANNER_CANONICAL_OWNER
+    )
 
 
 def test_canonical_app_output_contains_no_investment_behavior():
