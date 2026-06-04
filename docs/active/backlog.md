@@ -1058,9 +1058,50 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
+Status: COMPLETED BY RESET-10L-BL30
+
+Implementation records:
+
+- `src/market_scanner/app.py`
+- `src/market_scanner/scanner/__init__.py`
+- `src/market_scanner/scanner/scanner_contracts.py`
+- `src/market_scanner/scanner/scanner_boundary.py`
+- `tests/unit/test_v2_canonical_app.py`
+- `tests/unit/test_v2_canonical_scanner.py`
+- `docs/active/v2_scanner_runtime_boundary_migration.md`
+
+Result summary: Scanner runtime migration has started. The canonical v2 scanner/universe boundary is now established and integrated into the side-effect-free canonical app dry-run plan. Legacy runtime scripts remain present but are not canonical scanner authorities and remain migration/archive candidates under the legacy decoupling policy.
+
+Proposed next step: Proceed to `RESET-10L-BL31 — Migrate Analysis Runtime Logic to Canonical V2 Boundary`.
+
+Guardrails:
+
+- update existing Python files first unless BL28-approved canonical ownership requires a new file;
+- no one-off migration helper files committed to the repository;
+- no file deletion or archival unless separately approved;
+- no live provider calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- legacy runner authority must not be expanded.
+
+### RESET-10L-BL31 — Migrate Analysis Runtime Logic to Canonical V2 Boundary
+
+Category: Architecture / Cleanup Implementation
+
+Rationale: After the canonical app and scanner boundaries are established, the next migration target is analysis runtime logic currently concentrated in script-era fundamentals analysis files. The analysis boundary should start as side-effect-free and evidence/review-oriented before any production runner integration is approved.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
 Status: CANDIDATE NEXT STAGE
 
-Proposed next step: Migrate scanner/universe planning logic toward the canonical v2 scanner boundary without provider calls, production data writes, report generation, Telegram delivery, portfolio/watchlist updates, or Decision Engine investment behavior.
+Proposed next step: Establish the canonical v2 analysis boundary without production data writes, report generation, Telegram delivery, portfolio/watchlist updates, or Decision Engine investment behavior.
 
 Guardrails:
 
