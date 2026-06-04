@@ -596,9 +596,13 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL17
 
-Proposed next step: Add synthetic provider-to-persistence integration tests using fake provider output, in-memory handoff, and pytest temporary directories only.
+Test record: `tests/contract/test_v2_provider_to_persistence_integration_contracts.py`
+
+Result summary: Synthetic provider-to-persistence integration contracts now prove that fake provider-boundary output can be handed to the controlled persistence boundary while preserving provenance linkage, explicit missing-value behavior, neutral readiness, synthetic tmp_path writes, forbidden-path rejection, and no-side-effect guardrails. The contracts remain synthetic-only and do not authorize production data writes, live provider execution, reports, Telegram, pipeline integration, portfolio/watchlist integration, or Decision Engine investment use.
+
+Proposed next step: Proceed to `RESET-10L-BL18 — Production Persistence Readiness Review`.
 
 Guardrails:
 
@@ -611,6 +615,35 @@ Guardrails:
 - no committed raw live payload;
 - no production data writes;
 - no writes under `data/`;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist integration;
+- no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL18 — Production Persistence Readiness Review
+
+Category: Source Data / Review
+
+Rationale: After synthetic provider-to-persistence integration contracts exist, the next step should review whether any production persistence path can be considered and what approvals, path policy, audit controls, and no-side-effect requirements remain.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Data Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Review production persistence readiness, remaining governance approvals, path policy, append/version semantics, rollback design, audit retention, and downstream no-side-effect guardrails.
+
+Guardrails:
+
+- review-only unless separately approved;
+- no live provider calls;
+- no SEC, EDGAR, broker, or network calls;
+- no committed credentials;
+- no committed raw live payload;
+- no production data writes unless separately approved;
 - no production pipeline execution;
 - no report generation;
 - no Telegram delivery;
