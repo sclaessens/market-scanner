@@ -2,7 +2,8 @@
 
 This module owns the approved application entrypoint shape without running the
 legacy production pipeline. It is intentionally plan-first until scanner,
-analysis, reporting, and delivery logic are migrated into canonical v2 owners.
+analysis, message composition, reporting, and delivery logic are migrated into
+canonical v2 owners.
 """
 
 from __future__ import annotations
@@ -19,6 +20,11 @@ from market_scanner.decision.decision_boundary import (
     build_decision_review_plan,
 )
 from market_scanner.decision.decision_contracts import DecisionReviewPlan
+from market_scanner.messaging.message_boundary import (
+    MESSAGING_CANONICAL_OWNER,
+    build_message_composition_plan,
+)
+from market_scanner.messaging.message_contracts import MessageCompositionPlan
 
 from market_scanner.scanner.scanner_boundary import (
     SCANNER_CANONICAL_OWNER,
@@ -58,6 +64,7 @@ class CanonicalRuntimePlan:
     scanner_plan: ScannerPlan
     analysis_plan: AnalysisPlan
     decision_review_plan: DecisionReviewPlan
+    message_composition_plan: MessageCompositionPlan
     legacy_runtime_authorities: tuple[str, ...]
     migration_status: str
 
@@ -117,8 +124,8 @@ CANONICAL_RUNTIME_STAGES = (
     ),
     RuntimeStage(
         name="message_composition",
-        canonical_owner="src/market_scanner/messaging/",
-        status="planned_for_migration",
+        canonical_owner=MESSAGING_CANONICAL_OWNER,
+        status="canonical_boundary_established",
         side_effects_allowed=False,
     ),
     RuntimeStage(
@@ -145,9 +152,10 @@ def build_canonical_runtime_plan() -> CanonicalRuntimePlan:
         scanner_plan=build_scanner_plan(),
         analysis_plan=build_analysis_plan(),
         decision_review_plan=build_decision_review_plan(),
+        message_composition_plan=build_message_composition_plan(),
         legacy_runtime_authorities=LEGACY_RUNTIME_AUTHORITIES,
         migration_status=(
-            "canonical_entrypoint_scanner_analysis_and_decision_review_boundary_established"
+            "canonical_entrypoint_scanner_analysis_decision_review_and_message_boundary_established"
         ),
     )
 
