@@ -808,9 +808,13 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Data Steward / Financial Analyst / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL23
 
-Proposed next step: Re-run the controlled NVDA one-ticker real fundamental analysis review using the BL19/BL20 source-shaped findings and the BL22 governed FreeCashFlow derivation behavior.
+Analysis record: `docs/active/v2_nvda_real_analysis_rerun_with_derived_fcf.md`
+
+Analysis result: The controlled NVDA one-ticker real fundamental analysis re-run used governed source_derived FreeCashFlow and moved beyond the previous CASH_FLOW_UNKNOWN blocker. The review documented updated readiness, remaining limitations, and did not produce final BUY/SELL/HOLD, portfolio action, reports, Telegram artifacts, production pipeline execution, production data writes, or Decision Engine investment behavior.
+
+Proposed next step: Proceed to `RESET-10L-BL24 — Real Analysis Output Defect Review`.
 
 Guardrails:
 
@@ -826,6 +830,34 @@ Guardrails:
 - no Telegram delivery;
 - no portfolio or watchlist updates;
 - no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL24 — Real Analysis Output Defect Review
+
+Category: Fundamentals / Analysis Review
+
+Rationale: After governed derived FreeCashFlow resolved the NVDA CASH_FLOW_UNKNOWN blocker, the next limitation is incomplete real analysis metric coverage, especially prior-year growth evidence and clearer review signaling for partial metrics.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Data Steward / Financial Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Review the real analysis output path and document the minimum governed metric-history requirements needed before broader real analysis readiness can be considered.
+
+Guardrails:
+
+- review-only unless separately approved;
+- one ticker only unless separately approved;
+- no final BUY, SELL, or HOLD recommendation;
+- no portfolio or watchlist updates;
+- no production data writes unless separately approved;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no credentials or raw live payloads committed;
+- no missing-to-zero conversion;
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
 ## Relationship to Existing Backlog
