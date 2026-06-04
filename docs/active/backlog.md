@@ -729,16 +729,24 @@ Governance risk: HIGH
 
 Owner role: Data Steward / Financial Analyst / Governance Auditor / Developer
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL21
 
-Proposed next step: Decide whether v2 may derive FreeCashFlow from operating cash flow minus capital expenditures, or whether direct-source FreeCashFlow missingness must continue to block cash-flow analysis.
+Policy record: `docs/active/v2_free_cash_flow_derivation_policy.md`
+
+Policy result: Option C is approved. V2 may support both directly sourced FreeCashFlow and governed derived FreeCashFlow. Derived FreeCashFlow may only be produced from operating cash flow minus capital expenditures when both inputs are valid, same-period, same-currency, same-unit, provenance-linked, and clearly marked as derived. Missing values must remain explicit, no missing value may be converted to zero, and ambiguous sign conventions or mismatched inputs must fail closed as not derivable.
+
+Proposed next step: Proceed to `RESET-10L-BL22 — Implement Governed FreeCashFlow Derivation`.
 
 Guardrails:
 
-- one ticker evidence review may use the BL19/BL20 NVDA findings;
-- design and policy first unless separately approved for implementation;
+- governed derivation only;
 - no silent FreeCashFlow derivation;
 - no missing-to-zero conversion;
+- derived metrics must preserve provenance for both input fields;
+- derived metrics must be visibly marked as derived;
+- mismatched currency, unit, period, fiscal context, missing provenance, or ambiguous sign convention must fail closed;
+- implementation must update existing modules wherever possible;
+- Python file creation policy applies;
 - no committed credentials;
 - no committed raw unredacted live payload;
 - no production data writes unless separately approved;
@@ -747,6 +755,35 @@ Guardrails:
 - no Telegram delivery;
 - no portfolio or watchlist integration;
 - no Decision Engine investment logic;
+- no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL22 — Implement Governed FreeCashFlow Derivation
+
+Category: Fundamentals / Implementation
+
+Rationale: After FreeCashFlow derivation governance approval, the project may implement governed FreeCashFlow derivation so real-source analysis can progress beyond CASH_FLOW_UNKNOWN when operating cash flow and capital expenditures are available and valid.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Implement governed FreeCashFlow derivation in existing provider, normalization, readiness, or fundamentals modules where possible, with tests covering source_reported, source_derived, missing, invalid, not_parseable, and not_derivable states.
+
+Guardrails:
+
+- update existing Python files first;
+- no new Python file unless formally justified under `docs/active/v2_python_file_creation_policy.md`;
+- no one-off ticker-specific Python files;
+- no silent derivation;
+- no missing-to-zero conversion;
+- no investment recommendation behavior;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist integration;
 - no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
 ## Relationship to Existing Backlog
