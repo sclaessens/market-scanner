@@ -923,7 +923,7 @@ Analysis record: `docs/active/v2_nvda_real_analysis_rerun_with_growth_evidence.m
 
 Analysis result: The controlled NVDA real analysis re-run used governed source_derived FreeCashFlow and governed prior-year growth evidence, but LIMITED_ANALYSIS remains. The remaining blocker is documented in `docs/active/v2_nvda_real_analysis_rerun_with_growth_evidence.md`. No final recommendation, portfolio action, reports, Telegram artifacts, production pipeline execution, production data writes, or Decision Engine investment behavior were produced.
 
-Proposed next step: Proceed to `RESET-10L-BL27 — Real Analysis Remaining Evidence Gap Review`.
+Proposed next step: Proceed to `RESET-10L-BL27 — Python Architecture Cleanup and Legacy Decoupling Review`.
 
 Guardrails:
 
@@ -942,32 +942,68 @@ Guardrails:
 - no missing-to-zero conversion;
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
-### RESET-10L-BL27 — Real Analysis Remaining Evidence Gap Review
+### RESET-10L-BL27 — Python Architecture Cleanup and Legacy Decoupling Review
 
-Category: Fundamentals / Analysis Review
+Category: Architecture / Cleanup Review
 
-Rationale: After governed growth evidence improved the NVDA real analysis output, the analysis still remains LIMITED_ANALYSIS because EPS YoY growth is not governed and the existing analysis metrics schema treats the row as partial.
+Rationale: After governed real-analysis evidence improved the NVDA path, the project must understand Python runtime ownership, legacy dependencies, duplicate entrypoints, scanner/report/Telegram coupling, and cleanup sequencing before adding more real-analysis features.
 
 Governance risk: HIGH
 
-Owner role: Technical Analyst / Data Steward / Financial Analyst / Governance Auditor
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL27
 
-Proposed next step: Review whether EPS YoY needs governed prior-year growth evidence and whether the real-analysis input schema should consume governed growth evidence records directly.
+Review record: `docs/active/v2_python_architecture_cleanup_and_legacy_decoupling_review.md`
+
+Result summary: The Python architecture cleanup and legacy decoupling review inventoried committed Python files, identified multiple runnable legacy entrypoints, classified canonical v2 modules and script-era dependencies, mapped duplicate responsibilities across scanner, fundamentals analysis, Decision Engine, reporting, Telegram, portfolio, watchlist, configuration, and shared utilities, and proposed a canonical v2 ownership map and cleanup sequence. The review confirms that still-used legacy files are temporary dependencies, not automatically approved long-term owners. No Python files, tests, runtime behavior, data files, reports, workflows, portfolio/watchlist files, or Telegram artifacts were changed.
+
+Proposed next step: Proceed to `RESET-10L-BL28 — Define Canonical V2 Runtime Architecture`.
 
 Guardrails:
 
 - review-only unless separately approved;
-- one ticker only unless separately approved;
-- no final BUY, SELL, or HOLD recommendation;
-- no portfolio or watchlist updates;
-- no production data writes unless separately approved;
+- no Python code changes;
+- no test changes;
+- no file moves or deletions;
+- no provider calls;
+- no production data writes;
 - no production pipeline execution;
 - no report generation;
 - no Telegram delivery;
-- no credentials or raw live payloads committed;
-- no missing-to-zero conversion;
+- no portfolio or watchlist updates;
+- no Decision Engine investment behavior changes;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL28 — Define Canonical V2 Runtime Architecture
+
+Category: Architecture / Design Review
+
+Rationale: The BL27 cleanup review found multiple unclear runners, script-era scanner and analysis owners, reporting/Telegram coupling, and legacy dependencies that should not be moved or deleted until canonical v2 ownership is defined.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Define the single official v2 app entrypoint, scanner flow, fundamentals analysis flow, message composition flow, report artifact boundary, delivery boundary, configuration owner, and Decision Engine migration boundary before migration, archival, deletion, or runtime cleanup begins.
+
+Guardrails:
+
+- design/review-only unless separately approved;
+- no Python code changes unless separately approved;
+- no test changes unless separately approved;
+- no file moves or deletions;
+- no provider calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist updates;
+- no Decision Engine investment behavior changes;
+- no final BUY, SELL, or HOLD recommendation;
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
 
 ## Relationship to Existing Backlog
