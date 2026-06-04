@@ -1020,9 +1020,17 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL29
 
-Proposed next step: Start a narrow migration of runtime entrypoint authority away from legacy scripts and toward the canonical v2 application entrypoint, or produce an executable migration plan with import and test gates if implementation risk is too high.
+Implementation records:
+
+- `src/market_scanner/app.py`
+- `tests/unit/test_v2_canonical_app.py`
+- `docs/active/v2_legacy_runtime_entrypoint_migration.md`
+
+Result summary: Runtime entrypoint authority migration has started. The canonical v2 application boundary is now established under `src/market_scanner/app.py`, with tests proving a deterministic, side-effect-free dry-run boundary. Legacy runners remain present but are no longer the only runtime authority and remain migration/archive candidates under the legacy decoupling policy.
+
+Proposed next step: Proceed to `RESET-10L-BL30 — Migrate Scanner Runtime Logic to Canonical V2 Boundary`.
 
 Guardrails:
 
@@ -1039,6 +1047,35 @@ Guardrails:
 - no portfolio or watchlist updates;
 - no final BUY, SELL, or HOLD recommendation;
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL30 — Migrate Scanner Runtime Logic to Canonical V2 Boundary
+
+Category: Architecture / Cleanup Implementation
+
+Rationale: After the canonical v2 application boundary is established, the next migration target is scanner and universe-selection runtime logic currently concentrated in legacy scripts. Scanner migration should start with a side-effect-free canonical boundary before any production data writes or provider execution are connected.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Migrate scanner/universe planning logic toward the canonical v2 scanner boundary without provider calls, production data writes, report generation, Telegram delivery, portfolio/watchlist updates, or Decision Engine investment behavior.
+
+Guardrails:
+
+- update existing Python files first unless BL28-approved canonical ownership requires a new file;
+- no one-off migration helper files committed to the repository;
+- no file deletion or archival unless separately approved;
+- no live provider calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- legacy runner authority must not be expanded.
 
 ## Relationship to Existing Backlog
 
