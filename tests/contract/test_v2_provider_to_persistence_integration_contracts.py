@@ -305,6 +305,8 @@ def _metric_value_status(record, *, is_invalid: bool) -> str:
         return "invalid_unparseable"
     if record.metric_value is None or record.metric_value == "":
         return "missing_source_field"
+    if record.normalization_status in {"source_reported", "source_derived"}:
+        return record.normalization_status
     return "reported"
 
 
@@ -344,6 +346,61 @@ def test_complete_fake_provider_output_reaches_persistence_boundary(tmp_path):
     assert (tmp_path / "persistence" / "raw_source_evidence").is_dir()
     assert (tmp_path / "persistence" / "normalized_fundamentals").is_dir()
     assert (tmp_path / "persistence" / "source_data_readiness").is_dir()
+
+
+def test_nvda_shaped_provider_output_derives_free_cash_flow_before_persistence(tmp_path):
+    result = ingest_provider_fundamentals(
+        _response(
+            provider_record_id="CIK0001045810-FY-2025",
+            original_source_reference="sec-edgar-form-10-k:0001045810-25-000023",
+            ticker="NVDA",
+            symbol="NVDA",
+            entity_identifier="CIK0001045810",
+            raw_fields={
+                "Revenues": _field("Revenues", "1000"),
+                "GrossProfit": _field("GrossProfit", "600"),
+                "OperatingIncomeLoss": _field("OperatingIncomeLoss", "240"),
+                "NetIncomeLoss": _field("NetIncomeLoss", "155"),
+                "EarningsPerShareDiluted": _field(
+                    "EarningsPerShareDiluted",
+                    "3.14",
+                    unit="USD per share",
+                ),
+                "Assets": _field("Assets", "5000"),
+                "Liabilities": _field("Liabilities", "1700"),
+                "StockholdersEquity": _field("StockholdersEquity", "3300"),
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "900",
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "100",
+                ),
+            },
+            missing_field_evidence=("FreeCashFlow",),
+        )
+    )
+    raw, normalized, readiness = _persistence_records(result)
+    free_cash_flow = next(
+        record for record in normalized if record["metric_name"] == "free_cash_flow"
+    )
+
+    assert free_cash_flow["metric_value"] == "800"
+    assert free_cash_flow["metric_value_status"] == "source_derived"
+    assert readiness["readiness_state"] == "available"
+    assert "free_cash_flow:source_derived" in result.readiness_record.readiness_warnings
+
+    batch = prepare_persistence_batch((raw,), normalized, (readiness,))
+    write_result = write_synthetic_persistence_batch(
+        batch,
+        tmp_path / "nvda-derived-persistence",
+    )
+
+    assert batch.batch_status == "valid"
+    assert write_result.batch_status == "written"
+    assert not (tmp_path / "data").exists()
+    assert not (tmp_path / "reports").exists()
 
 
 def test_partial_fake_provider_output_remains_explicit_and_neutral():

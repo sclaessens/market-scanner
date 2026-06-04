@@ -46,12 +46,18 @@ def _field(
     *,
     currency: str = "USD",
     unit: str = "USD",
+    reported_period: str = "",
+    fiscal_year: str = "",
+    fiscal_quarter: str = "",
 ) -> ProviderRawFieldEvidence:
     return ProviderRawFieldEvidence(
         original_field_name=name,
         original_field_value=value,
         original_currency=currency,
         original_unit=unit,
+        reported_period=reported_period,
+        fiscal_year=fiscal_year,
+        fiscal_quarter=fiscal_quarter,
     )
 
 
@@ -136,7 +142,8 @@ def test_raw_evidence_maps_to_normalized_program_ready_records():
     assert metrics["revenue"].original_field_name == "Revenues"
     assert metrics["net_income"].metric_value == "155"
     assert metrics["eps_diluted"].metric_unit == "USD per share"
-    assert metrics["free_cash_flow"].metric_value is None
+    assert metrics["free_cash_flow"].metric_value == "189"
+    assert metrics["free_cash_flow"].normalization_status == "source_derived"
     assert result.readiness_record.readiness_state == "partial"
 
 
@@ -157,7 +164,28 @@ def test_missing_values_remain_explicit_and_are_not_zero():
     assert result.readiness_record.readiness_state == "partial"
 
 
-def test_missing_source_fields_are_not_backfilled_or_derived_as_zero():
+def test_direct_free_cash_flow_source_field_remains_source_reported():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                **_response().raw_fields,
+                "FreeCashFlow": _field("FreeCashFlow", "190"),
+            },
+            missing_field_evidence=(),
+        )
+    )
+    metrics = _metric_map(result)
+
+    free_cash_flow = metrics["free_cash_flow"]
+    assert free_cash_flow.metric_value == "190"
+    assert free_cash_flow.normalization_status == "source_reported"
+    assert free_cash_flow.original_field_name == "FreeCashFlow"
+    assert free_cash_flow.derivation_formula == ""
+    assert free_cash_flow.source_field_names == ("FreeCashFlow",)
+    assert "free_cash_flow:source_reported" in result.readiness_record.readiness_warnings
+
+
+def test_missing_direct_free_cash_flow_is_governed_source_derived():
     result = ingest_provider_fundamentals(
         _response(
             raw_fields={
@@ -174,12 +202,385 @@ def test_missing_source_fields_are_not_backfilled_or_derived_as_zero():
         )
     )
     metrics = _metric_map(result)
+    free_cash_flow = metrics["free_cash_flow"]
 
-    assert metrics["free_cash_flow"].metric_value is None
-    assert metrics["free_cash_flow"].metric_value not in ZERO_LIKE_MISSING_VALUES
-    assert metrics["free_cash_flow"].normalization_status == "missing_source_field"
+    assert free_cash_flow.metric_value == "189"
+    assert free_cash_flow.normalization_status == "source_derived"
+    assert free_cash_flow.validation_status == "valid"
+    assert free_cash_flow.derivation_formula == (
+        "free_cash_flow = operating_cash_flow - capital_expenditures"
+    )
+    assert free_cash_flow.source_field_names == (
+        "NetCashProvidedByUsedInOperatingActivities",
+        "PaymentsToAcquirePropertyPlantAndEquipment",
+    )
+    assert free_cash_flow.original_field_name == (
+        "NetCashProvidedByUsedInOperatingActivities|"
+        "PaymentsToAcquirePropertyPlantAndEquipment"
+    )
+    assert "free_cash_flow:source_derived" in free_cash_flow.validation_warnings
+    assert "free_cash_flow:source_derived" in result.readiness_record.readiness_warnings
+    assert result.readiness_record.readiness_state == "partial"
     assert metrics["operating_cash_flow"].metric_value == "222"
     assert metrics["capital_expenditures"].metric_value == "33"
+
+
+def test_derived_free_cash_flow_can_clear_readiness_when_no_other_inputs_are_missing():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "Revenues": _field("Revenues", "1000"),
+                "GrossProfit": _field("GrossProfit", "600"),
+                "OperatingIncomeLoss": _field("OperatingIncomeLoss", "240"),
+                "NetIncomeLoss": _field("NetIncomeLoss", "155"),
+                "EarningsPerShareDiluted": _field(
+                    "EarningsPerShareDiluted",
+                    "3.14",
+                    unit="USD per share",
+                ),
+                "Assets": _field("Assets", "5000"),
+                "Liabilities": _field("Liabilities", "1700"),
+                "StockholdersEquity": _field("StockholdersEquity", "3300"),
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "222",
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "33",
+                ),
+            },
+            missing_field_evidence=("FreeCashFlow",),
+        )
+    )
+
+    assert _metric_map(result)["free_cash_flow"].normalization_status == "source_derived"
+    assert result.readiness_record.missing_fundamentals_count == 0
+    assert result.readiness_record.readiness_state == "available"
+    assert result.readiness_record.source_data_status == "available"
+
+
+def test_missing_operating_cash_flow_keeps_free_cash_flow_missing():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "33",
+                ),
+            },
+            missing_field_evidence=("free_cash_flow", "operating_cash_flow"),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value is None
+    assert free_cash_flow.metric_value not in ZERO_LIKE_MISSING_VALUES
+    assert free_cash_flow.normalization_status == "missing"
+    assert "free_cash_flow:missing_required_input:operating_cash_flow" in (
+        free_cash_flow.validation_warnings
+    )
+    assert result.readiness_record.readiness_state == "partial"
+
+
+def test_missing_capital_expenditures_keeps_free_cash_flow_missing():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "222",
+                ),
+            },
+            missing_field_evidence=("free_cash_flow", "capital_expenditures"),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value is None
+    assert free_cash_flow.metric_value not in ZERO_LIKE_MISSING_VALUES
+    assert free_cash_flow.normalization_status == "missing"
+    assert "free_cash_flow:missing_required_input:capital_expenditures" in (
+        free_cash_flow.validation_warnings
+    )
+
+
+def test_invalid_operating_cash_flow_fails_closed():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    False,
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "33",
+                ),
+            },
+            missing_field_evidence=("free_cash_flow",),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value is None
+    assert free_cash_flow.normalization_status == "invalid"
+    assert "free_cash_flow:invalid:invalid" in free_cash_flow.validation_warnings
+
+
+def test_invalid_capital_expenditures_fails_closed():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "222",
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    False,
+                ),
+            },
+            missing_field_evidence=("free_cash_flow",),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value is None
+    assert free_cash_flow.normalization_status == "invalid"
+    assert "free_cash_flow:invalid:invalid" in free_cash_flow.validation_warnings
+
+
+def test_not_parseable_operating_cash_flow_fails_closed():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "not available",
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "33",
+                ),
+            },
+            missing_field_evidence=("free_cash_flow",),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value is None
+    assert free_cash_flow.normalization_status == "not_parseable"
+    assert "free_cash_flow:not_parseable:not_parseable" in (
+        free_cash_flow.validation_warnings
+    )
+
+
+def test_not_parseable_capital_expenditures_fails_closed():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "222",
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "not available",
+                ),
+            },
+            missing_field_evidence=("free_cash_flow",),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value is None
+    assert free_cash_flow.normalization_status == "not_parseable"
+    assert "free_cash_flow:not_parseable:not_parseable" in (
+        free_cash_flow.validation_warnings
+    )
+
+
+def test_free_cash_flow_derivation_currency_mismatch_fails_closed():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "222",
+                    currency="USD",
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "33",
+                    currency="EUR",
+                ),
+            },
+            missing_field_evidence=("free_cash_flow",),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value is None
+    assert free_cash_flow.normalization_status == "not_derivable"
+    assert "free_cash_flow:currency_mismatch" in free_cash_flow.validation_warnings
+
+
+def test_free_cash_flow_derivation_unit_mismatch_fails_closed():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "222",
+                    unit="USD",
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "33",
+                    unit="USD millions",
+                ),
+            },
+            missing_field_evidence=("free_cash_flow",),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value is None
+    assert free_cash_flow.normalization_status == "not_derivable"
+    assert "free_cash_flow:unit_mismatch" in free_cash_flow.validation_warnings
+
+
+def test_free_cash_flow_derivation_period_mismatch_fails_closed():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "222",
+                    reported_period="FY",
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "33",
+                    reported_period="Q4",
+                ),
+            },
+            missing_field_evidence=("free_cash_flow",),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value is None
+    assert free_cash_flow.normalization_status == "not_derivable"
+    assert "free_cash_flow:period_mismatch" in free_cash_flow.validation_warnings
+
+
+def test_free_cash_flow_derivation_fiscal_context_mismatch_fails_closed():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "222",
+                    fiscal_year="2025",
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "33",
+                    fiscal_year="2024",
+                ),
+            },
+            missing_field_evidence=("free_cash_flow",),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value is None
+    assert free_cash_flow.normalization_status == "not_derivable"
+    assert "free_cash_flow:fiscal_context_mismatch" in (
+        free_cash_flow.validation_warnings
+    )
+
+
+def test_free_cash_flow_derivation_missing_provenance_fails_closed():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "222",
+                    currency="",
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "33",
+                ),
+            },
+            missing_field_evidence=("free_cash_flow",),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value is None
+    assert free_cash_flow.normalization_status == "not_derivable"
+    assert "free_cash_flow:missing_provenance" in free_cash_flow.validation_warnings
+
+
+def test_ambiguous_negative_capex_sign_convention_fails_closed():
+    result = ingest_provider_fundamentals(
+        _response(
+            raw_fields={
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "222",
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "-33",
+                ),
+            },
+            missing_field_evidence=("free_cash_flow",),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value is None
+    assert free_cash_flow.normalization_status == "not_derivable"
+    assert "free_cash_flow:sign_convention_ambiguous" in (
+        free_cash_flow.validation_warnings
+    )
+
+
+def test_nvda_shaped_input_derives_free_cash_flow_from_valid_cash_flow_inputs():
+    result = ingest_provider_fundamentals(
+        _response(
+            provider_record_id="CIK0001045810-FY-2025",
+            original_source_reference="sec-edgar-form-10-k:0001045810-25-000023",
+            ticker="NVDA",
+            symbol="NVDA",
+            entity_identifier="CIK0001045810",
+            raw_fields={
+                "Revenues": _field("Revenues", "1000"),
+                "NetCashProvidedByUsedInOperatingActivities": _field(
+                    "NetCashProvidedByUsedInOperatingActivities",
+                    "900",
+                ),
+                "PaymentsToAcquirePropertyPlantAndEquipment": _field(
+                    "PaymentsToAcquirePropertyPlantAndEquipment",
+                    "100",
+                ),
+            },
+            missing_field_evidence=("FreeCashFlow",),
+        )
+    )
+    free_cash_flow = _metric_map(result)["free_cash_flow"]
+
+    assert free_cash_flow.metric_value == "800"
+    assert free_cash_flow.normalization_status == "source_derived"
+    assert result.readiness_record.readiness_warnings == (
+        "free_cash_flow:source_derived",
+    )
 
 
 def test_provider_errors_become_neutral_invalid_readiness():

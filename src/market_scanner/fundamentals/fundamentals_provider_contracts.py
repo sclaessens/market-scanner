@@ -55,6 +55,9 @@ class ProviderRawFieldEvidence:
     original_field_value: object
     original_currency: str
     original_unit: str
+    reported_period: str = ""
+    fiscal_year: str = ""
+    fiscal_quarter: str = ""
 
 
 @dataclass(frozen=True)
@@ -126,6 +129,9 @@ class ProviderNormalizedFundamentalRecord:
     original_field_name: str
     normalization_status: str
     validation_status: str
+    derivation_formula: str = ""
+    source_field_names: tuple[str, ...] = ()
+    validation_warnings: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -143,6 +149,7 @@ class ProviderSourceDataReadinessRecord:
     source_reference: str
     provider_status: str
     provider_error_status: str
+    readiness_warnings: tuple[str, ...] = ()
 
 
 REQUIRED_PROVIDER_RESPONSE_FIELDS: tuple[str, ...] = (

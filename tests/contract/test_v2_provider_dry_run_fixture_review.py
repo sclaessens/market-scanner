@@ -148,23 +148,37 @@ def test_provider_dry_run_missing_values_remain_explicit():
     assert metrics["gross_profit"].metric_value not in ZERO_LIKE_MISSING_VALUES
     assert metrics["gross_profit"].normalization_status == "missing_source_field"
     assert metrics["gross_profit"].validation_status == "review_required"
-    assert metrics["free_cash_flow"].metric_value is None
+    assert metrics["free_cash_flow"].metric_value == "7800000000"
     assert metrics["free_cash_flow"].metric_value not in ZERO_LIKE_MISSING_VALUES
-    assert metrics["free_cash_flow"].normalization_status == "missing_source_field"
-    assert result.readiness_record.missing_fundamentals_count == 2
+    assert metrics["free_cash_flow"].normalization_status == "source_derived"
+    assert metrics["free_cash_flow"].source_field_names == (
+        "NetCashProvidedByUsedInOperatingActivities",
+        "PaymentsToAcquirePropertyPlantAndEquipment",
+    )
+    assert "free_cash_flow:source_derived" in (
+        result.readiness_record.readiness_warnings
+    )
+    assert result.readiness_record.missing_fundamentals_count == 1
 
 
 def test_provider_dry_run_missing_values_are_not_converted_to_zero():
     result = ingest_provider_fundamentals(_fixture_response())
     metrics = _metric_map(result)
 
-    for metric_name in ("gross_profit", "free_cash_flow"):
+    for metric_name in ("gross_profit",):
         assert metrics[metric_name].metric_value is None
         assert metrics[metric_name].metric_value != 0
         assert metrics[metric_name].metric_value != 0.0
         assert metrics[metric_name].metric_value != "0"
         assert metrics[metric_name].metric_value is not False
         assert metrics[metric_name].metric_value != ""
+
+    assert metrics["free_cash_flow"].metric_value == "7800000000"
+    assert metrics["free_cash_flow"].metric_value != 0
+    assert metrics["free_cash_flow"].metric_value != 0.0
+    assert metrics["free_cash_flow"].metric_value != "0"
+    assert metrics["free_cash_flow"].metric_value is not False
+    assert metrics["free_cash_flow"].normalization_status == "source_derived"
 
 
 def test_provider_dry_run_readiness_remains_neutral():
