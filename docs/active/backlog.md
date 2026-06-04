@@ -665,9 +665,13 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL19
 
-Proposed next step: Execute one controlled NVDA real-source persistence smoke and commit only governance-safe redacted summaries or approved controlled outputs.
+Smoke record: `docs/active/v2_nvda_real_source_persistence_smoke.md`
+
+Smoke result: A controlled NVDA one-ticker real-source persistence smoke was executed. The run produced a governance-safe redacted summary showing source family, observed fields, missing fields, neutral readiness, persistence-boundary result, and side-effect checks. No credentials, raw unredacted live payloads, production data writes, reports, Telegram artifacts, production pipeline behavior, portfolio/watchlist updates, or Decision Engine investment behavior were committed.
+
+Proposed next step: Proceed to `RESET-10L-BL20 — Run First One-Ticker Real Fundamental Analysis`.
 
 Guardrails:
 
@@ -684,6 +688,32 @@ Guardrails:
 - no portfolio or watchlist integration;
 - no Decision Engine investment logic;
 - no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior.
+
+### RESET-10L-BL20 — Run First One-Ticker Real Fundamental Analysis
+
+Category: Fundamentals / Analysis Review
+
+Rationale: After the controlled NVDA real-source persistence smoke succeeded with explicit partial readiness, the project may run a first one-ticker real fundamental analysis review to learn how real source-data limitations affect analysis behavior.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Data Steward / Financial Analyst / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Run a controlled one-ticker NVDA real fundamental analysis review using the redacted smoke findings and explicit missing-field state as input.
+
+Guardrails:
+
+- one ticker only: `NVDA`;
+- controlled local execution only;
+- no multi-ticker run;
+- no automated scheduling;
+- no reports unless separately approved;
+- no Telegram unless separately approved;
+- no portfolio or watchlist modification;
+- no production data writes unless separately approved;
+- no BUY, SELL, HOLD, allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior unless explicitly part of an approved analysis review.
 
 ## Relationship to Existing Backlog
 
