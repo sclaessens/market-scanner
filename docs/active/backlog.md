@@ -1306,9 +1306,15 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL36
 
-Proposed next step: Review archive readiness for legacy runtime scripts and document which script-era responsibilities can be migrated, retained temporarily, archived after migration, or deleted after confirmation.
+Review record:
+
+- `docs/active/v2_legacy_runtime_script_archive_readiness_review.md`
+
+Result summary: Legacy runtime script archive readiness was reviewed for `scripts/run_scan.py` and `scripts/run_full_pipeline.py`. Neither script is archive-ready. `scripts/run_scan.py` remains referenced by an active workflow and active tests, still owns broad executable runtime sequencing and side effects, and still invokes scanner execution, production data/report writes, reporting, Telegram delivery, portfolio/intelligence layers, and legacy Decision Engine behavior. `scripts/run_full_pipeline.py` remains an active test dependency and subprocess wrapper around `scripts/run_scan.py`. Canonical v2 boundaries exist but remain planning-only for most runtime responsibilities, so dependencies and remaining logic must be decoupled before archive.
+
+Proposed next step: Proceed to `RESET-10L-BL37 — Decouple Remaining Legacy Runtime Dependencies`.
 
 Guardrails:
 
@@ -1326,6 +1332,36 @@ Guardrails:
 - no final BUY, SELL, or HOLD recommendation;
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
 - canonical delivery, message composition, report artifact planning, and legacy runtime responsibilities must remain separate;
+- legacy runner, legacy Decision Engine, legacy reporting, legacy message, and legacy Telegram authority must not be expanded.
+
+### RESET-10L-BL37 — Decouple Remaining Legacy Runtime Dependencies
+
+Category: Architecture / Cleanup Implementation
+
+Rationale: BL36 found that the legacy runtime scripts are not archive-ready because active workflow and test dependencies remain, and broad executable runtime logic has not yet been migrated, replaced, or retired through canonical v2 owners.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Remove or replace active workflow/test/operator dependencies on `scripts/run_scan.py` and `scripts/run_full_pipeline.py` without expanding legacy authority or moving side-effect behavior into the wrong canonical boundary.
+
+Guardrails:
+
+- no archive, delete, move, or rename until dependencies are removed and separately approved;
+- no live provider calls unless separately approved;
+- no credential reads;
+- no network calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- canonical delivery, message composition, report artifact planning, Decision Engine behavior, and runtime entrypoint responsibilities must remain separate;
 - legacy runner, legacy Decision Engine, legacy reporting, legacy message, and legacy Telegram authority must not be expanded.
 
 ## Relationship to Existing Backlog
