@@ -23,6 +23,10 @@ from market_scanner.messaging.message_boundary import (
     MESSAGING_CANONICAL_OWNER,
     build_message_composition_plan,
 )
+from market_scanner.reporting.report_boundary import (
+    REPORTING_CANONICAL_OWNER,
+    build_report_artifact_plan,
+)
 from market_scanner.scanner.scanner_boundary import (
     SCANNER_CANONICAL_OWNER,
     build_scanner_plan,
@@ -58,6 +62,7 @@ BLOCKED_POLICY_FIELDS = {
     "blocked_delivery_codes",
     "blocked_final_state_codes",
     "blocked_behavior_codes",
+    "blocked_write_codes",
 }
 
 
@@ -99,7 +104,7 @@ def test_canonical_runtime_plan_marks_all_stages_side_effect_free_by_default():
         "analysis": "canonical_boundary_established",
         "decision_review_boundary": "canonical_boundary_established",
         "message_composition": "canonical_boundary_established",
-        "report_generation_where_approved": "approval_required",
+        "report_generation_where_approved": "canonical_boundary_established",
         "delivery_telegram_where_approved": "approval_required",
     }
 
@@ -115,6 +120,7 @@ def test_canonical_app_dry_run_returns_side_effect_guarantees():
     assert result.runtime_plan.message_composition_plan == (
         build_message_composition_plan()
     )
+    assert result.runtime_plan.report_artifact_plan == build_report_artifact_plan()
     assert result.side_effect_guarantees.provider_calls_made is False
     assert result.side_effect_guarantees.production_data_writes is False
     assert result.side_effect_guarantees.reports_generated is False
@@ -207,6 +213,19 @@ def test_canonical_app_references_canonical_message_composition_boundary():
     assert message_stage.canonical_owner == MESSAGING_CANONICAL_OWNER
     assert build_canonical_runtime_plan().message_composition_plan.canonical_owner == (
         MESSAGING_CANONICAL_OWNER
+    )
+
+
+def test_canonical_app_references_canonical_report_artifact_boundary():
+    report_stage = next(
+        stage
+        for stage in build_canonical_runtime_plan().stages
+        if stage.name == "report_generation_where_approved"
+    )
+
+    assert report_stage.canonical_owner == REPORTING_CANONICAL_OWNER
+    assert build_canonical_runtime_plan().report_artifact_plan.canonical_owner == (
+        REPORTING_CANONICAL_OWNER
     )
 
 

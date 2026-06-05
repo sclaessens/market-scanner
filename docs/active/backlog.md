@@ -1222,9 +1222,21 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL34
 
-Proposed next step: Establish the canonical v2 report artifact boundary without production data writes, Telegram delivery, portfolio/watchlist updates, or investment recommendation behavior.
+Completion record:
+
+- `src/market_scanner/app.py`
+- `src/market_scanner/reporting/__init__.py`
+- `src/market_scanner/reporting/report_contracts.py`
+- `src/market_scanner/reporting/report_boundary.py`
+- `tests/unit/test_v2_canonical_app.py`
+- `tests/unit/test_v2_canonical_reporting.py`
+- `docs/active/v2_report_artifact_runtime_boundary_migration.md`
+
+Result summary: Report artifact runtime migration has started. The canonical v2 report artifact boundary is now established and integrated into the side-effect-free canonical app dry-run plan. Legacy runtime scripts, report builders, Telegram delivery files, and scattered report artifact logic remain present but are not canonical report artifact authorities and remain migration/archive candidates under the legacy decoupling policy. The new boundary explicitly separates report artifact planning from file writing, message composition, and delivery.
+
+Proposed next step: Proceed to `RESET-10L-BL35 — Migrate Delivery and Telegram Runtime Logic to Canonical V2 Boundary`.
 
 Guardrails:
 
@@ -1240,6 +1252,36 @@ Guardrails:
 - no final BUY, SELL, or HOLD recommendation;
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
 - message composition, report artifact generation, and delivery must remain separate;
+- legacy runner, legacy Decision Engine, legacy reporting, and legacy Telegram authority must not be expanded.
+
+### RESET-10L-BL35 — Migrate Delivery and Telegram Runtime Logic to Canonical V2 Boundary
+
+Category: Architecture / Cleanup Implementation
+
+Rationale: After canonical message composition and report artifact planning are established, delivery ownership should be separated into its own canonical boundary. Telegram delivery must remain disconnected from message composition and report artifact planning unless a future sprint explicitly approves delivery behavior.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Establish the canonical v2 delivery/Telegram boundary without sending messages, writing production data, generating reports, modifying portfolio/watchlist files, or producing investment recommendation behavior.
+
+Guardrails:
+
+- update existing Python files first unless BL28-approved canonical ownership requires a new file;
+- no one-off migration helper files committed to the repository;
+- no file deletion or archival unless separately approved;
+- no live provider calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery unless separately approved;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- message composition, report artifact planning, and delivery must remain separate;
 - legacy runner, legacy Decision Engine, legacy reporting, and legacy Telegram authority must not be expanded.
 
 ## Relationship to Existing Backlog
