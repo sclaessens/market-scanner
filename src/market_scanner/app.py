@@ -20,6 +20,11 @@ from market_scanner.decision.decision_boundary import (
     build_decision_review_plan,
 )
 from market_scanner.decision.decision_contracts import DecisionReviewPlan
+from market_scanner.delivery.delivery_boundary import (
+    DELIVERY_CANONICAL_OWNER,
+    build_delivery_plan,
+)
+from market_scanner.delivery.delivery_contracts import DeliveryPlan
 from market_scanner.messaging.message_boundary import (
     MESSAGING_CANONICAL_OWNER,
     build_message_composition_plan,
@@ -71,6 +76,7 @@ class CanonicalRuntimePlan:
     decision_review_plan: DecisionReviewPlan
     message_composition_plan: MessageCompositionPlan
     report_artifact_plan: ReportArtifactPlan
+    delivery_plan: DeliveryPlan
     legacy_runtime_authorities: tuple[str, ...]
     migration_status: str
 
@@ -142,8 +148,8 @@ CANONICAL_RUNTIME_STAGES = (
     ),
     RuntimeStage(
         name="delivery_telegram_where_approved",
-        canonical_owner="src/market_scanner/delivery/",
-        status="approval_required",
+        canonical_owner=DELIVERY_CANONICAL_OWNER,
+        status="canonical_boundary_established",
         side_effects_allowed=False,
     ),
 )
@@ -160,9 +166,10 @@ def build_canonical_runtime_plan() -> CanonicalRuntimePlan:
         decision_review_plan=build_decision_review_plan(),
         message_composition_plan=build_message_composition_plan(),
         report_artifact_plan=build_report_artifact_plan(),
+        delivery_plan=build_delivery_plan(),
         legacy_runtime_authorities=LEGACY_RUNTIME_AUTHORITIES,
         migration_status=(
-            "canonical_entrypoint_scanner_analysis_decision_review_message_and_report_boundary_established"
+            "canonical_entrypoint_scanner_analysis_decision_review_message_report_and_delivery_boundary_established"
         ),
     )
 

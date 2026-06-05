@@ -1264,9 +1264,21 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL35
 
-Proposed next step: Establish the canonical v2 delivery/Telegram boundary without sending messages, writing production data, generating reports, modifying portfolio/watchlist files, or producing investment recommendation behavior.
+Completion record:
+
+- `src/market_scanner/app.py`
+- `src/market_scanner/delivery/__init__.py`
+- `src/market_scanner/delivery/delivery_contracts.py`
+- `src/market_scanner/delivery/delivery_boundary.py`
+- `tests/unit/test_v2_canonical_app.py`
+- `tests/unit/test_v2_canonical_delivery.py`
+- `docs/active/v2_delivery_runtime_boundary_migration.md`
+
+Result summary: Delivery runtime migration has started. The canonical v2 delivery boundary is now established and integrated into the side-effect-free canonical app dry-run plan. Legacy runtime scripts, Telegram senders, delivery files, report builders, and scattered notification logic remain present but are not canonical delivery authorities and remain migration/archive candidates under the legacy decoupling policy. The new boundary explicitly separates delivery planning from Telegram execution, message composition, report artifact planning, network calls, and credential access.
+
+Proposed next step: Proceed to `RESET-10L-BL36 — Legacy Runtime Script Archive Readiness Review`.
 
 Guardrails:
 
@@ -1283,6 +1295,38 @@ Guardrails:
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
 - message composition, report artifact planning, and delivery must remain separate;
 - legacy runner, legacy Decision Engine, legacy reporting, and legacy Telegram authority must not be expanded.
+
+### RESET-10L-BL36 — Legacy Runtime Script Archive Readiness Review
+
+Category: Architecture / Cleanup Review
+
+Rationale: After the canonical app, scanner, analysis, decision/review, message composition, report artifact, and delivery boundaries are established, the repository needs a controlled archive-readiness review for legacy runtime scripts before any move, deletion, or behavioral migration.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Review archive readiness for legacy runtime scripts and document which script-era responsibilities can be migrated, retained temporarily, archived after migration, or deleted after confirmation.
+
+Guardrails:
+
+- review-only unless a future sprint separately approves implementation;
+- no Python runtime changes;
+- no file deletion, move, or archival in the review sprint;
+- no live provider calls;
+- no network calls;
+- no credential reads;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- canonical delivery, message composition, report artifact planning, and legacy runtime responsibilities must remain separate;
+- legacy runner, legacy Decision Engine, legacy reporting, legacy message, and legacy Telegram authority must not be expanded.
 
 ## Relationship to Existing Backlog
 
