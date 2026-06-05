@@ -1384,9 +1384,48 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
+Status: COMPLETED BY RESET-10L-BL38
+
+Implementation records:
+
+- `scripts/run_full_pipeline.py`
+- `tests/core/test_run_full_pipeline.py`
+- `tests/test_operator_visibility.py`
+- `docs/active/v2_legacy_runtime_blocker_decoupling.md`
+
+Result summary: Remaining legacy runtime blockers were decoupled. Workflow and tests no longer depend on legacy runtime scripts, and the legacy wrapper dependency has been removed by making `scripts/run_full_pipeline.py` fail closed instead of invoking the legacy scan runtime. The legacy runtime scripts remain present but are ready for a new archive-readiness recheck.
+
+Proposed next step: Proceed to `RESET-10L-BL39 — Legacy Runtime Script Archive Readiness Recheck`.
+
+Guardrails:
+
+- no archive, delete, move, or rename until archive-readiness is rechecked and separately approved;
+- no live provider calls unless separately approved;
+- no credential reads;
+- no network calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- canonical delivery, message composition, report artifact planning, Decision Engine behavior, and runtime entrypoint responsibilities must remain separate;
+- legacy runner, legacy Decision Engine, legacy reporting, legacy message, and legacy Telegram authority must not be expanded.
+
+### RESET-10L-BL39 — Legacy Runtime Script Archive Readiness Recheck
+
+Category: Architecture / Cleanup Review
+
+Rationale: BL38 removed active workflow/test dependencies and the wrapper invocation from the primary legacy runtime scripts. A controlled recheck is needed before any archive, delete, or move decision.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
 Status: CANDIDATE NEXT STAGE
 
-Proposed next step: Migrate or retire the remaining test-covered legacy runner responsibilities without deleting, moving, archiving, or expanding the legacy runtime scripts. Preserve coverage by moving validated behavior into canonical owners before replacing legacy runner tests.
+Proposed next step: Re-run archive-readiness review for `scripts/run_scan.py` and `scripts/run_full_pipeline.py`, distinguishing static governance references from active runtime/operator dependencies.
 
 Guardrails:
 
