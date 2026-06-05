@@ -8,7 +8,11 @@ canonical v2 owners.
 
 from __future__ import annotations
 
+import argparse
+import sys
+from collections.abc import Sequence
 from dataclasses import dataclass
+from typing import TextIO
 
 from market_scanner.analysis.analysis_boundary import (
     ANALYSIS_CANONICAL_OWNER,
@@ -192,3 +196,72 @@ def run_canonical_app(*, dry_run: bool = True) -> CanonicalAppResult:
             legacy_runners_invoked=False,
         ),
     )
+
+
+def _build_argument_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="Inspect the canonical v2 market-scanner runtime boundary.",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Return the side-effect-free canonical runtime plan.",
+    )
+    parser.add_argument(
+        "--execute",
+        action="store_true",
+        help="Reserved for future approved execution; currently fails closed.",
+    )
+    return parser
+
+
+def _format_dry_run_result(result: CanonicalAppResult) -> str:
+    stage_names = ",".join(stage.name for stage in result.runtime_plan.stages)
+    guarantees = result.side_effect_guarantees
+
+    return "\n".join(
+        (
+            "Canonical app dry-run completed.",
+            f"mode={result.mode}",
+            f"entrypoint={result.runtime_plan.entrypoint}",
+            f"stages={stage_names}",
+            f"provider_calls_made={guarantees.provider_calls_made}",
+            f"production_data_writes={guarantees.production_data_writes}",
+            f"reports_generated={guarantees.reports_generated}",
+            f"telegram_artifacts_created={guarantees.telegram_artifacts_created}",
+            (
+                "portfolio_or_watchlist_updates="
+                f"{guarantees.portfolio_or_watchlist_updates}"
+            ),
+            f"legacy_runners_invoked={guarantees.legacy_runners_invoked}",
+        )
+    )
+
+
+def main(
+    argv: Sequence[str] | None = None,
+    *,
+    stdout: TextIO | None = None,
+    stderr: TextIO | None = None,
+) -> int:
+    """Run the canonical app CLI in dry-run mode only."""
+
+    parser = _build_argument_parser()
+    args = parser.parse_args(argv)
+    stdout = stdout or sys.stdout
+    stderr = stderr or sys.stderr
+
+    if args.execute:
+        try:
+            run_canonical_app(dry_run=False)
+        except ValueError as exc:
+            print(str(exc), file=stderr)
+            return 2
+
+    result = run_canonical_app(dry_run=True)
+    print(_format_dry_run_result(result), file=stdout)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

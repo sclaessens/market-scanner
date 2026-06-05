@@ -1,14 +1,17 @@
 import importlib
+import subprocess
 import sys
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
 
 import pytest
 
+import market_scanner.app as canonical_app
 from market_scanner.app import (
     CANONICAL_ENTRYPOINT,
     LEGACY_RUNTIME_AUTHORITIES,
     build_canonical_runtime_plan,
+    main,
     run_canonical_app,
 )
 from market_scanner.analysis.analysis_boundary import (
@@ -140,6 +143,99 @@ def test_canonical_app_rejects_non_dry_run_execution():
         run_canonical_app(dry_run=False)
 
 
+def test_canonical_app_cli_default_runs_dry_run(capsys):
+    exit_code = main([])
+
+    output = capsys.readouterr()
+    assert exit_code == 0
+    assert "Canonical app dry-run completed." in output.out
+    assert f"entrypoint={CANONICAL_ENTRYPOINT}" in output.out
+    assert "legacy_runners_invoked=False" in output.out
+    assert "provider_calls_made=False" in output.out
+    assert "production_data_writes=False" in output.out
+    assert "reports_generated=False" in output.out
+    assert "telegram_artifacts_created=False" in output.out
+    assert "portfolio_or_watchlist_updates=False" in output.out
+    assert output.err == ""
+
+
+def test_canonical_app_cli_explicit_dry_run_succeeds(capsys):
+    exit_code = main(["--dry-run"])
+
+    output = capsys.readouterr()
+    assert exit_code == 0
+    assert "Canonical app dry-run completed." in output.out
+    assert "legacy_runners_invoked=False" in output.out
+    assert output.err == ""
+
+
+def test_canonical_app_cli_non_dry_run_fails_closed(capsys):
+    exit_code = main(["--execute"])
+
+    output = capsys.readouterr()
+    assert exit_code == 2
+    assert output.out == ""
+    assert "Only dry-run canonical app planning is approved." in output.err
+
+
+def test_canonical_app_module_cli_dry_run_succeeds():
+    completed = subprocess.run(
+        [sys.executable, "-m", "market_scanner.app", "--dry-run"],
+        check=False,
+        capture_output=True,
+        cwd=Path.cwd(),
+        env={"PYTHONPATH": "src"},
+        text=True,
+    )
+
+    assert completed.returncode == 0
+    assert "Canonical app dry-run completed." in completed.stdout
+    assert "legacy_runners_invoked=False" in completed.stdout
+    assert completed.stderr == ""
+
+
+def test_canonical_app_cli_does_not_import_legacy_scripts():
+    scripts_modules_before = {
+        module_name
+        for module_name in sys.modules
+        if module_name == "scripts" or module_name.startswith("scripts.")
+    }
+
+    main(["--dry-run"])
+
+    scripts_modules_after = {
+        module_name
+        for module_name in sys.modules
+        if module_name == "scripts" or module_name.startswith("scripts.")
+    }
+
+    assert scripts_modules_after == scripts_modules_before
+
+
+def test_canonical_app_cli_does_not_import_network_or_credential_modules():
+    legacy_modules_before = {
+        module_name
+        for module_name in sys.modules
+        if module_name == "requests"
+        or module_name.startswith("requests.")
+        or module_name == "dotenv"
+        or module_name.startswith("dotenv.")
+    }
+
+    main(["--dry-run"])
+
+    legacy_modules_after = {
+        module_name
+        for module_name in sys.modules
+        if module_name == "requests"
+        or module_name.startswith("requests.")
+        or module_name == "dotenv"
+        or module_name.startswith("dotenv.")
+    }
+
+    assert legacy_modules_after == legacy_modules_before
+
+
 def test_canonical_app_import_and_dry_run_create_no_files(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
@@ -170,6 +266,13 @@ def test_canonical_app_boundary_does_not_import_legacy_scripts():
     }
 
     assert scripts_modules_after == scripts_modules_before
+
+
+def test_canonical_app_cli_does_not_expose_legacy_runner_references():
+    source = Path(canonical_app.__file__).read_text(encoding="utf-8")
+
+    assert "import scripts" not in source
+    assert "from scripts" not in source
 
 
 def test_canonical_app_boundary_does_not_import_legacy_delivery_or_network_modules():
