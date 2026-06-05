@@ -19,6 +19,10 @@ from market_scanner.decision.decision_boundary import (
     DECISION_CANONICAL_OWNER,
     build_decision_review_plan,
 )
+from market_scanner.messaging.message_boundary import (
+    MESSAGING_CANONICAL_OWNER,
+    build_message_composition_plan,
+)
 from market_scanner.scanner.scanner_boundary import (
     SCANNER_CANONICAL_OWNER,
     build_scanner_plan,
@@ -51,6 +55,7 @@ FORBIDDEN_OUTPUT_TERMS = {
 }
 
 BLOCKED_POLICY_FIELDS = {
+    "blocked_delivery_codes",
     "blocked_final_state_codes",
     "blocked_behavior_codes",
 }
@@ -93,7 +98,7 @@ def test_canonical_runtime_plan_marks_all_stages_side_effect_free_by_default():
         "fundamentals_normalization_evidence": "canonical_boundary_available",
         "analysis": "canonical_boundary_established",
         "decision_review_boundary": "canonical_boundary_established",
-        "message_composition": "planned_for_migration",
+        "message_composition": "canonical_boundary_established",
         "report_generation_where_approved": "approval_required",
         "delivery_telegram_where_approved": "approval_required",
     }
@@ -107,6 +112,9 @@ def test_canonical_app_dry_run_returns_side_effect_guarantees():
     assert result.runtime_plan.scanner_plan == build_scanner_plan()
     assert result.runtime_plan.analysis_plan == build_analysis_plan()
     assert result.runtime_plan.decision_review_plan == build_decision_review_plan()
+    assert result.runtime_plan.message_composition_plan == (
+        build_message_composition_plan()
+    )
     assert result.side_effect_guarantees.provider_calls_made is False
     assert result.side_effect_guarantees.production_data_writes is False
     assert result.side_effect_guarantees.reports_generated is False
@@ -186,6 +194,19 @@ def test_canonical_app_references_canonical_decision_review_boundary():
     assert decision_stage.canonical_owner == DECISION_CANONICAL_OWNER
     assert build_canonical_runtime_plan().decision_review_plan.canonical_owner == (
         DECISION_CANONICAL_OWNER
+    )
+
+
+def test_canonical_app_references_canonical_message_composition_boundary():
+    message_stage = next(
+        stage
+        for stage in build_canonical_runtime_plan().stages
+        if stage.name == "message_composition"
+    )
+
+    assert message_stage.canonical_owner == MESSAGING_CANONICAL_OWNER
+    assert build_canonical_runtime_plan().message_composition_plan.canonical_owner == (
+        MESSAGING_CANONICAL_OWNER
     )
 
 
