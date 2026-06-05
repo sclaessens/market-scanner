@@ -6,10 +6,10 @@ on:
   # Re-enable only after explicit governance approval.
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  run-scan:
+  canonical-dry-run:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,48 +28,5 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Create .env file
-        run: |
-          cat <<EOF > .env
-          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
-          EOF
-
-      - name: Disable Telegram webhook for polling mode
-        run: |
-          curl -s "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/deleteWebhook?drop_pending_updates=false"
-
-      - name: Process Telegram commands
-        run: python scripts/telegram/process_telegram_commands.py
-
-      - name: Run scanner
-        run: python scripts/run_scan.py
-
-      - name: Show generated files
-        run: |
-          echo "=== WATCHLIST ==="
-          ls -la data/watchlist || true
-          echo "=== PORTFOLIO ==="
-          ls -la data/portfolio || true
-          echo "=== PROCESSED ==="
-          ls -la data/processed || true
-          echo "=== REPORTS ==="
-          ls -la reports/daily || true
-
-      - name: Commit updated state and reports
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add data/watchlist/*.csv || true
-          git add data/portfolio/*.csv || true
-          git add data/processed/market_regime.csv || true
-          git add data/processed/scanner_ranked.csv || true
-          git add reports/daily/telegram_message.txt || true
-
-          if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "Automated daily scan update"
-            git push
-          fi
+      - name: Run canonical app dry-run
+        run: PYTHONPATH=src python -m market_scanner.app --dry-run

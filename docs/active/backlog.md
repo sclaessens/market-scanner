@@ -1344,9 +1344,49 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
+Status: COMPLETED BY RESET-10L-BL37
+
+Implementation records:
+
+- `.github/workflows/daily-market-scan.yml`
+- `src/market_scanner/app.py`
+- `tests/unit/test_v2_canonical_app.py`
+- `tests/core/test_fundamentals_runtime_organization.py`
+- `docs/active/v2_legacy_runtime_dependency_decoupling.md`
+
+Result summary: Remaining legacy runtime dependencies were partially decoupled. The active workflow now targets the canonical v2 app dry-run instead of `scripts/run_scan.py`, and one narrow fundamentals namespace test no longer imports the legacy runner. The canonical app now exposes a guarded dry-run CLI that fails closed for non-dry-run execution. The remaining test, wrapper, and logic dependencies are documented in `docs/active/v2_legacy_runtime_dependency_decoupling.md`. Legacy scripts remain present and are not yet archive-ready.
+
+Proposed next step: Proceed to `RESET-10L-BL38 — Decouple Remaining Legacy Runtime Blockers`.
+
+Guardrails:
+
+- no archive, delete, move, or rename until dependencies are removed and separately approved;
+- no live provider calls unless separately approved;
+- no credential reads;
+- no network calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- canonical delivery, message composition, report artifact planning, Decision Engine behavior, and runtime entrypoint responsibilities must remain separate;
+- legacy runner, legacy Decision Engine, legacy reporting, legacy message, and legacy Telegram authority must not be expanded.
+
+### RESET-10L-BL38 — Decouple Remaining Legacy Runtime Blockers
+
+Category: Architecture / Cleanup Implementation
+
+Rationale: BL37 removed the active workflow dependency on `scripts/run_scan.py` and added a certified canonical app dry-run CLI, but active tests still import and monkeypatch `scripts/run_scan.py` and `scripts/run_full_pipeline.py`, and `scripts/run_full_pipeline.py` still shells into `scripts/run_scan.py`.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
 Status: CANDIDATE NEXT STAGE
 
-Proposed next step: Remove or replace active workflow/test/operator dependencies on `scripts/run_scan.py` and `scripts/run_full_pipeline.py` without expanding legacy authority or moving side-effect behavior into the wrong canonical boundary.
+Proposed next step: Migrate or retire the remaining test-covered legacy runner responsibilities without deleting, moving, archiving, or expanding the legacy runtime scripts. Preserve coverage by moving validated behavior into canonical owners before replacing legacy runner tests.
 
 Guardrails:
 
