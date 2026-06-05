@@ -25,6 +25,11 @@ from market_scanner.messaging.message_boundary import (
     build_message_composition_plan,
 )
 from market_scanner.messaging.message_contracts import MessageCompositionPlan
+from market_scanner.reporting.report_boundary import (
+    REPORTING_CANONICAL_OWNER,
+    build_report_artifact_plan,
+)
+from market_scanner.reporting.report_contracts import ReportArtifactPlan
 
 from market_scanner.scanner.scanner_boundary import (
     SCANNER_CANONICAL_OWNER,
@@ -65,6 +70,7 @@ class CanonicalRuntimePlan:
     analysis_plan: AnalysisPlan
     decision_review_plan: DecisionReviewPlan
     message_composition_plan: MessageCompositionPlan
+    report_artifact_plan: ReportArtifactPlan
     legacy_runtime_authorities: tuple[str, ...]
     migration_status: str
 
@@ -130,8 +136,8 @@ CANONICAL_RUNTIME_STAGES = (
     ),
     RuntimeStage(
         name="report_generation_where_approved",
-        canonical_owner="src/market_scanner/reporting/",
-        status="approval_required",
+        canonical_owner=REPORTING_CANONICAL_OWNER,
+        status="canonical_boundary_established",
         side_effects_allowed=False,
     ),
     RuntimeStage(
@@ -153,9 +159,10 @@ def build_canonical_runtime_plan() -> CanonicalRuntimePlan:
         analysis_plan=build_analysis_plan(),
         decision_review_plan=build_decision_review_plan(),
         message_composition_plan=build_message_composition_plan(),
+        report_artifact_plan=build_report_artifact_plan(),
         legacy_runtime_authorities=LEGACY_RUNTIME_AUTHORITIES,
         migration_status=(
-            "canonical_entrypoint_scanner_analysis_decision_review_and_message_boundary_established"
+            "canonical_entrypoint_scanner_analysis_decision_review_message_and_report_boundary_established"
         ),
     )
 
