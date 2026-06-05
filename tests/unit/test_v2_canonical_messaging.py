@@ -35,6 +35,8 @@ BLOCKED_POLICY_FIELDS = {
     "blocked_behavior_codes",
 }
 
+ARCHIVED_LEGACY_RUNTIME_DIR = Path("archive") / "legacy_runtime" / "scripts"
+
 
 def _flatten_values(value):
     if is_dataclass(value):
@@ -203,8 +205,10 @@ def test_message_composition_plan_contains_no_investment_behavior_outside_blocke
 
 def test_legacy_message_report_telegram_files_are_not_expanded_to_import_messaging():
     legacy_sources = (
-        Path("scripts/run_scan.py").read_text(encoding="utf-8"),
-        Path("scripts/run_full_pipeline.py").read_text(encoding="utf-8"),
+        (ARCHIVED_LEGACY_RUNTIME_DIR / "run_scan.py").read_text(encoding="utf-8"),
+        (ARCHIVED_LEGACY_RUNTIME_DIR / "run_full_pipeline.py").read_text(
+            encoding="utf-8"
+        ),
         Path("scripts/reporting/build_reporting_layer.py").read_text(encoding="utf-8"),
         Path("scripts/reporting/build_telegram_summary.py").read_text(encoding="utf-8"),
         Path("scripts/reporting/send_telegram.py").read_text(encoding="utf-8"),
@@ -215,6 +219,9 @@ def test_legacy_message_report_telegram_files_are_not_expanded_to_import_messagi
             encoding="utf-8"
         ),
     )
+
+    assert not (Path("scripts") / "run_scan.py").exists()
+    assert not (Path("scripts") / "run_full_pipeline.py").exists()
 
     for source in legacy_sources:
         assert "market_scanner.messaging.message_boundary" not in source

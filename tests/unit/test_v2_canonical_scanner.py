@@ -24,6 +24,8 @@ FORBIDDEN_OUTPUT_TERMS = {
     "recommendation",
 }
 
+ARCHIVED_LEGACY_RUNTIME_DIR = Path("archive") / "legacy_runtime" / "scripts"
+
 
 def _flatten_values(value):
     if is_dataclass(value):
@@ -119,9 +121,12 @@ def test_scanner_plan_contains_no_investment_behavior():
 
 def test_legacy_runners_are_not_expanded_to_import_canonical_scanner():
     legacy_sources = (
-        Path("scripts/run_scan.py").read_text(encoding="utf-8"),
-        Path("scripts/run_full_pipeline.py").read_text(encoding="utf-8"),
+        (ARCHIVED_LEGACY_RUNTIME_DIR / "run_scan.py").read_text(encoding="utf-8"),
+        (ARCHIVED_LEGACY_RUNTIME_DIR / "run_full_pipeline.py").read_text(encoding="utf-8"),
     )
+
+    assert not (Path("scripts") / "run_scan.py").exists()
+    assert not (Path("scripts") / "run_full_pipeline.py").exists()
 
     for source in legacy_sources:
         assert "market_scanner.scanner" not in source

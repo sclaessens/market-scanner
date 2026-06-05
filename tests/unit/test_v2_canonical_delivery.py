@@ -36,6 +36,8 @@ BLOCKED_POLICY_FIELDS = {
     "blocked_behavior_codes",
 }
 
+ARCHIVED_LEGACY_RUNTIME_DIR = Path("archive") / "legacy_runtime" / "scripts"
+
 
 def _flatten_values(value):
     if is_dataclass(value):
@@ -232,8 +234,10 @@ def test_delivery_plan_contains_no_investment_behavior_outside_blocked_policy():
 
 def test_legacy_delivery_files_are_not_expanded_to_import_delivery_boundary():
     legacy_sources = (
-        Path("scripts/run_scan.py").read_text(encoding="utf-8"),
-        Path("scripts/run_full_pipeline.py").read_text(encoding="utf-8"),
+        (ARCHIVED_LEGACY_RUNTIME_DIR / "run_scan.py").read_text(encoding="utf-8"),
+        (ARCHIVED_LEGACY_RUNTIME_DIR / "run_full_pipeline.py").read_text(
+            encoding="utf-8"
+        ),
         Path("scripts/reporting/send_telegram.py").read_text(encoding="utf-8"),
         Path("scripts/telegram/process_telegram_commands.py").read_text(
             encoding="utf-8"
@@ -244,6 +248,9 @@ def test_legacy_delivery_files_are_not_expanded_to_import_delivery_boundary():
             encoding="utf-8"
         ),
     )
+
+    assert not (Path("scripts") / "run_scan.py").exists()
+    assert not (Path("scripts") / "run_full_pipeline.py").exists()
 
     for source in legacy_sources:
         assert "market_scanner.delivery.delivery_boundary" not in source
