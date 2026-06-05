@@ -19,6 +19,10 @@ from market_scanner.decision.decision_boundary import (
     DECISION_CANONICAL_OWNER,
     build_decision_review_plan,
 )
+from market_scanner.delivery.delivery_boundary import (
+    DELIVERY_CANONICAL_OWNER,
+    build_delivery_plan,
+)
 from market_scanner.messaging.message_boundary import (
     MESSAGING_CANONICAL_OWNER,
     build_message_composition_plan,
@@ -63,6 +67,7 @@ BLOCKED_POLICY_FIELDS = {
     "blocked_final_state_codes",
     "blocked_behavior_codes",
     "blocked_write_codes",
+    "blocked_execution_codes",
 }
 
 
@@ -105,7 +110,7 @@ def test_canonical_runtime_plan_marks_all_stages_side_effect_free_by_default():
         "decision_review_boundary": "canonical_boundary_established",
         "message_composition": "canonical_boundary_established",
         "report_generation_where_approved": "canonical_boundary_established",
-        "delivery_telegram_where_approved": "approval_required",
+        "delivery_telegram_where_approved": "canonical_boundary_established",
     }
 
 
@@ -121,6 +126,7 @@ def test_canonical_app_dry_run_returns_side_effect_guarantees():
         build_message_composition_plan()
     )
     assert result.runtime_plan.report_artifact_plan == build_report_artifact_plan()
+    assert result.runtime_plan.delivery_plan == build_delivery_plan()
     assert result.side_effect_guarantees.provider_calls_made is False
     assert result.side_effect_guarantees.production_data_writes is False
     assert result.side_effect_guarantees.reports_generated is False
@@ -164,6 +170,35 @@ def test_canonical_app_boundary_does_not_import_legacy_scripts():
     }
 
     assert scripts_modules_after == scripts_modules_before
+
+
+def test_canonical_app_boundary_does_not_import_legacy_delivery_or_network_modules():
+    legacy_modules_before = {
+        module_name
+        for module_name in sys.modules
+        if module_name == "scripts"
+        or module_name.startswith("scripts.")
+        or module_name == "requests"
+        or module_name.startswith("requests.")
+        or module_name == "dotenv"
+        or module_name.startswith("dotenv.")
+    }
+
+    importlib.import_module("market_scanner.app")
+    run_canonical_app()
+
+    legacy_modules_after = {
+        module_name
+        for module_name in sys.modules
+        if module_name == "scripts"
+        or module_name.startswith("scripts.")
+        or module_name == "requests"
+        or module_name.startswith("requests.")
+        or module_name == "dotenv"
+        or module_name.startswith("dotenv.")
+    }
+
+    assert legacy_modules_after == legacy_modules_before
 
 
 def test_canonical_app_references_canonical_scanner_boundary():
@@ -226,6 +261,19 @@ def test_canonical_app_references_canonical_report_artifact_boundary():
     assert report_stage.canonical_owner == REPORTING_CANONICAL_OWNER
     assert build_canonical_runtime_plan().report_artifact_plan.canonical_owner == (
         REPORTING_CANONICAL_OWNER
+    )
+
+
+def test_canonical_app_references_canonical_delivery_boundary():
+    delivery_stage = next(
+        stage
+        for stage in build_canonical_runtime_plan().stages
+        if stage.name == "delivery_telegram_where_approved"
+    )
+
+    assert delivery_stage.canonical_owner == DELIVERY_CANONICAL_OWNER
+    assert build_canonical_runtime_plan().delivery_plan.canonical_owner == (
+        DELIVERY_CANONICAL_OWNER
     )
 
 
