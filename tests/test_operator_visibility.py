@@ -1,198 +1,74 @@
 from __future__ import annotations
 
 from pathlib import Path
-from types import SimpleNamespace
 
-import pandas as pd
-import pytest
-
-from scripts import run_full_pipeline, run_scan
+from market_scanner.app import CANONICAL_ENTRYPOINT, main
 
 
-def test_run_full_pipeline_step_prints_neutral_success(monkeypatch, capsys):
-    calls = []
+REPO_ROOT = Path(__file__).resolve().parents[1]
+WORKFLOW_FILE = REPO_ROOT / ".github" / "workflows" / "daily-market-scan.yml"
+LEGACY_RUNNER = REPO_ROOT / "scripts" / "run_scan.py"
+LEGACY_WRAPPER = REPO_ROOT / "scripts" / "run_full_pipeline.py"
 
-    def fake_run(command):
-        calls.append(command)
-        return SimpleNamespace(returncode=0)
-
-    monkeypatch.setattr(run_full_pipeline.subprocess, "run", fake_run)
-
-    run_full_pipeline.run_step("Example step", ["python", "example.py"])
-
-    output = capsys.readouterr().out
-    assert calls == [["python", "example.py"]]
-    assert "Pipeline step started: Example step" in output
-    assert "Command: python example.py" in output
-    assert "Pipeline step completed: Example step" in output
-
-
-def test_run_full_pipeline_step_prints_failure_context(monkeypatch, capsys):
-    def fake_run(command):
-        return SimpleNamespace(returncode=7)
-
-    monkeypatch.setattr(run_full_pipeline.subprocess, "run", fake_run)
-
-    with pytest.raises(SystemExit) as exc_info:
-        run_full_pipeline.run_step("Example step", ["python", "example.py"])
-
-    output = capsys.readouterr().out
-    assert exc_info.value.code == 7
-    assert "Pipeline step failed: Example step" in output
-    assert "Return code: 7" in output
+FORBIDDEN_OPERATOR_TERMS = {
+    "BUY",
+    "SELL",
+    "HOLD",
+    "allocation",
+    "conviction",
+    "urgency",
+    "scoring",
+    "target-price",
+    "tradeability",
+    "recommendation",
+}
 
 
-def test_scan_artifact_message_includes_optional_row_count():
-    assert (
-        run_scan.format_artifact_message(run_scan.SCANNER_RANKED_FILE, row_count=12)
-        == f"Artifact written: {run_scan.SCANNER_RANKED_FILE} rows=12"
-    )
-    assert (
-        run_scan.format_artifact_message(run_scan.TELEGRAM_MESSAGE_FILE)
-        == f"Artifact written: {run_scan.TELEGRAM_MESSAGE_FILE}"
-    )
+def test_canonical_dry_run_operator_output_is_neutral(capsys):
+    exit_code = main(["--dry-run"])
+
+    output = capsys.readouterr()
+    assert exit_code == 0
+    assert "Canonical app dry-run completed." in output.out
+    assert f"entrypoint={CANONICAL_ENTRYPOINT}" in output.out
+    assert "legacy_runners_invoked=False" in output.out
+    assert "provider_calls_made=False" in output.out
+    assert "production_data_writes=False" in output.out
+    assert "reports_generated=False" in output.out
+    assert "telegram_artifacts_created=False" in output.out
+    assert output.err == ""
+
+    for term in FORBIDDEN_OPERATOR_TERMS:
+        assert term not in output.out
 
 
-def test_scan_progress_uses_neutral_operational_language(capsys):
-    run_scan.print_scan_progress(
-        processed_count=25,
-        total_count=100,
-        setup_count=4,
-        failed_count=1,
-    )
+def test_canonical_execute_operator_output_fails_closed(capsys):
+    exit_code = main(["--execute"])
 
-    output = capsys.readouterr().out
-    assert "Scanner progress: processed=25/100" in output
-    assert "setup_rows_collected=4" in output
-    assert "failed_rows=1" in output
-    assert "tradeable" not in output.lower()
-    assert "conviction" not in output.lower()
-    assert "urgency" not in output.lower()
+    output = capsys.readouterr()
+    assert exit_code == 2
+    assert output.out == ""
+    assert "Only dry-run canonical app planning is approved." in output.err
 
 
-def test_run_scan_rebuilds_required_layers_and_reporting_before_delivery(monkeypatch, tmp_path: Path):
-    order = []
+def test_daily_workflow_operator_path_uses_canonical_dry_run_only():
+    workflow = WORKFLOW_FILE.read_text(encoding="utf-8")
 
-    processed_dir = tmp_path / "data" / "processed"
-    logs_dir = tmp_path / "data" / "logs"
-    portfolio_dir = tmp_path / "data" / "portfolio"
-    reports_dir = tmp_path / "reports" / "daily"
-    for directory in [processed_dir, logs_dir, portfolio_dir, reports_dir]:
-        directory.mkdir(parents=True, exist_ok=True)
+    assert "PYTHONPATH=src python -m market_scanner.app --dry-run" in workflow
+    assert "scripts/run_scan.py" not in workflow
+    assert "scripts/run_full_pipeline.py" not in workflow
+    assert "TELEGRAM_BOT_TOKEN" not in workflow
+    assert "TELEGRAM_CHAT_ID" not in workflow
+    assert "reports/daily/telegram_message.txt" not in workflow
+    assert "git add data/" not in workflow
 
-    monkeypatch.setattr(run_scan, "MIN_HISTORY_ROWS", 1)
-    monkeypatch.setattr(run_scan, "SCAN_PROGRESS_INTERVAL", 1)
-    monkeypatch.setattr(run_scan, "FAILED_TICKERS_FILE", logs_dir / "failed_tickers.csv")
-    monkeypatch.setattr(run_scan, "TELEGRAM_MESSAGE_FILE", reports_dir / "telegram_message.txt")
-    monkeypatch.setattr(run_scan, "SCANNER_RANKED_FILE", processed_dir / "scanner_ranked.csv")
-    monkeypatch.setattr(run_scan, "VALIDATION_LAYER_FILE", processed_dir / "validation_layer.csv")
-    monkeypatch.setattr(run_scan, "CONTEXT_LAYER_FILE", processed_dir / "context_strength.csv")
-    monkeypatch.setattr(run_scan, "FUNDAMENTAL_QUALITY_FILE", processed_dir / "fundamental_quality.csv")
-    monkeypatch.setattr(run_scan, "TIMING_STATE_LAYER_FILE", processed_dir / "timing_state_layer.csv")
-    monkeypatch.setattr(run_scan, "PORTFOLIO_POSITIONS_FILE", portfolio_dir / "portfolio_positions.csv")
-    monkeypatch.setattr(run_scan, "PORTFOLIO_REVIEW_FILE", portfolio_dir / "portfolio_review.csv")
-    monkeypatch.setattr(run_scan, "PORTFOLIO_INTELLIGENCE_FILE", processed_dir / "portfolio_intelligence.csv")
-    monkeypatch.setattr(run_scan, "FINAL_DECISIONS_FILE", processed_dir / "final_decisions.csv")
-    monkeypatch.setattr(run_scan, "ensure_dirs", lambda: None)
-    monkeypatch.setattr(run_scan, "load_tickers", lambda: ["AAA"])
-    monkeypatch.setattr(run_scan, "classify_market_regime", lambda **_: "BULLISH")
-    monkeypatch.setattr(
-        run_scan,
-        "fetch_ohlcv_data",
-        lambda ticker: pd.DataFrame({"Close": [100.0]}),
-    )
-    monkeypatch.setattr(
-        run_scan,
-        "add_indicators",
-        lambda df: df.assign(MA50=95.0, MA200=90.0),
-    )
-    monkeypatch.setattr(
-        run_scan,
-        "scan_ticker",
-        lambda **_: {
-            "ticker": "AAA",
-            "date": "2026-05-19",
-            "sector": "TECHNOLOGY",
-            "rs_20d_pct": 1.0,
-        },
-    )
-    monkeypatch.setattr(run_scan, "rank_setups", lambda setups, top_n: setups)
 
-    def record(name: str, rows: list[dict]) -> pd.DataFrame:
-        order.append(name)
-        return pd.DataFrame(rows)
+def test_legacy_runtime_scripts_remain_non_canonical_static_targets():
+    legacy_runner_source = LEGACY_RUNNER.read_text(encoding="utf-8")
+    legacy_wrapper_source = LEGACY_WRAPPER.read_text(encoding="utf-8")
 
-    monkeypatch.setattr(
-        run_scan,
-        "build_validation_layer",
-        lambda: record("validation", [{"ticker": "AAA", "date": "2026-05-19"}]),
-    )
-    monkeypatch.setattr(
-        run_scan,
-        "build_context_layer",
-        lambda: record("context", [{"ticker": "AAA", "date": "2026-05-19"}]),
-    )
-    monkeypatch.setattr(
-        run_scan,
-        "build_fundamental_layer",
-        lambda: record("fundamental", [{"ticker": "AAA", "date": "2026-05-19"}]),
-    )
-    monkeypatch.setattr(
-        run_scan,
-        "build_timing_state_layer",
-        lambda: record("timing", [{"ticker": "AAA", "date": "2026-05-19"}]),
-    )
-    monkeypatch.setattr(
-        run_scan,
-        "build_portfolio",
-        lambda: record("portfolio_state", [{"ticker": "AAA", "status": "OPEN"}]),
-    )
-    monkeypatch.setattr(
-        run_scan,
-        "evaluate_positions",
-        lambda: record("portfolio_review", [{"ticker": "AAA", "risk_state": "NORMAL"}]),
-    )
-    monkeypatch.setattr(
-        run_scan,
-        "build_portfolio_intelligence",
-        lambda: record("portfolio_intelligence", [{"ticker": "AAA", "date": "2026-05-19"}]),
-    )
-    monkeypatch.setattr(
-        run_scan,
-        "build_final_decisions",
-        lambda: record("final_decisions", [{"ticker": "AAA", "date": "2026-05-19"}]),
-    )
-    monkeypatch.setattr(
-        run_scan,
-        "build_reporting_layer",
-        lambda: (
-            record("reporting", [{"ticker": "AAA", "date": "2026-05-19"}]),
-            {"input_status": "SOURCE_AVAILABLE"},
-            "summary",
-        ),
-    )
-    monkeypatch.setattr(
-        run_scan,
-        "write_reporting_outputs",
-        lambda dashboard, log_row, telegram_text: order.append("reporting_outputs"),
-    )
-    monkeypatch.setattr(run_scan, "send_daily_summary", lambda: order.append("telegram_delivery"))
-
-    run_scan.main()
-
-    assert order == [
-        "validation",
-        "context",
-        "fundamental",
-        "timing",
-        "portfolio_state",
-        "portfolio_review",
-        "portfolio_intelligence",
-        "final_decisions",
-        "reporting",
-        "reporting_outputs",
-        "telegram_delivery",
-    ]
-    assert order.index("portfolio_intelligence") < order.index("final_decisions")
-    assert order.index("final_decisions") < order.index("reporting")
-    assert order.index("reporting_outputs") < order.index("telegram_delivery")
+    assert "Pipeline run started: market scan" in legacy_runner_source
+    assert "Legacy full pipeline execution is disabled." in legacy_wrapper_source
+    assert "canonical app dry-run boundary" in legacy_wrapper_source
+    assert "market_scanner.app" not in legacy_wrapper_source
+    assert "scripts/run_scan.py" not in legacy_wrapper_source
