@@ -1423,13 +1423,49 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL39
 
-Proposed next step: Re-run archive-readiness review for `scripts/run_scan.py` and `scripts/run_full_pipeline.py`, distinguishing static governance references from active runtime/operator dependencies.
+Review record:
+
+- `docs/active/v2_legacy_runtime_script_archive_readiness_recheck.md`
+
+Result summary: Legacy runtime script archive readiness was rechecked after BL37 and BL38. No active workflow, source import, test import, test monkeypatch, or wrapper dependency remains for `scripts/run_scan.py` or `scripts/run_full_pipeline.py`. `scripts/run_full_pipeline.py` is fail-closed and archive-ready. `scripts/run_scan.py` is archive-ready with manual invocation risk because it still contains side-effectful legacy runtime logic while present. Static governance, metadata, historical documentation, and static assertion references remain and should be handled by the controlled archive sprint.
+
+Proposed next step: Proceed to `RESET-10L-BL40 — Archive Confirmed Legacy Runtime Scripts`.
 
 Guardrails:
 
-- no archive, delete, move, or rename until dependencies are removed and separately approved;
+- no archive, delete, move, or rename until separately approved in BL40;
+- no live provider calls unless separately approved;
+- no credential reads;
+- no network calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- canonical delivery, message composition, report artifact planning, Decision Engine behavior, and runtime entrypoint responsibilities must remain separate;
+- legacy runner, legacy Decision Engine, legacy reporting, legacy message, and legacy Telegram authority must not be expanded.
+
+### RESET-10L-BL40 — Archive Confirmed Legacy Runtime Scripts
+
+Category: Architecture / Cleanup Implementation
+
+Rationale: BL39 found both primary legacy runtime scripts ready for a controlled archive sprint. `scripts/run_full_pipeline.py` is fail-closed and `scripts/run_scan.py` has no remaining active workflow, source import, test import, test monkeypatch, or wrapper dependency, but still carries manual invocation risk until removed from active script paths.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Archive or remove `scripts/run_scan.py` and `scripts/run_full_pipeline.py` through a controlled sprint with pre/post static dependency checks, explicit manual invocation risk handling, and no expansion of legacy runtime authority.
+
+Guardrails:
+
+- no archive, delete, move, or rename outside the approved BL40 scope;
 - no live provider calls unless separately approved;
 - no credential reads;
 - no network calls;
