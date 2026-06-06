@@ -1673,6 +1673,42 @@ Guardrails:
 - archived scripts must not be executed;
 - no script-era production files, archived scripts, workflows, data files, report files, portfolio/watchlist files, or runtime behavior were changed.
 
+### RESET-10L-BL46 — Fundamentals Script-Era Side-Effect Migration Review
+
+Category: Architecture / Fundamentals Cleanup Review
+
+Rationale: BL44 identified fundamentals/provider/source-data scripts as a high-risk side-effect domain with SEC/EDGAR download support, yfinance/provider access, data writes, production path pressure, and old fundamentals builders. Before migration or archive work begins, the useful logic and canonical parity gaps must be mapped.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Governance Auditor
+
+Status: COMPLETED BY RESET-10L-BL46
+
+Review record: `docs/active/v2_fundamentals_script_era_side_effect_migration_review.md`
+
+Result summary: Fundamentals script-era side-effect migration review is complete. The review classified 22 fundamentals/provider/source-data related script-era files, confirmed that canonical v2 already covers injected provider responses, provenance, explicit missingness, governed derived FreeCashFlow, prior-year growth evidence, readiness, and tmp-path persistence, and identified remaining gaps around live provider/SEC governance, SEC Company Facts bulk intake/cache ownership, SEC fact transformation parity, ticker/CIK mapping, production path policy, and old quality/metrics/profile outputs.
+
+Proposed next step: Proceed to `RESET-10L-BL47 — Govern Canonical Fundamentals Live Provider Boundary`.
+
+Guardrails:
+
+- review-only unless separately approved;
+- no live provider calls unless separately approved;
+- no SEC/EDGAR calls;
+- no yfinance calls;
+- no credential reads;
+- no network calls;
+- no production data writes;
+- no raw payload writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- no Python files, tests, workflows, script-era files, archived scripts, data files, reports, or production artifacts were changed.
+
 ## Relationship to Existing Backlog
 
 The historical `docs/sprints/project_backlog.md` remains preserved as legacy planning evidence until RESET-2 decides how to reconcile or archive it. This document is the v2 reset-facing backlog baseline.
