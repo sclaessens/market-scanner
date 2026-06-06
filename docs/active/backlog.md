@@ -1747,6 +1747,50 @@ Guardrails:
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
 - no Python files, tests, workflows, script-era files, archived scripts, data files, reports, or production artifacts were changed.
 
+### RESET-10L-BL48 — Implement Canonical Fundamentals SEC CompanyFacts Smoke Boundary
+
+Category: Source Data / Fundamentals Implementation
+
+Rationale: BL47 governed the first future canonical fundamentals live-provider boundary as a one-ticker SEC CompanyFacts smoke boundary. The implementation must remain injected-input-only, side-effect-free by default, and compliant with the no-live-call, no-production-write, no-cache, no-raw-payload, and no-investment-semantics guardrails.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
+
+Status: COMPLETED BY RESET-10L-BL48
+
+Implementation record: `docs/active/v2_canonical_sec_companyfacts_smoke_boundary_implementation.md`
+
+Implementation records:
+
+- `src/market_scanner/fundamentals/sec_companyfacts_smoke_boundary.py`
+- `tests/unit/test_v2_sec_companyfacts_smoke_boundary.py`
+
+Result summary: The canonical fundamentals SEC CompanyFacts smoke boundary is implemented for injected one-ticker SEC-shaped input only. The boundary preserves ticker/CIK/source provenance, performs deterministic fact selection, supports governed source-derived FreeCashFlow when inputs are valid, fails closed on ambiguity/missing provenance/context mismatches, and does not perform live SEC/EDGAR calls, network calls, production writes, raw payload/cache commits, reports, Telegram delivery, workflow execution, scanner-triggered execution, or multi-ticker capture.
+
+Proposed next step: Proceed to `RESET-10L-BL49 — Validate NVDA SEC CompanyFacts Smoke Boundary Against Redacted Source-Shaped Evidence`.
+
+Guardrails:
+
+- no live SEC/EDGAR calls;
+- no yfinance calls;
+- no provider network calls;
+- no credential reads;
+- no production data writes;
+- no raw payload writes;
+- no cache writes;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no workflow execution;
+- no scanner-triggered execution;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- no missing values converted to zero;
+- no script-era files imported or executed;
+- no archived scripts executed;
+- no script-era files, archived scripts, workflows, data files, reports, portfolio/watchlist files, raw payload files, cache files, or production artifacts were changed.
+
 ## Relationship to Existing Backlog
 
 The historical `docs/sprints/project_backlog.md` remains preserved as legacy planning evidence until RESET-2 decides how to reconcile or archive it. This document is the v2 reset-facing backlog baseline.
