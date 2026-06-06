@@ -1600,6 +1600,40 @@ Guardrails:
 - archived scripts must not be executed;
 - archived legacy runner, legacy Decision Engine, legacy reporting, legacy message, and legacy Telegram authority must not be expanded.
 
+### RESET-10L-BL44 — High-Risk Script-Era Side-Effect Cleanup Review
+
+Category: Architecture / Side-Effect Cleanup Review
+
+Rationale: BL42 inventoried 52 remaining script-era Python files under `scripts/`, including many runnable entrypoints and high-risk side-effect zones. BL43 removed archived-script execution from active tests, so the next cleanup step is to classify the highest-risk active script-era side-effect files before migration, archive, or deletion work begins.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Governance Auditor
+
+Status: COMPLETED BY RESET-10L-BL44
+
+Review record: `docs/active/v2_high_risk_script_era_side_effect_cleanup_review.md`
+
+Result summary: High-risk script-era side-effect review is complete. The review confirmed 52 remaining script-era Python files under `scripts/`, 43 runnable entrypoints, no script-era subprocess/shell execution patterns, and high-risk side-effect groups involving provider access, SEC download support, data writes, report writes, Telegram delivery, credential reads, portfolio/watchlist mutation, and Decision Engine final/allocation semantics. Active tests still import and exercise many high-risk script-era modules, so test execution should be decoupled before migration or archive work.
+
+Proposed next step: Proceed to `RESET-10L-BL45 — Remove High-Risk Script-Era Test Execution`.
+
+Guardrails:
+
+- no live provider calls unless separately approved;
+- no credential reads;
+- no network calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- script-era files must not be executed;
+- archived scripts must not be executed;
+- no script-era migration, archive, delete, or refactor is authorized by this review.
+
 ## Relationship to Existing Backlog
 
 The historical `docs/sprints/project_backlog.md` remains preserved as legacy planning evidence until RESET-2 decides how to reconcile or archive it. This document is the v2 reset-facing backlog baseline.
