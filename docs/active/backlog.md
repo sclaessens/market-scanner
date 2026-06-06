@@ -1791,6 +1791,52 @@ Guardrails:
 - no archived scripts executed;
 - no script-era files, archived scripts, workflows, data files, reports, portfolio/watchlist files, raw payload files, cache files, or production artifacts were changed.
 
+### RESET-10L-BL49 — Validate NVDA SEC CompanyFacts Smoke Boundary Against Redacted Source-Shaped Evidence
+
+Category: Source Data / Fundamentals Validation
+
+Rationale: BL48 implemented the canonical SEC CompanyFacts smoke boundary using minimal synthetic input. Before any controlled live-source governance can be considered, the boundary must be validated against a more realistic but still redacted and injected NVDA SEC CompanyFacts-shaped fixture.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
+
+Status: COMPLETED BY RESET-10L-BL49
+
+Validation record: `docs/active/v2_nvda_sec_companyfacts_smoke_boundary_validation.md`
+
+Validation records:
+
+- `tests/unit/test_v2_sec_companyfacts_smoke_boundary.py`
+
+Result summary: The canonical SEC CompanyFacts smoke boundary was validated against injected redacted/source-shaped NVDA evidence. Validation confirmed deterministic SEC-like fact selection, ticker/CIK/source provenance, source-derived FreeCashFlow, comparable prior-year growth evidence, explicit missingness, and fail-closed behavior without live SEC/EDGAR calls, provider calls, network access, raw payload commits, cache writes, production persistence, reports, Telegram, workflow execution, scanner-triggered execution, portfolio/watchlist integration, or recommendation behavior.
+
+Proposed next step: Proceed to `RESET-10L-BL50 — Govern Controlled Live SEC CompanyFacts One-Ticker Smoke`.
+
+Guardrails:
+
+- no live SEC/EDGAR calls;
+- no yfinance calls;
+- no provider calls;
+- no network calls;
+- no credential reads;
+- no environment variable reads;
+- no production data writes;
+- no raw payload writes;
+- no raw SEC payload commits;
+- no cache writes;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no workflow execution;
+- no scanner-triggered execution;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- no missing values converted to zero;
+- no script-era files imported or executed;
+- no archived scripts executed;
+- no script-era files, archived scripts, workflows, data files, reports, portfolio/watchlist files, raw payload files, cache files, or production artifacts were changed.
+
 ## Relationship to Existing Backlog
 
 The historical `docs/sprints/project_backlog.md` remains preserved as legacy planning evidence until RESET-2 decides how to reconcile or archive it. This document is the v2 reset-facing backlog baseline.
