@@ -1709,6 +1709,44 @@ Guardrails:
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
 - no Python files, tests, workflows, script-era files, archived scripts, data files, reports, or production artifacts were changed.
 
+### RESET-10L-BL47 — Govern Canonical Fundamentals Live Provider Boundary
+
+Category: Source Data / Fundamentals Governance
+
+Rationale: BL46 confirmed that canonical fundamentals already owns injected provider-shaped responses, provenance, explicit missingness, governed derived FreeCashFlow, prior-year growth evidence, readiness, and tmp-path persistence, but live SEC/EDGAR, cache, raw-payload, production path, ticker-to-CIK, and fact-selection governance must be defined before any live-provider implementation begins.
+
+Governance risk: HIGH
+
+Owner role: Data Steward / Technical Analyst / Governance Auditor
+
+Status: COMPLETED BY RESET-10L-BL47
+
+Governance record: `docs/active/v2_canonical_fundamentals_live_provider_boundary_policy.md`
+
+Result summary: The canonical fundamentals live-provider boundary is now governed. BL47 approves policy only, not implementation. The first future implementation candidate is a one-ticker SEC CompanyFacts canonical live-provider smoke boundary, with strict single-ticker, explicit-local-invocation, no-production-write, no-raw-payload-commit, provenance, missingness, and fail-closed guardrails.
+
+Proposed next step: Proceed to `RESET-10L-BL48 — Implement Canonical Fundamentals SEC CompanyFacts Smoke Boundary`.
+
+Guardrails:
+
+- governance-only unless separately approved;
+- no implementation of live provider execution;
+- no SEC/EDGAR calls;
+- no yfinance calls;
+- no provider calls;
+- no credential reads;
+- no network calls;
+- no production data writes;
+- no raw payload writes;
+- no cache writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- no Python files, tests, workflows, script-era files, archived scripts, data files, reports, or production artifacts were changed.
+
 ## Relationship to Existing Backlog
 
 The historical `docs/sprints/project_backlog.md` remains preserved as legacy planning evidence until RESET-2 decides how to reconcile or archive it. This document is the v2 reset-facing backlog baseline.
