@@ -1510,9 +1510,13 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL41
 
-Proposed next step: Validate archive placement, active entrypoint certification, canonical dry-run behavior, static dependency absence, and guardrail preservation after the archive.
+Validation record: `docs/active/v2_legacy_runtime_archive_validation_and_entrypoint_certification.md`
+
+Result summary: Legacy runtime archive validation is complete. The confirmed legacy runtime scripts are absent from the active `scripts/` runtime path, present only in `archive/legacy_runtime/scripts/`, and are not referenced by active workflow/source/test runtime paths. The certified active runtime entrypoint is `src/market_scanner/app.py`.
+
+Proposed next step: Proceed to `RESET-10L-BL42 — Script-Era Python Cleanup Inventory`.
 
 Guardrails:
 
@@ -1528,6 +1532,36 @@ Guardrails:
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
 - canonical delivery, message composition, report artifact planning, Decision Engine behavior, and runtime entrypoint responsibilities must remain separate;
 - legacy runner, legacy Decision Engine, legacy reporting, legacy message, and legacy Telegram authority must not be expanded.
+
+### RESET-10L-BL42 — Script-Era Python Cleanup Inventory
+
+Category: Architecture / Cleanup Review
+
+Rationale: With the primary legacy runtime scripts archived and the canonical app certified as the active runtime entrypoint, the remaining script-era Python surface should be inventoried for migration, compatibility, archive, or deletion planning before further cleanup implementation.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Architecture Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Inventory remaining `scripts/`, `legacy/`, and script-era compatibility modules; classify active dependencies; identify canonical owners; and recommend the safest next cleanup sequence without changing runtime behavior.
+
+Guardrails:
+
+- review-only unless separately approved;
+- no live provider calls unless separately approved;
+- no credential reads;
+- no network calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- canonical delivery, message composition, report artifact planning, Decision Engine behavior, and runtime entrypoint responsibilities must remain separate;
+- archived legacy runner, legacy Decision Engine, legacy reporting, legacy message, and legacy Telegram authority must not be expanded.
 
 ## Relationship to Existing Backlog
 
