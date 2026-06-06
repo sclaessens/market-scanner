@@ -1634,6 +1634,45 @@ Guardrails:
 - archived scripts must not be executed;
 - no script-era migration, archive, delete, or refactor is authorized by this review.
 
+### RESET-10L-BL45 — Remove High-Risk Script-Era Test Execution
+
+Category: Architecture / Cleanup Testing
+
+Rationale: BL44 confirmed that active tests still import and exercise many high-risk script-era modules. These tests make script-era modules harder to migrate, archive, or delete safely. Active coverage should move toward canonical v2 boundaries, static policy checks, and documented migration blockers.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Governance Auditor
+
+Status: COMPLETED BY RESET-10L-BL45
+
+Cleanup record: `docs/active/v2_high_risk_script_era_test_execution_cleanup.md`
+
+Implementation records:
+
+- `tests/conftest.py`
+- `tests/test_operator_visibility.py`
+
+Result summary: High-risk script-era test execution has been removed from active pytest collection. Active tests no longer import or execute the highest-risk script-era behavior suites and instead rely on canonical boundary coverage, static policy checks, and documented blockers. No script-era production files were changed.
+
+Proposed next step: Proceed to `RESET-10L-BL46 — Fundamentals Script-Era Side-Effect Migration Review`.
+
+Guardrails:
+
+- no live provider calls unless separately approved;
+- no credential reads;
+- no network calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- script-era files must not be executed;
+- archived scripts must not be executed;
+- no script-era production files, archived scripts, workflows, data files, report files, portfolio/watchlist files, or runtime behavior were changed.
+
 ## Relationship to Existing Backlog
 
 The historical `docs/sprints/project_backlog.md` remains preserved as legacy planning evidence until RESET-2 decides how to reconcile or archive it. This document is the v2 reset-facing backlog baseline.
