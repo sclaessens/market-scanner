@@ -1577,9 +1577,13 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL43
 
-Proposed next step: Rewrite archived-script execution tests into static archive-state or canonical-entrypoint validation without importing, executing, or monkeypatching archived scripts.
+Cleanup record: `docs/active/v2_archived_script_execution_test_cleanup.md`
+
+Result summary: Archived script execution has been removed from active tests. Tests now validate archived legacy runtime scripts through static archive-status checks and continue to validate the canonical app dry-run as the active runtime path. Archived scripts remain historical references only and are not imported, monkeypatched, or executed by active tests.
+
+Proposed next step: Proceed to `RESET-10L-BL44 — High-Risk Script-Era Side-Effect Cleanup Review`.
 
 Guardrails:
 

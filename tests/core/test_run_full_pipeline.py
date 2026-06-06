@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import subprocess
-import sys
 from pathlib import Path
 
 
@@ -13,53 +11,30 @@ LEGACY_SCAN_SCRIPT = ARCHIVED_RUNNER_DIR / "run_scan.py"
 CANONICAL_DRY_RUN_POINTER = "canonical app dry-run boundary"
 
 
-def test_legacy_full_pipeline_wrapper_fails_closed():
-    completed = subprocess.run(
-        [sys.executable, str(LEGACY_WRAPPER)],
-        check=False,
-        capture_output=True,
-        cwd=REPO_ROOT,
-        text=True,
-    )
+def test_archived_full_pipeline_wrapper_is_static_fail_closed_reference():
+    source = LEGACY_WRAPPER.read_text(encoding="utf-8")
 
-    assert completed.returncode == 2
-    assert "Legacy full pipeline execution is disabled." in completed.stdout
-    assert CANONICAL_DRY_RUN_POINTER in completed.stdout
-    assert completed.stderr == ""
+    assert "Legacy full pipeline execution is disabled." in source
+    assert CANONICAL_DRY_RUN_POINTER in source
+    assert "return 2" in source
+    assert "if __name__ == \"__main__\":" in source
+    assert "raise SystemExit(main(sys.argv[1:]))" in source
 
 
-def test_legacy_full_pipeline_wrapper_accepts_old_args_but_still_fails_closed(
-    tmp_path: Path,
-):
-    completed = subprocess.run(
-        [
-            sys.executable,
-            str(LEGACY_WRAPPER),
-            "--fundamentals-history-path",
-            str(tmp_path / "fundamentals_history.csv"),
-            "--fundamental-metrics-output-path",
-            str(tmp_path / "fundamental_metrics.csv"),
-            "--fundamental-analysis-output-path",
-            str(tmp_path / "fundamental_analysis.csv"),
-        ],
-        check=False,
-        capture_output=True,
-        cwd=REPO_ROOT,
-        text=True,
-    )
+def test_archived_full_pipeline_wrapper_preserves_legacy_arg_names_statically():
+    source = LEGACY_WRAPPER.read_text(encoding="utf-8")
 
-    assert completed.returncode == 2
-    assert "Legacy full pipeline execution is disabled." in completed.stdout
-    assert completed.stderr == ""
-    assert list(tmp_path.iterdir()) == []
+    assert "--fundamentals-history-path" in source
+    assert "--fundamental-metrics-output-path" in source
+    assert "--fundamental-analysis-output-path" in source
+    assert "parse_args(" in source
 
 
 def test_legacy_full_pipeline_wrapper_no_longer_invokes_legacy_scan_script():
     source = LEGACY_WRAPPER.read_text(encoding="utf-8")
 
-    assert "import subprocess" not in source
-    assert "subprocess.run" not in source
     assert "_build_run_scan_command" not in source
+    assert "run_scan.py" not in source
 
 
 def test_legacy_runtime_scripts_are_archived_not_active():
