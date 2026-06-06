@@ -1878,6 +1878,54 @@ Guardrails:
 - no missing values converted to zero;
 - no Python files, tests, workflows, script-era files, archived scripts, data files, reports, raw payload files, cache files, portfolio/watchlist files, or production artifacts were changed.
 
+### RESET-10L-BL51 — Execute Controlled Live SEC CompanyFacts One-Ticker Smoke
+
+Category: Source Data / Fundamentals Validation
+
+Rationale: BL50 governed the exact pre-flight conditions for the first controlled live SEC CompanyFacts one-ticker smoke. BL51 must execute the smoke only if those pre-flight guardrails are satisfied, or fail closed and document the blocker.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Data Steward / Governance Auditor
+
+Status: COMPLETED BY RESET-10L-BL51
+
+Result record: `docs/active/v2_live_nvda_sec_companyfacts_one_ticker_smoke_result.md`
+
+Implementation records:
+
+- `src/market_scanner/fundamentals/sec_companyfacts_live_smoke.py`
+- `tests/unit/test_v2_sec_companyfacts_live_smoke.py`
+
+Result summary: The first controlled live SEC CompanyFacts one-ticker smoke was attempted for NVDA / CIK 0001045810 and failed closed under BL50 guardrails. The failure category, readiness/missingness result, and next remediation step are documented. No retry loop, fallback provider, raw payload, cache, production data, reports, Telegram artifacts, workflow integration, scanner integration, portfolio/watchlist update, or recommendation behavior was committed.
+
+Proposed next step: Proceed to `RESET-10L-BL52 — Resolve Live SEC CompanyFacts Smoke Failure`.
+
+Guardrails:
+
+- one-ticker scope only: `NVDA`;
+- one CIK scope only: `0001045810`;
+- no live SEC request was executed because the local `SEC_USER_AGENT` pre-flight was missing;
+- no more than one SEC CompanyFacts request performed;
+- no endpoint other than NVDA / CIK0001045810 CompanyFacts used;
+- no yfinance calls;
+- no fallback provider calls;
+- no retry loop;
+- no production data writes;
+- no raw payload writes or commits;
+- no cache writes or commits;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no workflow execution;
+- no scanner-triggered execution;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- no missing values converted to zero;
+- no script-era files imported or executed;
+- no archived scripts executed;
+- no script-era files, archived scripts, workflows, data files, reports, portfolio/watchlist files, raw payload files, cache files, credential files, or production artifacts were changed.
+
 ## Relationship to Existing Backlog
 
 The historical `docs/sprints/project_backlog.md` remains preserved as legacy planning evidence until RESET-2 decides how to reconcile or archive it. This document is the v2 reset-facing backlog baseline.
