@@ -95,10 +95,11 @@ class CanonicalAppResult:
 
 
 CANONICAL_ENTRYPOINT = "src/market_scanner/app.py"
+ARCHIVED_LEGACY_RUNTIME_ROOT = "archive/legacy_runtime/scripts"
 
 LEGACY_RUNTIME_AUTHORITIES = (
-    "scripts/run_scan.py",
-    "scripts/run_full_pipeline.py",
+    f"{ARCHIVED_LEGACY_RUNTIME_ROOT}/run_scan.py",
+    f"{ARCHIVED_LEGACY_RUNTIME_ROOT}/run_full_pipeline.py",
 )
 
 CANONICAL_RUNTIME_STAGES = (

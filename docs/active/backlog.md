@@ -1459,13 +1459,63 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL40
 
-Proposed next step: Archive or remove `scripts/run_scan.py` and `scripts/run_full_pipeline.py` through a controlled sprint with pre/post static dependency checks, explicit manual invocation risk handling, and no expansion of legacy runtime authority.
+Archive records:
+
+- `archive/legacy_runtime/scripts/run_scan.py`
+- `archive/legacy_runtime/scripts/run_full_pipeline.py`
+
+Implementation records:
+
+- `src/market_scanner/app.py`
+- `src/market_scanner/scanner/scanner_boundary.py`
+- `src/market_scanner/delivery/delivery_boundary.py`
+- `tests/core/test_run_full_pipeline.py`
+- `tests/test_operator_visibility.py`
+- `tests/unit/test_v2_canonical_scanner.py`
+- `tests/unit/test_v2_canonical_analysis.py`
+- `tests/unit/test_v2_canonical_decision.py`
+- `tests/unit/test_v2_canonical_messaging.py`
+- `tests/unit/test_v2_canonical_reporting.py`
+- `tests/unit/test_v2_canonical_delivery.py`
+- `docs/active/v2_legacy_runtime_script_archive_execution.md`
+
+Result summary: Confirmed legacy runtime scripts were archived. `scripts/run_scan.py` and `scripts/run_full_pipeline.py` were removed from the active `scripts/` runtime path and moved to the legacy runtime archive. The canonical v2 runtime authority remains `src/market_scanner/app.py`. Workflow and tests remain decoupled from legacy runtime scripts, and no provider calls, production data writes, reports, Telegram delivery, portfolio/watchlist updates, or investment recommendation behavior were added.
+
+Proposed next step: Proceed to `RESET-10L-BL41 — Legacy Runtime Archive Validation and Active Entrypoint Certification`.
 
 Guardrails:
 
-- no archive, delete, move, or rename outside the approved BL40 scope;
+- no live provider calls unless separately approved;
+- no credential reads;
+- no network calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- canonical delivery, message composition, report artifact planning, Decision Engine behavior, and runtime entrypoint responsibilities must remain separate;
+- archived legacy runner, legacy Decision Engine, legacy reporting, legacy message, and legacy Telegram authority must not be expanded.
+
+### RESET-10L-BL41 — Legacy Runtime Archive Validation and Active Entrypoint Certification
+
+Category: Architecture / Cleanup Validation
+
+Rationale: BL40 archived the confirmed legacy runtime scripts. A follow-up validation sprint should certify that active runtime entrypoint authority is now only `src/market_scanner/app.py`, no workflow/source/test path depends on archived scripts, and historical references remain evidence-only.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Architecture Steward / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Validate archive placement, active entrypoint certification, canonical dry-run behavior, static dependency absence, and guardrail preservation after the archive.
+
+Guardrails:
+
 - no live provider calls unless separately approved;
 - no credential reads;
 - no network calls;

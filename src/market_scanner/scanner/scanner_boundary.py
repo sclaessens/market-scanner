@@ -6,9 +6,10 @@ from market_scanner.scanner.scanner_contracts import ScannerPlan, ScannerStage
 
 
 SCANNER_CANONICAL_OWNER = "src/market_scanner/scanner/"
+ARCHIVED_LEGACY_RUNTIME_ROOT = "archive/legacy_runtime/scripts"
 
 LEGACY_SCANNER_AUTHORITIES = (
-    "scripts/run_scan.py",
+    f"{ARCHIVED_LEGACY_RUNTIME_ROOT}/run_scan.py",
     "scripts/core/data_fetcher.py",
     "scripts/core/scanner.py",
 )
