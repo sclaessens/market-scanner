@@ -1543,9 +1543,13 @@ Governance risk: HIGH
 
 Owner role: Technical Analyst / Architecture Steward / Governance Auditor
 
-Status: CANDIDATE NEXT STAGE
+Status: COMPLETED BY RESET-10L-BL42
 
-Proposed next step: Inventory remaining `scripts/`, `legacy/`, and script-era compatibility modules; classify active dependencies; identify canonical owners; and recommend the safest next cleanup sequence without changing runtime behavior.
+Inventory record: `docs/active/v2_script_era_python_cleanup_inventory.md`
+
+Result summary: Script-era Python cleanup inventory is complete for `scripts/`. There are 52 remaining script-era Python files, 43 runnable script-era entrypoints, broad active test imports, and high-risk side-effect surfaces across scanner, fundamentals, Decision Engine, reporting, Telegram, portfolio, watchlist, data-source, diagnostics, and maintenance utilities. The next safest cleanup step is to remove the remaining archived-script execution pattern from tests before archiving additional script-era files.
+
+Proposed next step: Proceed to `RESET-10L-BL43 — Remove Archived Script Execution from Tests`.
 
 Guardrails:
 
@@ -1561,6 +1565,35 @@ Guardrails:
 - no final BUY, SELL, or HOLD recommendation;
 - no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
 - canonical delivery, message composition, report artifact planning, Decision Engine behavior, and runtime entrypoint responsibilities must remain separate;
+- archived legacy runner, legacy Decision Engine, legacy reporting, legacy message, and legacy Telegram authority must not be expanded.
+
+### RESET-10L-BL43 — Remove Archived Script Execution from Tests
+
+Category: Architecture / Cleanup Testing
+
+Rationale: BL41 and BL42 confirmed that `tests/core/test_run_full_pipeline.py` still executes `archive/legacy_runtime/scripts/run_full_pipeline.py` to validate fail-closed behavior. Archived scripts should remain historical references, not executable test targets, before additional script-era archive/delete work proceeds.
+
+Governance risk: HIGH
+
+Owner role: Technical Analyst / Developer / Governance Auditor
+
+Status: CANDIDATE NEXT STAGE
+
+Proposed next step: Rewrite archived-script execution tests into static archive-state or canonical-entrypoint validation without importing, executing, or monkeypatching archived scripts.
+
+Guardrails:
+
+- no live provider calls unless separately approved;
+- no credential reads;
+- no network calls;
+- no production data writes;
+- no production pipeline execution;
+- no report generation;
+- no Telegram artifacts or Telegram delivery;
+- no portfolio or watchlist updates;
+- no final BUY, SELL, or HOLD recommendation;
+- no allocation, conviction, urgency, scoring, target-price, tradeability, or recommendation behavior;
+- archived scripts must not be executed;
 - archived legacy runner, legacy Decision Engine, legacy reporting, legacy message, and legacy Telegram authority must not be expanded.
 
 ## Relationship to Existing Backlog
