@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from market_scanner.fundamentals import sec_companyfacts_live_smoke
@@ -145,6 +146,35 @@ def _minimal_companyfacts_payload() -> str:
 }
 """
 
+def _payload_with_equivalent_latest_filed_duplicate() -> str:
+    payload = json.loads(_minimal_companyfacts_payload())
+    revenues = payload["facts"]["us-gaap"]["Revenues"]["units"]["USD"]
+    duplicate = dict(revenues[0])
+    duplicate["frame"] = "CY2024"
+    revenues.append(duplicate)
+    return json.dumps(payload)
+
+
+def _payload_with_distinct_latest_filed_duplicate() -> str:
+    payload = json.loads(_minimal_companyfacts_payload())
+    revenues = payload["facts"]["us-gaap"]["Revenues"]["units"]["USD"]
+    duplicate = dict(revenues[0])
+    duplicate["val"] = 999999
+    revenues.append(duplicate)
+    return json.dumps(payload)
+
+
+def _payload_with_later_non_annual_form_candidate() -> str:
+    payload = json.loads(_minimal_companyfacts_payload())
+    revenues = payload["facts"]["us-gaap"]["Revenues"]["units"]["USD"]
+    revenues[0]["form"] = "10-K"
+    later_non_annual_form = dict(revenues[0])
+    later_non_annual_form["form"] = "10-Q"
+    later_non_annual_form["filed"] = "2025-03-15"
+    later_non_annual_form["val"] = 999999
+    revenues.append(later_non_annual_form)
+    return json.dumps(payload)
+
 
 def test_live_smoke_is_disabled_by_default():
     calls: list[str] = []
@@ -270,6 +300,62 @@ def test_network_function_is_injectable_and_single_request_only():
     assert result.growth_evidence_status == "available"
     assert result.readiness_state == "available"
 
+def test_equivalent_latest_filed_duplicates_are_collapsed():
+    result = run_controlled_live_sec_companyfacts_smoke(
+        ticker=APPROVED_LIVE_SMOKE_TICKER,
+        cik=APPROVED_LIVE_SMOKE_CIK,
+        user_agent="MarketScannerControlledSmoke/1.0",
+        execute_live=True,
+        network_fetcher=lambda endpoint, user_agent: SecCompanyFactsHttpResponse(
+            status_code=200,
+            body=_payload_with_equivalent_latest_filed_duplicate(),
+        ),
+        retrieval_timestamp="2026-06-06T00:00:00Z",
+    )
+
+    assert result.status == "passed"
+    assert result.failure_category == ""
+    assert "revenue" in result.canonical_fields_found
+    assert result.request_count == 1
+
+
+def test_distinct_latest_filed_duplicates_still_fail_closed_as_ambiguous():
+    result = run_controlled_live_sec_companyfacts_smoke(
+        ticker=APPROVED_LIVE_SMOKE_TICKER,
+        cik=APPROVED_LIVE_SMOKE_CIK,
+        user_agent="MarketScannerControlledSmoke/1.0",
+        execute_live=True,
+        network_fetcher=lambda endpoint, user_agent: SecCompanyFactsHttpResponse(
+            status_code=200,
+            body=_payload_with_distinct_latest_filed_duplicate(),
+        ),
+        retrieval_timestamp="2026-06-06T00:00:00Z",
+    )
+
+    assert result.status == "smoke_failed"
+    assert result.failure_category == "ambiguous_facts"
+    assert result.request_count == 1
+    assert result.boundary_result is None
+    assert "ambiguous_facts:Revenues:2025" in result.issues
+
+
+def test_annual_report_form_is_preferred_over_later_non_annual_form_candidate():
+    result = run_controlled_live_sec_companyfacts_smoke(
+        ticker=APPROVED_LIVE_SMOKE_TICKER,
+        cik=APPROVED_LIVE_SMOKE_CIK,
+        user_agent="MarketScannerControlledSmoke/1.0",
+        execute_live=True,
+        network_fetcher=lambda endpoint, user_agent: SecCompanyFactsHttpResponse(
+            status_code=200,
+            body=_payload_with_later_non_annual_form_candidate(),
+        ),
+        retrieval_timestamp="2026-06-06T00:00:00Z",
+    )
+
+    assert result.status == "passed"
+    assert result.failure_category == ""
+    assert "revenue" in result.canonical_fields_found
+    assert result.request_count == 1
 
 def test_http_failure_fails_closed_without_retry():
     calls: list[str] = []

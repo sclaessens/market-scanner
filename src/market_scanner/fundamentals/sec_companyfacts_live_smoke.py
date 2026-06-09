@@ -37,6 +37,11 @@ SUPPORTED_SEC_CONCEPTS: tuple[str, ...] = (
     "FreeCashFlow",
 )
 
+APPROVED_SEC_ANNUAL_FORMS: tuple[str, ...] = (
+    "10-K",
+    "10-K/A",
+)
+
 
 @dataclass(frozen=True)
 class SecCompanyFactsHttpResponse:
@@ -363,11 +368,13 @@ def _facts_for_year(
         ]
         if not candidates:
             continue
-        latest = _latest_filed_candidates(candidates)
-        if len(latest) > 1:
+
+        selected = _select_deterministic_annual_candidates(candidates)
+        if len(selected) > 1:
             issues.append(f"ambiguous_facts:{concept}:{fiscal_year}")
             continue
-        fact = _fact_from_entry(concept, latest[0], fiscal_year=fiscal_year)
+
+        fact = _fact_from_entry(concept, selected[0], fiscal_year=fiscal_year)
         if fact is None:
             issues.append(f"missing_provenance:{concept}:{fiscal_year}")
             continue
@@ -379,12 +386,53 @@ def _is_annual_fact(entry: Mapping) -> bool:
     return str(entry.get("fp", "")) == "FY"
 
 
+def _select_deterministic_annual_candidates(
+    candidates: Sequence[Mapping],
+) -> tuple[Mapping, ...]:
+    """Select a single annual SEC fact only when ambiguity can be resolved safely."""
+
+    scoped_candidates = _preferred_annual_form_candidates(candidates) or tuple(candidates)
+    latest = _latest_filed_candidates(scoped_candidates)
+    return _collapse_equivalent_candidates(latest)
+
+
+def _preferred_annual_form_candidates(
+    candidates: Sequence[Mapping],
+) -> tuple[Mapping, ...]:
+    return tuple(
+        candidate
+        for candidate in candidates
+        if str(candidate.get("form", "")).upper() in APPROVED_SEC_ANNUAL_FORMS
+    )
+
+
 def _latest_filed_candidates(candidates: Sequence[Mapping]) -> tuple[Mapping, ...]:
     latest_filed = max(str(candidate.get("filed", "")) for candidate in candidates)
     return tuple(
         candidate
         for candidate in candidates
         if str(candidate.get("filed", "")) == latest_filed
+    )
+
+
+def _collapse_equivalent_candidates(
+    candidates: Sequence[Mapping],
+) -> tuple[Mapping, ...]:
+    collapsed: dict[tuple[str, ...], Mapping] = {}
+    for candidate in candidates:
+        collapsed.setdefault(_canonical_fact_identity(candidate), candidate)
+    return tuple(collapsed.values())
+
+
+def _canonical_fact_identity(candidate: Mapping) -> tuple[str, ...]:
+    return (
+        str(candidate.get("fy", "")),
+        str(candidate.get("fp", "")),
+        str(candidate.get("start", "")),
+        str(candidate.get("end", "")),
+        str(candidate.get("val", "")),
+        str(candidate.get("accn", "")),
+        str(candidate.get("filed", "")),
     )
 
 
