@@ -175,6 +175,32 @@ def _payload_with_later_non_annual_form_candidate() -> str:
     revenues.append(later_non_annual_form)
     return json.dumps(payload)
 
+def _payload_with_comparative_annual_facts_in_latest_filing() -> str:
+    payload = json.loads(_minimal_companyfacts_payload())
+    revenues = payload["facts"]["us-gaap"]["Revenues"]["units"]["USD"]
+
+    base_current = dict(revenues[0])
+    base_current["form"] = "10-K"
+    base_current["start"] = "2024-01-29"
+    base_current["end"] = "2025-01-26"
+    base_current["frame"] = "CY2024"
+    base_current["val"] = 1200
+
+    comparative_prior = dict(base_current)
+    comparative_prior["start"] = "2023-01-30"
+    comparative_prior["end"] = "2024-01-28"
+    comparative_prior["frame"] = "CY2023"
+    comparative_prior["val"] = 1000
+
+    comparative_older = dict(base_current)
+    comparative_older["start"] = "2022-01-31"
+    comparative_older["end"] = "2023-01-29"
+    comparative_older["frame"] = "CY2022"
+    comparative_older["val"] = 800
+
+    revenues[:] = [comparative_older, comparative_prior, base_current]
+
+    return json.dumps(payload)
 
 def test_live_smoke_is_disabled_by_default():
     calls: list[str] = []
@@ -453,3 +479,22 @@ def test_live_smoke_module_has_no_yfinance_or_requests_dependency():
     assert "yfinance" not in source
     assert "yf." not in source
     assert "requests" not in source
+
+def test_latest_period_end_is_selected_within_latest_annual_filing():
+    result = run_controlled_live_sec_companyfacts_smoke(
+        ticker=APPROVED_LIVE_SMOKE_TICKER,
+        cik=APPROVED_LIVE_SMOKE_CIK,
+        user_agent="MarketScannerControlledSmoke/1.0",
+        execute_live=True,
+        network_fetcher=lambda endpoint, user_agent: SecCompanyFactsHttpResponse(
+            status_code=200,
+            body=_payload_with_comparative_annual_facts_in_latest_filing(),
+        ),
+        retrieval_timestamp="2026-06-06T00:00:00Z",
+    )
+
+    assert result.status == "passed"
+    assert result.failure_category == ""
+    assert result.fiscal_context_summary == "FY 2025; period_end=2025-01-26"
+    assert "revenue" in result.canonical_fields_found
+    assert result.request_count == 1
