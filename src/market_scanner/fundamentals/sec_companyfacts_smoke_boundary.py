@@ -30,7 +30,10 @@ SEC_COMPANYFACTS_METRIC_MAPPINGS: Mapping[str, tuple[str, ...]] = {
     "net_income": ("NetIncomeLoss",),
     "operating_income": ("OperatingIncomeLoss",),
     "operating_cash_flow": ("NetCashProvidedByUsedInOperatingActivities",),
-    "capital_expenditures": ("PaymentsToAcquirePropertyPlantAndEquipment",),
+    "capital_expenditures": (
+        "PaymentsToAcquirePropertyPlantAndEquipment",
+        "PaymentsToAcquireProductiveAssets",
+    ),
     "free_cash_flow": ("FreeCashFlow",),
 }
 

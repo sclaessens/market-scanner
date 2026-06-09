@@ -34,6 +34,7 @@ SUPPORTED_SEC_CONCEPTS: tuple[str, ...] = (
     "OperatingIncomeLoss",
     "NetCashProvidedByUsedInOperatingActivities",
     "PaymentsToAcquirePropertyPlantAndEquipment",
+    "PaymentsToAcquireProductiveAssets",
     "FreeCashFlow",
 )
 
@@ -415,6 +416,7 @@ def _latest_filed_candidates(candidates: Sequence[Mapping]) -> tuple[Mapping, ..
         if str(candidate.get("filed", "")) == latest_filed
     )
 
+
 def _latest_period_end_candidates(candidates: Sequence[Mapping]) -> tuple[Mapping, ...]:
     latest_period_end = max(str(candidate.get("end", "")) for candidate in candidates)
     return tuple(
@@ -422,6 +424,7 @@ def _latest_period_end_candidates(candidates: Sequence[Mapping]) -> tuple[Mappin
         for candidate in candidates
         if str(candidate.get("end", "")) == latest_period_end
     )
+
 
 def _collapse_equivalent_candidates(
     candidates: Sequence[Mapping],
