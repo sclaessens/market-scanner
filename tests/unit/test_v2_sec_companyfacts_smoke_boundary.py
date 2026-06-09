@@ -313,6 +313,45 @@ def _metric_map(result):
 def _growth_map(result):
     return {record.metric_name: record for record in result.growth_evidence}
 
+def test_productive_assets_maps_to_capital_expenditures_and_derives_free_cash_flow():
+    result = build_sec_companyfacts_smoke_result(
+        _input(
+            facts=_facts(
+                PaymentsToAcquirePropertyPlantAndEquipment=(),
+                PaymentsToAcquireProductiveAssets=(
+                    _fact("PaymentsToAcquireProductiveAssets", "125"),
+                ),
+            ),
+            prior_facts=_prior_facts(
+                PaymentsToAcquirePropertyPlantAndEquipment=(),
+                PaymentsToAcquireProductiveAssets=(
+                    _fact(
+                        "PaymentsToAcquireProductiveAssets",
+                        "100",
+                        fiscal_year="2024",
+                        period_end_date="2024-01-28",
+                        accession="redacted-nvda-2024-10k",
+                    ),
+                ),
+            ),
+        )
+    )
+
+    metrics = _metric_map(result)
+    free_cash_flow = metrics["free_cash_flow"]
+
+    assert result.issues == ()
+    assert result.ingestion_result is not None
+    assert metrics["capital_expenditures"].metric_value == "125"
+    assert metrics["capital_expenditures"].original_field_name == (
+        "PaymentsToAcquireProductiveAssets"
+    )
+    assert free_cash_flow.metric_value == "775"
+    assert free_cash_flow.normalization_status == "source_derived"
+    assert free_cash_flow.source_field_names == (
+        "NetCashProvidedByUsedInOperatingActivities",
+        "PaymentsToAcquireProductiveAssets",
+    )
 
 def test_redacted_nvda_source_shaped_evidence_is_accepted():
     result = build_sec_companyfacts_smoke_result(
