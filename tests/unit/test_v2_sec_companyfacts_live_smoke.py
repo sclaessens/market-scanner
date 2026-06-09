@@ -146,6 +146,17 @@ def _minimal_companyfacts_payload() -> str:
 }
 """
 
+def _payload_with_productive_assets_capex_alias() -> str:
+    payload = json.loads(_minimal_companyfacts_payload())
+    us_gaap = payload["facts"]["us-gaap"]
+
+    productive_assets = us_gaap.pop(
+        "PaymentsToAcquirePropertyPlantAndEquipment"
+    )
+    us_gaap["PaymentsToAcquireProductiveAssets"] = productive_assets
+
+    return json.dumps(payload)
+
 def _payload_with_equivalent_latest_filed_duplicate() -> str:
     payload = json.loads(_minimal_companyfacts_payload())
     revenues = payload["facts"]["us-gaap"]["Revenues"]["units"]["USD"]
@@ -479,6 +490,54 @@ def test_live_smoke_module_has_no_yfinance_or_requests_dependency():
     assert "yfinance" not in source
     assert "yf." not in source
     assert "requests" not in source
+
+    def test_live_smoke_accepts_productive_assets_as_capex_alias_without_network_or_writes():
+        calls: list[tuple[str, str]] = []
+
+        def fake_fetcher(endpoint, user_agent):
+            calls.append((endpoint, user_agent))
+            return SecCompanyFactsHttpResponse(
+                status_code=200,
+                body=_payload_with_productive_assets_capex_alias(),
+            )
+
+        result = run_controlled_live_sec_companyfacts_smoke(
+            ticker=APPROVED_LIVE_SMOKE_TICKER,
+            cik=APPROVED_LIVE_SMOKE_CIK,
+            user_agent="MarketScannerControlledSmoke/1.0",
+            execute_live=True,
+            network_fetcher=fake_fetcher,
+            retrieval_timestamp="2026-06-06T00:00:00Z",
+        )
+
+        assert calls == [
+            (
+                SEC_COMPANYFACTS_ENDPOINT,
+                "MarketScannerControlledSmoke/1.0",
+            )
+        ]
+        assert result.request_executed is True
+        assert result.request_count == 1
+        assert result.http_status_category == "2xx"
+        assert result.status == "passed"
+        assert result.failure_category == ""
+        assert result.free_cash_flow_status == "source_derived"
+        assert "capital_expenditures" in result.canonical_fields_found
+        assert "capital_expenditures" not in result.canonical_fields_missing
+
+        assert result.boundary_result is not None
+        assert result.boundary_result.ingestion_result is not None
+
+        metrics = {
+            record.metric_name: record
+            for record in result.boundary_result.ingestion_result.normalized_records
+        }
+
+        assert metrics["capital_expenditures"].original_field_name == (
+            "PaymentsToAcquireProductiveAssets"
+        )
+        assert metrics["free_cash_flow"].metric_value == "800"
+        assert metrics["free_cash_flow"].normalization_status == "source_derived"
 
 def test_latest_period_end_is_selected_within_latest_annual_filing():
     result = run_controlled_live_sec_companyfacts_smoke(

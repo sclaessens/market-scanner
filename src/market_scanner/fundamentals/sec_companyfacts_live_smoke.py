@@ -34,6 +34,7 @@ SUPPORTED_SEC_CONCEPTS: tuple[str, ...] = (
     "OperatingIncomeLoss",
     "NetCashProvidedByUsedInOperatingActivities",
     "PaymentsToAcquirePropertyPlantAndEquipment",
+    "PaymentsToAcquireProductiveAssets",
     "FreeCashFlow",
 )
 
