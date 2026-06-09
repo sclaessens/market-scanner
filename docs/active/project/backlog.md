@@ -1929,3 +1929,39 @@ Guardrails:
 ## Relationship to Existing Backlog
 
 The historical `docs/sprints/project_backlog.md` remains preserved as legacy planning evidence until RESET-2 decides how to reconcile or archive it. This document is the v2 reset-facing backlog baseline.
+
+## BL69 — Document SEC CompanyFacts capex alias validation and one-ticker live source-readiness result
+
+Status: Done
+
+Type: Documentation / Governance
+
+Summary:
+
+Documented the completed SEC CompanyFacts capex alias validation after BL68B and the controlled BL68C live retry.
+
+The documentation records that `PaymentsToAcquireProductiveAssets` is now accepted as a safe SEC CompanyFacts alias for canonical `capital_expenditures`, while acquisition and intangible concepts remain excluded.
+
+Controlled BL68C live retry result for NVDA / CIK `0001045810`:
+
+* request executed: true
+* request count: 1
+* HTTP status category: 2xx
+* status: passed
+* readiness state: available
+* canonical fields missing: none
+* `capital_expenditures:missing_fact`: resolved
+* free cash flow: source-derived
+* growth evidence: available
+* git status after retry: clean
+
+Governance conclusion:
+
+The SEC CompanyFacts provider now supports the productive-assets capex alias generally, but live source-readiness is only validated for the approved one-ticker NVDA smoke. Broader ticker validation remains out of scope.
+
+Files changed:
+
+* `docs/audits/provider_smokes/bl69_sec_companyfacts_capex_alias_validation.md`
+* `docs/active/project/backlog.md`
+
+No code, tests, data files, reports, Telegram output, portfolio/watchlist logic, or Decision Engine behavior were changed.
