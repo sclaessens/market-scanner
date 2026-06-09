@@ -392,8 +392,9 @@ def _select_deterministic_annual_candidates(
     """Select a single annual SEC fact only when ambiguity can be resolved safely."""
 
     scoped_candidates = _preferred_annual_form_candidates(candidates) or tuple(candidates)
-    latest = _latest_filed_candidates(scoped_candidates)
-    return _collapse_equivalent_candidates(latest)
+    latest_filed = _latest_filed_candidates(scoped_candidates)
+    latest_period_end = _latest_period_end_candidates(latest_filed)
+    return _collapse_equivalent_candidates(latest_period_end)
 
 
 def _preferred_annual_form_candidates(
@@ -414,6 +415,13 @@ def _latest_filed_candidates(candidates: Sequence[Mapping]) -> tuple[Mapping, ..
         if str(candidate.get("filed", "")) == latest_filed
     )
 
+def _latest_period_end_candidates(candidates: Sequence[Mapping]) -> tuple[Mapping, ...]:
+    latest_period_end = max(str(candidate.get("end", "")) for candidate in candidates)
+    return tuple(
+        candidate
+        for candidate in candidates
+        if str(candidate.get("end", "")) == latest_period_end
+    )
 
 def _collapse_equivalent_candidates(
     candidates: Sequence[Mapping],
