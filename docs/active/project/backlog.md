@@ -2010,3 +2010,48 @@ Files changed:
 - `scripts/utils/utils.py` moved to `archive/legacy_runtime/scripts/utils/utils.py`
 - `docs/audits/legacy_runtime/bl71_archive_low_risk_script_era_utils.md`
 - `docs/active/project/backlog.md`
+
+## BL72 — Archive legacy reporting markdown reporter
+
+Status: Done
+
+Type: Python Cleanup / Legacy Runtime Archive
+
+Summary:
+
+Archived one narrow P3 script-era reporting cleanup candidate from the BL70 canonical cleanup registry.
+
+Selected file:
+
+- `scripts/reporting/reporter.py`
+
+Archive destination:
+
+- `archive/legacy_runtime/scripts/reporting/reporter.py`
+
+Registry basis:
+
+The existing cleanup registry classified `scripts/reporting/reporter.py` as `ARCHIVE_CANDIDATE_NOW`, with no active reference found, no runnable entrypoint, low direct risk, and old legacy markdown report formatting responsibility. BL72 archived the file instead of deleting it.
+
+Validation:
+
+- focused delta reference check required before merge;
+- `pytest -q` required before merge.
+
+Guardrails:
+
+- no broad Python inventory was repeated;
+- no runtime behavior was changed;
+- no provider behavior was changed;
+- no SEC CompanyFacts behavior was changed;
+- no production data writes were added;
+- no reports were generated;
+- no Telegram behavior was changed;
+- no portfolio/watchlist logic was changed;
+- no Decision Engine behavior was changed.
+
+Files changed:
+
+- `scripts/reporting/reporter.py` moved to `archive/legacy_runtime/scripts/reporting/reporter.py`
+- `docs/audits/legacy_runtime/bl72_archive_legacy_reporting_reporter.md`
+- `docs/active/project/backlog.md`
