@@ -2169,3 +2169,44 @@ Result: active runtime/test paths are further decoupled from legacy `scripts/` f
 Validation:
 
 - `pytest -q`: pending local validation before merge.
+
+### BL76 — Static dependency classification of remaining script-era Python files
+
+Category: Legacy Runtime Cleanup / Repository Hygiene
+
+Status: COMPLETED
+
+BL76 classified the remaining script-era Python files under `scripts/` after BL74 and BL75.
+
+No runtime Python files were archived, deleted, moved, refactored, or executed. The sprint only added a static classification document for the remaining script-era tree.
+
+Classification record:
+
+- `docs/audits/legacy_runtime/bl76_remaining_script_era_python_dependency_classification.md`
+
+Result:
+
+- Initial BL77 archive candidates identified:
+  - `scripts/core/analyze_validation.py`
+  - `scripts/diagnostics/audit_data_coverage.py`
+  - `scripts/analyze_validation.py`
+- High-risk categories were separated:
+  - scanner/runtime entrypoints
+  - provider/data-fetch/intake scripts
+  - prefill/backfill scripts
+  - portfolio/watchlist state writers
+  - Telegram delivery and command handlers
+  - Decision Engine authority files
+  - fundamentals logic that may require canonical migration
+
+Guardrails:
+
+- no live SEC/EDGAR calls
+- no yfinance calls
+- no credentials read
+- no production data writes
+- no reports generated
+- no Telegram messages sent
+- no portfolio/watchlist state modified
+- no Decision Engine authority changed
+- no script-era Python runtime files executed
