@@ -2340,3 +2340,49 @@ Guardrails:
 - no Decision Engine authority changed
 - no script-era Python runtime files executed
 
+### BL81 — Extract fundamentals history and metrics contracts from script-era modules
+
+Category: Legacy Runtime Cleanup / Fundamentals Governance
+
+Status: COMPLETED
+
+BL81 extracted the stable history-schema and metrics-calculation contracts from the remaining script-era fundamentals modules:
+
+- `scripts/fundamentals/build_history_intake.py`
+- `scripts/fundamentals/build_metrics.py`
+
+No runtime Python files were archived, deleted, moved, refactored, or executed. This sprint was documentation-only.
+
+Review record:
+
+- `docs/audits/legacy_runtime/bl81_fundamentals_history_and_metrics_contract_extraction.md`
+
+Result:
+
+- Extracted the fundamentals history required-column contract.
+- Extracted the key/duplicate policy.
+- Extracted fiscal-year, fiscal-period, date, numeric, and required-value validation policies.
+- Extracted forbidden investment-semantics column policy.
+- Extracted metrics identity columns, metric columns, helper columns, ratio formulas, YoY formulas, missing-input policy, zero-denominator policy, and metric-status policy.
+- Confirmed that script-era CLI/write behavior is not automatically approved for canonical migration.
+- Confirmed that `build_history_intake.py` and `build_metrics.py` are not archive-ready until canonical parity or explicit retirement is completed.
+
+Recommended next sprint:
+
+- BL82 — Implement canonical fundamentals history and metrics contract tests
+
+Validation:
+
+- `pytest -q`: `522 passed in 0.57s`
+
+Guardrails:
+
+- no live SEC/EDGAR calls
+- no yfinance calls
+- no credentials read
+- no production data writes
+- no reports generated
+- no Telegram messages sent
+- no portfolio/watchlist state modified
+- no Decision Engine authority changed
+- no script-era Python runtime files executed
