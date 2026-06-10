@@ -2510,3 +2510,78 @@ Guardrails:
 * no portfolio/watchlist state modified
 * no Decision Engine authority changed
 * no script-era Python runtime files executed
+
+
+### BL85 — Review archive-readiness of script-era fundamentals history and metrics modules
+
+Category: Legacy Runtime Cleanup / Fundamentals Governance
+
+Status: COMPLETED
+
+BL85 reviewed archive-readiness for:
+
+* `scripts/fundamentals/build_history_intake.py`
+* `scripts/fundamentals/build_metrics.py`
+
+Result:
+
+* Both files still exist in `scripts/fundamentals/`.
+* Canonical coverage from BL83 and BL84 is present.
+* The files are still not ready for archive.
+* Remaining blockers are active references and internal script-era dependencies, not missing canonical contract coverage.
+
+Static active-reference review found references in:
+
+* `src/market_scanner/analysis/analysis_boundary.py`
+* `tests/unit/test_v2_canonical_analysis.py`
+* `tests/core/test_fundamentals_runtime_organization.py`
+* `tests/core/test_fundamentals_operational_validation.py`
+* `tests/core/test_build_fundamental_metrics.py`
+* `tests/core/test_build_fundamentals_history_intake.py`
+
+Internal script-era dependency review found imports from:
+
+* `scripts/fundamentals/build_analysis.py`
+* `scripts/fundamentals/build_quality.py`
+* `scripts/fundamentals/run_sec_transformation_review.py`
+* `scripts/fundamentals/sec_companyfacts_transform.py`
+* `scripts/fundamentals/build_metrics.py`
+
+Side-effect review confirmed:
+
+* `build_history_intake.py` has CSV read, CLI entrypoint, and optional report-write behavior.
+* `build_metrics.py` has CSV read, CLI entrypoint, optional directory creation, and optional CSV-write behavior.
+
+BL85 also corrected a BL84 focused-test-order instability:
+
+* removed unnecessary `reload(fundamental_contracts)` from `tests/contract/test_v2_fundamental_history_validation_contracts.py`;
+* this prevented dataclass/enum identity mismatch in focused combined test runs.
+
+Validation:
+
+* focused related tests: `39 passed in 0.03s`
+* full suite: `547 passed in 0.52s`
+
+Archive decision:
+
+* `scripts/fundamentals/build_history_intake.py`: `NOT_READY_FOR_ARCHIVE_YET`
+* `scripts/fundamentals/build_metrics.py`: `NOT_READY_FOR_ARCHIVE_YET`
+
+Recommended next sprint:
+
+* BL86 — Decouple active tests and metadata references from script-era fundamentals history and metrics files
+
+Guardrails:
+
+* no live SEC/EDGAR calls
+* no yfinance calls
+* no credentials read
+* no production data writes
+* no reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime files executed
+* no script-era runtime files edited
+* no script-era runtime files archived
+* no script-era runtime files deleted
