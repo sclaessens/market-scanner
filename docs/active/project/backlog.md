@@ -2451,3 +2451,62 @@ Guardrails:
 - no portfolio/watchlist state modified
 - no Decision Engine authority changed
 - no script-era Python runtime files executed
+
+
+### BL84 — Add canonical fundamentals history validation contract tests
+
+Category: Legacy Runtime Cleanup / Fundamentals Governance
+
+Status: COMPLETED
+
+BL84 added canonical fundamentals history validation contract coverage based on BL81 and BL82.
+
+Updated canonical module:
+
+* `src/market_scanner/fundamentals/fundamental_contracts.py`
+
+Added contract tests:
+
+* `tests/contract/test_v2_fundamental_history_validation_contracts.py`
+
+Result:
+
+* Added canonical ownership for fundamentals history numeric fields.
+* Added canonical ownership for fundamentals history date fields.
+* Added supported fiscal-period policy.
+* Added fiscal-period validation.
+* Added fiscal-year validation with accepted range `1900 <= fiscal_year <= 2200`.
+* Added date validation for non-empty date values.
+* Added duplicate-key validation for `ticker + fiscal_year + fiscal_period`.
+* Preserved required-value validation.
+* Preserved numeric validation.
+* Preserved forbidden investment-authority guardrails.
+* Added no-legacy/network/provider import guardrails.
+* Added no-file-side-effect guardrails.
+
+Validation:
+
+* `pytest tests/contract/test_v2_fundamental_history_validation_contracts.py -q`: `13 passed in 0.02s`
+* focused related tests: `27 passed in 0.02s`
+* `pytest -q`: `547 passed in 0.59s`
+
+Archive readiness:
+
+* `scripts/fundamentals/build_history_intake.py`: `CANDIDATE_FOR_REVIEWED_ARCHIVE_AFTER_PARITY_CHECK`
+* `scripts/fundamentals/build_metrics.py`: `CANDIDATE_FOR_REVIEWED_ARCHIVE_AFTER_PARITY_CHECK`
+
+Recommended next sprint:
+
+* BL85 — Review archive-readiness of script-era fundamentals history and metrics modules
+
+Guardrails:
+
+* no live SEC/EDGAR calls
+* no yfinance calls
+* no credentials read
+* no production data writes
+* no reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era Python runtime files executed
