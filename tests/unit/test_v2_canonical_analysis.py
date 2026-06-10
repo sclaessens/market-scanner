@@ -6,11 +6,11 @@ from pathlib import Path
 from market_scanner.analysis.analysis_boundary import (
     ANALYSIS_CANONICAL_OWNER,
     LEGACY_ANALYSIS_AUTHORITIES,
+    MIGRATED_FUNDAMENTALS_CONTRACT_AUTHORITIES,
     build_analysis_input_policy,
     build_analysis_plan,
     build_fundamental_analysis_plan,
 )
-
 
 FORBIDDEN_OUTPUT_TERMS = {
     "BUY",
@@ -24,8 +24,6 @@ FORBIDDEN_OUTPUT_TERMS = {
     "tradeability",
     "recommendation",
 }
-
-ARCHIVED_LEGACY_RUNTIME_DIR = Path("archive") / "legacy_runtime" / "scripts"
 
 
 def _flatten_values(value):
@@ -59,6 +57,29 @@ def test_analysis_plan_exposes_canonical_owner_and_stage_order():
     )
     assert plan.legacy_analysis_authorities == LEGACY_ANALYSIS_AUTHORITIES
     assert plan.migration_status == "canonical_analysis_boundary_established"
+
+
+def test_analysis_boundary_tracks_migrated_fundamentals_contract_authorities():
+    assert MIGRATED_FUNDAMENTALS_CONTRACT_AUTHORITIES == (
+        "src/market_scanner/fundamentals/fundamental_contracts.py",
+        "src/market_scanner/fundamentals/fundamentals_metrics_contracts.py",
+    )
+
+    for path in MIGRATED_FUNDAMENTALS_CONTRACT_AUTHORITIES:
+        assert path.startswith("src/market_scanner/fundamentals/")
+        assert not path.startswith("scripts/")
+
+
+def test_analysis_boundary_legacy_authorities_exclude_migrated_history_and_metrics():
+    assert LEGACY_ANALYSIS_AUTHORITIES == (
+        "scripts/fundamentals/build_analysis.py",
+        "scripts/fundamentals/build_quality.py",
+        "scripts/core/build_fundamental_analysis.py",
+    )
+
+    joined = " ".join(LEGACY_ANALYSIS_AUTHORITIES)
+    assert "build_history_intake" not in joined
+    assert "build_metrics" not in joined
 
 
 def test_analysis_plan_forbids_side_effects_and_final_outputs_by_default():
@@ -134,12 +155,13 @@ def test_analysis_plan_contains_no_investment_behavior():
 
 def test_legacy_runners_and_analysis_files_are_not_expanded_to_import_canonical_analysis():
     legacy_sources = (
-        (ARCHIVED_LEGACY_RUNTIME_DIR / "run_scan.py").read_text(encoding="utf-8"),
-        (ARCHIVED_LEGACY_RUNTIME_DIR / "run_full_pipeline.py").read_text(
+        (Path("archive") / "legacy_runtime" / "scripts" / "run_scan.py").read_text(
+            encoding="utf-8"
+        ),
+        (Path("archive") / "legacy_runtime" / "scripts" / "run_full_pipeline.py").read_text(
             encoding="utf-8"
         ),
         Path("scripts/fundamentals/build_analysis.py").read_text(encoding="utf-8"),
-        Path("scripts/fundamentals/build_metrics.py").read_text(encoding="utf-8"),
         Path("scripts/fundamentals/build_quality.py").read_text(encoding="utf-8"),
     )
 
