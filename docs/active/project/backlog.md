@@ -2252,3 +2252,44 @@ Guardrails:
 - no Decision Engine authority changed
 - no script-era Python runtime files executed
 
+### BL78 — Fundamentals script-era migration and archive-readiness review
+
+Category: Legacy Runtime Cleanup / Fundamentals Governance
+
+Status: COMPLETED
+
+BL78 reviewed the remaining script-era fundamentals Python files after BL74 removed active runtime imports from `scripts.fundamentals`.
+
+No runtime Python files were archived, deleted, moved, refactored, or executed. The sprint only classified the remaining fundamentals scripts for future cleanup.
+
+Review record:
+
+- `docs/audits/legacy_runtime/bl78_fundamentals_script_era_migration_review.md`
+
+Result:
+
+- No remaining `scripts/fundamentals/*.py` file is declared archive-ready by BL78.
+- Remaining fundamentals scripts still contain migration-required or side-effect-risk logic.
+- `scripts/core/build_fundamental_*` files were identified as compatibility wrappers over `scripts.fundamentals`.
+- Canonical modules exist under `src/market_scanner/analysis/` and `src/market_scanner/fundamentals/`, but complete behavioral parity is not proven by BL78.
+- The recommended next sprint is to review/archive the `scripts/core/build_fundamental_*` compatibility wrappers only after a focused active-reference check.
+
+Recommended next sprint:
+
+- BL79 — Archive fundamentals compatibility wrappers after active-reference check
+
+Validation:
+
+- `pytest -q`: `522 passed in 0.59s`
+
+Guardrails:
+
+- no live SEC/EDGAR calls
+- no yfinance calls
+- no credentials read
+- no production data writes
+- no reports generated
+- no Telegram messages sent
+- no portfolio/watchlist state modified
+- no Decision Engine authority changed
+- no script-era Python runtime files executed
