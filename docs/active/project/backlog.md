@@ -2386,3 +2386,68 @@ Guardrails:
 - no portfolio/watchlist state modified
 - no Decision Engine authority changed
 - no script-era Python runtime files executed
+
+### BL83 — Add canonical fundamentals history and metrics contract tests
+
+Category: Legacy Runtime Cleanup / Fundamentals Governance
+
+Status: COMPLETED
+
+BL83 added canonical fundamentals metrics contract coverage based on BL81 and BL82.
+
+Added canonical module:
+
+- `src/market_scanner/fundamentals/fundamentals_metrics_contracts.py`
+
+Added contract tests:
+
+- `tests/contract/test_v2_fundamentals_metrics_contracts.py`
+
+Result:
+
+- Added explicit canonical ownership for BL81 metrics identity fields, input fields, derived metric fields, and helper fields.
+- Added canonical tests for ratio formulas:
+  - `gross_margin`
+  - `operating_margin`
+  - `net_margin`
+  - `free_cash_flow_margin`
+  - `debt_to_equity`
+  - `return_on_equity`
+- Added canonical tests for YoY formulas:
+  - `revenue_yoy_growth`
+  - `eps_yoy_growth`
+  - `free_cash_flow_yoy_growth`
+- Added canonical tests for missing-input behavior.
+- Added canonical tests for zero-denominator behavior.
+- Added canonical tests for missing-prior-year behavior.
+- Added canonical tests for absolute prior-year denominator policy.
+- Added no-investment-authority guardrails.
+- Added no-legacy/network/provider import guardrails.
+- Added no-file-side-effect guardrails.
+
+Validation:
+
+- `pytest tests/contract/test_v2_fundamentals_metrics_contracts.py -q`: `12 passed in 0.02s`
+- focused related tests: `54 passed in 0.03s`
+- `pytest -q`: `534 passed in 0.56s`
+
+Archive readiness:
+
+- `scripts/fundamentals/build_history_intake.py`: `NOT_ARCHIVE_READY`
+- `scripts/fundamentals/build_metrics.py`: `CANDIDATE_FOR_REVIEWED_ARCHIVE_AFTER_PARITY_CHECK`
+
+Recommended next sprint:
+
+- BL84 — Add canonical fundamentals history validation contract tests
+
+Guardrails:
+
+- no live SEC/EDGAR calls
+- no yfinance calls
+- no credentials read
+- no production data writes
+- no reports generated
+- no Telegram messages sent
+- no portfolio/watchlist state modified
+- no Decision Engine authority changed
+- no script-era Python runtime files executed
