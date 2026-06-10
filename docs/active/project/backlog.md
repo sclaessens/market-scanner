@@ -2210,3 +2210,45 @@ Guardrails:
 - no portfolio/watchlist state modified
 - no Decision Engine authority changed
 - no script-era Python runtime files executed
+### BL77 — Archive BL76 low-risk script-era Python files
+
+Category: Legacy Runtime Cleanup / Repository Hygiene
+
+Status: COMPLETED
+
+BL77 archived the low-risk script-era Python files identified by BL76.
+
+Archived:
+
+- `scripts/core/analyze_validation.py`
+- `scripts/diagnostics/audit_data_coverage.py`
+- `scripts/analyze_validation.py`
+
+Archive targets:
+
+- `archive/legacy_runtime/scripts/core/analyze_validation.py`
+- `archive/legacy_runtime/scripts/diagnostics/audit_data_coverage.py`
+- `archive/legacy_runtime/scripts/analyze_validation.py`
+
+Result:
+
+- The three low-risk script-era validation/audit helpers were removed from active runtime paths.
+- Historical evidence was preserved under `archive/legacy_runtime/`.
+- The active `scripts/` tree is further reduced without touching provider, portfolio, Telegram, watchlist, reporting, or Decision Engine runtime behavior.
+
+Validation:
+
+- `pytest -q`: `522 passed in 0.59s`
+
+Guardrails:
+
+- no live SEC/EDGAR calls
+- no yfinance calls
+- no credentials read
+- no production data writes
+- no reports generated
+- no Telegram messages sent
+- no portfolio/watchlist state modified
+- no Decision Engine authority changed
+- no script-era Python runtime files executed
+
