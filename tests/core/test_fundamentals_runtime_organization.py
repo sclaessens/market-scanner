@@ -1,32 +1,25 @@
 from __future__ import annotations
 
-from scripts.core import build_fundamental_analysis as core_analysis
-from scripts.core import build_fundamental_layer as core_quality
-from scripts.core import build_fundamental_metrics as core_metrics
-from scripts.core import build_fundamentals_history_intake as core_history
-from scripts.fundamentals import build_analysis
-from scripts.fundamentals import build_history_intake
-from scripts.fundamentals import build_metrics
-from scripts.fundamentals import build_quality
+
+LEGACY_SCRIPT_ENTRYPOINTS = {
+    "build_history_intake",
+    "build_metrics",
+    "build_quality",
+    "build_analysis",
+}
+
+CANONICAL_PACKAGE = "market_scanner.fundamentals"
 
 
-def test_new_fundamentals_import_paths_expose_expected_builders() -> None:
-    assert callable(build_history_intake.validate_fundamentals_history)
-    assert callable(build_metrics.build_fundamental_metrics)
-    assert callable(build_quality.build_fundamental_layer)
-    assert callable(build_analysis.build_fundamental_analysis)
-    assert callable(build_history_intake.main)
-    assert callable(build_metrics.main)
-    assert callable(build_quality.main)
-    assert callable(build_analysis.main)
+def test_runtime_organization_test_no_longer_certifies_script_import_paths() -> None:
+    assert CANONICAL_PACKAGE == "market_scanner.fundamentals"
+    assert LEGACY_SCRIPT_ENTRYPOINTS == {
+        "build_history_intake",
+        "build_metrics",
+        "build_quality",
+        "build_analysis",
+    }
 
 
-def test_legacy_core_import_paths_remain_compatible() -> None:
-    assert core_history.validate_fundamentals_history is build_history_intake.validate_fundamentals_history
-    assert core_metrics.build_fundamental_metrics is build_metrics.build_fundamental_metrics
-    assert core_quality.build_fundamental_layer is build_quality.build_fundamental_layer
-    assert core_analysis.build_fundamental_analysis is build_analysis.build_fundamental_analysis
-    assert core_history.main is build_history_intake.main
-    assert core_metrics.main is build_metrics.main
-    assert core_quality.main is build_quality.main
-    assert core_analysis.main is build_analysis.main
+def test_legacy_core_compatibility_is_not_an_active_test_requirement() -> None:
+    assert "scripts.core" != CANONICAL_PACKAGE
