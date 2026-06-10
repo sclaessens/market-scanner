@@ -10,15 +10,16 @@ from market_scanner.analysis.analysis_contracts import (
 
 ANALYSIS_CANONICAL_OWNER = "src/market_scanner/analysis/"
 
-LEGACY_ANALYSIS_AUTHORITIES = (
-    "scripts/fundamentals/build_analysis.py",
-    "scripts/fundamentals/build_quality.py",
-    "scripts/core/build_fundamental_analysis.py",
-)
+LEGACY_ANALYSIS_AUTHORITIES: tuple[str, ...] = ()
 
 MIGRATED_FUNDAMENTALS_CONTRACT_AUTHORITIES = (
     "src/market_scanner/fundamentals/fundamental_contracts.py",
     "src/market_scanner/fundamentals/fundamentals_metrics_contracts.py",
+)
+
+MIGRATED_ANALYSIS_CONTRACT_AUTHORITIES = (
+    "src/market_scanner/analysis/analysis_boundary.py",
+    "src/market_scanner/analysis/analysis_contracts.py",
 )
 
 ANALYSIS_REQUIRED_UPSTREAM_OWNERS = (
@@ -58,7 +59,7 @@ def build_fundamental_analysis_plan() -> AnalysisStage:
         numeric_rank_outputs_allowed=False,
         price_projection_outputs_allowed=False,
         execution_quality_outputs_allowed=False,
-        legacy_migration_status="legacy_fundamental_analysis_pending_migration",
+        legacy_migration_status="legacy_fundamental_analysis_decoupled",
     )
 
 
@@ -78,7 +79,7 @@ def _build_profile_review_plan() -> AnalysisStage:
         numeric_rank_outputs_allowed=False,
         price_projection_outputs_allowed=False,
         execution_quality_outputs_allowed=False,
-        legacy_migration_status="legacy_profile_analysis_pending_migration",
+        legacy_migration_status="legacy_profile_analysis_decoupled",
     )
 
 
@@ -98,7 +99,7 @@ def _build_limitation_review_plan() -> AnalysisStage:
         numeric_rank_outputs_allowed=False,
         price_projection_outputs_allowed=False,
         execution_quality_outputs_allowed=False,
-        legacy_migration_status="legacy_limitation_review_pending_migration",
+        legacy_migration_status="legacy_limitation_review_decoupled",
     )
 
 

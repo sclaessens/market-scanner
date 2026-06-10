@@ -1,28 +1,23 @@
 from __future__ import annotations
 
-from pathlib import Path
+from market_scanner.analysis.analysis_boundary import build_analysis_plan
 
 
-LEGACY_MODULE_PATH = Path("scripts/fundamentals/build_analysis.py")
-CANONICAL_PACKAGE_PATH = Path("src/market_scanner/fundamentals")
+def test_fundamental_analysis_contract_is_now_canonical_evidence_only() -> None:
+    plan = build_analysis_plan()
 
-EXPECTED_LEGACY_POLICY = {
-    "row_preservation",
-    "classification_only",
-    "no_allocation_semantics",
-    "explicit_output_path_only",
-}
-
-
-def test_legacy_fundamental_analysis_test_is_static_evidence_only() -> None:
-    assert LEGACY_MODULE_PATH.parts == ("scripts", "fundamentals", "build_analysis.py")
-    assert CANONICAL_PACKAGE_PATH.parts == ("src", "market_scanner", "fundamentals")
+    assert plan.canonical_owner == "src/market_scanner/analysis/"
+    assert tuple(stage.name for stage in plan.stages) == (
+        "fundamental_evidence_review",
+        "profile_evidence_review",
+        "limitation_review",
+    )
 
 
-def test_legacy_fundamental_analysis_policy_surface_is_preserved() -> None:
-    assert EXPECTED_LEGACY_POLICY == {
-        "row_preservation",
-        "classification_only",
-        "no_allocation_semantics",
-        "explicit_output_path_only",
-    }
+def test_fundamental_analysis_contract_has_no_final_decision_authority() -> None:
+    for stage in build_analysis_plan().stages:
+        assert stage.final_outcomes_allowed is False
+        assert stage.capital_action_outputs_allowed is False
+        assert stage.priority_label_outputs_allowed is False
+        assert stage.numeric_rank_outputs_allowed is False
+        assert stage.price_projection_outputs_allowed is False
