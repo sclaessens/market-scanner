@@ -2735,3 +2735,71 @@ Guardrails:
 * no script-era runtime modules edited
 * no script-era runtime files archived
 * no script-era runtime files deleted
+
+
+### BL89 — Decouple active SEC transform/review tests from script-era SEC transformation modules
+
+Category: Legacy Runtime Cleanup / SEC CompanyFacts Governance
+
+Status: COMPLETED
+
+BL89 decoupled active SEC transform/review tests from script-era SEC transformation module paths.
+
+Updated tests:
+
+* `tests/fundamentals/test_sec_companyfacts_transform.py`
+* `tests/fundamentals/test_run_sec_transformation_review.py`
+* `tests/fundamentals/test_sec_ticker_cik_index.py`
+
+Reviewed related tests:
+
+* `tests/unit/test_v2_sec_companyfacts_smoke_boundary.py`
+* `tests/test_operator_visibility.py`
+
+Target script-era modules:
+
+* `scripts/fundamentals/run_sec_transformation_review.py`
+* `scripts/fundamentals/sec_companyfacts_transform.py`
+* `scripts/fundamentals/sec_ticker_cik_index.py`
+
+Result:
+
+* active positive test dependency on `run_sec_transformation_review.py` removed;
+* active positive test dependency on `sec_companyfacts_transform.py` removed;
+* active positive test dependency on `sec_ticker_cik_index.py` removed;
+* remaining references are limited to negative guardrails or operator-visibility references to test files.
+
+Validation:
+
+* focused SEC-related tests: `40 passed in 0.05s`
+* full suite: `551 passed in 0.58s`
+
+Archive decision after BL89:
+
+* `scripts/fundamentals/run_sec_transformation_review.py`: `ACTIVE_REFERENCE_DECOUPLED_BUT_CLUSTER_BLOCKED`
+* `scripts/fundamentals/sec_companyfacts_transform.py`: `ACTIVE_REFERENCE_DECOUPLED_BUT_CLUSTER_BLOCKED`
+* `scripts/fundamentals/sec_ticker_cik_index.py`: `ACTIVE_REFERENCE_DECOUPLED_BUT_CLUSTER_BLOCKED`
+* `scripts/fundamentals/sec_companyfacts_bulk_intake.py`: `PROVIDER_SIDE_EFFECT_RISK`
+* `scripts/fundamentals/build_analysis.py`: `ACTIVE_REFERENCE_DECOUPLED_BUT_CLUSTER_BLOCKED`
+* `scripts/fundamentals/build_quality.py`: `ACTIVE_REFERENCE_DECOUPLED_BUT_HIGH_RISK_CLUSTER_BLOCKED`
+* `scripts/fundamentals/build_history_intake.py`: `CLUSTER_DEPENDENCY_BLOCKED`
+* `scripts/fundamentals/build_metrics.py`: `CLUSTER_DEPENDENCY_BLOCKED`
+
+Recommended next sprint:
+
+* BL90 — Final archive-readiness review of remaining scripts/fundamentals cluster
+
+Guardrails:
+
+* no live SEC/EDGAR calls
+* no yfinance calls
+* no credentials read
+* no production data writes
+* no reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime modules executed
+* no script-era runtime modules edited
+* no script-era runtime files archived
+* no script-era runtime files deleted
