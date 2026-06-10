@@ -1,23 +1,27 @@
 from __future__ import annotations
 
-from pathlib import Path
+from market_scanner.fundamentals.sec_companyfacts_smoke_boundary import (
+    SEC_COMPANYFACTS_SOURCE_FAMILY,
+)
 
-
-LEGACY_MODULE_PATH = Path("scripts/fundamentals/run_sec_transformation_review.py")
-
-EXPECTED_REVIEW_STATUSES = {
+CANONICAL_REVIEW_STATUSES = {
     "TRANSFORMED",
     "CIK_REVIEW_REQUIRED",
     "COMPANYFACTS_MISSING",
 }
 
 
-def test_legacy_sec_transformation_review_test_is_static_evidence_only() -> None:
-    assert LEGACY_MODULE_PATH.parts == ("scripts", "fundamentals", "run_sec_transformation_review.py")
+def test_sec_transformation_review_policy_is_canonical_source_review_only() -> None:
+    assert SEC_COMPANYFACTS_SOURCE_FAMILY == "SEC EDGAR / SEC CompanyFacts"
+    assert CANONICAL_REVIEW_STATUSES == {
+        "TRANSFORMED",
+        "CIK_REVIEW_REQUIRED",
+        "COMPANYFACTS_MISSING",
+    }
 
 
-def test_legacy_sec_transformation_review_policy_is_review_only() -> None:
+def test_sec_transformation_review_policy_has_no_investment_authority() -> None:
     forbidden = {"allocation", "tradeability", "urgency", "conviction", "buy", "sell"}
-    rendered = " ".join(EXPECTED_REVIEW_STATUSES).lower()
+    rendered = " ".join(CANONICAL_REVIEW_STATUSES).lower()
 
     assert all(term not in rendered for term in forbidden)
