@@ -2585,3 +2585,83 @@ Guardrails:
 * no script-era runtime files edited
 * no script-era runtime files archived
 * no script-era runtime files deleted
+
+
+### BL87 — Review internal script-era dependencies on fundamentals history and metrics modules
+
+Category: Legacy Runtime Cleanup / Fundamentals Governance
+
+Status: COMPLETED
+
+BL87 reviewed internal `scripts/fundamentals/` dependencies that still block archiving:
+
+* `scripts/fundamentals/build_history_intake.py`
+* `scripts/fundamentals/build_metrics.py`
+
+Result:
+
+* `build_history_intake.py` and `build_metrics.py` are no longer blocked by missing canonical contract coverage.
+* `build_history_intake.py` and `build_metrics.py` are no longer blocked by active positive references from `src`, `tests`, or `.github`.
+* They remain blocked by internal script-era dependency clustering.
+
+Remaining script-era fundamentals files:
+
+* `scripts/fundamentals/build_analysis.py`
+* `scripts/fundamentals/build_history_intake.py`
+* `scripts/fundamentals/build_metrics.py`
+* `scripts/fundamentals/build_quality.py`
+* `scripts/fundamentals/run_sec_transformation_review.py`
+* `scripts/fundamentals/sec_companyfacts_bulk_intake.py`
+* `scripts/fundamentals/sec_companyfacts_transform.py`
+* `scripts/fundamentals/sec_ticker_cik_index.py`
+
+Internal dependency findings:
+
+* `build_analysis.py` imports from `build_metrics.py`
+* `build_quality.py` imports from `build_metrics.py`
+* `build_quality.py` imports from `build_history_intake.py`
+* `build_metrics.py` imports from `build_history_intake.py`
+* `run_sec_transformation_review.py` imports from `build_history_intake.py`
+* `run_sec_transformation_review.py` imports from `sec_companyfacts_transform.py`
+* `run_sec_transformation_review.py` imports from `sec_ticker_cik_index.py`
+* `sec_companyfacts_transform.py` imports from `build_history_intake.py`
+* `sec_companyfacts_transform.py` imports from `sec_ticker_cik_index.py`
+
+Archive decision after BL87:
+
+* `scripts/fundamentals/build_history_intake.py`: `CLUSTER_DEPENDENCY_BLOCKED`
+* `scripts/fundamentals/build_metrics.py`: `CLUSTER_DEPENDENCY_BLOCKED`
+* `scripts/fundamentals/build_analysis.py`: `ACTIVE_REFERENCE_AND_OPTIONAL_WRITE_RISK`
+* `scripts/fundamentals/build_quality.py`: `HIGH_RISK_PRODUCTION_WRITE_BLOCKER`
+* `scripts/fundamentals/run_sec_transformation_review.py`: `SEC_REVIEW_RUNNER_BLOCKER`
+* `scripts/fundamentals/sec_companyfacts_transform.py`: `SEC_TRANSFORM_BLOCKER`
+* `scripts/fundamentals/sec_ticker_cik_index.py`: `SEC_MAPPING_DEPENDENCY`
+* `scripts/fundamentals/sec_companyfacts_bulk_intake.py`: `PROVIDER_SIDE_EFFECT_RISK`
+
+Validation:
+
+* focused related tests: `44 passed in 0.04s`
+* full suite: `550 passed in 0.55s`
+
+Recommended next sprint:
+
+* BL88 — Decouple active tests from remaining script-era fundamentals analysis and quality modules
+
+Recommended follow-up:
+
+* BL89 — Decouple active SEC transform/review tests from script-era SEC transformation modules
+
+Guardrails:
+
+* no live SEC/EDGAR calls
+* no yfinance calls
+* no credentials read
+* no production data writes
+* no reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime modules executed
+* no script-era runtime modules edited
+* no script-era runtime files archived
+* no script-era runtime files deleted
