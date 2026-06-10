@@ -2293,3 +2293,50 @@ Guardrails:
 - no portfolio/watchlist state modified
 - no Decision Engine authority changed
 - no script-era Python runtime files executed
+### BL80 — Remaining fundamentals migration blocker review
+
+Category: Legacy Runtime Cleanup / Fundamentals Governance
+
+Status: COMPLETED
+
+BL80 reviewed the remaining `scripts/fundamentals/*.py` files after BL79 archived the `scripts/core/build_fundamental_*` compatibility wrappers.
+
+No runtime Python files were archived, deleted, moved, refactored, or executed. This sprint only classified the remaining blockers that prevent safe archive of the fundamentals modules.
+
+Review record:
+
+- `docs/audits/legacy_runtime/bl80_remaining_fundamentals_migration_blocker_review.md`
+
+Result:
+
+- No remaining `scripts/fundamentals/*.py` file is archive-ready as of BL80.
+- Eight fundamentals files remain under `scripts/fundamentals/`.
+- No active test, source, or workflow runtime imports were found.
+- The remaining imports are internal dependencies inside the legacy fundamentals group.
+- The files still contain migration knowledge, internal dependency coupling, provider/data-write risk, or review-runner behavior.
+- The remaining fundamentals cleanup is split into four governed lanes:
+  - pure contract extraction;
+  - analysis and quality parity;
+  - SEC transform and identifier mapping;
+  - provider and review-runner retirement.
+
+Recommended next sprint:
+
+- BL81 — Extract fundamentals history and metrics contracts from script-era modules
+
+Validation:
+
+- `pytest -q`: `522 passed in 0.58s`
+
+Guardrails:
+
+- no live SEC/EDGAR calls
+- no yfinance calls
+- no credentials read
+- no production data writes
+- no reports generated
+- no Telegram messages sent
+- no portfolio/watchlist state modified
+- no Decision Engine authority changed
+- no script-era Python runtime files executed
+
