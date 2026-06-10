@@ -8,14 +8,17 @@ from market_scanner.analysis.analysis_contracts import (
     AnalysisStage,
 )
 
-
 ANALYSIS_CANONICAL_OWNER = "src/market_scanner/analysis/"
 
 LEGACY_ANALYSIS_AUTHORITIES = (
     "scripts/fundamentals/build_analysis.py",
-    "scripts/fundamentals/build_metrics.py",
     "scripts/fundamentals/build_quality.py",
     "scripts/core/build_fundamental_analysis.py",
+)
+
+MIGRATED_FUNDAMENTALS_CONTRACT_AUTHORITIES = (
+    "src/market_scanner/fundamentals/fundamental_contracts.py",
+    "src/market_scanner/fundamentals/fundamentals_metrics_contracts.py",
 )
 
 ANALYSIS_REQUIRED_UPSTREAM_OWNERS = (
@@ -113,4 +116,3 @@ def build_analysis_plan() -> AnalysisPlan:
         legacy_analysis_authorities=LEGACY_ANALYSIS_AUTHORITIES,
         migration_status="canonical_analysis_boundary_established",
     )
-
