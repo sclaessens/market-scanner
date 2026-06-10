@@ -2110,3 +2110,38 @@ Files changed:
 - `scripts/portfolio/test_portfolio.py` moved to `archive/legacy_runtime/scripts/portfolio/test_portfolio.py`
 - `docs/audits/legacy_runtime/bl73_archive_remaining_low_risk_script_era_candidates.md`
 - `docs/active/project/backlog.md`
+
+## BL74 — Decouple active tests from script-era fundamentals imports
+
+Status: Done
+
+Type: Python Cleanup / Active Test Decoupling
+
+Summary:
+
+Active tests were decoupled from script-era fundamentals imports. The former `scripts.fundamentals` behavior tests were converted into active static legacy-policy/evidence tests where they only preserved governance expectations and no longer execute old script-era fundamentals modules.
+
+Archive pytest collection behavior was addressed by excluding `archive/` from pytest recursion in `pyproject.toml`. Future cleanup can retry archiving `scripts/fundamentals/__init__.py` and `scripts/portfolio/test_portfolio.py` if focused validation passes.
+
+Files changed:
+
+- `pyproject.toml`
+- `tests/conftest.py`
+- `tests/test_operator_visibility.py`
+- `tests/core/test_build_fundamental_analysis.py`
+- `tests/core/test_build_fundamental_layer.py`
+- `tests/core/test_build_fundamental_metrics.py`
+- `tests/core/test_build_fundamentals_history_intake.py`
+- `tests/core/test_fundamentals_operational_validation.py`
+- `tests/core/test_fundamentals_runtime_organization.py`
+- `tests/fundamentals/test_run_sec_transformation_review.py`
+- `tests/fundamentals/test_sec_companyfacts_bulk_intake.py`
+- `tests/fundamentals/test_sec_companyfacts_transform.py`
+- `tests/fundamentals/test_sec_ticker_cik_index.py`
+- `docs/audits/legacy_runtime/bl74_decouple_active_tests_from_script_era_fundamentals.md`
+- `docs/active/project/backlog.md`
+
+Validation:
+
+- active `scripts.fundamentals` import grep across `tests`, `src`, and `.github`: no output
+- `source .venv/bin/activate && pytest -q`: `522 passed in 0.78s`
