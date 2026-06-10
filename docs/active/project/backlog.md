@@ -2055,3 +2055,58 @@ Files changed:
 - `scripts/reporting/reporter.py` moved to `archive/legacy_runtime/scripts/reporting/reporter.py`
 - `docs/audits/legacy_runtime/bl72_archive_legacy_reporting_reporter.md`
 - `docs/active/project/backlog.md`
+
+## BL73 — Archive remaining low-risk script-era cleanup candidates
+
+Status: Done
+
+Type: Python Cleanup / Legacy Runtime Archive
+
+Summary:
+
+Archived the next small low-risk script-era Python cleanup batch from the BL70 canonical cleanup registry.
+
+Selected files:
+
+- `scripts/core/regime.py`
+- `scripts/portfolio/test_portfolio.py`
+
+Archive destinations:
+
+- `archive/legacy_runtime/scripts/core/regime.py`
+- `archive/legacy_runtime/scripts/portfolio/test_portfolio.py`
+
+Registry basis:
+
+The existing cleanup registry classified `scripts/core/regime.py` as a P3 archive candidate with no active test import found, no runnable entrypoint, and low direct write risk.
+
+The existing cleanup registry classified `scripts/portfolio/test_portfolio.py` as a P4 delete/archive candidate after confirmation that it is not part of the active test suite or operator procedure. BL73 archived the file instead of deleting it.
+
+Blocked candidate:
+
+- `scripts/fundamentals/__init__.py` remains blocked because active tests still import `scripts.fundamentals`.
+
+Validation:
+
+- focused delta reference checks required before merge;
+- `pytest -q` required before merge.
+
+Guardrails:
+
+- no broad Python inventory was repeated;
+- no runtime behavior was changed;
+- no scanner behavior was changed;
+- no provider behavior was changed;
+- no SEC CompanyFacts behavior was changed;
+- no production data writes were added;
+- no reports were generated;
+- no Telegram behavior was changed;
+- no portfolio/watchlist runtime logic was changed;
+- no Decision Engine behavior was changed.
+
+Files changed:
+
+- `scripts/core/regime.py` moved to `archive/legacy_runtime/scripts/core/regime.py`
+- `scripts/portfolio/test_portfolio.py` moved to `archive/legacy_runtime/scripts/portfolio/test_portfolio.py`
+- `docs/audits/legacy_runtime/bl73_archive_remaining_low_risk_script_era_candidates.md`
+- `docs/active/project/backlog.md`
