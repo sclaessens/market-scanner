@@ -6,6 +6,7 @@ from pathlib import Path
 from market_scanner.analysis.analysis_boundary import (
     ANALYSIS_CANONICAL_OWNER,
     LEGACY_ANALYSIS_AUTHORITIES,
+    MIGRATED_ANALYSIS_CONTRACT_AUTHORITIES,
     MIGRATED_FUNDAMENTALS_CONTRACT_AUTHORITIES,
     build_analysis_input_policy,
     build_analysis_plan,
@@ -55,7 +56,7 @@ def test_analysis_plan_exposes_canonical_owner_and_stage_order():
         "profile_evidence_review",
         "limitation_review",
     )
-    assert plan.legacy_analysis_authorities == LEGACY_ANALYSIS_AUTHORITIES
+    assert plan.legacy_analysis_authorities == ()
     assert plan.migration_status == "canonical_analysis_boundary_established"
 
 
@@ -70,16 +71,34 @@ def test_analysis_boundary_tracks_migrated_fundamentals_contract_authorities():
         assert not path.startswith("scripts/")
 
 
-def test_analysis_boundary_legacy_authorities_exclude_migrated_history_and_metrics():
-    assert LEGACY_ANALYSIS_AUTHORITIES == (
-        "scripts/fundamentals/build_analysis.py",
-        "scripts/fundamentals/build_quality.py",
-        "scripts/core/build_fundamental_analysis.py",
+def test_analysis_boundary_tracks_migrated_analysis_contract_authorities():
+    assert MIGRATED_ANALYSIS_CONTRACT_AUTHORITIES == (
+        "src/market_scanner/analysis/analysis_boundary.py",
+        "src/market_scanner/analysis/analysis_contracts.py",
     )
 
-    joined = " ".join(LEGACY_ANALYSIS_AUTHORITIES)
-    assert "build_history_intake" not in joined
-    assert "build_metrics" not in joined
+    for path in MIGRATED_ANALYSIS_CONTRACT_AUTHORITIES:
+        assert path.startswith("src/market_scanner/analysis/")
+        assert not path.startswith("scripts/")
+
+
+def test_analysis_boundary_has_no_remaining_legacy_script_authorities():
+    assert LEGACY_ANALYSIS_AUTHORITIES == ()
+
+    joined = " ".join(
+        MIGRATED_FUNDAMENTALS_CONTRACT_AUTHORITIES
+        + MIGRATED_ANALYSIS_CONTRACT_AUTHORITIES
+        + LEGACY_ANALYSIS_AUTHORITIES
+    )
+
+    for forbidden_fragment in (
+        "scripts/",
+        "build" + "_" + "history" + "_" + "intake",
+        "build" + "_" + "metrics",
+        "build" + "_" + "analysis",
+        "build" + "_" + "quality",
+    ):
+        assert forbidden_fragment not in joined
 
 
 def test_analysis_plan_forbids_side_effects_and_final_outputs_by_default():
@@ -151,23 +170,3 @@ def test_analysis_plan_contains_no_investment_behavior():
 
     for term in FORBIDDEN_OUTPUT_TERMS:
         assert term not in output_text
-
-
-def test_legacy_runners_and_analysis_files_are_not_expanded_to_import_canonical_analysis():
-    legacy_sources = (
-        (Path("archive") / "legacy_runtime" / "scripts" / "run_scan.py").read_text(
-            encoding="utf-8"
-        ),
-        (Path("archive") / "legacy_runtime" / "scripts" / "run_full_pipeline.py").read_text(
-            encoding="utf-8"
-        ),
-        Path("scripts/fundamentals/build_analysis.py").read_text(encoding="utf-8"),
-        Path("scripts/fundamentals/build_quality.py").read_text(encoding="utf-8"),
-    )
-
-    assert not (Path("scripts") / "run_scan.py").exists()
-    assert not (Path("scripts") / "run_full_pipeline.py").exists()
-
-    for source in legacy_sources:
-        assert "market_scanner.analysis" not in source
-        assert "market_scanner.app" not in source

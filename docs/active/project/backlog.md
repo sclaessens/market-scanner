@@ -2665,3 +2665,73 @@ Guardrails:
 * no script-era runtime modules edited
 * no script-era runtime files archived
 * no script-era runtime files deleted
+
+
+### BL88 — Decouple active tests from remaining script-era fundamentals analysis and quality modules
+
+Category: Legacy Runtime Cleanup / Fundamentals Governance
+
+Status: COMPLETED
+
+BL88 decoupled active tests and analysis metadata from:
+
+* `scripts/fundamentals/build_analysis.py`
+* `scripts/fundamentals/build_quality.py`
+
+Updated source metadata:
+
+* `src/market_scanner/analysis/analysis_boundary.py`
+
+Updated tests:
+
+* `tests/unit/test_v2_canonical_analysis.py`
+* `tests/core/test_fundamentals_runtime_organization.py`
+* `tests/core/test_fundamentals_operational_validation.py`
+* `tests/core/test_build_fundamental_analysis.py`
+* `tests/core/test_build_fundamental_layer.py`
+
+Result:
+
+* `LEGACY_ANALYSIS_AUTHORITIES` is now empty.
+* Canonical analysis metadata now tracks migrated analysis contract authorities:
+
+  * `src/market_scanner/analysis/analysis_boundary.py`
+  * `src/market_scanner/analysis/analysis_contracts.py`
+* Canonical analysis metadata continues to track migrated fundamentals contract authorities:
+
+  * `src/market_scanner/fundamentals/fundamental_contracts.py`
+  * `src/market_scanner/fundamentals/fundamentals_metrics_contracts.py`
+* Active tests no longer depend on `scripts/fundamentals/build_analysis.py`.
+* Active tests no longer depend on `scripts/fundamentals/build_quality.py`.
+* Remaining grep hits are canonical function names or negative guardrail assertions only.
+
+Validation:
+
+* focused tests: `20 passed in 0.03s`
+* full suite: `551 passed in 0.55s`
+
+Archive decision after BL88:
+
+* `scripts/fundamentals/build_analysis.py`: `ACTIVE_REFERENCE_DECOUPLED_BUT_CLUSTER_BLOCKED`
+* `scripts/fundamentals/build_quality.py`: `ACTIVE_REFERENCE_DECOUPLED_BUT_HIGH_RISK_CLUSTER_BLOCKED`
+* `scripts/fundamentals/build_history_intake.py`: `CLUSTER_DEPENDENCY_BLOCKED`
+* `scripts/fundamentals/build_metrics.py`: `CLUSTER_DEPENDENCY_BLOCKED`
+
+Recommended next sprint:
+
+* BL89 — Decouple active SEC transform/review tests from script-era SEC transformation modules
+
+Guardrails:
+
+* no live SEC/EDGAR calls
+* no yfinance calls
+* no credentials read
+* no production data writes
+* no reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime modules executed
+* no script-era runtime modules edited
+* no script-era runtime files archived
+* no script-era runtime files deleted
