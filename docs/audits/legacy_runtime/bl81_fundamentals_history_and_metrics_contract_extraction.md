@@ -487,18 +487,11 @@ Future archive of these files requires:
 Recommended next sprint:
 
 ```text
-BL82 — Implement canonical fundamentals history and metrics contract tests
-```
-
-BL82 should be a code-aware Codex sprint, not a pure ChatGPT documentation sprint, because it should add or update canonical tests and possibly canonical contract modules.
-
-Alternative documentation-only path:
-
-```text
 BL82 — Map extracted BL81 contracts to existing canonical fundamentals modules
-```
 
-This alternative would compare the BL81 extracted contracts against existing `src/market_scanner/fundamentals/` and `src/market_scanner/analysis/` files without implementing code.
+BL82 should remain documentation-only. It should compare the BL81 extracted contracts against existing src/market_scanner/fundamentals/ and src/market_scanner/analysis/ files without implementing code.
+
+A later code-aware Codex sprint can add canonical fundamentals history and metrics contract tests after the mapping confirms the correct canonical owners.
 
 ## Validation
 
@@ -515,7 +508,7 @@ pytest -q
 Result:
 
 ```text
-PASTE_LOCAL_RESULT_HERE
+522 passed in 0.58s
 ```
 
 ## Guardrails
