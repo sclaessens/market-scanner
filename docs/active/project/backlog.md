@@ -1965,3 +1965,48 @@ Files changed:
 * `docs/active/project/backlog.md`
 
 No code, tests, data files, reports, Telegram output, portfolio/watchlist logic, or Decision Engine behavior were changed.
+
+## BL71 — Archive first low-risk script-era Python utility
+
+Status: Done
+
+Type: Python Cleanup / Legacy Runtime Archive
+
+Summary:
+
+Archived the first narrow low-risk script-era Python cleanup batch from the BL70 canonical cleanup registry.
+
+Selected file:
+
+- `scripts/utils/utils.py`
+
+Archive destination:
+
+- `archive/legacy_runtime/scripts/utils/utils.py`
+
+Registry basis:
+
+The existing cleanup registry classified `scripts/utils/utils.py` as a low-priority archive candidate with no active reference found, no runnable entrypoint, and generic utility/write-helper behavior. BL71 archived the file instead of deleting it.
+
+Validation:
+
+- focused delta reference check: no active references found in `src/`, `tests/`, or `.github/`
+- `pytest -q`: 501 passed
+
+Guardrails:
+
+- no broad Python inventory was repeated;
+- no runtime behavior was changed;
+- no provider behavior was changed;
+- no SEC CompanyFacts behavior was changed;
+- no production data writes were added;
+- no reports were generated;
+- no Telegram behavior was changed;
+- no portfolio/watchlist logic was changed;
+- no Decision Engine behavior was changed.
+
+Files changed:
+
+- `scripts/utils/utils.py` moved to `archive/legacy_runtime/scripts/utils/utils.py`
+- `docs/audits/legacy_runtime/bl71_archive_low_risk_script_era_utils.md`
+- `docs/active/project/backlog.md`
