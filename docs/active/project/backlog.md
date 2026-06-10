@@ -2145,3 +2145,27 @@ Validation:
 
 - active `scripts.fundamentals` import grep across `tests`, `src`, and `.github`: no output
 - `source .venv/bin/activate && pytest -q`: `522 passed in 0.78s`
+
+### BL75 — Retry archiving BL74-unblocked script-era Python files
+
+Category: Legacy Runtime Cleanup / Repository Hygiene
+
+Status: COMPLETED
+
+BL75 retried the two script-era Python cleanup candidates that were unblocked by BL74.
+
+Archived or removed from active runtime paths:
+
+- `scripts/fundamentals/__init__.py`
+- `scripts/portfolio/test_portfolio.py`
+
+Archive targets:
+
+- `archive/legacy_runtime/scripts/fundamentals/__init__.py`
+- `archive/legacy_runtime/scripts/portfolio/test_portfolio.py`
+
+Result: active runtime/test paths are further decoupled from legacy `scripts/` files. BL74’s archive pytest exclusion allows archived `test_*.py` files to remain under `archive/` without active pytest collection.
+
+Validation:
+
+- `pytest -q`: pending local validation before merge.
