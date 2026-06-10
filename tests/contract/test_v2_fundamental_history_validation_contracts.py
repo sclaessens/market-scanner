@@ -1,4 +1,3 @@
-from importlib import reload
 from pathlib import Path
 
 from market_scanner.fundamentals import fundamental_contracts
@@ -231,7 +230,6 @@ def test_history_validation_contract_source_has_no_legacy_network_or_provider_im
 def test_history_validation_contract_helpers_create_no_files(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
 
-    reload(fundamental_contracts)
     validate_fundamental_history_contract_records((_history_record(),))
 
     assert list(tmp_path.iterdir()) == []
