@@ -23,8 +23,6 @@ HIGH_RISK_SCRIPT_ERA_TEST_BLOCKERS = (
     "core/test_build_validation_layer.py",
     "core/test_decision_engine.py",
     "core/test_entry_quality.py",
-    "diagnostics/test_audit_data_coverage.py",
-    "ops/test_capture_historical_evidence.py",
     "portfolio/test_portfolio_source_contract.py",
 )
 

@@ -3523,3 +3523,76 @@ Guardrails:
 * no script-era runtime modules archived
 * no script-era runtime modules edited
 * no script-era runtime modules executed directly
+
+
+### BL100 — Decouple ops and diagnostics tests from script-era modules
+
+Category: Legacy Runtime Cleanup / Test Decoupling
+
+Status: COMPLETED
+
+BL100 decoupled active ops and diagnostics tests from script-era modules.
+
+Targeted script-era modules:
+
+* `scripts/ops/capture_historical_evidence.py`
+* `archive/legacy_runtime/scripts/diagnostics/audit_data_coverage.py`
+
+Updated tests:
+
+* `tests/ops/test_capture_historical_evidence.py`
+* `tests/diagnostics/test_audit_data_coverage.py`
+
+Updated blocker registries:
+
+* `tests/conftest.py`
+* `tests/test_operator_visibility.py`
+
+Result:
+
+* `tests/ops/test_capture_historical_evidence.py` no longer imports `scripts.ops.capture_historical_evidence`.
+* `tests/diagnostics/test_audit_data_coverage.py` no longer imports `scripts.diagnostics.audit_data_coverage`.
+* Both tests now validate static/canonical contracts instead of script-era runtime behavior.
+* The two tests were removed from the high-risk script-era blocker registries.
+
+Active import check:
+
+* no active positive imports remain from `scripts.ops`;
+* no active positive imports remain from `scripts.diagnostics`.
+
+Validation:
+
+* focused suite: `18 passed in 0.06s`
+* full suite: `581 passed in 0.62s`
+
+Decision:
+
+* `OPS_AND_DIAGNOSTICS_ACTIVE_TEST_DEPENDENCIES_DECOUPLED`
+
+Remaining archive-readiness note:
+
+* `scripts/ops/capture_historical_evidence.py` still physically exists and is not archived by BL100.
+* `archive/legacy_runtime/scripts/diagnostics/audit_data_coverage.py` remains an archived historical reference.
+
+Recommended next sprint:
+
+* BL101 — Archive ops capture script after final no-active-reference check
+
+Candidate archive target:
+
+* `scripts/ops/capture_historical_evidence.py`
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime module archived
+* no script-era runtime module edited
+* no script-era runtime module executed directly
