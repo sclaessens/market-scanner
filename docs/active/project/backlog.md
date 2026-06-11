@@ -3855,3 +3855,80 @@ Guardrails:
 * no script-era runtime modules archived
 * no script-era runtime modules edited
 * no script-era runtime modules executed directly
+
+
+### BL104 — Review archive-readiness of decoupled core layer modules
+
+Category: Legacy Runtime Cleanup / Archive Readiness Review
+
+Status: COMPLETED
+
+BL104 reviewed archive-readiness of the selected core layer modules that were decoupled from active tests in BL103.
+
+Targeted modules:
+
+* `scripts/core/build_context_layer.py`
+* `scripts/core/build_validation_layer.py`
+* `scripts/core/build_timing_state_layer.py`
+* `scripts/core/build_stability_layer.py`
+
+Result:
+
+* no active positive imports remain for the four targeted modules;
+* remaining references are static contract-test references and negative import guardrails;
+* active `scripts.core` imports remain elsewhere, outside BL104 scope;
+* all four targeted modules still contain side-effect/runnable markers.
+
+Remaining side-effect/runnable markers include:
+
+* fixed `data/processed` paths;
+* fixed `data/logs` paths;
+* `pd.read_csv(...)`;
+* `to_csv(...)`;
+* `mkdir(...)`;
+* `if __name__ == "__main__"`;
+* `main()` in the stability layer.
+
+Validation:
+
+* focused suite: `35 passed in 0.07s`
+* full suite: `610 passed in 0.62s`
+
+Decision:
+
+* `DECOUPLED_CORE_LAYER_MODULES_NOT_ARCHIVE_READY_DUE_TO_MANUAL_RUN_AND_WRITE_RISK`
+
+Recommended next sprint:
+
+* BL105 — Fail-close or de-run selected decoupled core layer modules before archive
+
+BL105 goal:
+
+* remove or guard manual execution risk from the four selected modules;
+* preserve historical implementation for later archive;
+* avoid changing canonical runtime behavior;
+* avoid executing script-era modules.
+
+High-risk areas still out of scope:
+
+* Decision Engine
+* scanner/provider access
+* portfolio
+* watchlist
+* scan validation
+* portfolio intelligence
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime modules archived
+* no script-era runtime modules edited
+* no script-era runtime modules executed directly
