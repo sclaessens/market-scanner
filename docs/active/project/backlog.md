@@ -2803,3 +2803,76 @@ Guardrails:
 * no script-era runtime modules edited
 * no script-era runtime files archived
 * no script-era runtime files deleted
+
+
+### BL90 — Final archive-readiness review of remaining scripts/fundamentals cluster
+
+Category: Legacy Runtime Cleanup / Fundamentals Governance
+
+Status: COMPLETED
+
+BL90 performed a final archive-readiness review of the remaining `scripts/fundamentals/` cluster.
+
+Reviewed files:
+
+* `scripts/fundamentals/build_analysis.py`
+* `scripts/fundamentals/build_history_intake.py`
+* `scripts/fundamentals/build_metrics.py`
+* `scripts/fundamentals/build_quality.py`
+* `scripts/fundamentals/run_sec_transformation_review.py`
+* `scripts/fundamentals/sec_companyfacts_bulk_intake.py`
+* `scripts/fundamentals/sec_companyfacts_transform.py`
+* `scripts/fundamentals/sec_ticker_cik_index.py`
+
+Decision:
+
+* `NOT_ARCHIVE_READY_YET`
+
+Reason:
+
+* one active positive test reference remains:
+
+  * `tests/fundamentals/test_sec_companyfacts_bulk_intake.py`
+* this test still references:
+
+  * `scripts/fundamentals/sec_companyfacts_bulk_intake.py`
+* `sec_companyfacts_bulk_intake.py` is provider/network/cache-risk.
+
+File-level decisions:
+
+* `scripts/fundamentals/build_analysis.py`: `CANDIDATE_FOR_CLUSTER_ARCHIVE_AFTER_BULK_INTAKE_DECOUPLING`
+* `scripts/fundamentals/build_history_intake.py`: `CANDIDATE_FOR_CLUSTER_ARCHIVE_AFTER_BULK_INTAKE_DECOUPLING`
+* `scripts/fundamentals/build_metrics.py`: `CANDIDATE_FOR_CLUSTER_ARCHIVE_AFTER_BULK_INTAKE_DECOUPLING`
+* `scripts/fundamentals/build_quality.py`: `HIGH_RISK_CLUSTER_ARCHIVE_CANDIDATE_AFTER_BULK_INTAKE_DECOUPLING`
+* `scripts/fundamentals/run_sec_transformation_review.py`: `CANDIDATE_FOR_CLUSTER_ARCHIVE_AFTER_BULK_INTAKE_DECOUPLING`
+* `scripts/fundamentals/sec_companyfacts_transform.py`: `CANDIDATE_FOR_CLUSTER_ARCHIVE_AFTER_BULK_INTAKE_DECOUPLING`
+* `scripts/fundamentals/sec_ticker_cik_index.py`: `CANDIDATE_FOR_CLUSTER_ARCHIVE_AFTER_BULK_INTAKE_DECOUPLING`
+* `scripts/fundamentals/sec_companyfacts_bulk_intake.py`: `NOT_ARCHIVE_READY_PROVIDER_RISK_ACTIVE_TEST_REFERENCE`
+
+Validation:
+
+* focused review suite: `85 passed in 0.08s`
+* full suite: `551 passed in 0.67s`
+
+Recommended next sprint:
+
+* BL91 — Decouple active bulk SEC CompanyFacts intake test from provider-risk script-era module
+
+Likely follow-up:
+
+* BL92 — Archive remaining scripts/fundamentals cluster after final no-active-reference check
+
+Guardrails:
+
+* no live SEC/EDGAR calls
+* no yfinance calls
+* no credentials read
+* no production data writes
+* no reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime modules executed
+* no script-era runtime modules edited
+* no script-era runtime files archived
+* no script-era runtime files deleted
