@@ -4006,3 +4006,99 @@ Guardrails:
 * no script-era runtime modules archived
 * no script-era runtime modules executed directly
 * only manual entrypoint fail-close behavior changed
+
+
+### BL106 — Final archive-readiness review for fail-closed core layer modules
+
+Category: Legacy Runtime Cleanup / Archive Readiness Review
+
+Status: COMPLETED
+
+BL106 reviewed final archive-readiness for the selected fail-closed core layer script-era modules.
+
+Reviewed modules:
+
+* `scripts/core/build_context_layer.py`
+* `scripts/core/build_validation_layer.py`
+* `scripts/core/build_timing_state_layer.py`
+* `scripts/core/build_stability_layer.py`
+
+Result:
+
+* no active positive imports remain for the four targeted modules;
+* remaining target-module references are static tests, negative import guardrails, backlog entries, audit notes, historical archive documents, and legacy documentation;
+* active `scripts.core` imports remain elsewhere, outside BL106 scope;
+* manual execution remains fail-closed;
+* historical read/write bodies remain preserved for archive.
+
+Validation:
+
+* focused suite: `35 passed in 0.06s`
+* full suite: `610 passed in 0.62s`
+
+Decision:
+
+* `BL107_ARCHIVE_SPRINT_APPROVED`
+
+
+### BL107 — Controlled archive of fail-closed core layer modules
+
+Category: Legacy Runtime Cleanup / Controlled Archive
+
+Status: COMPLETED
+
+BL107 archived the four fail-closed core layer script-era modules.
+
+Archived modules:
+
+* `archive/legacy_runtime/scripts/core/build_context_layer.py`
+* `archive/legacy_runtime/scripts/core/build_validation_layer.py`
+* `archive/legacy_runtime/scripts/core/build_timing_state_layer.py`
+* `archive/legacy_runtime/scripts/core/build_stability_layer.py`
+
+Result:
+
+* the four-module core-layer archive cluster is completed;
+* historical source content was preserved through `git mv`;
+* no canonical runtime under `src/market_scanner/` was changed;
+* remaining active `scripts.core` imports reference other modules outside BL107 scope.
+
+Validation:
+
+* post-archive focused suite: `35 passed in 0.05s`
+* post-archive full suite: `610 passed in 0.64s`
+
+Decision:
+
+* `FAIL_CLOSED_CORE_LAYER_ARCHIVE_CLUSTER_COMPLETED`
+
+Recommended next sprint:
+
+* BL108 — Review remaining active `scripts/` dependencies after core layer archive
+
+BL108 goal:
+
+* perform a review-only dependency scan of remaining active `scripts/` dependencies;
+* do not archive additional files without a separate archive-readiness decision;
+* preserve Decision Engine authority and all canonical runtime boundaries.
+
+High-risk areas still out of scope:
+
+* Decision Engine
+* scanner/provider access
+* portfolio
+* watchlist
+* scan validation
+* portfolio intelligence
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
