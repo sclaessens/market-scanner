@@ -3673,3 +3673,99 @@ Guardrails:
 * no script-era ops module modified
 * no script-era ops module executed
 * files archived, not deleted
+
+
+### BL102 — Review remaining active scripts tree after ops archive
+
+Category: Legacy Runtime Cleanup / Repository Governance
+
+Status: COMPLETED
+
+BL102 reviewed the remaining active `scripts/` tree after BL92, BL95, BL98, and BL101 archived the fundamentals, reporting, telegram, data_sources, and ops script-era domains.
+
+Result:
+
+* 24 active `scripts/**/*.py` files remain.
+* Active `scripts/fundamentals/` Python runtime files no longer exist.
+* Active `scripts/reporting/` Python runtime files no longer exist.
+* Active `scripts/telegram/` Python runtime files no longer exist.
+* Active `scripts/data_sources/` Python runtime files no longer exist.
+* Active `scripts/ops/` Python runtime files no longer exist.
+
+Remaining active domains:
+
+* `scripts/core/`
+* `scripts/portfolio/`
+* `scripts/watchlist/`
+* `scripts/validate_scans.py`
+
+Active test coupling remains in:
+
+* core layer-builder tests;
+* Decision Engine tests;
+* portfolio source contract tests.
+
+Canonical metadata still references:
+
+* `scripts/core/decision_engine.py`
+* `scripts/core/data_fetcher.py`
+* `scripts/core/scanner.py`
+
+Side-effect and runtime-risk markers remain across:
+
+* core layer builders;
+* scanner/provider access;
+* Decision Engine;
+* portfolio state;
+* watchlist state;
+* scan validation.
+
+Validation:
+
+* full suite: `581 passed in 0.58s`
+
+Decision:
+
+* `REMAINING_SCRIPTS_TREE_NOT_ARCHIVE_READY_AS_A_WHOLE`
+
+Recommended next sprint:
+
+* BL103 — Decouple selected core layer tests from script-era modules
+
+Candidate tests:
+
+* `tests/core/test_build_context_layer.py`
+* `tests/core/test_build_validation_layer.py`
+* `tests/core/test_entry_quality.py`
+* `tests/core/test_build_timing_state_layer.py`
+* `tests/core/test_build_stability_layer.py`
+
+Candidate script-era modules:
+
+* `scripts/core/build_context_layer.py`
+* `scripts/core/build_validation_layer.py`
+* `scripts/core/build_timing_state_layer.py`
+* `scripts/core/build_stability_layer.py`
+
+High-risk areas to avoid in BL103:
+
+* Decision Engine
+* scanner/provider access
+* portfolio
+* watchlist
+* scan validation
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime modules archived
+* no script-era runtime modules edited
+* no script-era runtime modules executed directly
