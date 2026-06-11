@@ -3225,3 +3225,90 @@ Guardrails:
 * no portfolio/watchlist state modified
 * no Decision Engine authority changed
 * files archived, not deleted
+
+
+### BL96 — Review remaining active scripts tree after reporting and Telegram archive
+
+Category: Legacy Runtime Cleanup / Repository Governance
+
+Status: COMPLETED
+
+BL96 reviewed the remaining active `scripts/` tree after BL92 archived `scripts/fundamentals/` and BL95 archived `scripts/reporting/` and `scripts/telegram/`.
+
+Result:
+
+* 28 active `scripts/**/*.py` files remain.
+* Active `scripts/fundamentals/` Python runtime files no longer exist.
+* Active `scripts/reporting/` Python runtime files no longer exist.
+* Active `scripts/telegram/` Python runtime files no longer exist.
+* Active tests still import script-era modules from:
+
+  * `scripts.core`
+  * `scripts.portfolio`
+  * `scripts.ops`
+  * `scripts.data_sources`
+  * `scripts.diagnostics`
+* Canonical boundary metadata still references script-era files in:
+
+  * decision
+  * scanner
+* Side-effect markers remain across:
+
+  * core layer builders
+  * scanner/provider access
+  * Decision Engine
+  * data-source prefill utilities
+  * portfolio state
+  * watchlist state
+  * ops evidence capture
+  * diagnostics
+
+Decision:
+
+* `REMAINING_SCRIPTS_TREE_NOT_ARCHIVE_READY_AS_A_WHOLE`
+
+Reason:
+
+* broad active test coupling remains;
+* positive script-era metadata references remain;
+* high-risk side-effect surfaces remain;
+* domain-specific decoupling is required before further archive.
+
+Validation:
+
+* full suite: `560 passed in 0.57s`
+
+Recommended next sprint:
+
+* BL97 — Decouple active data-source tests from script-era data_sources modules
+
+Candidate targets:
+
+* `scripts/data_sources/common.py`
+* `scripts/data_sources/prefill_fundamentals.py`
+* `scripts/data_sources/prefill_portfolio_metadata.py`
+
+Candidate tests:
+
+* `tests/data_sources/test_prefill_common.py`
+* `tests/data_sources/test_prefill_fundamentals.py`
+* `tests/data_sources/test_prefill_portfolio_metadata.py`
+
+Likely follow-up:
+
+* BL98 — Archive data_sources script-era modules after final no-active-reference check
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime modules archived
+* no script-era runtime modules edited
+* no script-era runtime modules executed directly
