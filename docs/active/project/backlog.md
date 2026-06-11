@@ -3000,3 +3000,85 @@ Guardrails:
 * no script-era runtime modules executed
 * no script-era runtime behavior modified
 * files archived, not deleted
+
+
+### BL93 — Review remaining active scripts tree after fundamentals archive
+
+Category: Legacy Runtime Cleanup / Repository Governance
+
+Status: COMPLETED
+
+BL93 reviewed the remaining active `scripts/` tree after BL92 archived the full `scripts/fundamentals/` runtime cluster.
+
+Result:
+
+* 32 active `scripts/**/*.py` files remain.
+* The active `scripts/fundamentals/` runtime cluster is no longer present.
+* Active tests still import script-era modules from:
+
+  * `scripts.reporting`
+  * `scripts.core`
+  * `scripts.portfolio`
+  * `scripts.ops`
+  * `scripts.data_sources`
+  * `scripts.diagnostics`
+* Canonical boundary metadata still references script-era files in:
+
+  * reporting
+  * messaging
+  * delivery
+  * decision
+  * scanner
+* Side-effect markers remain across:
+
+  * reporting and Telegram delivery
+  * scanner/provider access
+  * core layer builders and Decision Engine
+  * data-source prefill utilities
+  * portfolio and watchlist mutation scripts
+  * ops evidence capture
+
+Decision:
+
+* `REMAINING_SCRIPTS_TREE_NOT_ARCHIVE_READY_AS_A_WHOLE`
+
+Reason:
+
+* broad active test coupling remains;
+* positive script-era metadata references remain;
+* high-risk side-effect surfaces remain;
+* domain-specific decoupling is required before further archive.
+
+Validation:
+
+* full suite: `553 passed in 0.58s`
+
+Recommended next sprint:
+
+* BL94 — Decouple active reporting, messaging, and delivery tests from script-era reporting and Telegram modules
+
+Candidate targets:
+
+* `scripts/reporting/build_reporting_layer.py`
+* `scripts/reporting/build_telegram_summary.py`
+* `scripts/reporting/send_telegram.py`
+* `scripts/telegram/process_telegram_commands.py`
+
+Likely follow-up:
+
+* BL95 — Archive reporting/messaging/delivery script-era modules after final no-active-reference check
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime modules archived
+* no script-era runtime modules edited
+* no script-era runtime modules executed directly
