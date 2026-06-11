@@ -3596,3 +3596,80 @@ Guardrails:
 * no script-era runtime module archived
 * no script-era runtime module edited
 * no script-era runtime module executed directly
+
+
+### BL101 — Archive ops capture script
+
+Category: Legacy Runtime Cleanup / Ops Archive
+
+Status: COMPLETED
+
+BL101 archived the remaining active ops script-era module after BL100 decoupled active ops and diagnostics tests from script-era modules.
+
+Archived file:
+
+* `scripts/ops/capture_historical_evidence.py` -> `archive/legacy_runtime/scripts/ops/capture_historical_evidence.py`
+
+Pre-archive checks:
+
+* no active positive imports remain from `scripts.ops`;
+* no active runtime import, workflow invocation, or source dependency remains for `scripts/ops/capture_historical_evidence.py`;
+* remaining references are static/negative test guardrails only.
+
+Post-archive result:
+
+* active `scripts/ops/*.py` no longer exists;
+* historical ops evidence-capture implementation remains preserved under `archive/legacy_runtime/scripts/ops/`.
+
+Validation:
+
+* focused suite: `12 passed in 0.03s`
+* full suite: `581 passed in 0.58s`
+
+Decision:
+
+* `ARCHIVED`
+
+Remaining cleanup status:
+
+* `scripts/fundamentals/` archived
+* `scripts/reporting/` archived
+* `scripts/telegram/` archived
+* `scripts/data_sources/` archived
+* `scripts/ops/` archived
+
+Recommended next sprint:
+
+* BL102 — Review remaining active scripts tree after ops archive
+
+Goal:
+
+* inspect remaining active `scripts/**/*.py` files after BL92, BL95, BL98, and BL101;
+* confirm that archived domains are no longer active Python runtime paths;
+* identify the safest next decoupling domain.
+
+Likely next candidates:
+
+* selected `scripts/core` layer builders
+
+High-risk domains to avoid archiving casually:
+
+* Decision Engine
+* scanner/provider access
+* portfolio
+* watchlist
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era ops module modified
+* no script-era ops module executed
+* files archived, not deleted
