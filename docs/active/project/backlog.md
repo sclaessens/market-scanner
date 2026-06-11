@@ -3165,3 +3165,63 @@ Guardrails:
 * no script-era Telegram module executed
 * no script-era runtime modules archived
 * no script-era runtime behavior modified
+
+
+### BL95 — Archive reporting, messaging, and delivery script-era modules
+
+Category: Legacy Runtime Cleanup / Reporting, Messaging & Delivery Governance
+
+Status: COMPLETED
+
+BL95 archived the remaining script-era reporting, messaging, and delivery modules after BL94 decoupled active tests and canonical boundary metadata from them.
+
+Archived files:
+
+* `scripts/reporting/build_reporting_layer.py` -> `archive/legacy_runtime/scripts/reporting/build_reporting_layer.py`
+* `scripts/reporting/build_telegram_summary.py` -> `archive/legacy_runtime/scripts/reporting/build_telegram_summary.py`
+* `scripts/reporting/send_telegram.py` -> `archive/legacy_runtime/scripts/reporting/send_telegram.py`
+* `scripts/telegram/process_telegram_commands.py` -> `archive/legacy_runtime/scripts/telegram/process_telegram_commands.py`
+
+Pre-archive checks:
+
+* no active positive imports remain from `scripts.reporting`;
+* no active positive imports remain from `scripts.telegram`;
+* remaining targeted path references are negative guardrail assertions only.
+
+Validation:
+
+* focused suite: `45 passed in 0.03s`
+* full suite: `560 passed in 0.53s`
+
+Decision:
+
+* `ARCHIVED`
+
+Impact:
+
+* active `scripts/reporting/*.py` no longer exists;
+* active `scripts/telegram/*.py` no longer exists;
+* historical script-era reporting and Telegram implementation remains preserved under `archive/legacy_runtime/`.
+
+Operator note:
+
+* archived file paths were accidentally pasted into the terminal as shell commands;
+* the shell produced permission/syntax errors;
+* no Python module execution, Telegram delivery, credential read, production data write, or report generation occurred.
+
+Recommended next sprint:
+
+* BL96 — Review remaining active scripts tree after reporting and Telegram archive
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* files archived, not deleted
