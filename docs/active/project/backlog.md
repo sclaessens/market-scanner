@@ -3380,3 +3380,62 @@ Guardrails:
 * no script-era data-source module executed
 * no script-era data-source module edited
 * no script-era runtime module archived
+
+
+### BL98 — Archive data_sources script-era modules
+
+Category: Legacy Runtime Cleanup / Data Source Governance
+
+Status: COMPLETED
+
+BL98 archived the script-era `scripts/data_sources` modules after BL97 decoupled active tests from them.
+
+Archived files:
+
+* `scripts/data_sources/common.py` -> `archive/legacy_runtime/scripts/data_sources/common.py`
+* `scripts/data_sources/prefill_fundamentals.py` -> `archive/legacy_runtime/scripts/data_sources/prefill_fundamentals.py`
+* `scripts/data_sources/prefill_portfolio_metadata.py` -> `archive/legacy_runtime/scripts/data_sources/prefill_portfolio_metadata.py`
+
+Pre-archive checks:
+
+* no active positive imports remain from `scripts.data_sources`;
+* no active positive path references remain to `scripts/data_sources` in `src`, `tests`, or `.github`.
+
+Post-archive result:
+
+* active `scripts/data_sources/*.py` no longer exists;
+* historical script-era data-source implementation remains preserved under `archive/legacy_runtime/scripts/data_sources/`.
+
+Validation:
+
+* focused suite: `15 passed in 0.03s`
+* full suite: `569 passed in 0.57s`
+
+Decision:
+
+* `ARCHIVED`
+
+Recommended next sprint:
+
+* BL99 — Review remaining active scripts tree after data_sources archive
+
+Goal:
+
+* inspect remaining active `scripts/**/*.py` files after BL92, BL95, and BL98;
+* confirm that `scripts/fundamentals`, `scripts/reporting`, `scripts/telegram`, and `scripts/data_sources` are now archived;
+* identify the safest next decoupling domain.
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era data-source module modified
+* no script-era data-source module executed
+* files archived, not deleted
