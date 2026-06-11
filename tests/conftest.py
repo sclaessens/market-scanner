@@ -21,8 +21,6 @@ _HIGH_RISK_SCRIPT_ERA_TEST_BLOCKERS = (
     "diagnostics/test_audit_data_coverage.py",
     "ops/test_capture_historical_evidence.py",
     "portfolio/test_portfolio_source_contract.py",
-    "reporting/test_build_reporting_layer.py",
-    "reporting/test_build_telegram_summary.py",
 )
 
 collect_ignore = [

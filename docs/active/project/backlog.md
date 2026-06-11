@@ -3082,3 +3082,86 @@ Guardrails:
 * no script-era runtime modules archived
 * no script-era runtime modules edited
 * no script-era runtime modules executed directly
+
+
+### BL94 — Decouple reporting, messaging, and delivery from script-era modules
+
+Category: Legacy Runtime Cleanup / Reporting, Messaging & Delivery Governance
+
+Status: COMPLETED
+
+BL94 decoupled active reporting, messaging, and delivery tests and canonical boundary metadata from script-era reporting and Telegram modules.
+
+Targeted script-era modules:
+
+* `scripts/reporting/build_reporting_layer.py`
+* `scripts/reporting/build_telegram_summary.py`
+* `scripts/reporting/send_telegram.py`
+* `scripts/telegram/process_telegram_commands.py`
+
+Changed files:
+
+* `src/market_scanner/delivery/delivery_boundary.py`
+* `src/market_scanner/messaging/message_boundary.py`
+* `src/market_scanner/reporting/report_boundary.py`
+* `tests/conftest.py`
+* `tests/reporting/test_build_reporting_layer.py`
+* `tests/reporting/test_build_telegram_summary.py`
+* `tests/test_operator_visibility.py`
+* `tests/unit/test_v2_canonical_delivery.py`
+* `tests/unit/test_v2_canonical_messaging.py`
+* `tests/unit/test_v2_canonical_reporting.py`
+
+Result:
+
+* active reporting tests no longer import `scripts.reporting`;
+* active tests no longer import `scripts.telegram`;
+* canonical reporting/messaging/delivery tests no longer statically read the targeted script-era files;
+* canonical boundary metadata no longer lists the targeted active script-era paths as legacy authorities;
+* operator visibility blockers were updated because the reporting tests are no longer script-era blocker tests.
+
+Validation:
+
+* focused suite: `45 passed in 0.05s`
+* full suite: `560 passed in 0.57s`
+
+Active import check:
+
+* no active positive imports remain from `scripts.reporting`;
+* no active positive imports remain from `scripts.telegram`.
+
+Active path reference check:
+
+* remaining references to targeted script-era paths are negative guardrail assertions only;
+* they are not imports, static file reads, runtime dependencies, or execution paths.
+
+Decision:
+
+* `REPORTING_MESSAGING_DELIVERY_ACTIVE_DEPENDENCIES_DECOUPLED`
+
+Recommended next sprint:
+
+* BL95 — Archive reporting, messaging, and delivery script-era modules after final no-active-reference check
+
+Candidate BL95 archive targets:
+
+* `scripts/reporting/build_reporting_layer.py`
+* `scripts/reporting/build_telegram_summary.py`
+* `scripts/reporting/send_telegram.py`
+* `scripts/telegram/process_telegram_commands.py`
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era reporting module executed
+* no script-era Telegram module executed
+* no script-era runtime modules archived
+* no script-era runtime behavior modified

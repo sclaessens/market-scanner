@@ -1,59 +1,83 @@
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-import pandas as pd
-
-sys.path.append(str(Path(__file__).resolve().parents[2]))
-
-from scripts.reporting import build_reporting_layer as reporting
-from scripts.reporting import build_telegram_summary
+from market_scanner.delivery.delivery_boundary import build_delivery_plan
+from market_scanner.messaging.message_boundary import build_message_composition_plan
+from market_scanner.reporting.report_boundary import build_report_artifact_plan
 
 
-def test_telegram_summary_wrapper_delegates_to_reporting_layer(
-    monkeypatch,
-    tmp_path: Path,
-):
-    final_decisions = pd.DataFrame(
-        [
-            {
-                "ticker": "AAA",
-                "date": "2026-05-10",
-                "final_action": "HOLD",
-                "allocation_decision": "SOURCE_HOLD",
-                "execution_decision": "SOURCE_NONE",
-                "portfolio_decision_state": "SOURCE_PORTFOLIO",
-                "opportunity_decision_state": "SOURCE_OPPORTUNITY",
-                "arbitration_state": "SOURCE_CLEAR",
-                "allocation_rationale": "source allocation rationale",
-                "execution_rationale": "source execution rationale",
-                "arbitration_reason": "source arbitration reason",
-                "conflict_resolution_reason": "source conflict reason",
-                "source_provenance": "DECISION_ENGINE",
-                "decision_contract_version": "DECISION_CONTRACT_V1",
-                "input_row_hash": "hash-aaa",
-            }
-        ]
+def _flatten_values(value):
+    if isinstance(value, dict):
+        for item in value.values():
+            yield from _flatten_values(item)
+    elif isinstance(value, (list, tuple, set)):
+        for item in value:
+            yield from _flatten_values(item)
+    elif hasattr(value, "__dict__"):
+        yield from _flatten_values(vars(value))
+    else:
+        yield str(value)
+
+
+def test_message_and_report_boundaries_remain_separated_from_delivery_execution():
+    message_plan = build_message_composition_plan()
+    report_plan = build_report_artifact_plan()
+    delivery_plan = build_delivery_plan()
+
+    assert message_plan.composition_policy.composition_only is True
+    assert report_plan.artifact_policy.artifact_planning_only is True
+    assert delivery_plan.delivery_policy.delivery_planning_only is True
+
+    assert delivery_plan.delivery_policy.credentials_allowed is False
+    assert delivery_plan.delivery_policy.network_calls_allowed is False
+    assert delivery_plan.delivery_policy.final_outcomes_allowed is False
+
+
+def test_telegram_summary_contract_is_represented_as_planning_not_script_wrapper():
+    output_text = " ".join(
+        (
+            " ".join(_flatten_values(build_message_composition_plan())),
+            " ".join(_flatten_values(build_report_artifact_plan())),
+            " ".join(_flatten_values(build_delivery_plan())),
+        )
     )
-    final_path = tmp_path / "data/processed/final_decisions.csv"
-    final_path.parent.mkdir(parents=True, exist_ok=True)
-    final_decisions.to_csv(final_path, index=False)
 
-    monkeypatch.setattr(reporting, "FINAL_DECISIONS_FILE", final_path)
-    monkeypatch.setattr(reporting, "STABILITY_STATE_FILE", tmp_path / "data/processed/stability_state.csv")
-    monkeypatch.setattr(
-        reporting,
-        "REPORTING_DASHBOARD_FILE",
-        tmp_path / "data/processed/reporting_dashboard_data.csv",
+    assert "review_summary" in output_text
+    assert "operator_review_message" in output_text
+    assert "telegram_planned" in output_text
+    assert "telegram_delivery" in output_text
+    assert "telegram_send" in output_text
+
+    forbidden_active_paths = (
+        "scripts/reporting/build_reporting_layer.py",
+        "scripts/reporting/build_telegram_summary.py",
+        "scripts/reporting/send_telegram.py",
+        "scripts/telegram/process_telegram_commands.py",
     )
-    monkeypatch.setattr(reporting, "REPORTING_LOG_FILE", tmp_path / "data/logs/reporting_layer_log.csv")
-    monkeypatch.setattr(reporting, "TELEGRAM_MESSAGE_FILE", tmp_path / "reports/daily/telegram_message.txt")
-    monkeypatch.setattr(build_telegram_summary, "TELEGRAM_MESSAGE_FILE", reporting.TELEGRAM_MESSAGE_FILE)
 
-    wrapper_text = build_telegram_summary.build_telegram_summary_text()
-    _, _, authoritative_text = reporting.build_reporting_layer()
+    for path in forbidden_active_paths:
+        assert path not in output_text
 
-    assert wrapper_text == authoritative_text
-    assert "Decision output: HOLD" in wrapper_text
-    assert "Low-information scanner observations omitted" not in wrapper_text
+
+def test_no_delivery_execution_or_investment_recommendation_language_is_allowed():
+    output_text = " ".join(
+        (
+            " ".join(_flatten_values(build_message_composition_plan())),
+            " ".join(_flatten_values(build_report_artifact_plan())),
+            " ".join(_flatten_values(build_delivery_plan())),
+        )
+    ).lower()
+
+    forbidden_outputs = (
+        "buy now",
+        "urgent buy",
+        "ranked buy",
+        "best buy",
+        "top pick",
+        "recommended buy",
+        "priority action",
+        "actionable trade",
+    )
+
+    for term in forbidden_outputs:
+        assert term not in output_text
+

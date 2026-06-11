@@ -232,9 +232,6 @@ def test_legacy_report_message_telegram_files_are_not_expanded_to_import_reporti
         (ARCHIVED_LEGACY_RUNTIME_DIR / "run_full_pipeline.py").read_text(
             encoding="utf-8"
         ),
-        Path("scripts/reporting/build_reporting_layer.py").read_text(encoding="utf-8"),
-        Path("scripts/reporting/build_telegram_summary.py").read_text(encoding="utf-8"),
-        Path("scripts/reporting/send_telegram.py").read_text(encoding="utf-8"),
         Path("src/market_scanner/reporting/reporting_input_adapter.py").read_text(
             encoding="utf-8"
         ),
