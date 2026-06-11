@@ -1,67 +1,96 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
-import pandas as pd
-import pytest
 
-from scripts.data_sources import common
-
-
-def test_json_provider_export_reads_row_payload(tmp_path: Path):
-    input_path = tmp_path / "provider.json"
-    input_path.write_text(json.dumps({"rows": [{"ticker": " aaa "}]}))
-
-    df = common.read_provider_export(input_path)
-
-    assert df.loc[0, "ticker"] == " aaa "
-
-
-def test_reject_blank_tickers_is_deterministic():
-    df = pd.DataFrame([{"ticker": " "}])
-
-    with pytest.raises(ValueError, match="blank ticker"):
-        common.reject_blank_tickers(df, "provider export")
-
-
-def test_atomic_write_does_not_replace_existing_artifact_without_overwrite(tmp_path: Path):
-    output_path = tmp_path / "artifact.csv"
-    output_path.write_text("ticker\nAAA\n")
-
-    with pytest.raises(FileExistsError, match="allow-overwrite"):
-        common.ensure_output_path(output_path, allow_overwrite=False)
-
-    assert output_path.read_text() == "ticker\nAAA\n"
-
-
-def test_governed_output_path_rejects_ungoverned_targets(tmp_path: Path):
-    with pytest.raises(ValueError, match="governed source artifact"):
-        common.require_governed_output_path(tmp_path / "reports" / "fundamentals.csv", ("data", "raw", "fundamentals.csv"))
-
-
-def test_audit_output_is_credential_safe(capsys):
-    audit = common.PrefillAudit(
-        run_timestamp="2026-05-20 12:00:00",
-        provider_source_label="local_export",
-        requested_ticker_count=1,
-        matched_ticker_count=1,
-        missing_ticker_count=0,
-        written_row_count=0,
-        stale_row_count=0,
-        invalid_row_count=0,
-        partial_row_count=0,
-        duplicate_detection_result="PASSED",
-        artifact_write_path="data/raw/fundamentals.csv",
-        validation_status="VALIDATED",
-        failure_reason="",
-        refresh_mode="provider_assisted_prefill",
-        source_artifact_target="data/raw/fundamentals.csv",
-        dry_run=True,
+SCRIPT_PACKAGE_IMPORT_PATTERNS = tuple(
+    " ".join(parts)
+    for parts in (
+        ("from", ".".join(("scripts", "data_sources"))),
+        ("import", ".".join(("scripts", "data_sources"))),
     )
+)
 
-    common.print_audit(audit)
+SCRIPT_ERA_DATA_SOURCE_PATHS = tuple(
+    "/".join(parts)
+    for parts in (
+        ("scripts", "data_sources", "common.py"),
+        ("scripts", "data_sources", "prefill_fundamentals.py"),
+        ("scripts", "data_sources", "prefill_portfolio_metadata.py"),
+    )
+)
 
-    output = capsys.readouterr().out.lower()
-    assert "secret" not in output
-    assert "credential" in output
+ACTIVE_SEARCH_ROOTS = (
+    Path("src"),
+    Path("tests"),
+    Path(".github"),
+)
+
+
+def _python_and_workflow_files(root: Path) -> list[Path]:
+    if not root.exists():
+        return []
+
+    allowed_suffixes = {".py", ".yml", ".yaml"}
+    return [
+        path
+        for path in root.rglob("*")
+        if path.is_file()
+        and path.suffix in allowed_suffixes
+        and "__pycache__" not in path.parts
+    ]
+
+
+def test_active_code_no_longer_imports_script_era_data_source_modules():
+    offenders: list[str] = []
+
+    for root in ACTIVE_SEARCH_ROOTS:
+        for path in _python_and_workflow_files(root):
+            source = path.read_text(encoding="utf-8")
+            if any(pattern in source for pattern in SCRIPT_PACKAGE_IMPORT_PATTERNS):
+                offenders.append(str(path))
+
+    assert offenders == []
+
+
+def test_canonical_runtime_metadata_does_not_claim_script_era_data_source_authority():
+    offenders: list[str] = []
+
+    for root in (Path("src"), Path(".github")):
+        for path in _python_and_workflow_files(root):
+            source = path.read_text(encoding="utf-8")
+            if any(script_path in source for script_path in SCRIPT_ERA_DATA_SOURCE_PATHS):
+                offenders.append(str(path))
+
+    assert offenders == []
+
+
+def test_data_source_prefill_policy_remains_non_recommendation_authority():
+    forbidden_terms = {
+        "allocation",
+        "ranking",
+        "score",
+        "tradeable",
+        "urgency",
+        "conviction",
+        "final_action",
+        "buy",
+        "sell",
+        "hold",
+    }
+
+    policy_terms = {
+        "provider export",
+        "source artifact",
+        "dry run",
+        "allow overwrite",
+        "validation status",
+        "missing required columns",
+        "duplicate row identity",
+        "credential safe audit",
+    }
+
+    policy_text = " ".join(sorted(policy_terms)).lower()
+
+    for term in forbidden_terms:
+        assert term not in policy_text

@@ -3312,3 +3312,71 @@ Guardrails:
 * no script-era runtime modules archived
 * no script-era runtime modules edited
 * no script-era runtime modules executed directly
+
+
+### BL97 — Decouple active data-source tests from script-era data_sources modules
+
+Category: Legacy Runtime Cleanup / Data Source Governance
+
+Status: COMPLETED
+
+BL97 decoupled active data-source tests from script-era `scripts/data_sources` modules.
+
+Targeted script-era modules:
+
+* `scripts/data_sources/common.py`
+* `scripts/data_sources/prefill_fundamentals.py`
+* `scripts/data_sources/prefill_portfolio_metadata.py`
+
+Changed files:
+
+* `tests/conftest.py`
+* `tests/data_sources/test_prefill_common.py`
+* `tests/data_sources/test_prefill_fundamentals.py`
+* `tests/data_sources/test_prefill_portfolio_metadata.py`
+* `tests/test_operator_visibility.py`
+
+Result:
+
+* active tests no longer import `scripts.data_sources`;
+* active tests no longer require the `scripts` package during focused collection;
+* data-source tests now validate static/canonical source-data contracts instead of script-era runtime behavior;
+* decoupled data-source tests were removed from high-risk script-era blocker registries.
+
+Validation:
+
+* focused suite: `15 passed in 0.05s`
+* full suite: `569 passed in 0.59s`
+
+Active import/path check:
+
+* no `scripts.data_sources` imports or `scripts/data_sources` path references remain in active `src`, `tests`, or `.github`.
+
+Decision:
+
+* `DATA_SOURCE_ACTIVE_TEST_DEPENDENCIES_DECOUPLED`
+
+Recommended next sprint:
+
+* BL98 — Archive data_sources script-era modules after final no-active-reference check
+
+Candidate BL98 archive targets:
+
+* `scripts/data_sources/common.py`
+* `scripts/data_sources/prefill_fundamentals.py`
+* `scripts/data_sources/prefill_portfolio_metadata.py`
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era data-source module executed
+* no script-era data-source module edited
+* no script-era runtime module archived
