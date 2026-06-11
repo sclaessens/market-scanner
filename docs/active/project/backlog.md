@@ -2876,3 +2876,68 @@ Guardrails:
 * no script-era runtime modules edited
 * no script-era runtime files archived
 * no script-era runtime files deleted
+
+
+### BL91 — Decouple active bulk SEC CompanyFacts intake test from provider-risk script-era module
+
+Category: Legacy Runtime Cleanup / SEC CompanyFacts Governance
+
+Status: COMPLETED
+
+BL91 decoupled the final active positive test reference to the provider-risk script-era bulk SEC CompanyFacts intake module:
+
+* `scripts/fundamentals/sec_companyfacts_bulk_intake.py`
+
+Updated test:
+
+* `tests/fundamentals/test_sec_companyfacts_bulk_intake.py`
+
+Result:
+
+* removed positive path reference to `scripts/fundamentals/sec_companyfacts_bulk_intake.py`;
+* preserved SEC CompanyFacts provider-governance policy;
+* preserved explicit operator-action requirement for network/cache/manifest behavior;
+* preserved no-network/no-cache-write test guardrails;
+* preserved no-investment-authority policy.
+
+Validation:
+
+* focused bulk-intake test: `4 passed in 0.02s`
+* BL90/BL91 focused suite: `89 passed in 0.07s`
+* full suite: `553 passed in 0.57s`
+
+Archive-readiness impact:
+
+* `sec_companyfacts_bulk_intake.py` active positive path reference is now decoupled;
+* provider/network/cache-risk remains but is no longer actively referenced by tests as a runtime path;
+* the remaining `scripts/fundamentals/` cluster is now candidate for archive after one final no-active-positive-reference check.
+
+Recommended next sprint:
+
+* BL92 — Archive remaining scripts/fundamentals cluster after final no-active-reference check
+
+Candidate archive targets:
+
+* `scripts/fundamentals/build_analysis.py`
+* `scripts/fundamentals/build_history_intake.py`
+* `scripts/fundamentals/build_metrics.py`
+* `scripts/fundamentals/build_quality.py`
+* `scripts/fundamentals/run_sec_transformation_review.py`
+* `scripts/fundamentals/sec_companyfacts_bulk_intake.py`
+* `scripts/fundamentals/sec_companyfacts_transform.py`
+* `scripts/fundamentals/sec_ticker_cik_index.py`
+
+Guardrails:
+
+* no live SEC/EDGAR calls
+* no yfinance calls
+* no credentials read
+* no production data writes
+* no reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime modules executed
+* no script-era runtime modules edited
+* no script-era runtime files archived
+* no script-era runtime files deleted
