@@ -3769,3 +3769,89 @@ Guardrails:
 * no script-era runtime modules archived
 * no script-era runtime modules edited
 * no script-era runtime modules executed directly
+
+
+### BL103 — Decouple selected core layer tests from script-era modules
+
+Category: Legacy Runtime Cleanup / Test Decoupling
+
+Status: COMPLETED
+
+BL103 decoupled selected active core-layer tests from script-era modules.
+
+Updated tests:
+
+* `tests/core/test_build_context_layer.py`
+* `tests/core/test_build_validation_layer.py`
+* `tests/core/test_entry_quality.py`
+* `tests/core/test_build_timing_state_layer.py`
+* `tests/core/test_build_stability_layer.py`
+
+Updated blocker registries:
+
+* `tests/conftest.py`
+* `tests/test_operator_visibility.py`
+
+Targeted script-era modules:
+
+* `scripts/core/build_context_layer.py`
+* `scripts/core/build_validation_layer.py`
+* `scripts/core/build_timing_state_layer.py`
+* `scripts/core/build_stability_layer.py`
+
+Result:
+
+* the selected tests no longer import script-era modules;
+* the tests now validate static/canonical contracts;
+* the selected tests were removed from the high-risk script-era blocker registries;
+* the full suite now includes these tests again.
+
+Validation:
+
+* focused suite: `35 passed in 0.07s`
+* full suite: `610 passed in 0.64s`
+
+Decision:
+
+* `SELECTED_CORE_LAYER_ACTIVE_TEST_DEPENDENCIES_DECOUPLED`
+
+Remaining active positive `scripts.core` test imports:
+
+* `tests/core/test_build_entry_quality_backfill.py`
+* `tests/core/test_build_context_backfill.py`
+* `tests/core/test_decision_engine.py`
+* `tests/core/test_build_portfolio_intelligence.py`
+
+Recommended next sprint:
+
+* BL104 — Review archive-readiness of decoupled core layer modules
+
+Candidate modules for review only:
+
+* `scripts/core/build_context_layer.py`
+* `scripts/core/build_validation_layer.py`
+* `scripts/core/build_timing_state_layer.py`
+* `scripts/core/build_stability_layer.py`
+
+High-risk areas still out of scope:
+
+* Decision Engine
+* scanner/provider access
+* portfolio
+* watchlist
+* scan validation
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime modules archived
+* no script-era runtime modules edited
+* no script-era runtime modules executed directly
