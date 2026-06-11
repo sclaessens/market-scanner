@@ -153,4 +153,7 @@ def build_context_layer() -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    build_context_layer()
+    raise SystemExit(
+        "FAIL_CLOSED: scripts/core/build_context_layer.py is a legacy script-era module. "
+        "Use the canonical market_scanner runtime instead."
+    )
