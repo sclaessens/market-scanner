@@ -237,4 +237,7 @@ def build_validation_layer() -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    build_validation_layer()
+    raise SystemExit(
+        "FAIL_CLOSED: scripts/core/build_validation_layer.py is a legacy script-era module. "
+        "Use the canonical market_scanner runtime instead."
+    )

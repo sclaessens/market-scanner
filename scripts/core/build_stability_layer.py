@@ -360,12 +360,10 @@ def build_stability_layer() -> pd.DataFrame:
 
 
 def main() -> None:
-    df = build_stability_layer()
-    print(f"Stability state written to: {OUTPUT_PATH}")
-    print(f"Stability layer log written to: {LOG_PATH}")
-    print(f"Rows: {len(df)}")
-    if not df.empty:
-        print(df.to_string(index=False))
+    raise SystemExit(
+        "FAIL_CLOSED: scripts/core/build_stability_layer.py is a legacy script-era module. "
+        "Use the canonical market_scanner runtime instead."
+    )
 
 
 if __name__ == "__main__":

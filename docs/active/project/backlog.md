@@ -3932,3 +3932,77 @@ Guardrails:
 * no script-era runtime modules archived
 * no script-era runtime modules edited
 * no script-era runtime modules executed directly
+
+
+### BL105 — Fail-close selected decoupled core layer modules before archive
+
+Category: Legacy Runtime Cleanup / De-run / Fail-close
+
+Status: COMPLETED
+
+BL105 fail-closed manual execution surfaces for selected decoupled core layer script-era modules.
+
+Updated modules:
+
+* `scripts/core/build_context_layer.py`
+* `scripts/core/build_validation_layer.py`
+* `scripts/core/build_timing_state_layer.py`
+* `scripts/core/build_stability_layer.py`
+
+Result:
+
+* direct manual execution through `if __name__ == "__main__"` is now fail-closed;
+* `scripts/core/build_stability_layer.py` now has a fail-closed `main()` function;
+* historical function bodies were preserved;
+* no modules were archived;
+* no canonical runtime behavior was changed.
+
+Validation:
+
+* focused suite: `35 passed in 0.07s`
+* full suite: `610 passed in 0.64s`
+
+Decision:
+
+* `SELECTED_DECOUPLED_CORE_LAYER_MANUAL_ENTRYPOINTS_FAIL_CLOSED`
+
+Remaining archive-readiness status:
+
+* internal `pd.read_csv(...)`, `to_csv(...)`, `mkdir(...)`, and fixed data paths remain;
+* the modules require one final archive-readiness review before controlled archive;
+* broader `scripts/core` remains blocked by active positive imports outside BL105 scope.
+
+Recommended next sprint:
+
+* BL106 — Final archive-readiness review for fail-closed core layer modules
+
+Candidate modules:
+
+* `scripts/core/build_context_layer.py`
+* `scripts/core/build_validation_layer.py`
+* `scripts/core/build_timing_state_layer.py`
+* `scripts/core/build_stability_layer.py`
+
+High-risk areas still out of scope:
+
+* Decision Engine
+* scanner/provider access
+* portfolio
+* watchlist
+* scan validation
+* portfolio intelligence
+
+Guardrails:
+
+* no live provider calls
+* no yfinance calls
+* no SEC/EDGAR calls
+* no credentials read
+* no production data writes
+* no production reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime modules archived
+* no script-era runtime modules executed directly
+* only manual entrypoint fail-close behavior changed
