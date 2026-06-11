@@ -2941,3 +2941,62 @@ Guardrails:
 * no script-era runtime modules edited
 * no script-era runtime files archived
 * no script-era runtime files deleted
+
+
+### BL92 — Archive remaining scripts/fundamentals cluster after final no-active-reference check
+
+Category: Legacy Runtime Cleanup / Fundamentals Governance
+
+Status: COMPLETED
+
+BL92 archived the remaining `scripts/fundamentals/` script-era runtime cluster after final no-active-reference checks confirmed that active `src`, `tests`, and `.github` code no longer depends on these files.
+
+Archived files:
+
+* `scripts/fundamentals/build_analysis.py` -> `archive/legacy_runtime/scripts/fundamentals/build_analysis.py`
+* `scripts/fundamentals/build_history_intake.py` -> `archive/legacy_runtime/scripts/fundamentals/build_history_intake.py`
+* `scripts/fundamentals/build_metrics.py` -> `archive/legacy_runtime/scripts/fundamentals/build_metrics.py`
+* `scripts/fundamentals/build_quality.py` -> `archive/legacy_runtime/scripts/fundamentals/build_quality.py`
+* `scripts/fundamentals/run_sec_transformation_review.py` -> `archive/legacy_runtime/scripts/fundamentals/run_sec_transformation_review.py`
+* `scripts/fundamentals/sec_companyfacts_bulk_intake.py` -> `archive/legacy_runtime/scripts/fundamentals/sec_companyfacts_bulk_intake.py`
+* `scripts/fundamentals/sec_companyfacts_transform.py` -> `archive/legacy_runtime/scripts/fundamentals/sec_companyfacts_transform.py`
+* `scripts/fundamentals/sec_ticker_cik_index.py` -> `archive/legacy_runtime/scripts/fundamentals/sec_ticker_cik_index.py`
+
+Final checks:
+
+* no active positive file-path references from `src`, `tests`, or `.github`;
+* no active positive `scripts.fundamentals` imports from `src`, `tests`, or `.github`;
+* no active `scripts/fundamentals/*.py` files remain.
+
+Validation:
+
+* focused regression suite: `89 passed in 0.07s`
+* full suite: `553 passed in 0.58s`
+
+Decision:
+
+* `ARCHIVED`
+
+Impact:
+
+* active fundamentals runtime is now canonical under `src/market_scanner/`;
+* script-era fundamentals runtime implementation is preserved under `archive/legacy_runtime/`;
+* provider-risk SEC CompanyFacts bulk-intake implementation is no longer active runtime and remains historical legacy evidence only.
+
+Recommended next sprint:
+
+* BL93 — Review remaining active scripts/ tree after fundamentals archive
+
+Guardrails:
+
+* no live SEC/EDGAR calls
+* no yfinance calls
+* no credentials read
+* no production data writes
+* no reports generated
+* no Telegram messages sent
+* no portfolio/watchlist state modified
+* no Decision Engine authority changed
+* no script-era runtime modules executed
+* no script-era runtime behavior modified
+* files archived, not deleted
