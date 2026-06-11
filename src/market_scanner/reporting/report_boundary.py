@@ -12,9 +12,6 @@ from market_scanner.reporting.report_contracts import (
 REPORTING_CANONICAL_OWNER = "src/market_scanner/reporting/"
 
 LEGACY_REPORT_AUTHORITIES = (
-    "scripts/reporting/build_reporting_layer.py",
-    "scripts/reporting/build_telegram_summary.py",
-    "scripts/reporting/send_telegram.py",
     "src/market_scanner/reporting/reporting_engine.py",
     "src/market_scanner/reporting/reporting_input_adapter.py",
     "src/market_scanner/reporting/telegram_renderer.py",

@@ -12,9 +12,6 @@ from market_scanner.messaging.message_contracts import (
 MESSAGING_CANONICAL_OWNER = "src/market_scanner/messaging/"
 
 LEGACY_MESSAGE_AUTHORITIES = (
-    "scripts/reporting/build_reporting_layer.py",
-    "scripts/reporting/build_telegram_summary.py",
-    "scripts/reporting/send_telegram.py",
     "src/market_scanner/reporting/reporting_input_adapter.py",
     "src/market_scanner/reporting/telegram_renderer.py",
 )

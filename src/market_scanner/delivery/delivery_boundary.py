@@ -13,8 +13,6 @@ DELIVERY_CANONICAL_OWNER = "src/market_scanner/delivery/"
 ARCHIVED_LEGACY_RUNTIME_ROOT = "archive/legacy_runtime/scripts"
 
 LEGACY_DELIVERY_AUTHORITIES = (
-    "scripts/reporting/send_telegram.py",
-    "scripts/telegram/process_telegram_commands.py",
     f"{ARCHIVED_LEGACY_RUNTIME_ROOT}/run_scan.py",
     f"{ARCHIVED_LEGACY_RUNTIME_ROOT}/run_full_pipeline.py",
 )
