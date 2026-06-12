@@ -2509,6 +2509,78 @@ Guardrails:
 * no Telegram messages sent
 * no portfolio/watchlist state modified
 * no Decision Engine authority changed
+
+
+### BL109 — Decouple historical backfill tests from script-era modules
+
+Category: Legacy Runtime Cleanup / Test Decoupling
+
+Status: COMPLETED
+
+BL109 decoupled historical backfill tests from script-era modules.
+
+Updated tests:
+
+* `tests/core/test_build_entry_quality_backfill.py`
+* `tests/core/test_build_context_backfill.py`
+
+Test-harness updates:
+
+* `tests/conftest.py`
+* `tests/test_operator_visibility.py`
+
+Targeted script-era modules:
+
+* `scripts/core/build_entry_quality_backfill.py`
+* `scripts/core/build_context_backfill.py`
+
+Result:
+
+* the target tests no longer import or execute the script-era backfill modules;
+* the target tests now use test-local contract helpers and synthetic fixtures;
+* the target tests were removed from the high-risk script-era blocker registry and are active in the full suite;
+* no archive move was performed;
+* no script-era module was modified or deleted;
+* no provider calls, production data writes, reports, Telegram delivery, portfolio state changes, watchlist state changes, scan validation runtime changes, Decision Engine changes, or portfolio intelligence changes were performed.
+
+Validation:
+
+* focused suite: `17 passed in 0.53s`
+* full suite: `628 passed in 1.13s`
+
+Full-suite count note:
+
+* the total increased from the prior `610 passed` baseline because the two previously ignored historical backfill tests are active again and operator visibility now includes one additional decoupling guard.
+
+Decision:
+
+* `BL110_ARCHIVE_READINESS_REVIEW_APPROVED_FOR_DECOUPLED_HISTORICAL_BACKFILL_MODULES`
+
+Recommended next sprint:
+
+* BL110 — Archive-readiness review for decoupled historical backfill modules
+
+BL110 goal:
+
+* review archive-readiness for `scripts/core/build_entry_quality_backfill.py` and `scripts/core/build_context_backfill.py`;
+* do not archive the modules unless a separate review proves readiness;
+* preserve historical source content;
+* keep the sprint review-only unless archive readiness is explicitly established.
+
+High-risk areas still out of scope:
+
+* Decision Engine
+* portfolio intelligence
+* portfolio source contract
+* trade command parser
+* scanner/provider runtime
+* SEC/EDGAR
+* yfinance
+* Telegram
+* production data writes
+* portfolio state
+* watchlist state
+* scan validation runtime
 * no script-era Python runtime files executed
 
 
