@@ -4238,7 +4238,7 @@ High-risk areas still out of scope:
 
 ## BL113 — Controlled archive of fail-closed historical backfill modules
 
-Status: proposed
+Status: COMPLETED
 
 Context:
 BL112 completed archive-readiness review for the two fail-closed historical backfill modules:
@@ -4277,3 +4277,40 @@ Required constraints:
 * do not touch Decision Engine, portfolio intelligence, portfolio source contract, trade command parser, scanner/provider runtime, SEC/EDGAR, yfinance, credentials, production data, reports, Telegram, portfolio state, or watchlist state;
 * run focused and full pytest suites after the archive.
 
+Result:
+
+* `scripts/core/build_entry_quality_backfill.py` was moved with `git mv` to `archive/legacy_runtime/scripts/core/build_entry_quality_backfill.py`;
+* `scripts/core/build_context_backfill.py` was moved with `git mv` to `archive/legacy_runtime/scripts/core/build_context_backfill.py`;
+* no historical code inside the archived files was modified;
+* no tests required changes;
+* no canonical runtime behavior changed.
+
+Validation:
+
+* focused suite: `24 passed in 0.35s`
+* full suite: `628 passed in 1.23s`
+
+Decision:
+
+* `BL113_COMPLETED_FAIL_CLOSED_HISTORICAL_BACKFILL_MODULES_ARCHIVED`
+
+
+## BL114 — Review remaining active scripts/core tree after historical backfill archive
+
+Status: proposed
+
+Context:
+BL113 archived the two fail-closed historical backfill modules:
+
+- `scripts/core/build_entry_quality_backfill.py`
+- `scripts/core/build_context_backfill.py`
+
+The modules were moved with `git mv` to:
+
+- `archive/legacy_runtime/scripts/core/build_entry_quality_backfill.py`
+- `archive/legacy_runtime/scripts/core/build_context_backfill.py`
+
+Required next step:
+Perform a review-only inventory of the remaining active `scripts/core/` tree after the historical backfill archive.
+
+BL114 must not archive anything. It must only classify remaining active script-era dependencies, active imports, side-effect risks, and candidate next sprints.
