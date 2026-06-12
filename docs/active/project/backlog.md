@@ -4174,3 +4174,32 @@ Guardrails:
 * no Telegram messages sent
 * no portfolio/watchlist state modified
 * no Decision Engine authority changed
+
+
+## BL111 — Fail-close decoupled historical backfill modules
+
+Status: proposed
+
+Context:
+BL110 reviewed archive-readiness for:
+
+- `scripts/core/build_entry_quality_backfill.py`
+- `scripts/core/build_context_backfill.py`
+
+BL110 found that active imports from `src`, `tests`, and `.github` are gone, and the focused/full suites passed. However, both modules still contain manual-run/write-risk markers, including `main()`, `if __name__ == "__main__"`, `read_csv`, `mkdir`, `to_csv`, and fixed `data/processed` / `data/logs` paths.
+
+Decision:
+BL111 must be a fail-closed sprint, not an archive sprint.
+
+Scope:
+- `scripts/core/build_entry_quality_backfill.py`
+- `scripts/core/build_context_backfill.py`
+
+Required outcome:
+- manual execution fails closed;
+- historical function bodies remain preserved;
+- no archive move;
+- no provider calls;
+- no production data writes;
+- focused and full pytest suites remain green.
+- 
