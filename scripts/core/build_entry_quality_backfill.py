@@ -70,6 +70,12 @@ ALLOWED_REASONS = {
     "missing_data",
 }
 
+FAIL_CLOSED_MESSAGE = (
+    "FAIL_CLOSED: This legacy historical backfill module is fail-closed and "
+    "must not be executed manually. It is retained only for historical review "
+    "pending controlled archive governance."
+)
+
 
 @dataclass(frozen=True)
 class EntryQualityConfig:
@@ -477,7 +483,7 @@ def parse_args(argv: Iterable[str]) -> argparse.Namespace:
     return parser.parse_args(list(argv))
 
 
-def main(argv: Iterable[str] | None = None) -> int:
+def _legacy_main_impl(argv: Iterable[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     config = EntryQualityConfig(
         max_distance_breakout_pct=args.max_distance_breakout_pct,
@@ -509,5 +515,9 @@ def main(argv: Iterable[str] | None = None) -> int:
     return 0
 
 
+def main(argv: Iterable[str] | None = None) -> int:
+    raise SystemExit(FAIL_CLOSED_MESSAGE)
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(FAIL_CLOSED_MESSAGE)

@@ -62,6 +62,12 @@ ALLOWED_CONTEXT_REASON = {
     "fallback",
 }
 
+FAIL_CLOSED_MESSAGE = (
+    "FAIL_CLOSED: This legacy historical backfill module is fail-closed and "
+    "must not be executed manually. It is retained only for historical review "
+    "pending controlled archive governance."
+)
+
 
 @dataclass(frozen=True)
 class PriceResult:
@@ -340,7 +346,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
+def _legacy_main_impl() -> None:
     args = parse_args()
     output = build_context_backfill(
         scans_path=args.scans,
@@ -351,5 +357,9 @@ def main() -> None:
     print(f"Wrote {len(output)} rows to {args.output}")
 
 
+def main() -> None:
+    raise SystemExit(FAIL_CLOSED_MESSAGE)
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(FAIL_CLOSED_MESSAGE)

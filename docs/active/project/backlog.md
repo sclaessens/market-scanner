@@ -4176,30 +4176,62 @@ Guardrails:
 * no Decision Engine authority changed
 
 
-## BL111 — Fail-close decoupled historical backfill modules
+### BL111 — Fail-close decoupled historical backfill modules
 
-Status: proposed
+Category: Legacy Runtime Cleanup / Fail-close
 
-Context:
-BL110 reviewed archive-readiness for:
+Status: COMPLETED
 
-- `scripts/core/build_entry_quality_backfill.py`
-- `scripts/core/build_context_backfill.py`
+BL111 fail-closed manual execution surfaces for the decoupled historical backfill modules.
 
-BL110 found that active imports from `src`, `tests`, and `.github` are gone, and the focused/full suites passed. However, both modules still contain manual-run/write-risk markers, including `main()`, `if __name__ == "__main__"`, `read_csv`, `mkdir`, `to_csv`, and fixed `data/processed` / `data/logs` paths.
+Updated modules:
+
+* `scripts/core/build_entry_quality_backfill.py`
+* `scripts/core/build_context_backfill.py`
+
+Result:
+
+* both modules now define a `FAIL_CLOSED_MESSAGE`;
+* direct `if __name__ == "__main__"` execution raises `SystemExit` with the fail-closed message;
+* public `main()` functions raise `SystemExit` with the fail-closed message;
+* historical `main()` bodies were preserved as private `_legacy_main_impl(...)` helpers;
+* no archive move was performed;
+* no historical helper logic was refactored;
+* no provider calls, production data writes, reports, Telegram delivery, portfolio state changes, watchlist state changes, scan validation runtime changes, Decision Engine changes, or portfolio intelligence changes were performed.
+
+Validation:
+
+* focused suite: `24 passed in 0.37s`
+* full suite: `628 passed in 0.99s`
+* direct execution safety check: both target scripts exited immediately with the fail-closed message and no writes.
 
 Decision:
-BL111 must be a fail-closed sprint, not an archive sprint.
 
-Scope:
-- `scripts/core/build_entry_quality_backfill.py`
-- `scripts/core/build_context_backfill.py`
+* `BL112_ARCHIVE_READINESS_REVIEW_APPROVED_FOR_FAIL_CLOSED_HISTORICAL_BACKFILL_MODULES`
 
-Required outcome:
-- manual execution fails closed;
-- historical function bodies remain preserved;
-- no archive move;
-- no provider calls;
-- no production data writes;
-- focused and full pytest suites remain green.
-- 
+Recommended next sprint:
+
+* BL112 — Archive-readiness review for fail-closed historical backfill modules
+
+BL112 goal:
+
+* review archive-readiness for `scripts/core/build_entry_quality_backfill.py` and `scripts/core/build_context_backfill.py`;
+* do not archive the modules unless a separate review proves readiness;
+* preserve historical source content;
+* keep the sprint review-only unless archive readiness is explicitly established.
+
+High-risk areas still out of scope:
+
+* Decision Engine
+* portfolio intelligence
+* portfolio source contract
+* trade command parser
+* scanner/provider runtime
+* SEC/EDGAR
+* yfinance
+* credentials
+* production data writes
+* report generation
+* Telegram
+* watchlist state
+* portfolio state
