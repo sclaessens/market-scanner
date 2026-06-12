@@ -4235,3 +4235,45 @@ High-risk areas still out of scope:
 * Telegram
 * watchlist state
 * portfolio state
+
+## BL113 — Controlled archive of fail-closed historical backfill modules
+
+Status: proposed
+
+Context:
+BL112 completed archive-readiness review for the two fail-closed historical backfill modules:
+
+* `scripts/core/build_entry_quality_backfill.py`
+* `scripts/core/build_context_backfill.py`
+
+BL112 confirmed:
+
+* no active imports from `src`, `tests`, or `.github`;
+* public `main()` functions fail closed;
+* direct script execution fails closed;
+* historical bodies are preserved under `_legacy_main_impl(...)`;
+* direct execution prints the `FAIL_CLOSED` message and performs no writes;
+* focused tests passed;
+* full suite passed.
+
+Decision:
+BL113 is approved as a controlled archive sprint.
+
+Scope:
+
+* archive `scripts/core/build_entry_quality_backfill.py`
+* archive `scripts/core/build_context_backfill.py`
+
+Required archive destination:
+
+* `archive/legacy_runtime/scripts/core/build_entry_quality_backfill.py`
+* `archive/legacy_runtime/scripts/core/build_context_backfill.py`
+
+Required constraints:
+
+* use `git mv`;
+* do not modify runtime behavior;
+* do not modify tests unless required by collection/import failures;
+* do not touch Decision Engine, portfolio intelligence, portfolio source contract, trade command parser, scanner/provider runtime, SEC/EDGAR, yfinance, credentials, production data, reports, Telegram, portfolio state, or watchlist state;
+* run focused and full pytest suites after the archive.
+
