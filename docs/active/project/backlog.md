@@ -4785,3 +4785,72 @@ Strict exclusions:
 * no portfolio/watchlist changes;
 * no runtime behavior changes.
 
+## BL124 — Review logging/validation/bootstrap core helpers after indicators archive
+
+Status: proposed
+
+Context:
+BL123 archived the script-era indicators helper:
+
+* `scripts/core/indicators.py`
+
+to:
+
+* `archive/legacy_runtime/scripts/core/indicators.py`
+
+using `git mv`.
+
+After BL123, the remaining active `scripts/core/` Python files are:
+
+* `scripts/core/data_fetcher.py`
+* `scripts/core/decision_engine.py`
+* `scripts/core/log_scans.py`
+* `scripts/core/scanner.py`
+* `scripts/core/validate_scans.py`
+* `scripts/core/validator.py`
+
+The scanner/provider modules remain blocked:
+
+* `scripts/core/data_fetcher.py`
+* `scripts/core/scanner.py`
+
+The Decision Engine remains P0 and out of scope:
+
+* `scripts/core/decision_engine.py`
+
+Decision:
+BL124 must be a review-only sprint for the remaining logging/validation/bootstrap helpers.
+
+Scope:
+
+* `scripts/core/log_scans.py`
+* `scripts/core/validate_scans.py`
+* `scripts/core/validator.py`
+
+Required outcome:
+
+* verify active imports from `src`, `tests`, `.github`, and `scripts`;
+* inspect static read/write markers;
+* inspect runtime entrypoints;
+* inspect production data/log paths;
+* classify each file as:
+
+  * archive-ready;
+  * fail-close required before archive;
+  * canonical migration required;
+  * blocked by validation/logging policy;
+* recommend the next sprint.
+
+Strict exclusions:
+
+* no archive action in BL124;
+* no runtime behavior changes;
+* no production data writes;
+* no scanner/provider changes;
+* no yfinance execution;
+* no live provider calls;
+* no Decision Engine changes;
+* no portfolio/watchlist changes;
+* no report generation;
+* no Telegram delivery.
+
