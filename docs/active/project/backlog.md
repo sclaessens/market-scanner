@@ -4601,3 +4601,74 @@ Required outcome:
   - pure helper candidates;
 - recommend the next cleanup sprint;
 - do not archive anything in BL120.
+
+
+## BL121 — Scanner/provider boundary review for remaining script-era core scanner modules
+
+Status: proposed
+
+Context:
+BL120 reviewed the remaining active `scripts/core/` tree after BL119 archived the fail-closed portfolio intelligence module.
+
+Remaining active `scripts/core/` files:
+
+* `scripts/core/data_fetcher.py`
+* `scripts/core/decision_engine.py`
+* `scripts/core/indicators.py`
+* `scripts/core/log_scans.py`
+* `scripts/core/scanner.py`
+* `scripts/core/validate_scans.py`
+* `scripts/core/validator.py`
+
+BL120 confirmed that the only remaining active positive `scripts.core` import is:
+
+* `tests/core/test_decision_engine.py` imports `scripts.core.decision_engine`
+
+BL120 also confirmed that:
+
+* `scripts/core/data_fetcher.py` contains yfinance/provider access;
+* `scripts/core/scanner.py` contains yfinance/provider access;
+* `scripts/core/indicators.py` appears scanner-adjacent and has no active test import or write-risk marker in the BL120 scan.
+
+Decision:
+BL121 must be a review-only scanner/provider boundary sprint.
+
+Scope:
+
+* `scripts/core/data_fetcher.py`
+* `scripts/core/scanner.py`
+* `scripts/core/indicators.py`
+
+Required outcome:
+
+* classify whether each file is:
+
+  * active scanner/provider dependency;
+  * canonical metadata-only reference;
+  * pure logic migration candidate;
+  * fail-close candidate;
+  * archive candidate;
+  * blocked by scanner/provider policy;
+* verify active imports from `src`, `tests`, `.github`, and `scripts`;
+* inspect static yfinance/provider/network markers without executing provider code;
+* inspect canonical scanner boundary references;
+* recommend BL122 as either:
+
+  * scanner/provider fail-close sprint;
+  * scanner/provider test/canonical decoupling sprint;
+  * controlled archive sprint for pure unused helper;
+  * blocker/governance sprint.
+
+Strict exclusions:
+
+* no yfinance execution;
+* no live provider calls;
+* no SEC/EDGAR calls;
+* no credentials;
+* no production data writes;
+* no scanner runtime behavior changes;
+* no Decision Engine changes;
+* no portfolio/watchlist changes;
+* no report generation;
+* no Telegram;
+* no archive action in BL121.
