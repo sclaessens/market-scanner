@@ -7,6 +7,12 @@ Reset stage: RESET-1
 
 This document captures the reset-oriented backlog direction for v2. It does not authorize implementation.
 
+## Market Engine Direction
+
+Market Engine is now tracked in `docs/market_engine/backlog/market_engine_backlog.md`.
+
+The Market Engine backlog is the active location for the ME sprint line. Existing reset and legacy backlog content remains reference material and does not authorize Market Engine implementation by itself.
+
 ## Backlog Rules
 
 A backlog item may identify future work, but it does not authorize code, tests, file moves, archive/delete actions, data changes, workflows, or runtime behavior changes.
