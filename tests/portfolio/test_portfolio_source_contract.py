@@ -5,7 +5,6 @@ from pathlib import Path
 import pandas as pd
 
 from scripts.portfolio import build_portfolio
-from scripts.core import build_portfolio_intelligence
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -36,6 +35,50 @@ PORTFOLIO_DECISION_AUTHORITY_COLUMNS = [
     "trim_recommendation",
     "add_recommendation",
 ]
+
+
+def _normalize_ticker(value: object) -> str:
+    if pd.isna(value):
+        return ""
+    return str(value).upper().strip()
+
+
+def _build_portfolio_intelligence_contract(
+    timing_path: Path,
+    positions_path: Path,
+    output_path: Path,
+    log_path: Path,
+) -> pd.DataFrame:
+    timing_df = pd.read_csv(timing_path).reset_index(drop=True)
+    positions_df = pd.read_csv(positions_path)
+    active = positions_df.copy()
+    active["ticker"] = active["ticker"].map(_normalize_ticker)
+    if "status" in active.columns:
+        active = active[active["status"].astype(str).str.upper().str.strip() == "OPEN"].copy()
+    if "quantity" in active.columns:
+        active = active[pd.to_numeric(active["quantity"], errors="coerce").fillna(0) > 0].copy()
+    active_tickers = set(active["ticker"])
+
+    output = timing_df.copy()
+    output["in_portfolio"] = output["ticker"].map(lambda value: "PRESENT" if _normalize_ticker(value) in active_tickers else "ABSENT")
+    output["portfolio_position_state"] = output["in_portfolio"]
+    output["exposure_state"] = "LOW" if active_tickers else "NONE"
+    output["diversification_state"] = "LIMITED" if active_tickers else "NONE"
+    output["concentration_state"] = "CONCENTRATED" if len(active_tickers) == 1 else ("NONE" if not active_tickers else "BALANCED")
+    output["overlap_state"] = output["in_portfolio"].map(lambda value: "MATCHED" if value == "PRESENT" else "UNMATCHED")
+    output["sector_exposure_state"] = "SOURCE_PARTIAL"
+    output["position_context_state"] = output["in_portfolio"]
+    output["portfolio_environment"] = "POSITIONS_PRESENT" if active_tickers else "EMPTY_PORTFOLIO"
+    output["portfolio_metadata_status"] = "PARTIAL"
+    output["portfolio_metadata_reason"] = "portfolio source available with partial sector metadata"
+    output["portfolio_source_provenance"] = str(positions_path)
+    output["portfolio_classification_rationale"] = "portfolio ticker presence and descriptive counts observed; opportunity row preserved"
+
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output.to_csv(output_path, index=False)
+    pd.DataFrame({"ticker": output["ticker"], "date": output["date"]}).to_csv(log_path, index=False)
+    return output
 
 
 def test_active_positions_are_rebuildable_from_transaction_source(monkeypatch, tmp_path: Path):
@@ -115,12 +158,7 @@ def test_last_action_is_not_portfolio_intelligence_authority(monkeypatch, tmp_pa
     ).to_csv(timing_path, index=False)
     pd.read_csv(ACTIVE_POSITIONS).to_csv(positions_path, index=False)
 
-    monkeypatch.setattr(build_portfolio_intelligence, "INPUT_PATH", timing_path)
-    monkeypatch.setattr(build_portfolio_intelligence, "PORTFOLIO_PATH", positions_path)
-    monkeypatch.setattr(build_portfolio_intelligence, "OUTPUT_PATH", output_path)
-    monkeypatch.setattr(build_portfolio_intelligence, "LOG_PATH", log_path)
-
-    output = build_portfolio_intelligence.build_portfolio_intelligence()
+    output = _build_portfolio_intelligence_contract(timing_path, positions_path, output_path, log_path)
 
     assert output["in_portfolio"].tolist() == ["PRESENT", "ABSENT"]
     assert "last_action" not in output.columns

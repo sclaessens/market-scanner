@@ -14,14 +14,17 @@ LEGACY_WRAPPER = ARCHIVED_RUNNER_DIR / "run_full_pipeline.py"
 TEST_CONFTEST_FILE = REPO_ROOT / "tests" / "conftest.py"
 
 HIGH_RISK_SCRIPT_ERA_TEST_BLOCKERS = (
-    "core/test_build_portfolio_intelligence.py",
     "core/test_decision_engine.py",
-    "portfolio/test_portfolio_source_contract.py",
 )
 
 DECOUPLED_HISTORICAL_BACKFILL_TESTS = (
     "core/test_build_context_backfill.py",
     "core/test_build_entry_quality_backfill.py",
+)
+
+DECOUPLED_PORTFOLIO_INTELLIGENCE_TESTS = (
+    "core/test_build_portfolio_intelligence.py",
+    "portfolio/test_portfolio_source_contract.py",
 )
 
 STATIC_LEGACY_FUNDAMENTALS_EVIDENCE_TESTS = (
@@ -127,6 +130,17 @@ def test_historical_backfill_tests_are_active_and_decoupled():
         assert test_path not in conftest_source
         assert "from scripts." not in source
         assert "import scripts." not in source
+
+
+def test_portfolio_intelligence_tests_are_active_and_decoupled_from_script_core():
+    conftest_source = TEST_CONFTEST_FILE.read_text(encoding="utf-8")
+
+    for test_path in DECOUPLED_PORTFOLIO_INTELLIGENCE_TESTS:
+        source = (REPO_ROOT / "tests" / test_path).read_text(encoding="utf-8")
+
+        assert test_path not in conftest_source
+        assert "from scripts.core" not in source
+        assert "import scripts.core" not in source
 
 
 def test_static_legacy_fundamentals_evidence_tests_are_active_and_decoupled():
