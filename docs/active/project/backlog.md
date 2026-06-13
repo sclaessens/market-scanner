@@ -4854,3 +4854,72 @@ Strict exclusions:
 * no report generation;
 * no Telegram delivery.
 
+## BL125 — Clean up logging/validation/bootstrap core helpers
+
+Status: proposed
+
+Context:
+BL124 reviewed the remaining logging/validation/bootstrap helpers under `scripts/core/`:
+
+* `scripts/core/log_scans.py`
+* `scripts/core/validate_scans.py`
+* `scripts/core/validator.py`
+
+BL124 found that no active import from `src`, `tests`, `.github`, or `scripts` references:
+
+* `scripts.core.log_scans`
+* `scripts.core.validate_scans`
+* `scripts.core.validator`
+
+The only remaining active positive `scripts.core` import is still:
+
+* `tests/core/test_decision_engine.py` importing `scripts.core.decision_engine`
+
+BL124 classified:
+
+* `scripts/core/log_scans.py` as `FAIL_CLOSE_REQUIRED_BEFORE_ARCHIVE`;
+* `scripts/core/validate_scans.py` as `FAIL_CLOSE_REQUIRED_BEFORE_ARCHIVE`;
+* `scripts/core/validator.py` as `CONTROLLED_ARCHIVE_APPROVED`.
+
+Decision:
+BL125 must be a cleanup execution sprint.
+
+Scope:
+
+* `scripts/core/log_scans.py`
+* `scripts/core/validate_scans.py`
+* `scripts/core/validator.py`
+
+Required actions:
+
+* fail-close `scripts/core/log_scans.py`;
+* fail-close `scripts/core/validate_scans.py`;
+* archive `scripts/core/validator.py` to `archive/legacy_runtime/scripts/core/validator.py` using `git mv`;
+* preserve historical source bodies;
+* do not modify the archived `validator.py` body.
+
+Required validation:
+
+* verify no active imports for the three target modules;
+* verify direct execution of fail-closed modules exits with the fail-closed message;
+* verify `scripts/core/validator.py` no longer exists;
+* verify `archive/legacy_runtime/scripts/core/validator.py` exists;
+* verify remaining active `scripts/core/` inventory;
+* run operator visibility tests;
+* run full pytest suite.
+
+Strict exclusions:
+
+* no scanner/provider runtime changes;
+* no changes to `scripts/core/data_fetcher.py`;
+* no changes to `scripts/core/scanner.py`;
+* no Decision Engine changes;
+* no yfinance execution;
+* no live provider calls;
+* no SEC/EDGAR calls;
+* no credentials;
+* no production data writes;
+* no report generation;
+* no Telegram;
+* no portfolio/watchlist changes;
+* no trade command parser changes.
