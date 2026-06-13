@@ -4493,3 +4493,59 @@ Required outcome:
 - verify no production data writes occur through direct execution;
 - classify whether BL119 controlled archive is approved or blocked;
 - do not archive anything in BL118.
+
+
+## BL119 — Controlled archive of fail-closed portfolio intelligence module
+
+Status: proposed
+
+Context:
+BL118 reviewed archive-readiness for the fail-closed script-era module:
+
+* `scripts/core/build_portfolio_intelligence.py`
+
+BL115 had already removed active test imports from `scripts.core.build_portfolio_intelligence`.
+BL116 confirmed the module was not archive-ready because manual/runtime execution and write-risk markers remained.
+BL117 fail-closed the public/manual execution path while preserving the historical implementation body.
+BL118 confirmed that the module is now archive-ready for a controlled archive sprint.
+
+Decision:
+BL119 must be a controlled archive sprint.
+
+Scope:
+
+* `scripts/core/build_portfolio_intelligence.py`
+
+Required action:
+
+* move `scripts/core/build_portfolio_intelligence.py` to `archive/legacy_runtime/scripts/core/build_portfolio_intelligence.py` using `git mv`;
+* preserve historical file content;
+* do not modify the archived source body;
+* do not archive any other module.
+
+Required validation:
+
+* verify `scripts/core/build_portfolio_intelligence.py` no longer exists;
+* verify `archive/legacy_runtime/scripts/core/build_portfolio_intelligence.py` exists;
+* verify the archived file still contains `FAIL_CLOSED_MESSAGE`;
+* verify the archived file still contains `_legacy_build_portfolio_intelligence_impl`;
+* verify no active import from `src`, `tests`, or `.github` to `scripts.core.build_portfolio_intelligence`;
+* run focused portfolio-intelligence/operator visibility tests;
+* run full pytest suite.
+
+Strict exclusions:
+
+* no Decision Engine changes;
+* no scanner/provider changes;
+* no SEC/EDGAR calls;
+* no yfinance calls;
+* no credentials;
+* no production data writes;
+* no reports;
+* no Telegram;
+* no portfolio state changes;
+* no watchlist state changes;
+* no trade command parser changes;
+* no portfolio command processing changes;
+* no other `scripts/core/` archive actions.
+
