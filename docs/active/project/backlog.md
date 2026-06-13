@@ -4672,3 +4672,59 @@ Strict exclusions:
 * no report generation;
 * no Telegram;
 * no archive action in BL121.
+
+
+## BL122 — Archive-readiness review for script-era indicators helper
+
+Status: proposed
+
+Context:
+BL121 reviewed the scanner/provider-adjacent script-era core modules:
+
+* `scripts/core/data_fetcher.py`
+* `scripts/core/scanner.py`
+* `scripts/core/indicators.py`
+
+BL121 found that:
+
+* `scripts/core/data_fetcher.py` contains yfinance provider calls and is not archive-ready;
+* `scripts/core/scanner.py` contains yfinance sector lookup plus scanner/scoring/trade-plan semantics and is not archive-ready;
+* `scripts/core/indicators.py` appears to be a pure pandas helper with no active import, no provider/network marker, and no write-risk marker in the BL121 scan.
+
+Decision:
+BL122 must be a review-only archive-readiness sprint for the indicators helper.
+
+Scope:
+
+* `scripts/core/indicators.py`
+
+Required outcome:
+
+* verify active references from `src`, `tests`, `.github`, and `scripts`;
+* verify whether `scripts.core.indicators` is imported anywhere;
+* inspect static provider/network markers;
+* inspect runtime/write markers;
+* inspect function-level behavior;
+* determine whether canonical scanner coverage already includes equivalent indicator behavior;
+* decide whether BL123 should be:
+
+  * controlled archive of `scripts/core/indicators.py`;
+  * fail-close first;
+  * canonical parity/test extraction first;
+  * blocked by scanner policy.
+
+Strict exclusions:
+
+* no archive action in BL122;
+* no yfinance execution;
+* no live provider calls;
+* no scanner runtime execution;
+* no Decision Engine changes;
+* no production data writes;
+* no report generation;
+* no Telegram;
+* no portfolio/watchlist changes;
+* no changes to `scripts/core/data_fetcher.py`;
+* no changes to `scripts/core/scanner.py`;
+* no runtime behavior changes.
+
