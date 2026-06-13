@@ -4856,7 +4856,7 @@ Strict exclusions:
 
 ## BL125 — Clean up logging/validation/bootstrap core helpers
 
-Status: proposed
+Status: completed
 
 Context:
 BL124 reviewed the remaining logging/validation/bootstrap helpers under `scripts/core/`:
@@ -4923,3 +4923,61 @@ Strict exclusions:
 * no Telegram;
 * no portfolio/watchlist changes;
 * no trade command parser changes.
+
+Result:
+
+* `scripts/core/log_scans.py` was fail-closed;
+* the historical `log_scans()` body was preserved as `_legacy_log_scans_impl()`;
+* public `log_scans()` now raises `SystemExit(FAIL_CLOSED_MESSAGE)`;
+* direct execution of `scripts/core/log_scans.py` exits with the fail-closed message before writing to `data/logs/scans_log.csv`;
+* `scripts/core/validate_scans.py` was fail-closed;
+* the historical `validate_scans()` body was preserved as `_legacy_validate_scans_impl()`;
+* the historical CLI body was preserved as `_legacy_main_impl()`;
+* public `validate_scans()` and `main()` now raise `SystemExit(FAIL_CLOSED_MESSAGE)`;
+* direct execution of `scripts/core/validate_scans.py` exits with the fail-closed message before writing to `data/processed/validation_results.csv`;
+* `scripts/core/validator.py` was moved with `git mv` to `archive/legacy_runtime/scripts/core/validator.py`;
+* the archived `validator.py` body was not modified;
+* no active import references `scripts.core.log_scans`, `scripts.core.validate_scans`, or `scripts.core.validator`.
+
+Validation:
+
+* operator visibility: `8 passed in 0.02s`
+* full suite: `667 passed in 1.16s`
+
+Decision:
+
+* `BL126_ARCHIVE_READINESS_REVIEW_FOR_FAIL_CLOSED_LOGGING_AND_VALIDATION_HELPERS_APPROVED`
+
+
+## BL126 — Archive-readiness review for fail-closed logging and validation helpers
+
+Status: proposed
+
+Context:
+BL125 fail-closed the decoupled script-era logging and validation helpers:
+
+* `scripts/core/log_scans.py`
+* `scripts/core/validate_scans.py`
+
+BL125 also archived the bootstrap helper:
+
+* `scripts/core/validator.py`
+
+to:
+
+* `archive/legacy_runtime/scripts/core/validator.py`
+
+using `git mv`.
+
+Decision:
+BL126 must be review-only.
+
+Required outcome:
+
+* verify no active imports from `src`, `tests`, `.github`, or `scripts` reference `scripts.core.log_scans` or `scripts.core.validate_scans`;
+* verify public/manual execution of both active files fails closed;
+* verify historical implementation bodies remain preserved under private legacy implementation names;
+* verify direct execution performs no production data writes;
+* verify `scripts/core/validator.py` remains archived and absent from the active tree;
+* classify whether a later controlled archive sprint is approved or blocked for the fail-closed logging and validation helpers;
+* do not archive anything in BL126.

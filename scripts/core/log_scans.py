@@ -12,6 +12,12 @@ RANKED_PATH = PROJECT_ROOT / "data/processed/scanner_ranked.csv"
 LOG_PATH = PROJECT_ROOT / "data/logs/scans_log.csv"
 REGIME_PATH = PROJECT_ROOT / "data/processed/market_regime.csv"
 
+FAIL_CLOSED_MESSAGE = (
+    "FAIL_CLOSED: scripts/core/log_scans.py is a legacy script-era logging "
+    "module. Manual/runtime execution is disabled; the historical implementation "
+    "is preserved only for legacy audit and controlled archive purposes."
+)
+
 # =========================
 # HELPERS
 # =========================
@@ -73,7 +79,7 @@ def load_existing_ids():
 # MAIN LOGIC
 # =========================
 
-def log_scans():
+def _legacy_log_scans_impl():
 
     df = load_ranked()
 
@@ -148,9 +154,13 @@ def log_scans():
     print(f"✅ Logged {len(new_df)} new scans")
 
 
+def log_scans():
+    raise SystemExit(FAIL_CLOSED_MESSAGE)
+
+
 # =========================
 # ENTRY POINT
 # =========================
 
 if __name__ == "__main__":
-    log_scans()
+    raise SystemExit(FAIL_CLOSED_MESSAGE)

@@ -19,6 +19,13 @@ VALIDATION_RESULTS_FILE = DATA_DIR / "processed" / "validation_results.csv"
 MAX_WAIT_DAYS_FOR_ENTRY = 5
 VALIDATION_HORIZON_DAYS = 20
 
+FAIL_CLOSED_MESSAGE = (
+    "FAIL_CLOSED: scripts/core/validate_scans.py is a legacy script-era "
+    "validation module. Manual/runtime execution is disabled; the historical "
+    "implementation is preserved only for legacy audit and controlled archive "
+    "purposes."
+)
+
 
 OUTPUT_COLUMNS = [
     "scan_date",
@@ -200,7 +207,7 @@ def validate_one_signal(row: pd.Series) -> dict:
     return base
 
 
-def validate_scans() -> pd.DataFrame:
+def _legacy_validate_scans_impl() -> pd.DataFrame:
     VALIDATION_RESULTS_FILE.parent.mkdir(parents=True, exist_ok=True)
 
     scans_df = read_csv_safe(SCANS_LOG_FILE)
@@ -223,8 +230,12 @@ def validate_scans() -> pd.DataFrame:
     return result_df
 
 
-def main() -> None:
-    df = validate_scans()
+def validate_scans() -> pd.DataFrame:
+    raise SystemExit(FAIL_CLOSED_MESSAGE)
+
+
+def _legacy_main_impl() -> None:
+    df = _legacy_validate_scans_impl()
     print(f"Validation results written to: {VALIDATION_RESULTS_FILE}")
     print(f"Rows: {len(df)}")
 
@@ -232,5 +243,9 @@ def main() -> None:
         print(df[["scan_date", "ticker", "setup_type", "grade", "outcome"]].tail(20).to_string(index=False))
 
 
+def main() -> None:
+    raise SystemExit(FAIL_CLOSED_MESSAGE)
+
+
 if __name__ == "__main__":
-    main()
+    raise SystemExit(FAIL_CLOSED_MESSAGE)
