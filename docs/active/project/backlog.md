@@ -4314,3 +4314,49 @@ Required next step:
 Perform a review-only inventory of the remaining active `scripts/core/` tree after the historical backfill archive.
 
 BL114 must not archive anything. It must only classify remaining active script-era dependencies, active imports, side-effect risks, and candidate next sprints.
+
+
+## BL115 — Decouple active portfolio intelligence tests from script-era module
+
+Status: proposed
+
+Context:
+BL114 reviewed the remaining active `scripts/core/` tree after BL113 archived the fail-closed historical backfill modules.
+
+BL114 found 8 remaining active `scripts/core/` Python files:
+
+* `scripts/core/build_portfolio_intelligence.py`
+* `scripts/core/data_fetcher.py`
+* `scripts/core/decision_engine.py`
+* `scripts/core/indicators.py`
+* `scripts/core/log_scans.py`
+* `scripts/core/scanner.py`
+* `scripts/core/validate_scans.py`
+* `scripts/core/validator.py`
+
+BL114 found three remaining active positive `scripts.core` imports:
+
+* `tests/core/test_decision_engine.py` imports `scripts.core.decision_engine`
+* `tests/core/test_build_portfolio_intelligence.py` imports `scripts.core.build_portfolio_intelligence`
+* `tests/portfolio/test_portfolio_source_contract.py` imports `scripts.core.build_portfolio_intelligence`
+
+Decision:
+BL115 must decouple only the portfolio intelligence tests from the script-era module.
+
+Scope:
+
+* `tests/core/test_build_portfolio_intelligence.py`
+* `tests/portfolio/test_portfolio_source_contract.py`
+* their import dependency on `scripts/core/build_portfolio_intelligence.py`
+
+Required outcome:
+
+* active tests no longer import `scripts.core.build_portfolio_intelligence`;
+* test-local or canonical contract helpers preserve the existing tested behavior;
+* `scripts/core/build_portfolio_intelligence.py` remains in place;
+* no archive action is performed;
+* Decision Engine remains untouched;
+* scanner/provider runtime remains untouched;
+* portfolio state and watchlist state remain untouched;
+* focused and full pytest suites remain green.
+
