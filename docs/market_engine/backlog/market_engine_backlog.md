@@ -48,6 +48,8 @@ Acceptance criteria:
 
 Owner roles: Functional Analyst, Product Owner, Scrum Master, Governance Auditor
 
+Status: COMPLETED BY ME02
+
 Goal: Extract the Market Engine functional flow from existing documentation, code, tests, audits, and backlog items.
 
 Scope: Functional flow specification, role responsibilities, user/operator workflows, classification flow, state boundaries, and implementation/testing implications.
@@ -60,6 +62,8 @@ Acceptance criteria:
 - Extraction decisions are recorded as keep / reject / defer.
 - Implementation and testing implications are recorded.
 - Open questions are narrow and do not block ME03.
+- Source intake, analysis, operator review, and deferred downstream layers are clearly separated.
+- Early-layer recommendation and side-effect exclusions are documented.
 
 ### ME03 - Extract and write Market Engine financial, scanner, and fundamental logic
 
@@ -77,6 +81,10 @@ Acceptance criteria:
 - Source intake is clearly separated from recommendation and allocation logic.
 - Missing-data and source-failure implications are recorded.
 - Testing implications use fake or synthetic provider responses.
+- Scanner context concepts are classified as keep / reject / defer.
+- Fundamental metrics and source-readiness states are classified as keep / reject / defer.
+- Data/source implications support future all-ticker source intake smoke.
+- The specification uses ME02 functional stage boundaries.
 
 ### ME04 - Extract and write Market Engine technical, coding, and testing architecture
 
@@ -94,6 +102,10 @@ Acceptance criteria:
 - Coding and testing standards are tied to implementation implications.
 - Automated test boundaries prohibit live provider calls.
 - Manual smoke harness rules are explicit and bounded.
+- Module ownership is mapped to ME02 functional stages.
+- Provider/data/analysis/decision/reporting/delivery boundaries are explicit.
+- Portfolio/watchlist mutation and Telegram/reporting side effects are excluded from lower layers.
+- Test-family placement rules are clear enough to steer future implementation.
 
 ### ME05 - Build all-ticker source intake smoke
 
@@ -112,6 +124,9 @@ Acceptance criteria:
 - Failures are captured without stopping the whole batch.
 - Missing data remains missing.
 - No recommendation or allocation behavior is introduced.
+- Source intake stops at coverage, raw evidence, normalized view, and readiness state.
+- No production reports, Telegram delivery, portfolio/watchlist mutation, or Decision Engine behavior occurs.
+- Smoke evidence can feed ME06 triage without becoming source truth by default.
 
 ### ME06 - Run all-ticker source coverage and triage failures
 
@@ -165,4 +180,3 @@ Acceptance criteria:
 - No lower layer mutates portfolio or watchlist state.
 - No hidden provider calls or production side effects occur.
 - Operator limitations and next steps are documented.
-
