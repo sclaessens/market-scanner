@@ -4981,3 +4981,65 @@ Required outcome:
 * verify `scripts/core/validator.py` remains archived and absent from the active tree;
 * classify whether a later controlled archive sprint is approved or blocked for the fail-closed logging and validation helpers;
 * do not archive anything in BL126.
+
+
+## BL127 — Review remaining scanner/provider core modules after logging validation archive
+
+Status: proposed
+
+Context:
+BL126 archived the fail-closed logging/validation helpers:
+
+* `scripts/core/log_scans.py`
+* `scripts/core/validate_scans.py`
+
+to:
+
+* `archive/legacy_runtime/scripts/core/log_scans.py`
+* `archive/legacy_runtime/scripts/core/validate_scans.py`
+
+After BL126, active `scripts/core/` contains only:
+
+* `scripts/core/data_fetcher.py`
+* `scripts/core/decision_engine.py`
+* `scripts/core/scanner.py`
+
+The Decision Engine remains P0 and out of scope.
+
+Decision:
+BL127 must be a review-only sprint for the remaining scanner/provider core modules.
+
+Scope:
+
+* `scripts/core/data_fetcher.py`
+* `scripts/core/scanner.py`
+
+Required outcome:
+
+* verify active imports from `src`, `tests`, `.github`, and `scripts`;
+* inspect yfinance/provider/network behavior;
+* inspect scanner/scoring/trade-plan semantics;
+* inspect runtime entrypoints and write-risk markers;
+* compare against canonical scanner/provider boundary documentation;
+* classify each file as:
+
+  * fail-close required before archive;
+  * canonical migration required;
+  * blocked by provider/source policy;
+  * not archive-ready;
+* recommend the next sprint.
+
+Strict exclusions:
+
+* no archive action in BL127;
+* no runtime behavior changes;
+* no yfinance execution;
+* no live provider calls;
+* no SEC/EDGAR calls;
+* no credentials;
+* no production data writes;
+* no Decision Engine changes;
+* no report generation;
+* no Telegram delivery;
+* no portfolio/watchlist changes.
+
