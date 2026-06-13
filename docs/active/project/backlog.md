@@ -4318,7 +4318,7 @@ BL114 must not archive anything. It must only classify remaining active script-e
 
 ## BL115 — Decouple active portfolio intelligence tests from script-era module
 
-Status: proposed
+Status: COMPLETED
 
 Context:
 BL114 reviewed the remaining active `scripts/core/` tree after BL113 archived the fail-closed historical backfill modules.
@@ -4360,3 +4360,51 @@ Required outcome:
 * portfolio state and watchlist state remain untouched;
 * focused and full pytest suites remain green.
 
+Result:
+
+* `tests/core/test_build_portfolio_intelligence.py` no longer imports `scripts.core.build_portfolio_intelligence`;
+* `tests/portfolio/test_portfolio_source_contract.py` no longer imports `scripts.core.build_portfolio_intelligence`;
+* the tested portfolio intelligence contract is preserved with test-local helpers and synthetic fixtures;
+* the two tests were removed from the high-risk script-era blocker registry and are active in the full suite;
+* `scripts/core/build_portfolio_intelligence.py` was not modified;
+* no archive action was performed;
+* Decision Engine, scanner/provider runtime, portfolio state, watchlist state, and scan validation runtime were untouched.
+
+Validation:
+
+* focused suite: `46 passed in 0.53s`
+* full suite: `667 passed in 1.13s`
+
+Full-suite count note:
+
+* the total increased from the prior `628 passed` baseline because the two previously ignored portfolio-intelligence tests are active again and operator visibility now includes one additional decoupling guard.
+
+Decision:
+
+* `BL116_ARCHIVE_READINESS_REVIEW_FOR_DECOUPLED_PORTFOLIO_INTELLIGENCE_MODULE_APPROVED`
+
+
+## BL116 — Archive-readiness review for decoupled portfolio intelligence module
+
+Status: proposed
+
+Context:
+BL115 decoupled active portfolio intelligence tests from the script-era module:
+
+- `scripts/core/build_portfolio_intelligence.py`
+
+The following tests no longer import `scripts.core.build_portfolio_intelligence`:
+
+- `tests/core/test_build_portfolio_intelligence.py`
+- `tests/portfolio/test_portfolio_source_contract.py`
+
+BL115 preserved the tested portfolio intelligence contract through test-local or canonical contract helpers.
+
+Decision:
+BL116 must be review-only.
+
+Required outcome:
+- verify no active imports from `src`, `tests`, or `.github` to `scripts.core.build_portfolio_intelligence`;
+- inspect `scripts/core/build_portfolio_intelligence.py` for manual-run/write-risk markers;
+- classify whether it is archive-ready, fail-close-required, or blocked;
+- do not archive anything in BL116.
