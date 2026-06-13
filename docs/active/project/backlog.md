@@ -4408,3 +4408,43 @@ Required outcome:
 - inspect `scripts/core/build_portfolio_intelligence.py` for manual-run/write-risk markers;
 - classify whether it is archive-ready, fail-close-required, or blocked;
 - do not archive anything in BL116.
+
+
+## BL117 — Fail-close decoupled portfolio intelligence module
+
+Status: proposed
+
+Context:
+BL116 reviewed archive-readiness for:
+
+* `scripts/core/build_portfolio_intelligence.py`
+
+BL116 confirmed that no active tests, `src`, or `.github` paths import `scripts.core.build_portfolio_intelligence`.
+
+However, the module is not archive-ready because it still contains manual-run and write-risk markers:
+
+* fixed `data/processed` paths;
+* fixed `data/logs` paths;
+* fixed portfolio source paths;
+* `pd.read_csv(...)`;
+* `mkdir(...)`;
+* `to_csv(...)`;
+* direct execution via `if __name__ == "__main__"`;
+* no `FAIL_CLOSED` marker.
+
+Decision:
+BL117 must be a fail-close sprint, not an archive sprint.
+
+Scope:
+
+* `scripts/core/build_portfolio_intelligence.py`
+
+Required outcome:
+
+* manual execution fails closed;
+* historical function body/content remains preserved;
+* no archive action is performed;
+* no runtime behavior is enhanced;
+* Decision Engine remains untouched;
+* portfolio state and watchlist state remain untouched;
+* focused and full pytest suites remain green.
