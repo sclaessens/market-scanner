@@ -5043,3 +5043,78 @@ Strict exclusions:
 * no Telegram delivery;
 * no portfolio/watchlist changes.
 
+
+## BL128 — Define canonical scanner/provider migration path
+
+Status: completed
+
+Context:
+BL127 reviewed the remaining scanner/provider core modules:
+
+* `scripts/core/data_fetcher.py`
+* `scripts/core/scanner.py`
+
+BL127 classified both modules as not archive-ready because provider/source-access behavior and scanner/scoring semantics remain.
+
+Decision:
+BL128 was documentation/governance/migration-planning only.
+
+Result:
+
+* approved a canonical migration path only;
+* did not approve provider execution;
+* did not approve yfinance execution;
+* did not approve source-access implementation;
+* did not approve archiving;
+* did not approve fail-closing;
+* kept `scripts/core/decision_engine.py` out of scope;
+* confirmed active `scripts/core` inventory remains:
+  * `scripts/core/data_fetcher.py`
+  * `scripts/core/decision_engine.py`
+  * `scripts/core/scanner.py`
+
+Migration lanes:
+
+* provider/source-access lane for `scripts/core/data_fetcher.py`;
+* scanner semantics lane for `scripts/core/scanner.py`;
+* canonical scanner boundary lane;
+* archive-readiness lane.
+
+Safety:
+
+* no live provider calls were run;
+* no yfinance calls were run;
+* no SEC/EDGAR calls were run;
+* no production data writes were performed;
+* no report generation was performed;
+* no Telegram delivery was performed;
+* no portfolio/watchlist state was changed;
+* no Decision Engine behavior was changed.
+
+
+## BL129 — Establish canonical scanner semantics contracts before script-era scanner migration
+
+Status: proposed
+
+Context:
+BL128 approved a migration path only for the remaining script-era scanner/provider modules:
+
+* `scripts/core/data_fetcher.py`
+* `scripts/core/scanner.py`
+
+BL128 did not approve implementation, archive, fail-close, provider execution, yfinance execution, source-access implementation, production writes, tests, or Python code changes.
+
+Decision:
+BL129 must be documentation/test-contract planning only unless later explicitly approved.
+
+Required scope:
+
+* identify pure scanner semantics to contract-test;
+* define planned contract coverage for setup classification, score components, liquidity state, discovery state, `rank_setups`, A/B/C grading, and trade-plan fields;
+* keep provider/source-access behavior disconnected;
+* do not execute providers;
+* do not execute yfinance;
+* do not move files to archive;
+* do not fail-close active files;
+* do not change runtime behavior;
+* do not change Decision Engine behavior.
