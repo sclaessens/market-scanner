@@ -5094,7 +5094,7 @@ Safety:
 
 ## BL129 — Establish canonical scanner semantics contracts before script-era scanner migration
 
-Status: proposed
+Status: completed
 
 Context:
 BL128 approved a migration path only for the remaining script-era scanner/provider modules:
@@ -5118,3 +5118,52 @@ Required scope:
 * do not fail-close active files;
 * do not change runtime behavior;
 * do not change Decision Engine behavior.
+
+Result:
+
+* documented the current canonical scanner boundary as planning-only and not yet a semantic scanner implementation;
+* documented that existing canonical scanner tests prove boundary and side-effect guarantees only;
+* inventoried script-era scanner semantics from `scripts/core/scanner.py`;
+* defined planned future scanner input, classification, scoring, trade-plan, ranking/grading, and side-effect safety contract families;
+* documented the migration gate before `scripts/core/scanner.py` can be migrated, archived, or fail-closed;
+* approved scanner semantics contract planning only;
+* did not approve implementation, tests, Python code changes, provider execution, yfinance execution, archive, or fail-close;
+* kept `scripts/core/data_fetcher.py` provider/source-access lane separate;
+* kept `scripts/core/decision_engine.py` out of scope.
+
+Safety:
+
+* no live provider calls were run;
+* no yfinance calls were run;
+* no SEC/EDGAR calls were run;
+* no production data writes were performed;
+* no report generation was performed;
+* no Telegram delivery was performed;
+* no portfolio/watchlist state was changed;
+* no Decision Engine behavior was changed;
+* no Python code was changed;
+* no tests were changed.
+
+
+## BL130 — Implement canonical scanner semantics contract tests with synthetic inputs
+
+Status: proposed
+
+Context:
+BL129 established the scanner semantics contract plan for future migration of `scripts/core/scanner.py`.
+
+BL129 did not approve implementation, tests, Python code changes, provider execution, yfinance execution, archive, fail-close, runtime behavior changes, or Decision Engine changes.
+
+Decision:
+BL130 requires explicit approval before implementation.
+
+Required scope:
+
+* implement canonical scanner semantics contract tests only after explicit approval;
+* use synthetic inputs only;
+* cover scanner input, classification, score component, trade-plan, ranking/grading, and side-effect safety contract families;
+* prohibit provider execution and yfinance;
+* prohibit archive moves;
+* prohibit fail-close changes;
+* prohibit runtime behavior changes unless separately approved;
+* keep Decision Engine out of scope.
