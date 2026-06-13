@@ -4412,7 +4412,7 @@ Required outcome:
 
 ## BL117 — Fail-close decoupled portfolio intelligence module
 
-Status: proposed
+Status: COMPLETED
 
 Context:
 BL116 reviewed archive-readiness for:
@@ -4448,3 +4448,48 @@ Required outcome:
 * Decision Engine remains untouched;
 * portfolio state and watchlist state remain untouched;
 * focused and full pytest suites remain green.
+
+Result:
+
+* `FAIL_CLOSED_MESSAGE` was added to `scripts/core/build_portfolio_intelligence.py`;
+* the historical `build_portfolio_intelligence()` body was preserved as `_legacy_build_portfolio_intelligence_impl()`;
+* public `build_portfolio_intelligence()` now raises `SystemExit(FAIL_CLOSED_MESSAGE)`;
+* direct execution via `if __name__ == "__main__"` raises `SystemExit(FAIL_CLOSED_MESSAGE)`;
+* no archive action was performed;
+* no runtime behavior was enhanced;
+* Decision Engine, scanner/provider runtime, portfolio state, watchlist state, scan validation runtime, trade command parser, reports, Telegram, and credentials were untouched.
+
+Validation:
+
+* focused suite: `46 passed in 0.51s`
+* full suite: `667 passed in 1.06s`
+* direct execution safety check: exited non-zero with the fail-closed message and no production writes.
+
+Decision:
+
+* `BL118_ARCHIVE_READINESS_REVIEW_FOR_FAIL_CLOSED_PORTFOLIO_INTELLIGENCE_MODULE_APPROVED`
+
+
+## BL118 — Archive-readiness review for fail-closed portfolio intelligence module
+
+Status: proposed
+
+Context:
+BL117 fail-closed the decoupled script-era module:
+
+- `scripts/core/build_portfolio_intelligence.py`
+
+BL115 had already removed active test imports from `scripts.core.build_portfolio_intelligence`.
+BL116 confirmed the module was not archive-ready because manual/runtime execution and write-risk markers remained.
+BL117 disabled public/manual execution while preserving the historical implementation body for audit purposes.
+
+Decision:
+BL118 must be review-only.
+
+Required outcome:
+- verify no active imports from `src`, `tests`, or `.github` to `scripts.core.build_portfolio_intelligence`;
+- verify public/manual execution fails closed;
+- verify historical implementation is preserved;
+- verify no production data writes occur through direct execution;
+- classify whether BL119 controlled archive is approved or blocked;
+- do not archive anything in BL118.
