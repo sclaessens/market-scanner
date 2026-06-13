@@ -15,6 +15,13 @@ OUTPUT_PATH = Path("data/processed/portfolio_intelligence.csv")
 LOG_PATH = Path("data/logs/portfolio_intelligence_log.csv")
 METADATA_STALE_THRESHOLD_DAYS = 365
 
+FAIL_CLOSED_MESSAGE = (
+    "FAIL_CLOSED: scripts/core/build_portfolio_intelligence.py is a legacy "
+    "script-era portfolio intelligence module. Active tests were decoupled in "
+    "BL115 and archive-readiness was reviewed in BL116. Manual/runtime execution "
+    "is disabled pending controlled archive review."
+)
+
 KEY_COLUMNS = ["ticker"]
 OPTIONAL_DATE_COLUMN = "date"
 METADATA_REQUIRED_COLUMNS = [
@@ -657,7 +664,7 @@ def _build_log(input_df: pd.DataFrame, output_df: pd.DataFrame, profile: Portfol
     return pd.DataFrame(rows, columns=LOG_COLUMNS)
 
 
-def build_portfolio_intelligence() -> pd.DataFrame:
+def _legacy_build_portfolio_intelligence_impl() -> pd.DataFrame:
     input_df = _load_required_csv(INPUT_PATH, "timing_state_layer.csv")
     _validate_input(input_df)
     input_df = input_df.reset_index(drop=True)
@@ -702,5 +709,9 @@ def build_portfolio_intelligence() -> pd.DataFrame:
     return output_df
 
 
+def build_portfolio_intelligence() -> pd.DataFrame:
+    raise SystemExit(FAIL_CLOSED_MESSAGE)
+
+
 if __name__ == "__main__":
-    build_portfolio_intelligence()
+    raise SystemExit(FAIL_CLOSED_MESSAGE)
