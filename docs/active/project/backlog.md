@@ -4497,7 +4497,7 @@ Required outcome:
 
 ## BL119 — Controlled archive of fail-closed portfolio intelligence module
 
-Status: proposed
+Status: completed
 
 Context:
 BL118 reviewed archive-readiness for the fail-closed script-era module:
@@ -4549,3 +4549,55 @@ Strict exclusions:
 * no portfolio command processing changes;
 * no other `scripts/core/` archive actions.
 
+Result:
+
+* `scripts/core/build_portfolio_intelligence.py` was moved with `git mv` to `archive/legacy_runtime/scripts/core/build_portfolio_intelligence.py`;
+* the archived file content was not edited;
+* the archived file still contains `FAIL_CLOSED_MESSAGE`;
+* the archived file still contains `_legacy_build_portfolio_intelligence_impl()`;
+* public/manual execution remains fail-closed in the archived file;
+* no active import from `src`, `tests`, or `.github` references `scripts.core.build_portfolio_intelligence`;
+* `scripts/core/build_portfolio_intelligence.py` is no longer present in the active `scripts/core/` tree;
+* Decision Engine, scanner/provider runtime, SEC/EDGAR, yfinance, credentials, production data, reports, Telegram, portfolio state, watchlist state, scan validation runtime, trade command parser, portfolio command processing, and all other `scripts/core/` modules were untouched.
+
+Validation:
+
+* focused suite: `46 passed in 0.88s`
+* full suite: `667 passed in 1.19s`
+
+Decision:
+
+* `BL120_REMAINING_ACTIVE_SCRIPTS_CORE_REVIEW_APPROVED`
+
+
+## BL120 — Review remaining active scripts/core tree after portfolio intelligence archive
+
+Status: proposed
+
+Context:
+BL119 archived the fail-closed portfolio intelligence module:
+
+- `scripts/core/build_portfolio_intelligence.py`
+
+The file was moved with `git mv` to:
+
+- `archive/legacy_runtime/scripts/core/build_portfolio_intelligence.py`
+
+BL115 removed active test imports.
+BL117 fail-closed public/manual execution.
+BL118 approved controlled archive.
+
+Decision:
+BL120 must be review-only.
+
+Required outcome:
+- inventory the remaining active `scripts/core/` Python files;
+- verify active `scripts.core` imports from `src`, `tests`, and `.github`;
+- classify remaining modules by risk:
+  - Decision Engine authority;
+  - scanner/provider access;
+  - log/write behavior;
+  - validation/runtime behavior;
+  - pure helper candidates;
+- recommend the next cleanup sprint;
+- do not archive anything in BL120.
