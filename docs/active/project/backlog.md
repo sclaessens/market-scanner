@@ -4728,3 +4728,60 @@ Strict exclusions:
 * no changes to `scripts/core/scanner.py`;
 * no runtime behavior changes.
 
+## BL123 — Controlled archive of script-era indicators helper
+
+Status: proposed
+
+Context:
+BL122 reviewed archive-readiness for:
+
+* `scripts/core/indicators.py`
+
+BL122 found that:
+
+* no active import from `src`, `tests`, `.github`, or `scripts` references `scripts.core.indicators`;
+* the only remaining active positive `scripts.core` import is `tests/core/test_decision_engine.py` importing `scripts.core.decision_engine`;
+* `scripts/core/indicators.py` has no yfinance/provider/network markers;
+* `scripts/core/indicators.py` has no runtime entrypoint;
+* `scripts/core/indicators.py` has no production data/log write behavior;
+* `scripts/core/indicators.py` is a pure pandas helper that computes moving averages, ATR14, 20-day high/low, and 20-day average volume.
+
+Decision:
+BL123 must be a controlled archive sprint.
+
+Scope:
+
+* `scripts/core/indicators.py`
+
+Required action:
+
+* move `scripts/core/indicators.py` to `archive/legacy_runtime/scripts/core/indicators.py` using `git mv`;
+* preserve historical source content;
+* do not modify the archived file body;
+* do not archive any other module.
+
+Required validation:
+
+* verify `scripts/core/indicators.py` no longer exists;
+* verify `archive/legacy_runtime/scripts/core/indicators.py` exists;
+* verify no active import from `src`, `tests`, `.github`, or `scripts` references `scripts.core.indicators`;
+* verify remaining active `scripts/core/` inventory;
+* run operator visibility tests;
+* run full pytest suite.
+
+Strict exclusions:
+
+* no changes to `scripts/core/data_fetcher.py`;
+* no changes to `scripts/core/scanner.py`;
+* no scanner/provider runtime changes;
+* no yfinance execution;
+* no live provider calls;
+* no SEC/EDGAR calls;
+* no credentials;
+* no production data writes;
+* no Decision Engine changes;
+* no report generation;
+* no Telegram;
+* no portfolio/watchlist changes;
+* no runtime behavior changes.
+
