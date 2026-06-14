@@ -114,6 +114,32 @@ Not in scope: Python code changes, test changes, provider calls, yfinance, SEC o
 
 Outcome: The former `docs/active/` tree is preserved under `docs/archive/market_scanner_reference/active/`. Future Market Engine work should cite the archived path for old v2, BL, and reset documents and use them only through explicit extraction.
 
+### ME04-PREP-B - Inventory remaining legacy documentation outside Market Engine
+
+Owner roles: Scrum Master, Governance Auditor
+
+Status: COMPLETED BY ME04-PREP-B
+
+Goal: Inventory remaining documentation and reference material outside `docs/market_engine/` and outside the Market Scanner reference archive.
+
+Scope: Documentation inventory only.
+
+Outcome: Remaining legacy documentation candidates were inventoried before consolidation.
+
+### ME04-PREP-C - Consolidate remaining legacy documentation under Market Scanner reference archive
+
+Owner roles: Scrum Master, Governance Auditor
+
+Status: COMPLETED BY ME04-PREP-C
+
+Goal: Move clear legacy documentation candidates under `docs/archive/market_scanner_reference/` while keeping `docs/market_engine/` as the only active Market Engine documentation root.
+
+Scope: Documentation structure only.
+
+Not in scope: Code, tests, provider calls, runtime behavior, production writes, reports, Telegram, portfolio/watchlist mutation, or Decision Engine behavior changes.
+
+Outcome: Legacy documentation/reference areas were preserved under `docs/archive/market_scanner_reference/`. `docs/templates/` remains in place pending manual decision.
+
 ### ME04 - Extract and write Market Engine technical, coding, and testing architecture
 
 Owner roles: Technical Architect, Development Lead, QA / Test Lead, Governance Auditor
