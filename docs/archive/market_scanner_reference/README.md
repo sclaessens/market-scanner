@@ -12,6 +12,14 @@ This folder preserves old v2, BL, and reset documentation as historical referenc
 
 `docs/archive/market_scanner_reference/active/` contains the former `docs/active/` tree.
 
+Additional historical reference areas include:
+
+- `archive/` - former `docs/archive/` historical documents.
+- `audits/` - former `docs/audits/` audit records.
+- `legacy/` - former `docs/legacy/` documentation.
+- `resets/` - former `docs/resets/` reset records.
+- `project_roles_and_responsibilities.md` - former standalone `docs/project_roles_and_responsibilities.md`.
+
 ## Reference Rules
 
 Archived documents are reference sources only. They preserve institutional evidence, prior decisions, prior constraints, and lessons learned, but they do not authorize new Market Engine implementation.

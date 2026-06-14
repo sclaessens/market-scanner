@@ -13,13 +13,30 @@ This map records the documentation-root transition after ME04-PREP.
 ```text
 docs/active/
 -> docs/archive/market_scanner_reference/active/
+
+docs/archive/ historical contents
+-> docs/archive/market_scanner_reference/archive/
+
+docs/audits/
+-> docs/archive/market_scanner_reference/audits/
+
+docs/legacy/
+-> docs/archive/market_scanner_reference/legacy/
+
+docs/resets/
+-> docs/archive/market_scanner_reference/resets/
+
+docs/project_roles_and_responsibilities.md
+-> docs/archive/market_scanner_reference/project_roles_and_responsibilities.md
 ```
+
+`docs/templates/` remains in place after ME04-PREP-C. It contains reusable documentation templates and is treated as a manual decision / shared documentation infrastructure area, not a clear legacy archive candidate.
 
 ## Authority Rule
 
 From ME04-PREP onward, `docs/market_engine/` is the active authority for Market Engine documentation.
 
-Archived documents under `docs/archive/market_scanner_reference/active/` are reference only. They may inform Market Engine work only through explicit extraction.
+Archived documents under `docs/archive/market_scanner_reference/` are reference only. They may inform Market Engine work only through explicit extraction.
 
 ## Citation Rule
 
