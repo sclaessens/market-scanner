@@ -100,6 +100,20 @@ Acceptance criteria:
 * The specification uses ME02 functional stage boundaries.
 * Only documentation/backlog files are changed.
 
+### ME04-PREP - Archive old active documentation and make Market Engine the only active docs root
+
+Owner roles: Scrum Master, Governance Auditor, Technical Architect
+
+Status: COMPLETED BY ME04-PREP
+
+Goal: Preserve the former active v2, BL, and reset documentation as historical reference material while making `docs/market_engine/` the only active Market Engine documentation root.
+
+Scope: Documentation structure only.
+
+Not in scope: Python code changes, test changes, provider calls, yfinance, SEC or EDGAR calls, scanner/runtime commands, report generation, Telegram, portfolio/watchlist mutation, production writes, Decision Engine behavior changes, or moving `docs/market_engine/`.
+
+Outcome: The former `docs/active/` tree is preserved under `docs/archive/market_scanner_reference/active/`. Future Market Engine work should cite the archived path for old v2, BL, and reset documents and use them only through explicit extraction.
+
 ### ME04 - Extract and write Market Engine technical, coding, and testing architecture
 
 Owner roles: Technical Architect, Development Lead, QA / Test Lead, Governance Auditor
