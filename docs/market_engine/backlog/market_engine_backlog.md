@@ -198,6 +198,8 @@ Acceptance criteria:
 
 Owner roles: Development Lead, Data Steward, QA / Test Lead, Governance Auditor
 
+Status: COMPLETED BY ME05
+
 Goal: Build an explicit all-ticker source intake smoke harness after ME02 through ME04 specifications authorize the boundary.
 
 Scope: Bounded manual source intake smoke harness, source availability capture, per-ticker failure capture, raw evidence feasibility, normalized data feasibility, missingness preservation, and source-readiness states.
@@ -218,23 +220,29 @@ Acceptance criteria:
 * No production reports, Telegram delivery, portfolio/watchlist mutation, or Decision Engine behavior occurs.
 * Smoke evidence can feed ME06 triage without becoming source truth by default.
 
-### ME06 - Run all-ticker source coverage and triage failures
+Outcome: ME05 added a clean `src/market_engine/source_intake/` package, fake provider scenarios, source readiness statuses, per-ticker intake results, batch summary, missing-field frequency tracking, targeted tests, a fake-provider manual smoke entrypoint, and audit/documentation updates.
+
+### ME06 - Add bounded real provider source intake smoke and coverage review
 
 Owner roles: Data Steward, QA / Test Lead, Governance Auditor, Operator / User
 
-Goal: Run the approved all-ticker source coverage smoke and triage failures.
+Goal: Add a bounded real-provider source intake smoke and review coverage evidence without entering analysis or recommendation behavior.
 
-Scope: Manual smoke execution, source coverage evidence, failure triage, source-readiness implications, missing-data observations, provider/source limitations, and backlog follow-up.
+Scope: First real provider selection, explicit manual invocation, ticker limit, source coverage evidence, failure triage, source-readiness implications, missing-data observations, provider/source limitations, data-owner review, generated-output/archive decision inputs, and backlog follow-up.
 
-Not in scope: Production writes, normal automated tests with live calls, report generation, Telegram, portfolio/watchlist mutation, recommendation behavior, allocation behavior, or Decision Engine behavior changes.
+Not in scope: Analysis, recommendation behavior, BUY / SELL / HOLD behavior, allocation, ranking, urgency, conviction, tradeability, position sizing, execution advice, production writes, normal automated tests with live calls, report generation, Telegram, portfolio/watchlist mutation, or Decision Engine behavior changes.
 
 Acceptance criteria:
 
-* Coverage results are documented.
+* First real provider is selected and documented.
+* Live execution is explicit, manual, bounded, and uses a ticker limit.
+* Coverage results are documented as evidence.
 * Ticker failures are triaged.
 * Provider/source limitations are recorded.
 * Missing-field patterns are recorded.
 * Partial, stale, invalid, unsupported, and provider-error states are distinguished where possible.
+* Data-owner review is recorded.
+* Generated output and archive implications are recorded without treating smoke evidence as source truth by default.
 * Follow-up work is added without changing runtime decision behavior.
 * Smoke evidence remains evidence for triage and does not become source truth by default.
 
