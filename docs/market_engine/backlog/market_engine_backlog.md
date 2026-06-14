@@ -140,6 +140,28 @@ Not in scope: Code, tests, provider calls, runtime behavior, production writes, 
 
 Outcome: Legacy documentation/reference areas were preserved under `docs/archive/market_scanner_reference/`. `docs/templates/` remains in place pending manual decision.
 
+### ME04-PREP-D - Inventory legacy runtime, tests, and data before Market Engine cutover
+
+Owner roles: Technical Architect, Development Lead, Data Steward, QA / Test Lead, Governance Auditor
+
+Status: COMPLETED BY ME04-PREP-D
+
+Goal: Inventory legacy runtime, scripts, tests, data, reports, and root-level files before Market Engine cutover.
+
+Scope: Documentation-only inventory.
+
+Not in scope: Moving, deleting, or renaming files; Python code changes; test changes; data, CSV, or report changes; provider calls; runtime commands; production writes; reports; Telegram; portfolio/watchlist mutation; Decision Engine behavior changes.
+
+Acceptance criteria:
+
+* Inventory exists.
+* Audit exists.
+* Old runtime, scripts, tests, data, reports, and root-level files are classified.
+* No files are moved, deleted, or renamed.
+* No Python, test, data, CSV, or report files are changed.
+* No provider or runtime commands are run.
+* ME04 extraction needs are recorded.
+
 ### ME04 - Extract and write Market Engine technical, coding, and testing architecture
 
 Owner roles: Technical Architect, Development Lead, QA / Test Lead, Governance Auditor
