@@ -483,7 +483,7 @@ Owner roles: Data Steward / Technical Architect / Financial Analyst / Developmen
 
 Job family: Source Context
 
-Status: RECOMMENDED NEXT
+Status: COMPLETED BY ME-SC02
 
 Goal: Implement the SEC CompanyFacts Source Context contract defined by ME-SC01.
 
@@ -491,12 +491,15 @@ Scope:
 
 * load cached raw SEC CompanyFacts snapshot envelopes from the ME-SR01 persistence path;
 * build source-only context output;
-* emit approved context-level states;
-* emit approved field-level states;
+* emit implemented context-level states: `AVAILABLE`, `PARTIAL`, and `MISSING`;
+* reserve contract-level states: `INVALID`, `PROVIDER_ERROR`, and `UNSUPPORTED`;
+* emit implemented field-level states: `PRESENT` and `MISSING`;
+* reserve contract-level field states: `INVALID` and `UNSUPPORTED`;
 * preserve source provenance;
+* preserve source refresh snapshot metadata;
 * preserve missingness explicitly;
-* map provider-error evidence to `PROVIDER_ERROR` context state;
-* persist Source Context output under `data/market_engine/source_contexts/fundamentals/<source_context_run_id>/`;
+* fail safely with controlled `SecCompanyFactsContextBuildError` when cached snapshot loading fails;
+* persist Source Context output under `data/market_engine/source_contexts/fundamentals/<source_context_run_id>/<ticker>/source_context.json`;
 * add local Source Context tests using synthetic/temporary cached payloads only;
 * document implementation and audit results.
 
@@ -504,6 +507,8 @@ Explicit non-scope:
 
 * no live provider calls in automated tests;
 * no source refresh job runner;
+* no source refresh behavior change;
+* no source intake provider behavior change;
 * no fundamental observations;
 * no derived observations;
 * no free cash flow;
@@ -522,13 +527,18 @@ Explicit non-scope:
 
 Acceptance criteria:
 
-* ME-SC02 implements the ME-SC01 contract.
+* ME-SC02 implements the ME-SC01 contract for cached raw snapshot consumption.
 * Source Context can be built from cached raw SEC CompanyFacts snapshots without live provider calls.
 * Source Context output remains source-only.
-* Missingness and provider errors remain explicit.
-* Raw source provenance is preserved.
+* Missingness remains explicit.
+* Numeric zero is treated as present, not missing.
+* Raw source provenance and period metadata are preserved.
+* Source refresh snapshot metadata is preserved.
+* Cached snapshot failures are controlled and explicit.
 * Tests prove boundary compliance and old path prohibition.
 * Documentation, backlog, and audit are updated.
+
+Outcome: ME-SC02 added a job-scoped Source Context implementation in `src/market_engine/source_context/`, with tests in `tests/market_engine/source_context/`. The implementation consumes ME-SR01 cached raw SEC CompanyFacts snapshots, emits source-only context output, preserves canonical field values, field states, source provenance, source refresh metadata, and missingness, and can persist context JSON under the approved Source Context path. Automated tests use temporary local cached snapshots only and do not make live provider calls.
 
 ## Candidate Follow-Up Sprints
 
