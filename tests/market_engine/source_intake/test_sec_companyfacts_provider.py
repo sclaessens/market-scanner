@@ -324,4 +324,14 @@ def _companyfacts_payload(
 
 
 def _fact(value: int | None, end: str) -> dict[str, object]:
-    return {"val": value, "end": end}
+    return {
+        "val": value,
+        "fy": int(end[:4]),
+        "fp": "FY",
+        "form": "10-K",
+        "filed": f"{int(end[:4]) + 1}-02-15",
+        "start": f"{end[:4]}-01-01",
+        "end": end,
+        "accn": f"0000000000-{end[:4]}-000001",
+        "frame": f"CY{end[:4]}",
+    }

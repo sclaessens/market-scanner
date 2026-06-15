@@ -12,14 +12,10 @@ from market_engine.source_intake.provider_boundary import (
     SourceProvider,
     UnsupportedTickerError,
 )
-
-
-SEC_COMPANYFACTS_PROVIDER_NAME = "SEC_COMPANYFACTS"
-SEC_COMPANYFACTS_REQUIRED_FIELDS = (
-    "revenue",
-    "net_income",
-    "operating_cash_flow",
-    "capital_expenditures",
+from market_engine.source_intake.sec_companyfacts_fields import (
+    SEC_COMPANYFACTS_PROVIDER_NAME,
+    SEC_COMPANYFACTS_REQUIRED_FIELDS,
+    extract_sec_companyfacts_field_values,
 )
 
 SMOKE_TICKER_CIKS = {
@@ -33,20 +29,6 @@ SMOKE_TICKER_CIKS = {
     "AMZN": "0001018724",
     "TSLA": "0001318605",
     "AVGO": "0001730168",
-}
-
-SEC_FACT_ALIASES = {
-    "revenue": (
-        "Revenues",
-        "RevenueFromContractWithCustomerExcludingAssessedTax",
-        "SalesRevenueNet",
-    ),
-    "net_income": ("NetIncomeLoss",),
-    "operating_cash_flow": ("NetCashProvidedByUsedInOperatingActivities",),
-    "capital_expenditures": (
-        "PaymentsToAcquirePropertyPlantAndEquipment",
-        "PaymentsToAcquireProductiveAssets",
-    ),
 }
 
 JsonFetcher = Callable[[str], dict[str, Any] | None]
@@ -141,26 +123,4 @@ def _fetch_json_from_sec(url: str) -> dict[str, Any] | None:
 
 
 def _extract_required_fields(payload: dict[str, Any]) -> dict[str, Any]:
-    us_gaap_facts = payload.get("facts", {}).get("us-gaap", {})
-    return {
-        field_name: _latest_numeric_fact(us_gaap_facts, aliases)
-        for field_name, aliases in SEC_FACT_ALIASES.items()
-    }
-
-
-def _latest_numeric_fact(us_gaap_facts: dict[str, Any], aliases: tuple[str, ...]) -> Any | None:
-    for alias in aliases:
-        fact = us_gaap_facts.get(alias)
-        units = fact.get("units", {}) if isinstance(fact, dict) else {}
-        values = units.get("USD", [])
-        numeric_values = [
-            value
-            for value in values
-            if isinstance(value, dict)
-            and value.get("val") is not None
-            and isinstance(value.get("end"), str)
-        ]
-        if numeric_values:
-            latest = max(numeric_values, key=lambda value: value["end"])
-            return latest.get("val")
-    return None
+    return extract_sec_companyfacts_field_values(payload)
