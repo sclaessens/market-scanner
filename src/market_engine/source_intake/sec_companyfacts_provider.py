@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any, Callable
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -16,6 +17,10 @@ from market_engine.source_intake.sec_companyfacts_fields import (
     SEC_COMPANYFACTS_PROVIDER_NAME,
     SEC_COMPANYFACTS_REQUIRED_FIELDS,
     extract_sec_companyfacts_field_values,
+)
+from market_engine.source_refresh.sec_companyfacts_snapshots import (
+    SecCompanyFactsSnapshotError,
+    load_sec_companyfacts_raw_snapshot,
 )
 
 SMOKE_TICKER_CIKS = {
@@ -46,17 +51,23 @@ class SecCompanyFactsNetworkError(ProviderUnavailableError):
     """Raised for controlled SEC CompanyFacts network failures."""
 
 
+class SecCompanyFactsCachedSnapshotError(ProviderUnavailableError):
+    """Raised for controlled SEC CompanyFacts cached snapshot failures."""
+
+
 class SecCompanyFactsProvider(SourceProvider):
     def __init__(
         self,
         ticker_to_cik: dict[str, str] | None = None,
         fetch_json: JsonFetcher | None = None,
+        cached_snapshot_path: Path | None = None,
     ) -> None:
         self._ticker_to_cik = {
             ticker.upper(): _normalize_cik(cik)
             for ticker, cik in (ticker_to_cik or SMOKE_TICKER_CIKS).items()
         }
         self._fetch_json = fetch_json or _fetch_json_from_sec
+        self._cached_snapshot_path = cached_snapshot_path
 
     @property
     def name(self) -> str:
@@ -64,6 +75,26 @@ class SecCompanyFactsProvider(SourceProvider):
 
     def fetch_source(self, ticker: str) -> ProviderSourceResponse | None:
         normalized_ticker = _normalize_ticker(ticker)
+        if self._cached_snapshot_path is not None:
+            try:
+                snapshot = load_sec_companyfacts_raw_snapshot(
+                    self._cached_snapshot_path,
+                    expected_ticker=normalized_ticker,
+                )
+            except SecCompanyFactsSnapshotError as error:
+                raise SecCompanyFactsCachedSnapshotError(
+                    f"SEC CompanyFacts cached snapshot error for {normalized_ticker}: {error}"
+                ) from error
+            fields = _extract_required_fields(snapshot.raw_payload)
+            return ProviderSourceResponse(
+                ticker=normalized_ticker,
+                fields=fields,
+                raw_evidence=snapshot.raw_payload,
+                raw_evidence_summary=(
+                    f"Cached SEC CompanyFacts snapshot {snapshot.snapshot_id} CIK{snapshot.cik}"
+                ),
+            )
+
         cik = self._ticker_to_cik.get(normalized_ticker)
         if cik is None:
             raise UnsupportedTickerError(f"{normalized_ticker} has no bounded smoke CIK mapping")
