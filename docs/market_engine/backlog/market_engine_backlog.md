@@ -309,7 +309,7 @@ Owner roles: Data Steward / Technical Architect / Development Lead / QA Lead / G
 
 Job family: Source Refresh
 
-Status: NEXT APPROVED SPRINT
+Status: COMPLETED BY ME-SR01
 
 Goal: Persist bounded raw SEC CompanyFacts provider responses so future source mapping, context building, and observations can run from cached source snapshots instead of repeatedly calling SEC.
 
@@ -371,6 +371,36 @@ Acceptance criteria:
 * Snapshot metadata and ticker manifest are written in the approved source snapshot path.
 * No old data/report paths are written.
 * Tests remain local to Source Refresh unless an explicit `ME-QA` sprint is created.
+* No analysis, recommendation, portfolio, delivery, Telegram, or Decision Engine behavior is introduced.
+
+Outcome: ME-SR01 added SEC CompanyFacts raw snapshot persistence, cached raw snapshot loading, provider error manifest writing, metadata validation, latest cached snapshot selection, and an explicit cached SEC provider path that avoids provider/network calls when supplied a cached snapshot file. Tests use temporary local payloads only.
+
+### ME-SR02 — Build bounded SEC CompanyFacts source refresh job runner
+
+Owner roles: Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: Source Refresh
+
+Status: CANDIDATE FOLLOW-UP
+
+Goal: Build a bounded Source Refresh job runner that fetches a controlled ticker set, persists raw SEC CompanyFacts snapshots, and records provider errors under the approved source snapshot path.
+
+Scope:
+
+* bounded ticker input;
+* explicit SEC CompanyFacts provider use;
+* raw snapshot writing;
+* provider error manifest writing;
+* run metadata;
+* no downstream source context, observations, analysis, recommendation, portfolio, delivery, Telegram, or Decision Engine behavior.
+
+Acceptance criteria:
+
+* Job runner is explicit and bounded.
+* Raw successful payloads are persisted under `data/market_engine/source_snapshots/sec_companyfacts/<run_id>/`.
+* Provider errors are persisted separately.
+* No old data/report paths are written.
+* Automated tests do not call live providers.
 * No analysis, recommendation, portfolio, delivery, Telegram, or Decision Engine behavior is introduced.
 
 ## Deferred / Future Candidate Sprints
