@@ -387,7 +387,7 @@ Outcome: ME11 added SEC CompanyFacts contract mapping, a source-only fundamental
 
 Owner roles: Financial Analyst, Data Steward, Technical Architect, Development Lead, QA / Test Lead, Governance Auditor
 
-Status: RECOMMENDED NEXT
+Status: COMPLETED BY ME12
 
 Goal: Build the first non-decision fundamental analysis pass from approved Market Engine source context.
 
@@ -401,6 +401,29 @@ Acceptance criteria:
 * Missing data remains explicit.
 * Output is non-decision and non-allocation.
 * No recommendation, score, rank, tradeability, or action language is emitted.
+* Tests prove no Decision Engine, reporting, Telegram, portfolio, or watchlist side effects.
+* Old runtime code remains reference only.
+
+Outcome: ME12 added the first non-decision fundamental analysis pass. It consumes the ME11 source context and emits source-grounded observations for source readiness, revenue presence, net income sign, operating cash flow sign, capital expenditures presence, and cash-generation source completeness. It does not calculate free cash flow, growth, margins, ratios, valuation metrics, scores, rankings, recommendations, or Decision Engine behavior.
+
+### ME13 - Add first derived cash-generation observation layer
+
+Owner roles: Financial Analyst, Data Steward, Technical Architect, Development Lead, QA / Test Lead, Governance Auditor
+
+Status: RECOMMENDED NEXT
+
+Goal: Add the first derived but still non-decision cash-generation observation layer.
+
+Scope: Explicitly approved derived cash-generation observation, likely free cash flow presence/sign based on operating cash flow and capital expenditures, source reference preservation, missing-data handling, and non-decision boundary tests.
+
+Not in scope: BUY / SELL / HOLD behavior, allocation, ranking, score, recommendation behavior, urgency, conviction, tradeability, position sizing, execution advice, valuation metrics, portfolio/watchlist mutation, Telegram, production reporting, or Decision Engine behavior changes.
+
+Acceptance criteria:
+
+* Any derived calculation is explicitly documented and source-grounded.
+* Missing operating cash flow or capital expenditures blocks the derived observation.
+* Output remains observational and non-decision.
+* No score, ranking, recommendation, tradeability, allocation, or operator action language is emitted.
 * Tests prove no Decision Engine, reporting, Telegram, portfolio, or watchlist side effects.
 * Old runtime code remains reference only.
 
