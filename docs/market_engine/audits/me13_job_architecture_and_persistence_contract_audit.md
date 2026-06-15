@@ -4,6 +4,8 @@ Owner roles: Product Owner / Technical Architect / Data Steward / Development Le
 
 Status: COMPLETED BY ME13
 
+ME-GOV01 update status: Historical audit retained; post-ME13 next-sprint references are superseded by the job-scoped naming convention.
+
 ## Purpose
 
 ME13 records a structural change in Market Engine architecture and workflow.
@@ -19,7 +21,9 @@ Market Engine is now governed as a job-oriented system with independent jobs, in
 
 ## Files Updated
 
-This audit is part of the ME13 documentation update. The backlog and other architecture documents should be aligned with this contract before the next implementation sprint.
+This audit was part of the ME13 documentation update.
+
+ME-GOV01 later aligned the backlog and roadmap with the job-scoped sprint naming convention.
 
 ## Triggering Decision
 
@@ -34,7 +38,7 @@ The planned next step was a derived cash-generation observation layer. However, 
 * upgrading one job should not require unrelated jobs to change;
 * raw data should be persisted so future analysis does not repeatedly require live provider calls.
 
-ME13 therefore pauses additional derived analysis and formalizes job architecture and persistence first.
+ME13 therefore paused additional derived analysis and formalized job architecture and persistence first.
 
 ## Strategic Decision
 
@@ -76,7 +80,7 @@ If a job output contract changes, the change must be documented and tested befor
 
 ## Approved Job Families
 
-ME13 defines these job families:
+ME13 defined these architecture-level job families:
 
 * source refresh jobs;
 * source mapping jobs;
@@ -88,7 +92,23 @@ ME13 defines these job families:
 * future portfolio review jobs;
 * future delivery jobs.
 
-Only the early source, context, and observation families are currently approved for implementation.
+ME-GOV01 later converted these architectural families into explicit sprint prefixes:
+
+```text
+ME-GOV   Governance / architecture / working method
+ME-SR    Source Refresh jobs
+ME-SC    Source Context jobs
+ME-FO    Fundamental Observation jobs
+ME-DO    Derived Observation jobs
+ME-AR    Analysis Review jobs
+ME-RR    Recommendation Review jobs
+ME-PR    Portfolio Review jobs
+ME-DL    Delivery jobs
+ME-QA    Cross-job quality/testing/CI
+ME-DATA  Data governance / persistence / retention
+```
+
+Only the early source, context, and observation families were approved for implementation at ME13 time.
 
 Recommendation, portfolio review, delivery, reporting, Telegram, and Decision Engine behavior remain not approved unless a later sprint explicitly authorizes them.
 
@@ -193,15 +213,19 @@ The previously recommended next sprint was:
 ME13 — Add first derived cash-generation observation layer
 ```
 
-ME13 changes the roadmap.
+ME13 changed the roadmap toward job architecture and source snapshot persistence first.
 
-The new recommended next implementation sprint is:
+At ME13 time, the next implementation sprint was temporarily described with the old generic numbering style.
+
+ME-GOV01 supersedes that temporary label and establishes the job-scoped sprint ID.
+
+The current approved next sprint is:
 
 ```text
-ME14 — Persist raw SEC CompanyFacts source snapshots and support cached source loading
+ME-SR01 — Persist raw SEC CompanyFacts source snapshots and support cached source loading
 ```
 
-The derived cash-generation observation layer remains important, but must wait until raw SEC snapshot persistence and cached loading are in place.
+The derived cash-generation observation layer remains important, but must wait until raw SEC snapshot persistence, cached loading, cached source context, and fundamental observation job execution are stable.
 
 ## Boundary Confirmation
 
@@ -240,10 +264,10 @@ It does not add derived observations.
 ## Recommended Next Sprint
 
 ```text
-ME14 — Persist raw SEC CompanyFacts source snapshots and support cached source loading
+ME-SR01 — Persist raw SEC CompanyFacts source snapshots and support cached source loading
 ```
 
-ME14 should implement bounded SEC raw JSON snapshot persistence under:
+ME-SR01 should implement bounded SEC raw JSON snapshot persistence under:
 
 ```text
 data/market_engine/source_snapshots/sec_companyfacts/<run_id>/
