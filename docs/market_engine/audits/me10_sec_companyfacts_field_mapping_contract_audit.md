@@ -17,8 +17,9 @@ ME10 does not implement analysis. It defines the approved source contract that a
 
 ## Files Updated
 
-- `docs/market_engine/architecture/source_intake_smoke.md`
-- `docs/market_engine/backlog/market_engine_backlog.md`
+- None.
+
+The dedicated contract document is the authoritative ME10 deliverable. Existing source-intake and backlog documents can be updated in a follow-up housekeeping commit if desired, but ME10's core governance decision is captured here and in the source contract.
 
 ## ME09 Evidence Used
 
