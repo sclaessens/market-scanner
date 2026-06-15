@@ -136,3 +136,117 @@ ME06 should focus on:
 * distinguishing provider errors, unsupported tickers, invalid tickers, missing sources, partial sources, and available sources;
 * keeping live-provider checks out of normal automated tests;
 * avoiding analysis and recommendation behavior.
+
+## ME06 Bounded Real-Provider Smoke
+
+ME06 adds SEC CompanyFacts as the first real-provider source-intake smoke candidate.
+
+The SEC adapter lives under the existing Market Engine source-intake boundary:
+
+```text
+src/market_engine/source_intake/sec_companyfacts_provider.py
+```
+
+It implements the ME05 provider protocol and is only invoked when explicitly called. There are no provider calls at import time.
+
+## SEC CompanyFacts Scope
+
+The ME06 adapter is intentionally small and bounded.
+
+Required fields:
+
+* `revenue`
+* `net_income`
+* `operating_cash_flow`
+* `capital_expenditures`
+
+Smoke ticker-to-CIK mapping is limited to a small in-code sample:
+
+* `NVDA`
+* `AMD`
+* `META`
+* `COST`
+
+The mapping exists only for bounded smoke behavior. It is not a full ticker master, data pipeline, or source truth.
+
+## SEC Fact Mapping
+
+Current aliases:
+
+* `revenue`: `Revenues`, `RevenueFromContractWithCustomerExcludingAssessedTax`, `SalesRevenueNet`
+* `net_income`: `NetIncomeLoss`
+* `operating_cash_flow`: `NetCashProvidedByUsedInOperatingActivities`
+* `capital_expenditures`: `PaymentsToAcquirePropertyPlantAndEquipment`, `PaymentsToAcquireProductiveAssets`
+
+The adapter selects the latest available USD fact by period end date.
+
+Missing values remain missing. ME06 does not derive free cash flow and does not convert missing numeric values to `0`.
+
+## Manual Real-Provider Invocation
+
+Default manual smoke remains fake-provider only:
+
+```bash
+PYTHONPATH=src python -m market_engine.source_intake.manual_smoke
+```
+
+SEC CompanyFacts smoke requires explicit flags:
+
+```bash
+PYTHONPATH=src python -m market_engine.source_intake.manual_smoke \
+  --provider sec-companyfacts \
+  --tickers NVDA AMD META COST \
+  --max-tickers 4
+```
+
+Real-provider smoke refuses to run without one of:
+
+* `--tickers`
+* `--ticker-file`
+* `--use-sec-sample`
+
+Real-provider smoke also refuses ticker counts above `--max-tickers`.
+
+## Coverage Review
+
+ME06 adds `coverage_review.py`, which turns a batch source-intake summary into a local coverage review.
+
+The coverage review includes:
+
+* provider name;
+* ticker count;
+* readiness counts;
+* missing-field frequency;
+* provider-error count;
+* unsupported count;
+* invalid ticker count;
+* top missing fields;
+* failed or unsupported tickers.
+
+Coverage review is source coverage evidence only. It is not analysis.
+
+It does not emit scores, rankings, recommendations, BUY / SELL / HOLD, allocation, conviction, urgency, tradeability, position sizing, or execution advice.
+
+## Optional Smoke Artifact
+
+Manual smoke writes no files by default.
+
+If `--write-smoke-artifact` is passed, the path must be under:
+
+```text
+data/market_engine/smokes/source_intake/
+```
+
+Existing files are not overwritten silently. Smoke artifacts are local evidence only and are not source truth by default.
+
+## ME07 Follow-Up
+
+ME07 should review real-provider coverage behavior and define source-data owner decisions before any first fundamental source context is built.
+
+ME07 should decide:
+
+* whether SEC access/user-agent/network setup needs adjustment;
+* whether ticker-to-CIK mapping should remain in-code for smoke or move to an approved input;
+* how smoke evidence should be retained or excluded;
+* which SEC aliases are sufficient for first source context;
+* whether generated smoke artifacts belong outside version control.

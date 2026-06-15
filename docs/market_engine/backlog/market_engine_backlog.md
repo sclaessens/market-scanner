@@ -226,6 +226,8 @@ Outcome: ME05 added a clean `src/market_engine/source_intake/` package, fake pro
 
 Owner roles: Data Steward, QA / Test Lead, Governance Auditor, Operator / User
 
+Status: COMPLETED BY ME06
+
 Goal: Add a bounded real-provider source intake smoke and review coverage evidence without entering analysis or recommendation behavior.
 
 Scope: First real provider selection, explicit manual invocation, ticker limit, source coverage evidence, failure triage, source-readiness implications, missing-data observations, provider/source limitations, data-owner review, generated-output/archive decision inputs, and backlog follow-up.
@@ -246,27 +248,29 @@ Acceptance criteria:
 * Follow-up work is added without changing runtime decision behavior.
 * Smoke evidence remains evidence for triage and does not become source truth by default.
 
-### ME07 - Build first analysis pass on collected data
+Outcome: ME06 added a SEC CompanyFacts provider adapter, mocked provider tests, explicit real-provider manual smoke flags, ticker limit enforcement, and local source coverage review. The bounded real-provider smoke executed safely but returned provider errors for the sampled tickers in this environment.
 
-Owner roles: Development Lead, Financial Analyst, Data Steward, QA / Test Lead
+### ME07 - Review real-provider coverage and define source-data owner decisions
 
-Goal: Build the first analysis pass on collected source data after source intake boundaries are proven.
+Owner roles: Data Steward, Technical Architect, Development Lead, QA / Test Lead, Governance Auditor, Operator / User
 
-Scope: Analysis-only transformation of approved collected data, missing-data preservation, source-readiness awareness, descriptive scanner/fundamental context, review-oriented analysis, and synthetic tests.
+Goal: Review ME06 real-provider coverage behavior and define source-data owner decisions before building first fundamental source context.
 
-Not in scope: BUY / SELL / HOLD behavior, allocation, urgency, conviction, tradeability, hidden ranking, portfolio mutation, watchlist mutation, Telegram, production reporting, or Decision Engine behavior changes.
+Scope: Provider availability review, SEC access/user-agent/network follow-up, ticker-to-CIK ownership decision, smoke evidence retention policy, required-field alias review, source artifact handling, and readiness criteria for first fundamental source context.
+
+Not in scope: BUY / SELL / HOLD behavior, allocation, urgency, conviction, tradeability, hidden ranking, score behavior, portfolio mutation, watchlist mutation, Telegram, production reporting, Decision Engine behavior changes, broad provider execution, or first analysis implementation unless separately authorized.
 
 Acceptance criteria:
 
-* Analysis pass consumes approved collected data boundaries.
-* Analysis remains review-oriented and descriptive.
-* Missing data remains missing.
-* Missing components block unsafe derived metrics.
-* Ticker-level failures do not stop batch analysis.
-* Tests use fake or fixture data.
-* No Decision Engine leakage occurs.
-* No final action, allocation, urgency, conviction, tradeability, or recommendation semantics are emitted.
-* No reporting, Telegram, portfolio, or watchlist side effects occur.
+* ME06 bounded SEC smoke result is reviewed.
+* Provider-error cause is triaged without forcing unbounded provider calls.
+* Ticker-to-CIK ownership is decided for future source intake.
+* Smoke evidence retention policy is documented.
+* Required SEC field aliases are reviewed.
+* Generated smoke artifact handling is documented.
+* Readiness criteria for first fundamental source context are recorded.
+* No analysis, recommendation, score, allocation, urgency, conviction, tradeability, or Decision Engine behavior is introduced.
+* No reporting, Telegram, portfolio, watchlist, production data, or production report side effects occur.
 
 ### ME08 - Produce local operator review output
 
