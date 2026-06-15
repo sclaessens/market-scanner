@@ -250,3 +250,81 @@ ME07 should decide:
 * how smoke evidence should be retained or excluded;
 * which SEC aliases are sufficient for first source context;
 * whether generated smoke artifacts belong outside version control.
+
+## ME07 Real-Provider Diagnostic Outcome
+
+ME07 reviewed the ME06 bounded SEC CompanyFacts smoke failure.
+
+The bounded diagnostic evidence showed DNS/name resolution failure before an SEC HTTP response was returned:
+
+```text
+url_error gaierror [Errno 8] nodename nor servname provided, or not known
+```
+
+The current best hypothesis is that the ME06 `PROVIDER_ERROR` result was caused by environment/network resolution, not by:
+
+* missing CIK mapping for the sampled tickers;
+* invalid CIK formatting;
+* wrong CompanyFacts endpoint shape;
+* missing facts being mislabeled as provider errors;
+* SEC fact-label mapping.
+
+ME07 improved diagnostics so coverage review now shows controlled provider error categories.
+
+## ME07 SEC CompanyFacts Coverage Status
+
+Bounded SEC CompanyFacts smoke still returns provider errors in this environment, but now identifies the controlled category:
+
+```text
+readiness=PROVIDER_ERROR=4
+provider_error_categories=SecCompanyFactsNetworkError=4
+```
+
+This means source coverage is blocked by provider/network access in the local execution environment.
+
+It does not prove SEC CompanyFacts is unsuitable as a source.
+
+## ME07 Source-Data Owner Decision
+
+Decision: `APPROVED_FOR_BOUNDED_SMOKE_ONLY`
+
+SEC CompanyFacts remains the first provider candidate for bounded source-intake smoke, but it is not yet approved for all-ticker US fundamental source intake or analysis.
+
+Before analysis can be built, Market Engine still needs:
+
+* successful bounded SEC access or a documented source-access resolution;
+* source-data owner decision for ticker-to-CIK mapping ownership;
+* source evidence retention and artifact policy;
+* alias coverage review for required SEC fields;
+* confirmation that missing facts become `MISSING` or `PARTIAL`, not provider errors.
+
+## What Source Intake Can Do After ME07
+
+After ME07, source intake can:
+
+* run fake-provider smoke;
+* run mocked SEC provider tests;
+* run bounded manual SEC smoke with explicit flags;
+* distinguish network, HTTP, and JSON parse provider errors;
+* distinguish unsupported and invalid tickers;
+* classify missing or partial required facts without turning them into provider errors;
+* summarize provider error categories in coverage review.
+
+Source intake still cannot:
+
+* perform broad or unbounded provider calls;
+* become analysis;
+* become recommendation behavior;
+* produce scores or rankings;
+* mutate data, reports, portfolio, or watchlist files;
+* call reporting, Telegram, or the Decision Engine.
+
+## What Remains Blocked Before Analysis
+
+First fundamental source context remains blocked until:
+
+* bounded SEC access succeeds or a second provider is selected;
+* ticker-to-CIK mapping ownership is settled;
+* source evidence retention policy is settled;
+* required-field alias coverage is reviewed;
+* data-owner readiness criteria are documented.

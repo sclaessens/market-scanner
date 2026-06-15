@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from urllib.error import HTTPError
 
 import pytest
 
@@ -106,7 +107,58 @@ def test_sec_provider_network_error_is_captured_as_provider_error():
     result = summary.results[0]
     assert result.readiness_status == SourceReadinessStatus.PROVIDER_ERROR
     assert result.error is not None
-    assert result.error.error_type == "ProviderUnavailableError"
+    assert result.error.error_type == "SecCompanyFactsNetworkError"
+
+
+def test_sec_provider_http_error_is_captured_as_controlled_provider_error():
+    def fail_fetch(url: str) -> dict[str, object]:
+        raise HTTPError(url=url, code=403, msg="Forbidden", hdrs=None, fp=None)
+
+    provider = SecCompanyFactsProvider(fetch_json=fail_fetch)
+
+    summary = run_source_intake(
+        tickers=["NVDA"],
+        provider=provider,
+        required_fields=SEC_COMPANYFACTS_REQUIRED_FIELDS,
+    )
+
+    result = summary.results[0]
+    assert result.readiness_status == SourceReadinessStatus.PROVIDER_ERROR
+    assert result.error is not None
+    assert result.error.error_type == "SecCompanyFactsHttpError"
+    assert "status=403" in result.error.message
+
+
+def test_sec_provider_json_parse_error_is_captured_as_controlled_provider_error():
+    def fail_fetch(url: str) -> dict[str, object]:
+        raise ValueError("invalid json")
+
+    provider = SecCompanyFactsProvider(fetch_json=fail_fetch)
+
+    summary = run_source_intake(
+        tickers=["NVDA"],
+        provider=provider,
+        required_fields=SEC_COMPANYFACTS_REQUIRED_FIELDS,
+    )
+
+    result = summary.results[0]
+    assert result.readiness_status == SourceReadinessStatus.PROVIDER_ERROR
+    assert result.error is not None
+    assert result.error.error_type == "SecCompanyFactsJsonParseError"
+
+
+def test_sec_provider_missing_required_facts_returns_missing_not_provider_error():
+    provider = SecCompanyFactsProvider(fetch_json=lambda url: {"facts": {"us-gaap": {}}})
+
+    summary = run_source_intake(
+        tickers=["NVDA"],
+        provider=provider,
+        required_fields=SEC_COMPANYFACTS_REQUIRED_FIELDS,
+    )
+
+    result = summary.results[0]
+    assert result.readiness_status == SourceReadinessStatus.MISSING
+    assert result.error is None
 
 
 def test_sec_provider_missing_numeric_fields_are_not_converted_to_zero():
@@ -133,6 +185,27 @@ def test_sec_provider_import_does_not_call_provider():
     assert calls == []
     provider.fetch_source("NVDA")
     assert len(calls) == 1
+
+
+def test_sec_provider_ticker_normalization_and_cik_formatting_are_deterministic():
+    attempted_urls: list[str] = []
+
+    def capture_url(url: str) -> dict[str, object]:
+        attempted_urls.append(url)
+        return _companyfacts_payload()
+
+    provider = SecCompanyFactsProvider(
+        ticker_to_cik={"nvda": "1045810"},
+        fetch_json=capture_url,
+    )
+
+    result = provider.fetch_source(" nvda ")
+
+    assert result is not None
+    assert result.ticker == "NVDA"
+    assert attempted_urls == [
+        "https://data.sec.gov/api/xbrl/companyfacts/CIK0001045810.json"
+    ]
 
 
 def test_real_provider_tests_do_not_require_network():
@@ -179,6 +252,21 @@ def test_source_coverage_review_includes_missing_field_frequency():
 
     assert review.missing_field_frequency == {"capital_expenditures": 1}
     assert review.top_missing_fields == (("capital_expenditures", 1),)
+
+
+def test_source_coverage_review_includes_controlled_error_categories():
+    def fail_fetch(url: str) -> dict[str, object]:
+        raise TimeoutError("network unavailable")
+
+    provider = SecCompanyFactsProvider(fetch_json=fail_fetch)
+    summary = run_source_intake(
+        tickers=["NVDA"],
+        provider=provider,
+        required_fields=SEC_COMPANYFACTS_REQUIRED_FIELDS,
+    )
+    review = build_source_coverage_review(summary)
+
+    assert review.provider_error_categories == {"SecCompanyFactsNetworkError": 1}
 
 
 def test_source_coverage_review_does_not_include_forbidden_authority_fields():

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 
 from market_engine.source_intake.models import BatchSourceIntakeSummary
@@ -15,6 +16,7 @@ class SourceCoverageReview:
     provider_error_count: int
     unsupported_count: int
     invalid_ticker_count: int
+    provider_error_categories: dict[str, int]
     top_missing_fields: tuple[tuple[str, int], ...]
     failed_or_unsupported_tickers: tuple[str, ...]
     note: str
@@ -31,6 +33,12 @@ def build_source_coverage_review(summary: BatchSourceIntakeSummary) -> SourceCov
         for result in summary.results
         if result.readiness_status in failed_statuses
     )
+    provider_error_categories = Counter(
+        result.error.error_type
+        for result in summary.results
+        if result.readiness_status == SourceReadinessStatus.PROVIDER_ERROR
+        and result.error is not None
+    )
     return SourceCoverageReview(
         provider_name=summary.provider_name,
         ticker_count=summary.total_tickers,
@@ -42,6 +50,7 @@ def build_source_coverage_review(summary: BatchSourceIntakeSummary) -> SourceCov
         provider_error_count=summary.status_counts.get(SourceReadinessStatus.PROVIDER_ERROR, 0),
         unsupported_count=summary.status_counts.get(SourceReadinessStatus.UNSUPPORTED, 0),
         invalid_ticker_count=summary.status_counts.get(SourceReadinessStatus.INVALID_TICKER, 0),
+        provider_error_categories=dict(sorted(provider_error_categories.items())),
         top_missing_fields=tuple(
             sorted(
                 summary.missing_field_frequency.items(),
@@ -63,12 +72,17 @@ def format_source_coverage_review(review: SourceCoverageReview) -> str:
         for field, count in review.missing_field_frequency.items()
     )
     failed = ", ".join(review.failed_or_unsupported_tickers)
+    error_categories = ", ".join(
+        f"{category}={count}"
+        for category, count in review.provider_error_categories.items()
+    )
     return (
         f"provider={review.provider_name}\n"
         f"tickers={review.ticker_count}\n"
         f"readiness={readiness or 'none'}\n"
         f"missing_fields={missing or 'none'}\n"
         f"provider_errors={review.provider_error_count}\n"
+        f"provider_error_categories={error_categories or 'none'}\n"
         f"unsupported={review.unsupported_count}\n"
         f"invalid_tickers={review.invalid_ticker_count}\n"
         f"failed_or_unsupported_tickers={failed or 'none'}\n"
