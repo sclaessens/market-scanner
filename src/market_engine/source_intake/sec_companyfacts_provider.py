@@ -46,6 +46,18 @@ SEC_FACT_ALIASES = {
 JsonFetcher = Callable[[str], dict[str, Any] | None]
 
 
+class SecCompanyFactsHttpError(ProviderUnavailableError):
+    """Raised for controlled SEC CompanyFacts HTTP failures."""
+
+
+class SecCompanyFactsJsonParseError(ProviderUnavailableError):
+    """Raised for controlled SEC CompanyFacts JSON parse failures."""
+
+
+class SecCompanyFactsNetworkError(ProviderUnavailableError):
+    """Raised for controlled SEC CompanyFacts network failures."""
+
+
 class SecCompanyFactsProvider(SourceProvider):
     def __init__(
         self,
@@ -71,10 +83,18 @@ class SecCompanyFactsProvider(SourceProvider):
         url = f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
         try:
             payload = self._fetch_json(url)
-        except (HTTPError, URLError, TimeoutError, OSError) as error:
-            raise ProviderUnavailableError(f"SEC CompanyFacts request failed for {normalized_ticker}") from error
+        except HTTPError as error:
+            raise SecCompanyFactsHttpError(
+                f"SEC CompanyFacts HTTP error for {normalized_ticker}: status={error.code}"
+            ) from error
+        except (URLError, TimeoutError, OSError) as error:
+            raise SecCompanyFactsNetworkError(
+                f"SEC CompanyFacts network error for {normalized_ticker}: {error}"
+            ) from error
         except ValueError as error:
-            raise ProviderUnavailableError(f"SEC CompanyFacts response was invalid for {normalized_ticker}") from error
+            raise SecCompanyFactsJsonParseError(
+                f"SEC CompanyFacts JSON parse error for {normalized_ticker}"
+            ) from error
 
         if not payload:
             return None

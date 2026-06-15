@@ -254,6 +254,8 @@ Outcome: ME06 added a SEC CompanyFacts provider adapter, mocked provider tests, 
 
 Owner roles: Data Steward, Technical Architect, Development Lead, QA / Test Lead, Governance Auditor, Operator / User
 
+Status: COMPLETED BY ME07
+
 Goal: Review ME06 real-provider coverage behavior and define source-data owner decisions before building first fundamental source context.
 
 Scope: Provider availability review, SEC access/user-agent/network follow-up, ticker-to-CIK ownership decision, smoke evidence retention policy, required-field alias review, source artifact handling, and readiness criteria for first fundamental source context.
@@ -272,9 +274,35 @@ Acceptance criteria:
 * No analysis, recommendation, score, allocation, urgency, conviction, tradeability, or Decision Engine behavior is introduced.
 * No reporting, Telegram, portfolio, watchlist, production data, or production report side effects occur.
 
-### ME08 - Produce local operator review output
+Outcome: ME07 identified the bounded SEC smoke failure as a controlled network/DNS access failure in this environment, improved provider error categories, kept SEC CompanyFacts approved for bounded smoke only, and deferred all-ticker coverage or analysis until access and source-data ownership decisions are resolved.
+
+### ME08 - Repair SEC CompanyFacts network access and rerun bounded coverage review
+
+Owner roles: Data Steward, Technical Architect, Development Lead, QA / Test Lead, Governance Auditor, Operator / User
+
+Goal: Resolve the SEC CompanyFacts network/request access issue and rerun bounded source coverage before approving source context work.
+
+Scope: SEC access diagnostics, User-Agent/contact policy review, environment/network review, bounded manual SEC smoke rerun, ticker-to-CIK ownership decision, source evidence retention decision, and coverage review documentation.
+
+Not in scope: Analysis, recommendation behavior, BUY / SELL / HOLD behavior, allocation, ranking, score, urgency, conviction, tradeability, position sizing, execution advice, production writes, normal automated tests with live calls, report generation, Telegram, portfolio/watchlist mutation, or Decision Engine behavior changes.
+
+Acceptance criteria:
+
+* SEC network/request failure cause is resolved or documented as an environment blocker.
+* Bounded SEC smoke is rerun with explicit ticker limit.
+* Readiness counts and provider error categories are documented.
+* Ticker-to-CIK source ownership is decided.
+* Smoke evidence retention policy is decided.
+* Required SEC alias coverage is reviewed for first source context readiness.
+* No source evidence is treated as source truth by default.
+* No analysis, recommendation, score, allocation, urgency, conviction, tradeability, or Decision Engine behavior is introduced.
+* No reporting, Telegram, portfolio, watchlist, production data, or production report side effects occur.
+
+### Future - Produce local operator review output
 
 Owner roles: Operator / User, Product Owner, Development Lead, QA / Test Lead, Governance Auditor
+
+Status: DEFERRED AFTER ME07
 
 Goal: Produce local operator review output for human review without creating allocation authority outside the Decision Engine.
 
@@ -292,3 +320,5 @@ Acceptance criteria:
 * No hidden provider calls or production side effects occur.
 * No Telegram delivery or production reporting occurs unless a later sprint explicitly authorizes it.
 * Operator limitations and next steps are documented.
+
+Deferral note: This was the original ME08 roadmap target. After ME07, the next recommended sprint is the revised ME08 source-access repair and bounded coverage review. Local operator review output remains important but depends on usable source intake evidence.
