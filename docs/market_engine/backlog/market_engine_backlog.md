@@ -333,6 +333,8 @@ Outcome: ME09 ran a bounded 10-ticker SEC CompanyFacts coverage review for `NVDA
 
 Owner roles: Data Steward, Technical Architect, Development Lead, QA / Test Lead, Governance Auditor
 
+Status: COMPLETED BY ME10
+
 Goal: Convert bounded SEC CompanyFacts smoke evidence into an approved source-field mapping and source coverage contract before source context or analysis work.
 
 Scope: SEC field alias review, required-field contract, ticker-to-CIK ownership decision, source coverage contract, artifact retention policy, missing-field semantics, provider-error semantics, and readiness criteria for first fundamental source context.
@@ -351,6 +353,56 @@ Acceptance criteria:
 * Readiness criteria for first source context are recorded.
 * No analysis, recommendation, score, allocation, urgency, conviction, tradeability, or Decision Engine behavior is introduced.
 * No reporting, Telegram, portfolio, watchlist, production data, or production report side effects occur.
+
+Outcome: ME10 approved the first SEC CompanyFacts field mapping and source coverage contract for `revenue`, `net_income`, `operating_cash_flow`, and `capital_expenditures`. SEC CompanyFacts is approved for field mapping implementation, but not for analysis.
+
+### ME11 - Implement SEC field mapping and first fundamental source context
+
+Owner roles: Financial Analyst, Data Steward, Technical Architect, Development Lead, QA / Test Lead, Governance Auditor
+
+Status: COMPLETED BY ME11
+
+Goal: Implement the approved SEC CompanyFacts field mapping contract and create the first source-only Market Engine fundamental context.
+
+Scope: Deterministic SEC alias priority, canonical source field mapping, raw source value preservation, SEC fact provenance, missing-data preservation, source readiness, and source-only context objects.
+
+Not in scope: Financial analysis, free cash flow, growth, margins, valuation metrics, recommendation behavior, BUY / SELL / HOLD behavior, allocation, ranking, score, urgency, conviction, tradeability, position sizing, execution advice, production writes, live provider calls in automated tests, report generation, Telegram, portfolio/watchlist mutation, or Decision Engine behavior changes.
+
+Acceptance criteria:
+
+* Approved SEC CompanyFacts mappings are implemented for `revenue`, `net_income`, `operating_cash_flow`, and `capital_expenditures`.
+* Alias priority is deterministic and selects one approved tag only.
+* Unapproved substitutions are not selected.
+* Selected SEC tag, unit, period metadata, filing metadata, raw value, selection reason, and fallback alias metadata are preserved.
+* Missing values remain missing and are not converted to zero.
+* Source context exposes readiness states without analysis output.
+* Automated tests use mocked/synthetic SEC payloads only.
+* No legacy runtime imports are introduced.
+* No old data/report paths are changed.
+* No Decision Engine, reporting, Telegram, portfolio, or watchlist side effects occur.
+
+Outcome: ME11 added SEC CompanyFacts contract mapping, a source-only fundamental context, tests for approved mappings and forbidden substitutions, provenance checks, missing-data checks, and documentation/audit updates.
+
+### ME12 - Build first non-decision fundamental analysis pass
+
+Owner roles: Financial Analyst, Data Steward, Technical Architect, Development Lead, QA / Test Lead, Governance Auditor
+
+Status: RECOMMENDED NEXT
+
+Goal: Build the first non-decision fundamental analysis pass from approved Market Engine source context.
+
+Scope: Source-backed financial observations, explicit missing-data handling, source limitation flags, and deterministic non-decision context suitable for later operator review.
+
+Not in scope: BUY / SELL / HOLD behavior, allocation, ranking, score, urgency, conviction, tradeability, position sizing, execution advice, portfolio/watchlist mutation, Telegram, production reporting, or Decision Engine behavior changes.
+
+Acceptance criteria:
+
+* Analysis consumes only approved Market Engine source context.
+* Missing data remains explicit.
+* Output is non-decision and non-allocation.
+* No recommendation, score, rank, tradeability, or action language is emitted.
+* Tests prove no Decision Engine, reporting, Telegram, portfolio, or watchlist side effects.
+* Old runtime code remains reference only.
 
 ### Future - Produce local operator review output
 

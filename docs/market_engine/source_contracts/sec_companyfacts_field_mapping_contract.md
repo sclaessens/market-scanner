@@ -602,3 +602,33 @@ ME11 should:
 - add tests for all approved mappings and forbidden substitutions;
 - keep all tests fake/mocked;
 - avoid analysis, scoring, ranking, recommendations, reporting, Telegram, portfolio, and watchlist behavior.
+
+## ME11 Implementation Status
+
+Status:
+
+```text
+IMPLEMENTED BY ME11
+```
+
+ME11 implements this contract in Market Engine code under:
+
+```text
+src/market_engine/source_intake/sec_companyfacts_fields.py
+src/market_engine/fundamentals/source_context.py
+```
+
+Implementation summary:
+
+- deterministic SEC alias priority is encoded for all four approved canonical fields;
+- selected SEC tag, unit, period metadata, filing metadata, raw value, selection reason, and fallback alias metadata are preserved;
+- missing fields remain missing and are not converted to zero;
+- source readiness is exposed through a source-only fundamental context;
+- automated tests use mocked SEC CompanyFacts payloads only;
+- no financial analysis, free cash flow, growth, margins, scoring, ranking, recommendations, Decision Engine behavior, reporting, Telegram, portfolio mutation, or watchlist mutation is implemented.
+
+ME11 updates the recommended next sprint to:
+
+```text
+ME12 — Build first non-decision fundamental analysis pass
+```
