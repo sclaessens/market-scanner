@@ -301,7 +301,7 @@ Outcome: Job-scoped sprint naming is approved and documented in `docs/market_eng
 | `ME-QA` | Cross-job quality / testing / CI | Contract tests, regression tests, compatibility checks, CI gates, cross-job quality enforcement |
 | `ME-DATA` | Data governance / persistence / retention | Shared data layout, persistence policy, retention policy, cache lifecycle, schema storage, and data governance |
 
-## Next Approved Sprint
+## Completed Job-Scoped Sprints
 
 ### ME-SR01 — Persist raw SEC CompanyFacts source snapshots and support cached source loading
 
@@ -375,6 +375,163 @@ Acceptance criteria:
 
 Outcome: ME-SR01 added SEC CompanyFacts raw snapshot persistence, cached raw snapshot loading, provider error manifest writing, metadata validation, latest cached snapshot selection, and an explicit cached SEC provider path that avoids provider/network calls when supplied a cached snapshot file. Tests use temporary local payloads only.
 
+### ME-SC01 — Define SEC CompanyFacts Source Context contract from cached raw snapshots
+
+Owner roles: Data Steward / Technical Architect / Financial Analyst / QA Lead / Governance Auditor
+
+Job family: Source Context
+
+Status: COMPLETED BY ME-SC01
+
+Goal: Define the Source Context contract for building SEC CompanyFacts source context from cached raw source snapshots produced by ME-SR01.
+
+Scope:
+
+* Source Context input contract from cached raw SEC CompanyFacts snapshot envelopes;
+* Source Context output contract;
+* approved context-level source availability states;
+* approved field-level states;
+* provenance requirements;
+* missingness and provider-error rules;
+* persistence paths;
+* test requirements for later implementation;
+* authority boundaries;
+* next implementation sprint identification.
+
+Approved input path:
+
+```text
+data/market_engine/source_snapshots/sec_companyfacts/<source_refresh_run_id>/
+```
+
+Approved output path:
+
+```text
+data/market_engine/source_contexts/fundamentals/<source_context_run_id>/
+```
+
+Approved context format version:
+
+```text
+sec-companyfacts-source-context-v1
+```
+
+Approved context-level states:
+
+* `AVAILABLE`;
+* `PARTIAL`;
+* `MISSING`;
+* `INVALID`;
+* `PROVIDER_ERROR`;
+* `UNSUPPORTED`.
+
+Approved field-level states:
+
+* `PRESENT`;
+* `MISSING`;
+* `INVALID`;
+* `UNSUPPORTED`.
+
+Approved initial canonical fields:
+
+* `revenue`;
+* `net_income`;
+* `operating_cash_flow`;
+* `capital_expenditures`.
+
+Explicit non-scope:
+
+* no Python implementation;
+* no tests;
+* no provider calls;
+* no runtime behavior;
+* no source refresh behavior;
+* no fundamental observations;
+* no derived observations;
+* no free cash flow;
+* no growth;
+* no margins;
+* no valuation metrics;
+* no analysis review;
+* no recommendation review;
+* no portfolio review;
+* no delivery;
+* no Telegram;
+* no Decision Engine behavior.
+
+Acceptance criteria:
+
+* Source Context contract is documented.
+* Input contract from ME-SR01 raw snapshots is defined.
+* Output contract for source-only context is defined.
+* Context-level and field-level states are defined.
+* Provenance requirements are defined.
+* Missingness and provider-error rules are defined.
+* Persistence paths are defined.
+* Test requirements are defined for implementation.
+* Authority boundaries are explicit.
+* Next implementation sprint is identified as `ME-SC02`.
+* No runtime, code, test, provider, data, generated artifact, recommendation, portfolio, delivery, Telegram, or Decision Engine behavior is changed.
+
+Outcome: ME-SC01 approved the SEC CompanyFacts Source Context contract in `docs/market_engine/source_context/me_sc01_sec_companyfacts_source_context_contract.md` and recorded the audit in `docs/market_engine/audits/me_sc01_sec_companyfacts_source_context_contract_audit.md`.
+
+## Next Approved Sprint
+
+### ME-SC02 — Implement SEC CompanyFacts Source Context from cached raw snapshots
+
+Owner roles: Data Steward / Technical Architect / Financial Analyst / Development Lead / QA Lead / Governance Auditor
+
+Job family: Source Context
+
+Status: RECOMMENDED NEXT
+
+Goal: Implement the SEC CompanyFacts Source Context contract defined by ME-SC01.
+
+Scope:
+
+* load cached raw SEC CompanyFacts snapshot envelopes from the ME-SR01 persistence path;
+* build source-only context output;
+* emit approved context-level states;
+* emit approved field-level states;
+* preserve source provenance;
+* preserve missingness explicitly;
+* map provider-error evidence to `PROVIDER_ERROR` context state;
+* persist Source Context output under `data/market_engine/source_contexts/fundamentals/<source_context_run_id>/`;
+* add local Source Context tests using synthetic/temporary cached payloads only;
+* document implementation and audit results.
+
+Explicit non-scope:
+
+* no live provider calls in automated tests;
+* no source refresh job runner;
+* no fundamental observations;
+* no derived observations;
+* no free cash flow;
+* no growth;
+* no margins;
+* no valuation metrics;
+* no score;
+* no ranking;
+* no BUY / SELL / HOLD;
+* no analysis review;
+* no recommendation review;
+* no portfolio review;
+* no delivery;
+* no Telegram;
+* no Decision Engine behavior.
+
+Acceptance criteria:
+
+* ME-SC02 implements the ME-SC01 contract.
+* Source Context can be built from cached raw SEC CompanyFacts snapshots without live provider calls.
+* Source Context output remains source-only.
+* Missingness and provider errors remain explicit.
+* Raw source provenance is preserved.
+* Tests prove boundary compliance and old path prohibition.
+* Documentation, backlog, and audit are updated.
+
+## Candidate Follow-Up Sprints
+
 ### ME-SR02 — Build bounded SEC CompanyFacts source refresh job runner
 
 Owner roles: Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
@@ -403,21 +560,9 @@ Acceptance criteria:
 * Automated tests do not call live providers.
 * No analysis, recommendation, portfolio, delivery, Telegram, or Decision Engine behavior is introduced.
 
-## Deferred / Future Candidate Sprints
-
-These candidate sprints must receive job-scoped IDs before execution.
-
-### ME-SC01 — Build cached SEC CompanyFacts source context from persisted snapshots
-
-Candidate follow-up after ME-SR01.
-
-Job family: Source Context
-
-Goal: Build source context from cached SEC CompanyFacts source snapshots without live provider calls.
-
 ### ME-FO01 — Produce fundamental observations from cached source context
 
-Candidate follow-up after source context job execution is stable.
+Candidate follow-up after Source Context implementation is stable.
 
 Job family: Fundamental Observation
 
