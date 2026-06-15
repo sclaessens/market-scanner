@@ -306,6 +306,8 @@ Outcome: ME08 confirmed that sandboxed network access still fails for `data.sec.
 
 Owner roles: Data Steward, Technical Architect, Development Lead, QA / Test Lead, Governance Auditor, Operator / User
 
+Status: COMPLETED BY ME09
+
 Goal: Run a bounded multi-ticker SEC CompanyFacts coverage review and evaluate isolated smoke artifacts before any source context or analysis sprint.
 
 Scope: Explicit bounded ticker set, SEC CompanyFacts coverage review, isolated non-production smoke artifacts if explicitly requested, missing-field evidence, provider-error evidence, ticker-to-CIK source ownership review, artifact retention review, and readiness criteria for first source context.
@@ -322,6 +324,31 @@ Acceptance criteria:
 * Provider-error categories are documented.
 * Ticker-to-CIK ownership decision is refined.
 * Smoke artifacts are reviewed as evidence only, not source truth.
+* No analysis, recommendation, score, allocation, urgency, conviction, tradeability, or Decision Engine behavior is introduced.
+* No reporting, Telegram, portfolio, watchlist, production data, or production report side effects occur.
+
+Outcome: ME09 ran a bounded 10-ticker SEC CompanyFacts coverage review for `NVDA`, `AMD`, `META`, `COST`, `AAPL`, `MSFT`, `GOOGL`, `AMZN`, `TSLA`, and `AVGO`. Escalated SEC coverage returned `AVAILABLE=10`, no missing fields, and no provider errors. Non-production smoke artifacts were written under `data/market_engine/smokes/source_intake/sec_companyfacts/20260615T103333Z/` and intentionally not committed.
+
+### ME10 - Define approved SEC CompanyFacts field mapping and source coverage contract
+
+Owner roles: Data Steward, Technical Architect, Development Lead, QA / Test Lead, Governance Auditor
+
+Goal: Convert bounded SEC CompanyFacts smoke evidence into an approved source-field mapping and source coverage contract before source context or analysis work.
+
+Scope: SEC field alias review, required-field contract, ticker-to-CIK ownership decision, source coverage contract, artifact retention policy, missing-field semantics, provider-error semantics, and readiness criteria for first fundamental source context.
+
+Not in scope: Analysis, recommendation behavior, BUY / SELL / HOLD behavior, allocation, ranking, score, urgency, conviction, tradeability, position sizing, execution advice, production writes, normal automated tests with live calls, report generation, Telegram, portfolio/watchlist mutation, or Decision Engine behavior changes.
+
+Acceptance criteria:
+
+* SEC required-field mapping is documented.
+* SEC alias selection rules are documented.
+* Ticker-to-CIK ownership is decided.
+* Source coverage contract is defined.
+* Artifact retention policy is decided.
+* Missing-field semantics are documented.
+* Provider-error semantics are documented.
+* Readiness criteria for first source context are recorded.
 * No analysis, recommendation, score, allocation, urgency, conviction, tradeability, or Decision Engine behavior is introduced.
 * No reporting, Telegram, portfolio, watchlist, production data, or production report side effects occur.
 

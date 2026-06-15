@@ -407,3 +407,100 @@ Source intake still cannot:
 * create scores or rankings;
 * emit recommendations;
 * call reporting, Telegram, portfolio/watchlist mutation, or the Decision Engine.
+
+## ME09 Bounded Multi-Ticker SEC Coverage Review
+
+ME09 ran a bounded SEC CompanyFacts source coverage review for 10 tickers:
+
+```text
+NVDA AMD META COST AAPL MSFT GOOGL AMZN TSLA AVGO
+```
+
+The max ticker limit was:
+
+```text
+10
+```
+
+Required fields remained:
+
+* `revenue`
+* `net_income`
+* `operating_cash_flow`
+* `capital_expenditures`
+
+The escalated SEC run returned:
+
+```text
+readiness=AVAILABLE=10
+missing_fields=none
+provider_errors=0
+provider_error_categories=none
+```
+
+No ticker returned `PARTIAL`, `MISSING`, `UNSUPPORTED`, `INVALID_TICKER`, or `PROVIDER_ERROR`.
+
+## ME09 Smoke Artifact Path
+
+ME09 added explicit smoke artifact support.
+
+Artifacts are written only when `--write-smoke-artifact` is passed.
+
+The required path shape is:
+
+```text
+data/market_engine/smokes/source_intake/sec_companyfacts/<run_id>/
+```
+
+ME09 artifact path:
+
+```text
+data/market_engine/smokes/source_intake/sec_companyfacts/20260615T103333Z/
+```
+
+Artifact files:
+
+* `coverage_summary.csv`
+* `ticker_results.csv`
+* `missing_fields.csv`
+* `provider_errors.csv`
+* `smoke_metadata.json`
+
+These files are non-production smoke evidence. They are not source truth, reports, or analysis output.
+
+## ME09 Data Isolation Rule
+
+ME09 confirms that Market Engine smoke artifacts must not be written to old paths:
+
+* `data/processed/`
+* `data/generated/`
+* `data/logs/`
+* `data/normalized/`
+* `reports/`
+* `data/portfolio/`
+* `data/watchlist/`
+
+Generated smoke artifacts should not be committed unless a later sprint explicitly approves retention in version control.
+
+## ME09 Source-Data Owner Decision
+
+Decision:
+
+```text
+APPROVED_FOR_BOUNDED_SEC_FIELD_MAPPING_CONTRACT
+```
+
+The bounded sample supports moving to a source-field contract and coverage contract sprint.
+
+This does not approve all-ticker production runs, analysis, scoring, recommendations, reporting, Telegram delivery, portfolio/watchlist mutation, or Decision Engine behavior.
+
+## What Remains Blocked Before Fundamental Analysis
+
+Before fundamental analysis can be built, Market Engine still needs:
+
+* approved SEC field mapping contract;
+* ticker-to-CIK ownership decision;
+* source coverage contract;
+* artifact retention policy;
+* source context model;
+* explicit tests proving source context remains non-analytical.

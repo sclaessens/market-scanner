@@ -18,6 +18,11 @@ from market_engine.source_intake.sec_companyfacts_provider import (
     SMOKE_TICKER_CIKS,
     SecCompanyFactsProvider,
 )
+from market_engine.source_intake.smoke_artifacts import (
+    default_sec_companyfacts_artifact_dir,
+    make_smoke_run_id,
+    write_sec_companyfacts_smoke_artifacts,
+)
 
 
 DEFAULT_REQUIRED_FIELDS = ("revenue", "operating_cash_flow", "capital_expenditures")
@@ -90,9 +95,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument(
         "--write-smoke-artifact",
+        nargs="?",
+        const="auto",
         type=Path,
-        help="Optional non-production JSON artifact path for local smoke output.",
+        help="Optional non-production smoke artifact directory. Defaults to the SEC smoke path.",
     )
+    parser.add_argument("--smoke-run-id", help="Optional run id for smoke artifact directory.")
     args = parser.parse_args(argv)
 
     tickers = _resolve_tickers(args)
@@ -115,7 +123,21 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     artifact_path = args.write_smoke_artifact or args.write_artifact
     if artifact_path is not None:
-        _write_artifact(path=artifact_path, summary=summary)
+        run_id = args.smoke_run_id or make_smoke_run_id()
+        output_dir = None if str(artifact_path) == "auto" else artifact_path
+        if output_dir is None and args.provider == "sec-companyfacts":
+            output_dir = default_sec_companyfacts_artifact_dir(run_id)
+        if output_dir is None:
+            output_dir = Path("data/market_engine/smokes/source_intake") / args.provider / run_id
+        written_dir = _write_artifact(
+            path=output_dir,
+            summary=summary,
+            tickers=tickers,
+            max_tickers=args.max_tickers,
+            run_id=run_id,
+            provider_name=args.provider,
+        )
+        print(f"smoke_artifact_path={written_dir}")
 
     return 0
 
@@ -143,17 +165,27 @@ def _validate_real_provider_args(tickers: list[str], max_tickers: int) -> None:
         raise SystemExit(f"refusing to run {len(tickers)} tickers with max_tickers={max_tickers}")
 
 
-def _write_artifact(path: Path, summary: BatchSourceIntakeSummary) -> None:
-    allowed_root = Path("data/market_engine/smokes/source_intake")
-    if allowed_root not in path.parents and path != allowed_root:
-        raise SystemExit(f"smoke artifacts must be written under {allowed_root}")
-    if path.exists():
-        raise SystemExit(f"refusing to overwrite existing smoke artifact: {path}")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(_summary_to_jsonable(summary), indent=2, sort_keys=True),
-        encoding="utf-8",
-    )
+def _write_artifact(
+    *,
+    path: Path,
+    summary: BatchSourceIntakeSummary,
+    tickers: list[str],
+    max_tickers: int,
+    run_id: str,
+    provider_name: str,
+) -> Path:
+    if provider_name != "sec-companyfacts":
+        raise SystemExit("smoke artifacts are currently supported only for sec-companyfacts")
+    try:
+        return write_sec_companyfacts_smoke_artifacts(
+            summary=summary,
+            tickers=tickers,
+            max_tickers=max_tickers,
+            run_id=run_id,
+            artifact_dir=path,
+        )
+    except (FileExistsError, ValueError) as error:
+        raise SystemExit(str(error)) from error
 
 
 def _format_summary(summary: BatchSourceIntakeSummary) -> str:
