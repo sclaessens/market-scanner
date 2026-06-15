@@ -570,13 +570,71 @@ Acceptance criteria:
 * Automated tests do not call live providers.
 * No analysis, recommendation, portfolio, delivery, Telegram, or Decision Engine behavior is introduced.
 
-### ME-FO01 — Produce fundamental observations from cached source context
+### ME-FO01 — Define Fundamental Observation contract from SEC CompanyFacts Source Context
 
-Candidate follow-up after Source Context implementation is stable.
+Owner roles: Financial Analyst / Data Steward / Technical Architect / QA Lead / Governance Auditor
 
 Job family: Fundamental Observation
 
-Goal: Produce non-decision fundamental observations from approved source context snapshots.
+Status: COMPLETED BY ME-FO01
+
+Goal: Define the non-decision Fundamental Observation contract from approved SEC CompanyFacts Source Context.
+
+Scope:
+
+* define approved Fundamental Observation input contract;
+* define approved Fundamental Observation output contract;
+* define observation categories;
+* define observation states;
+* define Source Context state handling;
+* define provenance requirements;
+* define forbidden authority semantics;
+* define persistence path recommendation;
+* define ME-FO02 implementation boundaries.
+
+Explicit non-scope:
+
+* no Python code changes;
+* no tests;
+* no data files;
+* no provider calls;
+* no runtime behavior;
+* no Source Refresh changes;
+* no Source Context changes;
+* no derived calculations;
+* no analysis review;
+* no recommendation review;
+* no portfolio review;
+* no delivery;
+* no Telegram;
+* no Decision Engine behavior.
+
+Acceptance criteria:
+
+* Fundamental Observation job boundary is defined.
+* Source Context input contract is defined.
+* Fundamental Observation output contract is defined.
+* Approved observation categories and states are defined.
+* Source Context state handling is defined.
+* Provenance requirements are defined.
+* Forbidden authority semantics are defined.
+* Persistence path recommendation is defined.
+* ME-FO02 implementation scope is clear.
+* Sprint remains documentation/contract only.
+
+Outcome: ME-FO01 defined the Fundamental Observation contract from SEC CompanyFacts Source Context. Implementation is deferred to `ME-FO02 — Implement Fundamental Observations from SEC CompanyFacts Source Context`.
+
+### ME-FO02 — Implement Fundamental Observations from SEC CompanyFacts Source Context
+
+Candidate follow-up after ME-FO01.
+
+Job family: Fundamental Observation
+
+Status: RECOMMENDED NEXT
+
+Goal: Implement non-decision Fundamental Observations from approved SEC CompanyFacts Source Context.
+
+Scope must remain inside the ME-FO job family and must not introduce derived observations, analysis review, recommendation review, portfolio review, delivery, Telegram, or Decision Engine behavior.
 
 ### ME-DO01 — Add first derived cash-generation observation layer
 
