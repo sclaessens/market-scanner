@@ -328,3 +328,82 @@ First fundamental source context remains blocked until:
 * source evidence retention policy is settled;
 * required-field alias coverage is reviewed;
 * data-owner readiness criteria are documented.
+
+## ME08 SEC Network Access Result
+
+ME08 verified that the local runtime environment can reach SEC CompanyFacts when network access is allowed.
+
+Sandboxed DNS and HTTPS checks still fail with DNS resolution errors. Escalated local runtime checks succeed:
+
+```text
+DNS: 2.21.223.65
+HTTPS: 200 application/json
+```
+
+The bounded SEC CompanyFacts smoke also succeeds when run with network permission:
+
+```text
+readiness=AVAILABLE=4
+missing_fields=none
+provider_errors=0
+provider_error_categories=none
+```
+
+The sampled tickers were:
+
+* `NVDA`
+* `AMD`
+* `META`
+* `COST`
+
+## ME08 Source Coverage Status
+
+Source-data owner decision after ME08:
+
+```text
+APPROVED_FOR_BOUNDED_SEC_COVERAGE_REVIEW
+```
+
+SEC CompanyFacts is no longer blocked for bounded local smoke. It is still not approved for broad/unbounded provider calls, all-ticker production runs, analysis, reporting, Telegram, portfolio/watchlist mutation, or Decision Engine behavior.
+
+## ME08 Data Isolation Rule
+
+ME08 wrote no smoke artifacts.
+
+Future smoke artifacts, if explicitly requested, must be isolated under:
+
+```text
+data/market_engine/smokes/source_intake/sec_companyfacts/<run_id>/
+```
+
+Forbidden write targets remain:
+
+* `data/processed/`
+* `data/generated/`
+* `data/logs/`
+* `data/normalized/`
+* `reports/`
+* `data/portfolio/`
+* `data/watchlist/`
+
+Smoke artifacts are evidence only and are not source truth by default.
+
+## What Source Intake Can Do After ME08
+
+After ME08, Market Engine source intake can:
+
+* run fake-provider smoke;
+* run mocked SEC provider tests;
+* run bounded SEC CompanyFacts smoke with explicit flags and network permission;
+* classify sandbox network failure as controlled provider error;
+* produce local stdout coverage review for the bounded SEC sample;
+* proceed to a bounded multi-ticker SEC coverage artifact review sprint.
+
+Source intake still cannot:
+
+* run unbounded provider calls;
+* write old data or report paths;
+* create analysis;
+* create scores or rankings;
+* emit recommendations;
+* call reporting, Telegram, portfolio/watchlist mutation, or the Decision Engine.

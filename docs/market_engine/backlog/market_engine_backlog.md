@@ -280,6 +280,8 @@ Outcome: ME07 identified the bounded SEC smoke failure as a controlled network/D
 
 Owner roles: Data Steward, Technical Architect, Development Lead, QA / Test Lead, Governance Auditor, Operator / User
 
+Status: COMPLETED BY ME08
+
 Goal: Resolve the SEC CompanyFacts network/request access issue and rerun bounded source coverage before approving source context work.
 
 Scope: SEC access diagnostics, User-Agent/contact policy review, environment/network review, bounded manual SEC smoke rerun, ticker-to-CIK ownership decision, source evidence retention decision, and coverage review documentation.
@@ -295,6 +297,31 @@ Acceptance criteria:
 * Smoke evidence retention policy is decided.
 * Required SEC alias coverage is reviewed for first source context readiness.
 * No source evidence is treated as source truth by default.
+* No analysis, recommendation, score, allocation, urgency, conviction, tradeability, or Decision Engine behavior is introduced.
+* No reporting, Telegram, portfolio, watchlist, production data, or production report side effects occur.
+
+Outcome: ME08 confirmed that sandboxed network access still fails for `data.sec.gov`, but escalated local runtime DNS and HTTPS access succeeds. The bounded SEC CompanyFacts smoke reached `AVAILABLE=4` for `NVDA`, `AMD`, `META`, and `COST` with no missing fields or provider errors. SEC CompanyFacts is approved for bounded coverage review only.
+
+### ME09 - Run bounded multi-ticker SEC CompanyFacts coverage artifact review
+
+Owner roles: Data Steward, Technical Architect, Development Lead, QA / Test Lead, Governance Auditor, Operator / User
+
+Goal: Run a bounded multi-ticker SEC CompanyFacts coverage review and evaluate isolated smoke artifacts before any source context or analysis sprint.
+
+Scope: Explicit bounded ticker set, SEC CompanyFacts coverage review, isolated non-production smoke artifacts if explicitly requested, missing-field evidence, provider-error evidence, ticker-to-CIK source ownership review, artifact retention review, and readiness criteria for first source context.
+
+Not in scope: Analysis, recommendation behavior, BUY / SELL / HOLD behavior, allocation, ranking, score, urgency, conviction, tradeability, position sizing, execution advice, production writes, normal automated tests with live calls, report generation, Telegram, portfolio/watchlist mutation, or Decision Engine behavior changes.
+
+Acceptance criteria:
+
+* Multi-ticker SEC coverage run is explicitly bounded.
+* Any artifact writing is explicitly requested and isolated under `data/market_engine/smokes/source_intake/sec_companyfacts/<run_id>/`.
+* No old data/report paths are written.
+* Readiness counts are documented.
+* Missing-field frequency is documented.
+* Provider-error categories are documented.
+* Ticker-to-CIK ownership decision is refined.
+* Smoke artifacts are reviewed as evidence only, not source truth.
 * No analysis, recommendation, score, allocation, urgency, conviction, tradeability, or Decision Engine behavior is introduced.
 * No reporting, Telegram, portfolio, watchlist, production data, or production report side effects occur.
 
