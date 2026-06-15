@@ -166,6 +166,8 @@ Acceptance criteria:
 
 Owner roles: Technical Architect, Development Lead, QA / Test Lead, Governance Auditor
 
+Status: COMPLETED BY ME04
+
 Goal: Extract technical architecture, coding rules, and testing architecture for Market Engine.
 
 Scope: Module ownership, provider/data/analysis/decision separation, runtime boundaries, side-effect controls, test-family conventions, manual smoke harness standards, forbidden field policy, and file strategy.
@@ -175,7 +177,9 @@ Not in scope: Implementation unless separately authorized, provider calls, produ
 Acceptance criteria:
 
 * Technical architecture specification exists.
-* ME04 architecture is explicitly based on ME01, ME02, and ME03.
+* ME04 extraction document exists.
+* ME04 audit document exists.
+* ME04 architecture is explicitly based on ME01, ME02, ME03, and ME04-PREP-D.
 * Coding and testing standards are tied to implementation implications.
 * Module ownership maps to the ME02 functional stages.
 * Financial/scanner/fundamental boundaries from ME03 are translated into technical ownership.
@@ -187,6 +191,8 @@ Acceptance criteria:
 * Test-family placement rules are clear enough to avoid unnecessary new test files.
 * Manual smoke harness policy is explicit and bounded before ME05 begins.
 * File/module strategy prevents unnecessary new Python files and avoids temporary quick scripts as canonical runtime.
+* ME05 readiness gate is defined.
+* Only documentation/backlog files are changed.
 
 ### ME05 - Build all-ticker source intake smoke
 
