@@ -998,14 +998,136 @@ Outcome: ME-AR02 implemented non-recommendation Analysis Review in `src/market_e
 
 ### ME-RR01 — Define Recommendation Review contract from Analysis Review
 
-Candidate follow-up after ME-AR02.
+Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / QA Lead / Governance Auditor
+
+Job family: Recommendation Review
+
+Status: COMPLETED BY ME-RR01
+
+Goal: Define the Recommendation Review contract from approved Analysis Review output.
+
+Scope:
+
+* define the Recommendation Review contract boundary;
+* define allowed input contract sec-companyfacts-analysis-review-v1;
+* define recommended output contract sec-companyfacts-recommendation-review-v1;
+* define recommended future output path data/market_engine/recommendation_reviews/<recommendation_review_run_id>/<ticker>/recommendation_review.json;
+* define review states;
+* define review categories;
+* define allowed message semantics;
+* define forbidden message semantics;
+* define missing-data and numeric-zero requirements;
+* define provenance requirements;
+* define boundaries with Analysis Review, Portfolio Review, Decision Engine, Delivery, Reporting, Telegram, providers, and legacy runtime;
+* define ME-RR02 implementation requirements.
+
+Approved input contract:
+
+* sec-companyfacts-analysis-review-v1.
+
+Recommended output contract:
+
+* sec-companyfacts-recommendation-review-v1.
+
+Recommended future output path:
+
+* data/market_engine/recommendation_reviews/<recommendation_review_run_id>/<ticker>/recommendation_review.json.
+
+Approved review states:
+
+* human_review_required;
+* insufficient_evidence;
+* blocked_by_missing_data;
+* not_applicable.
+
+Approved review categories:
+
+* analysis_supportive_but_not_actionable;
+* analysis_mixed_or_conflicted;
+* analysis_blocked_by_missing_data;
+* analysis_not_supported;
+* input_contract_invalid.
+
+Explicit non-scope:
+
+* no Python implementation;
+* no tests;
+* no runtime behavior;
+* no provider calls;
+* no data writes;
+* no generated artifacts;
+* no portfolio review;
+* no portfolio action;
+* no allocation;
+* no position sizing;
+* no execution advice;
+* no Telegram;
+* no reporting;
+* no delivery;
+* no Decision Engine behavior;
+* no BUY / SELL / HOLD as direct trading instructions;
+* no score;
+* no ranking;
+* no conviction;
+* no urgency;
+* no tradeability;
+* no watchlist mutation;
+* no portfolio mutation.
+
+Acceptance criteria:
+
+* Recommendation Review job boundary is defined.
+* Approved Analysis Review input contract is defined.
+* Recommended Recommendation Review output contract is defined.
+* Recommended future persistence path is defined.
+* Review states are defined.
+* Review categories are defined.
+* Allowed message semantics are defined.
+* Forbidden message semantics are defined.
+* Missing-data rules are defined.
+* Numeric-zero rules are defined.
+* Provenance requirements are defined.
+* Boundaries with Portfolio Review, Delivery, Reporting, Telegram, and Decision Engine remain explicit.
+* ME-RR02 implementation requirements are documented.
+* Sprint remains documentation/contract only.
+
+Outcome: ME-RR01 defined Recommendation Review as a non-actionable, source-grounded, human-review routing layer from sec-companyfacts-analysis-review-v1. The contract approves initial review states and review categories, defines provenance and boundary requirements, and prepares ME-RR02 implementation without introducing Python code, tests, runtime behavior, provider calls, data writes, Portfolio Review, Delivery, Telegram, reporting, or Decision Engine authority.
+
+### ME-RR02 — Implement Recommendation Review from Analysis Review
+
+Candidate follow-up after ME-RR01.
+
+Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
 Job family: Recommendation Review
 
 Status: RECOMMENDED NEXT
 
-Goal: Define the Recommendation Review contract from approved Analysis Review output.
+Goal: Implement the minimum viable non-actionable Recommendation Review builder from approved Analysis Review output.
 
-Scope must remain documentation-only and must define the boundary between analysis interpretation and recommendation review before any recommendation implementation is attempted.
+Scope must remain inside the ME-RR job family and must not introduce portfolio review, delivery, Telegram, reporting, Decision Engine behavior, BUY / SELL / HOLD action semantics, allocation, position sizing, execution advice, ranking, scoring, conviction, urgency, tradeability, watchlist mutation, or portfolio mutation.
 
-ME-RR01 must not implement Python code, tests, runtime behavior, provider calls, data writes, portfolio review, delivery, Telegram, reporting, or Decision Engine behavior.
+Required future input contract:
+
+* sec-companyfacts-analysis-review-v1.
+
+Required future output contract:
+
+* sec-companyfacts-recommendation-review-v1.
+
+Required future review states:
+
+* human_review_required;
+* insufficient_evidence;
+* blocked_by_missing_data;
+* not_applicable.
+
+Required future review categories:
+
+* analysis_supportive_but_not_actionable;
+* analysis_mixed_or_conflicted;
+* analysis_blocked_by_missing_data;
+* analysis_not_supported;
+* input_contract_invalid.
+
+ME-RR02 must use local synthetic tests only and must not call live providers.
