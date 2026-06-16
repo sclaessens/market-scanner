@@ -771,3 +771,134 @@ Acceptance criteria:
 * Documentation, backlog, and audit are updated.
 
 Outcome: ME-DO01 implemented the first non-decision Derived Observation layer in `src/market_engine/derived_observations/`, with tests in `tests/market_engine/derived_observations/`. The implementation consumes ME-FO02 Fundamental Observations, derives only free cash flow from operating cash flow and capital expenditures, preserves upstream source values, source references, Source Context state, source refresh metadata, and missingness, and stays inside the ME-DO job family without introducing analysis review, recommendation review, portfolio review, delivery, Telegram, reporting, or Decision Engine behavior.
+
+### ME-AR01 — Define Analysis Review contract from Fundamental and Derived Observations
+
+Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / QA Lead / Governance Auditor
+
+Job family: Analysis Review
+
+Status: COMPLETED BY ME-AR01
+
+Goal: Define the non-recommendation Analysis Review contract from approved ME-FO02 Fundamental Observations and ME-DO01 Derived Observations.
+
+Scope:
+
+* define approved Analysis Review input families;
+* define approved upstream input formats;
+* define recommended Analysis Review output format;
+* define recommended Analysis Review persistence path;
+* define approved Analysis Review categories;
+* define approved Analysis Review states;
+* define state semantics;
+* define recommended review item structure;
+* define approved and forbidden message style;
+* define provenance requirements;
+* define persistence requirements;
+* define ME-AR02 implementation requirements;
+* preserve recommendation, portfolio, delivery, Telegram, reporting, and Decision Engine boundaries.
+
+Approved input families:
+
+* ME-FO — Fundamental Observations;
+* ME-DO — Derived Observations.
+
+Approved initial input formats:
+
+* `sec-companyfacts-fundamental-observations-v1`;
+* `sec-companyfacts-derived-cash-generation-observations-v1`.
+
+Recommended output format:
+
+* `sec-companyfacts-analysis-review-v1`.
+
+Recommended output path:
+
+* `data/market_engine/analysis_reviews/<analysis_review_run_id>/<ticker>/analysis_review.json`.
+
+Approved Analysis Review categories:
+
+* `SOURCE_AVAILABILITY_REVIEW`;
+* `FUNDAMENTAL_OBSERVATION_COMPLETENESS_REVIEW`;
+* `CASH_GENERATION_REVIEW`;
+* `FREE_CASH_FLOW_REVIEW`;
+* `DATA_LIMITATION_REVIEW`;
+* `HUMAN_REVIEW_REQUIREMENT`.
+
+Approved Analysis Review states:
+
+* `SOURCE_HEALTHY`;
+* `SOURCE_LIMITED`;
+* `OBSERVATIONS_COMPLETE`;
+* `OBSERVATIONS_LIMITED`;
+* `CASH_GENERATION_POSITIVE`;
+* `CASH_GENERATION_NEGATIVE`;
+* `CASH_GENERATION_NEUTRAL`;
+* `DATA_LIMITED`;
+* `REQUIRES_HUMAN_REVIEW`;
+* `NOT_ASSESSED`.
+
+Explicit non-scope:
+
+* no Python implementation;
+* no tests;
+* no runtime behavior;
+* no provider calls;
+* no data writes;
+* no generated artifacts;
+* no raw SEC CompanyFacts fetching;
+* no Source Refresh changes;
+* no Source Context changes;
+* no Fundamental Observation changes;
+* no Derived Observation changes;
+* no Recommendation Review behavior;
+* no Portfolio Review behavior;
+* no Delivery behavior;
+* no Telegram;
+* no reporting;
+* no Decision Engine behavior;
+* no BUY / SELL / HOLD;
+* no target price;
+* no score;
+* no ranking;
+* no rating;
+* no conviction;
+* no urgency;
+* no tradeability;
+* no allocation;
+* no position sizing;
+* no execution advice;
+* no watchlist mutation;
+* no portfolio mutation.
+
+Acceptance criteria:
+
+* Analysis Review job boundary is defined.
+* Approved upstream observation families are defined.
+* Approved upstream input formats are defined.
+* Recommended Analysis Review output format is defined.
+* Recommended Analysis Review persistence path is defined.
+* Approved Analysis Review categories are defined.
+* Approved Analysis Review states are defined.
+* State semantics are documented.
+* Approved message style is documented.
+* Forbidden message style is documented.
+* Provenance requirements are documented.
+* Persistence requirements are documented.
+* ME-AR02 implementation requirements are documented.
+* Recommendation, portfolio, delivery, Telegram, reporting, and Decision Engine boundaries remain explicit.
+* Sprint remains documentation/contract only.
+
+Outcome: ME-AR01 defined the non-recommendation Analysis Review contract from ME-FO02 Fundamental Observations and ME-DO01 Derived Observations. The contract approves initial Analysis Review categories and states, defines provenance and persistence requirements, and prepares ME-AR02 implementation without introducing Python code, tests, runtime behavior, provider calls, data writes, Recommendation Review, Portfolio Review, Delivery, Telegram, reporting, or Decision Engine authority.
+
+### ME-AR02 — Implement Analysis Review from Fundamental and Derived Observations
+
+Candidate follow-up after ME-AR01.
+
+Job family: Analysis Review
+
+Status: RECOMMENDED NEXT
+
+Goal: Implement non-recommendation Analysis Review from approved Fundamental Observations and Derived Observations.
+
+Scope must remain inside the ME-AR job family and must not introduce recommendation review, portfolio review, delivery, Telegram, reporting, or Decision Engine behavior.
