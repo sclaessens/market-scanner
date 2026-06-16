@@ -31,6 +31,9 @@ Backlog items do not authorize implementation unless the sprint scope explicitly
 * Do not introduce BUY / SELL / HOLD, recommendation, allocation, urgency, conviction, tradeability, or hidden ranking semantics outside an approved Decision Engine or recommendation-review boundary.
 * Do not introduce Telegram, reporting, portfolio, watchlist, provider, or runtime side effects unless a sprint explicitly authorizes them.
 * Future Market Engine sprints must use job-scoped sprint IDs.
+* Future sprints must be preserved in the backlog and roadmap as soon as they are identified as logical next steps.
+* Planned sprint sequence may only be interrupted when a real problem, blocker, architectural gap, governance risk, test gap, data-quality issue, or newly discovered dependency requires insertion.
+* When a sprint is inserted ahead of the planned sequence, the insertion reason must be documented in the backlog and roadmap.
 * Code changes should usually happen inside one job family at a time.
 * Cross-job work must be explicitly labeled as governance, QA, data governance, or integration contract work.
 * Analysis, recommendation, portfolio review, and delivery authority must remain separated.
@@ -296,6 +299,7 @@ Outcome: Job-scoped sprint naming is approved and documented in `docs/market_eng
 | `ME-DO` | Derived Observation jobs | Produce derived observations, trends, deltas, ratios, comparisons, and computed analytical signals |
 | `ME-AR` | Analysis Review jobs | Review observations into analytical interpretation without recommendation authority |
 | `ME-RR` | Recommendation Review jobs | Produce recommendation review output from approved analysis inputs |
+| `ME-SD` | Setup Detection jobs | Detect non-actionable setups and patterns from approved observation inputs |
 | `ME-PR` | Portfolio Review jobs | Apply portfolio-specific context such as positions, allocation, exposure, concentration, and portfolio fit |
 | `ME-DL` | Delivery jobs | Deliver already-approved outputs through reports, Telegram, dashboards, exports, or other user-facing channels |
 | `ME-QA` | Cross-job quality / testing / CI | Contract tests, regression tests, compatibility checks, CI gates, cross-job quality enforcement |
@@ -1161,38 +1165,196 @@ Validation:
 
 Outcome: ME-RR02 implemented the first non-actionable SEC CompanyFacts Recommendation Review layer. The layer consumes `sec-companyfacts-analysis-review-v1`, emits `sec-companyfacts-recommendation-review-v1`, preserves upstream provenance and missing-data state, persists JSON safely, refuses overwrite, and keeps portfolio, delivery, Telegram, reporting, and Decision Engine authority out of scope.
 
-### ME-RR03 — Define Portfolio Review contract from Recommendation Review
+### ME-RM01 — Align Market Engine roadmap and sprint sequence
 
-Candidate follow-up after ME-RR02.
+Owner roles: Product Owner / Scrum Master / Technical Architect / Governance Auditor
+
+Job family: Roadmap / Governance
+
+Status: COMPLETED BY ME-RM01
+
+Goal: Align the Market Engine roadmap and backlog after Recommendation Review implementation and preserve the required future sprint sequence.
+
+Scope: Roadmap documentation, backlog sequence update, Setup Detection insertion before Portfolio Review, and governance rule for preserving future sprint sequence.
+
+Outcome: ME-RM01 created `docs/market_engine/roadmap/market_engine_roadmap.md`, inserted Setup Detection before Portfolio Review, moved Portfolio Review after Setup Detection-aware Analysis Review and Recommendation Review work, and added the governance rule that future logical next sprints must be preserved in the backlog and roadmap when identified.
+
+Insertion reason: Setup Detection was identified as a missing architectural layer between Derived Observations and downstream Analysis Review / Recommendation Review / Portfolio Review. Without this insertion, the roadmap would jump too quickly from Recommendation Review to Portfolio Review and skip a required pattern/setup layer.
+
+## Recommended Next Sprint
+
+### ME-SD01 — Define Setup Detection contract
+
+Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / QA Lead / Governance Auditor
+
+Job family: Setup Detection
+
+Status: RECOMMENDED NEXT
+
+Goal: Define the contract for detecting patterns and setups from Fundamental Observations and Derived Observations.
+
+Scope: Documentation-only contract sprint unless explicitly re-scoped.
+
+Required future input contracts:
+
+* `sec-companyfacts-fundamental-observations-v1`;
+* `sec-companyfacts-derived-cash-generation-observations-v1`.
+
+Required future output contract:
+
+* `sec-companyfacts-setup-detection-v1`.
+
+ME-SD01 must define:
+
+* Setup Detection job-family boundary;
+* setup categories;
+* setup states;
+* evidence requirements;
+* missing-data handling;
+* non-actionable boundary;
+* provenance requirements;
+* ME-SD02 implementation requirements.
+
+ME-SD01 must not introduce Python code, tests, provider calls, data writes, BUY / SELL / HOLD action semantics, portfolio mutation, Decision Engine behavior, Telegram, reporting, recommendation authority, allocation, execution advice, or delivery behavior.
+
+## Planned Future Sprints
+
+### ME-SD02 — Implement first Setup Detection layer
+
+Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: Setup Detection
+
+Status: PLANNED FUTURE
+
+Goal: Implement the first non-actionable Setup Detection builder from approved observation inputs.
+
+Scope: Local synthetic tests only; no live providers; no portfolio mutation; no Decision Engine behavior; no BUY / SELL / HOLD action semantics.
+
+### ME-AR03 — Extend Analysis Review contract for Setup Detection input
+
+Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / QA Lead / Governance Auditor
+
+Job family: Analysis Review
+
+Status: PLANNED FUTURE
+
+Goal: Define how Analysis Review can consume Setup Detection output without recommendation authority.
+
+Scope: Documentation-only contract update unless explicitly re-scoped.
+
+### ME-AR04 — Implement Analysis Review consumption of Setup Detection
+
+Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: Analysis Review
+
+Status: PLANNED FUTURE
+
+Goal: Implement Analysis Review support for Setup Detection input.
+
+Scope: Local synthetic tests only; no provider calls; no Recommendation Review, Portfolio Review, Delivery, Telegram, or Decision Engine behavior.
+
+### ME-RR03 — Extend Recommendation Review contract for Setup Detection-aware Analysis Review
+
+Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / QA Lead / Governance Auditor
+
+Job family: Recommendation Review
+
+Status: PLANNED FUTURE
+
+Goal: Define how Recommendation Review consumes Setup Detection-aware Analysis Review.
+
+Scope: Documentation-only contract update unless explicitly re-scoped. Recommendation Review must remain non-actionable.
+
+### ME-RR04 — Implement Setup Detection-aware Recommendation Review behavior
+
+Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: Recommendation Review
+
+Status: PLANNED FUTURE
+
+Goal: Implement Setup Detection-aware Recommendation Review behavior.
+
+Scope: Non-actionable Recommendation Review only; no action authority, portfolio mutation, delivery behavior, Telegram, or Decision Engine behavior.
+
+### ME-PR01 — Define Portfolio Review contract from Recommendation Review
+
+Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / QA Lead / Governance Auditor
+
+Job family: Portfolio Review
+
+Status: PLANNED FUTURE
+
+Goal: Define the Portfolio Review contract after Setup Detection-aware Recommendation Review exists.
+
+Scope: Documentation-only unless explicitly re-scoped. Must not introduce execution authority.
+
+Required future input contract:
+
+* `sec-companyfacts-recommendation-review-v1`, extended through Setup Detection-aware Analysis Review and Recommendation Review contracts as needed.
+
+Required future output contract:
+
+* `sec-companyfacts-portfolio-review-v1`.
+
+### ME-PR02 — Implement Portfolio Review
 
 Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
 Job family: Portfolio Review
 
-Status: RECOMMENDED NEXT
+Status: PLANNED FUTURE
 
-Goal: Define the Portfolio Review contract that can consume approved non-actionable Recommendation Review output without creating execution authority.
+Goal: Implement Portfolio Review after the contract is defined.
 
-ME-RR03 must remain documentation-only unless explicitly re-scoped.
+Scope: Must not mutate portfolio, execute actions, call the Decision Engine, send Telegram, generate delivery output, or emit BUY / SELL / HOLD action semantics.
 
-Required future input contract:
+### ME-DE01 — Define Decision Engine handoff contract
 
-* sec-companyfacts-recommendation-review-v1.
+Owner roles: Product Owner / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
-Required future output contract:
+Job family: Decision Engine handoff
 
-* sec-companyfacts-portfolio-review-v1.
+Status: PLANNED FUTURE
 
-ME-RR03 must define:
+Goal: Define the boundary between Market Engine review output and actual decision/action authority.
 
-* Portfolio Review job-family boundary;
-* approved input requirements from Recommendation Review;
-* portfolio-context requirements;
-* portfolio exposure and concentration review semantics;
-* allowed portfolio-review states;
-* allowed portfolio-review categories;
-* missing-data and stale-data rules;
-* authority boundary between Portfolio Review and Decision Engine;
-* implementation requirements for a future ME-PR implementation sprint.
+Scope: Documentation-only contract sprint unless explicitly re-scoped.
 
-ME-RR03 must not introduce Python code, tests, provider calls, data writes, Telegram, reporting, Decision Engine behavior, BUY / SELL / HOLD action semantics, allocation execution, order generation, or portfolio mutation.
+### ME-DE02 — Implement controlled Decision Engine handoff
+
+Owner roles: Product Owner / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: Decision Engine handoff
+
+Status: PLANNED FUTURE
+
+Goal: Implement controlled handoff according to the ME-DE01 contract.
+
+Scope: Must preserve Decision Engine as the only action/allocation authority.
+
+### ME-DL01 — Define Delivery / Reporting contract
+
+Owner roles: Product Owner / Operator / User / Technical Architect / QA Lead / Governance Auditor
+
+Job family: Delivery / Reporting
+
+Status: PLANNED FUTURE
+
+Goal: Define how approved outputs may be delivered or reported.
+
+Scope: Documentation-only contract sprint unless explicitly re-scoped.
+
+### ME-DL02 — Implement controlled Delivery / Reporting output
+
+Owner roles: Product Owner / Operator / User / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: Delivery / Reporting
+
+Status: PLANNED FUTURE
+
+Goal: Implement delivery/reporting only after contract and authority boundaries are defined.
+
+Scope: Must not bypass Recommendation Review, Portfolio Review, or Decision Engine handoff authority boundaries.
