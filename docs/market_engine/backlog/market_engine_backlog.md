@@ -1583,7 +1583,7 @@ Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical A
 
 Job family: Portfolio Review
 
-Status: RECOMMENDED NEXT
+Status: COMPLETED BY ME-PR02
 
 Goal: Implement Portfolio Review after the ME-PR01 contract definition.
 
@@ -1612,13 +1612,33 @@ ME-PR02 must:
 
 ME-PR02 must preserve Decision Engine authority and must not execute allocations, orders, rebalances, alerts, reports, delivery actions, portfolio mutations, or watchlist mutations.
 
+Implemented runtime:
+
+* `src/market_engine/portfolio_review/sec_companyfacts_portfolio_review.py`
+* `src/market_engine/portfolio_review/__init__.py`
+
+Implemented tests:
+
+* `tests/market_engine/portfolio_review/test_sec_companyfacts_portfolio_review.py`
+
+Implemented documentation:
+
+* `docs/market_engine/portfolio_review/me_pr02_portfolio_review_implementation.md`
+* `docs/market_engine/audits/me_pr02_portfolio_review_implementation_audit.md`
+
+Outcome: ME-PR02 implemented non-actionable Portfolio Review from validated `sec-companyfacts-recommendation-review-v1` input and explicitly supplied `market-engine-portfolio-context-v1` input. The implementation emits `sec-companyfacts-portfolio-review-v1`, preserves Recommendation Review provenance and Setup Detection-aware provenance when present, preserves portfolio-context provenance, missing and stale portfolio-context markers, numeric-zero semantics, and produces review-only position, exposure, concentration, portfolio-fit, data-limitation, and downstream-handoff-readiness items.
+
+Possible future Portfolio Review follow-up candidate: `ME-PR03 — Define approved portfolio context source and persistence contract`. This candidate is not inserted ahead of ME-DE01 because ME-PR02 did not uncover a blocker; it should be added formally only if a later Decision Engine handoff or portfolio-context sprint requires persisted portfolio-context sourcing beyond caller-supplied context.
+
+## Recommended Next Sprint
+
 ### ME-DE01 — Define Decision Engine handoff contract
 
 Owner roles: Product Owner / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
 Job family: Decision Engine handoff
 
-Status: PLANNED FUTURE
+Status: RECOMMENDED NEXT
 
 Goal: Define the boundary between Market Engine review output and actual decision/action authority.
 
