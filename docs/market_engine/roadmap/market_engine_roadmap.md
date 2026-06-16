@@ -2,11 +2,11 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-RR03
+Status: ACTIVE ROADMAP AFTER ME-RR04
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-RR03 and records Setup Detection-aware Recommendation Review as the next active implementation step.
+This roadmap preserves the Market Engine sprint sequence after ME-RR04 and records Portfolio Review contract definition as the next active planning step.
 
 ME-SD02 implemented the first non-actionable Setup Detection runtime layer.
 
@@ -14,7 +14,9 @@ ME-AR03 extended the Analysis Review contract so ME-AR04 could consume Setup Det
 
 ME-AR04 implemented Analysis Review consumption of Setup Detection output while preserving the existing `sec-companyfacts-analysis-review-v1` contract.
 
-ME-RR03 extended the Recommendation Review contract so ME-RR04 can consume Setup Detection-aware Analysis Review output while preserving Recommendation Review as downstream, non-actionable, provenance-preserving, missing-data-aware, and numeric-zero-safe.
+ME-RR03 extended the Recommendation Review contract so ME-RR04 could consume Setup Detection-aware Analysis Review output while preserving Recommendation Review as downstream, non-actionable, provenance-preserving, missing-data-aware, and numeric-zero-safe.
+
+ME-RR04 implemented Recommendation Review consumption of Setup Detection-aware Analysis Review output while preserving the existing `sec-companyfacts-recommendation-review-v1` contract.
 
 ## Completed Chain
 
@@ -38,6 +40,7 @@ Completed job-scoped chain:
 | ME-AR03 | Analysis Review          | Completed |
 | ME-AR04 | Analysis Review          | Completed |
 | ME-RR03 | Recommendation Review    | Completed |
+| ME-RR04 | Recommendation Review    | Completed |
 
 ME-RR02 implemented the first non-actionable SEC CompanyFacts Recommendation Review layer with:
 
@@ -93,6 +96,14 @@ ME-RR03 defined that Recommendation Review may consume Setup Detection-aware Ana
 
 ME-RR03 preserved Recommendation Review as downstream of Analysis Review and prevented direct Setup Detection consumption, runtime behavior, provider calls, data writes, Portfolio Review behavior, Delivery behavior, Telegram behavior, reporting behavior, Decision Engine behavior, and BUY / SELL / HOLD action semantics.
 
+ME-RR04 implemented Recommendation Review consumption of Setup Detection-aware Analysis Review with:
+
+* output contract preserved: `sec-companyfacts-recommendation-review-v1`;
+* module: `src/market_engine/recommendation_review/sec_companyfacts_recommendation_review.py`;
+* tests: `tests/market_engine/recommendation_review/test_sec_companyfacts_recommendation_review.py`;
+* implementation documentation: `docs/market_engine/recommendation_review/me_rr04_setup_detection_aware_recommendation_review_implementation.md`;
+* audit: `docs/market_engine/audits/me_rr04_setup_detection_aware_recommendation_review_implementation_audit.md`.
+
 ## Architectural Chain
 
 Current target architecture:
@@ -124,51 +135,38 @@ ME-AR04 extended Analysis Review to consume Setup Detection output.
 
 ME-RR03 extended Recommendation Review to consume Setup Detection-aware Analysis Review output.
 
+ME-RR04 implemented Recommendation Review consumption of Setup Detection-aware Analysis Review output.
+
 Insertion reason:
 
 Setup Detection is required so Market Engine can detect patterns/setups from Fundamental Observations and Derived Observations before downstream review layers attempt portfolio review or decision handoff. Without this layer, the project risks skipping a required interpretive layer and jumping too quickly from Recommendation Review to Portfolio Review.
 
 ## Recommended Next Sprint
 
-### ME-RR04 — Implement Setup Detection-aware Recommendation Review behavior
+### ME-PR01 — Define Portfolio Review contract from Recommendation Review
 
 Status: RECOMMENDED NEXT
 
-Job family: Recommendation Review
+Job family: Portfolio Review
 
-Goal: Implement Setup Detection-aware Recommendation Review behavior.
+Goal: Define the Portfolio Review contract after Setup Detection-aware Recommendation Review exists.
 
-Scope: Non-actionable Recommendation Review only; no action authority, portfolio mutation, delivery behavior, Telegram, reporting, or Decision Engine behavior.
+Scope: Documentation-only unless explicitly re-scoped; no execution authority, portfolio mutation, provider calls, delivery behavior, Telegram, reporting, or Decision Engine behavior.
 
-ME-RR04 must implement Setup Detection-aware Recommendation Review according to the ME-RR03 contract.
-
-ME-RR04 must preserve existing ME-RR02 behavior for non-setup-aware Analysis Review inputs while adding Setup Detection-aware routing, provenance preservation, missing-data preservation, numeric-zero safety, and forbidden-action boundary enforcement.
+ME-PR01 must define Portfolio Review job-family boundaries, approved Recommendation Review input requirements, portfolio-context requirements, allowed review categories and states, missing/stale data rules, and the authority boundary between Portfolio Review and Decision Engine.
 
 ## Planned Future Sprint Sequence
 
 | Sequence | Sprint  | Job family              | Status           | Purpose                                                        |
 | -------- | ------- | ----------------------- | ---------------- | -------------------------------------------------------------- |
-| 1        | ME-RR04 | Recommendation Review   | Recommended next | Implement Setup Detection-aware Recommendation Review behavior |
-| 2        | ME-PR01 | Portfolio Review        | Planned future   | Define Portfolio Review contract from Recommendation Review    |
-| 3        | ME-PR02 | Portfolio Review        | Planned future   | Implement Portfolio Review                                     |
-| 4        | ME-DE01 | Decision Engine handoff | Planned future   | Define Decision Engine handoff contract                        |
-| 5        | ME-DE02 | Decision Engine handoff | Planned future   | Implement controlled Decision Engine handoff                   |
-| 6        | ME-DL01 | Delivery / Reporting    | Planned future   | Define Delivery / Reporting contract                           |
-| 7        | ME-DL02 | Delivery / Reporting    | Planned future   | Implement controlled Delivery / Reporting output               |
+| 1        | ME-PR01 | Portfolio Review        | Recommended next | Define Portfolio Review contract from Recommendation Review |
+| 2        | ME-PR02 | Portfolio Review        | Planned future   | Implement Portfolio Review                                  |
+| 3        | ME-DE01 | Decision Engine handoff | Planned future   | Define Decision Engine handoff contract                     |
+| 4        | ME-DE02 | Decision Engine handoff | Planned future   | Implement controlled Decision Engine handoff                |
+| 5        | ME-DL01 | Delivery / Reporting    | Planned future   | Define Delivery / Reporting contract                        |
+| 6        | ME-DL02 | Delivery / Reporting    | Planned future   | Implement controlled Delivery / Reporting output            |
 
 ## Planned Sprint Details
-
-### ME-RR04 — Implement Setup Detection-aware Recommendation Review behavior
-
-Implement Setup Detection-aware Recommendation Review behavior without action authority.
-
-ME-RR04 must consume only validated `sec-companyfacts-analysis-review-v1`.
-
-ME-RR04 must preserve existing ME-RR02 behavior when Setup Detection-aware Analysis Review items are absent.
-
-ME-RR04 must preserve setup-aware provenance, missing setup observations, setup evidence, setup limitations, numeric-zero semantics, and non-actionable boundary markers.
-
-ME-RR04 must not introduce portfolio mutation, delivery behavior, Telegram, reporting, Decision Engine behavior, allocation, position sizing, ranking, scoring, conviction, urgency, or tradeability authority.
 
 ### ME-PR01 — Define Portfolio Review contract from Recommendation Review
 
