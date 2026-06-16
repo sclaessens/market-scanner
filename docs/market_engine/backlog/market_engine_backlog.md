@@ -893,12 +893,119 @@ Outcome: ME-AR01 defined the non-recommendation Analysis Review contract from ME
 
 ### ME-AR02 — Implement Analysis Review from Fundamental and Derived Observations
 
-Candidate follow-up after ME-AR01.
+Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / QA Lead / Governance Auditor
 
 Job family: Analysis Review
 
+Status: COMPLETED BY ME-AR02
+
+Goal: Implement non-recommendation Analysis Review from approved ME-FO02 Fundamental Observations and ME-DO01 Derived Observations.
+
+Scope:
+
+* consume `SecCompanyFactsFundamentalObservationSet` objects from ME-FO02;
+* consume `SecCompanyFactsDerivedCashGenerationObservationSet` objects from ME-DO01;
+* emit `sec-companyfacts-analysis-review-v1` output;
+* implement approved ME-AR01 Analysis Review categories;
+* implement approved ME-AR01 Analysis Review states;
+* validate upstream observation-set alignment;
+* preserve upstream Fundamental Observation references;
+* preserve upstream Derived Observation references;
+* preserve upstream source values;
+* preserve upstream derived values;
+* preserve source context state;
+* preserve source refresh metadata;
+* preserve missingness and limitation states;
+* emit data limitation review when upstream observations are limited;
+* emit human review requirement when upstream observations are incomplete or limited;
+* persist Analysis Review output under `data/market_engine/analysis_reviews/<analysis_review_run_id>/<ticker>/analysis_review.json`;
+* refuse overwrite of existing Analysis Review output;
+* add local tests using synthetic/temporary upstream observations only;
+* document implementation and audit results.
+
+Approved Analysis Review categories implemented:
+
+* `SOURCE_AVAILABILITY_REVIEW`;
+* `FUNDAMENTAL_OBSERVATION_COMPLETENESS_REVIEW`;
+* `CASH_GENERATION_REVIEW`;
+* `FREE_CASH_FLOW_REVIEW`;
+* `DATA_LIMITATION_REVIEW`;
+* `HUMAN_REVIEW_REQUIREMENT`.
+
+Approved Analysis Review states implemented:
+
+* `SOURCE_HEALTHY`;
+* `SOURCE_LIMITED`;
+* `OBSERVATIONS_COMPLETE`;
+* `OBSERVATIONS_LIMITED`;
+* `CASH_GENERATION_POSITIVE`;
+* `CASH_GENERATION_NEGATIVE`;
+* `CASH_GENERATION_NEUTRAL`;
+* `DATA_LIMITED`;
+* `REQUIRES_HUMAN_REVIEW`;
+* `NOT_ASSESSED`.
+
+Explicit non-scope:
+
+* no raw SEC CompanyFacts fetching;
+* no provider calls;
+* no Source Refresh behavior changes;
+* no Source Context behavior changes;
+* no Fundamental Observation behavior changes;
+* no Derived Observation behavior changes;
+* no Recommendation Review behavior;
+* no Portfolio Review behavior;
+* no Delivery behavior;
+* no Telegram;
+* no reporting;
+* no Decision Engine behavior;
+* no BUY / SELL / HOLD;
+* no target price;
+* no score;
+* no ranking;
+* no rating;
+* no conviction;
+* no urgency;
+* no tradeability;
+* no allocation;
+* no position sizing;
+* no execution advice;
+* no watchlist mutation;
+* no portfolio mutation.
+
+Acceptance criteria:
+
+* Analysis Review output is emitted using `sec-companyfacts-analysis-review-v1`.
+* Complete positive upstream observations produce non-recommendation Analysis Review.
+* Negative cash generation is reviewed without recommendation authority.
+* Neutral cash generation is reviewed without recommendation authority.
+* Limited upstream observations emit data limitation review.
+* Limited upstream observations emit human review requirement.
+* Upstream Fundamental Observation references are preserved.
+* Upstream Derived Observation references are preserved.
+* Upstream source values and derived values are preserved.
+* Source context metadata is preserved.
+* Source refresh metadata is preserved.
+* Upstream observation-set mismatch fails safely.
+* Persistence writes JSON under the approved Analysis Review path.
+* Persistence refuses overwrite.
+* Recommendation, score, ranking, portfolio, delivery, Telegram, reporting, and Decision Engine authority are not emitted.
+* Tests do not use live SEC/provider calls.
+* Tests do not import legacy runtime modules.
+* Documentation, backlog, and audit are updated.
+
+Outcome: ME-AR02 implemented non-recommendation Analysis Review in `src/market_engine/analysis_review/`, with tests in `tests/market_engine/analysis_review/`. The implementation consumes ME-FO02 Fundamental Observations and ME-DO01 Derived Cash Generation Observations, emits approved ME-AR01 review categories and states, preserves upstream observation references, source values, derived values, Source Context state, source refresh metadata, missingness, and limitation states, and stays inside the ME-AR job family without introducing Recommendation Review, Portfolio Review, Delivery, Telegram, reporting, or Decision Engine behavior.
+
+### ME-RR01 — Define Recommendation Review contract from Analysis Review
+
+Candidate follow-up after ME-AR02.
+
+Job family: Recommendation Review
+
 Status: RECOMMENDED NEXT
 
-Goal: Implement non-recommendation Analysis Review from approved Fundamental Observations and Derived Observations.
+Goal: Define the Recommendation Review contract from approved Analysis Review output.
 
-Scope must remain inside the ME-AR job family and must not introduce recommendation review, portfolio review, delivery, Telegram, reporting, or Decision Engine behavior.
+Scope must remain documentation-only and must define the boundary between analysis interpretation and recommendation review before any recommendation implementation is attempted.
+
+ME-RR01 must not implement Python code, tests, runtime behavior, provider calls, data writes, portfolio review, delivery, Telegram, reporting, or Decision Engine behavior.
