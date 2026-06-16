@@ -2,11 +2,11 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-PR01
+Status: ACTIVE ROADMAP AFTER ME-PR02
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-PR01 and records Portfolio Review implementation as the next active planning step.
+This roadmap preserves the Market Engine sprint sequence after ME-PR02 and records Decision Engine handoff contract definition as the next active planning step.
 
 ME-SD02 implemented the first non-actionable Setup Detection runtime layer.
 
@@ -19,6 +19,8 @@ ME-RR03 extended the Recommendation Review contract so ME-RR04 could consume Set
 ME-RR04 implemented Recommendation Review consumption of Setup Detection-aware Analysis Review output while preserving the existing `sec-companyfacts-recommendation-review-v1` contract.
 
 ME-PR01 defined the Portfolio Review contract from Setup Detection-aware Recommendation Review output while preserving Portfolio Review as non-actionable, explicit-portfolio-context-dependent, missing-data-aware, stale-data-aware, numeric-zero-safe, provenance-preserving, and upstream of Decision Engine handoff.
+
+ME-PR02 implemented Portfolio Review while preserving Portfolio Review as non-actionable, explicit-portfolio-context-dependent, missing-data-aware, stale-data-aware, numeric-zero-safe, provenance-preserving, and upstream of Decision Engine handoff.
 
 ## Completed Chain
 
@@ -44,6 +46,7 @@ Completed job-scoped chain:
 | ME-RR03 | Recommendation Review    | Completed |
 | ME-RR04 | Recommendation Review    | Completed |
 | ME-PR01 | Portfolio Review         | Completed |
+| ME-PR02 | Portfolio Review         | Completed |
 
 ME-RR02 implemented the first non-actionable SEC CompanyFacts Recommendation Review layer with:
 
@@ -120,6 +123,18 @@ ME-PR01 defined that Portfolio Review requires explicitly supplied portfolio con
 
 ME-PR01 preserved Portfolio Review as a non-actionable review layer and prevented Python code, tests, runtime behavior, provider calls, broker calls, data writes, generated artifacts, portfolio mutation, watchlist mutation, Telegram, reporting, delivery, Decision Engine behavior, BUY / SELL / HOLD action semantics, allocation execution, target weights, order generation, position sizing instructions, ranking, scoring, conviction, urgency, and tradeability authority.
 
+ME-PR02 implemented Portfolio Review with:
+
+* output contract: `sec-companyfacts-portfolio-review-v1`;
+* approved input contract: `sec-companyfacts-recommendation-review-v1`;
+* approved portfolio context input family: `market-engine-portfolio-context-v1`;
+* module: `src/market_engine/portfolio_review/sec_companyfacts_portfolio_review.py`;
+* tests: `tests/market_engine/portfolio_review/test_sec_companyfacts_portfolio_review.py`;
+* implementation documentation: `docs/market_engine/portfolio_review/me_pr02_portfolio_review_implementation.md`;
+* audit: `docs/market_engine/audits/me_pr02_portfolio_review_implementation_audit.md`.
+
+ME-PR02 preserved Recommendation Review provenance, Setup Detection-aware provenance when present, portfolio-context provenance, missing and stale portfolio-context markers, numeric-zero semantics, and non-actionable review boundaries.
+
 ## Architectural Chain
 
 Current target architecture:
@@ -155,45 +170,36 @@ ME-RR04 implemented Recommendation Review consumption of Setup Detection-aware A
 
 ME-PR01 defined Portfolio Review only after Setup Detection-aware Recommendation Review existed.
 
+ME-PR02 implemented Portfolio Review only after the ME-PR01 contract was defined.
+
 Insertion reason:
 
 Setup Detection is required so Market Engine can detect patterns/setups from Fundamental Observations and Derived Observations before downstream review layers attempt portfolio review or decision handoff. Without this layer, the project risks skipping a required interpretive layer and jumping too quickly from Recommendation Review to Portfolio Review.
 
 ## Recommended Next Sprint
 
-### ME-PR02 — Implement Portfolio Review
+### ME-DE01 — Define Decision Engine handoff contract
 
 Status: RECOMMENDED NEXT
 
-Job family: Portfolio Review
+Job family: Decision Engine handoff
 
-Goal: Implement Portfolio Review after the ME-PR01 contract definition.
+Goal: Define the boundary between Market Engine review output and actual decision/action authority.
 
-Scope: Non-actionable Portfolio Review only; no portfolio mutation, provider calls, broker calls, production data writes, delivery behavior, Telegram, reporting, or Decision Engine behavior.
+Scope: Documentation-only contract sprint unless explicitly re-scoped.
 
-ME-PR02 must implement Portfolio Review from validated `sec-companyfacts-recommendation-review-v1` input and explicitly supplied approved portfolio context.
-
-ME-PR02 must emit `sec-companyfacts-portfolio-review-v1`, preserve Recommendation Review provenance, preserve Setup Detection-aware provenance when present, preserve missing/stale portfolio-context markers, preserve numeric-zero semantics, implement approved Portfolio Review categories and states, and remain upstream of Decision Engine handoff.
-
-ME-PR02 must not introduce BUY / SELL / HOLD action semantics, allocation execution, target weights, order generation, position sizing instructions, ranking, scoring, conviction, urgency, tradeability authority, portfolio mutation, watchlist mutation, broker integration, Telegram, reporting, delivery, or Decision Engine behavior.
+ME-DE01 must define approved Portfolio Review input requirements, handoff payload requirements, what the Market Engine may request from the Decision Engine, what only the Decision Engine may decide, action/allocation authority boundaries, fail-closed rules, audit and traceability requirements, and ME-DE02 implementation requirements.
 
 ## Planned Future Sprint Sequence
 
 | Sequence | Sprint  | Job family              | Status           | Purpose                                                        |
 | -------- | ------- | ----------------------- | ---------------- | -------------------------------------------------------------- |
-| 1        | ME-PR02 | Portfolio Review        | Recommended next | Implement Portfolio Review                                  |
-| 2        | ME-DE01 | Decision Engine handoff | Planned future   | Define Decision Engine handoff contract                     |
-| 3        | ME-DE02 | Decision Engine handoff | Planned future   | Implement controlled Decision Engine handoff                |
-| 4        | ME-DL01 | Delivery / Reporting    | Planned future   | Define Delivery / Reporting contract                        |
-| 5        | ME-DL02 | Delivery / Reporting    | Planned future   | Implement controlled Delivery / Reporting output            |
+| 1        | ME-DE01 | Decision Engine handoff | Recommended next | Define Decision Engine handoff contract          |
+| 2        | ME-DE02 | Decision Engine handoff | Planned future   | Implement controlled Decision Engine handoff     |
+| 3        | ME-DL01 | Delivery / Reporting    | Planned future   | Define Delivery / Reporting contract             |
+| 4        | ME-DL02 | Delivery / Reporting    | Planned future   | Implement controlled Delivery / Reporting output |
 
 ## Planned Sprint Details
-
-### ME-PR02 — Implement Portfolio Review
-
-Implement Portfolio Review after the contract is defined.
-
-It must not mutate portfolio state, execute actions, call the Decision Engine, send Telegram, generate delivery output, or emit BUY / SELL / HOLD action semantics.
 
 ### ME-DE01 — Define Decision Engine handoff contract
 
