@@ -2,17 +2,17 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-AR03
+Status: ACTIVE ROADMAP AFTER ME-AR04
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-AR03 and records Setup Detection as an active Market Engine job family between Derived Observations and Analysis Review.
+This roadmap preserves the Market Engine sprint sequence after ME-AR04 and records Setup Detection as an active Market Engine job family between Derived Observations and Analysis Review.
 
 ME-SD02 implemented the first non-actionable Setup Detection runtime layer.
 
-ME-AR03 extended the Analysis Review contract so a future ME-AR04 implementation can consume Setup Detection output.
+ME-AR03 extended the Analysis Review contract so ME-AR04 could consume Setup Detection output.
 
-ME-AR03 is documentation-only. It does not change runtime code, tests, providers, data files, portfolio files, Telegram/reporting files, Recommendation Review behavior, Portfolio Review behavior, or Decision Engine behavior.
+ME-AR04 implemented Analysis Review consumption of Setup Detection output while preserving the existing `sec-companyfacts-analysis-review-v1` contract.
 
 ## Completed Chain
 
@@ -34,6 +34,7 @@ Completed job-scoped chain:
 | ME-SD01 | Setup Detection          | Completed |
 | ME-SD02 | Setup Detection          | Completed |
 | ME-AR03 | Analysis Review          | Completed |
+| ME-AR04 | Analysis Review          | Completed |
 
 ME-RR02 implemented the first non-actionable SEC CompanyFacts Recommendation Review layer with:
 
@@ -67,7 +68,15 @@ ME-AR03 extended the Analysis Review contract with:
 - approved input contract: `sec-companyfacts-setup-detection-v1`;
 - contract document: `docs/market_engine/analysis_review/me_ar03_setup_detection_input_contract.md`;
 - audit: `docs/market_engine/audits/me_ar03_setup_detection_input_contract_audit.md`;
-- future implementation sprint: `ME-AR04 — Implement Analysis Review consumption of Setup Detection`.
+- implementation sprint: `ME-AR04 — Implement Analysis Review consumption of Setup Detection`.
+
+ME-AR04 implemented Analysis Review consumption of Setup Detection with:
+
+- output contract preserved: `sec-companyfacts-analysis-review-v1`;
+- module: `src/market_engine/analysis_review/sec_companyfacts_analysis_review.py`;
+- tests: `tests/market_engine/analysis_review/test_sec_companyfacts_analysis_review.py`;
+- implementation documentation: `docs/market_engine/analysis_review/me_ar04_analysis_review_setup_detection_implementation.md`;
+- audit: `docs/market_engine/audits/me_ar04_analysis_review_setup_detection_implementation_audit.md`.
 
 ## Architectural Chain
 
@@ -96,7 +105,9 @@ This does not invalidate completed ME-AR01, ME-AR02, ME-RR01, or ME-RR02 work.
 
 ME-RM01 recorded Setup Detection as a missing future layer that must be inserted before Portfolio Review. ME-SD01 then defined the Setup Detection contract.
 
-Later Analysis Review and Recommendation Review sprints can extend existing completed layers to consume Setup Detection output.
+ME-AR04 extended Analysis Review to consume Setup Detection output.
+
+Later Recommendation Review sprints can extend the existing completed Recommendation Review layer to consume Setup Detection-aware Analysis Review output.
 
 Insertion reason:
 
@@ -104,48 +115,41 @@ Setup Detection is required so Market Engine can detect patterns/setups from Fun
 
 ## Recommended Next Sprint
 
-### ME-AR04 — Implement Analysis Review consumption of Setup Detection
+### ME-RR03 — Extend Recommendation Review contract for Setup Detection-aware Analysis Review
 
 Status: RECOMMENDED NEXT
 
-Job family: Analysis Review
+Job family: Recommendation Review
 
-Goal: Implement Analysis Review support for Setup Detection input according to the ME-AR03 contract.
+Goal: Define how Recommendation Review consumes Setup Detection-aware Analysis Review while remaining non-actionable.
 
-Scope: Local synthetic tests only; no provider calls; no Recommendation Review, Portfolio Review, Delivery, Telegram, reporting, or Decision Engine behavior.
+Scope: Documentation-only contract update unless explicitly re-scoped; no provider calls; no Portfolio Review, Delivery, Telegram, reporting, or Decision Engine behavior.
 
-ME-AR04 must consume `sec-companyfacts-setup-detection-v1`, preserve existing Analysis Review behavior, validate input alignment, emit Setup Detection-aware review items, preserve setup evidence and limitations, and remain non-recommendation and non-actionable.
+ME-RR03 must define how Recommendation Review consumes Setup Detection-aware Analysis Review, preserves setup-aware provenance, handles blocked/partial/conflicted setup states, and remains non-actionable.
 
 ## Planned Future Sprint Sequence
 
 | Sequence | Sprint  | Job family              | Status           | Purpose                                                                         |
 | -------- | ------- | ----------------------- | ---------------- | ------------------------------------------------------------------------------- |
-| 1        | ME-AR04 | Analysis Review         | Recommended next | Implement Analysis Review consumption of Setup Detection                        |
-| 2        | ME-RR03 | Recommendation Review   | Planned future   | Extend Recommendation Review contract for Setup Detection-aware Analysis Review |
-| 3        | ME-RR04 | Recommendation Review   | Planned future   | Implement Setup Detection-aware Recommendation Review behavior                  |
-| 4        | ME-PR01 | Portfolio Review        | Planned future   | Define Portfolio Review contract from Recommendation Review                     |
-| 5        | ME-PR02 | Portfolio Review        | Planned future   | Implement Portfolio Review                                                      |
-| 6        | ME-DE01 | Decision Engine handoff | Planned future   | Define Decision Engine handoff contract                                         |
-| 7        | ME-DE02 | Decision Engine handoff | Planned future   | Implement controlled Decision Engine handoff                                    |
-| 8        | ME-DL01 | Delivery / Reporting    | Planned future   | Define Delivery / Reporting contract                                            |
-| 9        | ME-DL02 | Delivery / Reporting    | Planned future   | Implement controlled Delivery / Reporting output                                |
+| 1        | ME-RR03 | Recommendation Review   | Recommended next | Extend Recommendation Review contract for Setup Detection-aware Analysis Review |
+| 2        | ME-RR04 | Recommendation Review   | Planned future   | Implement Setup Detection-aware Recommendation Review behavior                  |
+| 3        | ME-PR01 | Portfolio Review        | Planned future   | Define Portfolio Review contract from Recommendation Review                     |
+| 4        | ME-PR02 | Portfolio Review        | Planned future   | Implement Portfolio Review                                                      |
+| 5        | ME-DE01 | Decision Engine handoff | Planned future   | Define Decision Engine handoff contract                                         |
+| 6        | ME-DE02 | Decision Engine handoff | Planned future   | Implement controlled Decision Engine handoff                                    |
+| 7        | ME-DL01 | Delivery / Reporting    | Planned future   | Define Delivery / Reporting contract                                            |
+| 8        | ME-DL02 | Delivery / Reporting    | Planned future   | Implement controlled Delivery / Reporting output                                |
 
 ## Planned Sprint Details
-
-### ME-AR04 — Implement Analysis Review consumption of Setup Detection
-
-Implement Analysis Review support for Setup Detection input using local synthetic tests only.
-
-ME-AR04 must implement the ME-AR03 contract by consuming `sec-companyfacts-setup-detection-v1`, preserving existing Fundamental Observation and Derived Observation behavior, validating input alignment, emitting Setup Detection-aware review items, preserving Setup Detection references, preserving missing-data and numeric-zero semantics, and keeping Analysis Review non-recommendation and non-actionable.
-
-ME-AR04 must not introduce Recommendation Review, Portfolio Review, Delivery, Telegram, reporting, Decision Engine behavior, or BUY / SELL / HOLD action semantics.
-
 
 ### ME-RR03 — Extend Recommendation Review contract for Setup Detection-aware Analysis Review
 
 Define how Recommendation Review consumes Setup Detection-aware Analysis Review while remaining non-actionable.
 
 ME-RR03 must preserve Recommendation Review as downstream of Analysis Review and must not introduce action authority.
+
+ME-RR03 must define how Setup Detection-aware Analysis Review becomes approved Recommendation Review input, how setup-aware evidence is preserved in Recommendation Review provenance, how blocked, partial, conflicted, and detected setup states influence non-actionable human-review routing, and how ME-RR04 must implement the future behavior.
+
 
 ### ME-RR04 — Implement Setup Detection-aware Recommendation Review behavior
 
