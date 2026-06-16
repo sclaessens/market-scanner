@@ -75,6 +75,14 @@ class SecCompanyFactsRecommendationReviewItem:
     missing_data: tuple[str, ...]
     analysis_review_references: dict[str, dict[str, Any]]
     boundary_notes: tuple[str, ...]
+    setup_aware_analysis_review_references: dict[str, dict[str, Any]] = field(
+        default_factory=dict
+    )
+    setup_categories: tuple[str, ...] = field(default_factory=tuple)
+    setup_states: tuple[str, ...] = field(default_factory=tuple)
+    setup_evidence: dict[str, Any] = field(default_factory=dict)
+    setup_limitations: tuple[str, ...] = field(default_factory=tuple)
+    missing_setup_observations: tuple[str, ...] = field(default_factory=tuple)
     forbidden_actions: tuple[str, ...] = FORBIDDEN_RECOMMENDATION_REVIEW_ACTIONS
     non_actionable_boundary: str = NON_ACTIONABLE_RECOMMENDATION_REVIEW_BOUNDARY
 
@@ -93,6 +101,8 @@ class SecCompanyFactsRecommendationReview:
     source_refresh_payload_format_version: str
     recommendation_review_run_id: str
     input_contract: str
+    setup_detection_format_version: str | None
+    setup_detection_run_id: str | None
     review_state: SecCompanyFactsRecommendationReviewState
     review_category: SecCompanyFactsRecommendationReviewCategory
     review_items: tuple[SecCompanyFactsRecommendationReviewItem, ...]
@@ -110,12 +120,23 @@ def build_sec_companyfacts_recommendation_review(
     _validate_analysis_review_contract(analysis_review)
 
     analysis_items_by_category = _analysis_review_items_by_category(analysis_review)
+    setup_aware_items = _setup_aware_analysis_review_items(analysis_review)
     limited_items = _limited_analysis_review_items(analysis_review)
     human_review_item = analysis_items_by_category.get(
         SecCompanyFactsAnalysisReviewCategory.HUMAN_REVIEW_REQUIREMENT
     )
 
-    if limited_items or human_review_item is not None:
+    if setup_aware_items:
+        review_state, review_category = _setup_aware_review_state_and_category(
+            setup_aware_items
+        )
+        review_item = _setup_aware_recommendation_review_item(
+            analysis_review=analysis_review,
+            setup_aware_items=setup_aware_items,
+            review_state=review_state,
+            review_category=review_category,
+        )
+    elif limited_items or human_review_item is not None:
         review_state = SecCompanyFactsRecommendationReviewState.BLOCKED_BY_MISSING_DATA
         review_category = (
             SecCompanyFactsRecommendationReviewCategory.ANALYSIS_BLOCKED_BY_MISSING_DATA
@@ -159,6 +180,12 @@ def build_sec_companyfacts_recommendation_review(
         ),
         recommendation_review_run_id=recommendation_review_run_id,
         input_contract=REQUIRED_ANALYSIS_REVIEW_FORMAT_VERSION,
+        setup_detection_format_version=getattr(
+            analysis_review,
+            "setup_detection_format_version",
+            None,
+        ),
+        setup_detection_run_id=getattr(analysis_review, "setup_detection_run_id", None),
         review_state=review_state,
         review_category=review_category,
         review_items=(review_item,),
@@ -227,6 +254,31 @@ def _limited_analysis_review_items(
     )
 
 
+def _setup_aware_analysis_review_items(
+    analysis_review: SecCompanyFactsAnalysisReview,
+) -> tuple[SecCompanyFactsAnalysisReviewItem, ...]:
+    setup_categories = {
+        SecCompanyFactsAnalysisReviewCategory.SETUP_DETECTION_REVIEW,
+        SecCompanyFactsAnalysisReviewCategory.SETUP_EVIDENCE_COMPLETENESS_REVIEW,
+        SecCompanyFactsAnalysisReviewCategory.SETUP_LIMITATION_REVIEW,
+        SecCompanyFactsAnalysisReviewCategory.SETUP_HUMAN_REVIEW_REQUIREMENT,
+    }
+    setup_states = {
+        SecCompanyFactsAnalysisReviewState.SETUP_DETECTED,
+        SecCompanyFactsAnalysisReviewState.SETUP_PARTIALLY_DETECTED,
+        SecCompanyFactsAnalysisReviewState.SETUP_NOT_DETECTED,
+        SecCompanyFactsAnalysisReviewState.SETUP_CONFLICTED,
+        SecCompanyFactsAnalysisReviewState.SETUP_BLOCKED_BY_MISSING_DATA,
+        SecCompanyFactsAnalysisReviewState.SETUP_NOT_ASSESSED,
+        SecCompanyFactsAnalysisReviewState.SETUP_REQUIRES_HUMAN_REVIEW,
+    }
+    return tuple(
+        review_item
+        for review_item in analysis_review.review_items
+        if review_item.category in setup_categories or review_item.state in setup_states
+    )
+
+
 def _has_supportive_analysis_review(
     analysis_review: SecCompanyFactsAnalysisReview,
 ) -> bool:
@@ -238,6 +290,199 @@ def _has_supportive_analysis_review(
     }
 
     return any(review_item.state in supportive_states for review_item in analysis_review.review_items)
+
+
+def _setup_aware_review_state_and_category(
+    setup_aware_items: tuple[SecCompanyFactsAnalysisReviewItem, ...],
+) -> tuple[
+    SecCompanyFactsRecommendationReviewState,
+    SecCompanyFactsRecommendationReviewCategory,
+]:
+    states = {review_item.state for review_item in setup_aware_items}
+
+    if SecCompanyFactsAnalysisReviewState.SETUP_BLOCKED_BY_MISSING_DATA in states:
+        return (
+            SecCompanyFactsRecommendationReviewState.BLOCKED_BY_MISSING_DATA,
+            SecCompanyFactsRecommendationReviewCategory.ANALYSIS_BLOCKED_BY_MISSING_DATA,
+        )
+
+    if states & {
+        SecCompanyFactsAnalysisReviewState.SETUP_DETECTED,
+        SecCompanyFactsAnalysisReviewState.SETUP_PARTIALLY_DETECTED,
+        SecCompanyFactsAnalysisReviewState.SETUP_CONFLICTED,
+        SecCompanyFactsAnalysisReviewState.SETUP_REQUIRES_HUMAN_REVIEW,
+    }:
+        if SecCompanyFactsAnalysisReviewState.SETUP_DETECTED in states and not (
+            states
+            & {
+                SecCompanyFactsAnalysisReviewState.SETUP_PARTIALLY_DETECTED,
+                SecCompanyFactsAnalysisReviewState.SETUP_CONFLICTED,
+                SecCompanyFactsAnalysisReviewState.SETUP_REQUIRES_HUMAN_REVIEW,
+            }
+        ):
+            return (
+                SecCompanyFactsRecommendationReviewState.HUMAN_REVIEW_REQUIRED,
+                SecCompanyFactsRecommendationReviewCategory.ANALYSIS_SUPPORTIVE_BUT_NOT_ACTIONABLE,
+            )
+        return (
+            SecCompanyFactsRecommendationReviewState.HUMAN_REVIEW_REQUIRED,
+            SecCompanyFactsRecommendationReviewCategory.ANALYSIS_MIXED_OR_CONFLICTED,
+        )
+
+    if states & {
+        SecCompanyFactsAnalysisReviewState.SETUP_NOT_DETECTED,
+        SecCompanyFactsAnalysisReviewState.SETUP_NOT_ASSESSED,
+    }:
+        return (
+            SecCompanyFactsRecommendationReviewState.INSUFFICIENT_EVIDENCE,
+            SecCompanyFactsRecommendationReviewCategory.ANALYSIS_NOT_SUPPORTED,
+        )
+
+    return (
+        SecCompanyFactsRecommendationReviewState.INSUFFICIENT_EVIDENCE,
+        SecCompanyFactsRecommendationReviewCategory.ANALYSIS_NOT_SUPPORTED,
+    )
+
+
+def _setup_aware_recommendation_review_item(
+    *,
+    analysis_review: SecCompanyFactsAnalysisReview,
+    setup_aware_items: tuple[SecCompanyFactsAnalysisReviewItem, ...],
+    review_state: SecCompanyFactsRecommendationReviewState,
+    review_category: SecCompanyFactsRecommendationReviewCategory,
+) -> SecCompanyFactsRecommendationReviewItem:
+    missing_setup_observations = _missing_setup_observations(setup_aware_items)
+    return SecCompanyFactsRecommendationReviewItem(
+        category=review_category,
+        state=review_state,
+        message=_setup_aware_recommendation_message(review_state, review_category),
+        supporting_analysis_review_categories=_supporting_category_names(analysis_review),
+        blocking_analysis_review_categories=_setup_blocking_category_names(
+            setup_aware_items
+        ),
+        missing_data=missing_setup_observations,
+        analysis_review_references=_analysis_review_references(setup_aware_items),
+        boundary_notes=_standard_boundary_notes(),
+        setup_aware_analysis_review_references=_analysis_review_references(
+            setup_aware_items
+        ),
+        setup_categories=_setup_categories(setup_aware_items),
+        setup_states=_setup_states(setup_aware_items),
+        setup_evidence=_setup_evidence(setup_aware_items),
+        setup_limitations=_setup_limitations(setup_aware_items),
+        missing_setup_observations=missing_setup_observations,
+    )
+
+
+def _setup_aware_recommendation_message(
+    review_state: SecCompanyFactsRecommendationReviewState,
+    review_category: SecCompanyFactsRecommendationReviewCategory,
+) -> str:
+    if (
+        review_state
+        == SecCompanyFactsRecommendationReviewState.BLOCKED_BY_MISSING_DATA
+    ):
+        return (
+            "Recommendation Review is blocked by missing setup evidence from Setup-aware Analysis Review."
+        )
+    if (
+        review_category
+        == SecCompanyFactsRecommendationReviewCategory.ANALYSIS_SUPPORTIVE_BUT_NOT_ACTIONABLE
+    ):
+        return (
+            "Setup-aware Analysis Review supports human review and remains non-actionable."
+        )
+    if (
+        review_category
+        == SecCompanyFactsRecommendationReviewCategory.ANALYSIS_MIXED_OR_CONFLICTED
+    ):
+        return (
+            "Setup-aware Analysis Review is partial, conflicted, or requires human review."
+        )
+    return (
+        "Setup-aware Analysis Review does not provide enough setup evidence for a useful Recommendation Review candidate."
+    )
+
+
+def _setup_blocking_category_names(
+    setup_aware_items: tuple[SecCompanyFactsAnalysisReviewItem, ...],
+) -> tuple[str, ...]:
+    blocking_states = {
+        SecCompanyFactsAnalysisReviewState.SETUP_PARTIALLY_DETECTED,
+        SecCompanyFactsAnalysisReviewState.SETUP_CONFLICTED,
+        SecCompanyFactsAnalysisReviewState.SETUP_BLOCKED_BY_MISSING_DATA,
+        SecCompanyFactsAnalysisReviewState.SETUP_NOT_ASSESSED,
+        SecCompanyFactsAnalysisReviewState.SETUP_REQUIRES_HUMAN_REVIEW,
+    }
+    return tuple(
+        review_item.category.value
+        for review_item in setup_aware_items
+        if review_item.state in blocking_states or review_item.missing_observations
+    )
+
+
+def _missing_setup_observations(
+    setup_aware_items: tuple[SecCompanyFactsAnalysisReviewItem, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        sorted(
+            {
+                missing_observation
+                for review_item in setup_aware_items
+                for missing_observation in (
+                    tuple(review_item.missing_observations)
+                    + tuple(getattr(review_item, "missing_setup_observations", ()))
+                )
+            }
+        )
+    )
+
+
+def _setup_categories(
+    setup_aware_items: tuple[SecCompanyFactsAnalysisReviewItem, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        dict.fromkeys(
+            setup_category
+            for review_item in setup_aware_items
+            for setup_category in review_item.setup_categories
+        )
+    )
+
+
+def _setup_states(
+    setup_aware_items: tuple[SecCompanyFactsAnalysisReviewItem, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        dict.fromkeys(
+            setup_state
+            for review_item in setup_aware_items
+            for setup_state in review_item.setup_states
+        )
+    )
+
+
+def _setup_evidence(
+    setup_aware_items: tuple[SecCompanyFactsAnalysisReviewItem, ...],
+) -> dict[str, Any]:
+    return {
+        setup_category or review_item.category.value: review_item.setup_evidence
+        for review_item in setup_aware_items
+        for setup_category in (review_item.setup_categories or (review_item.category.value,))
+        if review_item.setup_evidence
+    }
+
+
+def _setup_limitations(
+    setup_aware_items: tuple[SecCompanyFactsAnalysisReviewItem, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        dict.fromkeys(
+            limitation
+            for review_item in setup_aware_items
+            for limitation in review_item.setup_limitations
+        )
+    )
 
 
 def _blocked_by_missing_data_review_item(
@@ -393,6 +638,15 @@ def _analysis_review_item_reference(
         "missing_observations": review_item.missing_observations,
         "source_observation_references": review_item.source_observation_references,
         "derived_observation_references": review_item.derived_observation_references,
+        "setup_detection_references": getattr(
+            review_item,
+            "setup_detection_references",
+            {},
+        ),
+        "setup_categories": getattr(review_item, "setup_categories", ()),
+        "setup_states": getattr(review_item, "setup_states", ()),
+        "setup_evidence": getattr(review_item, "setup_evidence", {}),
+        "setup_limitations": getattr(review_item, "setup_limitations", ()),
         "non_recommendation_boundary": review_item.non_recommendation_boundary,
     }
 
@@ -409,6 +663,17 @@ def _input_provenance(analysis_review: SecCompanyFactsAnalysisReview) -> dict[st
         "source_refresh_fetched_at": analysis_review.source_refresh_fetched_at,
         "source_refresh_payload_format_version": (
             analysis_review.source_refresh_payload_format_version
+        ),
+        "setup_detection_format_version": getattr(
+            analysis_review,
+            "setup_detection_format_version",
+            None,
+        ),
+        "setup_detection_run_id": getattr(analysis_review, "setup_detection_run_id", None),
+        "setup_detection_non_actionable_boundary": getattr(
+            analysis_review,
+            "setup_detection_non_actionable_boundary",
+            None,
         ),
     }
 

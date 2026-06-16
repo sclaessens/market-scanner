@@ -1471,7 +1471,7 @@ Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical A
 
 Job family: Recommendation Review
 
-Status: RECOMMENDED NEXT
+Status: COMPLETED BY ME-RR04
 
 Goal: Implement Setup Detection-aware Recommendation Review behavior.
 
@@ -1504,7 +1504,22 @@ ME-RR04 must:
 
 ME-RR04 must not introduce portfolio mutation, watchlist mutation, delivery behavior, Telegram behavior, reporting behavior, Decision Engine behavior, BUY / SELL / HOLD action semantics, allocation, position sizing, execution advice, ranking, scoring, conviction, urgency, or tradeability authority.
 
-## Planned Future Sprints
+Implemented runtime:
+
+* `src/market_engine/recommendation_review/sec_companyfacts_recommendation_review.py`
+
+Implemented tests:
+
+* `tests/market_engine/recommendation_review/test_sec_companyfacts_recommendation_review.py`
+
+Implemented documentation:
+
+* `docs/market_engine/recommendation_review/me_rr04_setup_detection_aware_recommendation_review_implementation.md`
+* `docs/market_engine/audits/me_rr04_setup_detection_aware_recommendation_review_implementation_audit.md`
+
+Outcome: ME-RR04 implemented Recommendation Review consumption of Setup Detection-aware `sec-companyfacts-analysis-review-v1` output. The implementation preserves existing ME-RR02 behavior when setup-aware fields are absent, preserves setup categories, setup states, setup evidence, setup limitations, missing setup observations, source and derived references, numeric-zero semantics, and routes setup-aware evidence only to non-actionable human-review, blocked-by-missing-data, or insufficient-evidence Recommendation Review outcomes.
+
+## Recommended Next Sprint
 
 ### ME-PR01 — Define Portfolio Review contract from Recommendation Review
 
@@ -1512,7 +1527,7 @@ Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical A
 
 Job family: Portfolio Review
 
-Status: PLANNED FUTURE
+Status: RECOMMENDED NEXT
 
 Goal: Define the Portfolio Review contract after Setup Detection-aware Recommendation Review exists.
 

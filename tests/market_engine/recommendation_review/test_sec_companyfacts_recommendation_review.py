@@ -230,6 +230,212 @@ def test_recommendation_review_persistence_writes_json_and_refuses_overwrite(
         )
 
 
+def test_detected_setup_aware_analysis_review_creates_human_review_candidate() -> None:
+    analysis_review = _setup_aware_analysis_review(
+        _setup_analysis_review_item(
+            state=SecCompanyFactsAnalysisReviewState.SETUP_DETECTED,
+            setup_state="setup_detected",
+            setup_evidence={"free_cash_flow": 0},
+        )
+    )
+
+    recommendation_review = build_sec_companyfacts_recommendation_review(
+        analysis_review,
+        recommendation_review_run_id="rr-run-setup-detected",
+    )
+
+    assert (
+        recommendation_review.review_state
+        == SecCompanyFactsRecommendationReviewState.HUMAN_REVIEW_REQUIRED
+    )
+    assert (
+        recommendation_review.review_category
+        == SecCompanyFactsRecommendationReviewCategory.ANALYSIS_SUPPORTIVE_BUT_NOT_ACTIONABLE
+    )
+    assert recommendation_review.setup_detection_format_version == (
+        "sec-companyfacts-setup-detection-v1"
+    )
+    assert recommendation_review.setup_detection_run_id == "setup-run-001"
+
+    review_item = recommendation_review.review_items[0]
+    assert review_item.setup_categories == ("cash_generation_setup",)
+    assert review_item.setup_states == ("setup_detected",)
+    assert review_item.setup_evidence["cash_generation_setup"]["free_cash_flow"] == 0
+    assert review_item.setup_aware_analysis_review_references
+
+
+def test_partial_setup_aware_analysis_review_preserves_uncertainty() -> None:
+    analysis_review = _setup_aware_analysis_review(
+        _setup_analysis_review_item(
+            state=SecCompanyFactsAnalysisReviewState.SETUP_PARTIALLY_DETECTED,
+            setup_state="setup_partially_detected",
+            setup_limitations=("capital_expenditures",),
+            missing_observations=("capital_expenditures",),
+        )
+    )
+
+    recommendation_review = build_sec_companyfacts_recommendation_review(
+        analysis_review,
+        recommendation_review_run_id="rr-run-setup-partial",
+    )
+
+    assert (
+        recommendation_review.review_state
+        == SecCompanyFactsRecommendationReviewState.HUMAN_REVIEW_REQUIRED
+    )
+    assert (
+        recommendation_review.review_category
+        == SecCompanyFactsRecommendationReviewCategory.ANALYSIS_MIXED_OR_CONFLICTED
+    )
+    review_item = recommendation_review.review_items[0]
+    assert review_item.missing_setup_observations == ("capital_expenditures",)
+    assert review_item.setup_limitations == ("capital_expenditures",)
+
+
+def test_blocked_setup_aware_analysis_review_preserves_missing_data() -> None:
+    analysis_review = _setup_aware_analysis_review(
+        _setup_analysis_review_item(
+            state=SecCompanyFactsAnalysisReviewState.SETUP_BLOCKED_BY_MISSING_DATA,
+            setup_state="setup_blocked_by_missing_data",
+            setup_category="data_limitation_setup",
+            category=SecCompanyFactsAnalysisReviewCategory.SETUP_LIMITATION_REVIEW,
+            setup_evidence={},
+            setup_limitations=("operating_cash_flow",),
+            missing_observations=("operating_cash_flow",),
+        )
+    )
+
+    recommendation_review = build_sec_companyfacts_recommendation_review(
+        analysis_review,
+        recommendation_review_run_id="rr-run-setup-blocked",
+    )
+
+    assert (
+        recommendation_review.review_state
+        == SecCompanyFactsRecommendationReviewState.BLOCKED_BY_MISSING_DATA
+    )
+    assert (
+        recommendation_review.review_category
+        == SecCompanyFactsRecommendationReviewCategory.ANALYSIS_BLOCKED_BY_MISSING_DATA
+    )
+    assert recommendation_review.review_items[0].missing_data == ("operating_cash_flow",)
+
+
+def test_conflicted_setup_aware_analysis_review_routes_to_human_review() -> None:
+    analysis_review = _setup_aware_analysis_review(
+        _setup_analysis_review_item(
+            state=SecCompanyFactsAnalysisReviewState.SETUP_CONFLICTED,
+            setup_state="setup_conflicted",
+            setup_evidence={"conflicted_source_observations": ("net_income",)},
+            setup_limitations=("net_income",),
+        )
+    )
+
+    recommendation_review = build_sec_companyfacts_recommendation_review(
+        analysis_review,
+        recommendation_review_run_id="rr-run-setup-conflicted",
+    )
+
+    assert (
+        recommendation_review.review_state
+        == SecCompanyFactsRecommendationReviewState.HUMAN_REVIEW_REQUIRED
+    )
+    assert (
+        recommendation_review.review_category
+        == SecCompanyFactsRecommendationReviewCategory.ANALYSIS_MIXED_OR_CONFLICTED
+    )
+    assert recommendation_review.review_items[0].setup_states == ("setup_conflicted",)
+
+
+def test_not_assessed_and_not_detected_setup_do_not_become_negative_recommendations() -> None:
+    for analysis_state, setup_state in (
+        (
+            SecCompanyFactsAnalysisReviewState.SETUP_NOT_ASSESSED,
+            "setup_not_assessed",
+        ),
+        (
+            SecCompanyFactsAnalysisReviewState.SETUP_NOT_DETECTED,
+            "setup_not_detected",
+        ),
+    ):
+        analysis_review = _setup_aware_analysis_review(
+            _setup_analysis_review_item(
+                state=analysis_state,
+                setup_state=setup_state,
+                setup_evidence={},
+            )
+        )
+
+        recommendation_review = build_sec_companyfacts_recommendation_review(
+            analysis_review,
+            recommendation_review_run_id=f"rr-run-{setup_state}",
+        )
+
+        assert (
+            recommendation_review.review_state
+            == SecCompanyFactsRecommendationReviewState.INSUFFICIENT_EVIDENCE
+        )
+        assert (
+            recommendation_review.review_category
+            == SecCompanyFactsRecommendationReviewCategory.ANALYSIS_NOT_SUPPORTED
+        )
+        assert recommendation_review.review_items[0].setup_states == (setup_state,)
+
+
+def test_missing_or_empty_setup_aware_fields_are_tolerated() -> None:
+    analysis_review = _analysis_review(
+        review_items=(
+            _analysis_review_item(
+                category=SecCompanyFactsAnalysisReviewCategory.SETUP_DETECTION_REVIEW,
+                state=SecCompanyFactsAnalysisReviewState.SETUP_DETECTED,
+                message="Setup-aware Analysis Review supports human review.",
+            ),
+        )
+    )
+
+    recommendation_review = build_sec_companyfacts_recommendation_review(
+        analysis_review,
+        recommendation_review_run_id="rr-run-empty-setup-fields",
+    )
+
+    assert (
+        recommendation_review.review_state
+        == SecCompanyFactsRecommendationReviewState.HUMAN_REVIEW_REQUIRED
+    )
+    assert recommendation_review.review_items[0].setup_categories == ()
+    assert recommendation_review.review_items[0].setup_evidence == {}
+
+
+def test_setup_aware_persistence_preserves_provenance(tmp_path: Path) -> None:
+    analysis_review = _setup_aware_analysis_review(
+        _setup_analysis_review_item(
+            state=SecCompanyFactsAnalysisReviewState.SETUP_DETECTED,
+            setup_state="setup_detected",
+            setup_evidence={"free_cash_flow": 0},
+        )
+    )
+    recommendation_review = build_sec_companyfacts_recommendation_review(
+        analysis_review,
+        recommendation_review_run_id="rr-run-setup-persist",
+    )
+
+    output_path = persist_sec_companyfacts_recommendation_review(
+        recommendation_review,
+        run_id="rr-run-setup-persist",
+        root_dir=tmp_path,
+    )
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+
+    assert payload["setup_detection_format_version"] == (
+        "sec-companyfacts-setup-detection-v1"
+    )
+    assert payload["setup_detection_run_id"] == "setup-run-001"
+    assert payload["review_items"][0]["setup_categories"] == ["cash_generation_setup"]
+    assert payload["review_items"][0]["setup_evidence"]["cash_generation_setup"][
+        "free_cash_flow"
+    ] == 0
+
+
 def test_recommendation_review_output_does_not_emit_action_authority_terms() -> None:
     analysis_review = _analysis_review(
         review_items=(
@@ -312,6 +518,9 @@ def test_recommendation_review_does_not_import_legacy_runtime_modules() -> None:
 def _analysis_review(
     *,
     review_items: tuple[SecCompanyFactsAnalysisReviewItem, ...],
+    setup_detection_format_version: str | None = None,
+    setup_detection_run_id: str | None = None,
+    setup_detection_non_actionable_boundary: str | None = None,
 ) -> SecCompanyFactsAnalysisReview:
     return SecCompanyFactsAnalysisReview(
         ticker="NVDA",
@@ -326,7 +535,23 @@ def _analysis_review(
         source_refresh_fetched_at="2026-01-01T00:00:00Z",
         source_refresh_payload_format_version="sec-companyfacts-raw-snapshot-v1",
         review_items=review_items,
+        setup_detection_format_version=setup_detection_format_version,
+        setup_detection_run_id=setup_detection_run_id,
+        setup_detection_non_actionable_boundary=setup_detection_non_actionable_boundary,
         warnings=(),
+    )
+
+
+def _setup_aware_analysis_review(
+    *review_items: SecCompanyFactsAnalysisReviewItem,
+) -> SecCompanyFactsAnalysisReview:
+    return _analysis_review(
+        review_items=review_items,
+        setup_detection_format_version="sec-companyfacts-setup-detection-v1",
+        setup_detection_run_id="setup-run-001",
+        setup_detection_non_actionable_boundary=(
+            "Setup Detection describes evidence patterns only and is non-actionable."
+        ),
     )
 
 
@@ -336,6 +561,11 @@ def _analysis_review_item(
     state: SecCompanyFactsAnalysisReviewState,
     message: str,
     missing_observations: tuple[str, ...] = (),
+    setup_detection_references: dict[str, dict[str, object]] | None = None,
+    setup_categories: tuple[str, ...] = (),
+    setup_states: tuple[str, ...] = (),
+    setup_evidence: dict[str, object] | None = None,
+    setup_limitations: tuple[str, ...] = (),
 ) -> SecCompanyFactsAnalysisReviewItem:
     return SecCompanyFactsAnalysisReviewItem(
         category=category,
@@ -358,5 +588,54 @@ def _analysis_review_item(
                 "value": 50,
             }
         },
+        setup_detection_references=setup_detection_references or {},
+        setup_categories=setup_categories,
+        setup_states=setup_states,
+        setup_evidence=setup_evidence or {},
+        setup_limitations=setup_limitations,
         non_recommendation_boundary=NON_RECOMMENDATION_ANALYSIS_REVIEW_BOUNDARY,
+    )
+
+
+def _setup_analysis_review_item(
+    *,
+    state: SecCompanyFactsAnalysisReviewState,
+    setup_state: str,
+    setup_category: str = "cash_generation_setup",
+    category: SecCompanyFactsAnalysisReviewCategory = (
+        SecCompanyFactsAnalysisReviewCategory.SETUP_DETECTION_REVIEW
+    ),
+    setup_evidence: dict[str, object] | None = None,
+    setup_limitations: tuple[str, ...] = (),
+    missing_observations: tuple[str, ...] = (),
+) -> SecCompanyFactsAnalysisReviewItem:
+    evidence = setup_evidence if setup_evidence is not None else {"free_cash_flow": 50}
+    return _analysis_review_item(
+        category=category,
+        state=state,
+        message="Setup-aware Analysis Review supports human review.",
+        missing_observations=missing_observations,
+        setup_detection_references={
+            setup_category: {
+                "setup_category": setup_category,
+                "setup_state": setup_state,
+                "setup_message": "Synthetic setup evidence for Recommendation Review.",
+                "setup_evidence": evidence,
+                "setup_limitations": setup_limitations,
+                "missing_observations": missing_observations,
+                "source_observation_references": {
+                    "revenue": {"state": "PRESENT", "value": 100}
+                },
+                "derived_observation_references": {
+                    "free_cash_flow": {"state": "DERIVED_VALUE", "value": 0}
+                },
+                "non_actionable_boundary": (
+                    "Setup Detection describes evidence patterns only and is non-actionable."
+                ),
+            }
+        },
+        setup_categories=(setup_category,),
+        setup_states=(setup_state,),
+        setup_evidence=evidence,
+        setup_limitations=setup_limitations,
     )
