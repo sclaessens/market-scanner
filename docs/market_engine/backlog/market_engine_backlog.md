@@ -1419,7 +1419,7 @@ Implemented documentation:
 
 Outcome: ME-AR04 extended the existing `sec-companyfacts-analysis-review-v1` implementation with optional Setup Detection input. The implementation preserves existing ME-AR02 behavior without Setup Detection input, validates Setup Detection alignment and contract version, emits Setup Detection-aware Analysis Review items, preserves setup evidence, setup limitations, missing observations, source and derived references, numeric-zero semantics, and remains non-recommendation and non-actionable.
 
-## Recommended Next Sprint
+## Completed Sprint
 
 ### ME-RR03 — Extend Recommendation Review contract for Setup Detection-aware Analysis Review
 
@@ -1427,25 +1427,43 @@ Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical A
 
 Job family: Recommendation Review
 
-Status: RECOMMENDED NEXT
+Status: COMPLETED BY ME-RR03
 
 Goal: Define how Recommendation Review consumes Setup Detection-aware Analysis Review.
 
-Scope: Documentation-only contract update unless explicitly re-scoped.
+Scope: Documentation-only contract update.
 
-Recommendation Review must remain non-actionable.
+Recommendation Review remains non-actionable.
 
-ME-RR03 must define:
+Implemented contract:
+
+* `docs/market_engine/recommendation_review/me_rr03_setup_detection_aware_analysis_review_contract.md`
+
+Implemented audit:
+
+* `docs/market_engine/audits/me_rr03_setup_detection_aware_analysis_review_contract_audit.md`
+
+ME-RR03 defined:
 
 * how Setup Detection-aware Analysis Review becomes approved Recommendation Review input;
+* how `sec-companyfacts-analysis-review-v1` remains the approved input contract;
 * how setup-aware evidence is preserved in Recommendation Review provenance;
-* how blocked, partial, conflicted, and detected setup states influence non-actionable human-review routing;
+* how detected setup states route only to non-actionable human review;
+* how partial setup states preserve uncertainty;
+* how conflicted setup states preserve conflict;
+* how blocked setup states preserve explicit missing-data blocking;
+* how not-assessed setup states remain not assessed or insufficient evidence;
+* how not-detected setup states must not become negative recommendations;
+* how missing setup data remains explicit;
+* how numeric zero remains present and must not be treated as missing;
 * how Recommendation Review remains downstream of Analysis Review;
 * ME-RR04 implementation requirements.
 
-ME-RR03 must not introduce Python code, tests, provider calls, data writes, Portfolio Review behavior, Telegram, reporting, delivery, Decision Engine behavior, BUY / SELL / HOLD action semantics, allocation, position sizing, execution advice, ranking, scoring, conviction, urgency, or tradeability authority.
+ME-RR03 did not introduce Python code, tests, provider calls, data writes, Recommendation Review runtime changes, Analysis Review runtime changes, Setup Detection runtime changes, Portfolio Review behavior, Telegram, reporting, delivery, Decision Engine behavior, BUY / SELL / HOLD action semantics, allocation, position sizing, execution advice, ranking, scoring, conviction, urgency, or tradeability authority.
 
-## Planned Future Sprints
+Outcome: ME-RR03 extended the Recommendation Review contract on paper so ME-RR04 can later implement consumption of Setup Detection-aware `sec-companyfacts-analysis-review-v1` output. The contract preserves setup-aware evidence and provenance, keeps missing setup data explicit, preserves numeric-zero semantics, routes setup states only to non-actionable human-review or blocked/insufficient-evidence outcomes, and prevents action, portfolio, delivery, ranking, scoring, or Decision Engine authority.
+
+## Recommended Next Sprint
 
 ### ME-RR04 — Implement Setup Detection-aware Recommendation Review behavior
 
@@ -1453,15 +1471,40 @@ Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical A
 
 Job family: Recommendation Review
 
-Status: PLANNED FUTURE
+Status: RECOMMENDED NEXT
 
 Goal: Implement Setup Detection-aware Recommendation Review behavior.
 
-Scope: Non-actionable Recommendation Review only; no action authority, portfolio mutation, delivery behavior, Telegram, or Decision Engine behavior.
+Scope: Non-actionable Recommendation Review only; no action authority, portfolio mutation, delivery behavior, Telegram, reporting, or Decision Engine behavior.
 
 ME-RR04 must implement Setup Detection-aware Recommendation Review only after ME-RR03 defines the contract.
 
+ME-RR04 must:
+
+* consume only validated `sec-companyfacts-analysis-review-v1`;
+* preserve existing ME-RR02 behavior when Setup Detection-aware Analysis Review items are absent;
+* detect Setup Detection-aware Analysis Review items where present;
+* preserve setup-aware provenance;
+* preserve setup categories and states;
+* preserve setup evidence and limitations;
+* preserve missing setup observations;
+* preserve source and derived references;
+* preserve numeric-zero semantics;
+* preserve non-actionable boundary markers;
+* route detected setup evidence to human review only;
+* route partial setup evidence to human review with explicit uncertainty;
+* route conflicted setup evidence to human review with explicit conflict;
+* route blocked setup evidence to blocked-by-missing-data;
+* route not-assessed setup evidence to insufficient-evidence or blocked routing;
+* fail closed for unsupported Analysis Review input contracts;
+* add local synthetic tests only;
+* avoid live provider calls;
+* avoid production data writes;
+* avoid legacy `scripts` or old `market_scanner` imports.
+
 ME-RR04 must not introduce portfolio mutation, watchlist mutation, delivery behavior, Telegram behavior, reporting behavior, Decision Engine behavior, BUY / SELL / HOLD action semantics, allocation, position sizing, execution advice, ranking, scoring, conviction, urgency, or tradeability authority.
+
+## Planned Future Sprints
 
 ### ME-PR01 — Define Portfolio Review contract from Recommendation Review
 
