@@ -1232,15 +1232,13 @@ ME-SD01 did not introduce Python code, tests, provider calls, data writes, BUY /
 
 Outcome: ME-SD01 defined Setup Detection as the missing non-actionable pattern/setup layer between Derived Observations and Analysis Review. The contract allows future ME-SD02 implementation to detect structured setups from approved Fundamental Observations and Derived Cash Generation Observations while preserving provenance, missing-data state, source grounding, numeric-zero semantics, and authority boundaries.
 
-## Recommended Next Sprint
-
 ### ME-SD02 — Implement first Setup Detection layer
 
 Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
 Job family: Setup Detection
 
-Status: RECOMMENDED NEXT
+Status: COMPLETED BY ME-SD02
 
 Goal: Implement the first non-actionable Setup Detection builder from approved observation inputs.
 
@@ -1292,7 +1290,9 @@ ME-SD02 must not introduce:
 * urgency scoring;
 * tradeability scoring.
 
-## Planned Future Sprints
+Outcome: ME-SD02 implemented the first non-actionable Setup Detection layer in `src/market_engine/setup_detection/`, with tests in `tests/market_engine/setup_detection/`. The implementation consumes approved SEC CompanyFacts Fundamental Observations and Derived Cash Generation Observations, emits `sec-companyfacts-setup-detection-v1`, preserves source and derived observation references, preserves missing-data and numeric-zero semantics, implements JSON persistence under `data/market_engine/setup_detections/<run_id>/<ticker>/setup_detection.json`, refuses overwrite, and does not introduce Analysis Review, Recommendation Review, Portfolio Review, Delivery, Telegram, reporting, or Decision Engine behavior.
+
+## Recommended Next Sprint
 
 ### ME-AR03 — Extend Analysis Review contract for Setup Detection input
 
@@ -1300,7 +1300,7 @@ Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical A
 
 Job family: Analysis Review
 
-Status: PLANNED FUTURE
+Status: RECOMMENDED NEXT
 
 Goal: Define how Analysis Review can consume Setup Detection output without recommendation authority.
 
