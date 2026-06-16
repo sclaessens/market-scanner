@@ -1095,34 +1095,48 @@ Outcome: ME-RR01 defined Recommendation Review as a non-actionable, source-groun
 
 ### ME-RR02 — Implement Recommendation Review from Analysis Review
 
-Candidate follow-up after ME-RR01.
-
 Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
 Job family: Recommendation Review
 
-Status: RECOMMENDED NEXT
+Status: COMPLETED BY ME-RR02
 
 Goal: Implement the minimum viable non-actionable Recommendation Review builder from approved Analysis Review output.
 
-Scope must remain inside the ME-RR job family and must not introduce portfolio review, delivery, Telegram, reporting, Decision Engine behavior, BUY / SELL / HOLD action semantics, allocation, position sizing, execution advice, ranking, scoring, conviction, urgency, tradeability, watchlist mutation, or portfolio mutation.
+Scope remained inside the ME-RR job family and did not introduce portfolio review, delivery, Telegram, reporting, Decision Engine behavior, BUY / SELL / HOLD action semantics, allocation, position sizing, execution advice, ranking, scoring, conviction, urgency, tradeability, watchlist mutation, or portfolio mutation.
 
-Required future input contract:
+Implemented input contract:
 
 * sec-companyfacts-analysis-review-v1.
 
-Required future output contract:
+Implemented output contract:
 
 * sec-companyfacts-recommendation-review-v1.
 
-Required future review states:
+Implemented runtime module:
+
+* `src/market_engine/recommendation_review/sec_companyfacts_recommendation_review.py`.
+
+Implemented package export:
+
+* `src/market_engine/recommendation_review/__init__.py`.
+
+Implemented tests:
+
+* `tests/market_engine/recommendation_review/test_sec_companyfacts_recommendation_review.py`.
+
+Implemented audit:
+
+* `docs/market_engine/audits/me_rr02_recommendation_review_implementation_audit.md`.
+
+Implemented review states:
 
 * human_review_required;
 * insufficient_evidence;
 * blocked_by_missing_data;
 * not_applicable.
 
-Required future review categories:
+Implemented review categories:
 
 * analysis_supportive_but_not_actionable;
 * analysis_mixed_or_conflicted;
@@ -1130,4 +1144,55 @@ Required future review categories:
 * analysis_not_supported;
 * input_contract_invalid.
 
-ME-RR02 must use local synthetic tests only and must not call live providers.
+Implemented behavior:
+
+* supportive Analysis Review input creates a non-actionable human-review candidate;
+* limited Analysis Review input blocks Recommendation Review with explicit missing data;
+* unsupported Analysis Review contracts fail closed;
+* Recommendation Review JSON can be persisted under `data/market_engine/recommendation_reviews`;
+* persistence refuses overwrite;
+* normal review text does not emit action-authority terms;
+* legacy `scripts` and `market_scanner` imports are not introduced.
+
+Validation:
+
+* targeted Recommendation Review tests passed: 7 passed;
+* full Market Engine test suite passed: 136 passed.
+
+Outcome: ME-RR02 implemented the first non-actionable SEC CompanyFacts Recommendation Review layer. The layer consumes `sec-companyfacts-analysis-review-v1`, emits `sec-companyfacts-recommendation-review-v1`, preserves upstream provenance and missing-data state, persists JSON safely, refuses overwrite, and keeps portfolio, delivery, Telegram, reporting, and Decision Engine authority out of scope.
+
+### ME-RR03 — Define Portfolio Review contract from Recommendation Review
+
+Candidate follow-up after ME-RR02.
+
+Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: Portfolio Review
+
+Status: RECOMMENDED NEXT
+
+Goal: Define the Portfolio Review contract that can consume approved non-actionable Recommendation Review output without creating execution authority.
+
+ME-RR03 must remain documentation-only unless explicitly re-scoped.
+
+Required future input contract:
+
+* sec-companyfacts-recommendation-review-v1.
+
+Required future output contract:
+
+* sec-companyfacts-portfolio-review-v1.
+
+ME-RR03 must define:
+
+* Portfolio Review job-family boundary;
+* approved input requirements from Recommendation Review;
+* portfolio-context requirements;
+* portfolio exposure and concentration review semantics;
+* allowed portfolio-review states;
+* allowed portfolio-review categories;
+* missing-data and stale-data rules;
+* authority boundary between Portfolio Review and Decision Engine;
+* implementation requirements for a future ME-PR implementation sprint.
+
+ME-RR03 must not introduce Python code, tests, provider calls, data writes, Telegram, reporting, Decision Engine behavior, BUY / SELL / HOLD action semantics, allocation execution, order generation, or portfolio mutation.
