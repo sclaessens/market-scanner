@@ -698,36 +698,76 @@ Outcome: ME-FO02 implemented non-decision Fundamental Observations from SEC Comp
 
 ### ME-DO01 — Add first derived cash-generation observation layer
 
-Candidate follow-up after persistence, cached context, and fundamental observation job execution are stable.
+Owner roles: Financial Analyst / Data Steward / Technical Architect / QA Lead / Governance Auditor
 
 Job family: Derived Observation
 
-Goal: Add first derived but still non-decision cash-generation observations.
+Status: COMPLETED BY ME-DO01
 
-Potential derived calculation:
+Goal: Add the first derived but still non-decision cash-generation observation layer from approved ME-FO02 Fundamental Observations.
 
-```text
-free_cash_flow = operating_cash_flow - capital_expenditures
-```
+Scope:
 
-Still forbidden:
+* consume `SecCompanyFactsFundamentalObservationSet` objects from ME-FO02;
+* emit `sec-companyfacts-derived-cash-generation-observations-v1` output;
+* calculate only `free_cash_flow = operating_cash_flow - capital_expenditures`;
+* preserve upstream Fundamental Observation references;
+* preserve upstream source values;
+* preserve upstream source references;
+* preserve source context state;
+* preserve source refresh metadata;
+* preserve missingness explicitly;
+* treat numeric zero as present;
+* emit positive, negative, and zero derived source-value states;
+* emit limitation observations when required source fields are missing;
+* persist Derived Cash Generation output under `data/market_engine/derived_observations/cash_generation/<derived_observation_run_id>/<ticker>/derived_cash_generation_observations.json`;
+* refuse overwrite of existing Derived Cash Generation output;
+* add local tests using synthetic/temporary upstream observations only;
+* document implementation and audit results.
 
-* FCF yield;
-* valuation;
-* quality score;
-* ranking;
-* recommendation;
-* BUY / SELL / HOLD;
-* portfolio action;
-* Telegram/reporting;
-* Decision Engine behavior.
+Explicit non-scope:
 
-### Future — Produce local operator review output
+* no raw SEC CompanyFacts fetching;
+* no cached raw snapshot loading as a primary input;
+* no Source Refresh behavior changes;
+* no Source Context behavior changes;
+* no Fundamental Observation behavior changes;
+* no FCF yield;
+* no margins;
+* no growth;
+* no ratios;
+* no valuation metrics;
+* no peer comparison;
+* no trend analysis;
+* no scoring;
+* no ranking;
+* no BUY / SELL / HOLD;
+* no recommendation review;
+* no portfolio review;
+* no delivery;
+* no Telegram;
+* no reporting;
+* no Decision Engine behavior;
+* no position sizing;
+* no execution advice.
 
-Candidate future sprint requiring job-scoped classification before execution.
+Acceptance criteria:
 
-Likely job family: Analysis Review or Delivery, depending on authority and output scope.
+* Positive free cash flow is derived correctly.
+* Negative free cash flow is derived correctly.
+* Zero free cash flow is derived correctly.
+* Zero operating cash flow remains present and can be used in derivation.
+* Missing operating cash flow limits derivation explicitly.
+* Missing capital expenditures limits derivation explicitly.
+* Upstream Fundamental Observation references are preserved.
+* Upstream source values and source references are preserved.
+* Source context metadata is preserved.
+* Source refresh metadata is preserved.
+* Persistence writes JSON under the approved Derived Observation path.
+* Persistence refuses overwrite.
+* Analysis, recommendation, score, ranking, portfolio, delivery, Telegram, and Decision Engine authority are not emitted.
+* Tests do not use live SEC/provider calls.
+* Tests do not import legacy runtime modules.
+* Documentation, backlog, and audit are updated.
 
-Goal: Produce local operator review output for human review without creating allocation authority outside the Decision Engine.
-
-Scope must remain communication/review only unless a later sprint explicitly authorizes delivery, recommendation, or portfolio authority.
+Outcome: ME-DO01 implemented the first non-decision Derived Observation layer in `src/market_engine/derived_observations/`, with tests in `tests/market_engine/derived_observations/`. The implementation consumes ME-FO02 Fundamental Observations, derives only free cash flow from operating cash flow and capital expenditures, preserves upstream source values, source references, Source Context state, source refresh metadata, and missingness, and stays inside the ME-DO job family without introducing analysis review, recommendation review, portfolio review, delivery, Telegram, reporting, or Decision Engine behavior.
