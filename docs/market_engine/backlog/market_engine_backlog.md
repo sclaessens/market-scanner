@@ -626,15 +626,75 @@ Outcome: ME-FO01 defined the Fundamental Observation contract from SEC CompanyFa
 
 ### ME-FO02 — Implement Fundamental Observations from SEC CompanyFacts Source Context
 
-Candidate follow-up after ME-FO01.
+Owner roles: Financial Analyst / Data Steward / Technical Architect / QA Lead / Governance Auditor
 
 Job family: Fundamental Observation
 
-Status: RECOMMENDED NEXT
+Status: COMPLETED BY ME-FO02
 
 Goal: Implement non-decision Fundamental Observations from approved SEC CompanyFacts Source Context.
 
-Scope must remain inside the ME-FO job family and must not introduce derived observations, analysis review, recommendation review, portfolio review, delivery, Telegram, or Decision Engine behavior.
+Scope:
+
+* consume `SecCompanyFactsSourceContext` objects from ME-SC02;
+* emit `sec-companyfacts-fundamental-observations-v1` output;
+* implement approved ME-FO01 observation categories;
+* implement approved ME-FO01 observation states;
+* preserve source context state;
+* preserve source refresh metadata;
+* preserve source values;
+* preserve source provenance;
+* preserve missingness explicitly;
+* treat numeric zero as present;
+* persist Fundamental Observation output under `data/market_engine/fundamental_observations/<fundamental_observation_run_id>/<ticker>/fundamental_observations.json`;
+* refuse overwrite of existing Fundamental Observation output;
+* add local tests using synthetic/temporary cached Source Context input only;
+* document implementation and audit results.
+
+Explicit non-scope:
+
+* no raw SEC CompanyFacts fetching;
+* no cached raw snapshot loading as a primary input;
+* no Source Refresh behavior changes;
+* no Source Context behavior changes;
+* no derived calculations;
+* no free cash flow;
+* no growth;
+* no margins;
+* no ratios;
+* no valuation metrics;
+* no peer comparison;
+* no trend analysis;
+* no scoring;
+* no ranking;
+* no BUY / SELL / HOLD;
+* no recommendation review;
+* no portfolio review;
+* no delivery;
+* no Telegram;
+* no reporting;
+* no Decision Engine behavior;
+* no position sizing;
+* no execution advice.
+
+Acceptance criteria:
+
+* Available Source Context produces approved observations.
+* Partial Source Context preserves missingness.
+* Missing Source Context produces `NOT_ASSESSED` and `MISSING_DATA` observations.
+* Positive, negative, zero, and missing source values are handled correctly.
+* Numeric zero remains present and produces `ZERO_SOURCE_VALUE` where applicable.
+* Source values and provenance are preserved.
+* Source refresh metadata is preserved.
+* Derived calculations are not emitted.
+* Recommendation, score, ranking, portfolio, delivery, Telegram, and Decision Engine authority are not emitted.
+* Persistence writes JSON under the approved Fundamental Observation path.
+* Persistence refuses overwrite.
+* Tests do not use live SEC/provider calls.
+* Tests do not import legacy runtime modules.
+* Documentation, backlog, and audit are updated.
+
+Outcome: ME-FO02 implemented non-decision Fundamental Observations from SEC CompanyFacts Source Context in `src/market_engine/fundamental_observations/`, with tests in `tests/market_engine/fundamental_observations/`. The implementation consumes ME-SC02 Source Context objects, emits source-grounded observation output, preserves source values, missingness, Source Context state, source refresh metadata, and provenance, and stays inside the ME-FO job family without introducing derived calculations, analysis review, recommendation review, portfolio review, delivery, Telegram, or Decision Engine behavior.
 
 ### ME-DO01 — Add first derived cash-generation observation layer
 
