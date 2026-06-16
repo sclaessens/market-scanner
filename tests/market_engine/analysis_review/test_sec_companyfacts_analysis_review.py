@@ -22,6 +22,12 @@ from market_engine.source_context.sec_companyfacts_context import (
 from market_engine.source_refresh.sec_companyfacts_snapshots import (
     persist_sec_companyfacts_raw_snapshot,
 )
+from market_engine.setup_detection.sec_companyfacts_setup_detection import (
+    SecCompanyFactsSetupCategory,
+    SecCompanyFactsSetupDetectionItem,
+    SecCompanyFactsSetupState,
+    build_sec_companyfacts_setup_detection,
+)
 
 
 def test_builds_analysis_review_from_complete_positive_observations(tmp_path):
@@ -197,6 +203,271 @@ def test_analysis_review_preserves_upstream_references(tmp_path):
     ]["derived_values"] == {"free_cash_flow": 25}
 
 
+def test_setup_detection_input_creates_setup_aware_analysis_review(tmp_path):
+    fundamental_set, derived_set, setup_detection = _upstream_with_setup_detection(
+        tmp_path,
+        _payload(
+            {
+                "Revenues": [_fact(100, "2025-12-31")],
+                "NetIncomeLoss": [_fact(20, "2025-12-31")],
+                "NetCashProvidedByUsedInOperatingActivities": [_fact(30, "2025-12-31")],
+                "PaymentsToAcquirePropertyPlantAndEquipment": [_fact(5, "2025-12-31")],
+            }
+        ),
+    )
+
+    analysis_review = build_sec_companyfacts_analysis_review(
+        fundamental_set,
+        derived_set,
+        setup_detection,
+    )
+    setup_reviews = _review_items_by_setup_category(analysis_review)
+
+    assert analysis_review.analysis_review_format_version == (
+        SEC_COMPANYFACTS_ANALYSIS_REVIEW_FORMAT_VERSION
+    )
+    assert analysis_review.setup_detection_format_version == (
+        setup_detection.setup_detection_format_version
+    )
+    assert analysis_review.setup_detection_run_id == "setup-detection-run"
+    assert setup_reviews["cash_generation_setup"].state == (
+        SecCompanyFactsAnalysisReviewState.SETUP_DETECTED
+    )
+    assert setup_reviews["cash_generation_setup"].category == (
+        SecCompanyFactsAnalysisReviewCategory.SETUP_DETECTION_REVIEW
+    )
+    assert setup_reviews["cash_generation_setup"].setup_states == ("setup_detected",)
+    assert "FREE_CASH_FLOW_DERIVATION" in (
+        setup_reviews["cash_generation_setup"].derived_observation_references
+    )
+
+
+def test_partial_setup_input_creates_partial_setup_review(tmp_path):
+    fundamental_set, derived_set, setup_detection = _upstream_with_setup_detection(
+        tmp_path,
+        _payload(
+            {
+                "Revenues": [_fact(100, "2025-12-31")],
+                "NetIncomeLoss": [_fact(20, "2025-12-31")],
+                "NetCashProvidedByUsedInOperatingActivities": [_fact(30, "2025-12-31")],
+            }
+        ),
+    )
+
+    analysis_review = build_sec_companyfacts_analysis_review(
+        fundamental_set,
+        derived_set,
+        setup_detection,
+    )
+    setup_reviews = _review_items_by_setup_category(analysis_review)
+
+    assert setup_reviews["fundamental_availability_setup"].state == (
+        SecCompanyFactsAnalysisReviewState.SETUP_PARTIALLY_DETECTED
+    )
+    assert _has_setup_human_review_item(analysis_review)
+
+
+def test_missing_setup_evidence_creates_blocked_review(tmp_path):
+    fundamental_set, derived_set, setup_detection = _upstream_with_setup_detection(
+        tmp_path,
+        _payload({"Revenues": [_fact(100, "2025-12-31")]}),
+    )
+
+    analysis_review = build_sec_companyfacts_analysis_review(
+        fundamental_set,
+        derived_set,
+        setup_detection,
+    )
+    setup_reviews = _review_items_by_setup_category(analysis_review)
+
+    assert setup_reviews["cash_generation_setup"].state == (
+        SecCompanyFactsAnalysisReviewState.SETUP_BLOCKED_BY_MISSING_DATA
+    )
+    assert setup_reviews["cash_generation_setup"].missing_observations
+    assert _has_setup_human_review_item(analysis_review)
+
+
+def test_conflicted_setup_input_creates_conflicted_review_and_human_review(tmp_path):
+    fundamental_set, derived_set, setup_detection = _upstream_with_setup_detection(
+        tmp_path,
+        _payload(
+            {
+                "Revenues": [_fact(100, "2025-12-31")],
+                "NetIncomeLoss": [_fact(20, "2025-12-31")],
+                "NetCashProvidedByUsedInOperatingActivities": [_fact(5, "2025-12-31")],
+                "PaymentsToAcquirePropertyPlantAndEquipment": [_fact(30, "2025-12-31")],
+            }
+        ),
+    )
+
+    analysis_review = build_sec_companyfacts_analysis_review(
+        fundamental_set,
+        derived_set,
+        setup_detection,
+    )
+    setup_reviews = _review_items_by_setup_category(analysis_review)
+
+    assert setup_reviews["cash_generation_setup"].state == (
+        SecCompanyFactsAnalysisReviewState.SETUP_CONFLICTED
+    )
+    assert _has_setup_human_review_item(analysis_review)
+
+
+def test_not_assessed_setup_input_remains_not_assessed(tmp_path):
+    fundamental_set, derived_set, setup_detection = _upstream_with_setup_detection(
+        tmp_path,
+        _payload(
+            {
+                "Revenues": [_fact(100, "2025-12-31")],
+                "NetIncomeLoss": [_fact(20, "2025-12-31")],
+                "NetCashProvidedByUsedInOperatingActivities": [_fact(30, "2025-12-31")],
+                "PaymentsToAcquirePropertyPlantAndEquipment": [_fact(5, "2025-12-31")],
+            }
+        ),
+    )
+    not_assessed_item = _setup_item(
+        category=SecCompanyFactsSetupCategory.NOT_ASSESSED_SETUP,
+        state=SecCompanyFactsSetupState.SETUP_NOT_ASSESSED,
+        message="Setup Detection could not assess the pattern from approved inputs.",
+        required_observations=("APPROVED_SETUP_INPUT",),
+        missing_observations=("APPROVED_SETUP_INPUT",),
+    )
+    setup_detection = replace(
+        setup_detection,
+        setup_items=setup_detection.setup_items + (not_assessed_item,),
+    )
+
+    analysis_review = build_sec_companyfacts_analysis_review(
+        fundamental_set,
+        derived_set,
+        setup_detection,
+    )
+    setup_reviews = _review_items_by_setup_category(analysis_review)
+
+    assert setup_reviews["not_assessed_setup"].state == (
+        SecCompanyFactsAnalysisReviewState.SETUP_NOT_ASSESSED
+    )
+    assert _has_setup_human_review_item(analysis_review)
+
+
+def test_unsupported_setup_detection_contract_fails_closed(tmp_path):
+    fundamental_set, derived_set, setup_detection = _upstream_with_setup_detection(
+        tmp_path,
+        _payload(
+            {
+                "Revenues": [_fact(100, "2025-12-31")],
+                "NetIncomeLoss": [_fact(20, "2025-12-31")],
+                "NetCashProvidedByUsedInOperatingActivities": [_fact(30, "2025-12-31")],
+                "PaymentsToAcquirePropertyPlantAndEquipment": [_fact(5, "2025-12-31")],
+            }
+        ),
+    )
+    setup_detection = replace(setup_detection, setup_detection_format_version="bad-v1")
+
+    try:
+        build_sec_companyfacts_analysis_review(
+            fundamental_set,
+            derived_set,
+            setup_detection,
+        )
+    except ValueError as error:
+        assert "unsupported SEC CompanyFacts Setup Detection contract: bad-v1" in str(error)
+    else:
+        raise AssertionError("expected ValueError for unsupported Setup Detection contract")
+
+
+def test_setup_detection_alignment_mismatch_fails_safely(tmp_path):
+    fundamental_set, derived_set, setup_detection = _upstream_with_setup_detection(
+        tmp_path,
+        _payload(
+            {
+                "Revenues": [_fact(100, "2025-12-31")],
+                "NetIncomeLoss": [_fact(20, "2025-12-31")],
+                "NetCashProvidedByUsedInOperatingActivities": [_fact(30, "2025-12-31")],
+                "PaymentsToAcquirePropertyPlantAndEquipment": [_fact(5, "2025-12-31")],
+            }
+        ),
+    )
+    setup_detection = replace(setup_detection, ticker="AMD")
+
+    try:
+        build_sec_companyfacts_analysis_review(
+            fundamental_set,
+            derived_set,
+            setup_detection,
+        )
+    except ValueError as error:
+        assert "analysis review and setup detection inputs do not align on: ticker" in str(error)
+    else:
+        raise AssertionError("expected ValueError for mismatched Setup Detection input")
+
+
+def test_numeric_zero_from_setup_detection_is_preserved(tmp_path):
+    fundamental_set, derived_set, setup_detection = _upstream_with_setup_detection(
+        tmp_path,
+        _payload(
+            {
+                "Revenues": [_fact(100, "2025-12-31")],
+                "NetIncomeLoss": [_fact(0, "2025-12-31")],
+                "NetCashProvidedByUsedInOperatingActivities": [_fact(10, "2025-12-31")],
+                "PaymentsToAcquirePropertyPlantAndEquipment": [_fact(10, "2025-12-31")],
+            }
+        ),
+    )
+
+    analysis_review = build_sec_companyfacts_analysis_review(
+        fundamental_set,
+        derived_set,
+        setup_detection,
+    )
+    setup_reviews = _review_items_by_setup_category(analysis_review)
+
+    assert setup_reviews["cash_generation_setup"].setup_evidence["derived_values"][
+        "free_cash_flow"
+    ] == 0
+    assert setup_reviews["profitability_evidence_setup"].setup_evidence[
+        "net_income"
+    ] == 0
+
+
+def test_persistence_preserves_setup_detection_references(tmp_path):
+    fundamental_set, derived_set, setup_detection = _upstream_with_setup_detection(
+        tmp_path,
+        _payload(
+            {
+                "Revenues": [_fact(100, "2025-12-31")],
+                "NetIncomeLoss": [_fact(20, "2025-12-31")],
+                "NetCashProvidedByUsedInOperatingActivities": [_fact(30, "2025-12-31")],
+                "PaymentsToAcquirePropertyPlantAndEquipment": [_fact(5, "2025-12-31")],
+            }
+        ),
+    )
+    analysis_review = build_sec_companyfacts_analysis_review(
+        fundamental_set,
+        derived_set,
+        setup_detection,
+    )
+
+    analysis_review_path = persist_sec_companyfacts_analysis_review(
+        analysis_review,
+        run_id="analysis-review-run",
+        root_dir=tmp_path / "analysis_reviews",
+    )
+    payload = json.loads(analysis_review_path.read_text(encoding="utf-8"))
+
+    assert payload["setup_detection_format_version"] == (
+        setup_detection.setup_detection_format_version
+    )
+    assert payload["setup_detection_run_id"] == "setup-detection-run"
+    setup_review_payloads = [
+        item
+        for item in payload["review_items"]
+        if item["input_observation_families"] == ["ME-SD"]
+    ]
+    assert setup_review_payloads
+    assert setup_review_payloads[0]["setup_detection_references"]
+
+
 def test_alignment_mismatch_fails_safely(tmp_path):
     fundamental_set, derived_set = _upstream_observation_sets(
         tmp_path,
@@ -334,11 +605,61 @@ def _upstream_observation_sets(tmp_path, raw_payload: dict[str, object]):
     return fundamental_set, derived_set
 
 
+def _upstream_with_setup_detection(tmp_path, raw_payload: dict[str, object]):
+    fundamental_set, derived_set = _upstream_observation_sets(tmp_path, raw_payload)
+    setup_detection = build_sec_companyfacts_setup_detection(
+        fundamental_set,
+        derived_set,
+        setup_detection_run_id="setup-detection-run",
+    )
+    return fundamental_set, derived_set, setup_detection
+
+
 def _review_items_by_category(analysis_review):
     return {
         review_item.category: review_item
         for review_item in analysis_review.review_items
     }
+
+
+def _review_items_by_setup_category(analysis_review):
+    review_items = {}
+    for review_item in analysis_review.review_items:
+        for setup_category in review_item.setup_categories:
+            review_items.setdefault(setup_category, review_item)
+    return review_items
+
+
+def _has_setup_human_review_item(analysis_review):
+    return any(
+        review_item.category
+        == SecCompanyFactsAnalysisReviewCategory.SETUP_HUMAN_REVIEW_REQUIREMENT
+        and review_item.state
+        == SecCompanyFactsAnalysisReviewState.SETUP_REQUIRES_HUMAN_REVIEW
+        for review_item in analysis_review.review_items
+    )
+
+
+def _setup_item(
+    *,
+    category: SecCompanyFactsSetupCategory,
+    state: SecCompanyFactsSetupState,
+    message: str,
+    required_observations: tuple[str, ...],
+    missing_observations: tuple[str, ...],
+):
+    return SecCompanyFactsSetupDetectionItem(
+        category=category,
+        state=state,
+        message=message,
+        input_observation_families=("ME-SD",),
+        required_observations=required_observations,
+        missing_observations=missing_observations,
+        source_observation_references={},
+        derived_observation_references={},
+        setup_evidence={},
+        setup_limitations=("manual synthetic test item",),
+    )
 
 
 def _payload(facts: dict[str, list[dict[str, object]]]) -> dict[str, object]:

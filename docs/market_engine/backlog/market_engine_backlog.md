@@ -1357,15 +1357,13 @@ ME-AR03 did not introduce Python code, tests, provider calls, data writes, Recom
 
 Outcome: ME-AR03 extended the Analysis Review contract so a future ME-AR04 implementation can consume `sec-companyfacts-setup-detection-v1` while preserving Analysis Review as descriptive, provenance-preserving, missing-data-aware, numeric-zero-safe, non-recommendation, and non-actionable.
 
-## Recommended Next Sprint
-
 ### ME-AR04 — Implement Analysis Review consumption of Setup Detection
 
 Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
 Job family: Analysis Review
 
-Status: RECOMMENDED NEXT
+Status: COMPLETED BY ME-AR04
 
 Goal: Implement Analysis Review support for Setup Detection input.
 
@@ -1406,7 +1404,22 @@ ME-AR04 must test:
 
 ME-AR04 must not introduce recommendation authority, portfolio mutation, delivery behavior, Telegram behavior, reporting behavior, Decision Engine behavior, BUY / SELL / HOLD action semantics, allocation, position sizing, execution advice, ranking, scoring, conviction, urgency, or tradeability authority.
 
-## Planned Future Sprints
+Implemented runtime:
+
+* `src/market_engine/analysis_review/sec_companyfacts_analysis_review.py`
+
+Implemented tests:
+
+* `tests/market_engine/analysis_review/test_sec_companyfacts_analysis_review.py`
+
+Implemented documentation:
+
+* `docs/market_engine/analysis_review/me_ar04_analysis_review_setup_detection_implementation.md`
+* `docs/market_engine/audits/me_ar04_analysis_review_setup_detection_implementation_audit.md`
+
+Outcome: ME-AR04 extended the existing `sec-companyfacts-analysis-review-v1` implementation with optional Setup Detection input. The implementation preserves existing ME-AR02 behavior without Setup Detection input, validates Setup Detection alignment and contract version, emits Setup Detection-aware Analysis Review items, preserves setup evidence, setup limitations, missing observations, source and derived references, numeric-zero semantics, and remains non-recommendation and non-actionable.
+
+## Recommended Next Sprint
 
 ### ME-RR03 — Extend Recommendation Review contract for Setup Detection-aware Analysis Review
 
@@ -1414,7 +1427,7 @@ Owner roles: Financial Analyst / Functional Analyst / Data Steward / Technical A
 
 Job family: Recommendation Review
 
-Status: PLANNED FUTURE
+Status: RECOMMENDED NEXT
 
 Goal: Define how Recommendation Review consumes Setup Detection-aware Analysis Review.
 
@@ -1431,6 +1444,8 @@ ME-RR03 must define:
 * ME-RR04 implementation requirements.
 
 ME-RR03 must not introduce Python code, tests, provider calls, data writes, Portfolio Review behavior, Telegram, reporting, delivery, Decision Engine behavior, BUY / SELL / HOLD action semantics, allocation, position sizing, execution advice, ranking, scoring, conviction, urgency, or tradeability authority.
+
+## Planned Future Sprints
 
 ### ME-RR04 — Implement Setup Detection-aware Recommendation Review behavior
 

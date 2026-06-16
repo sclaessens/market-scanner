@@ -18,6 +18,13 @@ from market_engine.fundamental_observations.sec_companyfacts_observations import
     SecCompanyFactsFundamentalObservationSet,
     SecCompanyFactsFundamentalObservationState,
 )
+from market_engine.setup_detection.sec_companyfacts_setup_detection import (
+    SEC_COMPANYFACTS_SETUP_DETECTION_FORMAT_VERSION,
+    SecCompanyFactsSetupCategory,
+    SecCompanyFactsSetupDetection,
+    SecCompanyFactsSetupDetectionItem,
+    SecCompanyFactsSetupState,
+)
 
 
 SEC_COMPANYFACTS_ANALYSIS_REVIEW_FORMAT_VERSION = "sec-companyfacts-analysis-review-v1"
@@ -37,6 +44,10 @@ class SecCompanyFactsAnalysisReviewCategory(str, Enum):
     FREE_CASH_FLOW_REVIEW = "FREE_CASH_FLOW_REVIEW"
     DATA_LIMITATION_REVIEW = "DATA_LIMITATION_REVIEW"
     HUMAN_REVIEW_REQUIREMENT = "HUMAN_REVIEW_REQUIREMENT"
+    SETUP_DETECTION_REVIEW = "SETUP_DETECTION_REVIEW"
+    SETUP_EVIDENCE_COMPLETENESS_REVIEW = "SETUP_EVIDENCE_COMPLETENESS_REVIEW"
+    SETUP_LIMITATION_REVIEW = "SETUP_LIMITATION_REVIEW"
+    SETUP_HUMAN_REVIEW_REQUIREMENT = "SETUP_HUMAN_REVIEW_REQUIREMENT"
 
 
 class SecCompanyFactsAnalysisReviewState(str, Enum):
@@ -50,6 +61,13 @@ class SecCompanyFactsAnalysisReviewState(str, Enum):
     DATA_LIMITED = "DATA_LIMITED"
     REQUIRES_HUMAN_REVIEW = "REQUIRES_HUMAN_REVIEW"
     NOT_ASSESSED = "NOT_ASSESSED"
+    SETUP_DETECTED = "SETUP_DETECTED"
+    SETUP_PARTIALLY_DETECTED = "SETUP_PARTIALLY_DETECTED"
+    SETUP_NOT_DETECTED = "SETUP_NOT_DETECTED"
+    SETUP_CONFLICTED = "SETUP_CONFLICTED"
+    SETUP_BLOCKED_BY_MISSING_DATA = "SETUP_BLOCKED_BY_MISSING_DATA"
+    SETUP_NOT_ASSESSED = "SETUP_NOT_ASSESSED"
+    SETUP_REQUIRES_HUMAN_REVIEW = "SETUP_REQUIRES_HUMAN_REVIEW"
 
 
 @dataclass(frozen=True)
@@ -62,6 +80,11 @@ class SecCompanyFactsAnalysisReviewItem:
     missing_observations: tuple[str, ...]
     source_observation_references: dict[str, dict[str, Any]]
     derived_observation_references: dict[str, dict[str, Any]]
+    setup_detection_references: dict[str, dict[str, Any]] = field(default_factory=dict)
+    setup_categories: tuple[str, ...] = field(default_factory=tuple)
+    setup_states: tuple[str, ...] = field(default_factory=tuple)
+    setup_evidence: dict[str, Any] = field(default_factory=dict)
+    setup_limitations: tuple[str, ...] = field(default_factory=tuple)
     non_recommendation_boundary: str = NON_RECOMMENDATION_ANALYSIS_REVIEW_BOUNDARY
 
 
@@ -79,6 +102,9 @@ class SecCompanyFactsAnalysisReview:
     source_refresh_fetched_at: str
     source_refresh_payload_format_version: str
     review_items: tuple[SecCompanyFactsAnalysisReviewItem, ...]
+    setup_detection_format_version: str | None = None
+    setup_detection_run_id: str | None = None
+    setup_detection_non_actionable_boundary: str | None = None
     non_recommendation_boundary: str = NON_RECOMMENDATION_ANALYSIS_REVIEW_BOUNDARY
     warnings: tuple[str, ...] = field(default_factory=tuple)
 
@@ -86,11 +112,18 @@ class SecCompanyFactsAnalysisReview:
 def build_sec_companyfacts_analysis_review(
     fundamental_observation_set: SecCompanyFactsFundamentalObservationSet,
     derived_cash_generation_observation_set: SecCompanyFactsDerivedCashGenerationObservationSet,
+    setup_detection: SecCompanyFactsSetupDetection | None = None,
 ) -> SecCompanyFactsAnalysisReview:
     _validate_observation_set_alignment(
         fundamental_observation_set,
         derived_cash_generation_observation_set,
     )
+    if setup_detection is not None:
+        _validate_setup_detection_alignment(
+            fundamental_observation_set,
+            derived_cash_generation_observation_set,
+            setup_detection,
+        )
 
     fundamental_by_category = _fundamental_observations_by_category(
         fundamental_observation_set
@@ -136,6 +169,9 @@ def build_sec_companyfacts_analysis_review(
     if human_review_requirement is not None:
         review_items.append(human_review_requirement)
 
+    if setup_detection is not None:
+        review_items.extend(_setup_detection_review_items(setup_detection))
+
     return SecCompanyFactsAnalysisReview(
         ticker=fundamental_observation_set.ticker,
         cik=fundamental_observation_set.cik,
@@ -155,6 +191,21 @@ def build_sec_companyfacts_analysis_review(
             fundamental_observation_set.source_refresh_payload_format_version
         ),
         review_items=tuple(review_items),
+        setup_detection_format_version=(
+            setup_detection.setup_detection_format_version
+            if setup_detection is not None
+            else None
+        ),
+        setup_detection_run_id=(
+            setup_detection.setup_detection_run_id
+            if setup_detection is not None
+            else None
+        ),
+        setup_detection_non_actionable_boundary=(
+            setup_detection.non_actionable_boundary
+            if setup_detection is not None
+            else None
+        ),
     )
 
 
@@ -221,6 +272,56 @@ def _validate_observation_set_alignment(
     if mismatches:
         raise ValueError(
             "fundamental and derived observation sets do not align on: "
+            + ", ".join(mismatches)
+        )
+
+
+def _validate_setup_detection_alignment(
+    fundamental_observation_set: SecCompanyFactsFundamentalObservationSet,
+    derived_cash_generation_observation_set: SecCompanyFactsDerivedCashGenerationObservationSet,
+    setup_detection: SecCompanyFactsSetupDetection,
+) -> None:
+    if (
+        setup_detection.setup_detection_format_version
+        != SEC_COMPANYFACTS_SETUP_DETECTION_FORMAT_VERSION
+    ):
+        raise ValueError(
+            "unsupported SEC CompanyFacts Setup Detection contract: "
+            f"{setup_detection.setup_detection_format_version}"
+        )
+
+    mismatches = []
+    for field_name in (
+        "ticker",
+        "cik",
+        "provider_name",
+        "source_context_format_version",
+        "source_context_state",
+        "source_refresh_snapshot_id",
+        "source_refresh_fetched_at",
+        "source_refresh_payload_format_version",
+    ):
+        if getattr(fundamental_observation_set, field_name) != getattr(
+            setup_detection,
+            field_name,
+        ):
+            mismatches.append(field_name)
+
+    if (
+        fundamental_observation_set.observation_format_version
+        != setup_detection.fundamental_observation_format_version
+    ):
+        mismatches.append("fundamental_observation_format_version")
+
+    if (
+        derived_cash_generation_observation_set.derived_observation_format_version
+        != setup_detection.derived_observation_format_version
+    ):
+        mismatches.append("derived_observation_format_version")
+
+    if mismatches:
+        raise ValueError(
+            "analysis review and setup detection inputs do not align on: "
             + ", ".join(mismatches)
         )
 
@@ -532,6 +633,206 @@ def _human_review_requirement(
             if category.value in limited_derived_observations
         },
     )
+
+
+def _setup_detection_review_items(
+    setup_detection: SecCompanyFactsSetupDetection,
+) -> list[SecCompanyFactsAnalysisReviewItem]:
+    review_items = [
+        _setup_detection_review_item(setup_item)
+        for setup_item in setup_detection.setup_items
+    ]
+
+    human_review_setup_items = tuple(
+        setup_item
+        for setup_item in setup_detection.setup_items
+        if setup_item.state
+        in {
+            SecCompanyFactsSetupState.SETUP_PARTIALLY_DETECTED,
+            SecCompanyFactsSetupState.SETUP_CONFLICTED,
+            SecCompanyFactsSetupState.SETUP_BLOCKED_BY_MISSING_DATA,
+            SecCompanyFactsSetupState.SETUP_NOT_ASSESSED,
+        }
+    )
+    if human_review_setup_items:
+        review_items.append(_setup_human_review_requirement(human_review_setup_items))
+
+    return review_items
+
+
+def _setup_detection_review_item(
+    setup_item: SecCompanyFactsSetupDetectionItem,
+) -> SecCompanyFactsAnalysisReviewItem:
+    setup_reference_key = setup_item.category.value
+    return SecCompanyFactsAnalysisReviewItem(
+        category=_analysis_category_for_setup_category(setup_item.category),
+        state=_analysis_state_for_setup_state(setup_item.state),
+        message=_setup_review_message(setup_item),
+        input_observation_families=("ME-SD",),
+        required_observations=setup_item.required_observations,
+        missing_observations=setup_item.missing_observations,
+        source_observation_references=setup_item.source_observation_references,
+        derived_observation_references=setup_item.derived_observation_references,
+        setup_detection_references={
+            setup_reference_key: _setup_detection_reference(setup_item)
+        },
+        setup_categories=(setup_item.category.value,),
+        setup_states=(setup_item.state.value,),
+        setup_evidence=setup_item.setup_evidence,
+        setup_limitations=setup_item.setup_limitations,
+    )
+
+
+def _setup_human_review_requirement(
+    setup_items: tuple[SecCompanyFactsSetupDetectionItem, ...],
+) -> SecCompanyFactsAnalysisReviewItem:
+    setup_references = {
+        setup_item.category.value: _setup_detection_reference(setup_item)
+        for setup_item in setup_items
+    }
+    return SecCompanyFactsAnalysisReviewItem(
+        category=SecCompanyFactsAnalysisReviewCategory.SETUP_HUMAN_REVIEW_REQUIREMENT,
+        state=SecCompanyFactsAnalysisReviewState.SETUP_REQUIRES_HUMAN_REVIEW,
+        message=(
+            "Setup Detection review requires human review because setup evidence is partial, conflicted, blocked, or not assessed."
+        ),
+        input_observation_families=("ME-SD",),
+        required_observations=tuple(
+            dict.fromkeys(
+                observation
+                for setup_item in setup_items
+                for observation in setup_item.required_observations
+            )
+        ),
+        missing_observations=tuple(
+            dict.fromkeys(
+                observation
+                for setup_item in setup_items
+                for observation in setup_item.missing_observations
+            )
+        ),
+        source_observation_references={
+            key: value
+            for setup_item in setup_items
+            for key, value in setup_item.source_observation_references.items()
+        },
+        derived_observation_references={
+            key: value
+            for setup_item in setup_items
+            for key, value in setup_item.derived_observation_references.items()
+        },
+        setup_detection_references=setup_references,
+        setup_categories=tuple(
+            dict.fromkeys(setup_item.category.value for setup_item in setup_items)
+        ),
+        setup_states=tuple(
+            dict.fromkeys(setup_item.state.value for setup_item in setup_items)
+        ),
+        setup_evidence={
+            setup_item.category.value: setup_item.setup_evidence
+            for setup_item in setup_items
+        },
+        setup_limitations=tuple(
+            dict.fromkeys(
+                limitation
+                for setup_item in setup_items
+                for limitation in setup_item.setup_limitations
+            )
+        ),
+    )
+
+
+def _analysis_category_for_setup_category(
+    setup_category: SecCompanyFactsSetupCategory,
+) -> SecCompanyFactsAnalysisReviewCategory:
+    mapping = {
+        SecCompanyFactsSetupCategory.CASH_GENERATION_SETUP: (
+            SecCompanyFactsAnalysisReviewCategory.SETUP_DETECTION_REVIEW
+        ),
+        SecCompanyFactsSetupCategory.FUNDAMENTAL_AVAILABILITY_SETUP: (
+            SecCompanyFactsAnalysisReviewCategory.SETUP_EVIDENCE_COMPLETENESS_REVIEW
+        ),
+        SecCompanyFactsSetupCategory.PROFITABILITY_EVIDENCE_SETUP: (
+            SecCompanyFactsAnalysisReviewCategory.SETUP_DETECTION_REVIEW
+        ),
+        SecCompanyFactsSetupCategory.REVENUE_EVIDENCE_SETUP: (
+            SecCompanyFactsAnalysisReviewCategory.SETUP_DETECTION_REVIEW
+        ),
+        SecCompanyFactsSetupCategory.BALANCE_SHEET_EVIDENCE_SETUP: (
+            SecCompanyFactsAnalysisReviewCategory.SETUP_DETECTION_REVIEW
+        ),
+        SecCompanyFactsSetupCategory.DATA_LIMITATION_SETUP: (
+            SecCompanyFactsAnalysisReviewCategory.SETUP_LIMITATION_REVIEW
+        ),
+        SecCompanyFactsSetupCategory.NOT_ASSESSED_SETUP: (
+            SecCompanyFactsAnalysisReviewCategory.SETUP_HUMAN_REVIEW_REQUIREMENT
+        ),
+    }
+    return mapping[setup_category]
+
+
+def _analysis_state_for_setup_state(
+    setup_state: SecCompanyFactsSetupState,
+) -> SecCompanyFactsAnalysisReviewState:
+    mapping = {
+        SecCompanyFactsSetupState.SETUP_DETECTED: (
+            SecCompanyFactsAnalysisReviewState.SETUP_DETECTED
+        ),
+        SecCompanyFactsSetupState.SETUP_PARTIALLY_DETECTED: (
+            SecCompanyFactsAnalysisReviewState.SETUP_PARTIALLY_DETECTED
+        ),
+        SecCompanyFactsSetupState.SETUP_NOT_DETECTED: (
+            SecCompanyFactsAnalysisReviewState.SETUP_NOT_DETECTED
+        ),
+        SecCompanyFactsSetupState.SETUP_CONFLICTED: (
+            SecCompanyFactsAnalysisReviewState.SETUP_CONFLICTED
+        ),
+        SecCompanyFactsSetupState.SETUP_BLOCKED_BY_MISSING_DATA: (
+            SecCompanyFactsAnalysisReviewState.SETUP_BLOCKED_BY_MISSING_DATA
+        ),
+        SecCompanyFactsSetupState.SETUP_NOT_ASSESSED: (
+            SecCompanyFactsAnalysisReviewState.SETUP_NOT_ASSESSED
+        ),
+    }
+    return mapping[setup_state]
+
+
+def _setup_review_message(setup_item: SecCompanyFactsSetupDetectionItem) -> str:
+    if setup_item.state == SecCompanyFactsSetupState.SETUP_DETECTED:
+        return (
+            "Setup Detection reports detected setup evidence from approved upstream observations."
+        )
+    if setup_item.state == SecCompanyFactsSetupState.SETUP_PARTIALLY_DETECTED:
+        return (
+            "Setup Detection reports partial setup evidence and preserves incomplete upstream observations."
+        )
+    if setup_item.state == SecCompanyFactsSetupState.SETUP_CONFLICTED:
+        return (
+            "Setup Detection reports conflicted setup evidence and requires human review."
+        )
+    if setup_item.state == SecCompanyFactsSetupState.SETUP_BLOCKED_BY_MISSING_DATA:
+        return (
+            "Setup Detection review is blocked because required upstream observations are missing."
+        )
+    if setup_item.state == SecCompanyFactsSetupState.SETUP_NOT_ASSESSED:
+        return "Setup Detection could not assess this setup from the approved inputs."
+    return "Setup Detection did not detect this setup from the approved inputs."
+
+
+def _setup_detection_reference(
+    setup_item: SecCompanyFactsSetupDetectionItem,
+) -> dict[str, Any]:
+    return {
+        "setup_category": setup_item.category.value,
+        "setup_state": setup_item.state.value,
+        "setup_message": setup_item.message,
+        "setup_evidence": setup_item.setup_evidence,
+        "setup_limitations": setup_item.setup_limitations,
+        "missing_observations": setup_item.missing_observations,
+        "source_observation_references": setup_item.source_observation_references,
+        "derived_observation_references": setup_item.derived_observation_references,
+        "non_actionable_boundary": setup_item.non_actionable_boundary,
+    }
 
 
 def _cash_generation_state_and_message(
