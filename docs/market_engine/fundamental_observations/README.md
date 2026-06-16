@@ -6,15 +6,16 @@ Fundamental Observation jobs consume approved Source Context output and emit sou
 
 They must not create:
 
-- analysis review;
-- recommendation review;
-- portfolio review;
-- delivery output;
-- Telegram behavior;
-- Decision Engine behavior;
-- BUY / SELL / HOLD semantics;
-- scores, rankings, urgency, conviction, tradeability, allocation, or execution advice.
+* analysis review;
+* recommendation review;
+* portfolio review;
+* delivery output;
+* Telegram behavior;
+* Decision Engine behavior;
+* BUY / SELL / HOLD semantics;
+* scores, rankings, urgency, conviction, tradeability, allocation, or execution advice.
 
 Current documents:
 
-- `me_fo01_fundamental_observation_contract.md` — Fundamental Observation contract from SEC CompanyFacts Source Context.
+* `me_fo01_fundamental_observation_contract.md` — Fundamental Observation contract from SEC CompanyFacts Source Context.
+* `me_fo02_fundamental_observations_implementation.md` — Fundamental Observation implementation from SEC CompanyFacts Source Context.
