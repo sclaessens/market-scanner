@@ -71,18 +71,24 @@ The fixture intentionally preserves:
 * side-effect boundary confirmation;
 * action-authority boundary confirmation.
 
+Local validation confirmed:
+
+```text
+18 passed in 0.04s
+```
+
+The local dry-run command requires `PYTHONPATH=src` when invoked through `python -m market_engine...` from a non-installed checkout.
+
 ## Boundaries preserved
 
 ME-RUN07 does not introduce provider calls, SEC/EDGAR calls, yfinance/live market data calls, broker calls, Telegram delivery, email delivery, production report generation, portfolio writes, watchlist writes, scheduler behavior, UI behavior, new financial analysis logic, Decision Engine action semantics, BUY / SELL / HOLD semantics, allocation advice, target weights, target prices, position sizing, order generation, execution advice, ranking, scoring, urgency, conviction, or tradeability authority.
 
 ## Next logical step preservation
 
-No mandatory next sprint is inserted by ME-RUN07.
-
-Possible future candidate, not active unless explicitly approved:
+ME-RUN07 proves a single realistic local blocked-review fixture. The next logical sprint is preserved as:
 
 ```text
 ME-RUN08 - Expand local fixture matrix coverage for multiple dry-run states
 ```
 
-Reason: ME-RUN07 demonstrates one realistic local blocked-review fixture. A future RUN sprint may broaden local fixture coverage across completed, completed-with-limitations, blocked, unsupported-input, and contract-violation states before any broader all-ticker or channel-adapter workflow is approved.
+Reason: before approving broader all-ticker, cached-source, channel-adapter, or user-facing workflows, the local dry-run path should prove deterministic behavior across representative states, including completed, completed-with-limitations, blocked, unsupported-input, stale-data, missing-data, numeric-zero, and provenance-heavy scenarios.
