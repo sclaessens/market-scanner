@@ -2,11 +2,11 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-RUN05
+Status: ACTIVE ROADMAP AFTER ME-RUN06
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-RUN05.
+This roadmap preserves the Market Engine sprint sequence after ME-RUN06.
 
 ME-SD02 implemented the first non-actionable Setup Detection runtime layer.
 
@@ -32,36 +32,37 @@ ME-DL02 implemented the Delivery / Reporting contract as a non-actionable payloa
 
 ME-RUN05 implemented optional local dry-run artifact persistence while preserving stdout-only dry-run behavior by default and keeping persisted artifacts local, non-production, deterministic, and inspectable.
 
+ME-RUN06 implemented a controlled local fixture/data input execution path while preserving embedded synthetic dry-run behavior, explicit in-memory payload compatibility, and all side-effect and authority boundaries.
+
 ## Completed Chain
 
 Completed job-scoped chain:
 
-| Sprint  | Job family               | Status    |
-| ------- | ------------------------ | --------- |
-| ME-SR01 | Source Refresh           | Completed |
-| ME-SC01 | Source Context           | Completed |
-| ME-SC02 | Source Context           | Completed |
-| ME-FO01 | Fundamental Observations | Completed |
-| ME-FO02 | Fundamental Observations | Completed |
-| ME-DO01 | Derived Observations     | Completed |
-| ME-AR01 | Analysis Review          | Completed |
-| ME-AR02 | Analysis Review          | Completed |
-| ME-RR01 | Recommendation Review    | Completed |
-| ME-RR02 | Recommendation Review    | Completed |
-| ME-RM01 | Roadmap / Governance     | Completed |
-| ME-SD01 | Setup Detection          | Completed |
-| ME-SD02 | Setup Detection          | Completed |
-| ME-AR03 | Analysis Review          | Completed |
-| ME-AR04 | Analysis Review          | Completed |
-| ME-RR03 | Recommendation Review    | Completed |
-| ME-RR04 | Recommendation Review    | Completed |
-| ME-PR01 | Portfolio Review         | Completed |
-| ME-PR02 | Portfolio Review         | Completed |
-| ME-DE01 | Decision Engine handoff  | Completed |
-| ME-DE02 | Decision Engine handoff  | Completed |
-| ME-DL01 | Delivery / Reporting     | Completed |
-| ME-DL02 | Delivery / Reporting     | Completed |
+| Sprint   | Job family               | Status    |
+| -------- | ------------------------ | --------- |
+| ME-SR01  | Source Refresh           | Completed |
+| ME-SC01  | Source Context           | Completed |
+| ME-SC02  | Source Context           | Completed |
+| ME-FO01  | Fundamental Observations | Completed |
+| ME-FO02  | Fundamental Observations | Completed |
+| ME-DO01  | Derived Observations     | Completed |
+| ME-AR01  | Analysis Review          | Completed |
+| ME-AR02  | Analysis Review          | Completed |
+| ME-RM01  | Roadmap / Governance     | Completed |
+| ME-SD01  | Setup Detection          | Completed |
+| ME-SD02  | Setup Detection          | Completed |
+| ME-AR03  | Analysis Review          | Completed |
+| ME-AR04  | Analysis Review          | Completed |
+| ME-RR03  | Recommendation Review    | Completed |
+| ME-RR04  | Recommendation Review    | Completed |
+| ME-PR01  | Portfolio Review         | Completed |
+| ME-PR02  | Portfolio Review         | Completed |
+| ME-DE01  | Decision Engine handoff  | Completed |
+| ME-DE02  | Decision Engine handoff  | Completed |
+| ME-DL01  | Delivery / Reporting     | Completed |
+| ME-DL02  | Delivery / Reporting     | Completed |
 | ME-RUN05 | Run / orchestration      | Completed |
+| ME-RUN06 | Run / orchestration      | Completed |
 
 ME-RR02 implemented the first non-actionable SEC CompanyFacts Recommendation Review layer with:
 
@@ -217,64 +218,19 @@ ME-RUN05 preserves stdout-only dry-run behavior by default and requires explicit
 
 ME-RUN05 did not introduce provider calls, live market data calls, Telegram delivery, email delivery, broker integration, generated production reports, portfolio writes, watchlist writes, scheduling, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability, or execution advice.
 
+ME-RUN06 implemented local dry-run fixture/data input with:
+
+* input fixture contract: `market-engine-local-dry-run-input-fixture-v1`;
+* approved local command mode: `--input-mode local_snapshot_fixture` with `--stage-payloads-json`;
+* runtime module: `src/market_engine/run/local_dry_run_inputs.py`;
+* command integration: `src/market_engine/run/end_to_end_dry_run_command.py`;
+* tests: `tests/market_engine/run/test_local_dry_run_inputs.py` and `tests/market_engine/run/test_end_to_end_dry_run_command.py`;
+* implementation documentation: `docs/market_engine/run/me_run06_local_dry_run_fixture_data_input_implementation.md`;
+* audit: `docs/market_engine/audits/me_run06_local_dry_run_fixture_data_input_audit.md`;
+* backlog entry: `docs/market_engine/backlog/me_run06_local_dry_run_fixture_data_input_backlog_entry.md`.
+
+ME-RUN06 preserves embedded synthetic dry-run behavior by default, preserves raw `explicit_in_memory_payload` compatibility, and requires a non-production wrapper for `local_snapshot_fixture` data input.
+
+ME-RUN06 did not introduce provider calls, live market data calls, Telegram delivery, email delivery, broker integration, generated production reports, portfolio writes, watchlist writes, scheduling, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability, or execution advice.
+
 ## Architectural Chain
-
-Current target architecture:
-
-```text
-Source Refresh / raw snapshots
-→ Source Context
-→ Fundamental Observations
-→ Derived Observations
-→ Setup Detection
-→ Analysis Review
-→ Recommendation Review
-→ Portfolio Review
-→ Decision Engine handoff / action authority
-→ Delivery / reporting
-```
-
-Decision Engine remains the only action/allocation authority.
-
-## Setup Detection Position
-
-Analysis Review and Recommendation Review already existed before Setup Detection was formally added.
-
-This does not invalidate completed ME-AR01, ME-AR02, ME-RR01, or ME-RR02 work.
-
-ME-RM01 recorded Setup Detection as a missing future layer that must be inserted before Portfolio Review. ME-SD01 then defined the Setup Detection contract.
-
-ME-AR04 extended Analysis Review to consume Setup Detection output.
-
-ME-RR03 extended Recommendation Review to consume Setup Detection-aware Analysis Review output.
-
-ME-RR04 implemented Recommendation Review consumption of Setup Detection-aware Analysis Review output.
-
-ME-PR01 defined Portfolio Review only after Setup Detection-aware Recommendation Review existed.
-
-ME-PR02 implemented Portfolio Review only after the ME-PR01 contract was defined.
-
-Insertion reason:
-
-Setup Detection is required so Market Engine can detect patterns/setups from Fundamental Observations and Derived Observations before downstream review layers attempt portfolio review or decision handoff. Without this layer, the project risks skipping a required interpretive layer and jumping too quickly from Recommendation Review to Portfolio Review.
-
-## Recommended Next Sprint
-
-No next sprint is inserted by ME-RUN05.
-
-Future work must be added through a new approved roadmap/backlog sprint when a real product, governance, review, persistence, or safe-channel need is identified.
-
-## Planned Sprint Details
-
-No planned future sprint is active after ME-DL02.
-
-## Possible Inserted Sprints
-
-Possible inserted sprints are allowed only when a real problem, blocker, architectural gap, governance risk, test gap, data-quality issue, or newly discovered dependency requires insertion ahead of the planned sequence.
-
-When such a sprint is inserted:
-
-* the insertion reason must be documented in this roadmap;
-* the insertion reason must be documented in `docs/market_engine/backlog/market_engine_backlog.md`;
-* completed sprint outcomes must be preserved;
-* the planned sequence must be updated rather than left ambiguous.

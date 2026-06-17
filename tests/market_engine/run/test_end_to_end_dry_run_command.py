@@ -11,6 +11,9 @@ from market_engine.run.end_to_end_dry_run_command import (
     build_synthetic_dry_run_stage_payloads,
     run_market_engine_end_to_end_dry_run_command,
 )
+from market_engine.run.local_dry_run_inputs import (
+    MARKET_ENGINE_LOCAL_DRY_RUN_INPUT_FIXTURE_FORMAT_VERSION,
+)
 
 
 def test_local_dry_run_command_emits_synthetic_payload(capsys) -> None:
@@ -76,6 +79,57 @@ def test_local_dry_run_command_accepts_explicit_json_payload_file(tmp_path: Path
     assert captured.err == ""
 
 
+def test_local_dry_run_command_accepts_local_snapshot_fixture_file(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    stage_payloads: dict[str, dict[str, Any]] = build_synthetic_dry_run_stage_payloads()
+    stage_payloads["source_context"] = {
+        **stage_payloads["source_context"],
+        "ticker": "MSFT",
+        "cik": "0000789019",
+    }
+    payload_path = tmp_path / "local_snapshot_fixture.json"
+    payload_path.write_text(
+        json.dumps(
+            {
+                "dry_run_input_fixture_format_version": (
+                    MARKET_ENGINE_LOCAL_DRY_RUN_INPUT_FIXTURE_FORMAT_VERSION
+                ),
+                "fixture_id": "local-snapshot-fixture-001",
+                "input_mode": "local_snapshot_fixture",
+                "non_production_fixture": True,
+                "stage_payloads": stage_payloads,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = run_market_engine_end_to_end_dry_run_command(
+        [
+            "--input-mode",
+            "local_snapshot_fixture",
+            "--stage-payloads-json",
+            str(payload_path),
+            "--dry-run-id",
+            "local-snapshot-run-001",
+            "--generated-at",
+            "2026-06-17T13:32:00Z",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    payload = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert payload["input_mode"] == "local_snapshot_fixture"
+    assert payload["dry_run_id"] == "local-snapshot-run-001"
+    assert payload["ticker"] == "MSFT"
+    assert payload["cik"] == "0000789019"
+    assert payload["run_state"] == "dry_run_completed"
+    assert captured.err == ""
+
+
 def test_local_dry_run_command_requires_json_file_for_non_synthetic_mode(capsys) -> None:
     exit_code = run_market_engine_end_to_end_dry_run_command(
         ["--input-mode", "local_snapshot_fixture"]
@@ -105,6 +159,29 @@ def test_local_dry_run_command_rejects_malformed_json_file(tmp_path: Path, capsy
 
     assert exit_code == 2
     assert "Stage payload JSON is invalid" in captured.err
+    assert captured.out == ""
+
+
+def test_local_dry_run_command_rejects_raw_payload_for_local_snapshot_mode(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    payload_path = tmp_path / "raw_stage_payloads.json"
+    payload_path.write_text(json.dumps(build_synthetic_dry_run_stage_payloads()), encoding="utf-8")
+
+    exit_code = run_market_engine_end_to_end_dry_run_command(
+        [
+            "--input-mode",
+            "local_snapshot_fixture",
+            "--stage-payloads-json",
+            str(payload_path),
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert "local-dry-run-input-fixture-v1" in captured.err
     assert captured.out == ""
 
 
