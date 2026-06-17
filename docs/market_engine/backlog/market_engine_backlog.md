@@ -1849,8 +1849,60 @@ Outcome: ME-RUN05 lets local dry-run executions persist deterministic, inspectab
 
 ME-RUN05 did not introduce provider calls, live market data calls, Telegram delivery, email delivery, broker integration, production report generation, portfolio writes, watchlist writes, scheduler behavior, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability, or execution advice.
 
+## Completed Sprint
+
+### ME-RUN10 — Implement cached-source end-to-end local execution path
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: COMPLETED BY ME-RUN10
+
+Goal: Implement the cached-source end-to-end local execution path defined by ME-RUN09.
+
+Scope: Local cached-source input loading, command input mode, fail-closed validation, downstream contract construction through approved builders, tests, documentation, and audit only.
+
+ME-RUN10 implemented:
+
+* `cached_source_snapshot` dry-run input mode;
+* `market-engine-cached-source-local-execution-input-v1` wrapper support;
+* cached SEC CompanyFacts source snapshot path containment validation;
+* cached source snapshot to Source Context construction;
+* downstream contract construction through the implemented Market Engine chain;
+* explicit local portfolio-context input support;
+* optional local dry-run artifact writing through the existing `--write-local-artifact` flag;
+* local synthetic tests only.
+
+Implemented runtime:
+
+* `src/market_engine/run/cached_source_execution.py`
+* `src/market_engine/run/end_to_end_dry_run.py`
+* `src/market_engine/run/end_to_end_dry_run_command.py`
+* `src/market_engine/run/local_dry_run_artifacts.py`
+* `src/market_engine/run/__init__.py`
+
+Implemented tests:
+
+* `tests/market_engine/run/test_me_run10_cached_source_local_execution.py`
+
+Implemented documentation:
+
+* `docs/market_engine/run/me_run10_cached_source_local_execution_implementation.md`
+* `docs/market_engine/audits/me_run10_cached_source_local_execution_implementation_audit.md`
+* `docs/market_engine/backlog/me_run10_cached_source_local_execution_backlog_entry.md`
+* `docs/market_engine/roadmap/me_run10_cached_source_local_execution_roadmap_entry.md`
+
+Outcome: ME-RUN10 proves Market Engine can run the local dry-run chain from an already-existing cached SEC CompanyFacts source snapshot and explicitly supplied local portfolio context without live provider calls or production side effects. The final output remains `market-engine-end-to-end-dry-run-v1`, and artifact persistence remains opt-in through the existing local artifact path.
+
+ME-RUN10 did not introduce provider calls, SEC/EDGAR live calls, yfinance calls, live market data calls, broker calls, Telegram/email delivery, production report generation, portfolio writes, watchlist writes, scheduler behavior, UI behavior, all-ticker production runs, automatic cache refresh, automatic cache cleanup, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, execution advice, ranking, scoring, urgency, conviction, tradeability, or execution advice.
+
 ## Future Sprint Candidates
 
-No new sprint is inserted by ME-RUN05.
+Recommended next sprint after ME-RUN10:
 
-Future work should be introduced only through a new approved roadmap/backlog sprint, such as a narrowly scoped local dry-run review, runtime fixture expansion, safe all-ticker dry-run contract, or safe channel adapter contract if product governance later approves it.
+```text
+ME-RUN11 - Run cached-source local execution against a broader deterministic ticker bundle
+```
+
+Rationale: ME-RUN10 proves the cached-source local execution path for one deterministic cached source snapshot. ME-RUN11 should validate the same path against a small deterministic ticker bundle before broader cached-source or operator-facing workflows are approved.

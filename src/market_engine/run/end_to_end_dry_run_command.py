@@ -10,6 +10,13 @@ from market_engine.run.end_to_end_dry_run import (
     APPROVED_DRY_RUN_INPUT_MODES,
     build_market_engine_end_to_end_dry_run,
 )
+from market_engine.run.cached_source_execution import (
+    CACHED_SOURCE_SNAPSHOT_INPUT_MODE,
+    CachedSourceLocalExecutionError,
+    build_cached_source_local_execution_stage_payloads,
+    load_cached_source_local_execution_stage_payloads,
+    load_portfolio_context_payload,
+)
 from market_engine.run.local_dry_run_artifacts import (
     MARKET_ENGINE_LOCAL_DRY_RUN_ARTIFACT_PATH_CATEGORY,
     LocalDryRunArtifactError,
@@ -113,6 +120,31 @@ def _argument_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--source-snapshot-json",
+        default=None,
+        help=(
+            "Local cached SEC CompanyFacts source snapshot JSON. Required for "
+            "cached_source_snapshot unless --stage-payloads-json provides the "
+            "cached-source local execution wrapper."
+        ),
+    )
+    parser.add_argument(
+        "--source-snapshot-root",
+        default="data/market_engine/source_snapshots",
+        help=(
+            "Approved local cached-source root used to validate "
+            "--source-snapshot-json containment."
+        ),
+    )
+    parser.add_argument(
+        "--portfolio-context-json",
+        default=None,
+        help=(
+            "Optional local portfolio-context JSON used only with "
+            "cached_source_snapshot."
+        ),
+    )
+    parser.add_argument(
         "--compact",
         action="store_true",
         help="Emit compact single-line JSON instead of pretty printed JSON.",
@@ -145,6 +177,34 @@ def _argument_parser() -> argparse.ArgumentParser:
 
 
 def _stage_payloads_for_command(args: argparse.Namespace) -> Mapping[str, Any]:
+    if args.input_mode == CACHED_SOURCE_SNAPSHOT_INPUT_MODE:
+        try:
+            if args.stage_payloads_json:
+                return load_cached_source_local_execution_stage_payloads(
+                    args.stage_payloads_json,
+                    dry_run_id=args.dry_run_id,
+                    generated_at=args.generated_at,
+                )
+            if not args.source_snapshot_json:
+                raise CachedSourceLocalExecutionError(
+                    "--source-snapshot-json is required when --input-mode is "
+                    "cached_source_snapshot unless --stage-payloads-json is supplied."
+                )
+            portfolio_context_payload = (
+                load_portfolio_context_payload(args.portfolio_context_json)
+                if args.portfolio_context_json
+                else None
+            )
+            return build_cached_source_local_execution_stage_payloads(
+                source_snapshot_path=args.source_snapshot_json,
+                source_snapshot_root=args.source_snapshot_root,
+                dry_run_id=args.dry_run_id,
+                generated_at=args.generated_at,
+                portfolio_context_payload=portfolio_context_payload,
+            )
+        except CachedSourceLocalExecutionError as exc:
+            raise _DryRunCommandError(str(exc)) from exc
+
     if args.stage_payloads_json:
         try:
             return load_market_engine_local_dry_run_input(
