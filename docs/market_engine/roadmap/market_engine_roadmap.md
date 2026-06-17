@@ -2,15 +2,19 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-RUN07
+Status: ACTIVE ROADMAP AFTER ME-RUN09
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-RUN07.
+This roadmap preserves the Market Engine sprint sequence after ME-RUN09.
 
 ME-RUN07 proved that the Market Engine can run end-to-end locally through `local_snapshot_fixture` using realistic non-production fixture data and can persist a deterministic local dry-run review artifact through the existing RUN05 artifact flag.
 
-The next approved sprint is preserved as `ME-RUN08 - Expand local fixture matrix coverage for multiple dry-run states`.
+ME-RUN08 expanded local non-production dry-run coverage into a deterministic fixture matrix for completed, completed-with-limitations, blocked, stale-data, missing-data, numeric-zero, unsupported-input, and provenance-heavy states.
+
+ME-RUN09 defined the cached-source end-to-end local execution contract as the next safe boundary toward real local analysis from already-existing cached source snapshots.
+
+The next implementation candidate is preserved as `ME-RUN10 - Implement cached-source end-to-end local execution path`.
 
 ## Completed Chain
 
@@ -42,6 +46,8 @@ Completed job-scoped chain:
 | ME-RUN05 | Run / orchestration      | Completed |
 | ME-RUN06 | Run / orchestration      | Completed |
 | ME-RUN07 | Run / orchestration      | Completed |
+| ME-RUN08 | Run / orchestration      | Completed |
+| ME-RUN09 | Run / orchestration      | Completed |
 
 ## Recent RUN chain
 
@@ -99,39 +105,74 @@ ME-RUN07 proved:
 * provenance remains present across all dry-run stages;
 * overwrite protection prevents accidental replacement of an existing local artifact directory.
 
-## Next Approved Sprint
+ME-RUN08 expanded local fixture matrix coverage with:
 
-### ME-RUN08 - Expand local fixture matrix coverage for multiple dry-run states
+* deterministic cases for completed, completed-with-limitations, blocked, stale-data, missing-data, numeric-zero, unsupported-input, and provenance-heavy states;
+* test: `tests/market_engine/run/test_me_run08_local_fixture_matrix_coverage.py`;
+* implementation documentation: `docs/market_engine/run/me_run08_local_fixture_matrix_coverage_implementation.md`;
+* audit: `docs/market_engine/audits/me_run08_local_fixture_matrix_coverage_audit.md`;
+* backlog entry: `docs/market_engine/backlog/me_run08_local_fixture_matrix_coverage_backlog_entry.md`;
+* roadmap entry: `docs/market_engine/roadmap/me_run08_local_fixture_matrix_coverage_roadmap_entry.md`.
+
+ME-RUN08 validation confirmed:
+
+```text
+9 passed in 0.03s
+49 passed in 0.08s
+```
+
+ME-RUN08 preserved all local-only, non-production, opt-in artifact, no-provider, no-delivery, no-portfolio-write, no-watchlist-write, no-scheduler, no-UI, and non-actionable boundaries.
+
+ME-RUN09 defined the cached-source end-to-end local execution contract with:
+
+* future input mode: `cached_source_snapshot`;
+* future input contract family: `market-engine-cached-source-local-execution-input-v1`;
+* approved cached-source path category: `data/market_engine/source_snapshots/`;
+* final output contract preserved as `market-engine-end-to-end-dry-run-v1`;
+* local artifact contracts preserved as `market-engine-local-dry-run-artifact-v1` and `market-engine-local-dry-run-artifact-manifest-v1`;
+* contract document: `docs/market_engine/run/me_run09_cached_source_end_to_end_local_execution_contract.md`;
+* audit: `docs/market_engine/audits/me_run09_cached_source_end_to_end_local_execution_contract_audit.md`;
+* backlog entry: `docs/market_engine/backlog/me_run09_cached_source_end_to_end_local_execution_backlog_entry.md`;
+* roadmap entry: `docs/market_engine/roadmap/me_run09_cached_source_end_to_end_local_execution_roadmap_entry.md`.
+
+ME-RUN09 is documentation-only and does not introduce Python code, tests, runtime behavior, provider calls, source refresh jobs, live market data calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, scheduler behavior, UI behavior, all-ticker production runs, automatic cache refresh, automatic cache cleanup, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, execution advice, ranking, scoring, urgency, conviction, or tradeability authority.
+
+## Next Implementation Candidate
+
+### ME-RUN10 - Implement cached-source end-to-end local execution path
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
 Job family: ME-RUN - Run / orchestration jobs
 
-Status: NEXT APPROVED SPRINT AFTER ME-RUN07
+Status: CANDIDATE AFTER ME-RUN09
 
-Goal: expand the local non-production dry-run fixture coverage from one realistic fixture into a deterministic fixture matrix for completed, limited, blocked, stale-data, missing-data, numeric-zero, unsupported-input, and provenance-heavy states.
+Goal: implement the cached-source end-to-end local execution path defined by ME-RUN09.
 
-Rationale: ME-RUN07 proves one realistic local blocked-review fixture. Before approving broader live execution, cached-source-to-review orchestration, channel adapters, user-facing reports, or production-style workflows, the local dry-run path should prove deterministic behavior across representative state families.
+Rationale: ME-RUN09 defines the safe contract for local execution from already-existing cached source snapshots. ME-RUN10 may implement that contract so Market Engine can move from synthetic/local fixture evidence toward realistic cached-source analysis without live provider calls or production side effects.
 
-Scope: local fixtures, local tests, command documentation, and audit documentation only.
+Scope: local cached-source input loading, command input mode, fail-closed validation, downstream contract construction through approved builders, tests, documentation, and audit only.
 
-Non-goals: no provider calls, live data, broker calls, message delivery, portfolio or watchlist writes, production artifacts, new financial logic, action semantics, allocation behavior, order generation, ranking, scoring, urgency, conviction, or tradeability authority.
+Non-goals: no provider refresh, live market data, external API calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, scheduler behavior, UI behavior, all-ticker production runs, automatic cache refresh, automatic cache cleanup, new financial logic, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, ranking, scoring, urgency, conviction, tradeability, or execution advice.
 
 Acceptance criteria:
 
-* fixture matrix is non-production;
-* existing Market Engine payload contracts are reused;
-* `local_snapshot_fixture` remains the local fixture input mode;
-* existing embedded synthetic and explicit in-memory modes remain compatible;
-* artifact writing remains opt-in only through the RUN05 flag;
-* tests cover completed, limited, blocked, stale-data, missing-data, numeric-zero, unsupported-input, and provenance behavior;
-* documentation records exact local commands, expected output, side-effect boundaries, and audit conclusion;
+* `cached_source_snapshot` input mode is added without breaking existing input modes;
+* source snapshot path validation is fail-closed;
+* malformed, missing, unsafe, unsupported, or ambiguous cached source snapshots fail closed;
+* stale and missing source evidence remains explicit;
+* numeric-zero evidence is preserved;
+* blocked downstream construction is represented safely;
+* final output remains `market-engine-end-to-end-dry-run-v1`;
+* artifact writing remains opt-in only through `--write-local-artifact`;
+* local tests cover success and failure paths;
+* documentation and audit are added;
 * roadmap and backlog remain synchronized after completion.
 
-## Candidate Follow-Ups After ME-RUN08
+## Candidate Follow-Ups After ME-RUN10
 
-These are candidates only and are not inserted ahead of ME-RUN08 unless ME-RUN08 discovers a blocker or governance gap:
+These are candidates only and are not inserted ahead of ME-RUN10 unless ME-RUN10 discovers a blocker or governance gap:
 
-* `ME-RUN09 - Define cached-source end-to-end local execution contract`;
 * `ME-SR02 - Build bounded SEC CompanyFacts source refresh job runner`;
-* `ME-QA01 - Add cross-job dry-run contract regression suite`.
+* `ME-QA01 - Add cross-job dry-run contract regression suite`;
+* `ME-RUN11 - Define safe all-ticker cached-source batch dry-run contract`.
