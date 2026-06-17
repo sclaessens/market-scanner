@@ -1804,8 +1804,53 @@ Outcome: ME-DL02 implemented deterministic `market-engine-delivery-report-v1` co
 
 ME-DL02 did not introduce provider calls, live market data calls, Telegram delivery, email delivery, broker integration, portfolio writes, watchlist writes, scheduler behavior, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability, or execution advice.
 
+## Completed Sprint
+
+### ME-RUN05 — Implement local dry-run artifact persistence
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: COMPLETED BY ME-RUN05
+
+Goal: Implement local dry-run artifact persistence for generated Market Engine runtime artifacts.
+
+Scope: Optional local non-production JSON persistence for already-built `market-engine-end-to-end-dry-run-v1` payloads only.
+
+ME-RUN05 implemented:
+
+* local dry-run artifact format: `market-engine-local-dry-run-artifact-v1`;
+* local dry-run artifact manifest format: `market-engine-local-dry-run-artifact-manifest-v1`;
+* approved path category: `artifacts/market_engine/dry_runs/`;
+* explicit `--write-local-artifact` command behavior;
+* deterministic artifact metadata through caller-supplied artifact timestamp;
+* safe path validation;
+* overwrite refusal by default;
+* stable, human-readable JSON serialization;
+* local synthetic tests only.
+
+Implemented runtime:
+
+* `src/market_engine/run/local_dry_run_artifacts.py`
+* `src/market_engine/run/end_to_end_dry_run_command.py`
+* `src/market_engine/run/__init__.py`
+
+Implemented tests:
+
+* `tests/market_engine/run/test_local_dry_run_artifacts.py`
+
+Implemented documentation:
+
+* `docs/market_engine/run/me_run05_local_dry_run_artifact_persistence_implementation.md`
+* `docs/market_engine/audits/me_run05_local_dry_run_artifact_persistence_audit.md`
+
+Outcome: ME-RUN05 lets local dry-run executions persist deterministic, inspectable, non-production JSON artifacts while preserving the stdout-only default command behavior. The writer preserves dry-run contract identity, missing-data markers, stale-data markers, blocked states, blocked reasons, numeric-zero values, provenance, delivery report references, forbidden-side-effect confirmation, and authority-boundary confirmation.
+
+ME-RUN05 did not introduce provider calls, live market data calls, Telegram delivery, email delivery, broker integration, production report generation, portfolio writes, watchlist writes, scheduler behavior, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability, or execution advice.
+
 ## Future Sprint Candidates
 
-No new sprint is inserted by ME-DL02.
+No new sprint is inserted by ME-RUN05.
 
-Future work should be introduced only through a new approved roadmap/backlog sprint, such as a narrowly scoped Delivery / Reporting review, persistence contract, or safe channel adapter contract if product governance later approves it.
+Future work should be introduced only through a new approved roadmap/backlog sprint, such as a narrowly scoped local dry-run review, runtime fixture expansion, safe all-ticker dry-run contract, or safe channel adapter contract if product governance later approves it.
