@@ -4,7 +4,6 @@ import argparse
 import json
 import sys
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any, Mapping, Sequence, TextIO
 
 from market_engine.run.end_to_end_dry_run import (
@@ -15,6 +14,10 @@ from market_engine.run.local_dry_run_artifacts import (
     MARKET_ENGINE_LOCAL_DRY_RUN_ARTIFACT_PATH_CATEGORY,
     LocalDryRunArtifactError,
     persist_market_engine_local_dry_run_artifact,
+)
+from market_engine.run.local_dry_run_inputs import (
+    LocalDryRunInputError,
+    load_market_engine_local_dry_run_input,
 )
 
 
@@ -103,7 +106,9 @@ def _argument_parser() -> argparse.ArgumentParser:
         "--stage-payloads-json",
         default=None,
         help=(
-            "Optional local JSON file containing a mapping of approved stage payloads. "
+            "Optional local JSON file containing approved stage payloads. "
+            "For local_snapshot_fixture, the file must be a non-production "
+            "market-engine-local-dry-run-input-fixture-v1 wrapper. "
             "Required for non-synthetic input modes."
         ),
     )
@@ -141,27 +146,19 @@ def _argument_parser() -> argparse.ArgumentParser:
 
 def _stage_payloads_for_command(args: argparse.Namespace) -> Mapping[str, Any]:
     if args.stage_payloads_json:
-        return _load_stage_payloads(Path(args.stage_payloads_json))
+        try:
+            return load_market_engine_local_dry_run_input(
+                args.stage_payloads_json,
+                input_mode=args.input_mode,
+            )
+        except LocalDryRunInputError as exc:
+            raise _DryRunCommandError(str(exc)) from exc
     if args.input_mode == "synthetic_contract_fixture":
         return build_synthetic_dry_run_stage_payloads()
     raise _DryRunCommandError(
         "--stage-payloads-json is required when --input-mode is not "
         "synthetic_contract_fixture."
     )
-
-
-def _load_stage_payloads(path: Path) -> Mapping[str, Any]:
-    try:
-        with path.open("r", encoding="utf-8") as payload_file:
-            payload = json.load(payload_file)
-    except OSError as exc:
-        raise _DryRunCommandError(f"Unable to read stage payload JSON: {path}") from exc
-    except json.JSONDecodeError as exc:
-        raise _DryRunCommandError(f"Stage payload JSON is invalid: {path}") from exc
-
-    if not isinstance(payload, Mapping):
-        raise _DryRunCommandError("Stage payload JSON must contain an object at the top level.")
-    return payload
 
 
 def _generated_at_utc() -> str:
