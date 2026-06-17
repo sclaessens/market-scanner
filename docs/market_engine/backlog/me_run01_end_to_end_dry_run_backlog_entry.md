@@ -1,12 +1,12 @@
-# ME-RUN01 / ME-RUN02 / ME-RUN03 - End-to-end dry-run backlog entry
+# ME-RUN01 / ME-RUN02 / ME-RUN03 / ME-RUN04 - End-to-end dry-run backlog entry
 
 ## Status
 
-ACTIVE BACKLOG ENTRY AFTER ME-RUN03
+ACTIVE BACKLOG ENTRY AFTER ME-RUN04
 
 ## Purpose
 
-This file records the Market Engine run/orchestration sprint sequence introduced by ME-RUN01, implemented by ME-RUN02, and wired into a local command by ME-RUN03 without rewriting unrelated historical backlog content.
+This file records the Market Engine run/orchestration sprint sequence introduced by ME-RUN01, implemented by ME-RUN02, wired into a local command by ME-RUN03, and extended by ME-RUN04 with a local non-production dry-run artifact persistence contract without rewriting unrelated historical backlog content.
 
 ## Completed Sprint
 
@@ -98,7 +98,7 @@ Implemented documentation:
 
 Outcome: ME-RUN02 implemented the first deterministic local end-to-end dry-run harness. The harness validates and summarizes the approved Market Engine chain through Delivery / Reporting and emits `market-engine-end-to-end-dry-run-v1` as an integration-review artifact only.
 
-ME-RUN02 did not introduce provider calls, live market data calls, SEC/EDGAR calls, broker calls, Telegram/email delivery, production report generation, portfolio writes, watchlist writes, scheduler behavior, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability, order generation, or execution advice.
+ME-RUN02 did not introduce provider calls, live market data calls, SEC/EDGAR calls, broker calls, Telegram/email delivery, production report generation, portfolio writes, watchlist writes, scheduler behavior, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation advice, target prices, position sizing, urgency, conviction, tradeability, order generation, or execution advice.
 
 ## Completed Sprint
 
@@ -141,10 +141,54 @@ Implemented documentation:
 
 Outcome: ME-RUN03 made the deterministic dry-run harness locally runnable while keeping output limited to inspectable JSON and preserving all non-live, non-delivering, non-mutating, non-scheduler, non-UI, and non-actionable boundaries.
 
-ME-RUN03 did not introduce provider calls, live market data calls, SEC/EDGAR calls, broker calls, Telegram/email delivery, production report generation, dry-run artifact persistence, portfolio writes, watchlist writes, scheduler behavior, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability, order generation, or execution advice.
+ME-RUN03 did not introduce provider calls, live market data calls, SEC/EDGAR calls, broker calls, Telegram/email delivery, production report generation, dry-run artifact persistence, portfolio writes, watchlist writes, scheduler behavior, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation advice, target prices, position sizing, urgency, conviction, tradeability, order generation, or execution advice.
+
+## Completed Sprint
+
+### ME-RUN04 - Define local dry-run artifact persistence contract
+
+Owner roles: Product Owner / Operator / User / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: Run / orchestration
+
+Status: COMPLETED BY ME-RUN04
+
+Goal: Define the safe boundary for optional local non-production persistence of dry-run JSON artifacts.
+
+Scope: Documentation-only contract sprint.
+
+ME-RUN04 defined:
+
+* approved upstream input: already-built `market-engine-end-to-end-dry-run-v1` payloads only;
+* future local artifact metadata contract `market-engine-local-dry-run-artifact-v1`;
+* approved non-production path category `artifacts/market_engine/dry_runs/`;
+* filename requirements;
+* deterministic JSON serialization requirements;
+* retention expectations;
+* fail-closed behavior for unsafe paths, unsupported payloads, serialization failure, and accidental overwrite;
+* numeric-zero preservation;
+* missing-data preservation;
+* stale-data preservation;
+* blocked-state preservation;
+* provenance preservation;
+* future ME-RUN05 implementation requirements.
+
+Implemented contract:
+
+* `docs/market_engine/run/me_run04_local_dry_run_artifact_persistence_contract.md`
+
+Implemented audit:
+
+* `docs/market_engine/audits/me_run04_local_dry_run_artifact_persistence_contract_audit.md`
+
+Outcome: ME-RUN04 defines the safe boundary for future local non-production persistence of dry-run JSON artifacts. It keeps dry-run artifacts as integration-review evidence only and prevents artifact writing from becoming a hidden production report, delivery channel, scheduler, portfolio mutation path, or Decision Engine substitute.
+
+ME-RUN04 did not introduce Python code, tests, runtime behavior, provider calls, live market data calls, SEC/EDGAR calls, broker calls, Telegram/email delivery, production report generation, artifact writes, portfolio writes, watchlist writes, scheduler behavior, UI behavior, Decision Engine decisions, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation advice, target prices, position sizing, urgency, conviction, tradeability, order generation, or execution advice.
 
 ## Future Sprint Candidates
 
-No new sprint is inserted by ME-RUN03.
+No implementation sprint is executed by ME-RUN04.
 
-Future work should be introduced only through a new approved roadmap/backlog sprint, such as an explicit non-production artifact persistence contract, real-data intake governance contract, safe all-ticker dry-run contract, or operator review/reporting workflow if product governance later approves it.
+The logical next candidate is `ME-RUN05 - Implement local dry-run artifact persistence`, but it must remain narrowly scoped to optional local JSON persistence under `artifacts/market_engine/dry_runs/` and must preserve all ME-RUN04 side-effect boundaries.
+
+Future work beyond local artifacts, such as real-data intake governance, a safe all-ticker dry-run contract, or an operator review/reporting workflow, still requires a separate approved roadmap/backlog sprint.
