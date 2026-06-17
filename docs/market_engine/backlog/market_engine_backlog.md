@@ -1667,7 +1667,7 @@ Outcome: ME-DE01 defined `market-engine-decision-engine-handoff-v1` as the futur
 
 ME-DE01 did not introduce Python code, tests, provider calls, data writes, Telegram, reporting, delivery behavior, portfolio mutation, BUY / SELL / HOLD execution semantics, allocation execution, order generation, or live Decision Engine behavior.
 
-## Recommended Next Sprint
+## Completed Sprint
 
 ### ME-DE02 — Implement controlled Decision Engine handoff
 
@@ -1675,7 +1675,7 @@ Owner roles: Product Owner / Technical Architect / Development Lead / QA Lead / 
 
 Job family: Decision Engine handoff
 
-Status: RECOMMENDED NEXT
+Status: COMPLETED BY ME-DE02
 
 Goal: Implement controlled handoff according to the ME-DE01 contract.
 
@@ -1700,13 +1700,33 @@ ME-DE02 must:
 * produce only a handoff-readiness payload;
 * avoid Decision Engine decisions, actions, allocation, ranking, scoring, execution, delivery, Telegram, and reporting behavior.
 
+Implemented runtime:
+
+* `src/market_engine/decision_engine_handoff/sec_companyfacts_handoff.py`
+* `src/market_engine/decision_engine_handoff/__init__.py`
+
+Implemented tests:
+
+* `tests/market_engine/decision_engine_handoff/test_sec_companyfacts_handoff.py`
+
+Implemented documentation:
+
+* `docs/market_engine/decision_engine/me_de02_decision_engine_handoff_implementation.md`
+* `docs/market_engine/audits/me_de02_decision_engine_handoff_implementation_audit.md`
+
+Outcome: ME-DE02 implemented deterministic `market-engine-decision-engine-handoff-v1` construction from approved `sec-companyfacts-portfolio-review-v1` input. Eligible Portfolio Review output produces `ready_for_decision_engine_review`; ineligible input produces explicit blocked handoff states with deterministic blocked reasons. The implementation preserves Portfolio Review, portfolio-context, Recommendation Review, Analysis Review, Setup Detection-aware, missing-data, stale-data, and numeric-zero evidence without introducing Decision Engine action or allocation authority.
+
+ME-DE02 did not introduce provider calls, broker calls, live data access, portfolio writes, watchlist writes, Telegram, reporting, delivery behavior, Decision Engine runtime decisions, trade instructions, allocation advice, target weights, order generation, position sizing, urgency, conviction, tradeability, ranking, scoring, or execution advice.
+
+## Recommended Next Sprint
+
 ### ME-DL01 — Define Delivery / Reporting contract
 
 Owner roles: Product Owner / Operator / User / Technical Architect / QA Lead / Governance Auditor
 
 Job family: Delivery / Reporting
 
-Status: PLANNED FUTURE
+Status: RECOMMENDED NEXT
 
 Goal: Define how approved outputs may be delivered or reported.
 
