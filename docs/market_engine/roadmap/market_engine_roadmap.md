@@ -2,11 +2,11 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-DL02
+Status: ACTIVE ROADMAP AFTER ME-RUN05
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-DL02.
+This roadmap preserves the Market Engine sprint sequence after ME-RUN05.
 
 ME-SD02 implemented the first non-actionable Setup Detection runtime layer.
 
@@ -29,6 +29,8 @@ ME-DE02 implemented controlled Decision Engine handoff-readiness payload constru
 ME-DL01 defined the Delivery / Reporting contract downstream of controlled Decision Engine handoff while preserving Delivery / Reporting as non-executing, non-broker-connected, provenance-preserving, blocked-state-preserving, and non-actionable.
 
 ME-DL02 implemented the Delivery / Reporting contract as a non-actionable payload builder while preserving blocked upstream states, missing-data markers, stale-data markers, numeric-zero evidence, and upstream provenance.
+
+ME-RUN05 implemented optional local dry-run artifact persistence while preserving stdout-only dry-run behavior by default and keeping persisted artifacts local, non-production, deterministic, and inspectable.
 
 ## Completed Chain
 
@@ -59,6 +61,7 @@ Completed job-scoped chain:
 | ME-DE02 | Decision Engine handoff  | Completed |
 | ME-DL01 | Delivery / Reporting     | Completed |
 | ME-DL02 | Delivery / Reporting     | Completed |
+| ME-RUN05 | Run / orchestration      | Completed |
 
 ME-RR02 implemented the first non-actionable SEC CompanyFacts Recommendation Review layer with:
 
@@ -198,6 +201,22 @@ ME-DL02 emits non-actionable display sections only and preserves upstream blocke
 
 ME-DL02 did not introduce provider calls, live market data calls, Telegram delivery, email delivery, broker integration, generated reports, portfolio writes, watchlist writes, scheduling, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability, or execution advice.
 
+ME-RUN05 implemented local dry-run artifact persistence with:
+
+* input contract: `market-engine-end-to-end-dry-run-v1`;
+* artifact contract: `market-engine-local-dry-run-artifact-v1`;
+* manifest contract: `market-engine-local-dry-run-artifact-manifest-v1`;
+* approved path category: `artifacts/market_engine/dry_runs/`;
+* module: `src/market_engine/run/local_dry_run_artifacts.py`;
+* command integration: `src/market_engine/run/end_to_end_dry_run_command.py`;
+* tests: `tests/market_engine/run/test_local_dry_run_artifacts.py`;
+* implementation documentation: `docs/market_engine/run/me_run05_local_dry_run_artifact_persistence_implementation.md`;
+* audit: `docs/market_engine/audits/me_run05_local_dry_run_artifact_persistence_audit.md`.
+
+ME-RUN05 preserves stdout-only dry-run behavior by default and requires explicit `--write-local-artifact` invocation before local artifact writing. Persisted artifacts are local non-production review evidence only.
+
+ME-RUN05 did not introduce provider calls, live market data calls, Telegram delivery, email delivery, broker integration, generated production reports, portfolio writes, watchlist writes, scheduling, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability, or execution advice.
+
 ## Architectural Chain
 
 Current target architecture:
@@ -241,7 +260,7 @@ Setup Detection is required so Market Engine can detect patterns/setups from Fun
 
 ## Recommended Next Sprint
 
-No next sprint is inserted by ME-DL02.
+No next sprint is inserted by ME-RUN05.
 
 Future work must be added through a new approved roadmap/backlog sprint when a real product, governance, review, persistence, or safe-channel need is identified.
 

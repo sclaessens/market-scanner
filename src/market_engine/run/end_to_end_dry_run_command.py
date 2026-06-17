@@ -11,6 +11,11 @@ from market_engine.run.end_to_end_dry_run import (
     APPROVED_DRY_RUN_INPUT_MODES,
     build_market_engine_end_to_end_dry_run,
 )
+from market_engine.run.local_dry_run_artifacts import (
+    MARKET_ENGINE_LOCAL_DRY_RUN_ARTIFACT_PATH_CATEGORY,
+    LocalDryRunArtifactError,
+    persist_market_engine_local_dry_run_artifact,
+)
 
 
 DEFAULT_LOCAL_DRY_RUN_ID = "market-engine-local-dry-run"
@@ -43,9 +48,21 @@ def run_market_engine_end_to_end_dry_run_command(
         input_mode=args.input_mode,
         generated_at=args.generated_at or _generated_at_utc(),
     )
+    dry_run_payload = dry_run.to_payload()
+
+    if args.write_local_artifact:
+        try:
+            persist_market_engine_local_dry_run_artifact(
+                dry_run_payload,
+                output_root=args.artifact_output_root,
+                artifact_created_at=args.artifact_created_at or _generated_at_utc(),
+            )
+        except LocalDryRunArtifactError as exc:
+            print(str(exc), file=error_stream)
+            return 2
 
     json.dump(
-        dry_run.to_payload(),
+        dry_run_payload,
         output_stream,
         indent=None if args.compact else 2,
         sort_keys=True,
@@ -94,6 +111,30 @@ def _argument_parser() -> argparse.ArgumentParser:
         "--compact",
         action="store_true",
         help="Emit compact single-line JSON instead of pretty printed JSON.",
+    )
+    parser.add_argument(
+        "--write-local-artifact",
+        action="store_true",
+        help=(
+            "Persist the emitted dry-run payload as a local non-production JSON "
+            "artifact. Disabled by default."
+        ),
+    )
+    parser.add_argument(
+        "--artifact-output-root",
+        default=MARKET_ENGINE_LOCAL_DRY_RUN_ARTIFACT_PATH_CATEGORY,
+        help=(
+            "Local dry-run artifact root. Used only with --write-local-artifact. "
+            "Defaults to artifacts/market_engine/dry_runs."
+        ),
+    )
+    parser.add_argument(
+        "--artifact-created-at",
+        default=None,
+        help=(
+            "Optional artifact creation timestamp for deterministic local artifact "
+            "metadata. Used only with --write-local-artifact."
+        ),
     )
     return parser
 
