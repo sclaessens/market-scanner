@@ -89,6 +89,8 @@ Local artifact persistence is requested only through:
 --write-local-artifact
 ```
 
+Direct local `python -m market_engine...` execution from the repository root requires `PYTHONPATH=src` unless the package is otherwise installed into the active virtual environment.
+
 ## Artifact audit
 
 PASS.
@@ -116,6 +118,23 @@ The tests inspect both files and verify:
 * preserved stale-data markers;
 * preserved numeric-zero evidence;
 * preserved provenance.
+
+Local manual execution also produced the expected files:
+
+```text
+artifacts/market_engine/dry_runs/me-run07-realistic-local-fixture-artifact/artifacts/market_engine_dry_run_me-run07-realistic-local-fixture-artifact_2026-06-17.json
+artifacts/market_engine/dry_runs/me-run07-realistic-local-fixture-artifact/manifest.json
+```
+
+The observed manifest confirms:
+
+```text
+artifact_count: 1
+artifact_persistence_mode: local_dry_run_only
+non_production_artifact: true
+source_input_mode: local_snapshot_fixture
+source_run_state: dry_run_blocked
+```
 
 ## Numeric-zero audit
 
@@ -207,15 +226,31 @@ Decision Engine remains the only future action/allocation authority. ME-RUN07 em
 PYTHONDONTWRITEBYTECODE=1 .venv/bin/pytest tests/market_engine/run/test_local_dry_run_inputs.py tests/market_engine/run/test_end_to_end_dry_run_command.py tests/market_engine/run/test_me_run07_realistic_local_snapshot_fixture_dry_run.py -q
 ```
 
+Observed local pytest result:
+
+```text
+18 passed in 0.04s
+```
+
 ## Manual dry-run command
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m market_engine.run.end_to_end_dry_run_command --input-mode local_snapshot_fixture --stage-payloads-json tests/fixtures/market_engine/run/me_run07_realistic_local_snapshot_fixture.json --dry-run-id me-run07-realistic-local-fixture-artifact --generated-at 2026-06-17T14:15:00Z --write-local-artifact --artifact-output-root artifacts/market_engine/dry_runs --artifact-created-at 2026-06-17T14:30:00Z
+PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m market_engine.run.end_to_end_dry_run_command --input-mode local_snapshot_fixture --stage-payloads-json tests/fixtures/market_engine/run/me_run07_realistic_local_snapshot_fixture.json --dry-run-id me-run07-realistic-local-fixture-artifact --generated-at 2026-06-17T14:15:00Z --write-local-artifact --artifact-output-root artifacts/market_engine/dry_runs --artifact-created-at 2026-06-17T14:30:00Z
+```
+
+Observed local dry-run result:
+
+```text
+input_mode: local_snapshot_fixture
+run_state: dry_run_blocked
+blocked_stage: delivery_reporting
+ticker: MSFT
+provider_name: sec_companyfacts
 ```
 
 ## Execution-environment limitation
 
-This ChatGPT session could not execute local pytest or the dry-run command from a repository checkout because cloning GitHub from the execution environment failed with DNS/network resolution errors. The sprint changes are therefore connector-backed and include exact local validation commands for execution from the user's local checkout.
+This ChatGPT session could not execute local pytest or the dry-run command from a repository checkout because cloning GitHub from the execution environment failed with DNS/network resolution errors. The sprint changes were created through the GitHub connector, then validated from the user's local checkout.
 
 ## Conclusion
 
