@@ -1630,7 +1630,7 @@ Outcome: ME-PR02 implemented non-actionable Portfolio Review from validated `sec
 
 Possible future Portfolio Review follow-up candidate: `ME-PR03 — Define approved portfolio context source and persistence contract`. This candidate is not inserted ahead of ME-DE01 because ME-PR02 did not uncover a blocker; it should be added formally only if a later Decision Engine handoff or portfolio-context sprint requires persisted portfolio-context sourcing beyond caller-supplied context.
 
-## Recommended Next Sprint
+## Completed Sprint
 
 ### ME-DE01 — Define Decision Engine handoff contract
 
@@ -1638,13 +1638,13 @@ Owner roles: Product Owner / Technical Architect / Development Lead / QA Lead / 
 
 Job family: Decision Engine handoff
 
-Status: RECOMMENDED NEXT
+Status: COMPLETED BY ME-DE01
 
 Goal: Define the boundary between Market Engine review output and actual decision/action authority.
 
 Scope: Documentation-only contract sprint unless explicitly re-scoped.
 
-ME-DE01 must define:
+ME-DE01 defined:
 
 * approved upstream input from Portfolio Review;
 * handoff payload requirements;
@@ -1655,7 +1655,19 @@ ME-DE01 must define:
 * audit and traceability requirements;
 * ME-DE02 implementation requirements.
 
-ME-DE01 must not introduce Python code, tests, provider calls, data writes, Telegram, reporting, delivery behavior, portfolio mutation, BUY / SELL / HOLD execution semantics, allocation execution, order generation, or live Decision Engine behavior.
+Implemented contract:
+
+* `docs/market_engine/decision_engine/me_de01_decision_engine_handoff_contract.md`
+
+Implemented audit:
+
+* `docs/market_engine/audits/me_de01_decision_engine_handoff_contract_audit.md`
+
+Outcome: ME-DE01 defined `market-engine-decision-engine-handoff-v1` as the future handoff payload downstream of `sec-companyfacts-portfolio-review-v1`. The contract defines Portfolio Review eligibility, blocked handoff states, fail-closed rules, numeric-zero preservation, provenance requirements, prohibited payload fields, and ME-DE02 implementation requirements while preserving Decision Engine as the only future action and allocation authority.
+
+ME-DE01 did not introduce Python code, tests, provider calls, data writes, Telegram, reporting, delivery behavior, portfolio mutation, BUY / SELL / HOLD execution semantics, allocation execution, order generation, or live Decision Engine behavior.
+
+## Recommended Next Sprint
 
 ### ME-DE02 — Implement controlled Decision Engine handoff
 
@@ -1663,7 +1675,7 @@ Owner roles: Product Owner / Technical Architect / Development Lead / QA Lead / 
 
 Job family: Decision Engine handoff
 
-Status: PLANNED FUTURE
+Status: RECOMMENDED NEXT
 
 Goal: Implement controlled handoff according to the ME-DE01 contract.
 
@@ -1672,6 +1684,21 @@ Scope: Must preserve Decision Engine as the only action/allocation authority.
 ME-DE02 must implement handoff behavior only after ME-DE01 defines the contract.
 
 ME-DE02 must not bypass Portfolio Review, Recommendation Review, Analysis Review, Setup Detection, or authority boundaries.
+
+ME-DE02 must:
+
+* consume approved `sec-companyfacts-portfolio-review-v1` input only;
+* emit `market-engine-decision-engine-handoff-v1`;
+* validate Portfolio Review contract and version;
+* validate ticker identity;
+* validate portfolio-context version and state;
+* validate Portfolio Review handoff-readiness evidence;
+* preserve Recommendation Review and Setup Detection-aware provenance when present;
+* preserve missing-data markers;
+* preserve stale-data markers;
+* preserve numeric-zero semantics;
+* produce only a handoff-readiness payload;
+* avoid Decision Engine decisions, actions, allocation, ranking, scoring, execution, delivery, Telegram, and reporting behavior.
 
 ### ME-DL01 — Define Delivery / Reporting contract
 
