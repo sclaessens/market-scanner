@@ -2,11 +2,11 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-DE02
+Status: ACTIVE ROADMAP AFTER ME-DL01
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-DE02 and records Delivery / Reporting contract definition as the next active planning step.
+This roadmap preserves the Market Engine sprint sequence after ME-DL01 and records Delivery / Reporting implementation as the next active planning step.
 
 ME-SD02 implemented the first non-actionable Setup Detection runtime layer.
 
@@ -25,6 +25,8 @@ ME-PR02 implemented Portfolio Review while preserving Portfolio Review as non-ac
 ME-DE01 defined the Decision Engine handoff contract downstream of Portfolio Review while preserving the Decision Engine as the only future action and allocation authority.
 
 ME-DE02 implemented controlled Decision Engine handoff-readiness payload construction while preserving Decision Engine as the only future action and allocation authority.
+
+ME-DL01 defined the Delivery / Reporting contract downstream of controlled Decision Engine handoff while preserving Delivery / Reporting as non-executing, non-broker-connected, provenance-preserving, blocked-state-preserving, and non-actionable.
 
 ## Completed Chain
 
@@ -53,6 +55,7 @@ Completed job-scoped chain:
 | ME-PR02 | Portfolio Review         | Completed |
 | ME-DE01 | Decision Engine handoff  | Completed |
 | ME-DE02 | Decision Engine handoff  | Completed |
+| ME-DL01 | Delivery / Reporting     | Completed |
 
 ME-RR02 implemented the first non-actionable SEC CompanyFacts Recommendation Review layer with:
 
@@ -167,6 +170,18 @@ ME-DE02 preserves Portfolio Review, portfolio-context, Recommendation Review, An
 
 ME-DE02 emits only handoff-readiness states and blocked reasons. It does not introduce Decision Engine decisions, trade instructions, allocation, target weights, order generation, position sizing, ranking, scoring, urgency, conviction, tradeability, execution, provider calls, broker calls, portfolio mutation, reporting, Telegram, delivery, or production data behavior.
 
+ME-DL01 defined Delivery / Reporting with:
+
+* approved upstream input: `market-engine-decision-engine-handoff-v1`;
+* future output contract: `market-engine-delivery-report-v1`;
+* contract document: `docs/market_engine/delivery_reporting/me_dl01_delivery_reporting_contract.md`;
+* audit: `docs/market_engine/audits/me_dl01_delivery_reporting_contract_audit.md`;
+* implementation sprint: `ME-DL02 — Implement Delivery / Reporting contract`.
+
+ME-DL01 defined delivery states, allowed reporting categories, forbidden reporting behavior, presentation rules, blocked/upstream handling, missing-data handling, stale-data handling, numeric-zero safety, provenance preservation, and ME-DL02 implementation requirements.
+
+ME-DL01 did not introduce runtime behavior, tests, provider calls, data writes, report generation, Telegram delivery, email delivery, broker integration, portfolio mutation, watchlist mutation, scheduling, Decision Engine behavior, trade instructions, allocation, position sizing, execution advice, ranking, scoring, conviction, urgency, or tradeability authority.
+
 ## Architectural Chain
 
 Current target architecture:
@@ -210,42 +225,35 @@ Setup Detection is required so Market Engine can detect patterns/setups from Fun
 
 ## Recommended Next Sprint
 
-### ME-DL01 — Define Delivery / Reporting contract
+### ME-DL02 — Implement Delivery / Reporting contract
 
 Status: RECOMMENDED NEXT
 
 Job family: Delivery / Reporting
 
-Goal: Define how approved outputs may be delivered or reported after Decision Engine handoff boundaries exist.
+Goal: Implement the Delivery / Reporting contract defined by ME-DL01.
 
-Scope: Documentation-only contract sprint unless explicitly re-scoped.
+Scope: Controlled Delivery / Reporting payload implementation only.
 
-ME-DL01 must define approved upstream input requirements, delivery eligibility, reporting eligibility, Telegram/reporting boundaries, user-facing output contract, audit and traceability requirements, fail-closed delivery rules, and ME-DL02 implementation requirements.
+ME-DL02 must consume only approved `market-engine-decision-engine-handoff-v1` payloads, emit `market-engine-delivery-report-v1`, preserve blocked upstream states as blocked, preserve missing and stale markers, preserve numeric-zero semantics, preserve upstream provenance, and emit only allowed non-actionable reporting categories.
 
-ME-DL01 must not introduce runtime behavior, provider calls, broker calls, portfolio mutation, Decision Engine behavior, trade instructions, allocation, position sizing, execution advice, ranking, scoring, conviction, urgency, or tradeability authority.
+ME-DL02 must not introduce provider calls, Telegram delivery, email delivery, broker integration, portfolio or watchlist writes, scheduling, Decision Engine behavior, trade instructions, allocation, target prices, position sizing, execution advice, ranking, scoring, conviction, urgency, or tradeability authority.
 
 ## Planned Future Sprint Sequence
 
 | Sequence | Sprint  | Job family              | Status           | Purpose                                                        |
 | -------- | ------- | ----------------------- | ---------------- | -------------------------------------------------------------- |
-| 1        | ME-DL01 | Delivery / Reporting    | Recommended next | Define Delivery / Reporting contract             |
-| 2        | ME-DL02 | Delivery / Reporting    | Planned future   | Implement controlled Delivery / Reporting output |
+| 1        | ME-DL02 | Delivery / Reporting    | Recommended next | Implement Delivery / Reporting contract          |
 
 ## Planned Sprint Details
-
-### ME-DL01 — Define Delivery / Reporting contract
-
-Define how approved outputs may be delivered or reported.
-
-ME-DL01 must not introduce delivery behavior beyond contract definition.
-
-ME-DL01 must preserve Decision Engine handoff authority boundaries and must define fail-closed delivery/reporting rules before any delivery runtime exists.
 
 ### ME-DL02 — Implement controlled Delivery / Reporting output
 
 Implement delivery/reporting only after contract and authority boundaries are defined.
 
 ME-DL02 must not bypass Recommendation Review, Portfolio Review, or Decision Engine handoff authority boundaries.
+
+ME-DL02 must implement only the `market-engine-delivery-report-v1` payload and must not add Telegram, email, broker, provider, portfolio, watchlist, scheduling, Decision Engine, execution, allocation, ranking, scoring, urgency, conviction, tradeability, or production-report side effects.
 
 ## Possible Inserted Sprints
 
