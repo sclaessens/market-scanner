@@ -1,3 +1,10 @@
+from market_engine.run.cached_source_execution import (
+    CACHED_SOURCE_SNAPSHOT_INPUT_MODE,
+    MARKET_ENGINE_CACHED_SOURCE_LOCAL_EXECUTION_INPUT_FORMAT_VERSION,
+    CachedSourceLocalExecutionError,
+    build_cached_source_local_execution_stage_payloads,
+    load_cached_source_local_execution_stage_payloads,
+)
 from market_engine.run.end_to_end_dry_run import (
     APPROVED_DRY_RUN_INPUT_MODES,
     MARKET_ENGINE_END_TO_END_DRY_RUN_BOUNDARY,
@@ -26,7 +33,9 @@ from market_engine.run.local_dry_run_inputs import (
 
 __all__ = [
     "APPROVED_DRY_RUN_INPUT_MODES",
+    "CACHED_SOURCE_SNAPSHOT_INPUT_MODE",
     "LOCAL_DRY_RUN_PERSISTENCE_MODE",
+    "MARKET_ENGINE_CACHED_SOURCE_LOCAL_EXECUTION_INPUT_FORMAT_VERSION",
     "MARKET_ENGINE_END_TO_END_DRY_RUN_BOUNDARY",
     "MARKET_ENGINE_END_TO_END_DRY_RUN_FORMAT_VERSION",
     "MARKET_ENGINE_LOCAL_DRY_RUN_ARTIFACT_FORMAT_VERSION",
@@ -34,6 +43,7 @@ __all__ = [
     "MARKET_ENGINE_LOCAL_DRY_RUN_INPUT_FIXTURE_FORMAT_VERSION",
     "MARKET_ENGINE_LOCAL_DRY_RUN_MANIFEST_FORMAT_VERSION",
     "REQUIRED_DRY_RUN_STAGE_NAMES",
+    "CachedSourceLocalExecutionError",
     "LocalDryRunArtifactError",
     "LocalDryRunArtifactPersistenceResult",
     "LocalDryRunInputError",
@@ -41,7 +51,9 @@ __all__ = [
     "MarketEngineEndToEndDryRunStageResult",
     "MarketEngineEndToEndDryRunStageStatus",
     "MarketEngineEndToEndDryRunState",
+    "build_cached_source_local_execution_stage_payloads",
     "build_market_engine_end_to_end_dry_run",
+    "load_cached_source_local_execution_stage_payloads",
     "load_market_engine_local_dry_run_input",
     "persist_market_engine_local_dry_run_artifact",
 ]

@@ -19,6 +19,7 @@ APPROVED_DRY_RUN_INPUT_MODES = (
     "synthetic_contract_fixture",
     "local_snapshot_fixture",
     "explicit_in_memory_payload",
+    "cached_source_snapshot",
 )
 
 FORBIDDEN_DRY_RUN_FIELDS = (

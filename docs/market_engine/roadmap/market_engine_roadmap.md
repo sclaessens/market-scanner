@@ -2,11 +2,11 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-RUN09
+Status: ACTIVE ROADMAP AFTER ME-RUN10
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-RUN09.
+This roadmap preserves the Market Engine sprint sequence after ME-RUN10.
 
 ME-RUN07 proved that the Market Engine can run end-to-end locally through `local_snapshot_fixture` using realistic non-production fixture data and can persist a deterministic local dry-run review artifact through the existing RUN05 artifact flag.
 
@@ -14,7 +14,7 @@ ME-RUN08 expanded local non-production dry-run coverage into a deterministic fix
 
 ME-RUN09 defined the cached-source end-to-end local execution contract as the next safe boundary toward real local analysis from already-existing cached source snapshots.
 
-The next implementation candidate is preserved as `ME-RUN10 - Implement cached-source end-to-end local execution path`.
+ME-RUN10 implemented that cached-source local execution path from already-existing cached SEC CompanyFacts snapshots into the approved Market Engine dry-run chain.
 
 ## Completed Chain
 
@@ -48,6 +48,7 @@ Completed job-scoped chain:
 | ME-RUN07 | Run / orchestration      | Completed |
 | ME-RUN08 | Run / orchestration      | Completed |
 | ME-RUN09 | Run / orchestration      | Completed |
+| ME-RUN10 | Run / orchestration      | Completed |
 
 ## Recent RUN chain
 
@@ -137,33 +138,50 @@ ME-RUN09 defined the cached-source end-to-end local execution contract with:
 
 ME-RUN09 is documentation-only and does not introduce Python code, tests, runtime behavior, provider calls, source refresh jobs, live market data calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, scheduler behavior, UI behavior, all-ticker production runs, automatic cache refresh, automatic cache cleanup, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, execution advice, ranking, scoring, urgency, conviction, or tradeability authority.
 
+ME-RUN10 implemented cached-source local execution with:
+
+* input mode: `cached_source_snapshot`;
+* wrapper input contract: `market-engine-cached-source-local-execution-input-v1`;
+* final output contract preserved as `market-engine-end-to-end-dry-run-v1`;
+* local artifact contracts preserved as `market-engine-local-dry-run-artifact-v1` and `market-engine-local-dry-run-artifact-manifest-v1`;
+* runtime module: `src/market_engine/run/cached_source_execution.py`;
+* command integration: `src/market_engine/run/end_to_end_dry_run_command.py`;
+* tests: `tests/market_engine/run/test_me_run10_cached_source_local_execution.py`;
+* implementation documentation: `docs/market_engine/run/me_run10_cached_source_local_execution_implementation.md`;
+* audit: `docs/market_engine/audits/me_run10_cached_source_local_execution_implementation_audit.md`;
+* backlog entry: `docs/market_engine/backlog/me_run10_cached_source_local_execution_backlog_entry.md`;
+* roadmap entry: `docs/market_engine/roadmap/me_run10_cached_source_local_execution_roadmap_entry.md`.
+
+ME-RUN10 remains local, deterministic, non-production, provider-free, broker-free, delivery-free, portfolio/write-free, watchlist/write-free, scheduler-free, UI-free, and non-actionable.
+
+ME-RUN10 does not introduce source refresh jobs, provider calls, SEC/EDGAR live calls, yfinance calls, live market data calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, all-ticker production runs, automatic cache refresh, automatic cache cleanup, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, execution advice, ranking, scoring, urgency, conviction, or tradeability authority.
+
 ## Next Implementation Candidate
 
-### ME-RUN10 - Implement cached-source end-to-end local execution path
+### ME-RUN11 - Run cached-source local execution against a broader deterministic ticker bundle
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
 Job family: ME-RUN - Run / orchestration jobs
 
-Status: CANDIDATE AFTER ME-RUN09
+Status: CANDIDATE AFTER ME-RUN10
 
-Goal: implement the cached-source end-to-end local execution path defined by ME-RUN09.
+Goal: validate cached-source local execution against a small deterministic ticker bundle.
 
-Rationale: ME-RUN09 defines the safe contract for local execution from already-existing cached source snapshots. ME-RUN10 may implement that contract so Market Engine can move from synthetic/local fixture evidence toward realistic cached-source analysis without live provider calls or production side effects.
+Rationale: ME-RUN10 proves one deterministic cached-source execution path. ME-RUN11 should validate the same path against a small deterministic ticker bundle before any broader cached-source or operator-facing workflow is approved.
 
-Scope: local cached-source input loading, command input mode, fail-closed validation, downstream contract construction through approved builders, tests, documentation, and audit only.
+Scope: local cached source fixtures or snapshots, deterministic bundle command coverage, local artifact inspection, tests, documentation, and audit only.
 
 Non-goals: no provider refresh, live market data, external API calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, scheduler behavior, UI behavior, all-ticker production runs, automatic cache refresh, automatic cache cleanup, new financial logic, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, ranking, scoring, urgency, conviction, tradeability, or execution advice.
 
 Acceptance criteria:
 
-* `cached_source_snapshot` input mode is added without breaking existing input modes;
-* source snapshot path validation is fail-closed;
-* malformed, missing, unsafe, unsupported, or ambiguous cached source snapshots fail closed;
-* stale and missing source evidence remains explicit;
+* deterministic ticker bundle is small and committed only if appropriate;
+* cached-source path remains provider-free;
+* malformed, missing, unsafe, unsupported, or ambiguous cached source snapshots still fail closed;
+* stale and missing source evidence remains explicit across bundle runs;
 * numeric-zero evidence is preserved;
-* blocked downstream construction is represented safely;
-* final output remains `market-engine-end-to-end-dry-run-v1`;
+* final per-ticker output remains `market-engine-end-to-end-dry-run-v1`;
 * artifact writing remains opt-in only through `--write-local-artifact`;
 * local tests cover success and failure paths;
 * documentation and audit are added;
@@ -171,8 +189,8 @@ Acceptance criteria:
 
 ## Candidate Follow-Ups After ME-RUN10
 
-These are candidates only and are not inserted ahead of ME-RUN10 unless ME-RUN10 discovers a blocker or governance gap:
+These are candidates only and are not inserted ahead of ME-RUN11 unless ME-RUN11 discovers a blocker or governance gap:
 
 * `ME-SR02 - Build bounded SEC CompanyFacts source refresh job runner`;
 * `ME-QA01 - Add cross-job dry-run contract regression suite`;
-* `ME-RUN11 - Define safe all-ticker cached-source batch dry-run contract`.
+* `ME-RUN12 - Define safe all-ticker cached-source batch dry-run contract`.

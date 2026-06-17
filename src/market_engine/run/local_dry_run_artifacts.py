@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import re
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -190,10 +191,10 @@ def _json_ready(value: Any, *, path: str) -> Any:
     if isinstance(value, Mapping):
         ready: dict[str, Any] = {}
         for key, nested_value in value.items():
-            if not isinstance(key, str):
-                raise LocalDryRunArtifactError(
-                    f"Dry-run artifact JSON object key is not a string at {path}."
-                )
+            if isinstance(key, Enum):
+                key = str(key.value)
+            else:
+                key = str(key)
             ready[key] = _json_ready(nested_value, path=f"{path}.{key}")
         return ready
     if isinstance(value, (list, tuple)):
