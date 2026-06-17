@@ -1,0 +1,168 @@
+{
+  "dry_run_input_fixture_format_version": "market-engine-local-dry-run-input-fixture-v1",
+  "fixture_generated_at": "2026-06-17T14:00:00Z",
+  "fixture_id": "me-run07-msft-local-snapshot-fixture-001",
+  "fixture_scope": "ME-RUN07 realistic local dry-run review fixture",
+  "input_mode": "local_snapshot_fixture",
+  "non_production_fixture": true,
+  "stage_payloads": {
+    "analysis_review": {
+      "analysis_notes": [
+        "Local fixture review only; no rating or recommendation emitted."
+      ],
+      "analysis_review_format_version": "sec-companyfacts-analysis-review-v1",
+      "analysis_review_run_id": "me-run07-analysis-review-msft-001",
+      "analysis_review_state": "completed_with_limitations",
+      "cik": "0000789019",
+      "fixture_backed": true,
+      "provider_name": "sec_companyfacts",
+      "setup_detection_reference": {
+        "setup_detection_run_id": "me-run07-setup-detection-msft-001"
+      },
+      "stale_data_markers": [
+        "analysis_review.market_price_snapshot_absent"
+      ],
+      "ticker": "MSFT"
+    },
+    "decision_engine_handoff": {
+      "audit_provenance": {
+        "portfolio_review_run_id": "me-run07-portfolio-review-msft-001"
+      },
+      "cik": "0000789019",
+      "fixture_backed": true,
+      "handoff_format_version": "market-engine-decision-engine-handoff-v1",
+      "handoff_readiness_state": "ready_for_decision_engine_review",
+      "handoff_run_id": "me-run07-handoff-msft-001",
+      "portfolio_context_reference": {
+        "portfolio_context_run_id": "me-run07-portfolio-context-msft-001"
+      },
+      "portfolio_review_reference": {
+        "portfolio_review_run_id": "me-run07-portfolio-review-msft-001"
+      },
+      "provider_name": "sec_companyfacts",
+      "ticker": "MSFT"
+    },
+    "delivery_reporting": {
+      "blocked_reasons": [
+        "ME-RUN07 fixture intentionally blocks before any delivery channel."
+      ],
+      "cik": "0000789019",
+      "delivery_state": "blocked_for_local_review_artifact_only",
+      "fixture_backed": true,
+      "forbidden_language_guardrails": [
+        "buy",
+        "sell",
+        "hold"
+      ],
+      "provider_name": "sec_companyfacts",
+      "report_format_version": "market-engine-delivery-report-v1",
+      "report_id": "me-run07-delivery-report-msft-001",
+      "source_handoff_run_id": "me-run07-handoff-msft-001",
+      "stale_data_markers": [
+        "delivery_reporting.local_fixture_review_timestamp"
+      ],
+      "ticker": "MSFT",
+      "upstream_provenance_summary": {
+        "decision_engine_handoff": {
+          "handoff_run_id": "me-run07-handoff-msft-001"
+        },
+        "fixture_id": "me-run07-msft-local-snapshot-fixture-001"
+      }
+    },
+    "derived_observations": {
+      "cik": "0000789019",
+      "derived_observation_run_id": "me-run07-derived-msft-001",
+      "derived_observations_format_version": "sec-companyfacts-derived-cash-generation-observations-v1",
+      "fixture_backed": true,
+      "free_cash_flow": 59475000000,
+      "fundamental_observations_reference": {
+        "observation_run_id": "me-run07-fundamental-msft-001"
+      },
+      "operating_cash_flow": 87582000000,
+      "provider_name": "sec_companyfacts",
+      "ticker": "MSFT"
+    },
+    "fundamental_observations": {
+      "capital_expenditures": -28107000000,
+      "cik": "0000789019",
+      "fixture_backed": true,
+      "fundamental_observations_format_version": "sec-companyfacts-fundamental-observations-v1",
+      "missing_data_markers": [
+        "fundamental_observations.segment_revenue_breakdown"
+      ],
+      "net_income": 72361000000,
+      "observation_run_id": "me-run07-fundamental-msft-001",
+      "provider_name": "sec_companyfacts",
+      "revenue": 211915000000,
+      "source_context_reference": {
+        "source_refresh_snapshot_id": "me-run07-source-snapshot-msft-001"
+      },
+      "ticker": "MSFT"
+    },
+    "portfolio_review": {
+      "cik": "0000789019",
+      "fixture_backed": true,
+      "portfolio_context_reference": {
+        "cash_available_for_review": 0,
+        "current_market_value": 0.0,
+        "current_quantity": 0,
+        "portfolio_context_format_version": "market-engine-portfolio-context-v1",
+        "portfolio_context_run_id": "me-run07-portfolio-context-msft-001"
+      },
+      "portfolio_review_format_version": "sec-companyfacts-portfolio-review-v1",
+      "portfolio_review_run_id": "me-run07-portfolio-review-msft-001",
+      "provider_name": "sec_companyfacts",
+      "recommendation_review_reference": {
+        "recommendation_review_run_id": "me-run07-rr-msft-001"
+      },
+      "ticker": "MSFT"
+    },
+    "recommendation_review": {
+      "cik": "0000789019",
+      "fixture_backed": true,
+      "input_provenance": {
+        "analysis_review_run_id": "me-run07-analysis-review-msft-001",
+        "setup_detection_run_id": "me-run07-setup-detection-msft-001"
+      },
+      "provider_name": "sec_companyfacts",
+      "recommendation_review_format_version": "sec-companyfacts-recommendation-review-v1",
+      "recommendation_review_run_id": "me-run07-rr-msft-001",
+      "recommendation_review_state": "completed_non_actionable",
+      "ticker": "MSFT"
+    },
+    "setup_detection": {
+      "cik": "0000789019",
+      "derived_observations_reference": {
+        "derived_observation_run_id": "me-run07-derived-msft-001"
+      },
+      "fixture_backed": true,
+      "missing_data_markers": [
+        "setup_detection.forward_guidance_not_in_fixture"
+      ],
+      "provider_name": "sec_companyfacts",
+      "setup_detection_format_version": "sec-companyfacts-setup-detection-v1",
+      "setup_detection_run_id": "me-run07-setup-detection-msft-001",
+      "setup_detection_state": "completed_with_limitations",
+      "setup_observations": [
+        "Durable cash-generation profile preserved as non-actionable observation."
+      ],
+      "ticker": "MSFT"
+    },
+    "source_context": {
+      "cik": "0000789019",
+      "fixture_backed": true,
+      "provider_name": "sec_companyfacts",
+      "source_context_format_version": "sec-companyfacts-source-context-v1",
+      "source_context_state": "AVAILABLE_WITH_LIMITATIONS",
+      "source_provenance_reference": {
+        "fixture_id": "me-run07-msft-local-snapshot-fixture-001",
+        "snapshot_source": "non_production_local_fixture"
+      },
+      "source_refresh_snapshot_id": "me-run07-source-snapshot-msft-001",
+      "stale_data_markers": [
+        "sec_companyfacts.snapshot_age.review_required"
+      ],
+      "ticker": "MSFT"
+    }
+  }
+}
