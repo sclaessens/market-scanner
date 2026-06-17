@@ -1,12 +1,12 @@
-# ME-RUN01 / ME-RUN02 - End-to-end dry-run backlog entry
+# ME-RUN01 / ME-RUN02 / ME-RUN03 - End-to-end dry-run backlog entry
 
 ## Status
 
-ACTIVE BACKLOG ENTRY AFTER ME-RUN02
+ACTIVE BACKLOG ENTRY AFTER ME-RUN03
 
 ## Purpose
 
-This file records the Market Engine run/orchestration sprint sequence introduced by ME-RUN01 and implemented by ME-RUN02 without rewriting unrelated historical backlog content.
+This file records the Market Engine run/orchestration sprint sequence introduced by ME-RUN01, implemented by ME-RUN02, and wired into a local command by ME-RUN03 without rewriting unrelated historical backlog content.
 
 ## Completed Sprint
 
@@ -100,8 +100,51 @@ Outcome: ME-RUN02 implemented the first deterministic local end-to-end dry-run h
 
 ME-RUN02 did not introduce provider calls, live market data calls, SEC/EDGAR calls, broker calls, Telegram/email delivery, production report generation, portfolio writes, watchlist writes, scheduler behavior, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability, order generation, or execution advice.
 
+## Completed Sprint
+
+### ME-RUN03 - Wire dry-run harness into runnable local command
+
+Owner roles: Product Owner / Operator / User / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: Run / orchestration
+
+Status: COMPLETED BY ME-RUN03
+
+Goal: Make the ME-RUN02 deterministic dry-run harness runnable as a local terminal command.
+
+Scope: Local command wrapper only.
+
+ME-RUN03 implemented:
+
+* a local command module for the ME-RUN02 dry-run harness;
+* console-script wiring through `pyproject.toml`;
+* embedded deterministic synthetic fixture execution;
+* explicit local JSON stage payload input for non-synthetic modes;
+* stdout JSON output for `market-engine-end-to-end-dry-run-v1`;
+* fail-closed command-level behavior for missing non-synthetic JSON input;
+* fail-closed command-level behavior for unreadable, malformed, or non-object JSON;
+* tests for command output, explicit JSON payload input, command failures, and side-effect import guardrails.
+
+Implemented runtime:
+
+* `src/market_engine/run/end_to_end_dry_run_command.py`
+* `pyproject.toml`
+
+Implemented tests:
+
+* `tests/market_engine/run/test_end_to_end_dry_run_command.py`
+
+Implemented documentation:
+
+* `docs/market_engine/run/me_run03_dry_run_local_command_implementation.md`
+* `docs/market_engine/audits/me_run03_dry_run_local_command_implementation_audit.md`
+
+Outcome: ME-RUN03 made the deterministic dry-run harness locally runnable while keeping output limited to inspectable JSON and preserving all non-live, non-delivering, non-mutating, non-scheduler, non-UI, and non-actionable boundaries.
+
+ME-RUN03 did not introduce provider calls, live market data calls, SEC/EDGAR calls, broker calls, Telegram/email delivery, production report generation, dry-run artifact persistence, portfolio writes, watchlist writes, scheduler behavior, UI behavior, Decision Engine behavior, Recommendation Review behavior, Portfolio Review behavior, new financial analysis logic, trade instructions, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability, order generation, or execution advice.
+
 ## Future Sprint Candidates
 
-No new sprint is inserted by ME-RUN02.
+No new sprint is inserted by ME-RUN03.
 
-Future work should be introduced only through a new approved roadmap/backlog sprint, such as a narrowly scoped local dry-run CLI wrapper, explicit non-production artifact persistence contract, real-data intake governance contract, or safe all-ticker dry-run contract if product governance later approves it.
+Future work should be introduced only through a new approved roadmap/backlog sprint, such as an explicit non-production artifact persistence contract, real-data intake governance contract, safe all-ticker dry-run contract, or operator review/reporting workflow if product governance later approves it.
