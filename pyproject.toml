@@ -8,6 +8,9 @@ version = "0.0.0"
 description = "Institutional market scanner v2 package bootstrap."
 requires-python = ">=3.11"
 
+[project.scripts]
+market-engine-dry-run = "market_engine.run.end_to_end_dry_run_command:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
