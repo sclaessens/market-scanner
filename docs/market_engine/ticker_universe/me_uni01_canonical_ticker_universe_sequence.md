@@ -2,7 +2,7 @@
 
 Job family: ME-UNI — Ticker Universe
 
-Status: PLANNED
+Status: COMPLETED BY ME-UNI01 CONTRACT
 
 ## Purpose
 
@@ -11,6 +11,16 @@ ME-UNI introduces a dedicated job family for the canonical list of tickers that 
 After ME-RUN15, cached-source batch dry-runs have operator-facing command visibility, but the project still lacks one approved, editable and extensible source of truth for the analysis scope.
 
 The ticker universe must become that source of truth before broader cached-source batch runs, Telegram previews, Telegram delivery, production reporting, portfolio automation or watchlist mutation are introduced.
+
+## Sequence status
+
+This sequence document established the ME-UNI planning order.
+
+The actual ME-UNI01 contract is now defined in:
+
+```text
+docs/market_engine/ticker_universe/me_uni01_canonical_ticker_universe_contract.md
+```
 
 ## Planned sequence
 
@@ -26,13 +36,15 @@ ME-TG03 — Implement gated Telegram delivery
 
 ## Canonical path
 
-Recommended canonical path:
+Canonical path:
 
 ```text
 data/market_engine/ticker_universe/ticker_universe.csv
 ```
 
-## Recommended required fields
+## Required fields
+
+The completed ME-UNI01 contract defines the canonical required fields as:
 
 ```text
 ticker
@@ -41,20 +53,16 @@ market
 asset_type
 active
 priority
-notes
-```
-
-## Recommended optional fields
-
-```text
-sector
-theme
 source_policy
-risk_bucket
 portfolio_relevant
 telegram_preview_eligible
 telegram_delivery_eligible
+notes
 ```
+
+## Optional fields
+
+The completed ME-UNI01 contract defines optional metadata handling and recommended optional fields in the contract document.
 
 ## Dependency rule
 
@@ -66,4 +74,4 @@ Telegram delivery remains blocked until render-only previews and explicit safe g
 
 ## Non-goals
 
-ME-UNI01 must not introduce runtime code, provider calls, live data calls, delivery behavior, portfolio writes, watchlist writes, scheduler behavior, UI behavior or trade/action authority.
+ME-UNI01 does not introduce runtime code, provider calls, live data calls, delivery behavior, portfolio writes, watchlist writes, scheduler behavior, UI behavior or trade/action authority.
