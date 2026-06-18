@@ -1947,3 +1947,71 @@ ME-RUN12 - Define safe all-ticker cached-source batch dry-run contract
 ```
 
 Rationale: ME-RUN11 validates a small deterministic per-ticker bundle. Any broader cached-source batch behavior should be contract-defined before implementation so that production boundaries, cached-source discovery, artifact semantics, failure isolation, and operator visibility remain explicit.
+
+## Completed Sprint
+
+### ME-RUN13 - Implement safe all-ticker cached-source batch dry-run behavior
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: COMPLETED BY ME-RUN13
+
+Goal: Implement the safe local cached-source batch dry-run path defined by ME-RUN12.
+
+Scope: Local cached-source batch dry-run implementation, deterministic local tests, documentation, and audit only.
+
+ME-RUN13 implemented:
+
+* batch contract: `market-engine-cached-source-batch-dry-run-v1`;
+* per-ticker output preservation as `market-engine-end-to-end-dry-run-v1`;
+* deterministic cached-source discovery under an explicit local root;
+* explicit requested ticker support;
+* deterministic cached ticker discovery mode;
+* missing cached-source ticker blocking;
+* invalid cached-source ticker blocking;
+* unsupported cached-source ticker blocking;
+* ambiguous cached-source ticker blocking;
+* downstream contract failure isolation;
+* unexpected local error isolation;
+* batch counts and per-ticker result summaries;
+* numeric-zero evidence preservation;
+* opt-in local batch artifact writing;
+* overwrite protection for batch artifacts.
+
+Implemented runtime:
+
+* `src/market_engine/run/cached_source_batch_execution.py`
+* `src/market_engine/run/__init__.py`
+
+Implemented tests:
+
+* `tests/market_engine/run/test_me_run13_cached_source_batch_dry_run.py`
+
+Implemented documentation:
+
+* `docs/market_engine/run/me_run13_safe_all_ticker_cached_source_batch_dry_run_implementation.md`
+* `docs/market_engine/audits/me_run13_safe_all_ticker_cached_source_batch_dry_run_implementation_audit.md`
+
+Outcome: ME-RUN13 implements the ME-RUN12 contract as a local cached-source batch wrapper over approved per-ticker dry-runs. It preserves per-ticker failure isolation, deterministic counts, local-only provenance, numeric-zero evidence, opt-in artifact behavior, and non-actionable boundaries.
+
+ME-RUN13 did not introduce live provider calls, SEC/EDGAR fetches, yfinance calls, live market data calls, broker calls, Telegram/email delivery, production report generation, portfolio writes, watchlist writes, scheduler behavior, UI behavior, automatic cache refresh, automatic cache cleanup, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, execution advice, ranking, scoring, urgency, conviction, tradeability, or execution advice.
+
+## Next Implementation Candidate
+
+### ME-RUN14 - Add cached-source batch dry-run command interface
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: CANDIDATE AFTER ME-RUN13
+
+Goal: Add a narrow operator-facing command interface for the ME-RUN13 cached-source batch dry-run runtime behavior.
+
+Rationale: ME-RUN13 implements the safe batch behavior as a runtime function and artifact writer. A separate sprint should add any operator-facing command interface so command arguments, terminal output, artifact flags, and failure messages remain explicit and reviewable.
+
+Scope: Command interface, local argument parsing, terminal JSON output, opt-in artifact wiring, deterministic local tests, documentation, and audit only unless explicitly re-scoped.
+
+Non-goals: no provider refresh, live market data, external API calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, scheduler behavior, UI behavior, automatic cache refresh, automatic cache cleanup, new financial logic, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, ranking, scoring, urgency, conviction, tradeability, or execution advice.
