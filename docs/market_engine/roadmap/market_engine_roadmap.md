@@ -2,11 +2,11 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-RUN11
+Status: ACTIVE ROADMAP AFTER ME-RUN12
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-RUN11.
+This roadmap preserves the Market Engine sprint sequence after ME-RUN12.
 
 ME-RUN07 proved that the Market Engine can run end-to-end locally through `local_snapshot_fixture` using realistic non-production fixture data and can persist a deterministic local dry-run review artifact through the existing RUN05 artifact flag.
 
@@ -17,6 +17,8 @@ ME-RUN09 defined the cached-source end-to-end local execution contract as the ne
 ME-RUN10 implemented that cached-source local execution path from already-existing cached SEC CompanyFacts snapshots into the approved Market Engine dry-run chain.
 
 ME-RUN11 validated that same cached-source path against a small deterministic ticker bundle using the existing per-ticker command path.
+
+ME-RUN12 defined the safe future contract for broader all-ticker cached-source batch dry-runs without approving implementation, provider refresh, production execution, delivery, portfolio/watchlist mutation, scheduler behavior, UI behavior, or action/allocation authority.
 
 ## Completed Chain
 
@@ -52,6 +54,7 @@ Completed job-scoped chain:
 | ME-RUN09 | Run / orchestration      | Completed |
 | ME-RUN10 | Run / orchestration      | Completed |
 | ME-RUN11 | Run / orchestration      | Completed |
+| ME-RUN12 | Run / orchestration      | Completed |
 
 ## Recent RUN chain
 
@@ -172,40 +175,67 @@ ME-RUN11 validated cached-source local execution with:
 
 ME-RUN11 remains local, deterministic, non-production, provider-free, broker-free, delivery-free, portfolio/write-free, watchlist/write-free, scheduler-free, UI-free, and non-actionable.
 
-ME-RUN11 does not introduce a batch runner, source refresh jobs, provider calls, SEC/EDGAR live calls, yfinance calls, live market data calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, all-ticker production execution, automatic cache refresh, automatic cache cleanup, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, execution advice, ranking, scoring, urgency, conviction, or tradeability authority.
+ME-RUN11 does not introduce a batch runner, source refresh jobs, provider calls, SEC/EDGAR live calls, yfinance calls, live market data calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, all-ticker production execution, automatic cache refresh, automatic cache cleanup, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, execution advice, ranking, scoring, urgency, conviction, tradeability, or execution advice.
+
+ME-RUN12 defined safe all-ticker cached-source batch dry-run behavior with:
+
+* future batch-level contract family: `market-engine-cached-source-batch-dry-run-v1`;
+* approved cached-source root boundary: `data/market_engine/source_snapshots/`;
+* explicit future input mode direction: `cached_source_batch`;
+* approved local ticker universe sources;
+* forbidden live/provider/broker/watchlist ticker universe sources;
+* deterministic cached-source discovery rules;
+* ambiguity handling rules;
+* per-ticker execution and failure isolation;
+* final per-ticker output preserved as `market-engine-end-to-end-dry-run-v1`;
+* batch summary and count expectations;
+* opt-in local artifact expectations;
+* operator visibility requirements;
+* missing-data, stale-data, blocked-state, numeric-zero, and provenance preservation;
+* fail-closed batch and ticker-level behavior;
+* contract document: `docs/market_engine/run/me_run12_safe_all_ticker_cached_source_batch_dry_run_contract.md`;
+* audit: `docs/market_engine/audits/me_run12_safe_all_ticker_cached_source_batch_dry_run_contract_audit.md`;
+* backlog entry: `docs/market_engine/backlog/me_run12_safe_all_ticker_cached_source_batch_dry_run_contract_backlog_entry.md`;
+* roadmap entry: `docs/market_engine/roadmap/me_run12_safe_all_ticker_cached_source_batch_dry_run_contract_roadmap_entry.md`.
+
+ME-RUN12 is documentation-only and does not introduce Python code, tests, fixtures, provider calls, source refresh jobs, SEC/EDGAR live calls, yfinance calls, live market data calls, external API calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, scheduler behavior, UI behavior, all-ticker production execution, automatic cache refresh, automatic cache cleanup, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, execution advice, ranking, scoring, urgency, conviction, or tradeability authority.
 
 ## Next Implementation Candidate
 
-### ME-RUN12 - Define safe all-ticker cached-source batch dry-run contract
+### ME-RUN13 - Implement safe cached-source batch dry-run path
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
 Job family: ME-RUN - Run / orchestration jobs
 
-Status: CANDIDATE AFTER ME-RUN11
+Status: CANDIDATE AFTER ME-RUN12
 
-Goal: define the contract for any future all-ticker or broader cached-source batch dry-run behavior.
+Goal: implement the safe local cached-source batch dry-run path defined by ME-RUN12.
 
-Rationale: ME-RUN11 validates a small deterministic per-ticker cached-source bundle. Any broader cached-source batch behavior should be contract-defined before implementation so that production boundaries, cached-source discovery, artifact semantics, failure isolation, and operator visibility remain explicit.
+Rationale: ME-RUN12 defines how broader cached-source batch dry-runs may safely discover already-existing local cached snapshots, isolate per-ticker failures, preserve per-ticker dry-run output contracts, emit batch-level summaries, and keep artifact behavior opt-in. The next implementation step may now build that path without expanding into provider refresh, production execution, delivery, portfolio/watchlist mutation, scheduler behavior, UI behavior, or action/allocation authority.
 
-Scope: documentation and contract definition for broader cached-source batch dry-run behavior only unless explicitly re-scoped.
+Scope: local cached-source batch dry-run implementation, deterministic local tests, documentation, and audit only unless explicitly re-scoped.
 
 Non-goals: no provider refresh, live market data, external API calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, scheduler behavior, UI behavior, all-ticker production execution, automatic cache refresh, automatic cache cleanup, new financial logic, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, ranking, scoring, urgency, conviction, tradeability, or execution advice.
 
 Acceptance criteria:
 
-* future batch input boundary is defined;
-* cached-source discovery and ambiguity rules are defined;
-* per-ticker failure isolation requirements are defined;
-* artifact behavior and manifest shape are defined;
-* no production writes or live provider calls are approved;
-* final per-ticker output relationship to `market-engine-end-to-end-dry-run-v1` is defined;
+* explicit local batch invocation path is implemented;
+* cached-source discovery is deterministic and path-contained;
+* ticker universe input is explicit and reviewable;
+* ambiguous and missing cached sources fail closed per ticker;
+* per-ticker execution reuses the approved cached-source dry-run path;
+* per-ticker output remains `market-engine-end-to-end-dry-run-v1`;
+* batch summary uses `market-engine-cached-source-batch-dry-run-v1`;
+* per-ticker failures are isolated;
+* artifact writing remains opt-in only;
+* forbidden side-effect and authority-boundary confirmations are preserved;
+* tests cover success, missing, ambiguous, malformed, unsupported, stale, numeric-zero, per-ticker failure isolation, batch counts, artifact default-off, opt-in artifacts, and forbidden side effects;
 * roadmap and backlog remain synchronized after completion.
 
-## Candidate Follow-Ups After ME-RUN11
+## Candidate Follow-Ups After ME-RUN12
 
-These are candidates only and are not inserted ahead of ME-RUN12 unless ME-RUN12 discovers a blocker or governance gap:
+These are candidates only and are not inserted ahead of ME-RUN13 unless ME-RUN13 discovers a blocker or governance gap:
 
 * `ME-SR02 - Build bounded SEC CompanyFacts source refresh job runner`;
-* `ME-QA01 - Add cross-job dry-run contract regression suite`;
-* `ME-RUN13 - Implement safe cached-source batch dry-run path if ME-RUN12 approves it`.
+* `ME-QA01 - Add cross-job dry-run contract regression suite`.
