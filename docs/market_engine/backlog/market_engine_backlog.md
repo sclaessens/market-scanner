@@ -1897,12 +1897,53 @@ Outcome: ME-RUN10 proves Market Engine can run the local dry-run chain from an a
 
 ME-RUN10 did not introduce provider calls, SEC/EDGAR live calls, yfinance calls, live market data calls, broker calls, Telegram/email delivery, production report generation, portfolio writes, watchlist writes, scheduler behavior, UI behavior, all-ticker production runs, automatic cache refresh, automatic cache cleanup, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, execution advice, ranking, scoring, urgency, conviction, tradeability, or execution advice.
 
+## Completed Sprint
+
+### ME-RUN11 — Run cached-source local execution against a broader deterministic ticker bundle
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: COMPLETED BY ME-RUN11
+
+Goal: Validate cached-source local execution against a small deterministic ticker bundle.
+
+Scope: Local synthetic cached-source fixtures, ticker-by-ticker command coverage, opt-in artifact validation, fail-closed malformed snapshot validation, tests, documentation, and audit only.
+
+ME-RUN11 implemented:
+
+* deterministic bundle coverage for `NVDA`, `MSFT`, and `AMD`;
+* per-ticker validation of `market-engine-end-to-end-dry-run-v1`;
+* per-ticker validation of `cached_source_snapshot`;
+* cached-source provenance checks;
+* source refresh snapshot ID provenance checks;
+* numeric-zero source and portfolio-context evidence checks;
+* artifact writing default-off validation across bundle runs;
+* opt-in artifact writing validation for one selected ticker;
+* malformed cached-source fail-closed validation.
+
+Implemented tests:
+
+* `tests/market_engine/run/test_me_run11_cached_source_ticker_bundle_execution.py`
+
+Implemented documentation:
+
+* `docs/market_engine/run/me_run11_cached_source_ticker_bundle_execution.md`
+* `docs/market_engine/audits/me_run11_cached_source_ticker_bundle_execution_audit.md`
+* `docs/market_engine/backlog/me_run11_cached_source_ticker_bundle_execution_backlog_entry.md`
+* `docs/market_engine/roadmap/me_run11_cached_source_ticker_bundle_execution_roadmap_entry.md`
+
+Outcome: ME-RUN11 proves the ME-RUN10 cached-source local execution path can run against a small deterministic ticker bundle by invoking the approved command path ticker-by-ticker. The sprint does not add a broad batch runner or production execution contract. The final per-ticker output remains `market-engine-end-to-end-dry-run-v1`, and artifact persistence remains opt-in through `--write-local-artifact`.
+
+ME-RUN11 did not introduce provider refresh, SEC/EDGAR live calls, yfinance calls, live market data calls, broker calls, Telegram/email delivery, production report generation, portfolio writes, watchlist writes, scheduler behavior, UI behavior, all-ticker production execution, automatic cache refresh, automatic cache cleanup, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, execution advice, ranking, scoring, urgency, conviction, tradeability, or execution advice.
+
 ## Future Sprint Candidates
 
-Recommended next sprint after ME-RUN10:
+Recommended next sprint after ME-RUN11:
 
 ```text
-ME-RUN11 - Run cached-source local execution against a broader deterministic ticker bundle
+ME-RUN12 - Define safe all-ticker cached-source batch dry-run contract
 ```
 
-Rationale: ME-RUN10 proves the cached-source local execution path for one deterministic cached source snapshot. ME-RUN11 should validate the same path against a small deterministic ticker bundle before broader cached-source or operator-facing workflows are approved.
+Rationale: ME-RUN11 validates a small deterministic per-ticker bundle. Any broader cached-source batch behavior should be contract-defined before implementation so that production boundaries, cached-source discovery, artifact semantics, failure isolation, and operator visibility remain explicit.
