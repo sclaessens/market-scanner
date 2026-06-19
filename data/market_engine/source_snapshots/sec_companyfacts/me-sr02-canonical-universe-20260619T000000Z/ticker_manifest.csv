@@ -1,0 +1,13 @@
+ticker,cik,snapshot_id,snapshot_path,source_name
+NVDA,0001045810,NVDA_companyfacts,data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/NVDA_companyfacts.json,sec_companyfacts
+AMD,0000002488,AMD_companyfacts,data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/AMD_companyfacts.json,sec_companyfacts
+ASML,0000937966,ASML_companyfacts,data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/ASML_companyfacts.json,sec_companyfacts
+META,0001326801,META_companyfacts,data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/META_companyfacts.json,sec_companyfacts
+MSFT,0000789019,MSFT_companyfacts,data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/MSFT_companyfacts.json,sec_companyfacts
+VRT,0001674101,VRT_companyfacts,data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/VRT_companyfacts.json,sec_companyfacts
+CLS,0001030894,CLS_companyfacts,data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/CLS_companyfacts.json,sec_companyfacts
+CRDO,0001807794,CRDO_companyfacts,data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/CRDO_companyfacts.json,sec_companyfacts
+IREN,0001878848,IREN_companyfacts,data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/IREN_companyfacts.json,sec_companyfacts
+COST,0000909832,COST_companyfacts,data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/COST_companyfacts.json,sec_companyfacts
+AVGO,0001730168,AVGO_companyfacts,data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/AVGO_companyfacts.json,sec_companyfacts
+TSM,0001046179,TSM_companyfacts,data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/TSM_companyfacts.json,sec_companyfacts
