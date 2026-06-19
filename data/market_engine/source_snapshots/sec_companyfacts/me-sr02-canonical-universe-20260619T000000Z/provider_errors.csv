@@ -1,0 +1,2 @@
+ticker,cik,error_type,error_message,source_name
+HO,,UnsupportedTickerError,HO is Euronext Thales and has no approved SEC CompanyFacts CIK in ME-SR02 bounded snapshot bundle,sec_companyfacts
