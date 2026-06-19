@@ -1,0 +1,15 @@
+ticker,name,market,asset_type,active,priority,source_policy,portfolio_relevant,telegram_preview_eligible,telegram_delivery_eligible,notes,sector,theme,risk_bucket,operator_group
+NVDA,NVIDIA,USA,equity,true,1,cached_source_only,true,true,false,Initial AI infrastructure anchor,technology,ai_infrastructure,large_cap_core,ai_semiconductors
+AMD,Advanced Micro Devices,USA,equity,true,2,cached_source_only,true,true,false,Initial AI and compute watchlist,technology,ai_compute,large_cap_core,ai_semiconductors
+ASML,ASML Holding,EURONEXT,equity,true,3,cached_source_only,true,true,false,Initial European semiconductor equipment anchor,technology,semiconductor_equipment,large_cap_core,european_core
+META,Meta Platforms,USA,equity,true,4,cached_source_only,true,true,false,Initial AI platform and advertising anchor,communication_services,ai_platforms,large_cap_core,us_platforms
+MSFT,Microsoft,USA,equity,true,5,cached_source_only,true,true,false,Initial cloud and AI platform anchor,technology,cloud_ai,large_cap_core,us_platforms
+VRT,Vertiv Holdings,USA,equity,true,6,cached_source_only,true,true,false,Initial data-center infrastructure candidate,industrials,data_center_infrastructure,growth_watch,infrastructure
+CLS,Celestica,USA,equity,true,7,cached_source_only,true,true,false,Initial AI hardware supply-chain candidate,technology,ai_hardware_supply_chain,growth_watch,ai_infrastructure
+CRDO,Credo Technology Group,USA,equity,true,8,cached_source_only,true,true,false,Initial high-growth connectivity candidate,technology,ai_connectivity,growth_watch,ai_semiconductors
+IREN,IREN,USA,equity,true,9,cached_source_only,true,true,false,Initial AI/HPC energy-infrastructure candidate,technology,ai_hpc_infrastructure,speculative_growth,ai_infrastructure
+COST,Costco Wholesale,USA,equity,true,10,cached_source_only,true,true,false,Initial quality compounder and current portfolio context,consumer_defensive,quality_compounder,large_cap_core,current_portfolio
+HO,Thales,EURONEXT,equity,true,11,cached_source_only,true,true,false,Initial European defence and current portfolio context,industrials,defence_security,large_cap_core,current_portfolio
+SMCI,Super Micro Computer,USA,equity,true,12,manual_review_only,true,true,false,Manual-review-only due governance caution and volatility,technology,ai_server_infrastructure,manual_review,ai_infrastructure
+AVGO,Broadcom,USA,equity,true,13,cached_source_only,true,true,false,Initial semiconductor and infrastructure software anchor,technology,semiconductor_infrastructure,large_cap_core,ai_semiconductors
+TSM,Taiwan Semiconductor Manufacturing,USA,equity,true,14,cached_source_only,true,true,false,Initial semiconductor manufacturing anchor,technology,semiconductor_foundry,large_cap_core,ai_semiconductors
