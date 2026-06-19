@@ -2015,3 +2015,72 @@ Rationale: ME-RUN13 implements the safe batch behavior as a runtime function and
 Scope: Command interface, local argument parsing, terminal JSON output, opt-in artifact wiring, deterministic local tests, documentation, and audit only unless explicitly re-scoped.
 
 Non-goals: no provider refresh, live market data, external API calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, scheduler behavior, UI behavior, automatic cache refresh, automatic cache cleanup, new financial logic, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, ranking, scoring, urgency, conviction, tradeability, or execution advice.
+
+## Completed Sprint
+
+### ME-UNI02 - Implement canonical ticker universe loading and validation
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-UNI - Ticker Universe
+
+Status: COMPLETED BY ME-UNI02
+
+Goal: implement the canonical ticker universe loader and validation layer defined by ME-UNI01.
+
+Scope: loader, validator, typed result models, deterministic selection, synthetic tests, documentation, backlog, roadmap and audit only.
+
+ME-UNI02 implemented:
+
+* canonical contract version: `market-engine-canonical-ticker-universe-v1`;
+* canonical default path: `data/market_engine/ticker_universe/ticker_universe.csv`;
+* explicit path override support;
+* required-column validation;
+* required field validation;
+* allowed-value validation;
+* ticker trim and uppercase normalization only;
+* duplicate normalized ticker and market rejection;
+* active cached-source default selection;
+* explicit inactive row inclusion when requested;
+* optional metadata preservation;
+* deterministic ordering;
+* operator-readable validation errors.
+
+Implemented runtime:
+
+```text
+src/market_engine/ticker_universe/
+```
+
+Implemented tests:
+
+```text
+tests/market_engine/ticker_universe/test_canonical_ticker_universe.py
+```
+
+Implemented documentation:
+
+```text
+docs/market_engine/ticker_universe/me_uni02_canonical_ticker_universe_loader_implementation.md
+docs/market_engine/audits/me_uni02_canonical_ticker_universe_loader_audit.md
+```
+
+Outcome: the canonical ticker universe can be loaded and validated deterministically before downstream RUN consumption.
+
+ME-UNI02 did not introduce provider calls, live network calls, source refresh jobs, batch execution, Telegram behavior, email delivery, broker integration, portfolio writes, watchlist writes, scheduler behavior, UI behavior, Decision Engine behavior, BUY / SELL / HOLD semantics, allocation advice, target prices, position sizing, order generation, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+## Next Canonical-Universe RUN Candidate
+
+### ME-RUN16 - Execute first real cached-source batch dry-run using canonical ticker universe
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: CANDIDATE AFTER ME-UNI02
+
+Goal: consume the ME-UNI02 canonical ticker universe loader in the cached-source batch dry-run path and execute the first real cached-source batch dry-run using the canonical universe.
+
+Scope: cached-source/local-only RUN integration, canonical universe visibility, fail-closed invalid-universe behavior, local tests, documentation and audit only unless explicitly re-scoped.
+
+ME-RUN16 must remain blocked from provider refresh, live data calls, Telegram delivery, portfolio writes, watchlist writes, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability and execution advice.

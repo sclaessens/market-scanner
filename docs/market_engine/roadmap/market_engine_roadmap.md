@@ -2,11 +2,11 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-RUN13
+Status: ACTIVE ROADMAP AFTER ME-UNI02
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-RUN13.
+This roadmap preserves the Market Engine sprint sequence after ME-UNI02.
 
 ME-RUN07 proved that the Market Engine can run end-to-end locally through `local_snapshot_fixture` using realistic non-production fixture data and can persist a deterministic local dry-run review artifact through the existing RUN05 artifact flag.
 
@@ -21,6 +21,10 @@ ME-RUN11 validated that same cached-source path against a small deterministic ti
 ME-RUN12 defined the safe future contract for broader all-ticker cached-source batch dry-runs without approving implementation, provider refresh, production execution, delivery, portfolio/watchlist mutation, scheduler behavior, UI behavior, or action/allocation authority.
 
 ME-RUN13 implemented the safe cached-source batch dry-run runtime behavior defined by ME-RUN12.
+
+ME-UNI01 defined the canonical ticker universe contract required before broader canonical-universe RUN and Telegram sequencing can proceed.
+
+ME-UNI02 implemented the canonical ticker universe loader and validation layer required by ME-UNI01. ME-RUN16 remains the downstream RUN sprint that may consume the validated canonical universe.
 
 ## Completed Chain
 
@@ -58,6 +62,8 @@ Completed job-scoped chain:
 | ME-RUN11 | Run / orchestration      | Completed |
 | ME-RUN12 | Run / orchestration      | Completed |
 | ME-RUN13 | Run / orchestration      | Completed |
+| ME-UNI01 | Ticker Universe          | Completed |
+| ME-UNI02 | Ticker Universe          | Completed |
 
 ## Recent RUN chain
 
@@ -256,3 +262,66 @@ These are candidates only and are not inserted ahead of ME-RUN14 unless ME-RUN14
 
 * `ME-SR02 - Build bounded SEC CompanyFacts source refresh job runner`;
 * `ME-QA01 - Add cross-job dry-run contract regression suite`.
+
+## Completed Sprint
+
+### ME-UNI02 - Implement canonical ticker universe loading and validation
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-UNI - Ticker Universe
+
+Status: COMPLETED BY ME-UNI02
+
+Goal: implement the canonical ticker universe loader and validation layer defined by ME-UNI01.
+
+ME-UNI02 implemented:
+
+* contract version: `market-engine-canonical-ticker-universe-v1`;
+* default canonical CSV path: `data/market_engine/ticker_universe/ticker_universe.csv`;
+* explicit path override support for tests and future command integration;
+* required-column validation;
+* required-value validation;
+* allowed-value validation;
+* duplicate ticker and market rejection;
+* active cached-source default selection;
+* explicit inactive, blocked and manual-review-only inclusion when requested;
+* deterministic ordering by priority, ticker and market;
+* normalized typed entries and result metadata.
+
+Implemented runtime:
+
+```text
+src/market_engine/ticker_universe/
+```
+
+Implemented tests:
+
+```text
+tests/market_engine/ticker_universe/test_canonical_ticker_universe.py
+```
+
+Implemented documentation:
+
+```text
+docs/market_engine/ticker_universe/me_uni02_canonical_ticker_universe_loader_implementation.md
+docs/market_engine/audits/me_uni02_canonical_ticker_universe_loader_audit.md
+```
+
+Outcome: Market Engine can now load and validate the canonical ticker universe without provider calls, live data, source refresh, Telegram behavior, portfolio writes, watchlist writes, Decision Engine behavior or action authority.
+
+## Next Canonical-Universe RUN Candidate
+
+### ME-RUN16 - Execute first real cached-source batch dry-run using canonical ticker universe
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: CANDIDATE AFTER ME-UNI02
+
+Goal: consume the ME-UNI02 canonical ticker universe loader in the cached-source batch dry-run path and execute the first real cached-source batch dry-run using the canonical universe.
+
+Scope: cached-source/local-only RUN integration, canonical universe visibility, fail-closed invalid-universe behavior, local tests, documentation and audit only unless explicitly re-scoped.
+
+Non-goals: no provider refresh, live market data, external API calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, scheduler behavior, UI behavior, automatic cache refresh, automatic cache cleanup, new financial logic, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, ranking, scoring, urgency, conviction, tradeability or execution advice.
