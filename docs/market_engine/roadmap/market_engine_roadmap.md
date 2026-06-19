@@ -2,11 +2,11 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-UNI02
+Status: ACTIVE ROADMAP AFTER ME-RUN16
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-UNI02.
+This roadmap preserves the Market Engine sprint sequence after ME-RUN16.
 
 ME-RUN07 proved that the Market Engine can run end-to-end locally through `local_snapshot_fixture` using realistic non-production fixture data and can persist a deterministic local dry-run review artifact through the existing RUN05 artifact flag.
 
@@ -25,6 +25,8 @@ ME-RUN13 implemented the safe cached-source batch dry-run runtime behavior defin
 ME-UNI01 defined the canonical ticker universe contract required before broader canonical-universe RUN and Telegram sequencing can proceed.
 
 ME-UNI02 implemented the canonical ticker universe loader and validation layer required by ME-UNI01. ME-RUN16 remains the downstream RUN sprint that may consume the validated canonical universe.
+
+ME-RUN16 consumed the canonical ticker universe in the cached-source batch dry-run command and executed the first canonical-universe batch. The execution selected 13 active `cached_source_only` tickers, excluded SMCI as `manual_review_only`, and failed closed for every selected ticker because no local cached SEC CompanyFacts source snapshots were present.
 
 ## Completed Chain
 
@@ -64,6 +66,8 @@ Completed job-scoped chain:
 | ME-RUN13 | Run / orchestration      | Completed |
 | ME-UNI01 | Ticker Universe          | Completed |
 | ME-UNI02 | Ticker Universe          | Completed |
+| ME-UNI03 | Ticker Universe          | Completed |
+| ME-RUN16 | Run / orchestration      | Completed with blocked ticker outcome |
 
 ## Recent RUN chain
 
@@ -325,3 +329,62 @@ Goal: consume the ME-UNI02 canonical ticker universe loader in the cached-source
 Scope: cached-source/local-only RUN integration, canonical universe visibility, fail-closed invalid-universe behavior, local tests, documentation and audit only unless explicitly re-scoped.
 
 Non-goals: no provider refresh, live market data, external API calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, scheduler behavior, UI behavior, automatic cache refresh, automatic cache cleanup, new financial logic, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+## Completed Sprint
+
+### ME-RUN16 - Execute first real cached-source batch dry-run using canonical ticker universe
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: COMPLETED WITH BLOCKED TICKER OUTCOME BY ME-RUN16
+
+Goal: execute the first cached-source batch dry-run selected from the canonical ticker universe.
+
+Outcome:
+
+* canonical universe loaded from `data/market_engine/ticker_universe/ticker_universe.csv`;
+* 14 canonical rows loaded;
+* 13 active `cached_source_only` tickers selected;
+* SMCI excluded because `source_policy=manual_review_only`;
+* all 13 selected tickers returned `blocked_missing_cached_source`;
+* no provider or live data fallback occurred;
+* generated local batch manifest under `artifacts/market_engine/...`, not committed.
+
+Implemented runtime change:
+
+```text
+src/market_engine/run/cached_source_batch_dry_run_command.py
+```
+
+Implemented tests:
+
+```text
+tests/market_engine/run/test_cached_source_batch_dry_run_command.py
+```
+
+Implemented documentation:
+
+```text
+docs/market_engine/run/me_run16_first_canonical_universe_cached_source_batch_dry_run_execution.md
+docs/market_engine/audits/me_run16_first_canonical_universe_cached_source_batch_dry_run_audit.md
+docs/market_engine/backlog/me_run16_first_canonical_universe_cached_source_batch_dry_run_backlog_entry.md
+docs/market_engine/roadmap/me_run16_first_canonical_universe_cached_source_batch_dry_run_roadmap_entry.md
+```
+
+## Next Source Refresh Candidate
+
+### ME-SR02 - Produce bounded canonical-universe SEC CompanyFacts cached source snapshots
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh
+
+Status: CANDIDATE AFTER ME-RUN16
+
+Goal: produce or validate bounded local SEC CompanyFacts cached source snapshots for the canonical universe so a later RUN sprint can execute downstream dry-runs from real cached source evidence.
+
+Rationale: ME-RUN16 proved canonical-universe RUN selection and fail-closed behavior. It also showed that this checkout has no cached source snapshots under `data/market_engine/source_snapshots`, so every selected ticker blocks before downstream dry-run execution.
+
+Scope: Source Refresh only. No portfolio writes, watchlist writes, Telegram delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
