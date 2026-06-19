@@ -144,7 +144,96 @@ def test_ticker_file_parses_comments_commas_and_uppercases(tmp_path: Path) -> No
     ticker_file.write_text("# comment\nnvda, msft\n\namd\n", encoding="utf-8")
     args = _parse("--ticker-file", str(ticker_file))
 
-    assert command._requested_tickers_from_args(args) == ("NVDA", "MSFT", "AMD")
+    tickers, metadata = command._requested_tickers_from_args(args)
+
+    assert tickers == ("NVDA", "MSFT", "AMD")
+    assert metadata is None
+
+
+def test_canonical_ticker_universe_selects_active_cached_source_only_rows(
+    tmp_path: Path,
+) -> None:
+    canonical_csv = tmp_path / "ticker_universe.csv"
+    canonical_csv.write_text(
+        "\n".join(
+            [
+                "ticker,name,market,asset_type,active,priority,source_policy,"
+                "portfolio_relevant,telegram_preview_eligible,"
+                "telegram_delivery_eligible,notes",
+                "NVDA,NVIDIA,USA,equity,true,2,cached_source_only,true,true,false,",
+                "SMCI,Super Micro Computer,USA,equity,true,1,manual_review_only,true,true,false,",
+                "AMD,AMD,USA,equity,true,1,cached_source_only,true,true,false,",
+                "COST,Costco,USA,equity,false,3,cached_source_only,true,true,false,",
+                "XYZ,Blocked,USA,equity,true,4,blocked,true,true,false,",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    args = _parse("--canonical-ticker-universe", str(canonical_csv))
+
+    tickers, metadata = command._requested_tickers_from_args(args)
+
+    assert tickers == ("AMD", "NVDA")
+    assert metadata is not None
+    assert metadata["selection_policy"] == (
+        "active_true_and_source_policy_cached_source_only"
+    )
+    assert metadata["loaded_row_count"] == 5
+    assert metadata["selected_tickers"] == ("AMD", "NVDA")
+    assert metadata["excluded_manual_review_only_tickers"] == ("SMCI",)
+    assert metadata["excluded_inactive_tickers"] == ("COST",)
+    assert metadata["excluded_blocked_tickers"] == ("XYZ",)
+
+
+def test_command_result_passes_canonical_ticker_universe_selection(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    canonical_csv = tmp_path / "ticker_universe.csv"
+    canonical_csv.write_text(
+        "\n".join(
+            [
+                "ticker,name,market,asset_type,active,priority,source_policy,"
+                "portfolio_relevant,telegram_preview_eligible,"
+                "telegram_delivery_eligible,notes",
+                "SMCI,Super Micro Computer,USA,equity,true,1,manual_review_only,true,true,false,",
+                "NVDA,NVIDIA,USA,equity,true,2,cached_source_only,true,true,false,",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    captured: dict[str, Any] = {}
+
+    def fake_build_cached_source_batch_dry_run(**kwargs: Any) -> dict[str, Any]:
+        captured.update(kwargs)
+        return _batch_payload(
+            requested_tickers=("NVDA",),
+            results=(_ticker_result("NVDA", "completed"),),
+        )
+
+    monkeypatch.setattr(
+        command,
+        "build_cached_source_batch_dry_run",
+        fake_build_cached_source_batch_dry_run,
+    )
+    args = _parse(
+        "--canonical-ticker-universe",
+        str(canonical_csv),
+        "--batch-id",
+        "run16-test",
+        "--generated-at",
+        "2026-06-19T10:00:00Z",
+    )
+
+    result = command.build_command_result(args)
+
+    assert captured["requested_tickers"] == ("NVDA",)
+    assert captured["discover_cached_tickers"] is False
+    canonical = result["run_context"]["canonical_ticker_universe"]
+    assert canonical["selected_tickers"] == ("NVDA",)
+    assert canonical["excluded_manual_review_only_tickers"] == ("SMCI",)
 
 
 def test_run_command_returns_error_for_invalid_ticker_file() -> None:
