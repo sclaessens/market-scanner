@@ -8,6 +8,29 @@ from typing import Any
 import pytest
 
 from market_engine.run import cached_source_batch_dry_run_command as command
+from market_engine.source_refresh.sec_companyfacts_snapshots import (
+    persist_sec_companyfacts_raw_snapshot,
+)
+
+
+RUN17_SELECTED_TICKERS = (
+    "NVDA",
+    "AMD",
+    "ASML",
+    "META",
+    "MSFT",
+    "VRT",
+    "CLS",
+    "CRDO",
+    "IREN",
+    "COST",
+    "HO",
+    "AVGO",
+    "TSM",
+)
+RUN17_AVAILABLE_SNAPSHOT_TICKERS = tuple(
+    ticker for ticker in RUN17_SELECTED_TICKERS if ticker != "HO"
+)
 
 
 def test_command_result_uses_explicit_tickers_and_visibility_contract(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -236,6 +259,70 @@ def test_command_result_passes_canonical_ticker_universe_selection(
     assert canonical["excluded_manual_review_only_tickers"] == ("SMCI",)
 
 
+def test_canonical_universe_batch_discovers_me_sr02_style_snapshots(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source_snapshots"
+    canonical_csv = _write_run17_canonical_universe(tmp_path)
+    for ticker in RUN17_AVAILABLE_SNAPSHOT_TICKERS:
+        _persist_run17_snapshot(source_root, ticker)
+    artifact_root = tmp_path / "artifacts"
+    args = _parse(
+        "--source-snapshot-root",
+        str(source_root),
+        "--canonical-ticker-universe",
+        str(canonical_csv),
+        "--batch-id",
+        "run17-test",
+        "--generated-at",
+        "2026-06-22T09:00:00Z",
+        "--write-local-artifacts",
+        "--artifact-output-root",
+        str(artifact_root),
+    )
+
+    result = command.build_command_result(args)
+
+    batch = result["batch_payload"]
+    canonical = result["run_context"]["canonical_ticker_universe"]
+    assert canonical["selected_tickers"] == RUN17_SELECTED_TICKERS
+    assert canonical["excluded_manual_review_only_tickers"] == ("SMCI",)
+    assert batch["requested_tickers"] == RUN17_SELECTED_TICKERS
+    assert batch["ticker_universe_metadata"]["discovery_policy"] == (
+        "scan_local_sec_companyfacts_raw_snapshot_layouts"
+    )
+    assert batch["batch_counts"]["discovered_cached_source_count"] == 12
+    assert batch["batch_counts"]["executed_count"] == 12
+    assert batch["batch_counts"]["blocked_count"] == 13
+    assert batch["batch_counts"]["missing_cached_source_count"] == 1
+    assert _batch_ticker_result(batch, "HO")["execution_state"] == (
+        "blocked_missing_cached_source"
+    )
+    assert _batch_ticker_result(batch, "NVDA")["execution_state"] == (
+        "blocked_downstream_contract_failure"
+    )
+    assert _batch_ticker_result(batch, "AMD")["numeric_zero_evidence_present"] is True
+    assert all(
+        _batch_ticker_result(batch, ticker)["end_to_end_dry_run_reference"] is not None
+        for ticker in RUN17_AVAILABLE_SNAPSHOT_TICKERS
+    )
+    assert all(
+        "sec_companyfacts/me-sr02-test/raw" in str(
+            _batch_ticker_result(batch, ticker)["source_snapshot_reference"]
+        )
+        for ticker in RUN17_AVAILABLE_SNAPSHOT_TICKERS
+    )
+    assert batch["live_provider_call_made"] is False
+    assert "No provider" in batch["forbidden_side_effect_confirmation"]
+    assert (
+        artifact_root / "run17-test" / "batch_manifest.json"
+    ).exists()
+    assert (
+        artifact_root / "run17-test" / "NVDA" / "dry_run.json"
+    ).exists()
+    assert _batch_ticker_result(batch, "HO")["artifact_reference"] is None
+
+
 def test_run_command_returns_error_for_invalid_ticker_file() -> None:
     stdout = StringIO()
     stderr = StringIO()
@@ -253,6 +340,83 @@ def test_run_command_returns_error_for_invalid_ticker_file() -> None:
 
 def _parse(*argv: str) -> argparse.Namespace:
     return command._argument_parser().parse_args(list(argv))
+
+
+def _write_run17_canonical_universe(tmp_path: Path) -> Path:
+    path = tmp_path / "ticker_universe.csv"
+    rows = [
+        "ticker,name,market,asset_type,active,priority,source_policy,"
+        "portfolio_relevant,telegram_preview_eligible,telegram_delivery_eligible,notes",
+    ]
+    for priority, ticker in enumerate(RUN17_SELECTED_TICKERS, start=1):
+        rows.append(
+            f"{ticker},{ticker} Inc,USA,equity,true,{priority},cached_source_only,"
+            "true,true,false,"
+        )
+    rows.append(
+        "SMCI,Super Micro Computer,USA,equity,true,14,manual_review_only,"
+        "true,true,false,manual review only"
+    )
+    path.write_text("\n".join(rows) + "\n", encoding="utf-8")
+    return path
+
+
+def _persist_run17_snapshot(source_root: Path, ticker: str) -> Path:
+    return persist_sec_companyfacts_raw_snapshot(
+        root_dir=source_root / "sec_companyfacts",
+        run_id="me-sr02-test",
+        ticker=ticker,
+        cik=_run17_cik(ticker),
+        raw_payload=_companyfacts_payload(ticker),
+        fetched_at="2026-06-19T00:00:00Z",
+    )
+
+
+def _run17_cik(ticker: str) -> str:
+    cik_by_ticker = {
+        ticker: str(index).zfill(10)
+        for index, ticker in enumerate(RUN17_AVAILABLE_SNAPSHOT_TICKERS, start=1)
+    }
+    return cik_by_ticker[ticker]
+
+
+def _companyfacts_payload(ticker: str) -> dict[str, object]:
+    zero = ticker == "AMD"
+    return {
+        "facts": {
+            "us-gaap": {
+                "Revenues": {"units": {"USD": [_fact(100 if not zero else 0)]}},
+                "NetIncomeLoss": {"units": {"USD": [_fact(20 if not zero else 0)]}},
+                "NetCashProvidedByUsedInOperatingActivities": {
+                    "units": {"USD": [_fact(30 if not zero else 0)]}
+                },
+                "PaymentsToAcquirePropertyPlantAndEquipment": {
+                    "units": {"USD": [_fact(5 if not zero else 0)]}
+                },
+            }
+        }
+    }
+
+
+def _fact(value: int) -> dict[str, object]:
+    return {
+        "val": value,
+        "fy": 2025,
+        "fp": "FY",
+        "form": "10-K",
+        "filed": "2026-02-15",
+        "start": "2025-01-01",
+        "end": "2025-12-31",
+        "accn": "0000000000-2025-000001",
+        "frame": "CY2025",
+    }
+
+
+def _batch_ticker_result(batch: dict[str, Any], ticker: str) -> dict[str, Any]:
+    for result in batch["per_ticker_results"]:
+        if result["ticker"] == ticker:
+            return result
+    raise AssertionError(f"missing ticker result: {ticker}")
 
 
 def _batch_payload(

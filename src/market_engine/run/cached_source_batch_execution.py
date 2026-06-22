@@ -121,7 +121,7 @@ def build_cached_source_batch_dry_run(
                 if ticker not in set(requested)
             ),
             "ticker_limit": ticker_limit,
-            "discovery_policy": "scan_explicit_local_snapshot_root_raw_json",
+            "discovery_policy": "scan_local_sec_companyfacts_raw_snapshot_layouts",
             "ambiguity_policy": "block_ambiguous_ticker",
         },
         "batch_execution_state": _batch_execution_state(per_ticker_results),
@@ -224,7 +224,7 @@ class _DiscoveredSnapshots:
 
 def _discover_cached_snapshots(root: Path) -> _DiscoveredSnapshots:
     discovered = _DiscoveredSnapshots()
-    for path in sorted(root.glob("*/raw/*.json"), key=lambda candidate: candidate.as_posix()):
+    for path in _candidate_snapshot_paths(root):
         try:
             snapshot = load_sec_companyfacts_raw_snapshot(path)
         except SecCompanyFactsSnapshotError as exc:
@@ -239,6 +239,18 @@ def _discover_cached_snapshots(root: Path) -> _DiscoveredSnapshots:
             continue
         discovered.valid_by_ticker.setdefault(snapshot.ticker, []).append((path, snapshot))
     return discovered
+
+
+def _candidate_snapshot_paths(root: Path) -> tuple[Path, ...]:
+    candidates = {
+        path
+        for pattern in (
+            "*/raw/*.json",
+            f"{SEC_COMPANYFACTS_SOURCE_NAME}/*/raw/*.json",
+        )
+        for path in root.glob(pattern)
+    }
+    return tuple(sorted(candidates, key=lambda candidate: candidate.as_posix()))
 
 
 def _requested_ticker_universe(
