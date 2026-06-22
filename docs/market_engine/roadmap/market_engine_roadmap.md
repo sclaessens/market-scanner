@@ -429,13 +429,36 @@ Owner roles: Product Owner / Operator / Technical Architect / Development Lead /
 
 Job family: ME-SR - Source Refresh / Source Coverage
 
-Status: CANDIDATE AFTER ME-SR03
+Status: COMPLETED BY ME-SR04
 
 Goal: decide whether HO should receive an approved source identity/backfill path or be moved out of default cached-source execution until a valid source exists.
 
 Rationale: ASML and TSM no longer block after source mapping remediation. HO remains the only canonical cached-source blocker.
 
+Outcome:
+
+* HO remains in the canonical universe as Thales on Euronext;
+* HO source policy changed to `manual_review_only`;
+* default canonical SEC CompanyFacts cached-source execution excludes HO and SMCI;
+* canonical cached-source rerun selected 12 supported tickers and completed 12 with zero blocked tickers.
+
 Scope: Source Refresh / source identity only. No portfolio writes, watchlist writes, Telegram delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+## Next Telegram Preview Candidate
+
+### ME-TG01 - Define Telegram preview contract
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-TG - Telegram / Preview Governance
+
+Status: RECOMMENDED NEXT AFTER ME-SR04
+
+Goal: define a render-only Telegram preview contract after canonical cached-source execution has a clean supported-ticker run.
+
+Rationale: ME-SR04 converted the unsupported HO blocker into a manual-review source-identity decision. The supported default canonical cached-source path now completes without blocked tickers.
+
+Scope: Documentation and contract only. ME-TG01 must not implement Telegram delivery, send messages, add notification channels, add scheduler behavior, write portfolio/watchlist state, call providers, add production reports, or introduce Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
 
 ## Completed Sprint
 

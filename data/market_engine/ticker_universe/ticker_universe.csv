@@ -9,7 +9,7 @@ CLS,Celestica,USA,equity,true,7,cached_source_only,true,true,false,Initial AI ha
 CRDO,Credo Technology Group,USA,equity,true,8,cached_source_only,true,true,false,Initial high-growth connectivity candidate,technology,ai_connectivity,growth_watch,ai_semiconductors
 IREN,IREN,USA,equity,true,9,cached_source_only,true,true,false,Initial AI/HPC energy-infrastructure candidate,technology,ai_hpc_infrastructure,speculative_growth,ai_infrastructure
 COST,Costco Wholesale,USA,equity,true,10,cached_source_only,true,true,false,Initial quality compounder and current portfolio context,consumer_defensive,quality_compounder,large_cap_core,current_portfolio
-HO,Thales,EURONEXT,equity,true,11,cached_source_only,true,true,false,Initial European defence and current portfolio context,industrials,defence_security,large_cap_core,current_portfolio
+HO,Thales,EURONEXT,equity,true,11,manual_review_only,true,false,false,Manual-review-only because Euronext Thales has no approved SEC CompanyFacts CIK or cached source snapshot in ME-SR02,industrials,defence_security,manual_review,current_portfolio
 SMCI,Super Micro Computer,USA,equity,true,12,manual_review_only,true,true,false,Manual-review-only due governance caution and volatility,technology,ai_server_infrastructure,manual_review,ai_infrastructure
 AVGO,Broadcom,USA,equity,true,13,cached_source_only,true,true,false,Initial semiconductor and infrastructure software anchor,technology,semiconductor_infrastructure,large_cap_core,ai_semiconductors
 TSM,Taiwan Semiconductor Manufacturing,USA,equity,true,14,cached_source_only,true,true,false,Initial semiconductor manufacturing anchor,technology,semiconductor_foundry,large_cap_core,ai_semiconductors

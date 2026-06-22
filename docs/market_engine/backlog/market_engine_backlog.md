@@ -2188,7 +2188,7 @@ docs/market_engine/roadmap/me_sr03_canonical_universe_cached_source_coverage_blo
 
 ME-SR03 did not introduce provider calls, live data calls, Telegram delivery, portfolio writes, watchlist writes, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
 
-## Next Source Refresh Candidate
+## Completed Sprint
 
 ### ME-SR04 - Resolve HO canonical-universe source identity or exclusion decision
 
@@ -2196,13 +2196,53 @@ Owner roles: Product Owner / Operator / Technical Architect / Development Lead /
 
 Job family: ME-SR - Source Refresh / Source Coverage
 
-Status: CANDIDATE AFTER ME-SR03
+Status: COMPLETED BY ME-SR04
 
 Goal: decide whether HO should receive an approved source identity/backfill path or be moved out of default cached-source execution until a valid source exists.
 
 Rationale: ME-SR03 resolved ASML and TSM using existing cached source data. HO remains blocked because ME-SR02 recorded it as unsupported and no local cached SEC CompanyFacts snapshot exists.
 
+Outcome:
+
+* HO remains in the canonical universe as Thales on Euronext;
+* HO source policy changed from `cached_source_only` to `manual_review_only`;
+* HO is excluded from default canonical SEC CompanyFacts cached-source execution;
+* HO is not eligible for future Telegram preview or delivery until a separate approved source identity decision changes that status;
+* canonical cached-source rerun selected 12 supported tickers and completed 12 with zero blocked tickers.
+
+Implemented configuration/test changes:
+
+```text
+data/market_engine/ticker_universe/ticker_universe.csv
+tests/market_engine/ticker_universe/test_canonical_ticker_universe.py
+```
+
+Implemented documentation:
+
+```text
+docs/market_engine/source_data/me_sr04_ho_canonical_universe_source_identity_decision.md
+docs/market_engine/audits/me_sr04_ho_canonical_universe_source_identity_decision_audit.md
+docs/market_engine/backlog/me_sr04_ho_canonical_universe_source_identity_decision_backlog_entry.md
+docs/market_engine/roadmap/me_sr04_ho_canonical_universe_source_identity_decision_roadmap_entry.md
+```
+
 Scope: Source Refresh / source identity only. No portfolio writes, watchlist writes, Telegram delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+## Next Telegram Preview Candidate
+
+### ME-TG01 - Define Telegram preview contract
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-TG - Telegram / Preview Governance
+
+Status: RECOMMENDED NEXT AFTER ME-SR04
+
+Goal: define a render-only Telegram preview contract after canonical cached-source execution has a clean supported-ticker run.
+
+Rationale: ME-SR04 removes the unsupported HO source identity blocker from default SEC CompanyFacts cached-source execution. The supported canonical cached-source dry-run now completes 12 of 12 selected tickers with zero blocked tickers.
+
+Scope: Documentation and contract only. ME-TG01 must not implement Telegram delivery, send messages, add notification channels, add scheduler behavior, write portfolio/watchlist state, call providers, add production reports, or introduce Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
 
 ## Completed Sprint
 

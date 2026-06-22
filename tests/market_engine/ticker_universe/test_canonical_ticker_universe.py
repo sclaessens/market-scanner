@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from market_engine.ticker_universe import (
+    CANONICAL_TICKER_UNIVERSE_PATH,
     CANONICAL_TICKER_UNIVERSE_CONTRACT_VERSION,
     CanonicalTickerUniverseValidationError,
     load_canonical_ticker_universe,
@@ -259,3 +260,22 @@ def test_no_provider_network_or_decision_engine_dependencies_are_imported() -> N
     assert "yfinance" not in module_names
     assert "telegram" not in module_names
     assert "market_scanner" not in module_names
+
+
+def test_current_canonical_universe_excludes_ho_from_default_sec_cached_source_execution() -> None:
+    selected = load_canonical_ticker_universe(CANONICAL_TICKER_UNIVERSE_PATH)
+    all_rows = load_canonical_ticker_universe(
+        CANONICAL_TICKER_UNIVERSE_PATH,
+        include_inactive=True,
+    )
+
+    assert "HO" not in [entry.ticker for entry in selected.entries]
+
+    ho_entry = next(entry for entry in all_rows.entries if entry.ticker == "HO")
+    assert ho_entry.name == "Thales"
+    assert ho_entry.market == "EURONEXT"
+    assert ho_entry.active is True
+    assert ho_entry.source_policy == "manual_review_only"
+    assert ho_entry.portfolio_relevant is True
+    assert ho_entry.telegram_preview_eligible is False
+    assert ho_entry.telegram_delivery_eligible is False
