@@ -372,6 +372,16 @@ Inactive, blocked and manual-review-only records must remain part of the loaded 
 
 A later RUN contract may define explicit override behavior, but ME-UNI01 does not approve override flags.
 
+## ME-SR04 HO source identity decision
+
+ME-SR04 records a source identity governance decision for HO.
+
+HO remains present in the canonical ticker universe as Thales on Euronext, but it is `manual_review_only` because the approved ME-SR02 bounded source bundle records no approved SEC CompanyFacts CIK and contains no local cached SEC CompanyFacts snapshot for HO.
+
+HO must be excluded from default canonical SEC CompanyFacts cached-source execution until a future approved source identity, source-refresh, or source-backfill sprint provides valid evidence.
+
+HO must not be treated as a missing-source runtime failure in default SEC CompanyFacts cached-source runs while its source policy remains `manual_review_only`.
+
 ## Downstream RUN integration requirements
 
 ME-RUN16 is blocked until ME-UNI02 implements canonical ticker universe loading and validation.

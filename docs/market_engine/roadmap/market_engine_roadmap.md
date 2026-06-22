@@ -429,13 +429,48 @@ Owner roles: Product Owner / Operator / Technical Architect / Development Lead /
 
 Job family: ME-SR - Source Refresh / Source Coverage
 
-Status: CANDIDATE AFTER ME-SR03
+Status: COMPLETED BY ME-SR04
 
 Goal: decide whether HO should receive an approved source identity/backfill path or be moved out of default cached-source execution until a valid source exists.
 
 Rationale: ASML and TSM no longer block after source mapping remediation. HO remains the only canonical cached-source blocker.
 
+Outcome:
+
+* HO remains in the canonical universe as Thales on Euronext;
+* HO source policy changed to `manual_review_only`;
+* default canonical SEC CompanyFacts cached-source execution excludes HO and SMCI;
+* canonical cached-source rerun selected 12 supported tickers and completed 12 with zero blocked tickers.
+
 Scope: Source Refresh / source identity only. No portfolio writes, watchlist writes, Telegram delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+## Next Universe Governance Candidate
+
+### ME-UNI04 - Define editable Professional Swing Universe contract
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-UNI - Ticker Universe
+
+Status: RECOMMENDED NEXT AFTER ME-SR04
+
+Goal: define the editable Professional Swing Universe contract before further reporting, output, or candidate-classification work.
+
+Rationale: project planning requires the editable Professional Swing Universe sequence before Telegram/reporting/output work. ME-SR04 closes the HO blocker for the current canonical SEC CompanyFacts cached-source universe, but the next roadmap phase is universe governance rather than preview or delivery.
+
+Scope: Documentation and contract only. ME-UNI04 must not implement runtime code, provider calls, source refresh, output/reporting behavior, delivery behavior, scheduler behavior, portfolio/watchlist writes, or Decision Engine action semantics.
+
+Planned sequence:
+
+```text
+ME-UNI04 - Define editable Professional Swing Universe contract
+ME-UNI05 - Import and normalize Professional Swing Universe seed list
+ME-UNI06 - Implement editable universe loader and validation
+ME-SR05 - Classify source support for Professional Swing Universe
+ME-RUN20 - Execute clean supported-universe cached-source scan
+ME-OUT01 - Define readable operator report from dry-run artifacts
+ME-CANDIDATE01 - Define non-actionable candidate classification contract
+```
 
 ## Completed Sprint
 
