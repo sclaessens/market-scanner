@@ -188,7 +188,19 @@ The canonical cached-source run now completes for the 12 supported active cached
 Recommended next sprint:
 
 ```text
-ME-TG01 - Define Telegram preview contract
+ME-UNI04 - Define editable Professional Swing Universe contract
 ```
 
-ME-TG01 remains contract-only and must not implement delivery.
+ME-UNI04 remains documentation and contract only.
+
+Planned sequence:
+
+```text
+ME-UNI04 - Define editable Professional Swing Universe contract
+ME-UNI05 - Import and normalize Professional Swing Universe seed list
+ME-UNI06 - Implement editable universe loader and validation
+ME-SR05 - Classify source support for Professional Swing Universe
+ME-RUN20 - Execute clean supported-universe cached-source scan
+ME-OUT01 - Define readable operator report from dry-run artifacts
+ME-CANDIDATE01 - Define non-actionable candidate classification contract
+```

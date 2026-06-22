@@ -50,12 +50,24 @@ ME-SR04 did not introduce provider calls, live SEC or EDGAR calls, yfinance call
 
 ## Next Recommended Sprint
 
-### ME-TG01 - Define Telegram preview contract
+### ME-UNI04 - Define editable Professional Swing Universe contract
 
 Status: RECOMMENDED NEXT AFTER ME-SR04
 
-Job family: ME-TG - Telegram / Preview Governance
+Job family: ME-UNI - Ticker Universe
 
-Goal: define a render-only Telegram preview contract after canonical cached-source execution has a clean supported-ticker run.
+Goal: define the editable Professional Swing Universe contract before further reporting, output, or candidate-classification work.
 
-Scope: documentation and contract only. ME-TG01 must not implement delivery, send Telegram messages, create scheduler behavior, mutate portfolios or watchlists, introduce provider calls, or introduce Decision Engine action semantics.
+Scope: documentation and contract only. ME-UNI04 must not implement runtime code, provider calls, source refresh, output/reporting behavior, delivery behavior, scheduler behavior, portfolio/watchlist writes, or Decision Engine action semantics.
+
+Planned sequence:
+
+```text
+ME-UNI04 - Define editable Professional Swing Universe contract
+ME-UNI05 - Import and normalize Professional Swing Universe seed list
+ME-UNI06 - Implement editable universe loader and validation
+ME-SR05 - Classify source support for Professional Swing Universe
+ME-RUN20 - Execute clean supported-universe cached-source scan
+ME-OUT01 - Define readable operator report from dry-run artifacts
+ME-CANDIDATE01 - Define non-actionable candidate classification contract
+```

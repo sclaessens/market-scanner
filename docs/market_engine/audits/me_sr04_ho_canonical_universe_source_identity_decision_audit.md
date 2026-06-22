@@ -123,5 +123,17 @@ ME-SR04 resolves the HO blocker as a source identity governance decision. HO is 
 Next recommended sprint:
 
 ```text
-ME-TG01 - Define Telegram preview contract
+ME-UNI04 - Define editable Professional Swing Universe contract
+```
+
+Planned sequence:
+
+```text
+ME-UNI04 - Define editable Professional Swing Universe contract
+ME-UNI05 - Import and normalize Professional Swing Universe seed list
+ME-UNI06 - Implement editable universe loader and validation
+ME-SR05 - Classify source support for Professional Swing Universe
+ME-RUN20 - Execute clean supported-universe cached-source scan
+ME-OUT01 - Define readable operator report from dry-run artifacts
+ME-CANDIDATE01 - Define non-actionable candidate classification contract
 ```
