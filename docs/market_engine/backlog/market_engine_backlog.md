@@ -2208,3 +2208,54 @@ Goal: provide approved local portfolio context to canonical-universe cached-sour
 Rationale: ME-RUN17 now discovers ME-SR02 snapshots and executes 12 dry-run payloads, but the chain remains blocked downstream because required local portfolio context is not provided.
 
 Scope: local cached-source RUN behavior only. No provider refresh, live market data, portfolio writes, watchlist writes, Telegram/email delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+## Completed Sprint
+
+### ME-RUN19 - Portfolio-context-aware canonical cached-source dry-run
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: COMPLETED BY ME-RUN19
+
+Goal: execute the canonical-universe cached-source batch dry-run with ME-SR02 snapshots and approved local non-production portfolio context.
+
+Outcome:
+
+* created the local non-production portfolio context file at `data/market_engine/portfolio_contexts/local_portfolio_context.json`;
+* ran the existing ME-RUN18 `--portfolio-context` command path without runtime code changes;
+* selected 13 active `cached_source_only` tickers from the canonical universe;
+* excluded SMCI because `source_policy=manual_review_only`;
+* discovered 12 ME-SR02 cached source snapshots;
+* executed 12 per-ticker dry-runs;
+* completed 10 tickers through Portfolio Review, Decision Engine handoff, Delivery / Reporting, and dry-run summary;
+* preserved 3 blocked tickers: ASML, HO, and TSM;
+* kept generated artifacts under `artifacts/market_engine/me-run19-20260622T103000Z/` uncommitted.
+
+Implemented documentation:
+
+```text
+docs/market_engine/run/me_run19_portfolio_context_aware_canonical_cached_source_dry_run_execution.md
+docs/market_engine/audits/me_run19_portfolio_context_aware_canonical_cached_source_dry_run_audit.md
+docs/market_engine/backlog/me_run19_portfolio_context_aware_canonical_cached_source_dry_run_backlog_entry.md
+docs/market_engine/roadmap/me_run19_portfolio_context_aware_canonical_cached_source_dry_run_roadmap_entry.md
+```
+
+ME-RUN19 did not introduce provider calls, live data calls, Telegram delivery, portfolio writes, watchlist writes, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+## Next Source Refresh Candidate
+
+### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh
+
+Status: CANDIDATE AFTER ME-RUN19
+
+Goal: resolve the remaining cached-source coverage blockers exposed by ME-RUN19 before broader canonical-universe validation or Telegram preview work.
+
+Rationale: ME-RUN19 proved that local portfolio context unlocks Portfolio Review, Decision Engine handoff, and Delivery / Reporting for complete cached-source tickers. Remaining blockers are source-coverage issues: HO lacks a cached source snapshot, while ASML and TSM preserve upstream missing-field evidence and block at Recommendation Review.
+
+Scope: Source Refresh only. No portfolio writes, watchlist writes, Telegram delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
