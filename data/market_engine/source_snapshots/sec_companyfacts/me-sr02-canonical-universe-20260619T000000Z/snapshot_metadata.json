@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-06-19T00:00:00+00:00",
+  "created_at": "2026-06-22T08:03:08.786390+00:00",
   "payload_format_version": "sec-companyfacts-raw-v1",
-  "purpose": "bounded canonical-universe raw source snapshot evidence for Market Engine Source Refresh",
+  "purpose": "bounded canonical-universe raw SEC CompanyFacts source snapshot evidence for Market Engine Source Refresh",
   "run_id": "me-sr02-canonical-universe-20260619T000000Z",
   "source_name": "sec_companyfacts"
 }
