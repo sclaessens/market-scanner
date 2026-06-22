@@ -2148,6 +2148,64 @@ Scope: Source Refresh only. No portfolio writes, watchlist writes, Telegram deli
 
 ## Completed Sprint
 
+### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR03
+
+Goal: resolve or precisely document the canonical-universe cached-source coverage blockers for HO, ASML, and TSM.
+
+Outcome:
+
+* ASML resolved by preserving annual `20-F` `us-gaap` facts in `EUR`;
+* TSM resolved by preserving annual `20-F` `ifrs-full` facts in `USD`;
+* HO remains blocked because no approved cached SEC CompanyFacts snapshot exists locally;
+* canonical rerun improved to 12 completed tickers and 1 blocked ticker.
+
+Implemented runtime change:
+
+```text
+src/market_engine/source_intake/sec_companyfacts_fields.py
+```
+
+Implemented tests:
+
+```text
+tests/market_engine/source_intake/test_sec_companyfacts_field_mapping.py
+```
+
+Implemented documentation:
+
+```text
+docs/market_engine/source_data/me_sr03_canonical_universe_cached_source_coverage_blockers.md
+docs/market_engine/audits/me_sr03_canonical_universe_cached_source_coverage_blockers_audit.md
+docs/market_engine/backlog/me_sr03_canonical_universe_cached_source_coverage_blockers_backlog_entry.md
+docs/market_engine/roadmap/me_sr03_canonical_universe_cached_source_coverage_blockers_roadmap_entry.md
+```
+
+ME-SR03 did not introduce provider calls, live data calls, Telegram delivery, portfolio writes, watchlist writes, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+## Next Source Refresh Candidate
+
+### ME-SR04 - Resolve HO canonical-universe source identity or exclusion decision
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: CANDIDATE AFTER ME-SR03
+
+Goal: decide whether HO should receive an approved source identity/backfill path or be moved out of default cached-source execution until a valid source exists.
+
+Rationale: ME-SR03 resolved ASML and TSM using existing cached source data. HO remains blocked because ME-SR02 recorded it as unsupported and no local cached SEC CompanyFacts snapshot exists.
+
+Scope: Source Refresh / source identity only. No portfolio writes, watchlist writes, Telegram delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+## Completed Sprint
+
 ### ME-RUN17 - Canonical-universe cached-source batch dry-run with ME-SR02 snapshots
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor

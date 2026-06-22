@@ -198,6 +198,78 @@ def test_selected_tag_unit_filing_and_period_metadata_are_preserved():
     assert revenue.frame == "CY2025"
 
 
+def test_foreign_issuer_us_gaap_20f_eur_facts_are_preserved():
+    mapped = map_sec_companyfacts_fields(
+        {
+            "facts": {
+                "us-gaap": {
+                    "RevenueFromContractWithCustomerExcludingAssessedTax": {
+                        "units": {"EUR": [_fact(32667300000, "2025-12-31", form="20-F")]}
+                    },
+                    "NetIncomeLoss": {
+                        "units": {"EUR": [_fact(9609400000, "2025-12-31", form="20-F")]}
+                    },
+                    "NetCashProvidedByUsedInOperatingActivities": {
+                        "units": {"EUR": [_fact(12658500000, "2025-12-31", form="20-F")]}
+                    },
+                    "PaymentsToAcquirePropertyPlantAndEquipment": {
+                        "units": {"EUR": [_fact(1573600000, "2025-12-31", form="20-F")]}
+                    },
+                }
+            }
+        }
+    )
+
+    assert mapped["revenue"] is not None
+    assert mapped["revenue"].sec_tag_selected == (
+        "RevenueFromContractWithCustomerExcludingAssessedTax"
+    )
+    assert mapped["revenue"].taxonomy_namespace == "us-gaap"
+    assert mapped["revenue"].unit == "EUR"
+    assert mapped["revenue"].filing_form == "20-F"
+    assert mapped["capital_expenditures"] is not None
+    assert mapped["capital_expenditures"].unit == "EUR"
+
+
+def test_ifrs_20f_usd_facts_are_preserved_without_currency_conversion():
+    mapped = map_sec_companyfacts_fields(
+        {
+            "facts": {
+                "ifrs-full": {
+                    "Revenue": {
+                        "units": {"USD": [_fact(88268000000, "2024-12-31", form="20-F")]}
+                    },
+                    "ProfitLoss": {
+                        "units": {"USD": [_fact(35301100000, "2024-12-31", form="20-F")]}
+                    },
+                    "CashFlowsFromUsedInOperatingActivities": {
+                        "units": {"USD": [_fact(55693100000, "2024-12-31", form="20-F")]}
+                    },
+                    "PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities": {
+                        "units": {"USD": [_fact(29155400000, "2024-12-31", form="20-F")]}
+                    },
+                }
+            }
+        }
+    )
+
+    assert mapped["revenue"] is not None
+    assert mapped["revenue"].sec_tag_selected == "Revenue"
+    assert mapped["revenue"].taxonomy_namespace == "ifrs-full"
+    assert mapped["revenue"].unit == "USD"
+    assert mapped["revenue"].raw_value == 88268000000
+    assert mapped["net_income"] is not None
+    assert mapped["net_income"].fallback_alias_used == "ProfitLoss"
+    assert mapped["operating_cash_flow"] is not None
+    assert mapped["operating_cash_flow"].sec_tag_selected == (
+        "CashFlowsFromUsedInOperatingActivities"
+    )
+    assert mapped["capital_expenditures"] is not None
+    assert mapped["capital_expenditures"].sec_tag_selected == (
+        "PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities"
+    )
+
+
 def test_mapping_does_not_include_forbidden_authority_fields():
     mapped = map_sec_companyfacts_fields(_complete_payload())
     payload = {field: asdict(value) if value is not None else None for field, value in mapped.items()}
@@ -250,12 +322,12 @@ def _payload(facts: dict[str, list[dict[str, object]]]) -> dict[str, object]:
     }
 
 
-def _fact(value: int | None, end: str) -> dict[str, object]:
+def _fact(value: int | None, end: str, *, form: str = "10-K") -> dict[str, object]:
     return {
         "val": value,
         "fy": int(end[:4]),
         "fp": "FY",
-        "form": "10-K",
+        "form": form,
         "filed": f"{int(end[:4]) + 1}-02-15",
         "start": f"{end[:4]}-01-01",
         "end": end,

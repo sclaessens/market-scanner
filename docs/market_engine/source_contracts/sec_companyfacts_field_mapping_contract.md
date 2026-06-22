@@ -327,6 +327,77 @@ capital_expenditures = missing
 
 Do not convert missing capital expenditures to `0`.
 
+## ME-SR03 Foreign-Issuer Cached-Source Coverage Amendment
+
+ME-SR03 extends the ME10/ME11 field mapping implementation only for cached SEC CompanyFacts source evidence already present in the local ME-SR02 snapshot bundle.
+
+This amendment is source mapping only. It does not authorize source refresh, provider calls, currency conversion, derived values, analysis conclusions, recommendation behavior, portfolio writes, delivery output, or Decision Engine action authority.
+
+### Approved Additional Filing Forms
+
+ME-SR03 approves annual foreign-issuer filings for source mapping:
+
+```text
+20-F
+20-F/A
+```
+
+These are accepted alongside the existing annual form set:
+
+```text
+10-K
+10-K/A
+```
+
+### Approved Additional Reported Units
+
+ME-SR03 permits source fields to preserve raw reported values in:
+
+```text
+USD
+EUR
+```
+
+No currency conversion is performed.
+
+The selected unit must be preserved in field provenance.
+
+### Approved IFRS Taxonomy Namespace
+
+ME-SR03 approves the `ifrs-full` namespace for cached SEC CompanyFacts foreign-issuer source mapping when US GAAP tags are unavailable.
+
+Approved IFRS aliases:
+
+```text
+revenue -> Revenue
+revenue -> RevenueFromContractsWithCustomers
+net_income -> ProfitLoss
+operating_cash_flow -> CashFlowsFromUsedInOperatingActivities
+capital_expenditures -> PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities
+```
+
+Selection rule:
+
+Use approved US GAAP aliases first. Use approved IFRS aliases only when higher-priority US GAAP aliases are unavailable for the selected period and unit.
+
+### ME-SR03 Remediated Tickers
+
+ASML:
+
+* cached source contained approved `us-gaap` foreign-issuer annual `20-F` facts in `EUR`;
+* all four canonical source fields were present after preserving `20-F` and `EUR` provenance.
+
+TSM:
+
+* cached source contained approved `ifrs-full` annual `20-F` facts in `USD`;
+* all four canonical source fields were present after preserving IFRS taxonomy and selected tag provenance.
+
+HO:
+
+* no cached source snapshot exists in the ME-SR02 bundle;
+* ME-SR02 records HO as unsupported because no approved SEC CompanyFacts CIK exists in that bounded snapshot bundle;
+* ME-SR03 does not fabricate source data.
+
 ## Period Selection Contract
 
 ME10 approves the following period-selection rules for source coverage only.
