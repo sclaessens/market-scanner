@@ -1,0 +1,33 @@
+{
+  "portfolio_context_batch_format_version": "market-engine-local-portfolio-context-batch-v1",
+  "non_production_local_context": true,
+  "portfolio_write_authority": false,
+  "portfolio_snapshot_timestamp": "2026-06-22T10:30:00Z",
+  "portfolio_base_currency": "EUR",
+  "portfolio_total_value": 32459,
+  "default_position_state": "not_held",
+  "positions_by_ticker": {
+    "COST": {
+      "position_state": "held",
+      "current_quantity": 2,
+      "current_market_value": 1850,
+      "current_ticker_exposure_pct": 5.7
+    },
+    "HO": {
+      "position_state": "held",
+      "current_quantity": 5,
+      "current_market_value": 845,
+      "current_ticker_exposure_pct": 2.6
+    }
+  },
+  "exposure_buckets": {
+    "single_position_max_pct": 10
+  },
+  "concentration_thresholds": {
+    "review_above_pct": 5
+  },
+  "policy_constraints": {
+    "non_actionable_review_only": true,
+    "local_dry_run_only": true
+  }
+}
