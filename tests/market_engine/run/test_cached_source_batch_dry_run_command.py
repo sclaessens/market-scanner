@@ -171,10 +171,11 @@ def test_ticker_file_parses_comments_commas_and_uppercases(tmp_path: Path) -> No
     ticker_file.write_text("# comment\nnvda, msft\n\namd\n", encoding="utf-8")
     args = _parse("--ticker-file", str(ticker_file))
 
-    tickers, metadata = command._requested_tickers_from_args(args)
+    tickers, metadata, editable_metadata = command._requested_tickers_from_args(args)
 
     assert tickers == ("NVDA", "MSFT", "AMD")
     assert metadata is None
+    assert editable_metadata is None
 
 
 def test_canonical_ticker_universe_selects_active_cached_source_only_rows(
@@ -199,10 +200,11 @@ def test_canonical_ticker_universe_selects_active_cached_source_only_rows(
     )
     args = _parse("--canonical-ticker-universe", str(canonical_csv))
 
-    tickers, metadata = command._requested_tickers_from_args(args)
+    tickers, metadata, editable_metadata = command._requested_tickers_from_args(args)
 
     assert tickers == ("AMD", "NVDA")
     assert metadata is not None
+    assert editable_metadata is None
     assert metadata["selection_policy"] == (
         "active_true_and_source_policy_cached_source_only"
     )
@@ -261,6 +263,123 @@ def test_command_result_passes_canonical_ticker_universe_selection(
     canonical = result["run_context"]["canonical_ticker_universe"]
     assert canonical["selected_tickers"] == ("NVDA",)
     assert canonical["excluded_manual_review_only_tickers"] == ("SMCI",)
+
+
+def test_professional_swing_universe_flag_builds_runtime_ticker_input(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, Any] = {}
+
+    def fake_build_cached_source_batch_dry_run(**kwargs: Any) -> dict[str, Any]:
+        captured.update(kwargs)
+        return _batch_payload(
+            requested_tickers=("NVDA", "AMD"),
+            results=(
+                _ticker_result("NVDA", "completed"),
+                _ticker_result("AMD", "completed"),
+            ),
+        )
+
+    monkeypatch.setattr(
+        command,
+        "build_cached_source_batch_dry_run",
+        fake_build_cached_source_batch_dry_run,
+    )
+    args = _parse(
+        "--professional-swing-universe",
+        "--batch-id",
+        "uni08-test",
+        "--generated-at",
+        "2026-06-22T13:00:00Z",
+        "--ticker-limit",
+        "2",
+    )
+
+    result = command.build_command_result(args)
+
+    assert captured["requested_tickers"][:2] == ("NVDA", "AMD")
+    assert captured["discover_cached_tickers"] is False
+    assert captured["ticker_limit"] == 2
+    assert result["run_context"]["canonical_ticker_universe"] is None
+    editable = result["run_context"]["editable_universe_runtime_input"]
+    assert editable["format_version"] == (
+        "market-engine-editable-universe-runtime-input-v1"
+    )
+    assert editable["source_contract_version"] == (
+        "market-engine-editable-professional-swing-universe-v1"
+    )
+    assert editable["source_path"] == (
+        "data/market_engine/ticker_universe/professional_swing_universe/"
+        "professional_swing_universe.csv"
+    )
+    assert editable["selected_row_count"] >= 2
+    assert "--professional-swing-universe" in result["command"]
+
+
+def test_custom_universe_path_still_uses_canonical_universe_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    canonical_csv = tmp_path / "custom_universe.csv"
+    canonical_csv.write_text(
+        "\n".join(
+            [
+                "ticker,name,market,asset_type,active,priority,source_policy,"
+                "portfolio_relevant,telegram_preview_eligible,"
+                "telegram_delivery_eligible,notes",
+                "MSFT,Microsoft,USA,equity,true,1,cached_source_only,true,true,false,",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    captured: dict[str, Any] = {}
+
+    def fake_build_cached_source_batch_dry_run(**kwargs: Any) -> dict[str, Any]:
+        captured.update(kwargs)
+        return _batch_payload(
+            requested_tickers=("MSFT",),
+            results=(_ticker_result("MSFT", "completed"),),
+        )
+
+    monkeypatch.setattr(
+        command,
+        "build_cached_source_batch_dry_run",
+        fake_build_cached_source_batch_dry_run,
+    )
+    args = _parse("--canonical-ticker-universe", str(canonical_csv))
+
+    result = command.build_command_result(args)
+
+    assert captured["requested_tickers"] == ("MSFT",)
+    assert result["run_context"]["editable_universe_runtime_input"] is None
+    assert result["run_context"]["canonical_ticker_universe"]["source_path"] == (
+        canonical_csv.as_posix()
+    )
+
+
+def test_professional_swing_universe_flag_conflicts_with_custom_universe_path(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    custom_path = tmp_path / "custom_universe.csv"
+
+    with pytest.raises(SystemExit) as exc_info:
+        _parse(
+            "--professional-swing-universe",
+            "--canonical-ticker-universe",
+            str(custom_path),
+        )
+
+    assert exc_info.value.code == 2
+    assert "not allowed with argument" in capsys.readouterr().err
+
+
+def test_cli_help_contains_professional_swing_universe_flag() -> None:
+    help_text = command._argument_parser().format_help()
+
+    assert "--professional-swing-universe" in help_text
+    assert "Professional Swing Universe" in help_text
 
 
 def test_command_result_passes_local_portfolio_contexts_by_ticker(

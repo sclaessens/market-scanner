@@ -14,6 +14,10 @@ from market_engine.run.cached_source_batch_execution import (
     CachedSourceBatchDryRunError,
     build_cached_source_batch_dry_run,
 )
+from market_engine.run.editable_universe_runtime_input import (
+    EditableUniverseRuntimeInputError,
+    build_professional_swing_runtime_input,
+)
 from market_engine.ticker_universe import (
     CANONICAL_TICKER_UNIVERSE_PATH,
     CANONICAL_TICKER_UNIVERSE_CONTRACT_VERSION,
@@ -66,7 +70,11 @@ def run_command(
 def build_command_result(args: argparse.Namespace) -> dict[str, Any]:
     generated_at = args.generated_at or _generated_at_utc()
     batch_id = args.batch_id or _default_batch_id(generated_at)
-    requested_tickers, canonical_universe_metadata = _requested_tickers_from_args(args)
+    (
+        requested_tickers,
+        canonical_universe_metadata,
+        editable_universe_metadata,
+    ) = _requested_tickers_from_args(args)
     portfolio_contexts_by_ticker, portfolio_context_metadata = _portfolio_contexts_from_args(
         args,
         requested_tickers=requested_tickers,
@@ -104,6 +112,7 @@ def build_command_result(args: argparse.Namespace) -> dict[str, Any]:
                 "operator_ticker_input_reference"
             ],
             "canonical_ticker_universe": canonical_universe_metadata,
+            "editable_universe_runtime_input": editable_universe_metadata,
             "portfolio_context": portfolio_context_metadata,
             "overwrite_protection": "enabled",
         },
@@ -144,6 +153,13 @@ def render_human_visible_output(
         _line("Canonical loaded rows", canonical_universe["loaded_row_count"], stdout)
         _line("Canonical selected rows", canonical_universe["selected_row_count"], stdout)
         _line("Excluded manual-review-only", ", ".join(canonical_universe["excluded_manual_review_only_tickers"]) or "none", stdout)
+    editable_universe = context.get("editable_universe_runtime_input")
+    if editable_universe:
+        _line("Editable universe path", editable_universe["source_path"], stdout)
+        _line("Editable universe contract", editable_universe["source_contract_version"], stdout)
+        _line("Editable universe input contract", editable_universe["format_version"], stdout)
+        _line("Editable universe loaded rows", editable_universe["loaded_row_count"], stdout)
+        _line("Editable universe selected rows", editable_universe["selected_row_count"], stdout)
     _line("Discovered cached-source tickers", counts["discovered_cached_source_count"], stdout)
     _line("Selected ticker count", counts["requested_count"], stdout)
     _line("Ticker limit", context["ticker_limit"] or "none", stdout)
@@ -237,6 +253,14 @@ def _argument_parser() -> argparse.ArgumentParser:
         const=str(CANONICAL_TICKER_UNIVERSE_PATH),
         default=None,
     )
+    ticker_group.add_argument(
+        "--professional-swing-universe",
+        action="store_true",
+        help=(
+            "Use the approved editable Professional Swing Universe default path "
+            "as local cached-source batch ticker input."
+        ),
+    )
     ticker_group.add_argument("--discover-cached-tickers", action="store_true")
     parser.add_argument("--portfolio-context", nargs="?", const=DEFAULT_PORTFOLIO_CONTEXT_PATH, default=None)
     parser.add_argument("--ticker-limit", type=int, default=None)
@@ -250,18 +274,24 @@ def _argument_parser() -> argparse.ArgumentParser:
 
 def _requested_tickers_from_args(
     args: argparse.Namespace,
-) -> tuple[tuple[str, ...] | None, dict[str, Any] | None]:
+) -> tuple[tuple[str, ...] | None, dict[str, Any] | None, dict[str, Any] | None]:
     if args.discover_cached_tickers:
-        return None, None
+        return None, None, None
     if args.tickers:
-        return _parse_ticker_tokens(args.tickers.split(",")), None
+        return _parse_ticker_tokens(args.tickers.split(",")), None, None
     if args.ticker_file:
-        return _parse_ticker_file(Path(args.ticker_file)), None
+        return _parse_ticker_file(Path(args.ticker_file)), None, None
     if args.canonical_ticker_universe:
-        return _parse_canonical_ticker_universe(Path(args.canonical_ticker_universe))
+        tickers, metadata = _parse_canonical_ticker_universe(
+            Path(args.canonical_ticker_universe)
+        )
+        return tickers, metadata, None
+    if args.professional_swing_universe:
+        tickers, metadata = _parse_professional_swing_universe()
+        return tickers, None, metadata
     raise CachedSourceBatchDryRunCommandError(
         "Provide --tickers, --ticker-file, --canonical-ticker-universe, "
-        "or --discover-cached-tickers."
+        "--professional-swing-universe, or --discover-cached-tickers."
     )
 
 
@@ -472,6 +502,16 @@ def _parse_canonical_ticker_universe(
     return selected_tickers, metadata
 
 
+def _parse_professional_swing_universe() -> tuple[tuple[str, ...], dict[str, Any]]:
+    try:
+        runtime_input = build_professional_swing_runtime_input()
+    except EditableUniverseRuntimeInputError as exc:
+        raise CachedSourceBatchDryRunCommandError(
+            f"Unable to load Professional Swing Universe runtime input: {exc}"
+        ) from exc
+    return runtime_input.requested_tickers, runtime_input.to_payload()
+
+
 def _parse_ticker_file(path: Path) -> tuple[str, ...]:
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -533,6 +573,8 @@ def _command_line_from_args(args: argparse.Namespace) -> str:
         parts.extend(["--ticker-file", args.ticker_file])
     elif args.canonical_ticker_universe:
         parts.extend(["--canonical-ticker-universe", str(args.canonical_ticker_universe)])
+    elif args.professional_swing_universe:
+        parts.append("--professional-swing-universe")
     elif args.discover_cached_tickers:
         parts.append("--discover-cached-tickers")
     if args.portfolio_context:
