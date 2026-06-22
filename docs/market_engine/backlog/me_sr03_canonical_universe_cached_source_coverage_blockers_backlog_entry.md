@@ -73,8 +73,32 @@ ME-SR03 did not introduce provider calls, live SEC or EDGAR calls, yfinance call
 
 ### ME-SR04 - Resolve HO canonical-universe source identity or exclusion decision
 
-Status: CANDIDATE AFTER ME-SR03
+Status: NEXT CANDIDATE AFTER ME-SR03
 
 Job family: ME-SR - Source Refresh / Source Coverage
 
 Goal: decide whether HO should receive an approved source identity/backfill path or be moved out of default cached-source execution until a valid source exists.
+
+## Planned Sequence After ME-SR04
+
+The operator clarified that the future minimum scan universe must be editable and must support adding, disabling, removing, and classifying tickers without Python hardcoding.
+
+The planned sequence after ME-SR04 is now recorded in:
+
+```text
+docs/market_engine/backlog/me_sr03_next_sprint_sequence_universe_management_backlog_entry.md
+```
+
+Required follow-up sequence:
+
+```text
+ME-UNI04 - Define editable Professional Swing Universe contract
+ME-UNI05 - Import and normalize Professional Swing Universe seed list
+ME-UNI06 - Implement editable universe loader and validation
+ME-SR05  - Classify source support for Professional Swing Universe
+ME-RUN20 - Execute clean supported-universe cached-source scan
+ME-OUT01 - Define readable operator report from dry-run artifacts
+ME-CANDIDATE01 - Define non-actionable candidate classification contract
+```
+
+This sequence must not be skipped in favor of hardcoded large-universe scans, ranking, scoring, entry analysis, or buy planning.
