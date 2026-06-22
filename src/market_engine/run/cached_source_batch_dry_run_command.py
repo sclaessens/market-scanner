@@ -7,6 +7,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Mapping, Sequence, TextIO
 
+from market_engine.portfolio_review.sec_companyfacts_portfolio_review import (
+    MARKET_ENGINE_PORTFOLIO_CONTEXT_FORMAT_VERSION,
+)
 from market_engine.run.cached_source_batch_execution import (
     CachedSourceBatchDryRunError,
     build_cached_source_batch_dry_run,
@@ -22,9 +25,13 @@ from market_engine.ticker_universe import (
 MARKET_ENGINE_REAL_CACHED_SOURCE_BATCH_DRY_RUN_VISIBILITY_FORMAT_VERSION = (
     "market-engine-real-cached-source-batch-dry-run-visibility-v1"
 )
+LOCAL_PORTFOLIO_CONTEXT_BATCH_FORMAT_VERSION = (
+    "market-engine-local-portfolio-context-batch-v1"
+)
 DEFAULT_CACHED_SOURCE_SNAPSHOT_ROOT = "data/market_engine/source_snapshots"
 DEFAULT_BATCH_ID_PREFIX = "real-cached-source-batch-dry-run"
 DEFAULT_ARTIFACT_OUTPUT_ROOT = "artifacts/market_engine"
+DEFAULT_PORTFOLIO_CONTEXT_PATH = "data/market_engine/portfolio_contexts/local_portfolio_context.json"
 
 
 class CachedSourceBatchDryRunCommandError(ValueError):
@@ -60,6 +67,12 @@ def build_command_result(args: argparse.Namespace) -> dict[str, Any]:
     generated_at = args.generated_at or _generated_at_utc()
     batch_id = args.batch_id or _default_batch_id(generated_at)
     requested_tickers, canonical_universe_metadata = _requested_tickers_from_args(args)
+    portfolio_contexts_by_ticker, portfolio_context_metadata = _portfolio_contexts_from_args(
+        args,
+        requested_tickers=requested_tickers,
+        batch_id=batch_id,
+        generated_at=generated_at,
+    )
     artifact_created_at = generated_at if args.write_local_artifacts else None
 
     batch_payload = build_cached_source_batch_dry_run(
@@ -68,6 +81,7 @@ def build_command_result(args: argparse.Namespace) -> dict[str, Any]:
         generated_at=generated_at,
         requested_tickers=requested_tickers,
         discover_cached_tickers=bool(args.discover_cached_tickers),
+        portfolio_contexts_by_ticker=portfolio_contexts_by_ticker,
         ticker_limit=args.ticker_limit,
         write_local_artifacts=bool(args.write_local_artifacts),
         artifact_output_root=args.artifact_output_root,
@@ -90,6 +104,7 @@ def build_command_result(args: argparse.Namespace) -> dict[str, Any]:
                 "operator_ticker_input_reference"
             ],
             "canonical_ticker_universe": canonical_universe_metadata,
+            "portfolio_context": portfolio_context_metadata,
             "overwrite_protection": "enabled",
         },
         "batch_payload": batch_payload,
@@ -132,6 +147,19 @@ def render_human_visible_output(
     _line("Discovered cached-source tickers", counts["discovered_cached_source_count"], stdout)
     _line("Selected ticker count", counts["requested_count"], stdout)
     _line("Ticker limit", context["ticker_limit"] or "none", stdout)
+
+    _section("PORTFOLIO CONTEXT", stdout)
+    portfolio_context = context.get("portfolio_context") or {"enabled": False}
+    _line("Enabled", _yes_no(bool(portfolio_context.get("enabled"))), stdout)
+    if portfolio_context.get("enabled"):
+        _line("Context path", portfolio_context["source_path"], stdout)
+        _line("Batch contract", portfolio_context["batch_contract_version"], stdout)
+        _line("Portfolio context contract", portfolio_context["portfolio_context_format_version"], stdout)
+        _line("Snapshot timestamp", portfolio_context["portfolio_snapshot_timestamp"], stdout)
+        _line("Context ticker count", portfolio_context["context_ticker_count"], stdout)
+        _line("Default position state", portfolio_context["default_position_state"], stdout)
+    else:
+        print("not provided", file=stdout)
 
     _section("SELECTED TICKERS", stdout)
     selected = batch.get("requested_tickers") or ()
@@ -210,6 +238,7 @@ def _argument_parser() -> argparse.ArgumentParser:
         default=None,
     )
     ticker_group.add_argument("--discover-cached-tickers", action="store_true")
+    parser.add_argument("--portfolio-context", nargs="?", const=DEFAULT_PORTFOLIO_CONTEXT_PATH, default=None)
     parser.add_argument("--ticker-limit", type=int, default=None)
     parser.add_argument("--batch-id", default=None)
     parser.add_argument("--generated-at", default=None)
@@ -234,6 +263,161 @@ def _requested_tickers_from_args(
         "Provide --tickers, --ticker-file, --canonical-ticker-universe, "
         "or --discover-cached-tickers."
     )
+
+
+def _portfolio_contexts_from_args(
+    args: argparse.Namespace,
+    *,
+    requested_tickers: Sequence[str] | None,
+    batch_id: str,
+    generated_at: str,
+) -> tuple[dict[str, Mapping[str, Any]], dict[str, Any]]:
+    if not args.portfolio_context:
+        return {}, {"enabled": False}
+    path = Path(args.portfolio_context)
+    payload = _read_json_object(path, description="portfolio context")
+    if payload.get("portfolio_context_batch_format_version") != LOCAL_PORTFOLIO_CONTEXT_BATCH_FORMAT_VERSION:
+        raise CachedSourceBatchDryRunCommandError(
+            "Portfolio context file must use "
+            f"{LOCAL_PORTFOLIO_CONTEXT_BATCH_FORMAT_VERSION}."
+        )
+    if payload.get("non_production_local_context") is not True:
+        raise CachedSourceBatchDryRunCommandError(
+            "Portfolio context file must set non_production_local_context=true."
+        )
+    if payload.get("portfolio_write_authority") not in (None, False):
+        raise CachedSourceBatchDryRunCommandError(
+            "Portfolio context file must not grant portfolio write authority."
+        )
+    positions = _positions_by_ticker(payload.get("positions_by_ticker"))
+    explicit_contexts = _explicit_contexts_by_ticker(payload.get("portfolio_contexts_by_ticker"))
+    context_tickers = tuple(requested_tickers or sorted(set(positions) | set(explicit_contexts)))
+    if not context_tickers:
+        raise CachedSourceBatchDryRunCommandError(
+            "Portfolio context file requires requested tickers or explicit per-ticker context."
+        )
+    default_position_state = str(payload.get("default_position_state") or "unknown")
+    contexts = {
+        ticker: _portfolio_context_for_ticker(
+            ticker=ticker,
+            payload=payload,
+            position=positions.get(ticker, {}),
+            explicit_context=explicit_contexts.get(ticker),
+            path=path,
+            batch_id=batch_id,
+            generated_at=generated_at,
+            default_position_state=default_position_state,
+        )
+        for ticker in context_tickers
+    }
+    metadata = {
+        "enabled": True,
+        "source_path": path.as_posix(),
+        "batch_contract_version": LOCAL_PORTFOLIO_CONTEXT_BATCH_FORMAT_VERSION,
+        "portfolio_context_format_version": str(
+            payload.get("portfolio_context_format_version")
+            or MARKET_ENGINE_PORTFOLIO_CONTEXT_FORMAT_VERSION
+        ),
+        "portfolio_snapshot_timestamp": str(
+            payload.get("portfolio_snapshot_timestamp") or generated_at
+        ),
+        "portfolio_base_currency": str(payload.get("portfolio_base_currency") or "EUR"),
+        "portfolio_write_authority": False,
+        "context_ticker_count": len(contexts),
+        "default_position_state": default_position_state,
+        "context_tickers": tuple(sorted(contexts)),
+    }
+    return contexts, metadata
+
+
+def _portfolio_context_for_ticker(
+    *,
+    ticker: str,
+    payload: Mapping[str, Any],
+    position: Mapping[str, Any],
+    explicit_context: Mapping[str, Any] | None,
+    path: Path,
+    batch_id: str,
+    generated_at: str,
+    default_position_state: str,
+) -> Mapping[str, Any]:
+    if explicit_context is not None:
+        context = dict(explicit_context)
+    else:
+        context = {
+            "portfolio_context_format_version": payload.get("portfolio_context_format_version")
+            or MARKET_ENGINE_PORTFOLIO_CONTEXT_FORMAT_VERSION,
+            "portfolio_context_run_id": f"{batch_id}-{ticker.lower()}-portfolio-context",
+            "portfolio_snapshot_timestamp": payload.get("portfolio_snapshot_timestamp")
+            or generated_at,
+            "portfolio_base_currency": payload.get("portfolio_base_currency") or "EUR",
+            "ticker": ticker,
+            "position_state": position.get("position_state") or default_position_state,
+            "current_quantity": position.get("current_quantity", 0),
+            "current_market_value": position.get("current_market_value", 0),
+            "portfolio_total_value": payload.get("portfolio_total_value"),
+            "current_ticker_exposure_pct": position.get("current_ticker_exposure_pct", 0),
+            "exposure_buckets": payload.get("exposure_buckets") or {},
+            "concentration_thresholds": payload.get("concentration_thresholds") or {},
+            "policy_constraints": payload.get("policy_constraints") or {},
+            "missing_portfolio_context_fields": tuple(
+                position.get("missing_portfolio_context_fields")
+                or payload.get("missing_portfolio_context_fields")
+                or ()
+            ),
+            "stale_portfolio_context_fields": tuple(
+                position.get("stale_portfolio_context_fields")
+                or payload.get("stale_portfolio_context_fields")
+                or ()
+            ),
+            "context_provenance": {
+                "source": "local_non_production_operator_supplied_json",
+                "source_path": path.as_posix(),
+                "batch_id": batch_id,
+                "generated_at": generated_at,
+                "portfolio_write_authority": False,
+            },
+        }
+    context["ticker"] = str(context.get("ticker") or ticker).upper()
+    if context["ticker"] != ticker:
+        raise CachedSourceBatchDryRunCommandError(
+            f"Portfolio context ticker mismatch for {ticker}: {context['ticker']}"
+        )
+    return context
+
+
+def _positions_by_ticker(value: Any) -> dict[str, Mapping[str, Any]]:
+    if value is None:
+        return {}
+    if not isinstance(value, Mapping):
+        raise CachedSourceBatchDryRunCommandError(
+            "positions_by_ticker must be a JSON object keyed by ticker."
+        )
+    positions: dict[str, Mapping[str, Any]] = {}
+    for ticker, payload in value.items():
+        if not isinstance(payload, Mapping):
+            raise CachedSourceBatchDryRunCommandError(
+                "Each positions_by_ticker value must be a JSON object."
+            )
+        positions[str(ticker).upper()] = dict(payload)
+    return positions
+
+
+def _explicit_contexts_by_ticker(value: Any) -> dict[str, Mapping[str, Any]]:
+    if value is None:
+        return {}
+    if not isinstance(value, Mapping):
+        raise CachedSourceBatchDryRunCommandError(
+            "portfolio_contexts_by_ticker must be a JSON object keyed by ticker."
+        )
+    contexts: dict[str, Mapping[str, Any]] = {}
+    for ticker, payload in value.items():
+        if not isinstance(payload, Mapping):
+            raise CachedSourceBatchDryRunCommandError(
+                "Each portfolio_contexts_by_ticker value must be a JSON object."
+            )
+        contexts[str(ticker).upper()] = dict(payload)
+    return contexts
 
 
 def _parse_canonical_ticker_universe(
@@ -313,6 +497,24 @@ def _parse_ticker_tokens(tokens: Sequence[str]) -> tuple[str, ...]:
     return tickers
 
 
+def _read_json_object(path: Path, *, description: str) -> Mapping[str, Any]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise CachedSourceBatchDryRunCommandError(
+            f"Unable to read {description} file: {path}"
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise CachedSourceBatchDryRunCommandError(
+            f"{description.title()} file is invalid JSON: {path}"
+        ) from exc
+    if not isinstance(payload, Mapping):
+        raise CachedSourceBatchDryRunCommandError(
+            f"{description.title()} file must contain a JSON object."
+        )
+    return payload
+
+
 def _generated_at_utc() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
 
@@ -333,6 +535,8 @@ def _command_line_from_args(args: argparse.Namespace) -> str:
         parts.extend(["--canonical-ticker-universe", str(args.canonical_ticker_universe)])
     elif args.discover_cached_tickers:
         parts.append("--discover-cached-tickers")
+    if args.portfolio_context:
+        parts.extend(["--portfolio-context", str(args.portfolio_context)])
     if args.ticker_limit is not None:
         parts.extend(["--ticker-limit", str(args.ticker_limit)])
     if args.batch_id:
@@ -352,6 +556,8 @@ def _next_review_actions(batch_payload: Mapping[str, Any], args: argparse.Namesp
         "Capture this terminal output with `| tee /dev/tty | pbcopy`.",
         "Review completed, blocked, and failed ticker counts before broadening input.",
     ]
+    if args.portfolio_context:
+        actions.append("Verify portfolio context metadata before using the run output for review.")
     if args.write_local_artifacts:
         actions.append("Inspect the batch manifest and at least one per-ticker artifact.")
         actions.append("Do not commit generated artifacts by default.")

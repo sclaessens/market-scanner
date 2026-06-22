@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from io import StringIO
 from pathlib import Path
 from typing import Any
@@ -69,8 +70,10 @@ def test_command_result_uses_explicit_tickers_and_visibility_contract(monkeypatc
     )
     assert result["run_context"]["batch_id"] == "run15-test"
     assert result["run_context"]["artifact_writing_enabled"] is False
+    assert result["run_context"]["portfolio_context"] == {"enabled": False}
     assert captured["requested_tickers"] == ("NVDA", "MSFT")
     assert captured["discover_cached_tickers"] is False
+    assert captured["portfolio_contexts_by_ticker"] == {}
     assert captured["write_local_artifacts"] is False
     assert captured["artifact_created_at"] is None
 
@@ -149,6 +152,7 @@ def test_render_human_visible_output_contains_required_sections() -> None:
     for section in (
         "RUN CONTEXT",
         "INPUT DISCOVERY",
+        "PORTFOLIO CONTEXT",
         "SELECTED TICKERS",
         "EXECUTION PROGRESS",
         "BATCH SUMMARY",
@@ -259,6 +263,61 @@ def test_command_result_passes_canonical_ticker_universe_selection(
     assert canonical["excluded_manual_review_only_tickers"] == ("SMCI",)
 
 
+def test_command_result_passes_local_portfolio_contexts_by_ticker(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    portfolio_context_path = _write_run18_portfolio_context(tmp_path)
+    captured: dict[str, Any] = {}
+
+    def fake_build_cached_source_batch_dry_run(**kwargs: Any) -> dict[str, Any]:
+        captured.update(kwargs)
+        return _batch_payload(
+            requested_tickers=("NVDA", "AMD"),
+            results=(
+                _ticker_result("NVDA", "completed"),
+                _ticker_result("AMD", "completed"),
+            ),
+        )
+
+    monkeypatch.setattr(
+        command,
+        "build_cached_source_batch_dry_run",
+        fake_build_cached_source_batch_dry_run,
+    )
+    args = _parse(
+        "--tickers",
+        "nvda,amd",
+        "--portfolio-context",
+        str(portfolio_context_path),
+        "--batch-id",
+        "run18-test",
+        "--generated-at",
+        "2026-06-22T12:00:00Z",
+    )
+
+    result = command.build_command_result(args)
+
+    contexts = captured["portfolio_contexts_by_ticker"]
+    assert tuple(sorted(contexts)) == ("AMD", "NVDA")
+    assert contexts["NVDA"]["portfolio_context_format_version"] == (
+        "market-engine-portfolio-context-v1"
+    )
+    assert contexts["NVDA"]["portfolio_context_run_id"] == (
+        "run18-test-nvda-portfolio-context"
+    )
+    assert contexts["NVDA"]["position_state"] == "not_held"
+    assert contexts["NVDA"]["current_quantity"] == 0
+    assert contexts["AMD"]["current_quantity"] == 4
+    assert contexts["AMD"]["position_state"] == "held"
+    metadata = result["run_context"]["portfolio_context"]
+    assert metadata["enabled"] is True
+    assert metadata["portfolio_write_authority"] is False
+    assert metadata["context_ticker_count"] == 2
+    assert "--portfolio-context" in result["command"]
+    assert any("portfolio context" in action for action in result["next_review_actions"])
+
+
 def test_canonical_universe_batch_discovers_me_sr02_style_snapshots(
     tmp_path: Path,
 ) -> None:
@@ -340,6 +399,37 @@ def test_run_command_returns_error_for_invalid_ticker_file() -> None:
 
 def _parse(*argv: str) -> argparse.Namespace:
     return command._argument_parser().parse_args(list(argv))
+
+
+def _write_run18_portfolio_context(tmp_path: Path) -> Path:
+    path = tmp_path / "portfolio_context.json"
+    path.write_text(
+        json.dumps(
+            {
+                "portfolio_context_batch_format_version": "market-engine-local-portfolio-context-batch-v1",
+                "non_production_local_context": True,
+                "portfolio_write_authority": False,
+                "portfolio_snapshot_timestamp": "2026-06-22T11:00:00Z",
+                "portfolio_base_currency": "EUR",
+                "portfolio_total_value": 32459,
+                "default_position_state": "not_held",
+                "positions_by_ticker": {
+                    "AMD": {
+                        "position_state": "held",
+                        "current_quantity": 4,
+                        "current_market_value": 520,
+                        "current_ticker_exposure_pct": 1.6,
+                    }
+                },
+                "exposure_buckets": {"single_position_max_pct": 10},
+                "concentration_thresholds": {"review_above_pct": 5},
+                "policy_constraints": {"non_actionable_review_only": True},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return path
 
 
 def _write_run17_canonical_universe(tmp_path: Path) -> Path:
