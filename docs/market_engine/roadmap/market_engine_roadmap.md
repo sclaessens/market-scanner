@@ -395,6 +395,50 @@ Scope: Source Refresh only. No portfolio writes, watchlist writes, Telegram deli
 
 ## Completed Sprint
 
+### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR03
+
+Goal: resolve or precisely document the source-coverage blockers exposed by ME-RUN19.
+
+Outcome:
+
+* ASML resolved through annual `20-F` `us-gaap` `EUR` source mapping;
+* TSM resolved through annual `20-F` `ifrs-full` `USD` source mapping;
+* HO remains blocked because no approved cached source snapshot exists locally;
+* canonical rerun reached 12 completed tickers and 1 blocked ticker.
+
+Implemented documentation:
+
+```text
+docs/market_engine/source_data/me_sr03_canonical_universe_cached_source_coverage_blockers.md
+docs/market_engine/audits/me_sr03_canonical_universe_cached_source_coverage_blockers_audit.md
+docs/market_engine/backlog/me_sr03_canonical_universe_cached_source_coverage_blockers_backlog_entry.md
+docs/market_engine/roadmap/me_sr03_canonical_universe_cached_source_coverage_blockers_roadmap_entry.md
+```
+
+## Next Source Refresh Candidate
+
+### ME-SR04 - Resolve HO canonical-universe source identity or exclusion decision
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: CANDIDATE AFTER ME-SR03
+
+Goal: decide whether HO should receive an approved source identity/backfill path or be moved out of default cached-source execution until a valid source exists.
+
+Rationale: ASML and TSM no longer block after source mapping remediation. HO remains the only canonical cached-source blocker.
+
+Scope: Source Refresh / source identity only. No portfolio writes, watchlist writes, Telegram delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+## Completed Sprint
+
 ### ME-RUN17 - Canonical-universe cached-source batch dry-run with ME-SR02 snapshots
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
