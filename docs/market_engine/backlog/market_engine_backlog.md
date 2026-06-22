@@ -2145,3 +2145,66 @@ Goal: produce or validate bounded local SEC CompanyFacts cached source snapshots
 Rationale: ME-RUN16 proved canonical-universe RUN selection and fail-closed behavior. It also showed that this checkout has no cached source snapshots under `data/market_engine/source_snapshots`, so every selected ticker blocks before downstream dry-run execution.
 
 Scope: Source Refresh only. No portfolio writes, watchlist writes, Telegram delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+## Completed Sprint
+
+### ME-RUN17 - Canonical-universe cached-source batch dry-run with ME-SR02 snapshots
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: COMPLETED WITH DOWNSTREAM BLOCKED OUTCOME BY ME-RUN17
+
+Goal: execute and fix canonical-universe cached-source batch dry-run behavior using ME-SR02 snapshots.
+
+Outcome:
+
+* fixed RUN discovery for `sec_companyfacts/<snapshot_id>/raw/*.json`;
+* preserved older `*/raw/*.json` discovery;
+* selected 13 canonical active `cached_source_only` tickers;
+* excluded SMCI as `manual_review_only`;
+* discovered 12 ME-SR02 raw snapshots;
+* executed 12 local end-to-end dry-run payloads;
+* kept HO blocked as missing cached source;
+* generated 12 local per-ticker artifacts plus a batch manifest;
+* preserved provider-free, local-only, non-actionable boundaries.
+
+Implemented runtime change:
+
+```text
+src/market_engine/run/cached_source_batch_execution.py
+```
+
+Implemented test change:
+
+```text
+tests/market_engine/run/test_cached_source_batch_dry_run_command.py
+```
+
+Implemented documentation:
+
+```text
+docs/market_engine/run/me_run17_canonical_universe_cached_source_batch_dry_run_with_me_sr02_snapshots.md
+docs/market_engine/audits/me_run17_canonical_universe_cached_source_batch_dry_run_audit.md
+docs/market_engine/backlog/me_run17_canonical_universe_cached_source_batch_dry_run_backlog_entry.md
+docs/market_engine/roadmap/me_run17_canonical_universe_cached_source_batch_dry_run_roadmap_entry.md
+```
+
+ME-RUN17 did not introduce provider calls, live data calls, Telegram delivery, portfolio writes, watchlist writes, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+## Next RUN Candidate
+
+### ME-RUN18 - Provide portfolio context for canonical-universe cached-source dry-runs
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: CANDIDATE AFTER ME-RUN17
+
+Goal: provide approved local portfolio context to canonical-universe cached-source dry-runs so downstream review stages can progress without production portfolio writes.
+
+Rationale: ME-RUN17 now discovers ME-SR02 snapshots and executes 12 dry-run payloads, but the chain remains blocked downstream because required local portfolio context is not provided.
+
+Scope: local cached-source RUN behavior only. No provider refresh, live market data, portfolio writes, watchlist writes, Telegram/email delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
