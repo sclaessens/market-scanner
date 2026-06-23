@@ -36,14 +36,16 @@ docs/market_engine/roadmap/me_uni07_editable_universe_runtime_input_roadmap_entr
 
 ## Next roadmap item
 
-Recommended:
+Completed hardening sprint:
+
+```text
+ME-UNI08 - Add first-class Professional Swing Universe CLI flag
+```
+
+Recommended next roadmap item:
 
 ```text
 ME-SR05 - Classify source support for Professional Swing Universe
 ```
 
-Optional hardening candidate:
-
-```text
-ME-UNI08 - Add first-class professional-swing-universe CLI flag
-```
+ME-UNI08 makes Professional Swing Universe selection first-class in the cached-source batch CLI. ME-SR05 remains the next source-support sprint.

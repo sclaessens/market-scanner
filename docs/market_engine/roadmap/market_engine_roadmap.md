@@ -444,28 +444,44 @@ Outcome:
 
 Scope: Source Refresh / source identity only. No portfolio writes, watchlist writes, Telegram delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
 
-## Next Universe Governance Candidate
+## Completed Universe Governance Sprint
 
-### ME-UNI04 - Define editable Professional Swing Universe contract
+### ME-UNI08 - Add first-class Professional Swing Universe CLI flag
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
 Job family: ME-UNI - Ticker Universe
 
-Status: RECOMMENDED NEXT AFTER ME-SR04
+Status: COMPLETED BY ME-UNI08
 
-Goal: define the editable Professional Swing Universe contract before further reporting, output, or candidate-classification work.
+Goal: expose the approved editable Professional Swing Universe as a first-class local cached-source batch runtime CLI choice.
 
-Rationale: project planning requires the editable Professional Swing Universe sequence before Telegram/reporting/output work. ME-SR04 closes the HO blocker for the current canonical SEC CompanyFacts cached-source universe, but the next roadmap phase is universe governance rather than preview or delivery.
+Outcome:
 
-Scope: Documentation and contract only. ME-UNI04 must not implement runtime code, provider calls, source refresh, output/reporting behavior, delivery behavior, scheduler behavior, portfolio/watchlist writes, or Decision Engine action semantics.
+* added `--professional-swing-universe` to the cached-source batch dry-run command;
+* routed the flag through the existing ME-UNI07 runtime-input builder;
+* preserved custom `--canonical-ticker-universe <path>` behavior;
+* added mutual-exclusion failure behavior for Professional Swing and custom universe inputs.
 
-Planned sequence:
+Scope: ME-UNI08 did not introduce provider calls, source refresh, output/reporting behavior, delivery behavior, scheduler behavior, portfolio/watchlist writes, Decision Engine action semantics, or trading authority.
+
+## Next Source Support Candidate
+
+### ME-SR05 - Classify source support for Professional Swing Universe
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: RECOMMENDED NEXT AFTER ME-UNI08
+
+Goal: classify actual cached-source support for Professional Swing Universe rows before broad supported-universe cached-source scanning.
+
+Rationale: ME-UNI08 makes the editable Professional Swing Universe easy to select at runtime, but source-support classification remains a separate Source Refresh responsibility.
+
+Planned sequence after ME-UNI08:
 
 ```text
-ME-UNI04 - Define editable Professional Swing Universe contract
-ME-UNI05 - Import and normalize Professional Swing Universe seed list
-ME-UNI06 - Implement editable universe loader and validation
 ME-SR05 - Classify source support for Professional Swing Universe
 ME-RUN20 - Execute clean supported-universe cached-source scan
 ME-OUT01 - Define readable operator report from dry-run artifacts
