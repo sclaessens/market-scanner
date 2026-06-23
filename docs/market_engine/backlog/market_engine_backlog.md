@@ -2346,11 +2346,23 @@ Owner roles: Product Owner / Operator / Technical Architect / Development Lead /
 
 Job family: ME-RUN - Run / orchestration jobs
 
-Status: RECOMMENDED NEXT AFTER ME-RUN21
+Status: COMPLETED BY ME-RUN22
 
 Goal: produce the first human-readable, non-actionable Market Engine interpretation report from the ME-RUN20 cached-source supported-universe artifacts.
 
 Scope: ME-RUN22 must preserve the non-actionable boundary. It may summarize and explain generated artifacts, but it must not introduce BUY / SELL / HOLD advice, allocation, ranking, scoring, target prices, urgency, conviction, tradeability, position sizing, execution instructions, broker-ready output, Telegram delivery, or production writes.
+
+Outcome:
+
+* implemented `market-engine-interpretation-report-v1`;
+* added a deterministic local report generator for cached-source dry-run artifacts;
+* generated Markdown and companion JSON summary outputs;
+* preserved per-ticker artifact paths, stage states, missing/stale/blocked markers, and provenance references;
+* handled missing and malformed ticker artifacts with explicit skipped reasons;
+* added focused tests for happy path, missing files, malformed JSON, deterministic ordering, guardrail metadata, and CLI output;
+* generated a local sample report under `artifacts/market_engine/me-run22-human-readable-report-me-run20-supported-universe-20260623T120000Z/`;
+* did not commit generated local report artifacts by default;
+* preserved the non-actionable, provider-free, local-only boundary.
 
 ### ME-OUT01 - Define readable operator report contract from dry-run artifacts
 
@@ -2358,7 +2370,7 @@ Owner roles: Product Owner / Operator / Technical Architect / Development Lead /
 
 Job family: ME-OUT - Output / Operator Reporting
 
-Status: PLANNED AFTER ME-RUN22
+Status: RECOMMENDED NEXT AFTER ME-RUN22
 
 Goal: define a readable, non-actionable operator report contract from generated dry-run artifacts without introducing delivery, trading authority, ranking, scoring, allocation, or execution behavior.
 
