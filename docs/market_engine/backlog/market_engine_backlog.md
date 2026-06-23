@@ -2275,20 +2275,40 @@ Owner roles: Product Owner / Operator / Technical Architect / Development Lead /
 
 Job family: ME-SR - Source Refresh / Source Coverage
 
-Status: RECOMMENDED NEXT AFTER ME-UNI08
+Status: COMPLETED BY ME-SR05
 
 Goal: classify actual cached-source support for Professional Swing Universe rows before broad supported-universe cached-source scanning.
 
 Rationale: ME-UNI08 makes the editable Professional Swing Universe easy to select at runtime, but operator source-policy hints are not authoritative source-support truth.
 
-Planned sequence after ME-UNI08:
+Outcome:
+
+* implemented deterministic Professional Swing Universe source-support classification;
+* consumed the validated editable Professional Swing Universe loader;
+* classified local SEC CompanyFacts source support from approved cached snapshot artifacts and provider error records;
+* emitted explicit statuses for `supported_cached`, `missing_snapshot`, `unsupported_sec_companyfacts`, `missing_required_source_field`, `malformed_or_unreadable_source_artifact`, `ambiguous_identity`, `manual_review_only`, and `excluded`;
+* preserved source artifact references, provider error references, required source field status, missing-field evidence, universe row references, and numeric-zero evidence;
+* preserved the source-support-only boundary with no provider calls, source refresh, reporting, portfolio/watchlist mutation, Decision Engine behavior, action semantics, allocation, ranking, scoring, urgency, conviction, tradeability, position sizing, order, or execution behavior.
+
+Planned sequence after ME-SR05:
 
 ```text
-ME-SR05 - Classify source support for Professional Swing Universe
 ME-RUN20 - Execute clean supported-universe cached-source scan
 ME-OUT01 - Define readable operator report from dry-run artifacts
 ME-CANDIDATE01 - Define non-actionable candidate classification contract
 ```
+
+### ME-RUN20 - Execute clean supported-universe cached-source scan
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: RECOMMENDED NEXT AFTER ME-SR05
+
+Goal: execute a local cached-source scan against the currently supported active subset of the editable Professional Swing Universe and produce inspectable local artifacts.
+
+Scope: ME-RUN20 should consume ME-SR05 source-support classification results. Unsupported, missing, malformed, ambiguous, manual-review-only, and excluded rows must remain visible but must not be silently treated as clean supported cached-source rows.
 
 ## Completed Sprint
 
