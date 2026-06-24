@@ -40,6 +40,9 @@ def run_command(
             batch_id=batch_id,
             generated_at=generated_at,
             ticker_limit=args.ticker_limit,
+            non_production_portfolio_context_fixture_path=(
+                args.non_production_portfolio_context_fixture
+            ),
             write_local_artifacts=bool(args.write_local_artifacts),
             artifact_output_root=args.artifact_output_root,
         )
@@ -86,6 +89,27 @@ def render_human_visible_output(payload: Mapping[str, Any], *, stdout: TextIO) -
     supported = tuple(payload.get("supported_cached_tickers") or ())
     print(", ".join(supported) if supported else "none", file=stdout)
 
+    _section("PORTFOLIO CONTEXT", stdout)
+    portfolio_context = payload.get("portfolio_context") or {"portfolio_context_source": "absent"}
+    _line("Portfolio context source", portfolio_context.get("portfolio_context_source") or "absent", stdout)
+    if portfolio_context.get("enabled"):
+        _line("Fixture path", portfolio_context["source_path"], stdout)
+        _line("Fixture contract", portfolio_context["batch_contract_version"], stdout)
+        _line("Context ticker count", portfolio_context["context_ticker_count"], stdout)
+        _line("Non-production boundary", portfolio_context["non_production_boundary"], stdout)
+        _line(
+            "No broker or live portfolio access",
+            portfolio_context["no_broker_or_live_portfolio_access"],
+            stdout,
+        )
+        _line(
+            "No portfolio or watchlist mutation",
+            portfolio_context["no_portfolio_or_watchlist_mutation"],
+            stdout,
+        )
+    else:
+        print("not provided", file=stdout)
+
     _section("NON-SUPPORTED ENTRIES", stdout)
     non_supported = tuple(payload.get("non_supported_entries") or ())
     if not non_supported:
@@ -129,6 +153,7 @@ def _argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--batch-id", default=None)
     parser.add_argument("--generated-at", default=None)
     parser.add_argument("--ticker-limit", type=int, default=None)
+    parser.add_argument("--non-production-portfolio-context-fixture", default=None)
     parser.add_argument("--write-local-artifacts", action="store_true")
     parser.add_argument("--artifact-output-root", default=str(DEFAULT_ARTIFACT_OUTPUT_ROOT))
     parser.add_argument("--emit-json", action="store_true")

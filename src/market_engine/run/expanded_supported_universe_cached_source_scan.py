@@ -9,6 +9,11 @@ from market_engine.run.cached_source_batch_execution import (
     CachedSourceBatchDryRunError,
     build_cached_source_batch_dry_run,
 )
+from market_engine.run.local_portfolio_context_fixture import (
+    LocalPortfolioContextFixtureError,
+    absent_portfolio_context_metadata,
+    load_local_portfolio_contexts_by_ticker,
+)
 from market_engine.source_support import (
     EXPANDED_PROFESSIONAL_SWING_SOURCE_SUPPORT_FORMAT_VERSION,
     ExpandedProfessionalSwingSourceSupportError,
@@ -50,6 +55,7 @@ class ExpandedSupportedUniverseCachedSourceScanResult:
     expanded_universe_count: int
     supported_cached_tickers: tuple[str, ...]
     non_supported_entries: tuple[dict[str, str], ...]
+    portfolio_context: dict[str, Any]
     batch_payload: dict[str, Any] | None
     run_state: str
     blocked_reasons: tuple[str, ...]
@@ -73,6 +79,7 @@ def build_expanded_supported_universe_cached_source_scan(
     batch_id: str,
     generated_at: str | None = None,
     ticker_limit: int | None = None,
+    non_production_portfolio_context_fixture_path: str | Path | None = None,
     write_local_artifacts: bool = False,
     artifact_output_root: str | Path = DEFAULT_ARTIFACT_OUTPUT_ROOT,
 ) -> ExpandedSupportedUniverseCachedSourceScanResult:
@@ -126,6 +133,24 @@ def build_expanded_supported_universe_cached_source_scan(
             reason="No expanded Professional Swing Universe entries are supported_cached.",
         )
 
+    portfolio_contexts_by_ticker: Mapping[str, Mapping[str, Any]] | None = None
+    portfolio_context_metadata = absent_portfolio_context_metadata()
+    if non_production_portfolio_context_fixture_path is not None:
+        try:
+            (
+                portfolio_contexts_by_ticker,
+                portfolio_context_metadata,
+            ) = load_local_portfolio_contexts_by_ticker(
+                path=non_production_portfolio_context_fixture_path,
+                requested_tickers=supported_tickers,
+                batch_id=safe_batch_id,
+                generated_at=generated_at or "",
+            )
+        except LocalPortfolioContextFixtureError as exc:
+            raise ExpandedSupportedUniverseCachedSourceScanError(
+                f"ME-RUN24 non-production portfolio-context fixture failed closed: {exc}"
+            ) from exc
+
     try:
         batch_payload = build_cached_source_batch_dry_run(
             source_snapshot_root=source_root,
@@ -133,6 +158,7 @@ def build_expanded_supported_universe_cached_source_scan(
             generated_at=generated_at,
             requested_tickers=supported_tickers,
             discover_cached_tickers=False,
+            portfolio_contexts_by_ticker=portfolio_contexts_by_ticker,
             ticker_limit=None,
             write_local_artifacts=write_local_artifacts,
             artifact_output_root=output_root,
@@ -157,6 +183,7 @@ def build_expanded_supported_universe_cached_source_scan(
         expanded_universe_count=len(source_support.entries),
         supported_cached_tickers=supported_tickers,
         non_supported_entries=non_supported_entries,
+        portfolio_context=portfolio_context_metadata,
         batch_payload=batch_payload,
         run_state="completed",
         blocked_reasons=(),
@@ -188,6 +215,7 @@ def _blocked_result(
         expanded_universe_count=len(source_support.entries),
         supported_cached_tickers=(),
         non_supported_entries=non_supported_entries,
+        portfolio_context=absent_portfolio_context_metadata(),
         batch_payload=None,
         run_state="blocked_no_supported_cached_entries",
         blocked_reasons=(reason,),

@@ -450,6 +450,28 @@ Scope: Source Refresh only. No portfolio writes, watchlist writes, Telegram deli
 
 ## Completed Sprint
 
+### ME-RUN24 - Non-production portfolio-context fixture for expanded scans
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: COMPLETED BY ME-RUN24
+
+Goal: unlock the next ME-RUN23 Portfolio Review blocker by allowing expanded cached-source scans to opt in to an explicit non-production portfolio-context fixture.
+
+Outcome:
+
+* ME-RUN23 source-support and cached-source scan selection remain unchanged;
+* expanded scans can pass fixture-backed `portfolio_contexts_by_ticker` into cached-source batch execution only when explicitly requested;
+* fixture provenance records absent versus non-production fixture context;
+* fixture validation fails closed for missing, malformed, or unsupported input;
+* all behavior remains local, non-production, non-actionable, and mutation-free.
+
+Next: rerun the expanded cached-source scan locally with the non-production fixture enabled and inspect the next downstream state before planning follow-up work.
+
+## Completed Sprint
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
