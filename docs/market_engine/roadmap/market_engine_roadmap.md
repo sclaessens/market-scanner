@@ -2,11 +2,11 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-CANDIDATE02
+Status: ACTIVE ROADMAP AFTER ME-UNI09
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-CANDIDATE02.
+This roadmap preserves the Market Engine sprint sequence after ME-UNI09.
 
 ME-RUN07 proved that the Market Engine can run end-to-end locally through `local_snapshot_fixture` using realistic non-production fixture data and can persist a deterministic local dry-run review artifact through the existing RUN05 artifact flag.
 
@@ -31,6 +31,8 @@ ME-RUN16 consumed the canonical ticker universe in the cached-source batch dry-r
 ME-RUN17 fixed RUN cached-source discovery for the ME-SR02 source-refresh snapshot layout. It discovered 12 canonical-universe snapshots, generated 12 local dry-run artifacts, kept HO blocked as missing cached source, and preserved downstream blocked states without provider calls or action authority.
 
 Since ME-RUN17, the project completed the supported-universe execution and readable-output chain through ME-RUN19, ME-SR05, ME-RUN20, ME-RUN21, ME-RUN22, ME-OUT01, ME-OUT02, ME-CANDIDATE01, and ME-CANDIDATE02.
+
+ME-UNI09 then implemented controlled Professional Swing Universe expansion from non-actionable candidate-classification output. It preserves existing universe entries, includes only eligible candidates with valid proposed universe rows, excludes unsafe or ineligible candidates with explicit reasons, and remains non-actionable universe maintenance only.
 
 The active planning direction is now expanded-universe execution. The project should scale from the current supported subset toward a larger Professional Swing Universe / target analysis universe before prioritizing additional polish, QA, delivery preview, portfolio-context persistence, Decision Engine handoff review hardening, or extra governance layers.
 
@@ -85,33 +87,31 @@ Completed job-scoped chain:
 | ME-OUT02 | Output / Operator Reporting | Completed |
 | ME-CANDIDATE01 | Candidate Classification | Completed |
 | ME-CANDIDATE02 | Candidate Classification | Completed |
+| ME-UNI09 | Ticker Universe | Completed |
 
 ## Active Next Direction
 
-### ME-UNI09 - Expand Professional Swing Universe toward target analysis universe
+### ME-SR06 - Classify source support for expanded Professional Swing Universe
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
-Job family: ME-UNI - Ticker Universe
+Job family: ME-SR - Source Refresh / Source Coverage
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-CANDIDATE02
+Status: NEXT ACTIVE CANDIDATE AFTER ME-UNI09
 
-Goal: expand the editable Professional Swing Universe from the current small supported subset toward a materially larger target analysis universe so the Market Engine can move from proof-of-flow to broader ticker analysis.
+Goal: classify cached-source support for the expanded Professional Swing Universe produced or proposed by ME-UNI09.
 
-Scope: universe/data-governance only. Add or curate tickers, source-policy metadata, identity metadata, active/manual/excluded state, and validation expectations. No provider calls, live data, analysis changes, report changes, candidate classification changes, delivery, portfolio/watchlist writes, or trading authority.
+Scope: source-support classification only. Use existing approved local source artifacts and metadata. No provider calls, live data, source refresh, analysis changes, report changes, candidate-classification changes, delivery, portfolio/watchlist writes, or trading authority.
 
 Rationale: the system now has a local dry-run, readable operator output, and non-actionable candidate classification path. The priority is to scale ticker coverage before adding more polish or governance layers.
 
-### Planned Next Candidates After ME-UNI09
+### Planned Next Candidate After ME-SR06
 
 ```text
-ME-SR06 - Classify source support for expanded Professional Swing Universe
 ME-RUN23 - Execute expanded supported-universe cached-source run and produce readable/candidate outputs
 ```
 
-ME-SR06 should classify cached-source support for the expanded universe created by ME-UNI09.
-
-ME-RUN23 should execute the expanded supported-universe cached-source run and produce readable operator output plus non-actionable candidate classification over that larger universe.
+ME-RUN23 should execute the expanded supported-universe cached-source run and produce readable operator output plus non-actionable candidate classification over the larger supported universe after ME-SR06 classifies source support.
 
 ## Deferred Follow-up Candidates
 
@@ -126,7 +126,7 @@ These sprints are not rejected and not blocked. They are intentionally deferred 
 
 ## Scale-first Planning Rule
 
-After ME-CANDIDATE02, do not insert additional QA, polish, delivery, portfolio, governance, or candidate-classification refinement sprints ahead of ME-UNI09 / ME-SR06 / ME-RUN23 unless a concrete blocker is discovered in local execution, source support, report generation, or candidate-classification output over the expanded universe.
+After ME-CANDIDATE02 and ME-UNI09, do not insert additional QA, polish, delivery, portfolio, governance, or candidate-classification refinement sprints ahead of ME-SR06 / ME-RUN23 unless a concrete blocker is discovered in local execution, source support, report generation, or candidate-classification output over the expanded universe.
 
 ## Recent RUN chain
 

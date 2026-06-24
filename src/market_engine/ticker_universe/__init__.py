@@ -18,6 +18,14 @@ from market_engine.ticker_universe.professional_swing import (
     load_professional_swing_universe,
     validate_professional_swing_universe,
 )
+from market_engine.ticker_universe.professional_swing_expansion import (
+    ELIGIBLE_CANDIDATE_BUCKETS,
+    PROFESSIONAL_SWING_UNIVERSE_EXPANSION_FORMAT_VERSION,
+    ProfessionalSwingUniverseExpansionDecision,
+    ProfessionalSwingUniverseExpansionError,
+    ProfessionalSwingUniverseExpansionResult,
+    build_professional_swing_universe_expansion,
+)
 
 __all__ = [
     "CANONICAL_TICKER_UNIVERSE_CONTRACT_VERSION",
@@ -36,4 +44,10 @@ __all__ = [
     "ProfessionalSwingUniverseValidationError",
     "load_professional_swing_universe",
     "validate_professional_swing_universe",
+    "ELIGIBLE_CANDIDATE_BUCKETS",
+    "PROFESSIONAL_SWING_UNIVERSE_EXPANSION_FORMAT_VERSION",
+    "ProfessionalSwingUniverseExpansionDecision",
+    "ProfessionalSwingUniverseExpansionError",
+    "ProfessionalSwingUniverseExpansionResult",
+    "build_professional_swing_universe_expansion",
 ]
