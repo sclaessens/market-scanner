@@ -23,6 +23,13 @@ from market_engine.run.end_to_end_dry_run import (
     MarketEngineEndToEndDryRunState,
     build_market_engine_end_to_end_dry_run,
 )
+from market_engine.run.expanded_supported_universe_cached_source_scan import (
+    EXPANDED_SUPPORTED_UNIVERSE_CACHED_SOURCE_SCAN_FORMAT_VERSION,
+    ExpandedSupportedUniverseCachedSourceScanError,
+    ExpandedSupportedUniverseCachedSourceScanResult,
+    build_expanded_supported_universe_cached_source_scan,
+    to_plain_dict as expanded_supported_universe_scan_to_plain_dict,
+)
 from market_engine.run.local_dry_run_artifacts import (
     MARKET_ENGINE_LOCAL_DRY_RUN_ARTIFACT_FORMAT_VERSION,
     MARKET_ENGINE_LOCAL_DRY_RUN_ARTIFACT_PATH_CATEGORY,
@@ -42,6 +49,7 @@ __all__ = [
     "APPROVED_DRY_RUN_INPUT_MODES",
     "CACHED_SOURCE_BATCH_INPUT_MODE",
     "CACHED_SOURCE_SNAPSHOT_INPUT_MODE",
+    "EXPANDED_SUPPORTED_UNIVERSE_CACHED_SOURCE_SCAN_FORMAT_VERSION",
     "LOCAL_DRY_RUN_PERSISTENCE_MODE",
     "MARKET_ENGINE_CACHED_SOURCE_BATCH_DRY_RUN_FORMAT_VERSION",
     "MARKET_ENGINE_CACHED_SOURCE_LOCAL_EXECUTION_INPUT_FORMAT_VERSION",
@@ -54,6 +62,8 @@ __all__ = [
     "REQUIRED_DRY_RUN_STAGE_NAMES",
     "CachedSourceBatchDryRunError",
     "CachedSourceLocalExecutionError",
+    "ExpandedSupportedUniverseCachedSourceScanError",
+    "ExpandedSupportedUniverseCachedSourceScanResult",
     "LocalDryRunArtifactError",
     "LocalDryRunArtifactPersistenceResult",
     "LocalDryRunInputError",
@@ -63,7 +73,9 @@ __all__ = [
     "MarketEngineEndToEndDryRunState",
     "build_cached_source_batch_dry_run",
     "build_cached_source_local_execution_stage_payloads",
+    "build_expanded_supported_universe_cached_source_scan",
     "build_market_engine_end_to_end_dry_run",
+    "expanded_supported_universe_scan_to_plain_dict",
     "load_cached_source_local_execution_stage_payloads",
     "load_market_engine_local_dry_run_input",
     "persist_cached_source_batch_dry_run_artifacts",
