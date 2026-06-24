@@ -472,6 +472,30 @@ Next: rerun the expanded cached-source scan locally with the non-production fixt
 
 ## Completed Sprint
 
+### ME-SR07 - Cached-source snapshot acquisition plan for missing expanded universe entries
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR07
+
+Roadmap position:
+
+```text
+ME-UNI09 -> ME-SR06 -> ME-RUN23 -> ME-RUN24 -> ME-SR07
+```
+
+ME-SR07 documents the current expanded-universe cached-source coverage baseline and plans the policy for future snapshot acquisition or staging. It does not acquire snapshots or add runtime provider behavior.
+
+Next logical sprint:
+
+```text
+ME-SR08 - Define cached-source snapshot acquisition manifest contract
+```
+
+ME-SR08 should formalize acquisition metadata, checksum, stale-data, validation, and real/synthetic/derived classification fields before any future staging or acquisition implementation begins.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor

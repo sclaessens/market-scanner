@@ -2180,6 +2180,43 @@ ME-RUN24 does not canonicalize the universe, add provider calls, use broker APIs
 
 ## Completed Sprint
 
+### ME-SR07 - Cached-source snapshot acquisition plan for missing expanded universe entries
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR07
+
+Goal: prepare a precise acquisition plan for cached-source snapshots needed by expanded-universe entries that are currently missing usable cached input data.
+
+Outcome:
+
+* documented the current expanded-universe coverage baseline from `data/market_engine/ticker_universe/professional_swing_universe/professional_swing_universe.csv` and `data/market_engine/source_snapshots`;
+* inventoried 53 expanded Professional Swing Universe entries: 12 `supported_cached`, 38 `missing_snapshot`, and 3 `manual_review_only`;
+* defined required source families for the current SEC CompanyFacts cached-source path;
+* defined allowed and disallowed future acquisition modes;
+* defined required acquisition metadata and validation gates;
+* documented that missing, partial, stale, malformed, unsupported, ambiguous, or manual-review-only data cannot be silently promoted to supported.
+
+No snapshots were acquired. No runtime provider or live-fetch behavior was added. No unavailable data was marked acquired or supported.
+
+Implemented documentation:
+
+```text
+docs/market_engine/audits/me_sr07_cached_source_snapshot_acquisition_plan.md
+docs/market_engine/backlog/me_sr07_cached_source_snapshot_acquisition_plan_backlog_entry.md
+docs/market_engine/roadmap/me_sr07_cached_source_snapshot_acquisition_plan_roadmap_entry.md
+```
+
+Follow-up sprint candidates:
+
+* ME-SR08 - Define cached-source snapshot acquisition manifest contract.
+* ME-SR09 - Implement missing expanded-universe snapshot coverage inventory command.
+* ME-SR10 - Implement manual cached-source snapshot staging validator.
+* ME-SR11 - Implement approved bounded acquisition or import workflow.
+* ME-RUN25 - Rerun expanded cached-source coverage audit after staged snapshots exist.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
