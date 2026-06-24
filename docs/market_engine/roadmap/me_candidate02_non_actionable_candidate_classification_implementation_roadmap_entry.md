@@ -43,4 +43,8 @@ It does not introduce provider calls, source refresh, live data, broker integrat
 
 ## Next Planning Note
 
-No new sprint is inserted by ME-CANDIDATE02. Future roadmap entries should be added only when a concrete candidate-classification output review, QA, or governance need is identified.
+ME-CANDIDATE02 does not insert an immediate blocking follow-up. Candidate-classification QA/review, output readability polish, delivery-preview work, portfolio-context persistence, stronger Decision Engine handoff review, and additional governance remain valid deferred follow-up candidates.
+
+Those follow-ups should be picked up only after expanded-universe execution produces concrete inspection, QA, governance, or delivery evidence that justifies them, or if such a concrete blocker is discovered earlier.
+
+The active next direction is to scale from the current supported subset toward a larger Professional Swing Universe / target analysis universe and then execute readable/candidate outputs over that larger universe.

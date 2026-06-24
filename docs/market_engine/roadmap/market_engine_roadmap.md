@@ -2,11 +2,11 @@
 
 Owner role: Product Owner / Scrum Master / Technical Architect / Governance Auditor
 
-Status: ACTIVE ROADMAP AFTER ME-RUN17
+Status: ACTIVE ROADMAP AFTER ME-CANDIDATE02
 
 ## Purpose
 
-This roadmap preserves the Market Engine sprint sequence after ME-RUN17.
+This roadmap preserves the Market Engine sprint sequence after ME-CANDIDATE02.
 
 ME-RUN07 proved that the Market Engine can run end-to-end locally through `local_snapshot_fixture` using realistic non-production fixture data and can persist a deterministic local dry-run review artifact through the existing RUN05 artifact flag.
 
@@ -29,6 +29,10 @@ ME-UNI02 implemented the canonical ticker universe loader and validation layer r
 ME-RUN16 consumed the canonical ticker universe in the cached-source batch dry-run command and executed the first canonical-universe batch. The execution selected 13 active `cached_source_only` tickers, excluded SMCI as `manual_review_only`, and failed closed for every selected ticker because no local cached SEC CompanyFacts source snapshots were present.
 
 ME-RUN17 fixed RUN cached-source discovery for the ME-SR02 source-refresh snapshot layout. It discovered 12 canonical-universe snapshots, generated 12 local dry-run artifacts, kept HO blocked as missing cached source, and preserved downstream blocked states without provider calls or action authority.
+
+Since ME-RUN17, the project completed the supported-universe execution and readable-output chain through ME-RUN19, ME-SR05, ME-RUN20, ME-RUN21, ME-RUN22, ME-OUT01, ME-OUT02, ME-CANDIDATE01, and ME-CANDIDATE02.
+
+The active planning direction is now expanded-universe execution. The project should scale from the current supported subset toward a larger Professional Swing Universe / target analysis universe before prioritizing additional polish, QA, delivery preview, portfolio-context persistence, Decision Engine handoff review hardening, or extra governance layers.
 
 ## Completed Chain
 
@@ -72,6 +76,57 @@ Completed job-scoped chain:
 | ME-RUN16 | Run / orchestration      | Completed with blocked ticker outcome |
 | ME-SR02  | Source Refresh           | Completed |
 | ME-RUN17 | Run / orchestration      | Completed with downstream blocked outcome |
+| ME-RUN19 | Run / orchestration      | Completed |
+| ME-SR05  | Source Refresh / Source Coverage | Completed |
+| ME-RUN20 | Run / orchestration      | Completed |
+| ME-RUN21 | Run / orchestration      | Completed |
+| ME-RUN22 | Run / orchestration      | Completed |
+| ME-OUT01 | Output / Operator Reporting | Completed |
+| ME-OUT02 | Output / Operator Reporting | Completed |
+| ME-CANDIDATE01 | Candidate Classification | Completed |
+| ME-CANDIDATE02 | Candidate Classification | Completed |
+
+## Active Next Direction
+
+### ME-UNI09 - Expand Professional Swing Universe toward target analysis universe
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-UNI - Ticker Universe
+
+Status: NEXT ACTIVE CANDIDATE AFTER ME-CANDIDATE02
+
+Goal: expand the editable Professional Swing Universe from the current small supported subset toward a materially larger target analysis universe so the Market Engine can move from proof-of-flow to broader ticker analysis.
+
+Scope: universe/data-governance only. Add or curate tickers, source-policy metadata, identity metadata, active/manual/excluded state, and validation expectations. No provider calls, live data, analysis changes, report changes, candidate classification changes, delivery, portfolio/watchlist writes, or trading authority.
+
+Rationale: the system now has a local dry-run, readable operator output, and non-actionable candidate classification path. The priority is to scale ticker coverage before adding more polish or governance layers.
+
+### Planned Next Candidates After ME-UNI09
+
+```text
+ME-SR06 - Classify source support for expanded Professional Swing Universe
+ME-RUN23 - Execute expanded supported-universe cached-source run and produce readable/candidate outputs
+```
+
+ME-SR06 should classify cached-source support for the expanded universe created by ME-UNI09.
+
+ME-RUN23 should execute the expanded supported-universe cached-source run and produce readable operator output plus non-actionable candidate classification over that larger universe.
+
+## Deferred Follow-up Candidates
+
+These sprints are not rejected and not blocked. They are intentionally deferred below expanded-universe execution to avoid refinement loops before broad ticker execution is proven:
+
+* ME-CANDIDATE03 - Candidate classification QA/review contract.
+* ME-OUT03 - Operator report readability/polish improvements.
+* ME-DL03 - Non-production delivery preview.
+* ME-PR03 - Approved portfolio context source/persistence contract.
+* ME-DE03 - Decision Engine handoff review hardening.
+* ME-QAxx / ME-GOVxx - Additional QA/governance only from concrete run evidence.
+
+## Scale-first Planning Rule
+
+After ME-CANDIDATE02, do not insert additional QA, polish, delivery, portfolio, governance, or candidate-classification refinement sprints ahead of ME-UNI09 / ME-SR06 / ME-RUN23 unless a concrete blocker is discovered in local execution, source support, report generation, or candidate-classification output over the expanded universe.
 
 ## Recent RUN chain
 
@@ -236,7 +291,7 @@ ME-RUN13 remains cached-source/local-only, deterministic, non-production, provid
 
 ME-RUN13 does not introduce live provider calls, SEC/EDGAR fetches, yfinance calls, live market data calls, broker calls, Telegram/email delivery, production reports, portfolio writes, watchlist writes, scheduler behavior, UI behavior, automatic cache refresh, automatic cache cleanup, Decision Engine decisions, BUY / SELL / HOLD semantics, allocation advice, target prices, target weights, position sizing, order generation, execution advice, ranking, scoring, urgency, conviction, or tradeability authority.
 
-## Next Implementation Candidate
+## Historical Implementation Candidate
 
 ### ME-RUN14 - Add cached-source batch dry-run command interface
 
@@ -244,7 +299,7 @@ Owner roles: Product Owner / Operator / Technical Architect / Development Lead /
 
 Job family: ME-RUN - Run / orchestration jobs
 
-Status: CANDIDATE AFTER ME-RUN13
+Status: HISTORICAL CANDIDATE SUPERSEDED BY COMPLETED RUN COMMAND WORK
 
 Goal: add a narrow operator-facing command interface for the ME-RUN13 cached-source batch dry-run runtime behavior.
 
@@ -637,7 +692,7 @@ Outcome:
 * added focused tests and implementation/audit documentation;
 * preserved local-only, provider-free, non-production, non-actionable boundaries.
 
-Next planning note: no new sprint is inserted by ME-CANDIDATE02. Future roadmap entries should be added only when a concrete candidate-classification output review, QA, or governance need is identified.
+Next planning note: ME-CANDIDATE02 does not insert an immediate blocking follow-up. Candidate-classification QA/review, output readability polish, delivery-preview work, portfolio-context persistence, stronger Decision Engine handoff review, and additional governance remain valid deferred follow-up candidates. They should be picked up only after expanded-universe execution produces concrete inspection, QA, governance, or delivery evidence that justifies them, or if such a concrete blocker is discovered earlier. The active next direction is to scale from the current supported subset toward a larger Professional Swing Universe / target analysis universe and then execute readable/candidate outputs over that larger universe.
 
 ## Completed Sprint
 
@@ -684,7 +739,7 @@ docs/market_engine/backlog/me_run17_canonical_universe_cached_source_batch_dry_r
 docs/market_engine/roadmap/me_run17_canonical_universe_cached_source_batch_dry_run_roadmap_entry.md
 ```
 
-## Next RUN Candidate
+## Historical RUN Candidate
 
 ### ME-RUN18 - Provide portfolio context for canonical-universe cached-source dry-runs
 
@@ -692,7 +747,7 @@ Owner roles: Product Owner / Operator / Technical Architect / Development Lead /
 
 Job family: ME-RUN - Run / orchestration jobs
 
-Status: CANDIDATE AFTER ME-RUN17
+Status: HISTORICAL CANDIDATE SUPERSEDED BY COMPLETED ME-RUN18 / ME-RUN19 PATH
 
 Goal: provide approved local portfolio context to canonical-universe cached-source dry-runs so downstream review stages can progress without production portfolio writes.
 
