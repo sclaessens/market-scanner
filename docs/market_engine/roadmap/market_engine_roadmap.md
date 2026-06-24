@@ -497,6 +497,7 @@ ME-RUN22 - Produce first human-readable Market Engine interpretation report from
 ME-OUT01 - Define readable operator report contract from dry-run artifacts
 ME-OUT02 - Implement readable operator report from dry-run artifacts
 ME-CANDIDATE01 - Define non-actionable candidate classification contract
+ME-CANDIDATE02 - Implement non-actionable candidate classification from readable operator output
 ```
 
 ### ME-RUN20 - Execute clean supported-universe cached-source scan
@@ -606,9 +607,37 @@ Owner roles: Product Owner / Operator / Technical Architect / Development Lead /
 
 Job family: ME-CANDIDATE - Candidate Classification
 
-Status: RECOMMENDED NEXT AFTER ME-OUT02
+Status: COMPLETED BY ME-CANDIDATE01
 
 Goal: define a non-actionable candidate classification contract after readable operator reporting exists.
+
+Outcome:
+
+* defined `market-engine-candidate-classification-v1`;
+* defined approved local readable operator and dry-run artifact inputs;
+* defined fixed non-actionable candidate buckets;
+* documented required evidence, provenance, missing-data, stale-data, blocked-state, malformed-artifact, unsupported-input, numeric-zero, deterministic-output, fail-closed, and advisory-language guardrail behavior.
+
+### ME-CANDIDATE02 - Implement non-actionable candidate classification from readable operator output
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-CANDIDATE - Candidate Classification
+
+Status: COMPLETED BY ME-CANDIDATE02
+
+Goal: implement the ME-CANDIDATE01 candidate classification contract from readable operator output.
+
+Outcome:
+
+* implemented `market-engine-candidate-classification-v1`;
+* added local candidate classification builder and CLI module;
+* emitted `candidate_classification_report.md` and `candidate_classification_summary.json`;
+* preserved evidence references, blocking reasons, safety flags, missing-data markers, stale-data markers, blocked-state markers, provenance presence, and numeric-zero evidence presence;
+* added focused tests and implementation/audit documentation;
+* preserved local-only, provider-free, non-production, non-actionable boundaries.
+
+Next planning note: no new sprint is inserted by ME-CANDIDATE02. Future roadmap entries should be added only when a concrete candidate-classification output review, QA, or governance need is identified.
 
 ## Completed Sprint
 

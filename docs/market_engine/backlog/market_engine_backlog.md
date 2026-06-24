@@ -2299,6 +2299,7 @@ ME-RUN22 - Produce first human-readable Market Engine interpretation report from
 ME-OUT01 - Define readable operator report contract from dry-run artifacts
 ME-OUT02 - Implement readable operator report from dry-run artifacts
 ME-CANDIDATE01 - Define non-actionable candidate classification contract
+ME-CANDIDATE02 - Implement non-actionable candidate classification from readable operator output
 ```
 
 ### ME-RUN20 - Execute clean supported-universe cached-source scan
@@ -2411,9 +2412,40 @@ Owner roles: Product Owner / Operator / Technical Architect / Development Lead /
 
 Job family: ME-CANDIDATE - Candidate Classification
 
-Status: RECOMMENDED NEXT AFTER ME-OUT02
+Status: COMPLETED BY ME-CANDIDATE01
 
 Goal: define a non-actionable candidate classification contract from readable operator output and dry-run artifacts without introducing action authority, ranking, scoring, allocation, urgency, conviction, tradeability, or execution behavior.
+
+Outcome:
+
+* defined `market-engine-candidate-classification-v1`;
+* listed approved local readable operator, dry-run artifact, and interpretation report inputs;
+* defined allowed non-actionable candidate buckets;
+* documented forbidden action, ranking, scoring, urgency, conviction, tradeability, target-price, allocation, and execution semantics;
+* defined required machine-readable summary metadata;
+* documented missing-data, stale-data, blocked-state, malformed-artifact, unsupported-input, numeric-zero, provenance, advisory-language guardrail, and fail-closed requirements.
+
+### ME-CANDIDATE02 - Implement non-actionable candidate classification from readable operator output
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-CANDIDATE - Candidate Classification
+
+Status: COMPLETED BY ME-CANDIDATE02
+
+Goal: implement `market-engine-candidate-classification-v1` from readable operator output without introducing action authority, ranking, scoring, allocation, urgency, conviction, tradeability, or execution behavior.
+
+Outcome:
+
+* implemented deterministic pure candidate classification from readable operator output;
+* emitted local `candidate_classification_report.md` and `candidate_classification_summary.json`;
+* used the exact ME-CANDIDATE01 candidate bucket set;
+* preserved evidence references, blocking reasons, safety flags, missing-data markers, stale-data markers, blocked-state markers, provenance presence, and numeric-zero evidence presence;
+* detected forbidden action-oriented wording and failed closed into an unclassified bucket;
+* added focused tests and implementation/audit documentation;
+* preserved local-only, provider-free, non-production, non-actionable boundaries.
+
+Next planning note: no new sprint is inserted by ME-CANDIDATE02. Future work should be added only after human review identifies a concrete candidate-classification output inspection, QA, or governance need.
 
 ## Completed Sprint
 
