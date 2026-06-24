@@ -70,7 +70,7 @@ Coverage inventory:
 |---|---|---|---|---|---|---|
 | NVDA | candidate | present and usable | `data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/NVDA_companyfacts.json` | none | none | already supported; no ME-SR07 acquisition |
 | AMD | candidate | present and usable | `data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/AMD_companyfacts.json` | none | none | already supported; no ME-SR07 acquisition |
-| ASML | needs_source_mapping | present and usable under current SEC CompanyFacts classifier | `data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/ASML_companyfacts.json` | none for current classifier | none in ME-SR07 inventory | already supported; future non-US source policy remains separate |
+| ASML | needs_source_mapping | present and usable for current cached-source classifier only; broader non-US source-family governance remains unresolved | `data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/ASML_companyfacts.json` | none for current classifier; future non-US source-family/source-mapping governance still required | none for current classifier; broader non-US governance unresolved | currently usable by existing classifier; do not treat ME-SR07 as resolving future non-US source-family governance |
 | META | candidate | present and usable | `data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/META_companyfacts.json` | none | none | already supported; no ME-SR07 acquisition |
 | MSFT | candidate | present and usable | `data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/MSFT_companyfacts.json` | none | none | already supported; no ME-SR07 acquisition |
 | VRT | watching | present and usable | `data/market_engine/source_snapshots/sec_companyfacts/me-sr02-canonical-universe-20260619T000000Z/raw/VRT_companyfacts.json` | none | none | already supported; no ME-SR07 acquisition |
@@ -251,9 +251,25 @@ Recommended sequence:
 | ME-SR09 — Implement missing expanded-universe snapshot coverage inventory command | Produce deterministic inventory from universe + source snapshot root. | No provider calls; output only. |
 | ME-SR10 — Implement manual cached-source snapshot staging validator | Validate manually staged snapshots against manifests, checksums, schema, identity, and required fields. | No live fetch; no acquisition. |
 | ME-SR11 — Implement approved bounded acquisition or import workflow | Only after ME-SR08 through ME-SR10 define and validate the gates. | Scope depends on approved source mode. |
+| ME-SR12 — Define non-US ticker source-family and source-mapping governance contract | Define how non-US tickers, ADRs, foreign listings, dual listings, and `needs_source_mapping` entries can be admitted into cached-source coverage. | Future governance work only; must define approved source-family rules and source identity mapping before entries such as ASML, NVO, RHM, RR, ADYEN, or similar future rows can be broadly governed. |
 | ME-RUN25 — Rerun expanded cached-source coverage audit after staged snapshots exist | Run existing cached-source path after new evidence exists. | Does not belong before actual validated snapshots exist. |
 
 ME-RUN23 should not be reused as a new follow-up name because it is already completed. A later run sprint should use the next available ME-RUN identifier.
+
+ME-SR12 is intentionally future work. It must not acquire snapshots, implement provider access, or mark non-US tickers supported merely because the current classifier can load a snapshot. It must define source identity mapping requirements, including ticker, exchange/listing context, company identity, source entity identifier, and CIK only when applicable. Until that governance exists, non-US and `needs_source_mapping` rows remain fail-closed for broader source-family purposes.
+
+## Backlog and Roadmap Consistency Check
+
+ME-SR07 also checked the canonical backlog and roadmap plus the standalone ME-SR07 backlog and roadmap entries:
+
+- `docs/market_engine/backlog/market_engine_backlog.md`
+- `docs/market_engine/backlog/me_sr07_cached_source_snapshot_acquisition_plan_backlog_entry.md`
+- `docs/market_engine/roadmap/market_engine_roadmap.md`
+- `docs/market_engine/roadmap/me_sr07_cached_source_snapshot_acquisition_plan_roadmap_entry.md`
+
+ME-SR08 remains the next logical sprint because the acquisition manifest contract must be formalized before inventory commands, staging validators, acquisition/import workflows, or non-US source-family governance are implemented.
+
+The non-US ticker/source-family governance item is intentionally recorded as future work. It does not change current ME-SR07 coverage counts, does not promote `needs_source_mapping` entries, and does not change runtime behavior.
 
 ## 10. Acceptance Criteria
 

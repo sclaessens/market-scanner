@@ -2215,7 +2215,10 @@ Follow-up sprint candidates:
 * ME-SR09 - Implement missing expanded-universe snapshot coverage inventory command.
 * ME-SR10 - Implement manual cached-source snapshot staging validator.
 * ME-SR11 - Implement approved bounded acquisition or import workflow.
+* ME-SR12 - Define non-US ticker source-family and source-mapping governance contract.
 * ME-RUN25 - Rerun expanded cached-source coverage audit after staged snapshots exist.
+
+ME-SR12 is future work only. It must define how non-US tickers, ADRs, foreign listings, dual listings, and `needs_source_mapping` entries can be admitted into cached-source coverage through explicit source-family rules and source identity mapping. It must define requirements for ticker, exchange/listing context, company identity, source entity identifier, and CIK only when applicable. It must cover entries such as ASML, NVO, RHM, RR, ADYEN, and similar future entries without acquiring snapshots, implementing provider access, or marking non-US tickers supported merely because a current classifier can load a snapshot.
 
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 

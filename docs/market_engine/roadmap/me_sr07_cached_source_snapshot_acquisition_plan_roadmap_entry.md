@@ -36,6 +36,14 @@ ME-SR08 — Define cached-source snapshot acquisition manifest contract
 
 ME-SR08 should formalize the manifest/metadata contract before any staging or acquisition implementation begins.
 
+Future source-governance candidate:
+
+```text
+ME-SR12 — Define non-US ticker source-family and source-mapping governance contract
+```
+
+ME-SR12 should define how non-US tickers, ADRs, foreign listings, dual listings, and `needs_source_mapping` entries can be admitted into cached-source coverage. It must define approved source-family rules and source identity mapping requirements for entries such as ASML, NVO, RHM, RR, ADYEN, and similar future rows. It is future work only and must not acquire snapshots, implement provider access, or promote non-US tickers from current classifier behavior alone.
+
 ## Boundaries
 
 ME-SR07 does not acquire snapshots, implement provider access, perform live fetches, stage data, modify runtime analysis behavior, mutate portfolio/watchlist state, or add action semantics.
