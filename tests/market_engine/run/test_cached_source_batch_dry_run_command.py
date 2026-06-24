@@ -70,7 +70,8 @@ def test_command_result_uses_explicit_tickers_and_visibility_contract(monkeypatc
     )
     assert result["run_context"]["batch_id"] == "run15-test"
     assert result["run_context"]["artifact_writing_enabled"] is False
-    assert result["run_context"]["portfolio_context"] == {"enabled": False}
+    assert result["run_context"]["portfolio_context"]["enabled"] is False
+    assert result["run_context"]["portfolio_context"]["portfolio_context_source"] == "absent"
     assert captured["requested_tickers"] == ("NVDA", "MSFT")
     assert captured["discover_cached_tickers"] is False
     assert captured["portfolio_contexts_by_ticker"] == {}

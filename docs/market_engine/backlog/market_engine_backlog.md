@@ -2148,6 +2148,38 @@ Scope: Source Refresh only. No portfolio writes, watchlist writes, Telegram deli
 
 ## Completed Sprint
 
+### ME-RUN24 - Non-production portfolio-context fixture for expanded scans
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Run / orchestration jobs
+
+Status: COMPLETED BY ME-RUN24
+
+Goal: add an explicit non-production portfolio-context fixture path for expanded cached-source scans so ME-RUN23-style `supported_cached` tickers can pass portfolio context into Portfolio Review without broker data, live portfolio data, or portfolio/watchlist mutations.
+
+Outcome:
+
+* reused the existing `market-engine-local-portfolio-context-batch-v1` contract;
+* added `--non-production-portfolio-context-fixture <path>` to the expanded supported-universe cached-source scan command;
+* kept default behavior unchanged when the fixture argument is omitted;
+* added output provenance for `portfolio_context_source=absent` and `portfolio_context_source=non_production_fixture`;
+* preserved no broker or live portfolio access and no portfolio/watchlist mutation confirmations;
+* added fail-closed tests for missing, malformed, and unsupported fixture input.
+
+Implemented documentation:
+
+```text
+docs/market_engine/run_reports/me_run24_non_production_portfolio_context_fixture_expanded_scans.md
+docs/market_engine/audits/me_run24_non_production_portfolio_context_fixture_expanded_scans_audit.md
+docs/market_engine/backlog/me_run24_non_production_portfolio_context_fixture_expanded_scans_backlog_entry.md
+docs/market_engine/roadmap/me_run24_non_production_portfolio_context_fixture_expanded_scans_roadmap_entry.md
+```
+
+ME-RUN24 does not canonicalize the universe, add provider calls, use broker APIs, mutate portfolio or watchlist state, add Telegram or delivery side effects, add Decision Engine action authority, or add trading/action semantics.
+
+## Completed Sprint
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
