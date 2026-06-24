@@ -2447,32 +2447,74 @@ Outcome:
 
 Next planning note: ME-CANDIDATE02 does not insert an immediate blocking follow-up. Candidate-classification QA/review, output readability polish, delivery-preview work, portfolio-context persistence, stronger Decision Engine handoff review, and additional governance remain valid deferred follow-up candidates. They should be picked up only after expanded-universe execution produces concrete inspection, QA, governance, or delivery evidence that justifies them, or if such a concrete blocker is discovered earlier. The active next direction is to scale from the current supported subset toward a larger Professional Swing Universe / target analysis universe and then execute readable/candidate outputs over that larger universe.
 
-## Active Next Direction
+## Completed Sprint
 
-### ME-UNI09 - Expand Professional Swing Universe toward target analysis universe
+### ME-UNI09 - Expand Professional Swing Universe from candidate classification output
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
 Job family: ME-UNI - Ticker Universe
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-CANDIDATE02
+Status: COMPLETED BY ME-UNI09
 
-Goal: expand the editable Professional Swing Universe from the current small supported subset toward a materially larger target analysis universe so the Market Engine can move from proof-of-flow to broader ticker analysis.
+Goal: implement controlled, deterministic Professional Swing Universe expansion from non-actionable candidate-classification output.
 
-Scope: universe/data-governance only. Add or curate tickers, source-policy metadata, identity metadata, active/manual/excluded state, and validation expectations. No provider calls, live data, analysis changes, report changes, candidate classification changes, delivery, portfolio/watchlist writes, or trading authority.
+Outcome:
+
+* added `market-engine-professional-swing-universe-expansion-v1`;
+* implemented a pure builder that consumes `market-engine-candidate-classification-v1`;
+* preserved existing editable Professional Swing Universe entries;
+* included only eligible `ready_for_manual_candidate_review` candidates with valid proposed universe rows;
+* excluded already-present, duplicated, manual-review-only, ambiguous, unsupported, non-equity, missing-source, malformed, and ineligible candidates with explicit reasons;
+* failed closed on malformed summaries, unsupported format versions, unknown candidate buckets, invalid tickers, conflicting identities, unsafe paths, and invalid proposed universe entries;
+* returned deterministic summary counts and auditable per-candidate decisions;
+* performed no file writes and did not mutate the canonical universe CSV;
+* preserved local-only, provider-free, non-production, non-actionable boundaries.
+
+Implemented runtime:
+
+```text
+src/market_engine/ticker_universe/professional_swing_expansion.py
+```
+
+Implemented tests:
+
+```text
+tests/market_engine/ticker_universe/test_professional_swing_universe_expansion.py
+```
+
+Implemented documentation:
+
+```text
+docs/market_engine/ticker_universe/me_uni09_professional_swing_universe_expansion_from_candidates.md
+docs/market_engine/audits/me_uni09_professional_swing_universe_expansion_from_candidates_audit.md
+docs/market_engine/backlog/me_uni09_professional_swing_universe_expansion_from_candidates_backlog_entry.md
+docs/market_engine/roadmap/me_uni09_professional_swing_universe_expansion_from_candidates_roadmap_entry.md
+```
+
+## Active Next Direction
+
+### ME-SR06 - Classify source support for expanded Professional Swing Universe
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: NEXT ACTIVE CANDIDATE AFTER ME-UNI09
+
+Goal: classify cached-source support for the expanded Professional Swing Universe produced or proposed by ME-UNI09.
+
+Scope: source-support classification only. Use existing approved local source artifacts and metadata. No provider calls, live data, source refresh, analysis changes, report changes, candidate-classification changes, delivery, portfolio/watchlist writes, or trading authority.
 
 Rationale: the system now has a local dry-run, readable operator output, and non-actionable candidate classification path. The priority is to scale ticker coverage before adding more polish or governance layers.
 
-### Planned Next Candidates After ME-UNI09
+### Planned Next Candidate After ME-SR06
 
 ```text
-ME-SR06 - Classify source support for expanded Professional Swing Universe
 ME-RUN23 - Execute expanded supported-universe cached-source scan with readable report and candidate classification
 ```
 
-ME-SR06 should classify cached-source support for the expanded Professional Swing Universe created by ME-UNI09.
-
-ME-RUN23 should execute the expanded supported-universe cached-source scan and produce readable/candidate outputs over that larger supported universe.
+ME-RUN23 should execute the expanded supported-universe cached-source scan and produce readable/candidate outputs over the larger supported universe after ME-SR06 classifies source support.
 
 ## Deferred Follow-up Candidates
 
@@ -2487,7 +2529,7 @@ These sprints are not rejected and not blocked. They remain valid later-candidat
 
 ## Scale-first Rule
 
-After ME-CANDIDATE02, planning should prefer expanded-universe execution over additional polish, QA, governance, or delivery layers unless a concrete blocker is discovered. The project should first prove that the full local pipeline can run over a materially larger ticker universe before refinement layers are prioritized.
+After ME-CANDIDATE02 and ME-UNI09, planning should prefer expanded-universe source-support classification and execution over additional polish, QA, governance, or delivery layers unless a concrete blocker is discovered. The project should first prove that the full local pipeline can run over a materially larger ticker universe before refinement layers are prioritized.
 
 ## Completed Sprint
 
