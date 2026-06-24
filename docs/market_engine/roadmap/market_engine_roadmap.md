@@ -495,6 +495,7 @@ ME-RUN20 - Execute clean supported-universe cached-source scan
 ME-RUN21 - Inspect and summarize supported-universe cached-source scan outputs
 ME-RUN22 - Produce first human-readable Market Engine interpretation report from cached-source supported-universe outputs
 ME-OUT01 - Define readable operator report contract from dry-run artifacts
+ME-OUT02 - Implement readable operator report from dry-run artifacts
 ME-CANDIDATE01 - Define non-actionable candidate classification contract
 ```
 
@@ -568,9 +569,46 @@ Owner roles: Product Owner / Operator / Technical Architect / Development Lead /
 
 Job family: ME-OUT - Output / Operator Reporting
 
-Status: RECOMMENDED NEXT AFTER ME-RUN22
+Status: COMPLETED BY ME-OUT01
 
 Goal: define a readable, non-actionable operator report contract from generated dry-run artifacts without introducing delivery, trading authority, ranking, scoring, allocation, or execution behavior.
+
+Outcome:
+
+* defined `market-engine-readable-operator-report-v1`;
+* formalized approved local dry-run artifact inputs;
+* defined required Markdown report sections;
+* defined required machine-readable companion summary fields;
+* documented artifact integrity, stage completion, per-ticker summary, missing-data, stale-data, blocked-state, provenance, numeric-zero, fail-closed, and advisory-language guardrail requirements.
+
+### ME-OUT02 - Implement readable operator report from dry-run artifacts
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-OUT - Output / Operator Reporting
+
+Status: COMPLETED BY ME-OUT02
+
+Goal: implement `market-engine-readable-operator-report-v1` as a deterministic local operator report generator from existing dry-run artifacts.
+
+Outcome:
+
+* implemented a local report builder and CLI command module;
+* emitted `operator_report.md` and `operator_report_summary.json`;
+* preserved local artifact integrity, stage-state, missing-data, stale-data, blocked-state, provenance, and numeric-zero evidence;
+* added explicit per-ticker skip reasons for incomplete, malformed, or unsupported artifacts;
+* added focused tests and implementation/audit documentation;
+* preserved local-only, provider-free, non-production, and non-actionable boundaries.
+
+### ME-CANDIDATE01 - Define non-actionable candidate classification contract
+
+Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-CANDIDATE - Candidate Classification
+
+Status: RECOMMENDED NEXT AFTER ME-OUT02
+
+Goal: define a non-actionable candidate classification contract after readable operator reporting exists.
 
 ## Completed Sprint
 
