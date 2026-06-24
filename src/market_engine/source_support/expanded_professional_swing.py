@@ -72,6 +72,7 @@ def classify_expanded_professional_swing_universe_source_support(
     final_entries = tuple(_validated_universe_row(row) for row in expansion_result.final_universe_entries)
     _validate_unique_ticker_market(final_entries)
     provenance_by_key = _provenance_by_key(expansion_result=expansion_result)
+    _attach_final_row_provenance(final_entries=final_entries, provenance_by_key=provenance_by_key)
 
     with tempfile.TemporaryDirectory() as tmpdir:
         expanded_universe_path = Path(tmpdir) / "expanded_professional_swing_universe.csv"
@@ -192,6 +193,21 @@ def _provenance_by_key(
     return provenance
 
 
+def _attach_final_row_provenance(
+    *,
+    final_entries: tuple[dict[str, str], ...],
+    provenance_by_key: dict[tuple[str, str], dict[str, Any]],
+) -> None:
+    for row in final_entries:
+        key = _row_key(row)
+        provenance = provenance_by_key.get(key)
+        if provenance is None:
+            raise ExpandedProfessionalSwingSourceSupportError(
+                f"Expanded source-support classification has no source-row provenance for {key[0]} / {key[1]}."
+            )
+        provenance["expanded_universe_row"] = dict(row)
+
+
 def _expanded_entry(
     *,
     source_entry: ProfessionalSwingTickerSourceSupport,
@@ -203,11 +219,16 @@ def _expanded_entry(
         raise ExpandedProfessionalSwingSourceSupportError(
             f"Expanded source-support classification lost provenance for {source_entry.ticker} / {source_entry.market}."
         )
+    expanded_row = provenance.get("expanded_universe_row")
+    if not isinstance(expanded_row, Mapping):
+        raise ExpandedProfessionalSwingSourceSupportError(
+            f"Expanded source-support classification lost expanded row data for {source_entry.ticker} / {source_entry.market}."
+        )
     return ExpandedProfessionalSwingTickerSourceSupport(
         ticker=source_entry.ticker,
         name=source_entry.name,
         market=source_entry.market,
-        asset_type=str(source_entry.universe_entry_reference.get("asset_type", "")),
+        asset_type=str(expanded_row.get("asset_type", "")),
         universe_entry_origin=str(provenance["universe_entry_origin"]),
         universe_entry_provenance=dict(provenance),
         source_candidate_id=provenance.get("source_candidate_id"),
