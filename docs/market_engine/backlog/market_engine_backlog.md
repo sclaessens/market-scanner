@@ -2378,6 +2378,45 @@ Follow-up implementation candidates:
 
 ME-SR12 is the next logical sprint because acquisition intent is now visible, but the repo still needs a controlled local import path for operator-supplied payloads before broader cached-source coverage can expand.
 
+## Completed Sprint
+
+### ME-SR12 - Operator-supplied cached-source snapshot import command
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR12
+
+Goal: implement a safe local command for importing operator-supplied cached-source snapshots into the cached-source snapshot workspace.
+
+Outcome:
+
+* added local cached-source snapshot import logic;
+* added module command `market_engine.source_refresh.cached_source_snapshot_import_command`;
+* validates one snapshot directory or direct `manifest.json` path with the ME-SR10 staging validator before copy;
+* imports to `<destination-root>/<batch_id>/<ticker>/<snapshot_id>/`;
+* preserves manifest and payload files without mutating the source;
+* blocks missing sources, missing/malformed manifests, validation failures, ambiguous manifests, and existing destinations fail-closed;
+* prints stable operator-readable terminal success and failure summaries;
+* added deterministic fixture-based tests.
+
+ME-SR12 did not call providers, fetch data, use SEC/EDGAR/yfinance, send Telegram output, mutate portfolio/watchlist state, write outside the configured destination root, modify cached-source dry-run semantics, change Decision Engine or Recommendation Review behavior, or add action authority.
+
+Implemented documentation:
+
+```text
+docs/market_engine/audits/me_sr12_operator_supplied_cached_source_snapshot_import_command_audit.md
+docs/market_engine/backlog/me_sr12_operator_supplied_cached_source_snapshot_import_command_backlog_entry.md
+docs/market_engine/roadmap/me_sr12_operator_supplied_cached_source_snapshot_import_command_roadmap_entry.md
+```
+
+Follow-up implementation candidates:
+
+* ME-RUN25 - Rerun expanded cached-source coverage audit after validated local imports exist.
+* Future source-family governance - Define non-US ticker source-family and source-mapping governance.
+* Future import enhancement - Add explicitly tested overwrite or batch-import behavior only if operator workflow requires it.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor

@@ -608,6 +608,32 @@ ME-SR12 should copy or register operator-supplied local payloads into a controll
 
 Non-US ticker source-family and source-mapping governance remains future work and must not be bypassed by import tooling.
 
+### ME-SR12 - Operator-supplied cached-source snapshot import command
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR12
+
+Roadmap position:
+
+```text
+ME-UNI09 -> ME-SR06 -> ME-RUN23 -> ME-RUN24 -> ME-SR07 -> ME-SR08 -> ME-SR09 -> ME-SR10 -> ME-SR11 -> ME-SR12
+```
+
+ME-SR12 implements a local operator-supplied cached-source snapshot import command. It validates a single snapshot directory or `manifest.json` through the ME-SR10 staging validator before copying it into the configured cached-source snapshot workspace. It is local-only, deterministic, fail-closed, and does not call providers, fetch data, or change runtime dry-run behavior.
+
+Next logical sprint:
+
+```text
+ME-RUN25 - Rerun expanded cached-source coverage audit after validated local imports exist
+```
+
+ME-RUN25 should inspect whether imported and staged snapshots can improve expanded cached-source coverage through existing local-only paths. It must not bypass ME-SR08 manifest requirements, ME-SR10 staging validation, or source-family governance boundaries.
+
+Non-US ticker source-family and source-mapping governance remains future work.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
