@@ -530,6 +530,32 @@ ME-SR09 - Implement missing expanded-universe snapshot coverage inventory comman
 
 ME-SR09 should remain inventory-only. It may reference ME-SR08 manifest requirements but must not acquire snapshots or implement provider access. Later implementation must not bypass ME-SR08 governance constraints.
 
+## Completed Sprint
+
+### ME-SR09 - Cached-source snapshot inventory command
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR09
+
+Roadmap position:
+
+```text
+ME-UNI09 -> ME-SR06 -> ME-RUN23 -> ME-RUN24 -> ME-SR07 -> ME-SR08 -> ME-SR09
+```
+
+ME-SR09 implements the first local inventory command for cached-source snapshot acquisition manifests. It is local-only, deterministic, fail-closed, and does not acquire snapshots, implement provider access, or change runtime dry-run behavior.
+
+Next logical sprint:
+
+```text
+ME-SR10 - Implement manual cached-source snapshot staging validator
+```
+
+ME-SR10 should validate manually staged payloads and manifests against the ME-SR08 contract and ME-SR09 inventory expectations before any bounded acquisition/import workflow begins.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
