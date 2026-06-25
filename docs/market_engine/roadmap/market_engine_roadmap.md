@@ -634,6 +634,36 @@ ME-RUN25 should inspect whether imported and staged snapshots can improve expand
 
 Non-US ticker source-family and source-mapping governance remains future work.
 
+### ME-RUN25 - Operator-supplied cached-source snapshot import validation flow
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Local Run / Validation
+
+Status: COMPLETED BY ME-RUN25
+
+Roadmap position:
+
+```text
+ME-SR12 -> ME-RUN25 -> ME-SR13 -> ME-SR14 -> ME-SR15
+```
+
+ME-RUN25 validates the first operator-supplied cached-source snapshot import/staging flow with a temporary non-production fixture. It confirms that ME-SR12 import, ME-SR10 staging validation, and the existing `cached_source_snapshot` dry-run path can be connected manually.
+
+Conclusion:
+
+```text
+PASS
+```
+
+Next logical sprint:
+
+```text
+ME-SR13 - Run real-world operator-supplied cached-source sample import for NVDA, AMD, ASML
+```
+
+ME-SR13 should use real local operator-supplied files, import and validate them, and attempt the same dry-run bridge for accepted samples. It must keep the roadmap moving toward first real cached-source analysis and Telegram-style terminal preview.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor

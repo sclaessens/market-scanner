@@ -2417,6 +2417,50 @@ Follow-up implementation candidates:
 * Future source-family governance - Define non-US ticker source-family and source-mapping governance.
 * Future import enhancement - Add explicitly tested overwrite or batch-import behavior only if operator workflow requires it.
 
+## Completed Run
+
+### ME-RUN25 - Operator-supplied cached-source snapshot import validation flow
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / QA Lead / Governance Auditor
+
+Job family: ME-RUN - Local Run / Validation
+
+Status: COMPLETED BY ME-RUN25
+
+Goal: run the first operator-supplied cached-source snapshot import/staging validation flow and prove whether it can feed the existing local dry-run path.
+
+Outcome:
+
+* created a temporary non-production operator-supplied SEC CompanyFacts fixture under `/private/tmp`;
+* imported the fixture with the ME-SR12 import command;
+* validated the imported workspace with the ME-SR10 staging validator;
+* confirmed the imported payload can feed `--input-mode cached_source_snapshot`;
+* confirmed the local dry-run blocks at `portfolio_review` without portfolio context;
+* confirmed the local dry-run completes when non-production local portfolio context is supplied;
+* recorded contract gaps, tooling gaps, safety state, and next sprint recommendation.
+
+Conclusion:
+
+```text
+PASS
+```
+
+The run is fixture-backed and non-production. Real-world source quality remains unproven until operator-supplied local files are used.
+
+Implemented documentation:
+
+```text
+docs/market_engine/audits/me_run25_operator_supplied_cached_source_snapshot_import_validation_flow.md
+docs/market_engine/backlog/me_run25_operator_supplied_cached_source_snapshot_import_validation_flow_backlog_entry.md
+docs/market_engine/roadmap/me_run25_operator_supplied_cached_source_snapshot_import_validation_flow_roadmap_entry.md
+```
+
+Follow-up implementation candidates:
+
+* ME-SR13 - Run real-world operator-supplied cached-source sample import for NVDA, AMD, ASML.
+* ME-SR14 - Run first real cached-source Market Engine analysis for accepted sample tickers.
+* ME-SR15 - Render Telegram-style terminal preview from real cached-source analysis output.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
