@@ -504,6 +504,32 @@ ME-SR12 - Define non-US ticker source-family and source-mapping governance contr
 
 ME-SR12 is future work only. It should define how non-US tickers, ADRs, foreign listings, dual listings, and `needs_source_mapping` entries can be admitted into cached-source coverage through explicit source-family rules and source identity mapping. It must cover entries such as ASML, NVO, RHM, RR, ADYEN, and similar future entries without acquiring snapshots, implementing provider access, or marking non-US tickers supported merely because a current classifier can load a snapshot.
 
+## Completed Sprint
+
+### ME-SR08 - Cached-source snapshot acquisition manifest contract
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR08
+
+Roadmap position:
+
+```text
+ME-UNI09 -> ME-SR06 -> ME-RUN23 -> ME-RUN24 -> ME-SR07 -> ME-SR08
+```
+
+ME-SR08 defines the cached-source snapshot acquisition manifest contract. It is docs-only and does not acquire snapshots, implement provider access, or change runtime behavior.
+
+Next logical sprint:
+
+```text
+ME-SR09 - Implement missing expanded-universe snapshot coverage inventory command
+```
+
+ME-SR09 should remain inventory-only. It may reference ME-SR08 manifest requirements but must not acquire snapshots or implement provider access. Later implementation must not bypass ME-SR08 governance constraints.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
