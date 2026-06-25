@@ -582,6 +582,32 @@ ME-SR11 - Implement cached-source snapshot acquisition dry-run command
 
 ME-SR11 should provide a bounded acquisition/import dry-run surface while preserving ME-SR08 manifest requirements and ME-SR10 staging validation gates.
 
+### ME-SR11 - Cached-source snapshot acquisition dry-run command
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR11
+
+Roadmap position:
+
+```text
+ME-UNI09 -> ME-SR06 -> ME-RUN23 -> ME-RUN24 -> ME-SR07 -> ME-SR08 -> ME-SR09 -> ME-SR10 -> ME-SR11
+```
+
+ME-SR11 implements a local deterministic cached-source snapshot acquisition dry-run command. It is local-only, deterministic, fail-closed, and does not acquire snapshots, implement provider access, write payloads, write acquisition manifests, or change runtime dry-run behavior.
+
+Next logical sprint:
+
+```text
+ME-SR12 - Implement operator-supplied cached-source snapshot import command
+```
+
+ME-SR12 should copy or register operator-supplied local payloads into a controlled staging layout with generated or verified manifest metadata, still without provider calls, and still requiring ME-SR10 staging validation before cached-source dry-run use.
+
+Non-US ticker source-family and source-mapping governance remains future work and must not be bypassed by import tooling.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor

@@ -2338,6 +2338,46 @@ Follow-up implementation candidates:
 
 ME-SR11 remains the next logical sprint because any acquisition/import dry-run must preserve ME-SR08 manifest requirements and ME-SR10 staging validation gates.
 
+## Completed Sprint
+
+### ME-SR11 - Cached-source snapshot acquisition dry-run command
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR11
+
+Goal: implement a local deterministic cached-source snapshot acquisition dry-run command.
+
+Outcome:
+
+* added local cached-source snapshot acquisition dry-run planning logic;
+* added module command `market_engine.source_refresh.cached_source_snapshot_acquisition_dry_run_command`;
+* defined JSON report format `market-engine-cached-source-snapshot-acquisition-dry-run-v1`;
+* reports planned/blocked entries for ticker and source-family requests;
+* blocks invalid tickers, unsupported source families, and missing output roots fail-closed;
+* reports ME-SR08 required manifest fields and ME-SR10 staging validator handoff;
+* added deterministic fixture-based tests.
+
+ME-SR11 did not acquire snapshots, fetch data, stage payloads, import payloads, write acquisition manifests, implement provider access, call SEC/EDGAR/yfinance, mutate portfolio/watchlist state, send Telegram output, write production data, modify cached-source dry-run semantics, change Decision Engine or Recommendation Review behavior, or add action authority.
+
+Implemented documentation:
+
+```text
+docs/market_engine/audits/me_sr11_cached_source_snapshot_acquisition_dry_run_command_audit.md
+docs/market_engine/backlog/me_sr11_cached_source_snapshot_acquisition_dry_run_command_backlog_entry.md
+docs/market_engine/roadmap/me_sr11_cached_source_snapshot_acquisition_dry_run_command_roadmap_entry.md
+```
+
+Follow-up implementation candidates:
+
+* ME-SR12 - Implement operator-supplied cached-source snapshot import command.
+* Future source-family governance - Define non-US ticker source-family and source-mapping governance.
+* ME-RUN25 - Rerun expanded cached-source coverage audit after staged snapshots exist.
+
+ME-SR12 is the next logical sprint because acquisition intent is now visible, but the repo still needs a controlled local import path for operator-supplied payloads before broader cached-source coverage can expand.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
