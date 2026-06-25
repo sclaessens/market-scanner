@@ -2260,6 +2260,45 @@ Follow-up implementation candidates:
 
 Implementation must not bypass ME-SR08 governance constraints.
 
+## Completed Sprint
+
+### ME-SR09 - Cached-source snapshot inventory command
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR09
+
+Goal: implement the first local deterministic inventory command for cached-source snapshot acquisition manifests.
+
+Outcome:
+
+* added local cached-source snapshot inventory logic;
+* added module command `market_engine.source_refresh.cached_source_snapshot_inventory_command`;
+* defined JSON report format `market-engine-cached-source-snapshot-inventory-v1`;
+* reports usable, unusable, missing-manifest, malformed-manifest, unknown-format, missing-payload, stale, and synthetic/test-fixture states;
+* added deterministic fixture-based tests.
+
+ME-SR09 did not acquire snapshots, stage snapshots, implement provider access, fetch live data, call SEC/EDGAR/yfinance, mutate portfolio/watchlist state, send Telegram output, write production data, modify cached-source dry-run semantics, change Decision Engine behavior, or add action authority.
+
+Implemented documentation:
+
+```text
+docs/market_engine/audits/me_sr09_cached_source_snapshot_inventory_command_audit.md
+docs/market_engine/backlog/me_sr09_cached_source_snapshot_inventory_command_backlog_entry.md
+docs/market_engine/roadmap/me_sr09_cached_source_snapshot_inventory_command_roadmap_entry.md
+```
+
+Follow-up implementation candidates:
+
+* ME-SR10 - Implement manual cached-source snapshot staging validator.
+* ME-SR11 - Implement approved bounded acquisition or import workflow.
+* ME-SR12 - Define non-US ticker source-family and source-mapping governance contract.
+* ME-RUN25 - Rerun expanded cached-source coverage audit after staged snapshots exist.
+
+ME-SR10 remains the next logical sprint because manually staged payloads and acquisition manifests must be validated against the ME-SR08 contract before acquisition/import work begins.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
