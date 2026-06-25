@@ -2299,6 +2299,45 @@ Follow-up implementation candidates:
 
 ME-SR10 remains the next logical sprint because manually staged payloads and acquisition manifests must be validated against the ME-SR08 contract before acquisition/import work begins.
 
+## Completed Sprint
+
+### ME-SR10 - Manual cached-source snapshot staging validator
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR10
+
+Goal: implement a local deterministic validator for manually staged cached-source snapshot manifests and payloads.
+
+Outcome:
+
+* added local cached-source snapshot staging validation logic;
+* added module command `market_engine.source_refresh.cached_source_snapshot_staging_validator_command`;
+* defined JSON report format `market-engine-cached-source-snapshot-staging-validation-v1`;
+* reports accepted/rejected staging decisions with deterministic issue codes;
+* blocks missing manifests, malformed manifests, unknown formats, missing payloads, hash/size mismatches, stale snapshots, failed/not-validated states, false usable flags, and fixture/test material;
+* added deterministic fixture-based tests.
+
+ME-SR10 did not acquire snapshots, stage snapshots, import snapshots, implement provider access, fetch live data, call SEC/EDGAR/yfinance, mutate portfolio/watchlist state, send Telegram output, write production data, modify cached-source dry-run semantics, change Decision Engine or Recommendation Review behavior, or add action authority.
+
+Implemented documentation:
+
+```text
+docs/market_engine/audits/me_sr10_manual_cached_source_snapshot_staging_validator_audit.md
+docs/market_engine/backlog/me_sr10_manual_cached_source_snapshot_staging_validator_backlog_entry.md
+docs/market_engine/roadmap/me_sr10_manual_cached_source_snapshot_staging_validator_roadmap_entry.md
+```
+
+Follow-up implementation candidates:
+
+* ME-SR11 - Implement cached-source snapshot acquisition dry-run command.
+* ME-SR12 - Define non-US ticker source-family and source-mapping governance contract.
+* ME-RUN25 - Rerun expanded cached-source coverage audit after staged snapshots exist.
+
+ME-SR11 remains the next logical sprint because any acquisition/import dry-run must preserve ME-SR08 manifest requirements and ME-SR10 staging validation gates.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor

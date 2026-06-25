@@ -556,6 +556,32 @@ ME-SR10 - Implement manual cached-source snapshot staging validator
 
 ME-SR10 should validate manually staged payloads and manifests against the ME-SR08 contract and ME-SR09 inventory expectations before any bounded acquisition/import workflow begins.
 
+## Completed Sprint
+
+### ME-SR10 - Manual cached-source snapshot staging validator
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: COMPLETED BY ME-SR10
+
+Roadmap position:
+
+```text
+ME-UNI09 -> ME-SR06 -> ME-RUN23 -> ME-RUN24 -> ME-SR07 -> ME-SR08 -> ME-SR09 -> ME-SR10
+```
+
+ME-SR10 implements local accepted/rejected validation for manually staged cached-source snapshot manifests and payloads. It is local-only, deterministic, fail-closed, and does not acquire snapshots, implement provider access, or change runtime dry-run behavior.
+
+Next logical sprint:
+
+```text
+ME-SR11 - Implement cached-source snapshot acquisition dry-run command
+```
+
+ME-SR11 should provide a bounded acquisition/import dry-run surface while preserving ME-SR08 manifest requirements and ME-SR10 staging validation gates.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
