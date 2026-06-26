@@ -169,3 +169,5 @@ ME-SR13A - Prepare real-world operator-supplied cached-source input package for 
 ```
 
 ME-SR13A should create or place the real operator-supplied local package outside production data paths, verify the expected directory layout, confirm that each ticker package contains a ME-SR08-compatible manifest and referenced payload file, and then hand back to ME-SR13 rerun or ME-SR14 only after availability is proven.
+
+Post-ME-SR13 correction: ME-RM03 supersedes ME-SR13A as the primary next sprint. ME-SA01 is now the active next sprint, and ME-SR13A remains only a fallback/manual diagnostic candidate.

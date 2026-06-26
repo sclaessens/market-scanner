@@ -91,31 +91,31 @@ Completed job-scoped chain:
 
 ## Active Next Direction
 
-### ME-SR06 - Classify source support for expanded Professional Swing Universe
+### ME-SA01 - Define automated cached-source acquisition job contract
 
-Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
-Job family: ME-SR - Source Refresh / Source Coverage
+Job family: ME-SA - Source Acquisition
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-UNI09
+Status: NEXT ACTIVE CANDIDATE AFTER ME-RM03
 
-Goal: classify cached-source support for the expanded Professional Swing Universe produced or proposed by ME-UNI09.
+Goal: define the automated cached-source acquisition job contract now that manual operator package preparation has been superseded as the primary route.
 
-Scope: source-support classification only. Use existing approved local source artifacts and metadata. No provider calls, live data, source refresh, analysis changes, report changes, candidate-classification changes, delivery, portfolio/watchlist writes, or trading authority.
+Scope: contract and governance only. ME-SA01 must define acquisition job inputs, approved ticker universe or bounded ticker list input, approved source families, approved provider/source adapters, provenance requirements, retrieval timestamp and source timestamp, freshness/staleness policy, missing-data handling, cached-source snapshot output location, manifest compatibility with the existing validator/import flow, fail-closed behavior, no downstream side effects, and no analysis or decision authority.
 
-Rationale: the system now has a local dry-run, readable operator output, and non-actionable candidate classification path. The priority is to scale ticker coverage before adding more polish or governance layers.
+Rationale: the application must own recurring source acquisition. Manually supplied source packages are not the primary operating model. ME-RUN25 remains the proven import/staging/dry-run bridge, and ME-SR13 remains the blocked evidence that manual input is insufficient as a primary path.
 
-### Planned Next Candidate After ME-SR06
+### Planned Next Candidates After ME-SA01
 
 ```text
-ME-RUN23 - Execute expanded supported-universe cached-source run and produce readable/candidate outputs
+ME-SA02 - Implement first bounded automated cached-source acquisition job for approved sample tickers/source families
+ME-RUN26 - Run automated cached-source acquisition for NVDA, AMD, ASML through staging validation and local dry-run
+ME-TP01 - Produce terminal-visible operator preview from real cached-source dry-run artifacts
 ```
-
-ME-RUN23 should execute the expanded supported-universe cached-source run and produce readable operator output plus non-actionable candidate classification over the larger supported universe after ME-SR06 classifies source support.
 
 ## Deferred Follow-up Candidates
 
-These sprints are not rejected and not blocked. They are intentionally deferred below expanded-universe execution to avoid refinement loops before broad ticker execution is proven:
+These sprints are not rejected and not blocked. They are intentionally deferred below ME-SA01 to avoid refinement loops before application-owned source acquisition is defined:
 
 * ME-CANDIDATE03 - Candidate classification QA/review contract.
 * ME-OUT03 - Operator report readability/polish improvements.
@@ -124,9 +124,9 @@ These sprints are not rejected and not blocked. They are intentionally deferred 
 * ME-DE03 - Decision Engine handoff review hardening.
 * ME-QAxx / ME-GOVxx - Additional QA/governance only from concrete run evidence.
 
-## Scale-first Planning Rule
+## Active Planning Rule
 
-After ME-CANDIDATE02 and ME-UNI09, do not insert additional QA, polish, delivery, portfolio, governance, or candidate-classification refinement sprints ahead of ME-SR06 / ME-RUN23 unless a concrete blocker is discovered in local execution, source support, report generation, or candidate-classification output over the expanded universe.
+After ME-RM03, do not insert manual operator package preparation, QA, polish, delivery, portfolio, governance, or candidate-classification refinement sprints ahead of ME-SA01 unless a concrete blocker is discovered in the automated cached-source acquisition contract. The project should first define application-owned source acquisition before continuing real cached-source execution or operator preview work.
 
 ## Recent RUN chain
 
@@ -675,7 +675,7 @@ Status: BLOCKED BY MISSING OPERATOR INPUT
 Roadmap position:
 
 ```text
-ME-SR12 -> ME-RUN25 -> ME-SR13 -> ME-SR13A -> ME-SR13 rerun or ME-SR14
+ME-SR12 -> ME-RUN25 -> ME-SR13 -> ME-RM03 -> ME-SA01
 ```
 
 ME-SR13 attempted to move from the ME-RUN25 fixture-backed import validation flow to real local operator-supplied samples for `NVDA`, `AMD`, and `ASML`.
@@ -694,13 +694,47 @@ operator_input/market_engine/me-sr13-real-world-sample/
 
 No import, staging validation, local cached-source dry-run, fixture substitution, or fake source creation was performed.
 
+Corrected next logical sprint:
+
+```text
+ME-SA01 - Define automated cached-source acquisition job contract
+```
+
+ME-SR13A is superseded as the primary next sprint by the ME-RM03 product-owner correction. It remains available only as a fallback/manual diagnostic candidate.
+
+### ME-RM03 - Automated cached-source acquisition roadmap correction
+
+Owner roles: Product Owner / Scrum Master / Technical Architect / Governance Auditor
+
+Job family: ME-RM / Roadmap Governance
+
+Status: COMPLETED BY ME-RM03
+
+Roadmap position:
+
+```text
+ME-RUN25 -> ME-SR13 -> ME-RM03 -> ME-SA01 -> ME-SA02 -> ME-RUN26 -> ME-TP01
+```
+
+ME-RM03 records the product-owner decision that automated cached-source acquisition by an application job is now the primary route. Manual operator-supplied packages remain useful as fallback, diagnostic, or recovery inputs, but they are not the primary operating model.
+
+Target architecture:
+
+```text
+automated cached-source acquisition job
+-> cached-source snapshot package
+-> existing import/staging validator
+-> existing cached_source_snapshot dry-run
+-> terminal-visible / Telegram-style operator preview
+```
+
 Next logical sprint:
 
 ```text
-ME-SR13A - Prepare real-world operator-supplied cached-source input package for NVDA, AMD, ASML
+ME-SA01 - Define automated cached-source acquisition job contract
 ```
 
-ME-SR13A should prepare and verify the real local input package before ME-SR13 is rerun or ME-SR14 begins.
+ME-SA01 must define acquisition job inputs, approved ticker universe or bounded ticker list input, approved source families, approved provider/source adapters, provenance requirements, retrieval timestamp and source timestamp, freshness/staleness policy, missing-data handling, cached-source snapshot output location, manifest compatibility with the existing validator/import flow, fail-closed behavior, no downstream side effects, and no analysis or decision authority.
 
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 

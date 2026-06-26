@@ -2498,7 +2498,49 @@ docs/market_engine/roadmap/me_sr13_real_world_operator_supplied_cached_source_sa
 
 Follow-up implementation candidate:
 
-* ME-SR13A - Prepare real-world operator-supplied cached-source input package for NVDA, AMD, ASML.
+* ME-SA01 - Define automated cached-source acquisition job contract.
+* ME-SR13A - Prepare real-world operator-supplied cached-source input package for NVDA, AMD, ASML as a fallback/manual diagnostic candidate only.
+
+ME-SR13A is superseded as the primary next sprint by the ME-RM03 product-owner correction. The application-owned automated cached-source acquisition path is now the active direction.
+
+## Completed Roadmap Governance Sprint
+
+### ME-RM03 - Automated cached-source acquisition roadmap correction
+
+Owner roles: Product Owner / Scrum Master / Technical Architect / Governance Auditor
+
+Job family: ME-RM / Roadmap Governance
+
+Status: COMPLETED BY ME-RM03
+
+Goal: lock the product-owner decision that automated cached-source acquisition by an application job is now the primary direction after ME-SR13.
+
+Decision:
+
+* automated cached-source acquisition is now primary;
+* ME-SR13A is superseded as the primary next sprint;
+* ME-SR13A remains available only as a fallback/manual diagnostic candidate;
+* ME-SA01 is now the next active sprint;
+* the existing ME-SR12 / ME-RUN25 import, staging validation, and `cached_source_snapshot` dry-run bridge remains valid and should be consumed by the future acquisition job.
+
+Recommended sequence:
+
+```text
+ME-SA01 - Define automated cached-source acquisition job contract
+ME-SA02 - Implement first bounded automated cached-source acquisition job for approved sample tickers/source families
+ME-RUN26 - Run automated cached-source acquisition for NVDA, AMD, ASML through staging validation and local dry-run
+ME-TP01 - Produce terminal-visible operator preview from real cached-source dry-run artifacts
+```
+
+ME-SA01 must define acquisition job inputs, bounded ticker or universe input, approved source families, approved provider/source adapters, provenance, retrieval timestamp, source timestamp, freshness/staleness policy, missing-data handling, cached-source snapshot output location, manifest compatibility with the existing validator/import flow, fail-closed behavior, no downstream side effects, and no analysis or decision authority.
+
+Implemented documentation:
+
+```text
+docs/market_engine/audits/me_rm03_automated_cached_source_acquisition_roadmap_correction.md
+docs/market_engine/backlog/me_rm03_automated_cached_source_acquisition_roadmap_correction_backlog_entry.md
+docs/market_engine/roadmap/me_rm03_automated_cached_source_acquisition_roadmap_correction_roadmap_entry.md
+```
 
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
@@ -2846,31 +2888,33 @@ docs/market_engine/roadmap/me_uni09_professional_swing_universe_expansion_from_c
 
 ## Active Next Direction
 
-### ME-SR06 - Classify source support for expanded Professional Swing Universe
+### ME-SA01 - Define automated cached-source acquisition job contract
 
-Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
-Job family: ME-SR - Source Refresh / Source Coverage
+Job family: ME-SA - Source Acquisition
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-UNI09
+Status: NEXT ACTIVE CANDIDATE AFTER ME-RM03
 
-Goal: classify cached-source support for the expanded Professional Swing Universe produced or proposed by ME-UNI09.
+Goal: define the automated cached-source acquisition job contract now that manual operator package preparation has been superseded as the primary route.
 
-Scope: source-support classification only. Use existing approved local source artifacts and metadata. No provider calls, live data, source refresh, analysis changes, report changes, candidate-classification changes, delivery, portfolio/watchlist writes, or trading authority.
+Scope: contract and governance only. ME-SA01 must define acquisition job inputs, approved ticker universe or bounded ticker list input, approved source families, approved provider/source adapters, provenance requirements, retrieval timestamp and source timestamp, freshness/staleness policy, missing-data handling, cached-source snapshot output location, manifest compatibility with the existing validator/import flow, fail-closed behavior, no downstream side effects, and no analysis or decision authority.
 
-Rationale: the system now has a local dry-run, readable operator output, and non-actionable candidate classification path. The priority is to scale ticker coverage before adding more polish or governance layers.
+Rationale: ME-RUN25 proved the import/staging/dry-run bridge. ME-SR13 proved that missing manual operator input blocks progress. The application must own recurring source acquisition as the primary operating model.
 
-### Planned Next Candidate After ME-SR06
+### Planned Next Candidates After ME-SA01
 
 ```text
-ME-RUN23 - Execute expanded supported-universe cached-source scan with readable report and candidate classification
+ME-SA02 - Implement first bounded automated cached-source acquisition job for approved sample tickers/source families
+ME-RUN26 - Run automated cached-source acquisition for NVDA, AMD, ASML through staging validation and local dry-run
+ME-TP01 - Produce terminal-visible operator preview from real cached-source dry-run artifacts
 ```
 
-ME-RUN23 should execute the expanded supported-universe cached-source scan and produce readable/candidate outputs over the larger supported universe after ME-SR06 classifies source support.
+ME-SR13A remains available only as a fallback/manual diagnostic candidate.
 
 ## Deferred Follow-up Candidates
 
-These sprints are not rejected and not blocked. They remain valid later-candidates and are intentionally deferred below expanded-universe execution:
+These sprints are not rejected and not blocked. They remain valid later-candidates and are intentionally deferred below ME-SA01:
 
 * ME-CANDIDATE03 - Candidate classification QA/review contract.
 * ME-OUT03 - Operator report readability/polish improvements.
