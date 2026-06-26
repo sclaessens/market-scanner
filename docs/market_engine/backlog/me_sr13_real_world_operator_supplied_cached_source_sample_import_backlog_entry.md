@@ -35,3 +35,5 @@ docs/market_engine/roadmap/me_sr13_real_world_operator_supplied_cached_source_sa
 * ME-SR13A - Prepare real-world operator-supplied cached-source input package for NVDA, AMD, ASML.
 
 ME-SR13A should verify local operator input availability and ME-SR08-compatible manifest/payload layout before any rerun of real sample import, staging validation, cached-source dry-run, or downstream real cached-source analysis.
+
+Post-ME-SR13 correction: ME-RM03 supersedes ME-SR13A as the primary next sprint. ME-SA01 is now the active next sprint, and ME-SR13A remains only a fallback/manual diagnostic candidate.

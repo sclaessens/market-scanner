@@ -5,7 +5,7 @@ BLOCKED BY ME-SR13.
 ## Roadmap position
 
 ```text
-ME-SR12 -> ME-RUN25 -> ME-SR13 -> ME-SR13A -> ME-SR13 rerun or ME-SR14
+ME-SR12 -> ME-RUN25 -> ME-SR13 -> ME-RM03 -> ME-SA01
 ```
 
 ME-SR13 was intended to move from the ME-RUN25 fixture-backed validation flow to real operator-supplied cached-source samples for `NVDA`, `AMD`, and `ASML`.
@@ -24,10 +24,10 @@ The expected local input root was missing:
 
 No import, staging validation, or local cached-source dry-run was attempted because the sprint was not allowed to fabricate source files or silently fall back to fixture data.
 
-## Next logical sprint
+## Corrected next logical sprint
 
 ```text
-ME-SR13A - Prepare real-world operator-supplied cached-source input package for NVDA, AMD, ASML
+ME-SA01 - Define automated cached-source acquisition job contract
 ```
 
-ME-SR13A should prepare the local input package, verify per-ticker directory availability, confirm manifest/payload contract compatibility, and preserve the same local-only, provider-free, production-safe boundaries.
+ME-RM03 supersedes ME-SR13A as the primary next sprint. ME-SR13A remains available only as a fallback/manual diagnostic candidate.
