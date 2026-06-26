@@ -91,25 +91,23 @@ Completed job-scoped chain:
 
 ## Active Next Direction
 
-### ME-SA01 - Define automated cached-source acquisition job contract
+### ME-RUN26 - Run automated cached-source acquisition through staging validation and local dry-run
 
 Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
-Job family: ME-SA - Source Acquisition
+Job family: ME-RUN - Run / orchestration
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-RM03
+Status: NEXT ACTIVE CANDIDATE AFTER ME-SA02
 
-Goal: define the automated cached-source acquisition job contract now that manual operator package preparation has been superseded as the primary route.
+Goal: run the ME-SA02 automated cached-source acquisition job for a bounded ticker set through existing staging validation and local cached-source dry-run.
 
-Scope: contract and governance only. ME-SA01 must define acquisition job inputs, approved ticker universe or bounded ticker list input, approved source families, approved provider/source adapters, provenance requirements, retrieval timestamp and source timestamp, freshness/staleness policy, missing-data handling, cached-source snapshot output location, manifest compatibility with the existing validator/import flow, fail-closed behavior, no downstream side effects, and no analysis or decision authority.
+Scope: local run validation only. Use the ME-SA02 bounded acquisition job output, existing staging validation, and existing cached-source dry-run path. Record pass/block evidence for `company_profile` consumption without adding provider calls, live data retrieval, Telegram delivery, production writes, portfolio/watchlist writes, Decision Engine semantics, recommendation semantics, or action authority.
 
-Rationale: the application must own recurring source acquisition. Manually supplied source packages are not the primary operating model. ME-RUN25 remains the proven import/staging/dry-run bridge, and ME-SR13 remains the blocked evidence that manual input is insufficient as a primary path.
+Rationale: ME-SA01 defined the automated acquisition contract and ME-SA02 implemented the first bounded job. The next step is to prove whether the generated packages pass through the existing downstream route and to document any remaining dry-run incompatibility as an explicit blocked reason.
 
-### Planned Next Candidates After ME-SA01
+### Planned Next Candidate After ME-RUN26
 
 ```text
-ME-SA02 - Implement first bounded automated cached-source acquisition job for approved sample tickers/source families
-ME-RUN26 - Run automated cached-source acquisition for NVDA, AMD, ASML through staging validation and local dry-run
 ME-TP01 - Produce terminal-visible operator preview from real cached-source dry-run artifacts
 ```
 
@@ -1136,4 +1134,38 @@ ME-SA01
   -> ME-SA02 — Implement first bounded automated cached-source acquisition job
   -> ME-RUN26 — Run automated cached-source acquisition for NVDA/AMD/ASML through staging validation and local dry-run
   -> ME-TP01 — Produce terminal-visible operator preview from real cached-source dry-run artifacts
+```
+
+### ME-SA02 — Implement first bounded automated cached-source acquisition job
+
+Status: COMPLETED BY ME-SA02
+
+ME-SA02 implemented the first bounded, local, non-production acquisition job under the ME-SA01 contract.
+
+Implemented:
+
+```text
+src/market_engine/source_acquisition/automated_cached_source_acquisition.py
+tests/market_engine/source_acquisition/test_automated_cached_source_acquisition.py
+docs/market_engine/source_data/me_sa02_bounded_automated_cached_source_acquisition_job_implementation.md
+docs/market_engine/audits/me_sa02_bounded_automated_cached_source_acquisition_job_audit.md
+docs/market_engine/backlog/me_sa02_bounded_automated_cached_source_acquisition_job_backlog_entry.md
+docs/market_engine/roadmap/me_sa02_bounded_automated_cached_source_acquisition_job_roadmap_entry.md
+```
+
+The job supports explicit bounded ticker lists, the initial `company_profile` source family, deterministic fake adapter behavior, snapshot package writing, result payload writing, provenance, freshness state, hash and size recording, and fail-closed validation.
+
+Validation:
+
+```text
+12 passed - tests/market_engine/source_acquisition/test_automated_cached_source_acquisition.py
+19 passed - tests/market_engine/source_refresh/test_cached_source_snapshot_staging_validator.py
+492 passed - tests/market_engine
+1159 passed - full pytest
+```
+
+Next active sprint:
+
+```text
+ME-RUN26 - Run automated cached-source acquisition for NVDA, AMD, ASML through staging validation and local dry-run
 ```
