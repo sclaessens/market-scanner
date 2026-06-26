@@ -2461,6 +2461,45 @@ Follow-up implementation candidates:
 * ME-SR14 - Run first real cached-source Market Engine analysis for accepted sample tickers.
 * ME-SR15 - Render Telegram-style terminal preview from real cached-source analysis output.
 
+## Blocked Sprint
+
+### ME-SR13 - Real-world operator-supplied cached-source sample import
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: BLOCKED BY MISSING OPERATOR INPUT
+
+Goal: run the first real-world operator-supplied cached-source sample import for `NVDA`, `AMD`, and `ASML`.
+
+Outcome:
+
+* checked for the expected local operator input root at `operator_input/market_engine/me-sr13-real-world-sample/`;
+* confirmed the `operator_input` root is absent from the workspace;
+* did not fabricate `NVDA`, `AMD`, or `ASML` source files;
+* did not substitute the ME-RUN25 fixture;
+* did not run import, staging validation, or local cached-source dry-runs because no real input was available;
+* preserved a documentation-only blocked result.
+
+Conclusion:
+
+```text
+BLOCKED
+```
+
+Implemented documentation:
+
+```text
+docs/market_engine/audits/me_sr13_real_world_operator_supplied_cached_source_sample_import.md
+docs/market_engine/backlog/me_sr13_real_world_operator_supplied_cached_source_sample_import_backlog_entry.md
+docs/market_engine/roadmap/me_sr13_real_world_operator_supplied_cached_source_sample_import_roadmap_entry.md
+```
+
+Follow-up implementation candidate:
+
+* ME-SR13A - Prepare real-world operator-supplied cached-source input package for NVDA, AMD, ASML.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
