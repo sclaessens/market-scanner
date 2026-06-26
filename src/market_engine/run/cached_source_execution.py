@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import asdict, is_dataclass
 from enum import Enum
@@ -44,6 +45,13 @@ MARKET_ENGINE_CACHED_SOURCE_LOCAL_EXECUTION_INPUT_FORMAT_VERSION = (
     "market-engine-cached-source-local-execution-input-v1"
 )
 CACHED_SOURCE_SNAPSHOT_INPUT_MODE = "cached_source_snapshot"
+COMPANY_PROFILE_SOURCE_FAMILY = "company_profile"
+COMPANY_PROFILE_SNAPSHOT_PAYLOAD_FORMAT_VERSION = (
+    "market-engine-company-profile-snapshot-v1"
+)
+COMPANY_PROFILE_COMPATIBILITY_GATE_VERSION = (
+    "market-engine-company-profile-cached-source-compatibility-gate-v1"
+)
 
 
 class CachedSourceLocalExecutionError(ValueError):
@@ -62,6 +70,7 @@ def build_cached_source_local_execution_stage_payloads(
         source_snapshot_path=Path(source_snapshot_path),
         source_snapshot_root=Path(source_snapshot_root),
     )
+    validate_cached_source_snapshot_consumption_compatibility(snapshot_path)
     try:
         source_context = build_sec_companyfacts_source_context_from_snapshot_path(
             snapshot_path,
@@ -184,6 +193,39 @@ def load_cached_source_local_execution_stage_payloads(
     )
 
 
+def validate_cached_source_snapshot_consumption_compatibility(
+    snapshot_path: str | Path,
+) -> Mapping[str, Any]:
+    path = Path(snapshot_path)
+    payload = _read_snapshot_payload_for_compatibility_gate(path)
+    if payload is None or not _looks_like_company_profile_snapshot(payload):
+        return {
+            "compatibility_gate_version": COMPANY_PROFILE_COMPATIBILITY_GATE_VERSION,
+            "result": "deferred_to_existing_source_context_loader",
+            "source_family": "unknown",
+        }
+
+    manifest_path = path.with_name("manifest.json")
+    manifest = _read_company_profile_manifest(manifest_path)
+    issues = _company_profile_compatibility_issues(
+        payload=payload,
+        manifest=manifest,
+        snapshot_path=path,
+    )
+    if issues:
+        raise CachedSourceLocalExecutionError(
+            "company_profile cached-source compatibility gate rejected snapshot: "
+            + "; ".join(issues)
+        )
+
+    raise CachedSourceLocalExecutionError(
+        "company_profile cached-source compatibility gate blocked snapshot: "
+        "blocked_company_profile_consumption_not_implemented; "
+        "source family is structurally valid, but cached_source_snapshot dry-run "
+        "consumption is not implemented for company_profile."
+    )
+
+
 def load_portfolio_context_payload(path: str | Path) -> Mapping[str, Any]:
     return _read_json_object(Path(path))
 
@@ -206,6 +248,161 @@ def _validated_snapshot_path(
             "Cached-source snapshot path must stay under the configured snapshot root."
         ) from exc
     return snapshot_path
+
+
+def _read_snapshot_payload_for_compatibility_gate(
+    snapshot_path: Path,
+) -> Mapping[str, Any] | None:
+    if not snapshot_path.exists():
+        return None
+    try:
+        payload = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise CachedSourceLocalExecutionError(
+            "Cached-source compatibility gate rejected snapshot: "
+            f"invalid JSON: {snapshot_path}"
+        ) from exc
+    if not isinstance(payload, Mapping):
+        return None
+    return payload
+
+
+def _looks_like_company_profile_snapshot(payload: Mapping[str, Any]) -> bool:
+    return (
+        payload.get("source_family") == COMPANY_PROFILE_SOURCE_FAMILY
+        or payload.get("payload_format") == COMPANY_PROFILE_SNAPSHOT_PAYLOAD_FORMAT_VERSION
+    )
+
+
+def _read_company_profile_manifest(manifest_path: Path) -> Mapping[str, Any] | None:
+    if not manifest_path.exists():
+        return None
+    try:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise CachedSourceLocalExecutionError(
+            "company_profile cached-source compatibility gate rejected snapshot: "
+            f"blocked_malformed_company_profile_manifest: {manifest_path}"
+        ) from exc
+    if not isinstance(payload, Mapping):
+        raise CachedSourceLocalExecutionError(
+            "company_profile cached-source compatibility gate rejected snapshot: "
+            "blocked_malformed_company_profile_manifest"
+        )
+    return payload
+
+
+def _company_profile_compatibility_issues(
+    *,
+    payload: Mapping[str, Any],
+    manifest: Mapping[str, Any] | None,
+    snapshot_path: Path,
+) -> list[str]:
+    issues: list[str] = []
+    _validate_company_profile_payload_shape(payload=payload, issues=issues)
+    _validate_company_profile_provenance(payload=payload, issues=issues)
+    _validate_company_profile_manifest(
+        payload=payload,
+        manifest=manifest,
+        snapshot_path=snapshot_path,
+        issues=issues,
+    )
+    return issues
+
+
+def _validate_company_profile_payload_shape(
+    *,
+    payload: Mapping[str, Any],
+    issues: list[str],
+) -> None:
+    if payload.get("payload_format") != COMPANY_PROFILE_SNAPSHOT_PAYLOAD_FORMAT_VERSION:
+        issues.append("blocked_malformed_company_profile_payload: payload_format")
+    if payload.get("source_family") != COMPANY_PROFILE_SOURCE_FAMILY:
+        issues.append("blocked_company_profile_manifest_mismatch: source_family")
+    if not _non_empty_text(payload.get("ticker")):
+        issues.append("blocked_ambiguous_company_profile_identity: ticker")
+    if not isinstance(payload.get("profile"), Mapping):
+        issues.append("blocked_malformed_company_profile_payload: profile")
+
+
+def _validate_company_profile_provenance(
+    *,
+    payload: Mapping[str, Any],
+    issues: list[str],
+) -> None:
+    provenance = payload.get("provenance")
+    if not isinstance(provenance, Mapping):
+        issues.append("blocked_malformed_company_profile_payload: provenance")
+        return
+
+    request_metadata = provenance.get("request_metadata")
+    if not isinstance(request_metadata, Mapping):
+        issues.append("blocked_malformed_company_profile_payload: request_metadata")
+        return
+    if request_metadata.get("network_used") is not False:
+        issues.append("blocked_company_profile_network_dependency: network_used")
+    if request_metadata.get("provider_calls_performed") is not False:
+        issues.append(
+            "blocked_company_profile_network_dependency: provider_calls_performed"
+        )
+    for side_effect_key in (
+        "production_write_performed",
+        "portfolio_written",
+        "watchlist_written",
+        "broker_action_performed",
+    ):
+        if request_metadata.get(side_effect_key) is True:
+            issues.append(
+                f"blocked_company_profile_side_effect_intent: {side_effect_key}"
+            )
+
+
+def _validate_company_profile_manifest(
+    *,
+    payload: Mapping[str, Any],
+    manifest: Mapping[str, Any] | None,
+    snapshot_path: Path,
+    issues: list[str],
+) -> None:
+    if manifest is None:
+        issues.append("blocked_missing_company_profile_manifest")
+        return
+
+    if manifest.get("source_family") != COMPANY_PROFILE_SOURCE_FAMILY:
+        issues.append("blocked_company_profile_manifest_mismatch: source_family")
+    if manifest.get("validation_status") != "passed":
+        issues.append("blocked_malformed_company_profile_payload: validation_status")
+    if manifest.get("local_use_allowed") is not True:
+        issues.append("blocked_company_profile_side_effect_intent: local_use_allowed")
+    if manifest.get("usable_for_cached_source_dry_run") is not True:
+        issues.append("blocked_company_profile_manifest_mismatch: dry_run_eligibility")
+    if manifest.get("local_snapshot_path") not in (None, snapshot_path.name):
+        issues.append("blocked_company_profile_manifest_mismatch: local_snapshot_path")
+
+    payload_ticker = payload.get("ticker")
+    manifest_ticker = manifest.get("ticker")
+    if (
+        _non_empty_text(payload_ticker)
+        and _non_empty_text(manifest_ticker)
+        and str(payload_ticker).upper() != str(manifest_ticker).upper()
+    ):
+        issues.append("blocked_ambiguous_company_profile_identity: ticker_mismatch")
+
+    expected_size = manifest.get("local_payload_size_bytes")
+    if isinstance(expected_size, int) and snapshot_path.stat().st_size != expected_size:
+        issues.append("blocked_malformed_company_profile_payload: payload_size")
+
+    expected_hash = manifest.get("local_payload_sha256")
+    if _non_empty_text(expected_hash) and _sha256(snapshot_path) != expected_hash:
+        issues.append("blocked_malformed_company_profile_payload: payload_hash")
+
+
+def _non_empty_text(value: Any) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _portfolio_context(
