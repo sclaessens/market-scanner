@@ -1087,3 +1087,53 @@ Goal: resolve the remaining cached-source coverage blockers exposed by ME-RUN19 
 Rationale: local portfolio context is no longer the default blocker. Remaining blockers are cached-source coverage and canonical source-field completeness for HO, ASML, and TSM.
 
 Scope: Source Refresh only. No portfolio writes, watchlist writes, Telegram delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+### ME-SA01 — Define automated cached-source acquisition job contract
+
+Status: COMPLETED BY ME-SA01
+
+ME-SA01 completed the docs-only contract for automated cached-source acquisition.
+
+The active route after ME-SA01 is:
+
+```text
+automated acquisition job
+  -> cached-source snapshot package
+  -> existing import/staging validation
+  -> cached_source_snapshot dry-run
+  -> operator preview
+```
+
+ME-SA01 moves the roadmap away from manual operator-supplied input packages as the primary route. ME-SR13A remains only a fallback/manual diagnostic candidate.
+
+Next active sprint:
+
+```text
+ME-SA02 — Implement first bounded automated cached-source acquisition job
+```
+
+ME-SA02 should implement a bounded, local, non-production first acquisition job using the ME-SA01 contract.
+
+Expected implementation guardrails:
+
+- bounded ticker list, initially `NVDA`, `AMD`, `ASML`, or smaller;
+- at least one approved source family;
+- deterministic fake adapter in tests;
+- no real provider calls in tests;
+- no network calls in tests;
+- no yfinance;
+- no SEC/EDGAR;
+- no Telegram send;
+- no portfolio/watchlist writes;
+- no production writes;
+- no Decision Engine, Recommendation Review, Portfolio Review, or Delivery semantic changes;
+- snapshot package compatible with existing import/staging validation.
+
+Roadmap chain:
+
+```text
+ME-SA01
+  -> ME-SA02 — Implement first bounded automated cached-source acquisition job
+  -> ME-RUN26 — Run automated cached-source acquisition for NVDA/AMD/ASML through staging validation and local dry-run
+  -> ME-TP01 — Produce terminal-visible operator preview from real cached-source dry-run artifacts
+```

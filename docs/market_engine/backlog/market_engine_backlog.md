@@ -3040,3 +3040,65 @@ Goal: resolve the remaining cached-source coverage blockers exposed by ME-RUN19 
 Rationale: ME-RUN19 proved that local portfolio context unlocks Portfolio Review, Decision Engine handoff, and Delivery / Reporting for complete cached-source tickers. Remaining blockers are source-coverage issues: HO lacks a cached source snapshot, while ASML and TSM preserve upstream missing-field evidence and block at Recommendation Review.
 
 Scope: Source Refresh only. No portfolio writes, watchlist writes, Telegram delivery, production reports, scheduler behavior, UI behavior, Decision Engine action semantics, allocation advice, target prices, position sizing, ranking, scoring, urgency, conviction, tradeability or execution advice.
+
+### ME-SA01 — Define automated cached-source acquisition job contract
+
+Status: COMPLETED BY ME-SA01
+
+ME-SA01 defined the docs-only contract for the automated cached-source acquisition job.
+
+The primary route is now:
+
+```text
+automated acquisition job
+  -> cached-source snapshot package
+  -> existing import/staging validation
+  -> cached_source_snapshot dry-run
+  -> operator preview
+```
+
+This follows the product-owner decision recorded after ME-SR13 and ME-RM03: the application must be able to retrieve source data itself through an automated job. Manual operator-supplied input packages are no longer the primary route and remain only a possible fallback/manual diagnostic candidate.
+
+ME-SA01 added:
+
+```text
+docs/market_engine/source_data/me_sa01_automated_cached_source_acquisition_job_contract.md
+docs/market_engine/audits/me_sa01_automated_cached_source_acquisition_job_contract_audit.md
+docs/market_engine/backlog/me_sa01_automated_cached_source_acquisition_job_contract_backlog_entry.md
+docs/market_engine/roadmap/me_sa01_automated_cached_source_acquisition_job_contract_roadmap_entry.md
+```
+
+ME-SA01 defined:
+
+- request format `market-engine-automated-cached-source-acquisition-request-v1`;
+- result format `market-engine-automated-cached-source-acquisition-result-v1`;
+- approved run modes;
+- ticker input rules;
+- source family rules;
+- provider/source adapter policy;
+- snapshot package compatibility;
+- provenance requirements;
+- freshness/staleness policy;
+- missing-data policy;
+- failure model;
+- safety and side-effect constraints;
+- handoff to existing import/staging/dry-run flow;
+- ME-SA02 acceptance criteria.
+
+ME-SA01 did not introduce runtime code, tests, provider calls, live data retrieval, yfinance, SEC/EDGAR access, source data files, fake NVDA/AMD/ASML data, Telegram sending, portfolio/watchlist writes, production writes, or downstream Decision Engine / Recommendation Review / Portfolio Review / Delivery semantic changes.
+
+ME-SA01 also did not introduce BUY / SELL / HOLD, target price, allocation, position sizing, ranking, urgency, conviction, or tradeability authority.
+
+Next logical sprint:
+
+```text
+ME-SA02 — Implement first bounded automated cached-source acquisition job
+```
+
+Follow-up route:
+
+```text
+ME-SA02
+  -> ME-RUN26 — Run automated cached-source acquisition for NVDA/AMD/ASML through staging validation and local dry-run
+  -> ME-TP01 — Produce terminal-visible operator preview from real cached-source dry-run artifacts
+```
