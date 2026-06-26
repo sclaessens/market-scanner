@@ -664,6 +664,44 @@ ME-SR13 - Run real-world operator-supplied cached-source sample import for NVDA,
 
 ME-SR13 should use real local operator-supplied files, import and validate them, and attempt the same dry-run bridge for accepted samples. It must keep the roadmap moving toward first real cached-source analysis and Telegram-style terminal preview.
 
+### ME-SR13 - Real-world operator-supplied cached-source sample import
+
+Owner roles: Product Owner / Operator / Data Steward / Technical Architect / QA Lead / Governance Auditor
+
+Job family: ME-SR - Source Refresh / Source Coverage
+
+Status: BLOCKED BY MISSING OPERATOR INPUT
+
+Roadmap position:
+
+```text
+ME-SR12 -> ME-RUN25 -> ME-SR13 -> ME-SR13A -> ME-SR13 rerun or ME-SR14
+```
+
+ME-SR13 attempted to move from the ME-RUN25 fixture-backed import validation flow to real local operator-supplied samples for `NVDA`, `AMD`, and `ASML`.
+
+Conclusion:
+
+```text
+BLOCKED
+```
+
+The expected input root was absent:
+
+```text
+operator_input/market_engine/me-sr13-real-world-sample/
+```
+
+No import, staging validation, local cached-source dry-run, fixture substitution, or fake source creation was performed.
+
+Next logical sprint:
+
+```text
+ME-SR13A - Prepare real-world operator-supplied cached-source input package for NVDA, AMD, ASML
+```
+
+ME-SR13A should prepare and verify the real local input package before ME-SR13 is rerun or ME-SR14 begins.
+
 ### ME-SR03 - Resolve canonical-universe cached-source coverage blockers
 
 Owner roles: Product Owner / Operator / Technical Architect / Development Lead / QA Lead / Governance Auditor
