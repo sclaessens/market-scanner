@@ -2888,24 +2888,24 @@ docs/market_engine/roadmap/me_uni09_professional_swing_universe_expansion_from_c
 
 ## Active Next Direction
 
-### ME-RUN26 - Run automated cached-source acquisition through staging validation and local dry-run
+### ME-SA03 - Define company_profile cached-source dry-run consumption compatibility contract
 
 Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
-Job family: ME-RUN - Run / orchestration
+Job family: ME-SA - Source Acquisition
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-SA02
+Status: NEXT ACTIVE CANDIDATE AFTER ME-RUN26
 
-Goal: run the ME-SA02 automated cached-source acquisition job for a bounded ticker set through existing staging validation and local cached-source dry-run.
+Goal: define how ME-SA02 `company_profile` cached-source packages can be consumed by, or explicitly rejected from, local dry-run flows without bypassing staging validation.
 
-Scope: local run validation only. Use the ME-SA02 bounded acquisition job output, existing staging validation, and existing cached-source dry-run path. Record pass/block evidence for `company_profile` consumption without adding provider calls, live data retrieval, Telegram delivery, production writes, portfolio/watchlist writes, Decision Engine semantics, recommendation semantics, or action authority.
+Scope: compatibility contract only. No provider calls, live data retrieval, Telegram delivery, production writes, portfolio/watchlist writes, Decision Engine semantics, recommendation semantics, allocation authority, or action authority.
 
-Rationale: ME-SA01 defined the automated acquisition contract and ME-SA02 implemented the first bounded job. The next step is to prove whether the generated packages pass through the existing downstream route and to document any remaining dry-run incompatibility as an explicit blocked reason.
+Rationale: ME-RUN26 proved that ME-SA02 acquisition and staging validation pass, but the existing `cached_source_snapshot` dry-run path blocks because it expects SEC CompanyFacts metadata and does not consume `company_profile` payloads.
 
-### Planned Next Candidate After ME-RUN26
+### Planned Next Candidate After ME-SA03
 
 ```text
-ME-TP01 - Produce terminal-visible operator preview from real cached-source dry-run artifacts
+ME-RUN27 - Implement or validate company_profile cached-source package consumption for local dry-run
 ```
 
 ME-SR13A remains available only as a fallback/manual diagnostic candidate.
@@ -3146,4 +3146,46 @@ Next logical sprint:
 
 ```text
 ME-RUN26 - Run automated cached-source acquisition for NVDA, AMD, ASML through staging validation and local dry-run
+```
+
+### ME-RUN26 - Run automated cached-source acquisition through staging validation and local dry-run
+
+Status: COMPLETED WITH BLOCKED OUTCOME BY ME-RUN26
+
+ME-RUN26 executed the ME-SA02 automated cached-source acquisition job for `NVDA`, `AMD`, and `ASML`, validated the generated packages with the existing staging validator, and attempted the existing `cached_source_snapshot` local dry-run path.
+
+Artifact root:
+
+```text
+artifacts/market_engine/me-run26-automated-cached-source-acquisition-20260626T120200Z
+```
+
+Outcome:
+
+```text
+Acquisition: PASS - 3 completed entries
+Staging validation: PASS - 3 accepted entries, 0 rejected entries
+cached_source_snapshot dry-run: BLOCKED - 3 blocked entries
+Overall: BLOCKED
+```
+
+Exact blocker:
+
+```text
+The existing cached_source_snapshot local dry-run path attempts to build SEC CompanyFacts Source Context and blocks on ME-SA02 company_profile payloads with: SEC CompanyFacts snapshot metadata is missing.
+```
+
+Implemented files:
+
+```text
+scripts/market_engine/me_run26_run_automated_cached_source_acquisition.sh
+docs/market_engine/audits/me_run26_automated_cached_source_acquisition_staging_and_dry_run_audit.md
+docs/market_engine/backlog/me_run26_automated_cached_source_acquisition_staging_and_dry_run_backlog_entry.md
+docs/market_engine/roadmap/me_run26_automated_cached_source_acquisition_staging_and_dry_run_roadmap_entry.md
+```
+
+Next active sprint:
+
+```text
+ME-SA03 - Define company_profile cached-source dry-run consumption compatibility contract
 ```
