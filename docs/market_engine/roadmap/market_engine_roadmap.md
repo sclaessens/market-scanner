@@ -88,28 +88,24 @@ Completed job-scoped chain:
 | ME-CANDIDATE01 | Candidate Classification | Completed |
 | ME-CANDIDATE02 | Candidate Classification | Completed |
 | ME-UNI09 | Ticker Universe | Completed |
+| ME-SA03 | Source Acquisition | Completed |
+| ME-SA04 | Source Acquisition | Completed |
 
 ## Active Next Direction
 
-### ME-SA03 - Define company_profile cached-source dry-run consumption compatibility contract
+### ME-RUN27 - Implement or validate company_profile cached-source package consumption for local dry-run
 
 Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
-Job family: ME-SA - Source Acquisition
+Job family: ME-RUN - Run / orchestration jobs
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-RUN26
+Status: NEXT ACTIVE CANDIDATE AFTER ME-SA04
 
-Goal: define how ME-SA02 `company_profile` cached-source packages can be consumed by, or explicitly rejected from, local dry-run flows without bypassing staging validation.
+Goal: decide whether to implement contextual `company_profile` dry-run consumption or preserve the explicit ME-SA04 blocked state with broader run evidence.
 
-Scope: compatibility contract only. No provider calls, live data retrieval, Telegram delivery, production writes, portfolio/watchlist writes, Decision Engine semantics, recommendation semantics, allocation authority, or action authority.
+Scope: local cached-source dry-run validation only. No provider calls, live data retrieval, delivery sends, production writes, portfolio/watchlist writes, Decision Engine semantics, recommendation semantics, allocation authority, or action authority.
 
-Rationale: ME-RUN26 proved that ME-SA02 acquisition and staging validation pass, but the existing `cached_source_snapshot` dry-run path blocks because it expects SEC CompanyFacts metadata and does not consume `company_profile` payloads.
-
-### Planned Next Candidate After ME-SA03
-
-```text
-ME-RUN27 - Implement or validate company_profile cached-source package consumption for local dry-run
-```
+Rationale: ME-SA04 made `company_profile` cached-source dry-run blocking explicit and provenance-aware. ME-RUN27 should provide the next run-level decision or evidence point.
 
 ## Deferred Follow-up Candidates
 
@@ -1201,4 +1197,55 @@ Next active sprint:
 
 ```text
 ME-SA03 - Define company_profile cached-source dry-run consumption compatibility contract
+```
+
+### ME-SA03 - Define company_profile cached-source dry-run consumption compatibility contract
+
+Status: COMPLETED BY ME-SA03
+
+ME-SA03 defined the compatibility contract for consuming or explicitly rejecting `company_profile` cached-source snapshots through local `cached_source_snapshot` dry-run flows.
+
+Implemented documentation:
+
+```text
+docs/market_engine/audits/me_sa03_company_profile_cached_source_dry_run_consumption_compatibility_contract.md
+docs/market_engine/backlog/me_sa03_company_profile_cached_source_dry_run_consumption_compatibility_contract_backlog_entry.md
+docs/market_engine/roadmap/me_sa03_company_profile_cached_source_dry_run_consumption_compatibility_contract_roadmap_entry.md
+```
+
+Next active sprint:
+
+```text
+ME-SA04 - Implement company_profile cached-source dry-run consumption compatibility gate
+```
+
+### ME-SA04 - Implement company_profile cached-source dry-run compatibility gate
+
+Status: COMPLETED BY ME-SA04
+
+ME-SA04 implemented a deterministic local compatibility gate for `company_profile` cached-source snapshots in the existing `cached_source_snapshot` dry-run route.
+
+Implemented:
+
+```text
+src/market_engine/run/cached_source_execution.py
+tests/market_engine/run/test_me_run10_cached_source_local_execution.py
+docs/market_engine/audits/me_sa04_company_profile_cached_source_dry_run_compatibility_gate_audit.md
+docs/market_engine/backlog/me_sa04_company_profile_cached_source_dry_run_compatibility_gate_backlog_entry.md
+docs/market_engine/roadmap/me_sa04_company_profile_cached_source_dry_run_compatibility_gate_roadmap_entry.md
+```
+
+Validation:
+
+```text
+12 passed - tests/market_engine/run/test_me_run10_cached_source_local_execution.py
+103 passed - tests/market_engine/run
+496 passed - tests/market_engine
+1163 passed - full pytest
+```
+
+Next active sprint:
+
+```text
+ME-RUN27 - Implement or validate company_profile cached-source package consumption for local dry-run
 ```

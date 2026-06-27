@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -110,6 +111,97 @@ def test_malformed_cached_source_fails_closed(tmp_path: Path, capsys) -> None:
     assert exit_code == 2
     assert captured.out == ""
     assert "invalid JSON" in captured.err
+
+
+def test_company_profile_cached_source_blocks_with_explicit_gate(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    source_root = tmp_path / "source_snapshots"
+    snapshot_path = _write_company_profile_package(source_root)
+
+    exit_code = run_market_engine_end_to_end_dry_run_command(
+        [
+            "--input-mode",
+            CACHED_SOURCE_SNAPSHOT_INPUT_MODE,
+            "--source-snapshot-json",
+            str(snapshot_path),
+            "--source-snapshot-root",
+            str(source_root),
+            "--dry-run-id",
+            "company-profile-gate-run-001",
+        ]
+    )
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert captured.out == ""
+    assert "company_profile cached-source compatibility gate blocked snapshot" in (
+        captured.err
+    )
+    assert "blocked_company_profile_consumption_not_implemented" in captured.err
+    assert "SEC CompanyFacts snapshot metadata is missing" not in captured.err
+
+
+def test_company_profile_cached_source_requires_manifest(tmp_path: Path) -> None:
+    source_root = tmp_path / "source_snapshots"
+    snapshot_dir = source_root / "NVDA" / "company_profile"
+    snapshot_dir.mkdir(parents=True)
+    snapshot_path = snapshot_dir / "company_profile.json"
+    snapshot_path.write_text(json.dumps(_company_profile_payload()), encoding="utf-8")
+
+    with pytest.raises(
+        CachedSourceLocalExecutionError,
+        match="blocked_missing_company_profile_manifest",
+    ):
+        build_cached_source_local_execution_stage_payloads(
+            source_snapshot_path=snapshot_path,
+            source_snapshot_root=source_root,
+            dry_run_id="company-profile-gate-run-002",
+            generated_at="2026-06-26T12:00:00Z",
+        )
+
+
+def test_company_profile_cached_source_blocks_provider_call_provenance(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source_snapshots"
+    payload = _company_profile_payload()
+    payload["provenance"]["request_metadata"]["provider_calls_performed"] = True
+    snapshot_path = _write_company_profile_package(source_root, payload=payload)
+
+    with pytest.raises(
+        CachedSourceLocalExecutionError,
+        match="blocked_company_profile_network_dependency: provider_calls_performed",
+    ):
+        build_cached_source_local_execution_stage_payloads(
+            source_snapshot_path=snapshot_path,
+            source_snapshot_root=source_root,
+            dry_run_id="company-profile-gate-run-003",
+            generated_at="2026-06-26T12:00:00Z",
+        )
+
+
+def test_company_profile_cached_source_blocks_manifest_payload_ticker_mismatch(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source_snapshots"
+    snapshot_path = _write_company_profile_package(
+        source_root,
+        manifest_overrides={"ticker": "AMD"},
+    )
+
+    with pytest.raises(
+        CachedSourceLocalExecutionError,
+        match="blocked_ambiguous_company_profile_identity: ticker_mismatch",
+    ):
+        build_cached_source_local_execution_stage_payloads(
+            source_snapshot_path=snapshot_path,
+            source_snapshot_root=source_root,
+            dry_run_id="company-profile-gate-run-004",
+            generated_at="2026-06-26T12:00:00Z",
+        )
 
 
 def test_live_provider_input_mode_is_rejected() -> None:
@@ -281,6 +373,84 @@ def _portfolio_context_payload() -> dict[str, object]:
             "portfolio_context_source": "local_non_production_fixture"
         },
     }
+
+
+def _write_company_profile_package(
+    source_root: Path,
+    *,
+    payload: dict[str, object] | None = None,
+    manifest_overrides: dict[str, object] | None = None,
+) -> Path:
+    snapshot_dir = source_root / "NVDA" / "company_profile"
+    snapshot_dir.mkdir(parents=True)
+    snapshot_path = snapshot_dir / "company_profile.json"
+    profile_payload = payload or _company_profile_payload()
+    snapshot_path.write_text(
+        json.dumps(profile_payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    manifest = {
+        "manifest_format_version": "market-engine-cached-source-acquisition-manifest-v1",
+        "snapshot_id": "NVDA-company_profile-company-profile-gate-run",
+        "batch_id": "company-profile-gate-run",
+        "created_at_utc": "2026-06-26T12:00:00Z",
+        "acquired_at_utc": "2026-06-26T12:00:00Z",
+        "acquisition_mode": "automated_dry_run",
+        "source_family": "company_profile",
+        "source_name": "deterministic_fake_provider",
+        "source_url": "fake://company_profile/NVDA",
+        "local_use_allowed": True,
+        "commit_allowed": False,
+        "ticker": "NVDA",
+        "local_snapshot_path": "company_profile.json",
+        "local_manifest_path": "manifest.json",
+        "local_payload_sha256": _file_sha256(snapshot_path),
+        "local_payload_size_bytes": snapshot_path.stat().st_size,
+        "validation_status": "passed",
+        "validation_errors": [],
+        "validation_warnings": [],
+        "usable_for_cached_source_dry_run": True,
+        "blocked_reason": None,
+    }
+    if manifest_overrides:
+        manifest.update(manifest_overrides)
+    (snapshot_dir / "manifest.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return snapshot_path
+
+
+def _company_profile_payload() -> dict[str, object]:
+    return {
+        "payload_format": "market-engine-company-profile-snapshot-v1",
+        "ticker": "NVDA",
+        "entity_name": "NVIDIA Corporation",
+        "entity_country": "US",
+        "entity_exchange": "NASDAQ",
+        "source_family": "company_profile",
+        "profile": {
+            "business_summary": "Deterministic non-production company profile for NVDA.",
+            "missing_data": [],
+        },
+        "provenance": {
+            "adapter_id": "fake_company_profile_adapter",
+            "adapter_version": "test-v1",
+            "provider_name": "deterministic_fake_provider",
+            "canonical_source_identity": "fake://company_profile/NVDA",
+            "retrieved_at": "2026-06-26T12:00:00Z",
+            "source_timestamp": None,
+            "request_metadata": {
+                "network_used": False,
+                "provider_calls_performed": False,
+                "deterministic_fake_adapter": True,
+            },
+        },
+    }
+
+
+def _file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def _companyfacts_payload() -> dict[str, object]:
