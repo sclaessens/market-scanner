@@ -139,12 +139,21 @@ def test_company_profile_cached_source_is_consumed_into_source_context(
     company_profile = dry_run["provenance_summary"]["source_context"][
         "company_profile"
     ]
+    profile_observations = dry_run["provenance_summary"][
+        "fundamental_observations"
+    ]["company_profile"]
+    stage_results = {
+        stage["stage_name"]: stage for stage in dry_run["stage_results"]
+    }
 
     assert exit_code == 0
     assert captured.err == ""
     assert dry_run["ticker"] == "NVDA"
     assert dry_run["run_state"] == "dry_run_blocked"
-    assert dry_run["blocked_stage"] == "fundamental_observations"
+    assert dry_run["blocked_stage"] == "derived_observations"
+    assert stage_results["source_context"]["status"] == "completed"
+    assert stage_results["fundamental_observations"]["status"] == "completed"
+    assert stage_results["derived_observations"]["status"] == "blocked"
     assert company_profile["input_family"] == "company_profile"
     assert company_profile["consumption_state"] == "consumed"
     assert company_profile["symbol"] == "NVDA"
@@ -153,6 +162,26 @@ def test_company_profile_cached_source_is_consumed_into_source_context(
     assert company_profile["compatibility_gate"]["result"] == (
         "company_profile_consumption_allowed"
     )
+    assert profile_observations["input_family"] == "company_profile"
+    assert profile_observations["source_context_state"] == "consumed"
+    assert profile_observations["observation_format_version"] == (
+        "market-engine-company-profile-fundamental-observations-v1"
+    )
+    assert {
+        observation["observation_code"]
+        for observation in profile_observations["observations"]
+    } >= {
+        "company_profile_identity_observed",
+        "company_profile_symbol_observed",
+        "company_profile_exchange_observed",
+        "company_profile_sector_observed",
+        "company_profile_industry_observed",
+        "company_profile_country_observed",
+        "company_profile_currency_observed",
+        "company_profile_description_available",
+        "company_profile_provenance_retained",
+        "company_profile_as_of_retained",
+    }
     assert "blocked_company_profile_consumption_not_implemented" not in captured.out
 
 
@@ -175,6 +204,7 @@ def test_company_profile_cached_source_missing_manifest_is_traceably_blocked(
     source_context = stage_payloads["source_context"]
     assert source_context["consumption_state"] == "blocked"
     assert "profile" not in source_context["company_profile"]
+    assert "company_profile" not in stage_payloads["fundamental_observations"]
     assert "blocked_missing_company_profile_manifest" in source_context[
         "blocked_reasons"
     ]
@@ -223,6 +253,7 @@ def test_company_profile_cached_source_manifest_payload_ticker_mismatch_is_block
         "blocked_ambiguous_company_profile_identity: ticker_mismatch"
         in source_context["blocked_reasons"]
     )
+    assert "company_profile" not in stage_payloads["fundamental_observations"]
 
 
 def test_company_profile_cached_source_package_ticker_mismatch_is_blocked(
@@ -270,6 +301,7 @@ def test_company_profile_invalid_format_is_not_consumed(tmp_path: Path) -> None:
     source_context = stage_payloads["source_context"]
     assert source_context["consumption_state"] == "blocked"
     assert "profile" not in source_context["company_profile"]
+    assert "company_profile" not in stage_payloads["fundamental_observations"]
     assert (
         "blocked_malformed_company_profile_payload: payload_format"
         in source_context["blocked_reasons"]
@@ -292,6 +324,7 @@ def test_company_profile_missing_provenance_is_not_consumed(tmp_path: Path) -> N
     assert "blocked_malformed_company_profile_payload: provenance" in stage_payloads[
         "source_context"
     ]["blocked_reasons"]
+    assert "company_profile" not in stage_payloads["fundamental_observations"]
 
 
 def test_company_profile_unsupported_profile_field_is_not_consumed(
@@ -484,10 +517,15 @@ def test_company_profile_is_visible_in_written_dry_run_artifact(
     company_profile = artifact["payload"]["provenance_summary"]["source_context"][
         "company_profile"
     ]
+    profile_observations = artifact["payload"]["provenance_summary"][
+        "fundamental_observations"
+    ]["company_profile"]
 
     assert exit_code == 0
     assert company_profile["consumption_state"] == "consumed"
     assert company_profile["profile"]["business_summary"].startswith("Deterministic")
+    assert profile_observations["source_context_state"] == "consumed"
+    assert profile_observations["observations"]
 
 
 def test_cached_source_wrapper_input_is_supported(tmp_path: Path) -> None:
@@ -542,6 +580,7 @@ def test_sec_companyfacts_source_context_marks_company_profile_absent_optional(
         "consumption_state": "absent_optional",
         "consumption_reason_codes": ("company_profile_absent_optional",),
     }
+    assert "company_profile" not in stage_payloads["fundamental_observations"]
 
 
 def test_cached_source_path_must_stay_inside_configured_root(tmp_path: Path) -> None:
@@ -679,6 +718,10 @@ def _company_profile_payload() -> dict[str, object]:
         "source_family": "company_profile",
         "profile": {
             "business_summary": "Deterministic non-production company profile for NVDA.",
+            "sector": "Technology",
+            "industry": "Semiconductors",
+            "currency": "USD",
+            "website": "https://example.invalid/nvda",
             "missing_data": [],
         },
         "provenance": {

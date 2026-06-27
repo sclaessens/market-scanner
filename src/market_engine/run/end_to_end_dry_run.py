@@ -66,6 +66,10 @@ _STAGE_CONTRACT_SPECS: tuple[dict[str, Any], ...] = (
         "label": "Fundamental Observations",
         "version_field": "fundamental_observations_format_version",
         "expected_version": "sec-companyfacts-fundamental-observations-v1",
+        "accepted_versions": (
+            "sec-companyfacts-fundamental-observations-v1",
+            "market-engine-company-profile-fundamental-observations-v1",
+        ),
     },
     {
         "stage_name": "derived_observations",

@@ -20,6 +20,9 @@ from market_engine.delivery_reporting.sec_companyfacts_delivery_report import (
 from market_engine.derived_observations.sec_companyfacts_cash_generation import (
     build_sec_companyfacts_derived_cash_generation_observations,
 )
+from market_engine.fundamental_observations.company_profile_observations import (
+    build_company_profile_fundamental_observations,
+)
 from market_engine.fundamental_observations.sec_companyfacts_observations import (
     build_sec_companyfacts_fundamental_observations,
 )
@@ -698,6 +701,17 @@ def _company_profile_stage_payloads(
                 "cached_source_reference",
             }
         }
+        fundamental_observations = build_company_profile_fundamental_observations(
+            source_context
+        )
+        fundamental_observations_payload = _fundamental_observations_payload(
+            fundamental_observations
+        )
+        fundamental_observations_payload["company_profile"] = {
+            key: value
+            for key, value in fundamental_observations_payload.items()
+            if key not in {"company_profile", "cached_source_reference"}
+        }
     else:
         payload_ticker = payload.get("ticker") if isinstance(payload, Mapping) else None
         manifest_ticker = (
@@ -730,24 +744,18 @@ def _company_profile_stage_payloads(
             "blocked_reasons": gate_outcome.reason_codes,
             "cached_source_snapshot_path": snapshot_path.as_posix(),
         }
-
-    ticker = source_context_payload.get("ticker", "")
-    provider_name = source_context_payload.get("provider_name", "")
-    downstream_reason = (
-        "company_profile_source_context_does_not_provide_fundamental_observations"
-        if gate_outcome.allowed
-        else "company_profile_consumption_blocked_by_compatibility_gate"
-    )
-    stage_payloads = {
-        "source_context": source_context_payload,
-        "fundamental_observations": {
+        ticker = source_context_payload.get("ticker", "")
+        provider_name = source_context_payload.get("provider_name", "")
+        fundamental_observations_payload = {
             "fundamental_observations_format_version": (
                 "sec-companyfacts-fundamental-observations-v1"
             ),
             "ticker": ticker,
             "provider_name": provider_name,
             "stage_state": "blocked",
-            "blocked_reasons": (downstream_reason,),
+            "blocked_reasons": (
+                "company_profile_consumption_blocked_by_compatibility_gate",
+            ),
             "source_context_reference": {
                 "source_refresh_snapshot_id": source_context_payload.get(
                     "source_refresh_snapshot_id"
@@ -756,7 +764,18 @@ def _company_profile_stage_payloads(
                     "consumption_state"
                 ],
             },
-        },
+        }
+
+    ticker = source_context_payload.get("ticker", "")
+    provider_name = source_context_payload.get("provider_name", "")
+    downstream_reason = (
+        "company_profile_fundamental_observations_do_not_provide_derived_financial_evidence"
+        if gate_outcome.allowed
+        else "company_profile_consumption_blocked_by_compatibility_gate"
+    )
+    stage_payloads = {
+        "source_context": source_context_payload,
+        "fundamental_observations": fundamental_observations_payload,
     }
     stage_payloads.update(
         _not_started_company_profile_downstream_payloads(
