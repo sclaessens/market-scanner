@@ -2888,19 +2888,19 @@ docs/market_engine/roadmap/me_uni09_professional_swing_universe_expansion_from_c
 
 ## Active Next Direction
 
-### ME-SA06 - Derive basic company_profile observations from Source Context
+### ME-RUN27 - Run NVDA/AMD/ASML with company_profile Source Context and Fundamental Observations
 
 Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
-Job family: ME-SA / Source Context
+Job family: ME-RUN / Run and orchestration
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-SA05
+Status: NEXT ACTIVE CANDIDATE AFTER ME-SA06
 
-Goal: define bounded descriptive observations from consumed `company_profile` Source Context without financial or investment interpretation.
+Goal: execute the bounded NVDA/AMD/ASML cached-source profile set through Source Context and Fundamental Observations and record deterministic run evidence.
 
-Scope: descriptive company identity and profile observations only. No provider calls, live data retrieval, fundamental conclusions, recommendations, targets, ranking, urgency, conviction, allocation, or Decision Engine authority.
+Scope: local cached-source run evidence only. No provider calls, live data retrieval, investment interpretation, setup progression, delivery, production writes, allocation, or Decision Engine authority.
 
-Rationale: ME-SA05 made valid profile data available as explicit lower-authority Source Context while stopping the profile-only route before Fundamental Observations.
+Rationale: ME-SA06 allows valid profile-only runs to complete Fundamental Observations and preserves a controlled Derived Observations boundary.
 
 ME-SR13A remains available only as a fallback/manual diagnostic candidate.
 
@@ -3271,4 +3271,43 @@ Next active sprint:
 
 ```text
 ME-SA06 - Derive basic company_profile observations from Source Context
+```
+
+### ME-SA06 - Derive basic company_profile observations from Source Context
+
+Status: COMPLETED BY ME-SA06
+
+ME-SA06 implemented deterministic, informational profile observations from
+consumed Company Profile Source Context.
+
+Implemented:
+
+```text
+src/market_engine/fundamental_observations/company_profile_observations.py
+src/market_engine/run/cached_source_execution.py
+src/market_engine/run/end_to_end_dry_run.py
+tests/market_engine/fundamental_observations/test_company_profile_observations.py
+tests/market_engine/run/test_me_run10_cached_source_local_execution.py
+docs/market_engine/audits/me_sa06_company_profile_fundamental_observations_audit.md
+docs/market_engine/backlog/me_sa06_company_profile_fundamental_observations_backlog_entry.md
+docs/market_engine/roadmap/me_sa06_company_profile_fundamental_observations_roadmap_entry.md
+```
+
+Profile-only runs now complete Fundamental Observations and stop at Derived
+Observations. SEC CompanyFacts observations remain unchanged.
+
+Validation:
+
+```text
+4 passed - company-profile Fundamental Observations tests
+21 passed - cached-source local execution tests
+112 passed - tests/market_engine/run
+509 passed - tests/market_engine
+1176 passed - full pytest
+```
+
+Next active sprint:
+
+```text
+ME-RUN27 - Run NVDA/AMD/ASML with company_profile Source Context and Fundamental Observations
 ```
