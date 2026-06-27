@@ -50,12 +50,16 @@ FORBIDDEN_DRY_RUN_FIELDS = (
     "live_market_data_fetch",
 )
 
-_STAGE_CONTRACT_SPECS: tuple[dict[str, str], ...] = (
+_STAGE_CONTRACT_SPECS: tuple[dict[str, Any], ...] = (
     {
         "stage_name": "source_context",
         "label": "Source Context",
         "version_field": "source_context_format_version",
         "expected_version": "sec-companyfacts-source-context-v1",
+        "accepted_versions": (
+            "sec-companyfacts-source-context-v1",
+            "market-engine-company-profile-source-context-v1",
+        ),
     },
     {
         "stage_name": "fundamental_observations",
@@ -324,7 +328,8 @@ def _inspect_stage_payload(
             blocked_reasons=(f"{stage_label} payload contains prohibited dry-run semantics.",),
         )
 
-    if observed_version != expected_version:
+    accepted_versions = spec.get("accepted_versions", (expected_version,))
+    if observed_version not in accepted_versions:
         return MarketEngineEndToEndDryRunStageResult(
             stage_name=stage_name,
             stage_label=stage_label,
@@ -414,7 +419,7 @@ def _not_started_results() -> tuple[MarketEngineEndToEndDryRunStageResult, ...]:
     return tuple(results)
 
 
-def _not_started_result(spec: Mapping[str, str]) -> MarketEngineEndToEndDryRunStageResult:
+def _not_started_result(spec: Mapping[str, Any]) -> MarketEngineEndToEndDryRunStageResult:
     return MarketEngineEndToEndDryRunStageResult(
         stage_name=spec["stage_name"],
         stage_label=spec["label"],
@@ -535,6 +540,9 @@ def _collect_provenance(payload: Mapping[str, Any]) -> dict[str, Any]:
             or normalized_key.endswith("_id")
         ):
             provenance[key] = value
+    company_profile = payload.get("company_profile")
+    if isinstance(company_profile, Mapping):
+        provenance["company_profile"] = company_profile
     return provenance
 
 

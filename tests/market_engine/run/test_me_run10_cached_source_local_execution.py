@@ -113,7 +113,7 @@ def test_malformed_cached_source_fails_closed(tmp_path: Path, capsys) -> None:
     assert "invalid JSON" in captured.err
 
 
-def test_company_profile_cached_source_blocks_with_explicit_gate(
+def test_company_profile_cached_source_is_consumed_into_source_context(
     tmp_path: Path,
     capsys,
 ) -> None:
@@ -135,35 +135,52 @@ def test_company_profile_cached_source_blocks_with_explicit_gate(
 
     captured = capsys.readouterr()
 
-    assert exit_code == 2
-    assert captured.out == ""
-    assert "company_profile cached-source compatibility gate blocked snapshot" in (
-        captured.err
+    dry_run = json.loads(captured.out)
+    company_profile = dry_run["provenance_summary"]["source_context"][
+        "company_profile"
+    ]
+
+    assert exit_code == 0
+    assert captured.err == ""
+    assert dry_run["ticker"] == "NVDA"
+    assert dry_run["run_state"] == "dry_run_blocked"
+    assert dry_run["blocked_stage"] == "fundamental_observations"
+    assert company_profile["input_family"] == "company_profile"
+    assert company_profile["consumption_state"] == "consumed"
+    assert company_profile["symbol"] == "NVDA"
+    assert company_profile["profile"]["business_summary"].startswith("Deterministic")
+    assert company_profile["compatibility_gate"]["allowed"] is True
+    assert company_profile["compatibility_gate"]["result"] == (
+        "company_profile_consumption_allowed"
     )
-    assert "blocked_company_profile_consumption_not_implemented" in captured.err
-    assert "SEC CompanyFacts snapshot metadata is missing" not in captured.err
+    assert "blocked_company_profile_consumption_not_implemented" not in captured.out
 
 
-def test_company_profile_cached_source_requires_manifest(tmp_path: Path) -> None:
+def test_company_profile_cached_source_missing_manifest_is_traceably_blocked(
+    tmp_path: Path,
+) -> None:
     source_root = tmp_path / "source_snapshots"
     snapshot_dir = source_root / "NVDA" / "company_profile"
     snapshot_dir.mkdir(parents=True)
     snapshot_path = snapshot_dir / "company_profile.json"
     snapshot_path.write_text(json.dumps(_company_profile_payload()), encoding="utf-8")
 
-    with pytest.raises(
-        CachedSourceLocalExecutionError,
-        match="blocked_missing_company_profile_manifest",
-    ):
-        build_cached_source_local_execution_stage_payloads(
-            source_snapshot_path=snapshot_path,
-            source_snapshot_root=source_root,
-            dry_run_id="company-profile-gate-run-002",
-            generated_at="2026-06-26T12:00:00Z",
-        )
+    stage_payloads = build_cached_source_local_execution_stage_payloads(
+        source_snapshot_path=snapshot_path,
+        source_snapshot_root=source_root,
+        dry_run_id="company-profile-gate-run-002",
+        generated_at="2026-06-26T12:00:00Z",
+    )
+
+    source_context = stage_payloads["source_context"]
+    assert source_context["consumption_state"] == "blocked"
+    assert "profile" not in source_context["company_profile"]
+    assert "blocked_missing_company_profile_manifest" in source_context[
+        "blocked_reasons"
+    ]
 
 
-def test_company_profile_cached_source_blocks_provider_call_provenance(
+def test_company_profile_cached_source_provider_call_provenance_is_blocked(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source_snapshots"
@@ -171,19 +188,20 @@ def test_company_profile_cached_source_blocks_provider_call_provenance(
     payload["provenance"]["request_metadata"]["provider_calls_performed"] = True
     snapshot_path = _write_company_profile_package(source_root, payload=payload)
 
-    with pytest.raises(
-        CachedSourceLocalExecutionError,
-        match="blocked_company_profile_network_dependency: provider_calls_performed",
-    ):
-        build_cached_source_local_execution_stage_payloads(
-            source_snapshot_path=snapshot_path,
-            source_snapshot_root=source_root,
-            dry_run_id="company-profile-gate-run-003",
-            generated_at="2026-06-26T12:00:00Z",
-        )
+    stage_payloads = build_cached_source_local_execution_stage_payloads(
+        source_snapshot_path=snapshot_path,
+        source_snapshot_root=source_root,
+        dry_run_id="company-profile-gate-run-003",
+        generated_at="2026-06-26T12:00:00Z",
+    )
+
+    assert (
+        "blocked_company_profile_network_dependency: provider_calls_performed"
+        in stage_payloads["source_context"]["blocked_reasons"]
+    )
 
 
-def test_company_profile_cached_source_blocks_manifest_payload_ticker_mismatch(
+def test_company_profile_cached_source_manifest_payload_ticker_mismatch_is_blocked(
     tmp_path: Path,
 ) -> None:
     source_root = tmp_path / "source_snapshots"
@@ -192,16 +210,179 @@ def test_company_profile_cached_source_blocks_manifest_payload_ticker_mismatch(
         manifest_overrides={"ticker": "AMD"},
     )
 
-    with pytest.raises(
-        CachedSourceLocalExecutionError,
-        match="blocked_ambiguous_company_profile_identity: ticker_mismatch",
-    ):
-        build_cached_source_local_execution_stage_payloads(
-            source_snapshot_path=snapshot_path,
-            source_snapshot_root=source_root,
-            dry_run_id="company-profile-gate-run-004",
-            generated_at="2026-06-26T12:00:00Z",
-        )
+    stage_payloads = build_cached_source_local_execution_stage_payloads(
+        source_snapshot_path=snapshot_path,
+        source_snapshot_root=source_root,
+        dry_run_id="company-profile-gate-run-004",
+        generated_at="2026-06-26T12:00:00Z",
+    )
+
+    source_context = stage_payloads["source_context"]
+    assert source_context["consumption_state"] == "blocked"
+    assert (
+        "blocked_ambiguous_company_profile_identity: ticker_mismatch"
+        in source_context["blocked_reasons"]
+    )
+
+
+def test_company_profile_cached_source_package_ticker_mismatch_is_blocked(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source_snapshots"
+    payload = _company_profile_payload()
+    payload["ticker"] = "AMD"
+    payload["provenance"]["canonical_source_identity"] = "fake://company_profile/AMD"
+    snapshot_path = _write_company_profile_package(
+        source_root,
+        payload=payload,
+        manifest_overrides={
+            "ticker": "AMD",
+            "source_url": "fake://company_profile/AMD",
+        },
+    )
+
+    stage_payloads = build_cached_source_local_execution_stage_payloads(
+        source_snapshot_path=snapshot_path,
+        source_snapshot_root=source_root,
+        dry_run_id="company-profile-gate-run-package-mismatch",
+        generated_at="2026-06-26T12:00:00Z",
+    )
+
+    assert (
+        "blocked_ambiguous_company_profile_identity: package_ticker_mismatch"
+        in stage_payloads["source_context"]["blocked_reasons"]
+    )
+
+
+def test_company_profile_invalid_format_is_not_consumed(tmp_path: Path) -> None:
+    source_root = tmp_path / "source_snapshots"
+    payload = _company_profile_payload()
+    payload["payload_format"] = "unknown-company-profile-format"
+    snapshot_path = _write_company_profile_package(source_root, payload=payload)
+
+    stage_payloads = build_cached_source_local_execution_stage_payloads(
+        source_snapshot_path=snapshot_path,
+        source_snapshot_root=source_root,
+        dry_run_id="company-profile-gate-run-005",
+        generated_at="2026-06-26T12:00:00Z",
+    )
+
+    source_context = stage_payloads["source_context"]
+    assert source_context["consumption_state"] == "blocked"
+    assert "profile" not in source_context["company_profile"]
+    assert (
+        "blocked_malformed_company_profile_payload: payload_format"
+        in source_context["blocked_reasons"]
+    )
+
+
+def test_company_profile_missing_provenance_is_not_consumed(tmp_path: Path) -> None:
+    source_root = tmp_path / "source_snapshots"
+    payload = _company_profile_payload()
+    payload.pop("provenance")
+    snapshot_path = _write_company_profile_package(source_root, payload=payload)
+
+    stage_payloads = build_cached_source_local_execution_stage_payloads(
+        source_snapshot_path=snapshot_path,
+        source_snapshot_root=source_root,
+        dry_run_id="company-profile-gate-run-006",
+        generated_at="2026-06-26T12:00:00Z",
+    )
+
+    assert "blocked_malformed_company_profile_payload: provenance" in stage_payloads[
+        "source_context"
+    ]["blocked_reasons"]
+
+
+def test_company_profile_unsupported_profile_field_is_not_consumed(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source_snapshots"
+    payload = _company_profile_payload()
+    payload["profile"]["target_price"] = 200
+    snapshot_path = _write_company_profile_package(source_root, payload=payload)
+
+    stage_payloads = build_cached_source_local_execution_stage_payloads(
+        source_snapshot_path=snapshot_path,
+        source_snapshot_root=source_root,
+        dry_run_id="company-profile-gate-run-unsupported-field",
+        generated_at="2026-06-26T12:00:00Z",
+    )
+
+    assert (
+        "blocked_malformed_company_profile_payload: "
+        "unsupported_profile_fields=target_price"
+    ) in stage_payloads["source_context"]["blocked_reasons"]
+
+
+def test_malformed_company_profile_payload_returns_blocked_state(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    source_root = tmp_path / "source_snapshots"
+    snapshot_path = source_root / "NVDA" / "company_profile" / "company_profile.json"
+    snapshot_path.parent.mkdir(parents=True)
+    snapshot_path.write_text("{not-json", encoding="utf-8")
+
+    exit_code = run_market_engine_end_to_end_dry_run_command(
+        [
+            "--input-mode",
+            CACHED_SOURCE_SNAPSHOT_INPUT_MODE,
+            "--source-snapshot-json",
+            str(snapshot_path),
+            "--source-snapshot-root",
+            str(source_root),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    dry_run = json.loads(captured.out)
+    assert exit_code == 0
+    assert captured.err == ""
+    assert dry_run["blocked_stage"] == "source_context"
+    assert "blocked_malformed_company_profile_payload" in dry_run["blocked_reasons"]
+
+
+def test_stale_company_profile_manifest_is_not_consumed(tmp_path: Path) -> None:
+    source_root = tmp_path / "source_snapshots"
+    snapshot_path = _write_company_profile_package(
+        source_root,
+        manifest_overrides={"staleness_status": "stale"},
+    )
+
+    stage_payloads = build_cached_source_local_execution_stage_payloads(
+        source_snapshot_path=snapshot_path,
+        source_snapshot_root=source_root,
+        dry_run_id="company-profile-gate-run-007",
+        generated_at="2026-06-26T12:00:00Z",
+    )
+
+    assert (
+        "blocked_company_profile_non_consumable_timestamp: staleness_status"
+        in stage_payloads["source_context"]["blocked_reasons"]
+    )
+
+
+def test_unknown_company_profile_source_timestamp_is_consumed_with_note(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source_snapshots"
+    payload = _company_profile_payload()
+    payload["provenance"]["source_timestamp"] = None
+    snapshot_path = _write_company_profile_package(source_root, payload=payload)
+
+    stage_payloads = build_cached_source_local_execution_stage_payloads(
+        source_snapshot_path=snapshot_path,
+        source_snapshot_root=source_root,
+        dry_run_id="company-profile-gate-run-008",
+        generated_at="2026-06-26T12:00:00Z",
+    )
+
+    source_context = stage_payloads["source_context"]
+    assert source_context["consumption_state"] == "consumed"
+    assert source_context["stale_data_markers"] == (
+        "source_context.company_profile.source_timestamp_unknown",
+    )
 
 
 def test_live_provider_input_mode_is_rejected() -> None:
@@ -264,6 +445,51 @@ def test_cached_source_artifact_writing_is_explicit(tmp_path: Path, capsys) -> N
     ]["source_snapshot_path"] == snapshot_path.resolve().as_posix()
 
 
+def test_company_profile_is_visible_in_written_dry_run_artifact(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    source_root = tmp_path / "source_snapshots"
+    artifact_root = tmp_path / "artifacts"
+    snapshot_path = _write_company_profile_package(source_root)
+
+    exit_code = run_market_engine_end_to_end_dry_run_command(
+        [
+            "--input-mode",
+            CACHED_SOURCE_SNAPSHOT_INPUT_MODE,
+            "--source-snapshot-json",
+            str(snapshot_path),
+            "--source-snapshot-root",
+            str(source_root),
+            "--dry-run-id",
+            "company-profile-artifact-run",
+            "--generated-at",
+            "2026-06-26T12:00:00Z",
+            "--write-local-artifact",
+            "--artifact-output-root",
+            str(artifact_root),
+            "--artifact-created-at",
+            "2026-06-26T12:01:00Z",
+        ]
+    )
+
+    capsys.readouterr()
+    artifact_path = (
+        artifact_root
+        / "company-profile-artifact-run"
+        / "artifacts"
+        / "market_engine_dry_run_company-profile-artifact-run_2026-06-26.json"
+    )
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    company_profile = artifact["payload"]["provenance_summary"]["source_context"][
+        "company_profile"
+    ]
+
+    assert exit_code == 0
+    assert company_profile["consumption_state"] == "consumed"
+    assert company_profile["profile"]["business_summary"].startswith("Deterministic")
+
+
 def test_cached_source_wrapper_input_is_supported(tmp_path: Path) -> None:
     source_root = tmp_path / "source_snapshots"
     snapshot_path = _persist_snapshot(source_root)
@@ -296,6 +522,26 @@ def test_cached_source_wrapper_input_is_supported(tmp_path: Path) -> None:
     assert stage_payloads["delivery_reporting"]["report_format_version"] == (
         "market-engine-delivery-report-v1"
     )
+
+
+def test_sec_companyfacts_source_context_marks_company_profile_absent_optional(
+    tmp_path: Path,
+) -> None:
+    source_root = tmp_path / "source_snapshots"
+    snapshot_path = _persist_snapshot(source_root)
+
+    stage_payloads = build_cached_source_local_execution_stage_payloads(
+        source_snapshot_path=snapshot_path,
+        source_snapshot_root=source_root,
+        dry_run_id="cached-run-without-profile",
+        generated_at="2026-06-17T15:00:00Z",
+    )
+
+    assert stage_payloads["source_context"]["company_profile"] == {
+        "input_family": "company_profile",
+        "consumption_state": "absent_optional",
+        "consumption_reason_codes": ("company_profile_absent_optional",),
+    }
 
 
 def test_cached_source_path_must_stay_inside_configured_root(tmp_path: Path) -> None:
@@ -409,6 +655,8 @@ def _write_company_profile_package(
         "validation_status": "passed",
         "validation_errors": [],
         "validation_warnings": [],
+        "staleness_status": "fresh",
+        "staleness_reason": "Deterministic test fixture.",
         "usable_for_cached_source_dry_run": True,
         "blocked_reason": None,
     }
@@ -439,7 +687,7 @@ def _company_profile_payload() -> dict[str, object]:
             "provider_name": "deterministic_fake_provider",
             "canonical_source_identity": "fake://company_profile/NVDA",
             "retrieved_at": "2026-06-26T12:00:00Z",
-            "source_timestamp": None,
+            "source_timestamp": "2026-06-26T11:59:00Z",
             "request_metadata": {
                 "network_used": False,
                 "provider_calls_performed": False,
