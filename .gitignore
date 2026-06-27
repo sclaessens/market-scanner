@@ -46,6 +46,9 @@ data/processed/*.csv
 # Historical evidence artifacts are generated locally.
 data/history/
 
+# ME-RUN27 cross-ticker evidence is generated locally.
+artifacts/market_engine/me-run27-company-profile-cross-ticker-*/
+
 # ========================
 # Allow these core files
 # ========================

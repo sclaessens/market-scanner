@@ -92,22 +92,23 @@ Completed job-scoped chain:
 | ME-SA04 | Source Acquisition | Completed |
 | ME-SA05 | Source Acquisition / Source Context | Completed |
 | ME-SA06 | Fundamental Observations | Completed |
+| ME-RUN27 | Run / orchestration | Completed with controlled stop |
 
 ## Active Next Direction
 
-### ME-RUN27 - Run NVDA/AMD/ASML with company_profile Source Context and Fundamental Observations
+### ME-SA07 - Allow company_profile observations into Analysis Review as descriptive context only
 
 Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
-Job family: ME-RUN / Run and orchestration
+Job family: ME-SA / Analysis Review
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-SA06
+Status: NEXT ACTIVE CANDIDATE AFTER ME-RUN27
 
-Goal: execute the bounded NVDA/AMD/ASML cached-source profile set through Source Context and Fundamental Observations and record deterministic run evidence.
+Goal: expose validated company-profile observations to Analysis Review as descriptive context without adding investment or action authority.
 
-Scope: local cached-source run evidence only. No provider calls, live data retrieval, investment interpretation, setup progression, delivery, production writes, allocation, or Decision Engine authority.
+Scope: descriptive Analysis Review context only. No provider calls, live data, scoring, ranking, recommendation, setup progression, allocation, or Decision Engine authority.
 
-Rationale: ME-SA06 allows valid profile-only runs to complete Fundamental Observations and preserves a controlled Derived Observations boundary.
+Rationale: ME-RUN27 proved the ticker-agnostic company-profile flow for NVDA, AMD, and ASML and identified the same controlled post-observation boundary for every ticker.
 
 ## Deferred Follow-up Candidates
 
@@ -1327,4 +1328,39 @@ Next active sprint:
 
 ```text
 ME-RUN27 - Run NVDA/AMD/ASML with company_profile Source Context and Fundamental Observations
+```
+
+### ME-RUN27 - Run NVDA/AMD/ASML through company_profile Source Context and Fundamental Observations
+
+Status: COMPLETED WITH CONTROLLED STOP BY ME-RUN27
+
+ME-RUN27 executed one deterministic local path for the bounded NVDA/AMD/ASML
+validation set.
+
+Outcome:
+
+```text
+acquisition: 3 completed
+staging validation: 3 accepted
+compatibility gate: 3 allowed
+Source Context: 3 consumed
+Fundamental Observations: 3 completed
+stop stage: Derived Observations for all 3
+overall: completed_with_controlled_stop
+```
+
+Implemented evidence:
+
+```text
+scripts/market_engine/me_run27_company_profile_cross_ticker_dry_run.py
+tests/market_engine/run/test_me_run27_company_profile_cross_ticker_dry_run.py
+docs/market_engine/audits/me_run27_company_profile_cross_ticker_dry_run_audit.md
+docs/market_engine/backlog/me_run27_company_profile_cross_ticker_dry_run_backlog_entry.md
+docs/market_engine/roadmap/me_run27_company_profile_cross_ticker_dry_run_roadmap_entry.md
+```
+
+Next active sprint:
+
+```text
+ME-SA07 - Allow company_profile observations into Analysis Review as descriptive context only
 ```
