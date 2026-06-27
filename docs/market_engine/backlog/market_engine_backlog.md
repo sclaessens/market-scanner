@@ -2888,19 +2888,19 @@ docs/market_engine/roadmap/me_uni09_professional_swing_universe_expansion_from_c
 
 ## Active Next Direction
 
-### ME-RUN27 - Implement or validate company_profile cached-source package consumption for local dry-run
+### ME-SA06 - Derive basic company_profile observations from Source Context
 
 Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
-Job family: ME-RUN - Run / orchestration jobs
+Job family: ME-SA / Source Context
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-SA04
+Status: NEXT ACTIVE CANDIDATE AFTER ME-SA05
 
-Goal: decide whether to implement contextual `company_profile` dry-run consumption or preserve the explicit ME-SA04 blocked state with broader run evidence.
+Goal: define bounded descriptive observations from consumed `company_profile` Source Context without financial or investment interpretation.
 
-Scope: local cached-source dry-run validation only. No provider calls, live data retrieval, delivery sends, production writes, portfolio/watchlist writes, Decision Engine semantics, recommendation semantics, allocation authority, or action authority.
+Scope: descriptive company identity and profile observations only. No provider calls, live data retrieval, fundamental conclusions, recommendations, targets, ranking, urgency, conviction, allocation, or Decision Engine authority.
 
-Rationale: ME-SA04 made `company_profile` cached-source dry-run blocking explicit and provenance-aware. ME-RUN27 should provide the next run-level decision or evidence point.
+Rationale: ME-SA05 made valid profile data available as explicit lower-authority Source Context while stopping the profile-only route before Fundamental Observations.
 
 ME-SR13A remains available only as a fallback/manual diagnostic candidate.
 
@@ -3232,5 +3232,43 @@ Validation:
 Next active sprint:
 
 ```text
-ME-RUN27 - Implement or validate company_profile cached-source package consumption for local dry-run
+ME-SA05 - Consume company_profile into Source Context
+```
+
+### ME-SA05 - Consume company_profile into Source Context
+
+Status: COMPLETED BY ME-SA05
+
+ME-SA05 implemented deterministic local consumption of compatible
+`company_profile` snapshots into an explicit Source Context contract.
+
+Implemented:
+
+```text
+src/market_engine/source_context/company_profile_context.py
+src/market_engine/run/cached_source_execution.py
+src/market_engine/run/end_to_end_dry_run.py
+tests/market_engine/run/test_me_run10_cached_source_local_execution.py
+docs/market_engine/audits/me_sa05_company_profile_source_context_consumption_audit.md
+docs/market_engine/backlog/me_sa05_company_profile_source_context_consumption_backlog_entry.md
+docs/market_engine/roadmap/me_sa05_company_profile_source_context_consumption_roadmap_entry.md
+```
+
+Valid profiles are consumed, rejected profiles remain fail-closed without
+trusted profile content, and SEC CompanyFacts input records profile absence as
+optional. Profile-only execution stops before Fundamental Observations.
+
+Validation:
+
+```text
+21 passed - tests/market_engine/run/test_me_run10_cached_source_local_execution.py
+112 passed - tests/market_engine/run
+505 passed - tests/market_engine
+1172 passed - full pytest
+```
+
+Next active sprint:
+
+```text
+ME-SA06 - Derive basic company_profile observations from Source Context
 ```
