@@ -8,6 +8,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Mapping
 
+from market_engine.analysis_review.company_profile_analysis_context import (
+    build_company_profile_analysis_context,
+)
 from market_engine.analysis_review.sec_companyfacts_analysis_review import (
     build_sec_companyfacts_analysis_review,
 )
@@ -16,6 +19,9 @@ from market_engine.decision_engine_handoff.sec_companyfacts_handoff import (
 )
 from market_engine.delivery_reporting.sec_companyfacts_delivery_report import (
     build_market_engine_delivery_report,
+)
+from market_engine.derived_observations.company_profile_context_bridge import (
+    build_company_profile_derived_context_bridge,
 )
 from market_engine.derived_observations.sec_companyfacts_cash_generation import (
     build_sec_companyfacts_derived_cash_generation_observations,
@@ -32,6 +38,9 @@ from market_engine.portfolio_review.sec_companyfacts_portfolio_review import (
 )
 from market_engine.recommendation_review.sec_companyfacts_recommendation_review import (
     build_sec_companyfacts_recommendation_review,
+)
+from market_engine.setup_detection.company_profile_not_applicable import (
+    build_company_profile_setup_not_applicable,
 )
 from market_engine.setup_detection.sec_companyfacts_setup_detection import (
     build_sec_companyfacts_setup_detection,
@@ -712,6 +721,61 @@ def _company_profile_stage_payloads(
             for key, value in fundamental_observations_payload.items()
             if key not in {"company_profile", "cached_source_reference"}
         }
+        derived_bridge = build_company_profile_derived_context_bridge(
+            fundamental_observations
+        )
+        derived_observations_payload = _derived_observations_payload(derived_bridge)
+        derived_observations_payload["company_profile"] = {
+            key: value
+            for key, value in derived_observations_payload.items()
+            if key not in {"company_profile", "cached_source_reference"}
+        }
+        setup_boundary = build_company_profile_setup_not_applicable(
+            derived_bridge,
+            setup_detection_run_id=(
+                f"{source_context.source_refresh_snapshot_id}-setup-not-applicable"
+            ),
+        )
+        setup_detection_payload = _jsonable(setup_boundary)
+        setup_detection_payload["company_profile"] = {
+            key: value
+            for key, value in setup_detection_payload.items()
+            if key not in {"company_profile", "cached_source_reference"}
+        }
+        analysis_context = build_company_profile_analysis_context(
+            fundamental_observations,
+            derived_bridge,
+            setup_boundary,
+            analysis_review_run_id=(
+                f"{source_context.source_refresh_snapshot_id}-analysis-context"
+            ),
+        )
+        analysis_review_payload = _jsonable(analysis_context)
+        analysis_review_payload["company_profile"] = {
+            key: value
+            for key, value in analysis_review_payload.items()
+            if key not in {"company_profile", "cached_source_reference"}
+        }
+        ticker = source_context_payload.get("ticker", "")
+        provider_name = source_context_payload.get("provider_name", "")
+        downstream_reason = (
+            "company_profile_descriptive_analysis_context_has_no_recommendation_input"
+        )
+        stage_payloads = _not_started_company_profile_downstream_payloads(
+            ticker=str(ticker),
+            provider_name=str(provider_name),
+            upstream_reason=downstream_reason,
+        )
+        stage_payloads.update(
+            {
+                "source_context": source_context_payload,
+                "fundamental_observations": fundamental_observations_payload,
+                "derived_observations": derived_observations_payload,
+                "setup_detection": setup_detection_payload,
+                "analysis_review": analysis_review_payload,
+            }
+        )
+        return stage_payloads
     else:
         payload_ticker = payload.get("ticker") if isinstance(payload, Mapping) else None
         manifest_ticker = (
@@ -768,11 +832,7 @@ def _company_profile_stage_payloads(
 
     ticker = source_context_payload.get("ticker", "")
     provider_name = source_context_payload.get("provider_name", "")
-    downstream_reason = (
-        "company_profile_fundamental_observations_do_not_provide_derived_financial_evidence"
-        if gate_outcome.allowed
-        else "company_profile_consumption_blocked_by_compatibility_gate"
-    )
+    downstream_reason = "company_profile_consumption_blocked_by_compatibility_gate"
     stage_payloads = {
         "source_context": source_context_payload,
         "fundamental_observations": fundamental_observations_payload,

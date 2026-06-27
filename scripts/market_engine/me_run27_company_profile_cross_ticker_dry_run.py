@@ -108,7 +108,9 @@ def run_company_profile_cross_ticker_dry_run(
         and result["compatibility_gate_state"] == "allowed"
         and result["source_context_state"] == "consumed"
         and result["fundamental_observations_state"] == "completed"
-        and result["stop_stage"] == "derived_observations"
+        and result["analysis_review_state"] == "completed"
+        and result["analysis_context_available"] is True
+        and result["stop_stage"] == "recommendation_review"
         and result["company_profile_observations_produced"] is True
         for result in ticker_results
     )
@@ -221,6 +223,9 @@ def _ticker_result(
     observation_profile = dry_run["provenance_summary"][
         "fundamental_observations"
     ]["company_profile"]
+    analysis_profile = dry_run["provenance_summary"]["analysis_review"][
+        "company_profile"
+    ]
     observations = observation_profile["observations"]
     return {
         "ticker": ticker,
@@ -234,6 +239,10 @@ def _ticker_result(
         "fundamental_observations_state": stage_results[
             "fundamental_observations"
         ]["status"],
+        "analysis_review_state": stage_results["analysis_review"]["status"],
+        "analysis_context_available": (
+            analysis_profile["context_state"] == "descriptive_context_available"
+        ),
         "completed_stages": tuple(
             stage["stage_name"]
             for stage in dry_run["stage_results"]
@@ -257,8 +266,8 @@ def _markdown_summary(summary: Mapping[str, Any]) -> str:
         "",
         f"Overall result: `{summary['overall_result']}`",
         "",
-        "| Ticker | Acquisition | Staging | Gate | Source Context | Fundamental Observations | Stop stage |",
-        "|---|---|---|---|---|---|---|",
+        "| Ticker | Acquisition | Staging | Gate | Source Context | Fundamental Observations | Analysis Review | Stop stage |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for result in summary["ticker_results"]:
         lines.append(
@@ -267,6 +276,7 @@ def _markdown_summary(summary: Mapping[str, Any]) -> str:
             f"{result['compatibility_gate_state']} | "
             f"{result['source_context_state']} | "
             f"{result['fundamental_observations_state']} | "
+            f"{result['analysis_review_state']} | "
             f"{result['stop_stage']} |"
         )
     return "\n".join(lines) + "\n"

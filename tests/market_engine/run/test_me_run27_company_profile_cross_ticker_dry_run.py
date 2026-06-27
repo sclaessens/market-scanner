@@ -40,13 +40,18 @@ def test_cross_ticker_runner_records_controlled_profile_outcomes(tmp_path) -> No
         assert result["compatibility_gate_state"] == "allowed"
         assert result["source_context_state"] == "consumed"
         assert result["fundamental_observations_state"] == "completed"
+        assert result["analysis_review_state"] == "completed"
+        assert result["analysis_context_available"] is True
         assert result["completed_stages"] == (
             "source_context",
             "fundamental_observations",
+            "derived_observations",
+            "setup_detection",
+            "analysis_review",
         )
-        assert result["stop_stage"] == "derived_observations"
+        assert result["stop_stage"] == "recommendation_review"
         assert result["blocker_reasons"] == (
-            "company_profile_fundamental_observations_do_not_provide_derived_financial_evidence",
+            "company_profile_descriptive_analysis_context_has_no_recommendation_input",
         )
         assert result["company_profile_observations_produced"] is True
         assert result["company_profile_observation_codes"]

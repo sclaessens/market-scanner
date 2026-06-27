@@ -93,22 +93,23 @@ Completed job-scoped chain:
 | ME-SA05 | Source Acquisition / Source Context | Completed |
 | ME-SA06 | Fundamental Observations | Completed |
 | ME-RUN27 | Run / orchestration | Completed with controlled stop |
+| ME-SA07 | Analysis Review | Completed |
 
 ## Active Next Direction
 
-### ME-SA07 - Allow company_profile observations into Analysis Review as descriptive context only
+### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 
 Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor
 
-Job family: ME-SA / Analysis Review
+Job family: ME-SA / Pipeline continuation contract
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-RUN27
+Status: NEXT ACTIVE CANDIDATE AFTER ME-SA07
 
-Goal: expose validated company-profile observations to Analysis Review as descriptive context without adding investment or action authority.
+Goal: define how descriptive Analysis Review context may continue toward reportability without creating recommendation or allocation authority.
 
-Scope: descriptive Analysis Review context only. No provider calls, live data, scoring, ranking, recommendation, setup progression, allocation, or Decision Engine authority.
+Scope: continuation contract only. No provider calls, live data, investment evaluation, recommendation semantics, portfolio behavior, allocation, or Decision Engine authority.
 
-Rationale: ME-RUN27 proved the ticker-agnostic company-profile flow for NVDA, AMD, and ASML and identified the same controlled post-observation boundary for every ticker.
+Rationale: ME-SA07 reaches Analysis Review safely and exposes Recommendation Review as the next controlled authority boundary before reportability.
 
 ## Deferred Follow-up Candidates
 
@@ -1363,4 +1364,47 @@ Next active sprint:
 
 ```text
 ME-SA07 - Allow company_profile observations into Analysis Review as descriptive context only
+```
+
+### ME-SA07 - Allow company_profile observations into Analysis Review as descriptive context only
+
+Status: COMPLETED BY ME-SA07
+
+ME-SA07 implemented a non-financial context bridge, setup-not-applicable
+boundary, and descriptive Analysis Review context for consumed company-profile
+observations.
+
+Profile-only runs now complete Analysis Review and stop at Recommendation Review
+with:
+
+```text
+company_profile_descriptive_analysis_context_has_no_recommendation_input
+```
+
+Implemented:
+
+```text
+src/market_engine/derived_observations/company_profile_context_bridge.py
+src/market_engine/setup_detection/company_profile_not_applicable.py
+src/market_engine/analysis_review/company_profile_analysis_context.py
+tests/market_engine/analysis_review/test_company_profile_analysis_context.py
+docs/market_engine/audits/me_sa07_company_profile_analysis_review_descriptive_context_audit.md
+docs/market_engine/backlog/me_sa07_company_profile_analysis_review_descriptive_context_backlog_entry.md
+docs/market_engine/roadmap/me_sa07_company_profile_analysis_review_descriptive_context_roadmap_entry.md
+```
+
+Validation:
+
+```text
+7 passed - Company Profile Analysis Context tests
+21 passed - cached-source local execution tests
+114 passed - tests/market_engine/run
+518 passed - tests/market_engine
+1185 passed - full pytest
+```
+
+Next active sprint:
+
+```text
+ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 ```
