@@ -1465,3 +1465,34 @@ governance. Runtime classification is deferred to:
 ```text
 ME-SA10 - Implement multi-source analysis-context readiness classifier
 ```
+
+### ME-SA10 - Implement typed fail-closed analysis-context readiness classifier
+
+Status: COMPLETED BY ME-SA10
+
+ME-SA10 completes the contract-to-classifier sequence:
+
+```text
+ME-SA08 -> ME-SA09 -> ME-SA10
+```
+
+The standalone typed classifier produces only `descriptive_only`,
+`partial_analysis`, or `recommendation_eligible`.
+
+`actionable_review` and `decision_ready` remain declared but unreachable under
+current governance. The classifier produces no recommendations or trading,
+allocation, execution, delivery, portfolio, watchlist, Telegram, or Decision
+Engine authority.
+
+Runtime artifact integration and persistence remain deferred to a future
+explicit contract.
+
+Validation:
+
+```text
+15 passed - new readiness classifier tests
+40 passed - Analysis Review tests
+16 passed - Recommendation Review tests
+535 passed - tests/market_engine
+1202 passed - full pytest
+```
