@@ -4,6 +4,10 @@ from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any, Mapping
 
+from market_engine.analysis_review.analysis_context_readiness_adapter import (
+    classify_analysis_context_readiness_from_stage_payloads,
+)
+
 
 MARKET_ENGINE_END_TO_END_DRY_RUN_FORMAT_VERSION = (
     "market-engine-end-to-end-dry-run-v1"
@@ -182,6 +186,7 @@ class MarketEngineEndToEndDryRun:
     numeric_zero_evidence_summary: dict[str, Any]
     provenance_summary: dict[str, Any]
     delivery_report_reference: dict[str, Any]
+    analysis_context_readiness: dict[str, Any]
     forbidden_side_effect_confirmation: str
     authority_boundary_confirmation: str
     audit_metadata: dict[str, Any]
@@ -218,6 +223,7 @@ def build_market_engine_end_to_end_dry_run(
             stage_results=stage_results,
             blocked_stage="input_mode",
             blocked_reasons=input_mode_reasons,
+            stage_payloads=None,
         )
 
     if not isinstance(stage_payloads, Mapping):
@@ -230,6 +236,7 @@ def build_market_engine_end_to_end_dry_run(
             stage_results=stage_results,
             blocked_stage="stage_payloads",
             blocked_reasons=("Dry-run stage payloads must be a mapping.",),
+            stage_payloads=None,
         )
 
     stage_results: list[MarketEngineEndToEndDryRunStageResult] = []
@@ -279,6 +286,7 @@ def build_market_engine_end_to_end_dry_run(
         ticker=_first_text(stage_payloads, "ticker"),
         cik=_first_text(stage_payloads, "cik"),
         provider_name=_first_text(stage_payloads, "provider_name"),
+        stage_payloads=stage_payloads,
     )
 
 
@@ -469,6 +477,7 @@ def _dry_run(
     ticker: str = "",
     cik: str = "",
     provider_name: str = "",
+    stage_payloads: Mapping[str, Any] | None = None,
 ) -> MarketEngineEndToEndDryRun:
     return MarketEngineEndToEndDryRun(
         dry_run_format_version=MARKET_ENGINE_END_TO_END_DRY_RUN_FORMAT_VERSION,
@@ -487,6 +496,11 @@ def _dry_run(
         numeric_zero_evidence_summary=_summary_numeric_zero_evidence(stage_results),
         provenance_summary=_summary_provenance(stage_results),
         delivery_report_reference=_delivery_report_reference(stage_results),
+        analysis_context_readiness=(
+            classify_analysis_context_readiness_from_stage_payloads(
+                stage_payloads
+            ).to_payload()
+        ),
         forbidden_side_effect_confirmation=(
             "No provider, market-data, broker, message-delivery, scheduler, portfolio, "
             "watchlist, production-report, or execution side effects are performed."

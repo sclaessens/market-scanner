@@ -251,6 +251,14 @@ def test_payload_output_contains_serialized_enum_values() -> None:
     assert payload["dry_run_format_version"] == MARKET_ENGINE_END_TO_END_DRY_RUN_FORMAT_VERSION
     assert payload["run_state"] == "dry_run_completed"
     assert payload["stage_results"][0]["status"] == "completed"
+    assert payload["analysis_context_readiness"]["readiness_level"] == (
+        "recommendation_eligible"
+    )
+    assert payload["analysis_context_readiness"][
+        "recommendation_review_eligible"
+    ] is True
+    assert payload["analysis_context_readiness"]["actionable_review_allowed"] is False
+    assert payload["analysis_context_readiness"]["decision_engine_ready"] is False
 
 
 def test_dry_run_harness_does_not_import_legacy_or_side_effect_modules() -> None:
