@@ -3389,3 +3389,42 @@ Next active sprint:
 ```text
 ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 ```
+
+### ME-SA08 - Add company_profile-only Recommendation Review boundary
+
+Status: COMPLETED BY ME-SA08
+
+ME-SA08 implemented an explicit fail-closed Recommendation Review result for
+profile-only analysis context:
+
+```text
+review_state: blocked_by_missing_data
+review_category: company_profile_only_context_non_actionable
+```
+
+Company metadata remains descriptive provenance only. It cannot populate
+recommendation, price, conviction, sizing, trade, or Decision Engine-ready
+fields and cannot upgrade limited SEC CompanyFacts evidence.
+
+Implemented:
+
+```text
+src/market_engine/recommendation_review/sec_companyfacts_recommendation_review.py
+src/market_engine/run/cached_source_execution.py
+tests/market_engine/recommendation_review/test_sec_companyfacts_recommendation_review.py
+tests/market_engine/run/test_me_run10_cached_source_local_execution.py
+tests/market_engine/run/test_me_run27_company_profile_cross_ticker_dry_run.py
+docs/market_engine/audits/me_sa08_company_profile_only_recommendation_review_boundary.md
+docs/market_engine/backlog/me_sa08_company_profile_only_recommendation_review_boundary_backlog_entry.md
+docs/market_engine/roadmap/me_sa08_company_profile_only_recommendation_review_boundary_roadmap_entry.md
+```
+
+Validation:
+
+```text
+16 passed - Recommendation Review tests
+21 passed - cached-source local execution tests
+2 passed - ME-RUN27 cross-ticker tests
+520 passed - tests/market_engine
+1187 passed - full pytest
+```

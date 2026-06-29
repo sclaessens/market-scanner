@@ -37,6 +37,8 @@ from market_engine.portfolio_review.sec_companyfacts_portfolio_review import (
     build_sec_companyfacts_portfolio_review,
 )
 from market_engine.recommendation_review.sec_companyfacts_recommendation_review import (
+    COMPANY_PROFILE_ONLY_CONTEXT_NON_ACTIONABLE,
+    build_company_profile_only_recommendation_review,
     build_sec_companyfacts_recommendation_review,
 )
 from market_engine.setup_detection.company_profile_not_applicable import (
@@ -758,13 +760,16 @@ def _company_profile_stage_payloads(
         }
         ticker = source_context_payload.get("ticker", "")
         provider_name = source_context_payload.get("provider_name", "")
-        downstream_reason = (
-            "company_profile_descriptive_analysis_context_has_no_recommendation_input"
+        recommendation_review = build_company_profile_only_recommendation_review(
+            analysis_context,
+            recommendation_review_run_id=(
+                f"{source_context.source_refresh_snapshot_id}-recommendation-review"
+            ),
         )
         stage_payloads = _not_started_company_profile_downstream_payloads(
             ticker=str(ticker),
             provider_name=str(provider_name),
-            upstream_reason=downstream_reason,
+            upstream_reason=COMPANY_PROFILE_ONLY_CONTEXT_NON_ACTIONABLE,
         )
         stage_payloads.update(
             {
@@ -773,6 +778,7 @@ def _company_profile_stage_payloads(
                 "derived_observations": derived_observations_payload,
                 "setup_detection": setup_detection_payload,
                 "analysis_review": analysis_review_payload,
+                "recommendation_review": _jsonable(recommendation_review),
             }
         )
         return stage_payloads

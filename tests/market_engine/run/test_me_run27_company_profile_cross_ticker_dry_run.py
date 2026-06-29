@@ -51,7 +51,7 @@ def test_cross_ticker_runner_records_controlled_profile_outcomes(tmp_path) -> No
         )
         assert result["stop_stage"] == "recommendation_review"
         assert result["blocker_reasons"] == (
-            "company_profile_descriptive_analysis_context_has_no_recommendation_input",
+            "company_profile_only_context_non_actionable",
         )
         assert result["company_profile_observations_produced"] is True
         assert result["company_profile_observation_codes"]

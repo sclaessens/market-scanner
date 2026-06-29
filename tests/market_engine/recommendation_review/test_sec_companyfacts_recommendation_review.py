@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 import json
-from dataclasses import replace
+from dataclasses import asdict, replace
 from pathlib import Path
 
 import pytest
 
+from market_engine.analysis_review.company_profile_analysis_context import (
+    COMPANY_PROFILE_ANALYSIS_CONTEXT_FORMAT_VERSION,
+    CompanyProfileAnalysisContext,
+    CompanyProfileDescriptiveContextItem,
+)
 from market_engine.analysis_review.sec_companyfacts_analysis_review import (
     SEC_COMPANYFACTS_ANALYSIS_REVIEW_FORMAT_VERSION,
     NON_RECOMMENDATION_ANALYSIS_REVIEW_BOUNDARY,
@@ -15,14 +20,105 @@ from market_engine.analysis_review.sec_companyfacts_analysis_review import (
     SecCompanyFactsAnalysisReviewState,
 )
 from market_engine.recommendation_review.sec_companyfacts_recommendation_review import (
+    COMPANY_PROFILE_ONLY_CONTEXT_NON_ACTIONABLE,
     FORBIDDEN_RECOMMENDATION_REVIEW_ACTIONS,
     NON_ACTIONABLE_RECOMMENDATION_REVIEW_BOUNDARY,
     SEC_COMPANYFACTS_RECOMMENDATION_REVIEW_FORMAT_VERSION,
     SecCompanyFactsRecommendationReviewCategory,
     SecCompanyFactsRecommendationReviewState,
+    build_company_profile_only_recommendation_review,
     build_sec_companyfacts_recommendation_review,
     persist_sec_companyfacts_recommendation_review,
 )
+
+
+def test_company_profile_only_context_is_deterministically_non_actionable() -> None:
+    recommendation_review = build_company_profile_only_recommendation_review(
+        _company_profile_analysis_context(),
+        recommendation_review_run_id="rr-run-profile-only",
+    )
+
+    assert (
+        recommendation_review.review_state
+        == SecCompanyFactsRecommendationReviewState.BLOCKED_BY_MISSING_DATA
+    )
+    assert (
+        recommendation_review.review_category
+        == SecCompanyFactsRecommendationReviewCategory.COMPANY_PROFILE_ONLY_CONTEXT_NON_ACTIONABLE
+    )
+    assert recommendation_review.blocked_reasons == (
+        COMPANY_PROFILE_ONLY_CONTEXT_NON_ACTIONABLE,
+    )
+    assert recommendation_review.input_contract == (
+        COMPANY_PROFILE_ANALYSIS_CONTEXT_FORMAT_VERSION
+    )
+    assert recommendation_review.input_provenance["input_family"] == "company_profile"
+    assert recommendation_review.input_provenance["descriptive_context"][0][
+        "context_type"
+    ] == "company_identity_context"
+
+    review_item = recommendation_review.review_items[0]
+    assert review_item.supporting_analysis_review_categories == ()
+    assert review_item.blocking_analysis_review_categories == (
+        "company_profile_only_context",
+    )
+    assert review_item.missing_data == (
+        "fundamental_financial_evidence",
+        "financial_market_evidence",
+        "setup_evidence",
+    )
+
+    actionable_fields = {
+        "recommendation",
+        "action",
+        "entry_price",
+        "stop_loss",
+        "target_price",
+        "conviction",
+        "position_size",
+        "position_sizing",
+        "decision_engine_ready",
+        "trade",
+    }
+    assert not actionable_fields.intersection(_nested_keys(asdict(recommendation_review)))
+
+
+def test_company_profile_context_does_not_upgrade_limited_financial_analysis() -> None:
+    analysis_review = _analysis_review(
+        review_items=(
+            _analysis_review_item(
+                category=SecCompanyFactsAnalysisReviewCategory.DATA_LIMITATION_REVIEW,
+                state=SecCompanyFactsAnalysisReviewState.DATA_LIMITED,
+                message="Analysis is limited by missing observations.",
+                missing_observations=("operating_cash_flow",),
+            ),
+        )
+    )
+
+    recommendation_review = build_sec_companyfacts_recommendation_review(
+        analysis_review,
+        recommendation_review_run_id="rr-run-limited-with-profile",
+        company_profile_context=replace(
+            _company_profile_analysis_context(),
+            ticker="NVDA",
+            symbol="NVDA",
+        ),
+    )
+
+    assert (
+        recommendation_review.review_state
+        == SecCompanyFactsRecommendationReviewState.BLOCKED_BY_MISSING_DATA
+    )
+    assert (
+        recommendation_review.review_category
+        == SecCompanyFactsRecommendationReviewCategory.ANALYSIS_BLOCKED_BY_MISSING_DATA
+    )
+    assert recommendation_review.review_items[0].missing_data == (
+        "operating_cash_flow",
+    )
+    assert recommendation_review.input_provenance["company_profile_context"][
+        "context_state"
+    ] == "descriptive_context_available"
 
 
 def test_supportive_analysis_review_produces_non_actionable_human_review_candidate() -> None:
@@ -540,6 +636,58 @@ def _analysis_review(
         setup_detection_non_actionable_boundary=setup_detection_non_actionable_boundary,
         warnings=(),
     )
+
+
+def _company_profile_analysis_context() -> CompanyProfileAnalysisContext:
+    return CompanyProfileAnalysisContext(
+        ticker="SYNTH",
+        symbol="SYNTH",
+        provider_name="deterministic_fake_provider",
+        analysis_review_format_version=(
+            COMPANY_PROFILE_ANALYSIS_CONTEXT_FORMAT_VERSION
+        ),
+        analysis_review_run_id="profile-analysis-context",
+        input_family="company_profile",
+        context_state="descriptive_context_available",
+        source_observation_format_version=(
+            "market-engine-company-profile-fundamental-observations-v1"
+        ),
+        source_bridge_format_version=(
+            "market-engine-company-profile-derived-context-bridge-v1"
+        ),
+        setup_boundary_format_version=(
+            "market-engine-company-profile-setup-not-applicable-v1"
+        ),
+        source_refresh_snapshot_id="SYNTH-company-profile",
+        source_refresh_fetched_at="2026-06-27T10:01:00Z",
+        source_refresh_payload_format_version=(
+            "market-engine-company-profile-snapshot-v1"
+        ),
+        as_of="2026-06-27T10:00:00Z",
+        provenance={"provider_name": "deterministic_fake_provider"},
+        descriptive_context=(
+            CompanyProfileDescriptiveContextItem(
+                context_type="company_identity_context",
+                value="Synthetic Equipment N.V.",
+                source_observation_code="company_profile_identity_observed",
+                source_field="entity_name",
+            ),
+        ),
+    )
+
+
+def _nested_keys(value: object) -> set[str]:
+    if isinstance(value, dict):
+        keys = {str(key) for key in value}
+        for nested_value in value.values():
+            keys.update(_nested_keys(nested_value))
+        return keys
+    if isinstance(value, (list, tuple)):
+        keys: set[str] = set()
+        for nested_value in value:
+            keys.update(_nested_keys(nested_value))
+        return keys
+    return set()
 
 
 def _setup_aware_analysis_review(

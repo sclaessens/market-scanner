@@ -6,6 +6,10 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from market_engine.analysis_review.company_profile_analysis_context import (
+    COMPANY_PROFILE_ANALYSIS_CONTEXT_FORMAT_VERSION,
+    CompanyProfileAnalysisContext,
+)
 from market_engine.analysis_review.sec_companyfacts_analysis_review import (
     SEC_COMPANYFACTS_ANALYSIS_REVIEW_FORMAT_VERSION,
     SecCompanyFactsAnalysisReview,
@@ -25,6 +29,9 @@ SEC_COMPANYFACTS_RECOMMENDATION_REVIEW_ROOT = Path(
 NON_ACTIONABLE_RECOMMENDATION_REVIEW_BOUNDARY = (
     "Recommendation Review creates a non-actionable human-review candidate only "
     "and does not create trade, portfolio, delivery, or Decision Engine authority."
+)
+COMPANY_PROFILE_ONLY_CONTEXT_NON_ACTIONABLE = (
+    "company_profile_only_context_non_actionable"
 )
 
 REQUIRED_ANALYSIS_REVIEW_FORMAT_VERSION = SEC_COMPANYFACTS_ANALYSIS_REVIEW_FORMAT_VERSION
@@ -55,6 +62,9 @@ class SecCompanyFactsRecommendationReviewCategory(str, Enum):
     ANALYSIS_MIXED_OR_CONFLICTED = "analysis_mixed_or_conflicted"
     ANALYSIS_BLOCKED_BY_MISSING_DATA = "analysis_blocked_by_missing_data"
     ANALYSIS_NOT_SUPPORTED = "analysis_not_supported"
+    COMPANY_PROFILE_ONLY_CONTEXT_NON_ACTIONABLE = (
+        COMPANY_PROFILE_ONLY_CONTEXT_NON_ACTIONABLE
+    )
     INPUT_CONTRACT_INVALID = "input_contract_invalid"
 
 
@@ -109,6 +119,7 @@ class SecCompanyFactsRecommendationReview:
     input_provenance: dict[str, Any]
     forbidden_actions: tuple[str, ...] = FORBIDDEN_RECOMMENDATION_REVIEW_ACTIONS
     non_actionable_boundary: str = NON_ACTIONABLE_RECOMMENDATION_REVIEW_BOUNDARY
+    blocked_reasons: tuple[str, ...] = field(default_factory=tuple)
     warnings: tuple[str, ...] = field(default_factory=tuple)
 
 
@@ -116,8 +127,14 @@ def build_sec_companyfacts_recommendation_review(
     analysis_review: SecCompanyFactsAnalysisReview,
     *,
     recommendation_review_run_id: str,
+    company_profile_context: CompanyProfileAnalysisContext | None = None,
 ) -> SecCompanyFactsRecommendationReview:
     _validate_analysis_review_contract(analysis_review)
+    if company_profile_context is not None:
+        _validate_company_profile_context(
+            company_profile_context,
+            expected_ticker=analysis_review.ticker,
+        )
 
     analysis_items_by_category = _analysis_review_items_by_category(analysis_review)
     setup_aware_items = _setup_aware_analysis_review_items(analysis_review)
@@ -163,6 +180,12 @@ def build_sec_companyfacts_recommendation_review(
         review_category = SecCompanyFactsRecommendationReviewCategory.INPUT_CONTRACT_INVALID
         review_item = _not_applicable_review_item(analysis_review=analysis_review)
 
+    input_provenance = _input_provenance(analysis_review)
+    if company_profile_context is not None:
+        input_provenance["company_profile_context"] = (
+            _company_profile_analysis_context_reference(company_profile_context)
+        )
+
     return SecCompanyFactsRecommendationReview(
         ticker=analysis_review.ticker,
         cik=analysis_review.cik,
@@ -189,7 +212,79 @@ def build_sec_companyfacts_recommendation_review(
         review_state=review_state,
         review_category=review_category,
         review_items=(review_item,),
-        input_provenance=_input_provenance(analysis_review),
+        input_provenance=input_provenance,
+    )
+
+
+def build_company_profile_only_recommendation_review(
+    analysis_context: CompanyProfileAnalysisContext,
+    *,
+    recommendation_review_run_id: str,
+) -> SecCompanyFactsRecommendationReview:
+    _validate_company_profile_context(
+        analysis_context,
+        expected_ticker=analysis_context.ticker,
+    )
+    review_category = (
+        SecCompanyFactsRecommendationReviewCategory.COMPANY_PROFILE_ONLY_CONTEXT_NON_ACTIONABLE
+    )
+    review_state = SecCompanyFactsRecommendationReviewState.BLOCKED_BY_MISSING_DATA
+    review_item = SecCompanyFactsRecommendationReviewItem(
+        category=review_category,
+        state=review_state,
+        message=(
+            "Recommendation Review is non-actionable because company profile "
+            "context is descriptive only and contains no sufficient fundamental, "
+            "financial-market, valuation, or setup evidence."
+        ),
+        supporting_analysis_review_categories=(),
+        blocking_analysis_review_categories=("company_profile_only_context",),
+        missing_data=(
+            "fundamental_financial_evidence",
+            "financial_market_evidence",
+            "setup_evidence",
+        ),
+        analysis_review_references={
+            "company_profile_context": (
+                _company_profile_analysis_context_reference(analysis_context)
+            )
+        },
+        boundary_notes=(
+            *_standard_boundary_notes(),
+            "Company profile metadata is descriptive context, not recommendation evidence.",
+            "Downstream handoff remains blocked until sufficient non-profile analysis evidence exists.",
+        ),
+    )
+    return SecCompanyFactsRecommendationReview(
+        ticker=analysis_context.ticker,
+        cik="",
+        provider_name=analysis_context.provider_name,
+        recommendation_review_format_version=(
+            SEC_COMPANYFACTS_RECOMMENDATION_REVIEW_FORMAT_VERSION
+        ),
+        analysis_review_format_version=(
+            analysis_context.analysis_review_format_version
+        ),
+        source_context_format_version=(
+            "market-engine-company-profile-source-context-v1"
+        ),
+        source_context_state="consumed",
+        source_refresh_snapshot_id=analysis_context.source_refresh_snapshot_id,
+        source_refresh_fetched_at=analysis_context.source_refresh_fetched_at or "",
+        source_refresh_payload_format_version=(
+            analysis_context.source_refresh_payload_format_version
+        ),
+        recommendation_review_run_id=recommendation_review_run_id,
+        input_contract=COMPANY_PROFILE_ANALYSIS_CONTEXT_FORMAT_VERSION,
+        setup_detection_format_version=analysis_context.setup_boundary_format_version,
+        setup_detection_run_id=None,
+        review_state=review_state,
+        review_category=review_category,
+        review_items=(review_item,),
+        input_provenance=_company_profile_analysis_context_reference(
+            analysis_context
+        ),
+        blocked_reasons=(COMPANY_PROFILE_ONLY_CONTEXT_NON_ACTIONABLE,),
     )
 
 
@@ -227,6 +322,33 @@ def _validate_analysis_review_contract(
         raise ValueError(
             "unsupported SEC CompanyFacts Analysis Review contract: "
             f"{analysis_review.analysis_review_format_version}"
+        )
+
+
+def _validate_company_profile_context(
+    analysis_context: CompanyProfileAnalysisContext,
+    *,
+    expected_ticker: str,
+) -> None:
+    if (
+        analysis_context.analysis_review_format_version
+        != COMPANY_PROFILE_ANALYSIS_CONTEXT_FORMAT_VERSION
+    ):
+        raise ValueError(
+            "unsupported Company Profile Analysis Review contract: "
+            f"{analysis_context.analysis_review_format_version}"
+        )
+    if analysis_context.input_family != "company_profile":
+        raise ValueError(
+            "Company Profile Recommendation Review requires company_profile input."
+        )
+    if analysis_context.context_state != "descriptive_context_available":
+        raise ValueError(
+            "Company Profile Recommendation Review requires available descriptive context."
+        )
+    if analysis_context.ticker.upper() != expected_ticker.upper():
+        raise ValueError(
+            "Company Profile Recommendation Review ticker alignment failed."
         )
 
 
@@ -675,6 +797,38 @@ def _input_provenance(analysis_review: SecCompanyFactsAnalysisReview) -> dict[st
             "setup_detection_non_actionable_boundary",
             None,
         ),
+    }
+
+
+def _company_profile_analysis_context_reference(
+    analysis_context: CompanyProfileAnalysisContext,
+) -> dict[str, Any]:
+    return {
+        "input_contract": analysis_context.analysis_review_format_version,
+        "analysis_review_run_id": analysis_context.analysis_review_run_id,
+        "input_family": analysis_context.input_family,
+        "context_state": analysis_context.context_state,
+        "ticker": analysis_context.ticker,
+        "symbol": analysis_context.symbol,
+        "provider_name": analysis_context.provider_name,
+        "source_observation_format_version": (
+            analysis_context.source_observation_format_version
+        ),
+        "source_bridge_format_version": analysis_context.source_bridge_format_version,
+        "setup_boundary_format_version": (
+            analysis_context.setup_boundary_format_version
+        ),
+        "source_refresh_snapshot_id": analysis_context.source_refresh_snapshot_id,
+        "source_refresh_fetched_at": analysis_context.source_refresh_fetched_at,
+        "source_refresh_payload_format_version": (
+            analysis_context.source_refresh_payload_format_version
+        ),
+        "as_of": analysis_context.as_of,
+        "provenance": dict(analysis_context.provenance),
+        "descriptive_context": tuple(
+            asdict(item) for item in analysis_context.descriptive_context
+        ),
+        "non_advisory_boundary": analysis_context.non_advisory_boundary,
     }
 
 
