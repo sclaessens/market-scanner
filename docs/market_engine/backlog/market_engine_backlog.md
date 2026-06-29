@@ -3428,3 +3428,41 @@ Validation:
 520 passed - tests/market_engine
 1187 passed - full pytest
 ```
+
+### ME-SA09 - Define multi-source analysis-context readiness contract
+
+Status: COMPLETED DOCS-ONLY CONTRACT
+
+ME-SA09 defines five distinct evidence-readiness levels:
+
+```text
+descriptive_only
+partial_analysis
+recommendation_eligible
+actionable_review
+decision_ready
+```
+
+The contract defines source families, a readiness matrix, deterministic blocked
+reasons, prohibited inferences, downstream implications, and transition
+invariants.
+
+Company-profile-only context remains `descriptive_only` and blocked with
+`company_profile_only_context_non_actionable`. Recommendation eligibility does
+not imply a favorable or actionable result. `actionable_review` and ME-SA09
+`decision_ready` are reserved under current governance.
+
+Implemented documentation:
+
+```text
+docs/market_engine/analysis_review/me_sa09_multi_source_analysis_context_readiness_contract.md
+docs/market_engine/audits/me_sa09_multi_source_analysis_context_readiness_contract_audit.md
+docs/market_engine/backlog/me_sa09_multi_source_analysis_context_readiness_contract_backlog_entry.md
+docs/market_engine/roadmap/me_sa09_multi_source_analysis_context_readiness_contract_roadmap_entry.md
+```
+
+Next sprint:
+
+```text
+ME-SA10 - Implement multi-source analysis-context readiness classifier
+```
