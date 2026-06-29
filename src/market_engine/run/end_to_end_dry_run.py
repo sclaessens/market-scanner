@@ -76,18 +76,30 @@ _STAGE_CONTRACT_SPECS: tuple[dict[str, Any], ...] = (
         "label": "Derived Observations",
         "version_field": "derived_observations_format_version",
         "expected_version": "sec-companyfacts-derived-cash-generation-observations-v1",
+        "accepted_versions": (
+            "sec-companyfacts-derived-cash-generation-observations-v1",
+            "market-engine-company-profile-derived-context-bridge-v1",
+        ),
     },
     {
         "stage_name": "setup_detection",
         "label": "Setup Detection",
         "version_field": "setup_detection_format_version",
         "expected_version": "sec-companyfacts-setup-detection-v1",
+        "accepted_versions": (
+            "sec-companyfacts-setup-detection-v1",
+            "market-engine-company-profile-setup-not-applicable-v1",
+        ),
     },
     {
         "stage_name": "analysis_review",
         "label": "Analysis Review",
         "version_field": "analysis_review_format_version",
         "expected_version": "sec-companyfacts-analysis-review-v1",
+        "accepted_versions": (
+            "sec-companyfacts-analysis-review-v1",
+            "market-engine-company-profile-analysis-context-v1",
+        ),
     },
     {
         "stage_name": "recommendation_review",
