@@ -1496,3 +1496,40 @@ Validation:
 535 passed - tests/market_engine
 1202 passed - full pytest
 ```
+
+### ME-SA11 - Implement readiness adapter and artifact metadata
+
+Status: COMPLETED BY ME-SA11
+
+ME-SA11 completes the classifier-to-output sequence:
+
+```text
+ME-SA09 -> ME-SA10 -> ME-SA11
+```
+
+Readiness metadata is now visible in the top-level dry-run payload and
+persisted local artifact payload. The adapter maps only explicit approved stage
+contracts and fails closed on stale, unprovenanced, blocked, unsupported, or
+malformed context.
+
+The integration is additive and does not change artifact format versions.
+`actionable_review` and `decision_ready` remain unreachable. No trading,
+allocation, broker, Telegram sending, portfolio mutation, production write, or
+Decision Engine authority was added.
+
+Validation:
+
+```text
+11 passed - readiness adapter tests
+51 passed - Analysis Review tests
+16 passed - Recommendation Review tests
+114 passed - run tests
+546 passed - tests/market_engine
+1213 passed - full pytest
+```
+
+Next:
+
+```text
+ME-RUN28A - Run NVDA/AMD/ASML through persisted readiness and Recommendation Review boundary
+```

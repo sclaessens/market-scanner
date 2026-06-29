@@ -559,6 +559,7 @@ def test_company_profile_is_visible_in_written_dry_run_artifact(
     analysis_context = artifact["payload"]["provenance_summary"]["analysis_review"][
         "company_profile"
     ]
+    readiness = artifact["payload"]["analysis_context_readiness"]
     recommendation_stage = next(
         stage
         for stage in artifact["payload"]["stage_results"]
@@ -580,6 +581,18 @@ def test_company_profile_is_visible_in_written_dry_run_artifact(
         "company_profile_only_context_non_actionable"
     ]
     assert recommendation_provenance["input_family"] == "company_profile"
+    assert readiness["readiness_level"] == "descriptive_only"
+    assert "company_profile" in readiness["evidence_families_present"]
+    assert (
+        "company_profile_only_context_non_actionable"
+        in readiness["blocked_reasons"]
+    )
+    assert readiness["recommendation_review_eligible"] is False
+    assert readiness["actionable_review_allowed"] is False
+    assert readiness["decision_engine_ready"] is False
+    assert "does not create recommendation" in readiness[
+        "non_authority_boundary"
+    ]
 
 
 def test_cached_source_wrapper_input_is_supported(tmp_path: Path) -> None:

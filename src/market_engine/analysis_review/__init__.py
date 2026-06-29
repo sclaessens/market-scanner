@@ -11,6 +11,9 @@ from market_engine.analysis_review.analysis_context_readiness import (
     AnalysisContextReadinessResult,
     classify_analysis_context_readiness,
 )
+from market_engine.analysis_review.analysis_context_readiness_adapter import (
+    classify_analysis_context_readiness_from_stage_payloads,
+)
 from market_engine.analysis_review.sec_companyfacts_analysis_review import (
     NON_RECOMMENDATION_ANALYSIS_REVIEW_BOUNDARY,
     SEC_COMPANYFACTS_ANALYSIS_REVIEW_FORMAT_VERSION,
@@ -42,6 +45,7 @@ __all__ = [
     "SecCompanyFactsAnalysisReviewItem",
     "SecCompanyFactsAnalysisReviewState",
     "classify_analysis_context_readiness",
+    "classify_analysis_context_readiness_from_stage_payloads",
     "build_sec_companyfacts_analysis_review",
     "persist_sec_companyfacts_analysis_review",
 ]

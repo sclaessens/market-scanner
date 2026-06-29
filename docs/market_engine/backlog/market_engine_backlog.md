@@ -3515,3 +3515,54 @@ Validation:
 535 passed - tests/market_engine
 1202 passed - full pytest
 ```
+
+### ME-SA11 - Implement readiness adapter and artifact metadata
+
+Status: COMPLETED BY ME-SA11
+
+ME-SA11 adds a conservative adapter from existing dry-run stage payloads to the
+ME-SA10 evidence families and persists the result at:
+
+```text
+artifact["payload"]["analysis_context_readiness"]
+```
+
+Company-profile-only output remains `descriptive_only` with
+`company_profile_only_context_non_actionable`. Complete fundamental plus
+setup/price/market evidence with valid provenance reaches at most
+`recommendation_eligible`.
+
+`actionable_review` and `decision_ready` remain reserved and unreachable.
+Existing dry-run and local artifact format versions remain unchanged.
+
+Implemented:
+
+```text
+src/market_engine/analysis_review/analysis_context_readiness_adapter.py
+src/market_engine/analysis_review/__init__.py
+src/market_engine/run/end_to_end_dry_run.py
+tests/market_engine/analysis_review/test_analysis_context_readiness_adapter.py
+tests/market_engine/run/test_end_to_end_dry_run.py
+tests/market_engine/run/test_local_dry_run_artifacts.py
+tests/market_engine/run/test_me_run10_cached_source_local_execution.py
+docs/market_engine/audits/me_sa11_analysis_context_readiness_adapter_artifact_metadata_audit.md
+docs/market_engine/backlog/me_sa11_analysis_context_readiness_adapter_artifact_metadata_backlog_entry.md
+docs/market_engine/roadmap/me_sa11_analysis_context_readiness_adapter_artifact_metadata_roadmap_entry.md
+```
+
+Validation:
+
+```text
+11 passed - readiness adapter tests
+51 passed - Analysis Review tests
+16 passed - Recommendation Review tests
+114 passed - run tests
+546 passed - tests/market_engine
+1213 passed - full pytest
+```
+
+Next sprint:
+
+```text
+ME-RUN28A - Run NVDA/AMD/ASML through persisted readiness and Recommendation Review boundary
+```

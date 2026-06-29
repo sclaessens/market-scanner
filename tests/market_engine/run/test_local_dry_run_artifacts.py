@@ -52,6 +52,15 @@ def test_valid_dry_run_artifact_is_persisted_locally(tmp_path: Path) -> None:
     assert artifact["payload"]["numeric_zero_evidence_summary"][
         "portfolio_review.portfolio_context_reference.current_quantity"
     ] == 0
+    assert artifact["payload"]["analysis_context_readiness"]["readiness_level"] == (
+        "recommendation_eligible"
+    )
+    assert artifact["payload"]["analysis_context_readiness"][
+        "actionable_review_allowed"
+    ] is False
+    assert artifact["payload"]["analysis_context_readiness"][
+        "decision_engine_ready"
+    ] is False
     assert manifest["manifest_format_version"] == (
         MARKET_ENGINE_LOCAL_DRY_RUN_MANIFEST_FORMAT_VERSION
     )
