@@ -1440,3 +1440,28 @@ Validation:
 520 passed - tests/market_engine
 1187 passed - full pytest
 ```
+
+### ME-SA09 - Define multi-source analysis-context readiness contract
+
+Status: COMPLETED DOCS-ONLY CONTRACT
+
+ME-SA09 establishes the contract-first readiness sequence:
+
+```text
+ME-SA08 -> ME-SA09 -> ME-SA10
+```
+
+It separates descriptive-only context, partial analysis, Recommendation Review
+eligibility, future actionable-review readiness, and future Decision Engine
+readiness.
+
+Company profile remains descriptive-only and cannot upgrade missing
+fundamental, valuation, setup, price, market, portfolio, provenance, handoff, or
+delivery evidence.
+
+`actionable_review` and ME-SA09 `decision_ready` remain reserved under current
+governance. Runtime classification is deferred to:
+
+```text
+ME-SA10 - Implement multi-source analysis-context readiness classifier
+```
