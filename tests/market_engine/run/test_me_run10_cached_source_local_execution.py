@@ -160,6 +160,16 @@ def test_company_profile_cached_source_is_consumed_into_source_context(
     assert stage_results["setup_detection"]["status"] == "completed"
     assert stage_results["analysis_review"]["status"] == "completed"
     assert stage_results["recommendation_review"]["status"] == "blocked"
+    assert stage_results["recommendation_review"]["blocked_reasons"] == [
+        "company_profile_only_context_non_actionable"
+    ]
+    recommendation_provenance = dry_run["provenance_summary"][
+        "recommendation_review"
+    ]["input_provenance"]
+    assert recommendation_provenance["input_family"] == "company_profile"
+    assert recommendation_provenance["context_state"] == (
+        "descriptive_context_available"
+    )
     assert company_profile["input_family"] == "company_profile"
     assert company_profile["consumption_state"] == "consumed"
     assert company_profile["symbol"] == "NVDA"
@@ -549,6 +559,14 @@ def test_company_profile_is_visible_in_written_dry_run_artifact(
     analysis_context = artifact["payload"]["provenance_summary"]["analysis_review"][
         "company_profile"
     ]
+    recommendation_stage = next(
+        stage
+        for stage in artifact["payload"]["stage_results"]
+        if stage["stage_name"] == "recommendation_review"
+    )
+    recommendation_provenance = artifact["payload"]["provenance_summary"][
+        "recommendation_review"
+    ]["input_provenance"]
 
     assert exit_code == 0
     assert company_profile["consumption_state"] == "consumed"
@@ -557,6 +575,11 @@ def test_company_profile_is_visible_in_written_dry_run_artifact(
     assert profile_observations["observations"]
     assert analysis_context["context_state"] == "descriptive_context_available"
     assert analysis_context["descriptive_context"]
+    assert recommendation_stage["status"] == "blocked"
+    assert recommendation_stage["blocked_reasons"] == [
+        "company_profile_only_context_non_actionable"
+    ]
+    assert recommendation_provenance["input_family"] == "company_profile"
 
 
 def test_cached_source_wrapper_input_is_supported(tmp_path: Path) -> None:

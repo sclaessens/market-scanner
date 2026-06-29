@@ -1408,3 +1408,35 @@ Next active sprint:
 ```text
 ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 ```
+
+### ME-SA08 - Add company_profile-only Recommendation Review boundary
+
+Status: COMPLETED BY ME-SA08
+
+ME-SA08 replaced the generic profile-only Recommendation Review stop with a
+deterministic blocked review result:
+
+```text
+company_profile_only_context_non_actionable
+```
+
+The existing Recommendation Review structure preserves descriptive
+company-profile provenance while explicitly withholding fundamental,
+financial-market, valuation, and setup evidence. Portfolio Review and Decision
+Engine handoff remain not started.
+
+Roadmap outcome:
+
+```text
+ME-RUN27 -> ME-SA07 -> ME-SA08 -> future governed downstream continuation
+```
+
+Validation:
+
+```text
+16 passed - Recommendation Review tests
+21 passed - cached-source local execution tests
+2 passed - ME-RUN27 cross-ticker tests
+520 passed - tests/market_engine
+1187 passed - full pytest
+```
