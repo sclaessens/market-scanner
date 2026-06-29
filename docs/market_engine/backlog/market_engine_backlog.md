@@ -3466,3 +3466,52 @@ Next sprint:
 ```text
 ME-SA10 - Implement multi-source analysis-context readiness classifier
 ```
+
+### ME-SA10 - Implement typed fail-closed analysis-context readiness classifier
+
+Status: COMPLETED BY ME-SA10
+
+ME-SA10 implements the ME-SA09 contract as a pure typed classifier.
+
+Reachable levels:
+
+```text
+descriptive_only
+partial_analysis
+recommendation_eligible
+```
+
+Reserved and unreachable:
+
+```text
+actionable_review
+decision_ready
+```
+
+Company-profile-only context remains descriptive and blocked with
+`company_profile_only_context_non_actionable`. Descriptive context cannot
+upgrade missing fundamental or setup/price/market evidence.
+
+The classifier is exported as a standalone Analysis Review module. Existing
+runtime artifacts and downstream contracts are unchanged.
+
+Implemented:
+
+```text
+src/market_engine/analysis_review/analysis_context_readiness.py
+src/market_engine/analysis_review/__init__.py
+tests/market_engine/analysis_review/test_analysis_context_readiness.py
+docs/market_engine/audits/me_sa10_analysis_context_readiness_classifier_audit.md
+docs/market_engine/backlog/me_sa10_analysis_context_readiness_classifier_backlog_entry.md
+docs/market_engine/roadmap/me_sa10_analysis_context_readiness_classifier_roadmap_entry.md
+```
+
+Validation:
+
+```text
+15 passed - new readiness classifier tests
+40 passed - Analysis Review tests
+16 passed - Recommendation Review tests
+535 passed - tests/market_engine
+1202 passed - full pytest
+```
