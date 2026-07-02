@@ -52,6 +52,9 @@ artifacts/market_engine/me-run27-company-profile-cross-ticker-*/
 # ME-RUN28A readiness-boundary evidence is generated locally.
 artifacts/market_engine/me-run28a-nvda-amd-asml-readiness-boundary-*/
 
+# ME-RUN28 expanded supported-universe evidence is generated locally.
+artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-*/
+
 # ========================
 # Allow these core files
 # ========================
