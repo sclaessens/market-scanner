@@ -3712,3 +3712,51 @@ ME-SA13 - Implement generic cached-source coverage classification model
 
 Expanded acquisition coverage must not precede the generic classifier or use
 ticker-specific shortcuts.
+
+### ME-SA13 - Implement generic cached-source coverage classification model
+
+Status: COMPLETED BY ME-SA13
+
+ME-SA13 implements the ME-SA12 contract as a pure deterministic classifier:
+
+```text
+market-engine-supported-universe-cached-source-coverage-v1
+```
+
+The model classifies generic source-family requirements across support,
+availability, manifest validity, provenance, freshness, consumability,
+completeness, readiness, and blockers.
+
+Public API:
+
+```text
+classify_cached_source_coverage(...)
+classify_cached_source_coverage_batch(...)
+```
+
+Ticker strings remain data attributes. No ticker-specific runtime branch or
+allowlist determines classification.
+
+Company-profile-only input remains `descriptive_only`. Partial analytical
+coverage remains non-actionable. Reserved `actionable` and `de_ready` states
+remain unreachable under current governance.
+
+Validation:
+
+```text
+39 passed - new classifier tests
+63 passed - source-support tests
+585 passed - tests/market_engine
+1252 passed - full pytest
+PASS - git diff --check
+PASS - governance greps; no new ticker-specific runtime logic
+```
+
+Next sprint:
+
+```text
+ME-SA14 - Adapt cached-source staging validation into generic coverage input
+```
+
+Expanded acquisition or dry-run reporting integration must follow the generic
+adapter and may not use ticker-specific shortcuts.
