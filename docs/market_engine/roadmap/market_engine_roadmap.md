@@ -1573,3 +1573,59 @@ ME-RUN28 - Expanded supported-universe acquisition and dry-run classification
 
 ME-DL03 remains deferred and must create a non-production Telegram preview
 artifact without sending.
+
+### ME-RUN28 - Expanded supported-universe acquisition and dry-run classification
+
+Status: COMPLETED WITH BLOCKED OUTCOME BY ME-RUN28
+
+ME-RUN28 completes the first expanded persisted-readiness run:
+
+```text
+ME-SA11 -> ME-RUN28A -> ME-RUN28
+```
+
+Sixteen active Professional Swing Universe tickers were classified.
+
+```text
+automated acquisition completed: 3
+automated acquisition unsupported_ticker: 13
+staging accepted: 3
+direct acquisition-package dry-runs: 3 descriptive_only
+existing SEC cached source found: 12
+missing cached source snapshot: 4
+partial_analysis: 12
+actionable: 0
+Decision Engine-ready: 0
+```
+
+The primary structural blocker is the bounded automated acquisition coverage.
+The current job supports only `NVDA`, `AMD`, and `ASML` and only the
+`company_profile` source family. The three produced packages validate and
+directly dry-run to the approved descriptive-only Recommendation Review
+boundary.
+
+The local dry-run path successfully consumes 12 existing SEC CompanyFacts
+snapshots and persists non-actionable readiness. Those results remain
+`partial_analysis` because approved setup/price/market evidence is missing.
+Portfolio Review also stops because this run supplied no portfolio context.
+
+No runtime defect, staging defect, side effect, actionable state, or Decision
+Engine-ready state was introduced or observed.
+
+Validation:
+
+```text
+546 passed - tests/market_engine
+1213 passed - full pytest
+PASS - 16-ticker artifact classification assertions
+PASS - git diff --check
+```
+
+Next:
+
+```text
+ME-SA12 - Expanded supported-universe cached-source acquisition coverage contract
+```
+
+Setup/price/market evidence and portfolio-context readiness remain separate
+future contract decisions.
