@@ -3662,3 +3662,53 @@ ME-SA12 - Expanded supported-universe cached-source acquisition coverage contrac
 
 Setup/price/market evidence and portfolio-context readiness remain separate
 follow-ups.
+
+### ME-SA12 - Generic supported-universe cached-source coverage contract
+
+Status: COMPLETED DOCS-ONLY CONTRACT
+
+ME-SA12 defines a future-ticker-safe contract for supported-universe
+cached-source coverage.
+
+```text
+tickers are data, not logic
+```
+
+The contract separates:
+
+* universe membership;
+* source-family support and availability;
+* manifest and staging validation;
+* provenance and freshness;
+* consumability and completeness;
+* analysis readiness;
+* Recommendation Review eligibility;
+* Portfolio Review and handoff readiness;
+* reserved actionable and Decision Engine-ready capabilities.
+
+Coverage requirements are selected through generic capability profiles, never
+ticker names. ME-RUN28 tickers remain regression examples only.
+
+Current ME-SA09/10/11 readiness values remain authoritative.
+`actionable_review`, `actionable`, `decision_ready`, and `de_ready` remain
+reserved and unreachable.
+
+No runtime or test file changed.
+
+Validation:
+
+```text
+546 passed - tests/market_engine
+1213 passed - full pytest
+PASS - git diff --check
+PASS - governance grep; no new runtime hit
+```
+
+Next sprint:
+
+```text
+ME-SA13 - Implement generic cached-source coverage classification model
+```
+
+Expanded acquisition coverage must not precede the generic classifier or use
+ticker-specific shortcuts.
