@@ -3566,3 +3566,46 @@ Next sprint:
 ```text
 ME-RUN28A - Run NVDA/AMD/ASML through persisted readiness and Recommendation Review boundary
 ```
+
+### ME-RUN28A - Validate persisted readiness and Recommendation Review boundary
+
+Status: COMPLETED WITH CONTROLLED STOP BY ME-RUN28A
+
+ME-RUN28A reused the existing deterministic cached-source/local dry-run flow
+for `NVDA`, `AMD`, and `ASML`.
+
+All three persisted artifacts contain
+`artifact["payload"]["analysis_context_readiness"]`. Every result is
+`descriptive_only`, with company-profile evidence present and fundamental,
+setup/price/market, and provenance/staleness evidence missing. Recommendation
+Review is blocked with `company_profile_only_context_non_actionable`.
+
+Every artifact confirms:
+
+```text
+actionable_review_allowed: false
+decision_engine_ready: false
+```
+
+No actionable recommendation fields were produced. `actionable_review` and
+`decision_ready` remain reserved and unreachable.
+
+Validation:
+
+```text
+51 passed - Analysis Review tests
+16 passed - Recommendation Review tests
+114 passed - run tests
+1213 passed - full pytest
+PASS - three persisted artifacts inspected
+PASS - no actionable recommendation-field keys
+PASS - git diff --check
+```
+
+Next sprint:
+
+```text
+ME-RUN28 - Expanded supported-universe acquisition and dry-run classification
+```
+
+The non-production Telegram preview remains unsent and deferred to ME-DL03.
