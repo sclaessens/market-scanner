@@ -151,16 +151,23 @@ def _entry_from_manifest(*, root: Path, manifest_path: Path) -> dict[str, Any]:
     manifest_reference = _relative_path(manifest_path, root)
     base_entry = {
         "ticker": None,
+        "market": None,
         "snapshot_id": None,
         "source_family": None,
         "source_name": None,
+        "source_retrieved_at_utc": None,
+        "source_publication_date": None,
         "manifest_path": manifest_reference,
         "payload_path": None,
         "manifest_format_version": None,
         "staging_validation_status": "rejected",
         "accepted_for_cached_source_staging": False,
         "validation_status": None,
+        "validation_errors": (),
+        "validation_warnings": (),
         "staleness_status": None,
+        "usable_for_cached_source_dry_run": None,
+        "blocked_reason": None,
         "issues": (),
     }
     try:
@@ -203,16 +210,31 @@ def _entry_from_manifest(*, root: Path, manifest_path: Path) -> dict[str, Any]:
     accepted = staging_status == "accepted"
     return {
         "ticker": _string_or_none(payload.get("ticker")),
+        "market": _string_or_none(payload.get("entity_exchange")),
         "snapshot_id": _string_or_none(payload.get("snapshot_id")),
         "source_family": _string_or_none(payload.get("source_family")),
         "source_name": _string_or_none(payload.get("source_name")),
+        "source_retrieved_at_utc": _string_or_none(
+            payload.get("source_retrieved_at_utc")
+        ),
+        "source_publication_date": _string_or_none(
+            payload.get("source_publication_date")
+        ),
         "manifest_path": manifest_reference,
         "payload_path": _relative_path(payload_path, root) if payload_path else None,
         "manifest_format_version": _string_or_none(manifest_format_version),
         "staging_validation_status": staging_status,
         "accepted_for_cached_source_staging": accepted,
         "validation_status": _string_or_none(payload.get("validation_status")),
+        "validation_errors": _text_sequence(payload.get("validation_errors")),
+        "validation_warnings": _text_sequence(payload.get("validation_warnings")),
         "staleness_status": _string_or_none(payload.get("staleness_status")),
+        "usable_for_cached_source_dry_run": (
+            payload.get("usable_for_cached_source_dry_run")
+            if isinstance(payload.get("usable_for_cached_source_dry_run"), bool)
+            else None
+        ),
+        "blocked_reason": _string_or_none(payload.get("blocked_reason")),
         "issues": tuple(issues),
     }
 
@@ -236,9 +258,12 @@ def _missing_manifest_entries(
             continue
         yield {
             "ticker": _infer_ticker_from_directory(root=root, directory=directory),
+            "market": None,
             "snapshot_id": directory.name,
             "source_family": None,
             "source_name": None,
+            "source_retrieved_at_utc": None,
+            "source_publication_date": None,
             "manifest_path": None,
             "directory_path": _relative_path(directory, root),
             "payload_path": None,
@@ -246,7 +271,11 @@ def _missing_manifest_entries(
             "staging_validation_status": "missing_manifest",
             "accepted_for_cached_source_staging": False,
             "validation_status": None,
+            "validation_errors": (),
+            "validation_warnings": (),
             "staleness_status": None,
+            "usable_for_cached_source_dry_run": None,
+            "blocked_reason": None,
             "issues": ("manifest_missing",),
         }
 
@@ -384,6 +413,12 @@ def _append_boolean_type_issue(
         bool,
     ):
         issues.append(f"{field_name}_invalid")
+
+
+def _text_sequence(value: object) -> tuple[str, ...]:
+    if not isinstance(value, list):
+        return ()
+    return tuple(item for item in value if isinstance(item, str))
 
 
 def _staging_status(

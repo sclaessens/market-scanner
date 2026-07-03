@@ -68,9 +68,14 @@ def test_staging_validation_accepts_valid_manual_manifest_and_payload(
     assert report["acceptance_summary"]["all_entries_accepted"] is True
     entry = report["entries"][0]
     assert entry["ticker"] == "NVDA"
+    assert entry["market"] == "NASDAQ"
     assert entry["source_family"] == "sec_companyfacts"
+    assert entry["source_retrieved_at_utc"] == VALIDATED_AT
     assert entry["staging_validation_status"] == "accepted"
     assert entry["accepted_for_cached_source_staging"] is True
+    assert entry["usable_for_cached_source_dry_run"] is True
+    assert entry["validation_errors"] == ()
+    assert entry["validation_warnings"] == ()
     assert entry["issues"] == ()
 
 

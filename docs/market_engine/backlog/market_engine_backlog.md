@@ -3760,3 +3760,24 @@ ME-SA14 - Adapt cached-source staging validation into generic coverage input
 
 Expanded acquisition or dry-run reporting integration must follow the generic
 adapter and may not use ticker-specific shortcuts.
+
+### ME-SA14 - Staging-validation evidence adapter
+
+Status: COMPLETED BY ME-SA14
+
+ME-SA14 adds the deterministic Refinery bridge from existing cached-source
+staging-validation entries to ME-SA13 `CachedSourceCoverageInput` values.
+
+The adapter preserves ticker and market as data, maps only approved generic
+source-family aliases, and fails closed for invalid manifests, missing
+provenance, stale evidence, unsupported families, non-consumable snapshots,
+and incomplete evidence.
+
+Next sprint:
+
+```text
+ME-RUN29 - Run expanded generic coverage classification from staging-validation evidence
+```
+
+No expanded run, provider call, Governor/Dispatch Station behavior, actionable
+state, or Decision Engine authority is part of ME-SA14.

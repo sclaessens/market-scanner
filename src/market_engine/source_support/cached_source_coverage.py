@@ -115,6 +115,7 @@ class CachedSourceCoverageInput:
     ticker: str
     universe_supported: bool
     target_capability: TargetCapability
+    market: str | None = None
     requirements: tuple[SourceFamilyRequirement, ...] = ()
     source_evidence: tuple[SourceFamilyEvidence, ...] = ()
     additional_blockers: tuple[BlockerCode, ...] = ()
@@ -141,6 +142,7 @@ class SourceFamilyCoverageResult:
 class CachedSourceCoverageClassification:
     contract_version: str
     ticker: str
+    market: str | None
     target_capability: TargetCapability
     coverage_status: CoverageStatus
     readiness_status: ReadinessStatus
@@ -271,6 +273,7 @@ def classify_cached_source_coverage(
     return CachedSourceCoverageClassification(
         contract_version=CACHED_SOURCE_COVERAGE_CONTRACT_VERSION,
         ticker=coverage_input.ticker,
+        market=coverage_input.market,
         target_capability=coverage_input.target_capability,
         coverage_status=coverage_status,
         readiness_status=readiness_status,
@@ -300,9 +303,11 @@ def classify_cached_source_coverage_batch(
     inputs = tuple(coverage_inputs)
     if not inputs:
         raise CachedSourceCoverageError("coverage batch must not be empty")
-    tickers = [item.ticker for item in inputs]
-    if len(tickers) != len(set(tickers)):
-        raise CachedSourceCoverageError("coverage batch ticker values must be unique")
+    instrument_keys = [(item.ticker, item.market) for item in inputs]
+    if len(instrument_keys) != len(set(instrument_keys)):
+        raise CachedSourceCoverageError(
+            "coverage batch ticker and market values must be unique"
+        )
     classifications = tuple(
         classify_cached_source_coverage(item)
         for item in inputs
@@ -336,6 +341,13 @@ def _validate_input(coverage_input: CachedSourceCoverageInput) -> None:
     if not coverage_input.ticker or coverage_input.ticker != coverage_input.ticker.strip():
         raise CachedSourceCoverageError(
             "coverage input ticker must be non-empty and without padding"
+        )
+    if coverage_input.market is not None and (
+        not coverage_input.market
+        or coverage_input.market != coverage_input.market.strip()
+    ):
+        raise CachedSourceCoverageError(
+            "coverage input market must be non-empty and without padding when supplied"
         )
     requirement_families = [
         item.source_family for item in coverage_input.requirements
