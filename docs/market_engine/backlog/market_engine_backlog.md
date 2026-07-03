@@ -3781,3 +3781,18 @@ ME-RUN29 - Run expanded generic coverage classification from staging-validation 
 
 No expanded run, provider call, Governor/Dispatch Station behavior, actionable
 state, or Decision Engine authority is part of ME-SA14.
+
+### ME-RUN29 - Expanded generic coverage classification
+
+Status: COMPLETED BY ME-RUN29
+
+ME-RUN29 runs deterministic committed staging-validation fixture evidence
+through the ME-SA14 adapter and ME-SA13 classifier. It writes local JSON and
+Markdown evidence with per-entry coverage/readiness, dominant blockers, and
+zero reserved authority states.
+
+Next:
+
+```text
+ME-GV01 - Define The Governor investment evaluation contract
+```
