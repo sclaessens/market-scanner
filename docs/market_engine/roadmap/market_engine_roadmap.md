@@ -1712,3 +1712,22 @@ ME-SA14 - Adapt cached-source staging validation into generic coverage input
 ```
 
 The adapter must preserve current staging semantics and fail closed.
+
+### ME-SA14 - Staging-validation evidence adapter
+
+Status: COMPLETED BY ME-SA14
+
+ME-SA14 completes the ME-SA12 -> ME-SA13 -> ME-SA14 generic coverage chain in
+Refinery. Existing staging-validation evidence can now be converted into
+generic coverage-classifier input through deterministic single-entry and
+ordered batch APIs.
+
+The implementation performs no expanded classification run and adds no
+provider, Governor, Dispatch Station, recommendation, allocation, delivery,
+portfolio, watchlist, or Decision Engine behavior.
+
+Next:
+
+```text
+ME-RUN29 - Run expanded generic coverage classification from staging-validation evidence
+```

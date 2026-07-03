@@ -39,6 +39,11 @@ from market_engine.source_support.professional_swing import (
     classify_professional_swing_universe_source_support,
     to_plain_dict,
 )
+from market_engine.source_support.staging_validation_coverage_adapter import (
+    StagingValidationCoverageAdapterError,
+    adapt_staging_validation_batch_to_cached_source_coverage_inputs,
+    adapt_staging_validation_to_cached_source_coverage_input,
+)
 
 __all__ = [
     "BlockerCode",
@@ -68,7 +73,10 @@ __all__ = [
     "SourceFamilyEvidence",
     "SourceFamilyRequirement",
     "SourceArtifactReference",
+    "StagingValidationCoverageAdapterError",
     "TargetCapability",
+    "adapt_staging_validation_batch_to_cached_source_coverage_inputs",
+    "adapt_staging_validation_to_cached_source_coverage_input",
     "classify_cached_source_coverage",
     "classify_cached_source_coverage_batch",
     "classify_expanded_professional_swing_universe_source_support",
