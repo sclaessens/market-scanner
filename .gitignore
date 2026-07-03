@@ -55,6 +55,9 @@ artifacts/market_engine/me-run28a-nvda-amd-asml-readiness-boundary-*/
 # ME-RUN28 expanded supported-universe evidence is generated locally.
 artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-*/
 
+# ME-RUN29 expanded generic coverage evidence is generated locally.
+artifacts/market_engine/me-run29-expanded-generic-coverage-classification-*/
+
 # ========================
 # Allow these core files
 # ========================

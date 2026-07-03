@@ -1731,3 +1731,18 @@ Next:
 ```text
 ME-RUN29 - Run expanded generic coverage classification from staging-validation evidence
 ```
+
+### ME-RUN29 - Expanded generic coverage classification
+
+Status: COMPLETED BY ME-RUN29
+
+ME-RUN29 completes the ME-SA12 -> ME-SA13 -> ME-SA14 coverage chain with a
+deterministic Refinery evidence run. The committed fixture and runner reproduce
+the local JSON and Markdown classification artifacts without provider,
+acquisition, Governor, Dispatch Station, or Decision Engine behavior.
+
+Next:
+
+```text
+ME-GV01 - Define The Governor investment evaluation contract
+```
