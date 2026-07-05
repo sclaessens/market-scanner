@@ -67,6 +67,9 @@ artifacts/market_engine/me-gv04-governor-factor-scoring-*/
 # ME-GV05 deterministic local Governor recommendation-mapping artifacts
 artifacts/market_engine/me-gv05-governor-recommendation-mapping-*/
 
+# ME-GV06 deterministic local Governor explanation artifacts
+artifacts/market_engine/me-gv06-governor-explanation-*/
+
 # ========================
 # Allow these core files
 # ========================

@@ -29,6 +29,18 @@ from market_engine.governor.recommendation import (
     RecommendationState,
     map_recommendation_state,
 )
+from market_engine.governor.explanation import (
+    APPROVED_PORTFOLIO_CONTEXT_CONTRACT_VERSION,
+    APPROVED_PRICE_SETUP_CONTEXT_CONTRACT_VERSION,
+    GOVERNOR_EXPLANATION_CONTRACT_VERSION,
+    BuyZoneExplanationResult,
+    BuyZoneState,
+    ExplanationEligibilityState,
+    PositionManagementExplanationResult,
+    PositionManagementState,
+    evaluate_buy_zone_explanation,
+    evaluate_position_management_explanation,
+)
 
 __all__ = [
     "APPROVED_GOVERNOR_EVIDENCE_CONTRACT_VERSION",
@@ -54,4 +66,14 @@ __all__ = [
     "RecommendationResult",
     "RecommendationState",
     "map_recommendation_state",
+    "APPROVED_PORTFOLIO_CONTEXT_CONTRACT_VERSION",
+    "APPROVED_PRICE_SETUP_CONTEXT_CONTRACT_VERSION",
+    "GOVERNOR_EXPLANATION_CONTRACT_VERSION",
+    "BuyZoneExplanationResult",
+    "BuyZoneState",
+    "ExplanationEligibilityState",
+    "PositionManagementExplanationResult",
+    "PositionManagementState",
+    "evaluate_buy_zone_explanation",
+    "evaluate_position_management_explanation",
 ]

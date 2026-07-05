@@ -258,10 +258,10 @@ def test_incomplete_valuation_inputs_are_insufficient() -> None:
 def test_boundary_sections_and_reserved_states_are_fixed_false() -> None:
     payload = to_plain_dict(_evaluate("GX006"))
 
-    assert payload["buy_zone_explanation"]["state"] == "blocked_not_authorized"
+    assert payload["buy_zone_explanation"]["state"] == "blocked"
     assert (
         payload["position_management_explanation"]["state"]
-        == "blocked_not_authorized"
+        == "no_position_context"
     )
     assert payload["recommendation_state"]["recommendation_state_ready"] is False
     for field in (
@@ -275,6 +275,11 @@ def test_boundary_sections_and_reserved_states_are_fixed_false() -> None:
         assert payload["authority_boundary"][field] is False
     assert payload["authority_boundary"]["scoring_authorized"] is True
     assert payload["authority_boundary"]["recommendation_mapping_authorized"] is True
+    assert payload["authority_boundary"]["buy_zone_authorized"] is True
+    assert payload["authority_boundary"]["position_management_authorized"] is True
+    assert payload["authority_boundary"]["execution_authorized"] is False
+    assert payload["authority_boundary"]["portfolio_mutation_authorized"] is False
+    assert payload["authority_boundary"]["order_generation_authorized"] is False
 
 
 def test_unknown_factor_or_evidence_level_is_rejected() -> None:

@@ -3847,3 +3847,21 @@ Next:
 ```text
 ME-GV06 - Implement buy-zone and position-management explanation contract
 ```
+
+### ME-GV06 - Governor buy-zone and position-management explanation
+
+Status: COMPLETED BY ME-GV06
+
+ME-GV06 adds fail-closed explanation from approved price/setup and position
+context after recommendation mapping. Pullback, breakout, invalidation, and
+hold/add/reduce/exit review context preserve evidence references and never
+invent price levels.
+
+Execution, orders, stops, allocation, mutation, and Decision Engine authority
+remain unavailable.
+
+Next:
+
+```text
+ME-DS01 - Define Dispatch Station output contract for Governor reports
+```

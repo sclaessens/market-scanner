@@ -212,13 +212,17 @@ def _assert_evaluation_invariants(
                 "ME-GV05 overall score and rank must remain null"
             )
         if (
-            evaluation.buy_zone_explanation["state"]
-            != "blocked_not_authorized"
-            or evaluation.position_management_explanation["state"]
-            != "blocked_not_authorized"
+            evaluation.buy_zone_explanation["execution_authorized"]
+            or evaluation.buy_zone_explanation["stop_order_authorized"]
+            or evaluation.position_management_explanation[
+                "portfolio_mutation_authorized"
+            ]
+            or evaluation.position_management_explanation[
+                "order_generation_authorized"
+            ]
         ):
             raise MeGv05RunnerError(
-                "ME-GV05 price or position explanation became reachable"
+                "ME-GV05 explanation authority became reachable"
             )
 
 
@@ -356,8 +360,8 @@ def _markdown_report(result: Mapping[str, Any]) -> str:
             ),
             f"- Non-null ranks: {summary['non_null_rank_count']}",
             (
-                "- Buy-zone and position-management states: "
-                "`blocked_not_authorized`"
+                "- Buy-zone and position-management authority: "
+                "non-executable and non-mutating"
             ),
             "",
             result["authority_boundary"],

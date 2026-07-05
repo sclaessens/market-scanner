@@ -207,13 +207,17 @@ def _assert_evaluation_invariants(
                 "ME-GV04 recommendation authority became reachable"
             )
         if (
-            evaluation.buy_zone_explanation["state"]
-            != "blocked_not_authorized"
-            or evaluation.position_management_explanation["state"]
-            != "blocked_not_authorized"
+            evaluation.buy_zone_explanation["execution_authorized"]
+            or evaluation.buy_zone_explanation["stop_order_authorized"]
+            or evaluation.position_management_explanation[
+                "portfolio_mutation_authorized"
+            ]
+            or evaluation.position_management_explanation[
+                "order_generation_authorized"
+            ]
         ):
             raise MeGv04RunnerError(
-                "ME-GV04 explanation boundary became reachable"
+                "ME-GV04 explanation authority became reachable"
             )
 
 
@@ -375,9 +379,8 @@ def _markdown_report(result: Mapping[str, Any]) -> str:
             "## Recommendation, Buy-Zone, and Authority Boundary",
             "",
             (
-                "Recommendation output remains non-actionable; buy-zone "
-                "explanation and position management remain "
-                "`blocked_not_authorized` for every case."
+                "Recommendation, buy-zone, and position-management output "
+                "remain non-actionable and non-executable for every case."
             ),
             "",
             result["authority_boundary"],
