@@ -3811,3 +3811,21 @@ Next:
 ```text
 ME-GV04 - Implement factor scoring from approved analysis evidence
 ```
+
+### ME-GV04 - Governor factor scoring
+
+Status: COMPLETED BY ME-GV04
+
+ME-GV04 implements deterministic 0-100 factor scoring for explicit approved
+fundamentals, growth, risk, and data-confidence evidence. Components,
+normalization rules, contributions, evidence references, and limitations are
+inspectable. Missing or conflicting evidence remains unscored.
+
+Factor weights, overall score, rank, recommendation mapping, actionability,
+allocation, and Decision Engine readiness remain unavailable.
+
+Next:
+
+```text
+ME-GV05 - Implement recommendation-state mapping under approved boundary
+```

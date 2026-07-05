@@ -1761,3 +1761,21 @@ Next:
 ```text
 ME-GV04 - Implement factor scoring from approved analysis evidence
 ```
+
+### ME-GV04 - Governor factor scoring
+
+Status: COMPLETED BY ME-GV04
+
+ME-GV04 adds the first versioned factor scores after ME-GV03 evidence
+readiness. Only `evaluable` factors with complete approved scoring inputs can
+score. The implementation exposes component contributions and keeps data
+confidence independent.
+
+No factor weighting, overall score, rank, recommendation, actionability,
+allocation, or Decision Engine authority is added.
+
+Next:
+
+```text
+ME-GV05 - Implement recommendation-state mapping under approved boundary
+```
