@@ -3796,3 +3796,18 @@ Next:
 ```text
 ME-GV01 - Define The Governor investment evaluation contract
 ```
+
+### ME-GV03 - Governor non-actionable dry-run scaffold
+
+Status: COMPLETED BY ME-GV03
+
+ME-GV03 implements deterministic ME-GV02 factor-state classification inside
+the ME-GV01 output envelope. Evidence gaps, blockers, limitations, provenance,
+and conflicts remain explicit. All scoring and reserved authority output stays
+null, false, or blocked.
+
+Next:
+
+```text
+ME-GV04 - Implement factor scoring from approved analysis evidence
+```

@@ -1,0 +1,369 @@
+{
+  "cases": [
+    {
+      "approved_portfolio_context": false,
+      "company_name": "Profile Evidence Example",
+      "evaluation_id": "gv03-profile-only",
+      "evidence_contract_version": "market-engine-governor-approved-evidence-v1",
+      "evidence_readiness": {
+        "consumable": true,
+        "fresh": true,
+        "manifest_valid": true,
+        "provenance_valid": true,
+        "structurally_valid": true
+      },
+      "factor_evidence": {
+        "data_confidence": {
+          "evidence_references": [
+            "fixture://profile/coverage"
+          ],
+          "level": "descriptive"
+        },
+        "fundamentals": {
+          "evidence_references": [
+            "fixture://profile/company-profile"
+          ],
+          "level": "descriptive",
+          "missing_evidence": [
+            "measured_fundamental_evidence"
+          ]
+        },
+        "growth": {
+          "evidence_references": [
+            "fixture://profile/growth-narrative"
+          ],
+          "level": "descriptive",
+          "missing_evidence": [
+            "measured_growth_series"
+          ]
+        },
+        "risk": {
+          "evidence_references": [
+            "fixture://profile/source-limitations"
+          ],
+          "level": "descriptive",
+          "limitations": [
+            "source_readiness_limitations_only"
+          ]
+        }
+      },
+      "input_references": {
+        "analysis": "fixture://profile/analysis",
+        "coverage": "fixture://profile/coverage"
+      },
+      "market": "XNAS",
+      "ticker": "GX001"
+    },
+    {
+      "approved_portfolio_context": false,
+      "company_name": "Partial Evidence Example",
+      "evaluation_id": "gv03-partial-fundamentals",
+      "evidence_contract_version": "market-engine-governor-approved-evidence-v1",
+      "evidence_readiness": {
+        "consumable": true,
+        "fresh": true,
+        "manifest_valid": true,
+        "provenance_valid": true,
+        "structurally_valid": true
+      },
+      "factor_evidence": {
+        "data_confidence": {
+          "evidence_references": [
+            "fixture://partial/coverage"
+          ],
+          "level": "limited",
+          "missing_evidence": [
+            "complete_evidence_set"
+          ]
+        },
+        "fundamentals": {
+          "evidence_references": [
+            "fixture://partial/revenue"
+          ],
+          "level": "limited",
+          "missing_evidence": [
+            "balance_sheet_evidence",
+            "cash_flow_evidence"
+          ]
+        },
+        "growth": {
+          "evidence_references": [
+            "fixture://partial/revenue-growth-series"
+          ],
+          "level": "limited",
+          "missing_evidence": [
+            "growth_persistence_evidence"
+          ]
+        },
+        "momentum": {
+          "evidence_references": [
+            "fixture://partial/isolated-momentum-item"
+          ],
+          "level": "limited",
+          "missing_evidence": [
+            "momentum_confirmation"
+          ]
+        },
+        "risk": {
+          "evidence_references": [
+            "fixture://partial/readiness-limitations"
+          ],
+          "level": "descriptive",
+          "limitations": [
+            "source_readiness_limitations_only"
+          ]
+        }
+      },
+      "input_references": {
+        "analysis": "fixture://partial/analysis",
+        "coverage": "fixture://partial/coverage"
+      },
+      "market": "XNYS",
+      "ticker": "GX002"
+    },
+    {
+      "approved_portfolio_context": false,
+      "company_name": "Stale Market Evidence Example",
+      "evaluation_id": "gv03-stale-market",
+      "evidence_contract_version": "market-engine-governor-approved-evidence-v1",
+      "evidence_readiness": {
+        "consumable": true,
+        "fresh": true,
+        "manifest_valid": true,
+        "provenance_valid": true,
+        "structurally_valid": true
+      },
+      "factor_evidence": {
+        "data_confidence": {
+          "evidence_references": [
+            "fixture://stale/coverage"
+          ],
+          "fresh": false,
+          "level": "limited",
+          "missing_evidence": [
+            "current_market_evidence"
+          ]
+        },
+        "fundamentals": {
+          "evidence_references": [
+            "fixture://stale/fundamentals"
+          ],
+          "level": "limited"
+        },
+        "momentum": {
+          "evidence_references": [
+            "fixture://stale/momentum"
+          ],
+          "fresh": false,
+          "level": "limited"
+        },
+        "risk": {
+          "evidence_references": [
+            "fixture://stale/risk"
+          ],
+          "level": "limited"
+        },
+        "technical_setup": {
+          "evidence_references": [
+            "fixture://stale/setup"
+          ],
+          "fresh": false,
+          "level": "complete"
+        },
+        "trend": {
+          "evidence_references": [
+            "fixture://stale/trend"
+          ],
+          "fresh": false,
+          "level": "complete"
+        }
+      },
+      "input_references": {
+        "analysis": "fixture://stale/analysis",
+        "coverage": "fixture://stale/coverage"
+      },
+      "market": "XNAS",
+      "ticker": "GX003"
+    },
+    {
+      "approved_portfolio_context": false,
+      "company_name": "Unprovenanced Evidence Example",
+      "evaluation_id": "gv03-unprovenanced",
+      "evidence_contract_version": "market-engine-governor-approved-evidence-v1",
+      "evidence_readiness": {
+        "consumable": true,
+        "fresh": true,
+        "manifest_valid": true,
+        "provenance_valid": true,
+        "structurally_valid": true
+      },
+      "factor_evidence": {
+        "data_confidence": {
+          "evidence_references": [
+            "fixture://unprovenanced/coverage"
+          ],
+          "level": "complete",
+          "provenance_valid": false
+        },
+        "fundamentals": {
+          "evidence_references": [
+            "fixture://unprovenanced/fundamentals"
+          ],
+          "level": "complete",
+          "provenance_valid": false
+        }
+      },
+      "input_references": {
+        "analysis": "fixture://unprovenanced/analysis",
+        "coverage": "fixture://unprovenanced/coverage"
+      },
+      "market": "XNYS",
+      "ticker": "GX004"
+    },
+    {
+      "approved_portfolio_context": false,
+      "company_name": "Conflicting Evidence Example",
+      "evaluation_id": "gv03-conflicting",
+      "evidence_contract_version": "market-engine-governor-approved-evidence-v1",
+      "evidence_readiness": {
+        "consumable": true,
+        "fresh": true,
+        "manifest_valid": true,
+        "provenance_valid": true,
+        "structurally_valid": true
+      },
+      "factor_evidence": {
+        "data_confidence": {
+          "evidence_references": [
+            "fixture://conflict/coverage"
+          ],
+          "level": "complete"
+        },
+        "fundamentals": {
+          "evidence_references": [
+            "fixture://conflict/fundamentals"
+          ],
+          "level": "complete"
+        },
+        "growth": {
+          "conflicting_evidence_references": [
+            "fixture://conflict/growth-series-a",
+            "fixture://conflict/growth-series-b"
+          ],
+          "evidence_references": [
+            "fixture://conflict/growth-series-a",
+            "fixture://conflict/growth-series-b"
+          ],
+          "level": "complete"
+        },
+        "momentum": {
+          "evidence_references": [
+            "fixture://conflict/momentum"
+          ],
+          "level": "complete"
+        },
+        "risk": {
+          "evidence_references": [
+            "fixture://conflict/risk"
+          ],
+          "level": "complete"
+        },
+        "technical_setup": {
+          "evidence_references": [
+            "fixture://conflict/setup"
+          ],
+          "level": "complete"
+        },
+        "trend": {
+          "evidence_references": [
+            "fixture://conflict/trend"
+          ],
+          "level": "complete"
+        },
+        "valuation": {
+          "evidence_references": [
+            "fixture://conflict/valuation"
+          ],
+          "level": "complete"
+        }
+      },
+      "input_references": {
+        "analysis": "fixture://conflict/analysis",
+        "coverage": "fixture://conflict/coverage"
+      },
+      "market": "XNAS",
+      "ticker": "GX005"
+    },
+    {
+      "approved_portfolio_context": false,
+      "company_name": "Broad Evidence Example",
+      "evaluation_id": "gv03-broad-evidence",
+      "evidence_contract_version": "market-engine-governor-approved-evidence-v1",
+      "evidence_readiness": {
+        "consumable": true,
+        "fresh": true,
+        "manifest_valid": true,
+        "provenance_valid": true,
+        "structurally_valid": true
+      },
+      "factor_evidence": {
+        "data_confidence": {
+          "evidence_references": [
+            "fixture://broad/coverage"
+          ],
+          "level": "complete"
+        },
+        "fundamentals": {
+          "evidence_references": [
+            "fixture://broad/fundamentals"
+          ],
+          "level": "complete"
+        },
+        "growth": {
+          "evidence_references": [
+            "fixture://broad/growth"
+          ],
+          "level": "complete"
+        },
+        "momentum": {
+          "evidence_references": [
+            "fixture://broad/momentum"
+          ],
+          "level": "complete"
+        },
+        "risk": {
+          "evidence_references": [
+            "fixture://broad/risk"
+          ],
+          "level": "complete"
+        },
+        "technical_setup": {
+          "evidence_references": [
+            "fixture://broad/setup"
+          ],
+          "level": "complete"
+        },
+        "trend": {
+          "evidence_references": [
+            "fixture://broad/trend"
+          ],
+          "level": "complete"
+        },
+        "valuation": {
+          "evidence_references": [
+            "fixture://broad/valuation"
+          ],
+          "level": "complete"
+        }
+      },
+      "input_references": {
+        "analysis": "fixture://broad/analysis",
+        "coverage": "fixture://broad/coverage"
+      },
+      "market": "XNYS",
+      "ticker": "GX006"
+    }
+  ],
+  "fixture_contract": "market-engine-governor-evidence-fixture-batch-v1",
+  "fixture_notice": "Deterministic local ME-GV03 evidence sufficiency fixtures only; no live or provider evidence is claimed."
+}
