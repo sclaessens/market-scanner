@@ -58,6 +58,9 @@ artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run
 # ME-RUN29 expanded generic coverage evidence is generated locally.
 artifacts/market_engine/me-run29-expanded-generic-coverage-classification-*/
 
+# ME-GV03 Governor dry-run evidence is generated locally.
+artifacts/market_engine/me-gv03-governor-non-actionable-dry-run-*/
+
 # ========================
 # Allow these core files
 # ========================

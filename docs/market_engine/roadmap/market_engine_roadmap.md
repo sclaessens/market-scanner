@@ -1746,3 +1746,18 @@ Next:
 ```text
 ME-GV01 - Define The Governor investment evaluation contract
 ```
+
+### ME-GV03 - Governor non-actionable dry-run scaffold
+
+Status: COMPLETED BY ME-GV03
+
+ME-GV03 implements the ME-GV01 envelope and ME-GV02 factor-state taxonomy as a
+deterministic, fail-closed local runtime scaffold. Scoring, recommendation,
+buy-zone, position-management, actionable, and Decision Engine-ready output
+remains unavailable.
+
+Next:
+
+```text
+ME-GV04 - Implement factor scoring from approved analysis evidence
+```
