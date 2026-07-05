@@ -93,7 +93,7 @@ def test_runner_preserves_all_aggregation_and_authority_boundaries(
         assert evaluation["overall_evaluation"]["rank"] is None
         assert (
             evaluation["recommendation_state"]["state"]
-            == "blocked_not_authorized"
+            == "blocked"
         )
 
 

@@ -20,6 +20,15 @@ from market_engine.governor.scoring import (
     FactorScoreResult,
     score_factor,
 )
+from market_engine.governor.recommendation import (
+    APPROVED_RECOMMENDATION_REVIEW_CONTRACT_VERSION,
+    DATA_CONFIDENCE_ELIGIBILITY_THRESHOLD,
+    GOVERNOR_RECOMMENDATION_STATE_CONTRACT_VERSION,
+    RecommendationEligibilityState,
+    RecommendationResult,
+    RecommendationState,
+    map_recommendation_state,
+)
 
 __all__ = [
     "APPROVED_GOVERNOR_EVIDENCE_CONTRACT_VERSION",
@@ -38,4 +47,11 @@ __all__ = [
     "SCORE_SCALE",
     "FactorScoreResult",
     "score_factor",
+    "APPROVED_RECOMMENDATION_REVIEW_CONTRACT_VERSION",
+    "DATA_CONFIDENCE_ELIGIBILITY_THRESHOLD",
+    "GOVERNOR_RECOMMENDATION_STATE_CONTRACT_VERSION",
+    "RecommendationEligibilityState",
+    "RecommendationResult",
+    "RecommendationState",
+    "map_recommendation_state",
 ]

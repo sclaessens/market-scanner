@@ -1779,3 +1779,20 @@ Next:
 ```text
 ME-GV05 - Implement recommendation-state mapping under approved boundary
 ```
+
+### ME-GV05 - Governor recommendation-state mapping
+
+Status: COMPLETED BY ME-GV05
+
+ME-GV05 adds fail-closed recommendation eligibility and direct, explainable
+critical-factor mapping after ME-GV04 scoring. Data confidence is a gate, risk
+is an explicit guardrail, and conflicts are preserved.
+
+No overall score, rank, actionability, price guidance, allocation, execution,
+or Decision Engine authority is added.
+
+Next:
+
+```text
+ME-GV06 - Implement buy-zone and position-management explanation contract
+```

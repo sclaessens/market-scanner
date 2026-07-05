@@ -200,13 +200,11 @@ def _assert_evaluation_invariants(
                 "ME-GV04 overall score and rank must remain null"
             )
         if (
-            evaluation.recommendation_state["state"]
-            != "blocked_not_authorized"
-            or evaluation.recommendation_state["actionable"]
+            evaluation.recommendation_state["actionable"]
             or evaluation.recommendation_state["decision_engine_ready"]
         ):
             raise MeGv04RunnerError(
-                "ME-GV04 recommendation boundary became reachable"
+                "ME-GV04 recommendation authority became reachable"
             )
         if (
             evaluation.buy_zone_explanation["state"]
@@ -377,8 +375,9 @@ def _markdown_report(result: Mapping[str, Any]) -> str:
             "## Recommendation, Buy-Zone, and Authority Boundary",
             "",
             (
-                "Recommendation state, buy-zone explanation, and position "
-                "management remain `blocked_not_authorized` for every case."
+                "Recommendation output remains non-actionable; buy-zone "
+                "explanation and position management remain "
+                "`blocked_not_authorized` for every case."
             ),
             "",
             result["authority_boundary"],

@@ -99,7 +99,9 @@ def test_runner_preserves_conflicts_and_blocked_boundaries(
         "fixture://conflict/growth-series-b",
     ]
     for item in result["evaluations"]:
-        assert item["recommendation_state"]["state"] == "blocked_not_authorized"
+        assert item["recommendation_state"]["state"] == "blocked"
+        assert item["recommendation_state"]["actionable"] is False
+        assert item["recommendation_state"]["decision_engine_ready"] is False
         assert item["buy_zone_explanation"]["state"] == "blocked_not_authorized"
         assert (
             item["position_management_explanation"]["state"]

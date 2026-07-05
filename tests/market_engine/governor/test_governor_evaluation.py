@@ -88,7 +88,8 @@ def test_profile_only_case_is_descriptive_and_non_actionable() -> None:
         _factor(evaluation, FactorFamily.VALUATION).state
         is FactorState.UNAVAILABLE
     )
-    assert evaluation.recommendation_state["state"] == "blocked_not_authorized"
+    assert evaluation.recommendation_state["state"] == "blocked"
+    assert evaluation.recommendation_state["eligibility_state"] == "ineligible"
     assert evaluation.recommendation_state["actionable"] is False
     assert evaluation.recommendation_state["decision_engine_ready"] is False
 
@@ -273,6 +274,7 @@ def test_boundary_sections_and_reserved_states_are_fixed_false() -> None:
     ):
         assert payload["authority_boundary"][field] is False
     assert payload["authority_boundary"]["scoring_authorized"] is True
+    assert payload["authority_boundary"]["recommendation_mapping_authorized"] is True
 
 
 def test_unknown_factor_or_evidence_level_is_rejected() -> None:
