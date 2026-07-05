@@ -10,6 +10,10 @@ from market_engine.governor.scoring import (
     GOVERNOR_FACTOR_SCORING_CONTRACT_VERSION,
     score_factor,
 )
+from market_engine.governor.recommendation import (
+    GOVERNOR_RECOMMENDATION_STATE_CONTRACT_VERSION,
+    map_recommendation_state,
+)
 
 
 GOVERNOR_INVESTMENT_EVALUATION_CONTRACT_VERSION = (
@@ -77,6 +81,7 @@ class FactorEvaluation:
     blocked_reasons: tuple[str, ...]
     limitations: tuple[str, ...]
     conflicting_evidence_references: tuple[str, ...]
+    soft_conflicting_evidence_references: tuple[str, ...]
     qualitative_summary: str
     score: float | None = None
     score_scale: Mapping[str, Any] | None = None
@@ -227,6 +232,17 @@ def evaluate_governor_evidence(
         for item in (*factor.limitations, *factor.score_limitations)
     )
     state_counts = Counter(item.state.value for item in factor_evaluations)
+    recommendation_review_boundary = payload.get(
+        "recommendation_review_boundary"
+    )
+    recommendation = map_recommendation_state(
+        governor_contract_version=(
+            GOVERNOR_INVESTMENT_EVALUATION_CONTRACT_VERSION
+        ),
+        evaluation_state=evaluation_state.value,
+        factor_evaluations=factor_evaluations,
+        recommendation_review_boundary=recommendation_review_boundary,
+    )
     return GovernorEvaluation(
         contract_version=GOVERNOR_INVESTMENT_EVALUATION_CONTRACT_VERSION,
         evaluation_id=_required_text(payload, "evaluation_id"),
@@ -253,19 +269,10 @@ def evaluate_governor_evidence(
             "rank": None,
             "summary": (
                 "Factor scores are independent non-actionable assessments; "
-                "no overall score, weighting, rank, or recommendation exists."
+                "no overall score, weighting, rank, or action authority exists."
             ),
         },
-        recommendation_state={
-            "state": "blocked_not_authorized",
-            "reason": (
-                "governor_recommendation_state_mapping_not_implemented_or_"
-                "not_authorized"
-            ),
-            "actionable": False,
-            "recommendation_state_ready": False,
-            "decision_engine_ready": False,
-        },
+        recommendation_state=asdict(recommendation),
         buy_zone_explanation={
             "state": "blocked_not_authorized",
             "reason": "governor_buy_zone_not_implemented_or_not_authorized",
@@ -282,7 +289,7 @@ def evaluate_governor_evidence(
         authority_boundary={
             "non_actionable": True,
             "scoring_authorized": True,
-            "recommendation_mapping_authorized": False,
+            "recommendation_mapping_authorized": True,
             "buy_zone_authorized": False,
             "position_management_authorized": False,
             "actionable": False,
@@ -304,6 +311,9 @@ def evaluate_governor_evidence(
             "factor_taxonomy_version": GOVERNOR_FACTOR_TAXONOMY_VERSION,
             "factor_scoring_contract_version": (
                 GOVERNOR_FACTOR_SCORING_CONTRACT_VERSION
+            ),
+            "recommendation_state_contract_version": (
+                GOVERNOR_RECOMMENDATION_STATE_CONTRACT_VERSION
             ),
             "deterministic": True,
         },
@@ -329,6 +339,10 @@ def _evaluate_factor(
     conflicts = _text_sequence(
         raw.get("conflicting_evidence_references", ()),
         "conflicting evidence references",
+    )
+    soft_conflicts = _text_sequence(
+        raw.get("soft_conflicting_evidence_references", ()),
+        "soft conflicting evidence references",
     )
     gates = {
         name: _optional_bool(raw, name, global_gates[name])
@@ -364,6 +378,8 @@ def _evaluate_factor(
         limitations.append("conflicting_evidence_preserved_without_averaging")
         if state is FactorState.EVALUABLE:
             state = FactorState.PARTIAL
+    if soft_conflicts:
+        limitations.append("soft_conflicting_evidence_preserved")
 
     if level is not EvidenceLevel.NONE and not references:
         state = FactorState.BLOCKED
@@ -378,6 +394,7 @@ def _evaluate_factor(
         blocked_reasons=_unique_sorted(blocked_reasons),
         limitations=_unique_sorted(limitations),
         conflicting_evidence_references=conflicts,
+        soft_conflicting_evidence_references=soft_conflicts,
         qualitative_summary=_factor_summary(state),
         provenance={
             **gates,

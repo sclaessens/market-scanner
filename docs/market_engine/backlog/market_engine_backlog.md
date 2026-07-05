@@ -3829,3 +3829,21 @@ Next:
 ```text
 ME-GV05 - Implement recommendation-state mapping under approved boundary
 ```
+
+### ME-GV05 - Governor recommendation-state mapping
+
+Status: COMPLETED BY ME-GV05
+
+ME-GV05 separates recommendation eligibility from direction and maps complete
+approved Governor evidence into deterministic `avoid`, `watch`, `consider`, or
+`preferred` interpretive states. Critical factors, data confidence, risk,
+Recommendation Review boundaries, conflicts, and limitations remain explicit.
+
+All recommendation output is non-actionable. Overall scoring, ranking,
+allocation, execution, and Decision Engine readiness remain unavailable.
+
+Next:
+
+```text
+ME-GV06 - Implement buy-zone and position-management explanation contract
+```

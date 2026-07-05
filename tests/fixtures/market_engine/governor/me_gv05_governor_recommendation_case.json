@@ -1,0 +1,190 @@
+{
+  "approved_portfolio_context": false,
+  "company_name": "Governed Recommendation Evidence Example",
+  "evaluation_id": "gv05-governed-recommendation",
+  "evidence_contract_version": "market-engine-governor-approved-evidence-v1",
+  "evidence_readiness": {
+    "consumable": true,
+    "fresh": true,
+    "manifest_valid": true,
+    "provenance_valid": true,
+    "structurally_valid": true
+  },
+  "factor_evidence": {
+    "data_confidence": {
+      "evidence_references": [
+        "fixture://recommendation/confidence/source-support",
+        "fixture://recommendation/confidence/provenance",
+        "fixture://recommendation/confidence/completeness"
+      ],
+      "level": "complete",
+      "score_inputs": {
+        "components": [
+          {
+            "component_id": "source_support_ratio",
+            "evidence_reference": "fixture://recommendation/confidence/source-support",
+            "input_value": 0.9,
+            "limitations": [],
+            "normalization_rule": "linear_clamp_zero_to_one_v1"
+          },
+          {
+            "component_id": "provenance_completeness_ratio",
+            "evidence_reference": "fixture://recommendation/confidence/provenance",
+            "input_value": 1.0,
+            "limitations": [],
+            "normalization_rule": "linear_clamp_zero_to_one_v1"
+          },
+          {
+            "component_id": "evidence_completeness_ratio",
+            "evidence_reference": "fixture://recommendation/confidence/completeness",
+            "input_value": 0.95,
+            "limitations": [],
+            "normalization_rule": "linear_clamp_zero_to_one_v1"
+          }
+        ],
+        "contract_version": "market-engine-governor-factor-scoring-v1"
+      }
+    },
+    "fundamentals": {
+      "evidence_references": [
+        "fixture://recommendation/fundamentals/profitability",
+        "fixture://recommendation/fundamentals/cash-flow",
+        "fixture://recommendation/fundamentals/returns"
+      ],
+      "level": "complete",
+      "score_inputs": {
+        "components": [
+          {
+            "component_id": "profitability_margin",
+            "evidence_reference": "fixture://recommendation/fundamentals/profitability",
+            "input_value": 0.24,
+            "limitations": [],
+            "normalization_rule": "linear_clamp_negative_ten_to_thirty_percent_v1"
+          },
+          {
+            "component_id": "operating_cash_flow_margin",
+            "evidence_reference": "fixture://recommendation/fundamentals/cash-flow",
+            "input_value": 0.22,
+            "limitations": [],
+            "normalization_rule": "linear_clamp_negative_ten_to_thirty_percent_v1"
+          },
+          {
+            "component_id": "return_on_assets",
+            "evidence_reference": "fixture://recommendation/fundamentals/returns",
+            "input_value": 0.15,
+            "limitations": [],
+            "normalization_rule": "linear_clamp_negative_five_to_twenty_percent_v1"
+          }
+        ],
+        "contract_version": "market-engine-governor-factor-scoring-v1"
+      }
+    },
+    "growth": {
+      "evidence_references": [
+        "fixture://recommendation/growth/revenue",
+        "fixture://recommendation/growth/earnings",
+        "fixture://recommendation/growth/cash-flow"
+      ],
+      "level": "complete",
+      "score_inputs": {
+        "components": [
+          {
+            "component_id": "revenue_growth_rate",
+            "evidence_reference": "fixture://recommendation/growth/revenue",
+            "input_value": 0.22,
+            "limitations": [],
+            "normalization_rule": "linear_clamp_negative_ten_to_thirty_percent_v1"
+          },
+          {
+            "component_id": "earnings_growth_rate",
+            "evidence_reference": "fixture://recommendation/growth/earnings",
+            "input_value": 0.22,
+            "limitations": [],
+            "normalization_rule": "linear_clamp_negative_twenty_to_forty_percent_v1"
+          },
+          {
+            "component_id": "cash_flow_growth_rate",
+            "evidence_reference": "fixture://recommendation/growth/cash-flow",
+            "input_value": 0.22,
+            "limitations": [],
+            "normalization_rule": "linear_clamp_negative_twenty_to_forty_percent_v1"
+          }
+        ],
+        "contract_version": "market-engine-governor-factor-scoring-v1",
+        "period_alignment": "aligned_multi_period",
+        "period_count": 3
+      }
+    },
+    "momentum": {
+      "evidence_references": [
+        "fixture://recommendation/momentum/context"
+      ],
+      "level": "complete"
+    },
+    "risk": {
+      "evidence_references": [
+        "fixture://recommendation/risk/leverage",
+        "fixture://recommendation/risk/debt-cash-flow",
+        "fixture://recommendation/risk/coverage"
+      ],
+      "level": "complete",
+      "score_inputs": {
+        "components": [
+          {
+            "component_id": "debt_to_assets_ratio",
+            "evidence_reference": "fixture://recommendation/risk/leverage",
+            "input_value": 0.32,
+            "limitations": [],
+            "normalization_rule": "inverse_linear_clamp_twenty_to_eighty_percent_v1"
+          },
+          {
+            "component_id": "net_debt_to_cash_flow",
+            "evidence_reference": "fixture://recommendation/risk/debt-cash-flow",
+            "input_value": 1.0,
+            "limitations": [],
+            "normalization_rule": "inverse_linear_clamp_zero_to_five_v1"
+          },
+          {
+            "component_id": "cash_coverage_ratio",
+            "evidence_reference": "fixture://recommendation/risk/coverage",
+            "input_value": 1.6,
+            "limitations": [],
+            "normalization_rule": "linear_clamp_zero_to_two_v1"
+          }
+        ],
+        "contract_version": "market-engine-governor-factor-scoring-v1"
+      }
+    },
+    "technical_setup": {
+      "evidence_references": [
+        "fixture://recommendation/setup/context"
+      ],
+      "level": "complete"
+    },
+    "trend": {
+      "evidence_references": [
+        "fixture://recommendation/trend/context"
+      ],
+      "level": "complete"
+    },
+    "valuation": {
+      "evidence_references": [
+        "fixture://recommendation/valuation/context"
+      ],
+      "level": "complete"
+    }
+  },
+  "input_references": {
+    "analysis": "fixture://recommendation/analysis",
+    "coverage": "fixture://recommendation/coverage",
+    "recommendation_review": "fixture://recommendation/review"
+  },
+  "market": "XNAS",
+  "recommendation_review_boundary": {
+    "contract_version": "sec-companyfacts-recommendation-review-v1",
+    "non_actionable": true,
+    "reference": "fixture://recommendation/review",
+    "review_state": "human_review_required"
+  },
+  "ticker": "GR001"
+}

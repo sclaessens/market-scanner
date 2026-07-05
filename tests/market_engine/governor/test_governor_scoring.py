@@ -312,16 +312,18 @@ def test_overall_weight_recommendation_and_reserved_boundaries_remain_null() -> 
     assert payload["overall_evaluation"]["score_scale"] is None
     assert payload["overall_evaluation"]["weighted_score"] is None
     assert payload["overall_evaluation"]["rank"] is None
-    assert payload["recommendation_state"] == {
-        "state": "blocked_not_authorized",
-        "reason": (
-            "governor_recommendation_state_mapping_not_implemented_or_"
-            "not_authorized"
-        ),
-        "actionable": False,
-        "recommendation_state_ready": False,
-        "decision_engine_ready": False,
-    }
+    recommendation = payload["recommendation_state"]
+    assert recommendation["contract_version"] == (
+        "market-engine-governor-recommendation-state-v1"
+    )
+    assert recommendation["eligibility_state"] == "ineligible"
+    assert recommendation["state"] == "blocked"
+    assert recommendation["reason_codes"] == (
+        "blocked_recommendation_review_boundary_missing",
+    )
+    assert recommendation["actionable"] is False
+    assert recommendation["recommendation_state_ready"] is False
+    assert recommendation["decision_engine_ready"] is False
     assert payload["buy_zone_explanation"]["state"] == "blocked_not_authorized"
     assert (
         payload["position_management_explanation"]["state"]
