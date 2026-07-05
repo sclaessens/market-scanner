@@ -270,9 +270,9 @@ def test_boundary_sections_and_reserved_states_are_fixed_false() -> None:
         "decision_ready",
         "de_ready",
         "decision_engine_ready",
-        "scoring_authorized",
     ):
         assert payload["authority_boundary"][field] is False
+    assert payload["authority_boundary"]["scoring_authorized"] is True
 
 
 def test_unknown_factor_or_evidence_level_is_rejected() -> None:

@@ -2,9 +2,14 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Mapping, Sequence
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from enum import StrEnum
 from typing import Any
+
+from market_engine.governor.scoring import (
+    GOVERNOR_FACTOR_SCORING_CONTRACT_VERSION,
+    score_factor,
+)
 
 
 GOVERNOR_INVESTMENT_EVALUATION_CONTRACT_VERSION = (
@@ -73,8 +78,11 @@ class FactorEvaluation:
     limitations: tuple[str, ...]
     conflicting_evidence_references: tuple[str, ...]
     qualitative_summary: str
-    score: None = None
-    score_scale: None = None
+    score: float | None = None
+    score_scale: Mapping[str, Any] | None = None
+    score_components: tuple[Mapping[str, Any], ...] = ()
+    score_evidence_references: tuple[str, ...] = ()
+    score_limitations: tuple[str, ...] = ()
     weight: None = None
     weighted_score: None = None
     provenance: Mapping[str, Any] | None = None
@@ -216,7 +224,7 @@ def evaluate_governor_evidence(
     risk_and_limitations = _unique_sorted(
         item
         for factor in factor_evaluations
-        for item in factor.limitations
+        for item in (*factor.limitations, *factor.score_limitations)
     )
     state_counts = Counter(item.state.value for item in factor_evaluations)
     return GovernorEvaluation(
@@ -244,8 +252,8 @@ def evaluate_governor_evidence(
             "weighted_score": None,
             "rank": None,
             "summary": (
-                "Evidence sufficiency classification only; investment quality "
-                "and scoring are not evaluated in ME-GV03."
+                "Factor scores are independent non-actionable assessments; "
+                "no overall score, weighting, rank, or recommendation exists."
             ),
         },
         recommendation_state={
@@ -273,7 +281,7 @@ def evaluate_governor_evidence(
         blocked_reasons=blocked_reasons,
         authority_boundary={
             "non_actionable": True,
-            "scoring_authorized": False,
+            "scoring_authorized": True,
             "recommendation_mapping_authorized": False,
             "buy_zone_authorized": False,
             "position_management_authorized": False,
@@ -294,6 +302,9 @@ def evaluate_governor_evidence(
                 "evaluation_timestamp",
             ),
             "factor_taxonomy_version": GOVERNOR_FACTOR_TAXONOMY_VERSION,
+            "factor_scoring_contract_version": (
+                GOVERNOR_FACTOR_SCORING_CONTRACT_VERSION
+            ),
             "deterministic": True,
         },
     )
@@ -358,7 +369,7 @@ def _evaluate_factor(
         state = FactorState.BLOCKED
         blocked_reasons.append("missing_deterministic_evidence_reference")
 
-    return FactorEvaluation(
+    factor_evaluation = FactorEvaluation(
         factor=factor,
         state=state,
         evidence_references=references,
@@ -373,6 +384,21 @@ def _evaluate_factor(
             "contract_approved": contract_approved,
             "evidence_level": level.value,
         },
+    )
+    score = score_factor(
+        factor=factor.value,
+        state=state.value,
+        factor_evidence=raw,
+        evidence_references=references,
+        conflicting_evidence_references=conflicts,
+    )
+    return replace(
+        factor_evaluation,
+        score=score.score,
+        score_scale=score.score_scale,
+        score_components=score.score_components,
+        score_evidence_references=score.score_evidence_references,
+        score_limitations=score.score_limitations,
     )
 
 
@@ -463,8 +489,8 @@ def _factor_summary(state: FactorState) -> str:
             "Approved descriptive evidence supports qualitative context only."
         ),
         FactorState.EVALUABLE: (
-            "Evidence gates are sufficient for future evaluation; no score "
-            "or investment-quality conclusion is produced."
+            "Evidence gates permit approved factor-specific scoring without "
+            "recommendation or action semantics."
         ),
     }
     return messages[state]

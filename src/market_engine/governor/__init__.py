@@ -13,6 +13,13 @@ from market_engine.governor.evaluation import (
     evaluate_governor_evidence,
     to_plain_dict,
 )
+from market_engine.governor.scoring import (
+    GOVERNOR_FACTOR_SCORING_CONTRACT_VERSION,
+    SCORE_PRECISION,
+    SCORE_SCALE,
+    FactorScoreResult,
+    score_factor,
+)
 
 __all__ = [
     "APPROVED_GOVERNOR_EVIDENCE_CONTRACT_VERSION",
@@ -26,4 +33,9 @@ __all__ = [
     "GovernorEvaluationError",
     "evaluate_governor_evidence",
     "to_plain_dict",
+    "GOVERNOR_FACTOR_SCORING_CONTRACT_VERSION",
+    "SCORE_PRECISION",
+    "SCORE_SCALE",
+    "FactorScoreResult",
+    "score_factor",
 ]

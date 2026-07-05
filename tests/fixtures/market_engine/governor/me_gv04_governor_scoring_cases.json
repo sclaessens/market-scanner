@@ -1,0 +1,221 @@
+{
+  "cases": [
+    {
+      "approved_portfolio_context": false,
+      "company_name": "Broad Scoring Evidence Example",
+      "evaluation_id": "gv04-broad-scoring",
+      "evidence_contract_version": "market-engine-governor-approved-evidence-v1",
+      "evidence_readiness": {
+        "consumable": true,
+        "fresh": true,
+        "manifest_valid": true,
+        "provenance_valid": true,
+        "structurally_valid": true
+      },
+      "factor_evidence": {
+        "data_confidence": {
+          "evidence_references": [
+            "fixture://scoring/confidence/source-support",
+            "fixture://scoring/confidence/provenance",
+            "fixture://scoring/confidence/completeness"
+          ],
+          "level": "complete",
+          "score_inputs": {
+            "components": [
+              {
+                "component_id": "source_support_ratio",
+                "evidence_reference": "fixture://scoring/confidence/source-support",
+                "input_value": 0.9,
+                "limitations": [],
+                "normalization_rule": "linear_clamp_zero_to_one_v1"
+              },
+              {
+                "component_id": "provenance_completeness_ratio",
+                "evidence_reference": "fixture://scoring/confidence/provenance",
+                "input_value": 1.0,
+                "limitations": [],
+                "normalization_rule": "linear_clamp_zero_to_one_v1"
+              },
+              {
+                "component_id": "evidence_completeness_ratio",
+                "evidence_reference": "fixture://scoring/confidence/completeness",
+                "input_value": 0.8,
+                "limitations": [
+                  "one_optional_source_family_absent"
+                ],
+                "normalization_rule": "linear_clamp_zero_to_one_v1"
+              }
+            ],
+            "contract_version": "market-engine-governor-factor-scoring-v1"
+          }
+        },
+        "fundamentals": {
+          "evidence_references": [
+            "fixture://scoring/fundamentals/profitability",
+            "fixture://scoring/fundamentals/cash-flow",
+            "fixture://scoring/fundamentals/returns"
+          ],
+          "level": "complete",
+          "score_inputs": {
+            "components": [
+              {
+                "component_id": "profitability_margin",
+                "evidence_reference": "fixture://scoring/fundamentals/profitability",
+                "input_value": 0.2,
+                "limitations": [],
+                "normalization_rule": "linear_clamp_negative_ten_to_thirty_percent_v1"
+              },
+              {
+                "component_id": "operating_cash_flow_margin",
+                "evidence_reference": "fixture://scoring/fundamentals/cash-flow",
+                "input_value": 0.14,
+                "limitations": [],
+                "normalization_rule": "linear_clamp_negative_ten_to_thirty_percent_v1"
+              },
+              {
+                "component_id": "return_on_assets",
+                "evidence_reference": "fixture://scoring/fundamentals/returns",
+                "input_value": 0.1,
+                "limitations": [],
+                "normalization_rule": "linear_clamp_negative_five_to_twenty_percent_v1"
+              }
+            ],
+            "contract_version": "market-engine-governor-factor-scoring-v1"
+          }
+        },
+        "growth": {
+          "evidence_references": [
+            "fixture://scoring/growth/revenue",
+            "fixture://scoring/growth/earnings",
+            "fixture://scoring/growth/cash-flow"
+          ],
+          "level": "complete",
+          "score_inputs": {
+            "components": [
+              {
+                "component_id": "revenue_growth_rate",
+                "evidence_reference": "fixture://scoring/growth/revenue",
+                "input_value": 0.18,
+                "limitations": [],
+                "normalization_rule": "linear_clamp_negative_ten_to_thirty_percent_v1"
+              },
+              {
+                "component_id": "earnings_growth_rate",
+                "evidence_reference": "fixture://scoring/growth/earnings",
+                "input_value": 0.1,
+                "limitations": [],
+                "normalization_rule": "linear_clamp_negative_twenty_to_forty_percent_v1"
+              },
+              {
+                "component_id": "cash_flow_growth_rate",
+                "evidence_reference": "fixture://scoring/growth/cash-flow",
+                "input_value": 0.04,
+                "limitations": [
+                  "cash_flow_growth_is_less_persistent"
+                ],
+                "normalization_rule": "linear_clamp_negative_twenty_to_forty_percent_v1"
+              }
+            ],
+            "contract_version": "market-engine-governor-factor-scoring-v1",
+            "period_alignment": "aligned_multi_period",
+            "period_count": 3
+          }
+        },
+        "momentum": {
+          "evidence_references": [
+            "fixture://scoring/momentum/limited"
+          ],
+          "level": "limited"
+        },
+        "risk": {
+          "evidence_references": [
+            "fixture://scoring/risk/leverage",
+            "fixture://scoring/risk/debt-cash-flow",
+            "fixture://scoring/risk/coverage"
+          ],
+          "level": "complete",
+          "score_inputs": {
+            "components": [
+              {
+                "component_id": "debt_to_assets_ratio",
+                "evidence_reference": "fixture://scoring/risk/leverage",
+                "input_value": 0.35,
+                "limitations": [],
+                "normalization_rule": "inverse_linear_clamp_twenty_to_eighty_percent_v1"
+              },
+              {
+                "component_id": "net_debt_to_cash_flow",
+                "evidence_reference": "fixture://scoring/risk/debt-cash-flow",
+                "input_value": 1.5,
+                "limitations": [],
+                "normalization_rule": "inverse_linear_clamp_zero_to_five_v1"
+              },
+              {
+                "component_id": "cash_coverage_ratio",
+                "evidence_reference": "fixture://scoring/risk/coverage",
+                "input_value": 1.6,
+                "limitations": [],
+                "normalization_rule": "linear_clamp_zero_to_two_v1"
+              }
+            ],
+            "contract_version": "market-engine-governor-factor-scoring-v1"
+          }
+        },
+        "technical_setup": {
+          "evidence_references": [
+            "fixture://scoring/setup/descriptive"
+          ],
+          "level": "descriptive"
+        },
+        "trend": {
+          "evidence_references": [
+            "fixture://scoring/trend/approved-context"
+          ],
+          "level": "complete"
+        }
+      },
+      "input_references": {
+        "analysis": "fixture://scoring/analysis",
+        "coverage": "fixture://scoring/coverage"
+      },
+      "market": "XNAS",
+      "ticker": "GS001"
+    },
+    {
+      "approved_portfolio_context": false,
+      "company_name": "Conflicting Scoring Evidence Example",
+      "evaluation_id": "gv04-conflicting-scoring",
+      "evidence_contract_version": "market-engine-governor-approved-evidence-v1",
+      "evidence_readiness": {
+        "consumable": true,
+        "fresh": true,
+        "manifest_valid": true,
+        "provenance_valid": true,
+        "structurally_valid": true
+      },
+      "factor_evidence": {
+        "growth": {
+          "conflicting_evidence_references": [
+            "fixture://scoring/conflict/revenue-a",
+            "fixture://scoring/conflict/revenue-b"
+          ],
+          "evidence_references": [
+            "fixture://scoring/conflict/revenue-a",
+            "fixture://scoring/conflict/revenue-b",
+            "fixture://scoring/conflict/earnings",
+            "fixture://scoring/conflict/cash-flow"
+          ],
+          "level": "complete"
+        }
+      },
+      "input_references": {
+        "analysis": "fixture://scoring/conflict-analysis",
+        "coverage": "fixture://scoring/conflict-coverage"
+      },
+      "market": "XNYS",
+      "ticker": "GS002"
+    }
+  ],
+  "fixture_contract": "market-engine-governor-evidence-fixture-batch-v1",
+  "fixture_notice": "Deterministic local ME-GV04 approved numerical evidence fixtures only; no live or provider evidence is claimed."
+}
