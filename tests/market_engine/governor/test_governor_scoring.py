@@ -324,10 +324,10 @@ def test_overall_weight_recommendation_and_reserved_boundaries_remain_null() -> 
     assert recommendation["actionable"] is False
     assert recommendation["recommendation_state_ready"] is False
     assert recommendation["decision_engine_ready"] is False
-    assert payload["buy_zone_explanation"]["state"] == "blocked_not_authorized"
+    assert payload["buy_zone_explanation"]["state"] == "blocked"
     assert (
         payload["position_management_explanation"]["state"]
-        == "blocked_not_authorized"
+        == "no_position_context"
     )
 
 

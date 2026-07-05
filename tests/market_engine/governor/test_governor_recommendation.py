@@ -421,10 +421,10 @@ def test_complete_technical_context_cannot_replace_missing_fundamentals() -> Non
         FactorFamily.TECHNICAL_SETUP,
     ).state is FactorState.EVALUABLE
     assert evaluation.recommendation_state["state"] == "insufficient_evidence"
-    assert evaluation.buy_zone_explanation["state"] == "blocked_not_authorized"
+    assert evaluation.buy_zone_explanation["state"] == "blocked"
     assert (
         evaluation.position_management_explanation["state"]
-        == "blocked_not_authorized"
+        == "no_position_context"
     )
 
 

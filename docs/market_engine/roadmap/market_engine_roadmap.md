@@ -1796,3 +1796,17 @@ Next:
 ```text
 ME-GV06 - Implement buy-zone and position-management explanation contract
 ```
+
+### ME-GV06 - Governor buy-zone and position-management explanation
+
+Status: COMPLETED BY ME-GV06
+
+ME-GV06 completes the Governor explanation layer with approved price/setup
+conditions and position-review context. Outputs are deterministic,
+evidence-backed, non-actionable, non-mutating, and non-executable.
+
+Next:
+
+```text
+ME-DS01 - Define Dispatch Station output contract for Governor reports
+```

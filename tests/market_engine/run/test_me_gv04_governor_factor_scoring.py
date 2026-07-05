@@ -110,7 +110,7 @@ def test_markdown_contains_scoring_and_boundary_evidence(
     assert "## Score Component Breakdown" in report
     assert "Conflict-blocked scores: 1" in report
     assert "Non-null overall scores: 0" in report
-    assert "`blocked_not_authorized`" in report
+    assert "non-executable" in report
     assert NEXT_SPRINT in report
 
 

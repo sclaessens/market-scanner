@@ -347,9 +347,8 @@ def _markdown_report(result: Mapping[str, Any]) -> str:
             "## Recommendation, Buy-Zone, and Authority Boundary",
             "",
             (
-                "Recommendation output remains non-actionable; buy-zone "
-                "explanation and position management remain "
-                "`blocked_not_authorized` for every case."
+                "Recommendation, buy-zone, and position-management output "
+                "remain non-actionable and non-executable for every case."
             ),
             "",
             result["authority_boundary"],

@@ -177,9 +177,51 @@
   "input_references": {
     "analysis": "fixture://recommendation/analysis",
     "coverage": "fixture://recommendation/coverage",
+    "price_setup_context": "fixture://recommendation/price-setup-context",
     "recommendation_review": "fixture://recommendation/review"
   },
   "market": "XNAS",
+  "price_setup_context": {
+    "acceptable_zone": {
+      "explanation": "The approved zone preserves the upstream setup context without implying an order.",
+      "limitations": [],
+      "lower_bound": 146.0,
+      "reference": "fixture://recommendation/price/acceptable-zone",
+      "upper_bound": 148.0
+    },
+    "additional_setup_confirmation": false,
+    "breakout_trigger": {
+      "explanation": "A confirmed move through approved resistance may improve setup confirmation.",
+      "level": 152.0,
+      "limitations": [],
+      "reference": "fixture://recommendation/price/breakout-trigger"
+    },
+    "condition_state": "acceptable_zone",
+    "contract_version": "market-engine-governor-approved-price-setup-context-v1",
+    "current_position_relative_to_zone": "unavailable",
+    "fresh": true,
+    "hard_conflict_references": [],
+    "invalidation_context": {
+      "level": 139.0,
+      "limitations": [],
+      "reason": "The approved setup context is invalidated if its upstream invalidation evidence is reached.",
+      "reference": "fixture://recommendation/price/invalidation",
+      "state": "intact"
+    },
+    "provenance_valid": true,
+    "reference": "fixture://recommendation/price-setup-context",
+    "setup_state": "intact",
+    "soft_conflict_references": [],
+    "structurally_valid": true,
+    "support_zone": {
+      "explanation": "The approved support zone provides pullback context without an entry instruction.",
+      "limitations": [],
+      "lower_bound": 140.0,
+      "reference": "fixture://recommendation/price/support-zone",
+      "upper_bound": 143.0
+    },
+    "ticker": "GR001"
+  },
   "recommendation_review_boundary": {
     "contract_version": "sec-companyfacts-recommendation-review-v1",
     "non_actionable": true,

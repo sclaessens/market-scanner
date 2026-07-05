@@ -14,6 +14,11 @@ from market_engine.governor.recommendation import (
     GOVERNOR_RECOMMENDATION_STATE_CONTRACT_VERSION,
     map_recommendation_state,
 )
+from market_engine.governor.explanation import (
+    GOVERNOR_EXPLANATION_CONTRACT_VERSION,
+    evaluate_buy_zone_explanation,
+    evaluate_position_management_explanation,
+)
 
 
 GOVERNOR_INVESTMENT_EVALUATION_CONTRACT_VERSION = (
@@ -187,6 +192,7 @@ def evaluate_governor_evidence(
     input_reference: str,
 ) -> GovernorEvaluation:
     payload = _validated_evidence(evidence)
+    ticker = _required_text(payload, "ticker")
     gates = _validated_gates(payload.get("evidence_readiness"))
     evidence_contract_version = _required_text(
         payload,
@@ -243,10 +249,26 @@ def evaluate_governor_evidence(
         factor_evaluations=factor_evaluations,
         recommendation_review_boundary=recommendation_review_boundary,
     )
+    price_setup_context = payload.get("price_setup_context")
+    buy_zone = evaluate_buy_zone_explanation(
+        evaluation_ticker=ticker,
+        evaluation_state=evaluation_state.value,
+        factor_evaluations=factor_evaluations,
+        recommendation_state=recommendation,
+        price_setup_context=price_setup_context,
+    )
+    position_management = evaluate_position_management_explanation(
+        evaluation_ticker=ticker,
+        factor_evaluations=factor_evaluations,
+        recommendation_state=recommendation,
+        buy_zone_explanation=buy_zone,
+        price_setup_context=price_setup_context,
+        position_context=payload.get("position_context"),
+    )
     return GovernorEvaluation(
         contract_version=GOVERNOR_INVESTMENT_EVALUATION_CONTRACT_VERSION,
         evaluation_id=_required_text(payload, "evaluation_id"),
-        ticker=_required_text(payload, "ticker"),
+        ticker=ticker,
         market=_required_text(payload, "market"),
         company_name=_required_text(payload, "company_name"),
         input_references=_validated_text_mapping(
@@ -273,16 +295,8 @@ def evaluate_governor_evidence(
             ),
         },
         recommendation_state=asdict(recommendation),
-        buy_zone_explanation={
-            "state": "blocked_not_authorized",
-            "reason": "governor_buy_zone_not_implemented_or_not_authorized",
-        },
-        position_management_explanation={
-            "state": "blocked_not_authorized",
-            "reason": (
-                "governor_position_management_not_implemented_or_not_authorized"
-            ),
-        },
+        buy_zone_explanation=asdict(buy_zone),
+        position_management_explanation=asdict(position_management),
         risk_and_limitations=risk_and_limitations,
         missing_evidence=missing_evidence,
         blocked_reasons=blocked_reasons,
@@ -290,8 +304,11 @@ def evaluate_governor_evidence(
             "non_actionable": True,
             "scoring_authorized": True,
             "recommendation_mapping_authorized": True,
-            "buy_zone_authorized": False,
-            "position_management_authorized": False,
+            "buy_zone_authorized": True,
+            "position_management_authorized": True,
+            "execution_authorized": False,
+            "portfolio_mutation_authorized": False,
+            "order_generation_authorized": False,
             "actionable": False,
             "actionable_review": False,
             "recommendation_state_ready": False,
@@ -314,6 +331,9 @@ def evaluate_governor_evidence(
             ),
             "recommendation_state_contract_version": (
                 GOVERNOR_RECOMMENDATION_STATE_CONTRACT_VERSION
+            ),
+            "explanation_contract_version": (
+                GOVERNOR_EXPLANATION_CONTRACT_VERSION
             ),
             "deterministic": True,
         },

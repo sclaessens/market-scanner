@@ -207,9 +207,12 @@ def test_runner_preserves_aggregation_and_authority_boundaries(
         )
         assert evaluation["overall_evaluation"]["score"] is None
         assert evaluation["overall_evaluation"]["rank"] is None
+        assert evaluation["buy_zone_explanation"]["execution_authorized"] is False
         assert (
-            evaluation["buy_zone_explanation"]["state"]
-            == "blocked_not_authorized"
+            evaluation["position_management_explanation"][
+                "portfolio_mutation_authorized"
+            ]
+            is False
         )
 
 
@@ -230,7 +233,7 @@ def test_markdown_contains_mapping_and_boundary_evidence(
     assert "## Mapping Rule Summary" in report
     assert "## Data Confidence, Conflict, and Risk Boundaries" in report
     assert "Non-null overall scores: 0" in report
-    assert "`blocked_not_authorized`" in report
+    assert "non-executable" in report
     assert NEXT_SPRINT in report
 
 
