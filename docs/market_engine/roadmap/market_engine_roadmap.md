@@ -207,7 +207,7 @@ The new planning order is:
 ```text
 ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption (completed)
   -> ME-CI02 - Define ChatGPT Advisory Context Contract (completed)
-  -> ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context
+  -> ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context (completed)
   -> ME-CI04 - Define explainability/change-rationale contract
   -> ME-CI05 - Produce daily ChatGPT-ready advisory artifact
   -> ME-PI01 - Define Portfolio Intelligence exposure contract
@@ -284,6 +284,50 @@ Next:
 
 ```text
 ME-CI03 - ChatGPT-readable Portfolio Intelligence context
+```
+
+### ME-CI03 - ChatGPT-readable Portfolio Intelligence Context
+
+Status: COMPLETED DOCS-ONLY CONTRACT
+
+ME-CI03 defines the controlled Portfolio Intelligence Context that can be
+embedded inside, or referenced beside, `chatgpt-advisory-context-v1`:
+
+```text
+schema_version: chatgpt-portfolio-intelligence-context-v1
+artifact_type: market-engine-chatgpt-portfolio-intelligence-context
+```
+
+The contract composes proven `market-engine-portfolio-context-v1`,
+`sec-companyfacts-portfolio-review-v1`, Decision Engine handoff readiness,
+Governor position-management explanation, provenance, freshness, missingness,
+and fail-closed semantics for ChatGPT advisory interpretation.
+
+It defines source-of-truth rules for holdings, position intelligence, exposure,
+concentration, cash, allocation, constraints, portfolio fit, and
+recommendation-to-position relationship.
+
+ME-CI03 preserves hard boundaries:
+
+```text
+portfolio context unavailable != zero holdings
+portfolio cash unavailable != cash = 0
+position absent from partial context != user owns no position
+```
+
+ChatGPT may explain proven portfolio context, but it must not infer holdings,
+cash, exposure, target weight, max weight, allocation, position size,
+rebalancing, portfolio fit, or Decision Engine approval.
+
+ME-CI03 is docs-only. It adds no runtime assembler, schema validator, ChatGPT
+API call, prompt runner, provider behavior, broker integration,
+portfolio/watchlist write, allocation engine, sizing engine, rebalancing engine,
+or Decision Engine semantic change.
+
+Next:
+
+```text
+ME-CI04 - Define explainability/change-rationale contract
 ```
 
 ## Active Planning Rule

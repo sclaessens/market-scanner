@@ -3902,7 +3902,7 @@ Follow-up backlog items:
 
 * ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption. Completed by ME-CI01.
 * ME-CI02 - Define ChatGPT Advisory Context Contract. Completed by ME-CI02.
-* ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context.
+* ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context. Completed by ME-CI03.
 * ME-CI04 - Define explainability/change-rationale contract.
 * ME-CI05 - Produce daily ChatGPT-ready advisory artifact.
 * ME-PI01 - Define Portfolio Intelligence exposure contract.
@@ -3970,7 +3970,7 @@ Dependencies:
 Follow-ups:
 
 * ME-CI02 - ChatGPT Advisory Context Contract. Completed by ME-CI02.
-* ME-CI03 - ChatGPT-readable Portfolio Intelligence context.
+* ME-CI03 - ChatGPT-readable Portfolio Intelligence context. Completed by ME-CI03.
 * ME-CI04 - explainability/change-rationale contract.
 * ME-CI05 - daily ChatGPT-ready advisory artifact.
 * ME-PI01 - Portfolio Intelligence exposure contract.
@@ -4029,9 +4029,79 @@ Dependencies:
 
 Follow-ups:
 
-* ME-CI03 - ChatGPT-readable Portfolio Intelligence context.
+* ME-CI03 - ChatGPT-readable Portfolio Intelligence context. Completed by ME-CI03.
 * ME-CI04 - explainability/change-rationale contract.
 * ME-CI05 - daily ChatGPT-ready advisory artifact.
 * ME-PI01 - Portfolio Intelligence exposure contract.
 * ME-PS01 - Position Sizing decision contract.
 * ME-NL01 - channel-neutral Notification Layer contract.
+
+### ME-CI03 - ChatGPT-readable Portfolio Intelligence Context
+
+Status: COMPLETED DOCS-ONLY CONTRACT
+
+Goal: define `chatgpt-portfolio-intelligence-context-v1`, the controlled
+Portfolio Intelligence subcontext that future ChatGPT advisory context assembly
+may embed or reference inside the ME-CI02 advisory boundary.
+
+Scope:
+
+* source-of-truth matrix for portfolio identity, holdings, position value,
+  weight, cash, exposure, concentration, constraints, portfolio fit,
+  recommendation-to-position relationship, missingness, freshness, and
+  provenance;
+* relationship to `chatgpt-advisory-context-v1`;
+* availability states: `available`, `partial`, `unavailable`, `blocked`;
+* holdings and position semantics;
+* exposure and concentration boundaries;
+* cash and allocation boundaries;
+* portfolio-fit boundary;
+* missingness, provenance, and freshness contracts;
+* advisory permission boundary;
+* prohibited inputs and prohibited inferences;
+* fail-closed matrix;
+* complete, partial, blocked, and held-with-sizing-unavailable examples.
+
+Non-goals:
+
+* no runtime assembler;
+* no typed schema or validator;
+* no ChatGPT API integration;
+* no prompt template;
+* no provider, yfinance, SEC, or EDGAR change;
+* no broker integration;
+* no portfolio or watchlist writes;
+* no allocation engine;
+* no position sizing engine;
+* no rebalancing engine;
+* no Decision Engine, Governor, Portfolio Review, Dispatch Station, reporting,
+  delivery, or notification semantic change.
+
+Acceptance criteria:
+
+* Contract identity is explicit:
+  `chatgpt-portfolio-intelligence-context-v1`.
+* Canonical upstream sources are documented.
+* Unknown, missing, zero, partial, stale, and blocked semantics are separated.
+* ChatGPT advisory permissions and prohibited determinations are explicit.
+* Fail-closed behavior is documented.
+* JSON examples validate.
+* No runtime code is changed.
+
+Dependencies:
+
+* ME-RM06 - ChatGPT advisory delivery roadmap reposition.
+* ME-CI01 - Structured Decision Output contract.
+* ME-CI02 - ChatGPT Advisory Context Contract.
+* ME-PR01 / ME-PR02 - Portfolio Review contract and implementation.
+* ME-DE01 / ME-DE02 - Decision Engine handoff contract and implementation.
+* ME-GV06 - Governor buy-zone and position-management explanation contract.
+* ME-DS01 - Dispatch Station Governor report output contract.
+
+Follow-ups:
+
+* ME-CI04 - explainability/change-rationale contract.
+* ME-CI05 - daily ChatGPT-ready advisory artifact.
+* ME-PI01 - Portfolio Intelligence exposure contract.
+* future typed schema / validator.
+* future deterministic advisory context assembler.

@@ -1,0 +1,157 @@
+{
+  "schema_version": "chatgpt-portfolio-intelligence-context-v1",
+  "artifact_type": "market-engine-chatgpt-portfolio-intelligence-context",
+  "generated_at": "2026-07-07T10:10:00Z",
+  "run_id": "me-ci03-example-blocked",
+  "portfolio_identity": {
+    "portfolio_id": null,
+    "identity_state": "conflicting",
+    "source_ref": null
+  },
+  "portfolio_snapshot_identity": {
+    "snapshot_id": null,
+    "portfolio_context_run_id": null,
+    "portfolio_snapshot_time": null
+  },
+  "source_artifact_refs": [
+    "market-engine-portfolio-context-v1:portfolio-context-run-a",
+    "market-engine-portfolio-context-v1:portfolio-context-run-b",
+    "sec-companyfacts-portfolio-review-v1:portfolio-review-run-malformed"
+  ],
+  "inclusion": {
+    "mode": "referenced_companion_artifact",
+    "chatgpt_advisory_context_schema_version": "chatgpt-advisory-context-v1",
+    "semantic_override_allowed": false
+  },
+  "availability": {
+    "state": "blocked",
+    "reason_codes": [
+      "conflicting_portfolio_snapshots",
+      "missing_snapshot_identity",
+      "malformed_portfolio_review",
+      "missing_holdings_provenance"
+    ],
+    "mandatory_caveats": [
+      "Portfolio-specific advisory is blocked."
+    ]
+  },
+  "currency_context": {
+    "portfolio_base_currency": null,
+    "valuation_currency": null,
+    "fx_context_state": "blocked"
+  },
+  "timestamp_context": {
+    "context_generated_at": "2026-07-07T10:10:00Z",
+    "portfolio_snapshot_time": null,
+    "market_valuation_time": null,
+    "portfolio_review_time": null,
+    "governor_interpretation_time": null
+  },
+  "holdings": [],
+  "exposure_context": {
+    "entries": [],
+    "unsupported_families": [],
+    "missing_exposure_families": [
+      "holdings",
+      "valuation",
+      "portfolio_total_value"
+    ]
+  },
+  "concentration_context": {
+    "states": [],
+    "warnings": [
+      "Concentration review is blocked by conflicting snapshots."
+    ]
+  },
+  "cash_context": {
+    "state": "blocked",
+    "amount": null,
+    "currency": null,
+    "deployable_cash_state": "blocked"
+  },
+  "allocation_context": {
+    "current_exposure_available": false,
+    "target_allocation_available": false,
+    "recommended_allocation_available": false,
+    "position_sizing_available": false
+  },
+  "portfolio_fit_context": {
+    "portfolio_review_state": "blocked_by_invalid_input",
+    "portfolio_review_category": "input_contract_invalid",
+    "handoff_readiness_state": "blocked_invalid_portfolio_review_contract",
+    "fit_does_not_authorize_sizing": true
+  },
+  "recommendation_to_position_relationship": {
+    "ticker": "AMD",
+    "state": "blocked_relation_conflict",
+    "source_refs": []
+  },
+  "missingness": {
+    "states": [
+      {
+        "family": "portfolio_identity",
+        "state": "conflicting"
+      },
+      {
+        "family": "snapshot_identity",
+        "state": "blocked"
+      },
+      {
+        "family": "holdings_provenance",
+        "state": "blocked"
+      },
+      {
+        "family": "portfolio_review",
+        "state": "blocked"
+      }
+    ]
+  },
+  "freshness": {
+    "holdings_freshness": "blocked",
+    "valuation_freshness": "blocked",
+    "cash_freshness": "blocked",
+    "portfolio_review_freshness": "blocked",
+    "governor_interpretation_freshness": "not_applicable",
+    "exposure_freshness": "blocked",
+    "concentration_freshness": "blocked"
+  },
+  "provenance": {
+    "free_floating_portfolio_facts_present": true,
+    "artifact_refs": [
+      "market-engine-portfolio-context-v1:portfolio-context-run-a",
+      "market-engine-portfolio-context-v1:portfolio-context-run-b"
+    ]
+  },
+  "advisory_permission_boundary": {
+    "explain_allowed": [
+      "blocked_reasons",
+      "missingness"
+    ],
+    "conditional_interpretation_allowed": [],
+    "determination_forbidden": [
+      "held_state",
+      "portfolio_fit",
+      "target_weight",
+      "order_size",
+      "cash_to_deploy",
+      "rebalance_instruction"
+    ]
+  },
+  "validation": {
+    "contract_valid": false,
+    "validation_state": "blocked",
+    "errors": [
+      "Conflicting portfolio snapshots.",
+      "Missing snapshot identity.",
+      "Malformed upstream Portfolio Review."
+    ],
+    "warnings": [],
+    "blocked_reasons": [
+      "conflicting_portfolio_snapshots",
+      "missing_snapshot_identity",
+      "malformed_portfolio_review"
+    ],
+    "unsupported_fields": [],
+    "semantic_boundary_version": "me-ci03-v1"
+  }
+}

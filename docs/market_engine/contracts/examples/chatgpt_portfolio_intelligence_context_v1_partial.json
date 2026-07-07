@@ -1,0 +1,183 @@
+{
+  "schema_version": "chatgpt-portfolio-intelligence-context-v1",
+  "artifact_type": "market-engine-chatgpt-portfolio-intelligence-context",
+  "generated_at": "2026-07-07T10:05:00Z",
+  "run_id": "me-ci03-example-partial",
+  "portfolio_identity": {
+    "portfolio_id": "synthetic-non-production-portfolio",
+    "identity_state": "known",
+    "source_ref": "market-engine-portfolio-context-v1:synthetic-snapshot-partial"
+  },
+  "portfolio_snapshot_identity": {
+    "snapshot_id": "synthetic-snapshot-partial",
+    "portfolio_context_run_id": "portfolio-context-run-partial",
+    "portfolio_snapshot_time": "2026-07-07T09:40:00Z"
+  },
+  "source_artifact_refs": [
+    "market-engine-portfolio-context-v1:portfolio-context-run-partial",
+    "sec-companyfacts-portfolio-review-v1:portfolio-review-run-partial"
+  ],
+  "inclusion": {
+    "mode": "referenced_companion_artifact",
+    "chatgpt_advisory_context_schema_version": "chatgpt-advisory-context-v1",
+    "semantic_override_allowed": false
+  },
+  "availability": {
+    "state": "partial",
+    "reason_codes": [
+      "cash_context_missing",
+      "external_accounts_unknown",
+      "multi_holding_exposure_incomplete"
+    ],
+    "mandatory_caveats": [
+      "Known holdings are not guaranteed to represent all external accounts.",
+      "Cash context is unavailable."
+    ]
+  },
+  "currency_context": {
+    "portfolio_base_currency": "EUR",
+    "valuation_currency": "EUR",
+    "fx_context_state": "unknown"
+  },
+  "timestamp_context": {
+    "context_generated_at": "2026-07-07T10:05:00Z",
+    "portfolio_snapshot_time": "2026-07-07T09:40:00Z",
+    "market_valuation_time": null,
+    "portfolio_review_time": "2026-07-07T09:42:00Z",
+    "governor_interpretation_time": null
+  },
+  "holdings": [
+    {
+      "ticker": "NVDA",
+      "position_state": "held",
+      "quantity": 3,
+      "market_value": null,
+      "portfolio_weight_pct": null,
+      "missing_fields": [
+        "current_market_value",
+        "current_ticker_exposure_pct"
+      ],
+      "freshness": {
+        "holdings_freshness": "fresh",
+        "valuation_freshness": "unknown"
+      },
+      "provenance": {
+        "artifact_ref": "market-engine-portfolio-context-v1:portfolio-context-run-partial"
+      }
+    }
+  ],
+  "exposure_context": {
+    "entries": [],
+    "unsupported_families": [
+      "sector_exposure",
+      "currency_exposure",
+      "thematic_exposure",
+      "factor_exposure"
+    ],
+    "missing_exposure_families": [
+      "current_ticker_exposure_pct",
+      "portfolio_total_value"
+    ]
+  },
+  "concentration_context": {
+    "states": [
+      {
+        "ticker": "NVDA",
+        "state": "concentration_requires_review",
+        "source_ref": "sec-companyfacts-portfolio-review-v1:portfolio-review-run-partial",
+        "reason_codes": [
+          "exposure_missing",
+          "threshold_context_incomplete"
+        ]
+      }
+    ],
+    "warnings": [
+      "Concentration cannot be fully assessed from partial context."
+    ]
+  },
+  "cash_context": {
+    "state": "unknown",
+    "amount": null,
+    "currency": null,
+    "deployable_cash_state": "unknown"
+  },
+  "allocation_context": {
+    "current_exposure_available": false,
+    "target_allocation_available": false,
+    "recommended_allocation_available": false,
+    "position_sizing_available": false
+  },
+  "portfolio_fit_context": {
+    "portfolio_review_state": "portfolio_context_partial",
+    "portfolio_review_category": "portfolio_data_limitation_review",
+    "handoff_readiness_state": "blocked_missing_portfolio_context",
+    "fit_does_not_authorize_sizing": true
+  },
+  "recommendation_to_position_relationship": {
+    "ticker": "NVDA",
+    "state": "held_status_partial",
+    "source_refs": [
+      "market-engine-portfolio-context-v1:portfolio-context-run-partial"
+    ]
+  },
+  "missingness": {
+    "states": [
+      {
+        "family": "valuation",
+        "state": "unknown"
+      },
+      {
+        "family": "cash",
+        "state": "unknown"
+      },
+      {
+        "family": "external_accounts",
+        "state": "unknown"
+      },
+      {
+        "family": "target_allocation",
+        "state": "not_provided"
+      }
+    ]
+  },
+  "freshness": {
+    "holdings_freshness": "fresh",
+    "valuation_freshness": "unknown",
+    "cash_freshness": "unknown",
+    "portfolio_review_freshness": "fresh",
+    "governor_interpretation_freshness": "not_applicable",
+    "exposure_freshness": "unknown",
+    "concentration_freshness": "unknown"
+  },
+  "provenance": {
+    "free_floating_portfolio_facts_present": false,
+    "artifact_refs": [
+      "market-engine-portfolio-context-v1:portfolio-context-run-partial"
+    ]
+  },
+  "advisory_permission_boundary": {
+    "explain_allowed": [
+      "known_held_state",
+      "missingness"
+    ],
+    "conditional_interpretation_allowed": [],
+    "determination_forbidden": [
+      "total_concentration",
+      "target_weight",
+      "order_size",
+      "cash_to_deploy",
+      "rebalance_instruction"
+    ]
+  },
+  "validation": {
+    "contract_valid": true,
+    "validation_state": "valid_with_warnings",
+    "errors": [],
+    "warnings": [
+      "Partial context limits portfolio-specific advisory."
+    ],
+    "blocked_reasons": [],
+    "unsupported_fields": [],
+    "semantic_boundary_version": "me-ci03-v1"
+  }
+}

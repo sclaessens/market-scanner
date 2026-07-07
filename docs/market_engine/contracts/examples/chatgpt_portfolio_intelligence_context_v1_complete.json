@@ -1,0 +1,205 @@
+{
+  "schema_version": "chatgpt-portfolio-intelligence-context-v1",
+  "artifact_type": "market-engine-chatgpt-portfolio-intelligence-context",
+  "generated_at": "2026-07-07T10:00:00Z",
+  "run_id": "me-ci03-example-complete",
+  "portfolio_identity": {
+    "portfolio_id": "synthetic-non-production-portfolio",
+    "identity_state": "known",
+    "source_ref": "market-engine-portfolio-context-v1:synthetic-snapshot-001"
+  },
+  "portfolio_snapshot_identity": {
+    "snapshot_id": "synthetic-snapshot-001",
+    "portfolio_context_run_id": "portfolio-context-run-001",
+    "portfolio_snapshot_time": "2026-07-07T09:45:00Z"
+  },
+  "source_artifact_refs": [
+    "market-engine-portfolio-context-v1:portfolio-context-run-001",
+    "sec-companyfacts-portfolio-review-v1:portfolio-review-run-001",
+    "market-engine-decision-engine-handoff-v1:handoff-run-001",
+    "market-engine-governor-buy-zone-position-management-explanation-v1:governor-run-001"
+  ],
+  "inclusion": {
+    "mode": "embedded_subcontext",
+    "chatgpt_advisory_context_schema_version": "chatgpt-advisory-context-v1",
+    "semantic_override_allowed": false
+  },
+  "availability": {
+    "state": "available",
+    "reason_codes": [],
+    "mandatory_caveats": [
+      "Portfolio context is synthetic and non-production.",
+      "Position sizing and allocation remain unavailable."
+    ]
+  },
+  "currency_context": {
+    "portfolio_base_currency": "EUR",
+    "valuation_currency": "EUR",
+    "fx_context_state": "not_applicable"
+  },
+  "timestamp_context": {
+    "context_generated_at": "2026-07-07T10:00:00Z",
+    "portfolio_snapshot_time": "2026-07-07T09:45:00Z",
+    "market_valuation_time": "2026-07-07T09:45:00Z",
+    "portfolio_review_time": "2026-07-07T09:50:00Z",
+    "governor_interpretation_time": "2026-07-07T09:55:00Z"
+  },
+  "holdings": [
+    {
+      "ticker": "COST",
+      "instrument": {
+        "asset_type": "equity",
+        "currency": "USD"
+      },
+      "position_state": "held",
+      "quantity": 2,
+      "quantity_unit": "shares",
+      "market_value": 1850,
+      "market_value_currency": "EUR",
+      "portfolio_weight_pct": 5.7,
+      "cost_basis": null,
+      "unrealized_result": null,
+      "freshness": {
+        "holdings_freshness": "fresh",
+        "valuation_freshness": "fresh"
+      },
+      "provenance": {
+        "artifact_ref": "market-engine-portfolio-context-v1:portfolio-context-run-001",
+        "observed_at": "2026-07-07T09:45:00Z"
+      }
+    },
+    {
+      "ticker": "AMD",
+      "instrument": {
+        "asset_type": "equity",
+        "currency": "USD"
+      },
+      "position_state": "not_held",
+      "quantity": 0,
+      "quantity_unit": "shares",
+      "market_value": 0,
+      "market_value_currency": "EUR",
+      "portfolio_weight_pct": 0,
+      "cost_basis": null,
+      "unrealized_result": null,
+      "freshness": {
+        "holdings_freshness": "fresh",
+        "valuation_freshness": "fresh"
+      },
+      "provenance": {
+        "artifact_ref": "market-engine-portfolio-context-v1:portfolio-context-run-001",
+        "observed_at": "2026-07-07T09:45:00Z"
+      }
+    }
+  ],
+  "exposure_context": {
+    "entries": [
+      {
+        "exposure_type": "single_name",
+        "exposure_key": "COST",
+        "value": 5.7,
+        "unit": "percent_of_portfolio",
+        "source_ref": "market-engine-portfolio-context-v1:portfolio-context-run-001",
+        "timestamp": "2026-07-07T09:45:00Z",
+        "completeness": "complete_for_reviewed_tickers",
+        "confidence_or_uncertainty": "source_provenanced"
+      }
+    ],
+    "unsupported_families": [
+      "currency_exposure",
+      "thematic_exposure",
+      "factor_exposure"
+    ]
+  },
+  "concentration_context": {
+    "states": [
+      {
+        "ticker": "COST",
+        "state": "concentration_within_context",
+        "threshold_ref": "concentration_thresholds.review_above_pct",
+        "source_ref": "sec-companyfacts-portfolio-review-v1:portfolio-review-run-001"
+      }
+    ],
+    "warnings": []
+  },
+  "cash_context": {
+    "state": "not_provided",
+    "amount": null,
+    "currency": null,
+    "deployable_cash_state": "unknown",
+    "mandatory_caveat": "Cash is not supplied by the approved ME-CI03 source set."
+  },
+  "allocation_context": {
+    "current_exposure_available": true,
+    "target_allocation_available": false,
+    "recommended_allocation_available": false,
+    "position_sizing_available": false
+  },
+  "portfolio_fit_context": {
+    "portfolio_review_state": "portfolio_review_required",
+    "portfolio_review_category": "portfolio_fit_context_review",
+    "handoff_readiness_state": "ready_for_decision_engine_review",
+    "fit_does_not_authorize_sizing": true
+  },
+  "recommendation_to_position_relationship": {
+    "ticker": "COST",
+    "state": "recommendation_for_held_instrument",
+    "source_refs": [
+      "sec-companyfacts-portfolio-review-v1:portfolio-review-run-001"
+    ]
+  },
+  "missingness": {
+    "states": [
+      {
+        "family": "cost_basis",
+        "state": "not_provided"
+      },
+      {
+        "family": "cash",
+        "state": "not_provided"
+      }
+    ]
+  },
+  "freshness": {
+    "holdings_freshness": "fresh",
+    "valuation_freshness": "fresh",
+    "cash_freshness": "not_applicable",
+    "portfolio_review_freshness": "fresh",
+    "governor_interpretation_freshness": "fresh",
+    "exposure_freshness": "fresh",
+    "concentration_freshness": "fresh"
+  },
+  "provenance": {
+    "free_floating_portfolio_facts_present": false,
+    "artifact_refs": [
+      "market-engine-portfolio-context-v1:portfolio-context-run-001",
+      "sec-companyfacts-portfolio-review-v1:portfolio-review-run-001"
+    ]
+  },
+  "advisory_permission_boundary": {
+    "explain_allowed": [
+      "held_state",
+      "current_weight",
+      "concentration_review",
+      "portfolio_fit_review"
+    ],
+    "conditional_interpretation_allowed": [
+      "recommendation_to_position_relationship"
+    ],
+    "determination_forbidden": [
+      "target_weight",
+      "order_size",
+      "cash_to_deploy",
+      "rebalance_instruction"
+    ]
+  },
+  "validation": {
+    "contract_valid": true,
+    "validation_state": "valid",
+    "errors": [],
+    "warnings": [],
+    "blocked_reasons": [],
+    "unsupported_fields": [],
+    "semantic_boundary_version": "me-ci03-v1"
+  }
+}
