@@ -1,0 +1,152 @@
+{
+  "schema_version": "structured-decision-output-v1",
+  "artifact_type": "market-engine-structured-decision-output",
+  "generated_at": "2026-07-07T12:00:00Z",
+  "run_id": "me-ci01-example-run",
+  "ticker": "BLKEX",
+  "instrument": {
+    "ticker": "BLKEX",
+    "name": "Blocked Example Holdings",
+    "asset_type": "equity",
+    "exchange": "EXAMPLE",
+    "currency": "USD"
+  },
+  "data_coverage": {
+    "coverage_status": "descriptive_only",
+    "coverage_score": 38,
+    "freshness_status": "mixed",
+    "missing_families": ["approved_price_context", "portfolio_context"],
+    "stale_families": ["fundamental_observations"],
+    "blocked_reason": "insufficient_fresh_evidence_for_actionability"
+  },
+  "decision": {
+    "action": "blocked",
+    "action_strength": "none",
+    "time_horizon": "unknown",
+    "is_actionable": false,
+    "actionability_blockers": [
+      "missing_approved_price_context",
+      "missing_portfolio_context",
+      "stale_fundamental_observations"
+    ],
+    "review_required": true
+  },
+  "scores": {
+    "conviction": {
+      "value": null,
+      "scale": "0_100",
+      "status": "not_available",
+      "reason_codes": ["conviction_engine_not_available"]
+    },
+    "confidence": {
+      "value": 31,
+      "scale": "0_100",
+      "status": "available",
+      "reason_codes": ["mixed_freshness", "missing_price_and_portfolio_context"]
+    },
+    "quality": {
+      "value": null,
+      "scale": "0_100",
+      "status": "insufficient_evidence",
+      "reason_codes": ["stale_fundamental_observations"]
+    },
+    "momentum": {
+      "value": null,
+      "scale": "0_100",
+      "status": "not_available",
+      "reason_codes": ["approved_setup_context_missing"]
+    },
+    "valuation": {
+      "value": null,
+      "scale": "0_100",
+      "status": "not_available",
+      "reason_codes": ["valuation_engine_not_available"]
+    },
+    "risk_reward": {
+      "value": null,
+      "scale": "0_100",
+      "status": "blocked",
+      "reason_codes": ["missing_invalidation_context"]
+    },
+    "portfolio_fit": {
+      "value": null,
+      "scale": "0_100",
+      "status": "blocked",
+      "reason_codes": ["missing_portfolio_context"]
+    }
+  },
+  "portfolio_context": {
+    "position_status": "not_available",
+    "current_weight": null,
+    "target_weight": null,
+    "max_weight": null,
+    "exposure_flags": [],
+    "concentration_risk": "not_available",
+    "cash_dependency": "not_available",
+    "position_sizing_available": false
+  },
+  "risk": {
+    "risk_level": "unknown",
+    "risk_score": null,
+    "volatility_flag": "unknown",
+    "liquidity_flag": "unknown",
+    "drawdown_flag": "unknown",
+    "thesis_break_flags": ["missing_fresh_evidence"],
+    "invalidation_triggers": []
+  },
+  "levels": {
+    "current_price": null,
+    "buy_zone": null,
+    "add_zone": null,
+    "trim_zone": null,
+    "stop_or_invalidation_level": null,
+    "support_levels": [],
+    "resistance_levels": []
+  },
+  "thesis": {
+    "summary_codes": ["descriptive_only", "insufficient_fresh_evidence"],
+    "positive_drivers": [],
+    "negative_drivers": ["missing_price_context", "missing_portfolio_context"],
+    "changed_since_previous_run": null,
+    "thesis_status": "unknown"
+  },
+  "evidence": {
+    "source_refs": ["source:company_profile:BLKEX:2026-07-07"],
+    "artifact_refs": ["artifact:descriptive_analysis:BLKEX:2026-07-07"],
+    "observation_refs": [],
+    "recommendation_review_ref": null,
+    "portfolio_review_ref": null,
+    "decision_engine_ref": null
+  },
+  "explainability": {
+    "primary_reason_codes": ["blocked_descriptive_only"],
+    "score_change_reasons": [],
+    "decision_change_reasons": [],
+    "blocking_reasons": [
+      "missing_approved_price_context",
+      "missing_portfolio_context",
+      "stale_fundamental_observations"
+    ],
+    "human_summary_allowed": true
+  },
+  "consumer_guidance": {
+    "chatgpt_allowed_use": ["explain_blockers", "describe_missing_evidence"],
+    "notification_allowed_use": ["compact_blocked_signal"],
+    "dashboard_allowed_use": ["display_blocked_state", "display_missing_evidence"],
+    "requires_human_review": true,
+    "forbidden_uses": [
+      "action_recommendation",
+      "order_generation",
+      "broker_instruction",
+      "fabricate_missing_scores",
+      "fabricate_price_levels",
+      "ignore_descriptive_only"
+    ]
+  },
+  "validation": {
+    "contract_status": "valid_with_warnings",
+    "required_fields_present": true,
+    "semantic_warnings": ["descriptive_only_must_not_be_treated_as_actionable"],
+    "fail_closed_reason": null
+  }
+}

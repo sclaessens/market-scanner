@@ -1,0 +1,191 @@
+{
+  "schema_version": "structured-decision-output-v1",
+  "artifact_type": "market-engine-structured-decision-output",
+  "generated_at": "2026-07-07T12:00:00Z",
+  "run_id": "me-ci01-example-run",
+  "ticker": "EXMPL",
+  "instrument": {
+    "ticker": "EXMPL",
+    "name": "Example Semiconductors Inc.",
+    "asset_type": "equity",
+    "exchange": "EXAMPLE",
+    "currency": "USD"
+  },
+  "data_coverage": {
+    "coverage_status": "ready",
+    "coverage_score": 92,
+    "freshness_status": "fresh",
+    "missing_families": [],
+    "stale_families": [],
+    "blocked_reason": null
+  },
+  "decision": {
+    "action": "add_candidate",
+    "action_strength": "medium",
+    "time_horizon": "swing",
+    "is_actionable": true,
+    "actionability_blockers": [],
+    "review_required": true
+  },
+  "scores": {
+    "conviction": {
+      "value": 76,
+      "scale": "0_100",
+      "status": "available",
+      "reason_codes": ["strong_quality_evidence", "setup_confirmed"]
+    },
+    "confidence": {
+      "value": 82,
+      "scale": "0_100",
+      "status": "available",
+      "reason_codes": ["fresh_sources", "complete_required_evidence"]
+    },
+    "quality": {
+      "value": 84,
+      "scale": "0_100",
+      "status": "available",
+      "reason_codes": ["margin_quality_supported", "cash_generation_supported"]
+    },
+    "momentum": {
+      "value": 71,
+      "scale": "0_100",
+      "status": "available",
+      "reason_codes": ["constructive_trend", "pullback_stabilized"]
+    },
+    "valuation": {
+      "value": 63,
+      "scale": "0_100",
+      "status": "available",
+      "reason_codes": ["valuation_context_acceptable"]
+    },
+    "risk_reward": {
+      "value": 69,
+      "scale": "0_100",
+      "status": "available",
+      "reason_codes": ["defined_invalidation", "acceptable_zone_context"]
+    },
+    "portfolio_fit": {
+      "value": 58,
+      "scale": "0_100",
+      "status": "available",
+      "reason_codes": ["existing_sector_exposure_medium"]
+    }
+  },
+  "portfolio_context": {
+    "position_status": "held",
+    "current_weight": 0.035,
+    "target_weight": 0.05,
+    "max_weight": 0.07,
+    "exposure_flags": ["semiconductor_overlap_medium", "ai_theme_overlap_medium"],
+    "concentration_risk": "medium",
+    "cash_dependency": "low",
+    "position_sizing_available": true
+  },
+  "risk": {
+    "risk_level": "medium",
+    "risk_score": 42,
+    "volatility_flag": "watch",
+    "liquidity_flag": "none",
+    "drawdown_flag": "watch",
+    "thesis_break_flags": [],
+    "invalidation_triggers": [
+      {
+        "code": "breaks_approved_invalidation_level",
+        "evidence_refs": ["artifact:governor_explanation:EXMPL:invalidation"]
+      }
+    ]
+  },
+  "levels": {
+    "current_price": {
+      "value": 100.0,
+      "currency": "USD",
+      "confidence": "example_only",
+      "evidence_refs": ["artifact:approved_price_context:EXMPL:current_price"],
+      "as_of": "2026-07-07T12:00:00Z"
+    },
+    "buy_zone": {
+      "lower": 94.0,
+      "upper": 98.0,
+      "currency": "USD",
+      "confidence": "medium",
+      "evidence_refs": ["artifact:approved_price_context:EXMPL:buy_zone"],
+      "as_of": "2026-07-07T12:00:00Z"
+    },
+    "add_zone": {
+      "lower": 96.0,
+      "upper": 99.0,
+      "currency": "USD",
+      "confidence": "medium",
+      "evidence_refs": ["artifact:approved_price_context:EXMPL:add_zone"],
+      "as_of": "2026-07-07T12:00:00Z"
+    },
+    "trim_zone": {
+      "lower": 118.0,
+      "upper": 125.0,
+      "currency": "USD",
+      "confidence": "low",
+      "evidence_refs": ["artifact:approved_price_context:EXMPL:trim_zone"],
+      "as_of": "2026-07-07T12:00:00Z"
+    },
+    "stop_or_invalidation_level": {
+      "value": 91.0,
+      "currency": "USD",
+      "confidence": "medium",
+      "evidence_refs": ["artifact:approved_price_context:EXMPL:invalidation"],
+      "as_of": "2026-07-07T12:00:00Z"
+    },
+    "support_levels": [
+      {
+        "value": 95.0,
+        "currency": "USD",
+        "confidence": "medium",
+        "evidence_refs": ["artifact:approved_price_context:EXMPL:support_1"],
+        "as_of": "2026-07-07T12:00:00Z"
+      }
+    ],
+    "resistance_levels": [
+      {
+        "value": 112.0,
+        "currency": "USD",
+        "confidence": "medium",
+        "evidence_refs": ["artifact:approved_price_context:EXMPL:resistance_1"],
+        "as_of": "2026-07-07T12:00:00Z"
+      }
+    ]
+  },
+  "thesis": {
+    "summary_codes": ["quality_supported", "setup_constructive", "portfolio_fit_moderate"],
+    "positive_drivers": ["cash_generation_supported", "trend_constructive"],
+    "negative_drivers": ["sector_overlap_medium"],
+    "changed_since_previous_run": true,
+    "thesis_status": "intact"
+  },
+  "evidence": {
+    "source_refs": ["source:sec_companyfacts:EXMPL:2026-07-07"],
+    "artifact_refs": ["artifact:governor_report:EXMPL:2026-07-07"],
+    "observation_refs": ["observation:quality:EXMPL", "observation:setup:EXMPL"],
+    "recommendation_review_ref": "artifact:recommendation_review:EXMPL:2026-07-07",
+    "portfolio_review_ref": "artifact:portfolio_review:EXMPL:2026-07-07",
+    "decision_engine_ref": "artifact:decision_engine:EXMPL:2026-07-07"
+  },
+  "explainability": {
+    "primary_reason_codes": ["add_candidate_from_quality_setup_and_portfolio_fit"],
+    "score_change_reasons": ["confidence_improved_from_fresh_sources"],
+    "decision_change_reasons": ["watch_to_add_candidate_after_setup_confirmation"],
+    "blocking_reasons": [],
+    "human_summary_allowed": true
+  },
+  "consumer_guidance": {
+    "chatgpt_allowed_use": ["explain", "compare", "scenario_discussion", "artifact_grounded_questions"],
+    "notification_allowed_use": ["compact_change_signal", "review_prompt"],
+    "dashboard_allowed_use": ["display_structured_state", "display_evidence_links"],
+    "requires_human_review": true,
+    "forbidden_uses": ["order_generation", "broker_instruction", "fabricate_missing_values", "ignore_human_review"]
+  },
+  "validation": {
+    "contract_status": "valid",
+    "required_fields_present": true,
+    "semantic_warnings": ["example_values_are_non_production"],
+    "fail_closed_reason": null
+  }
+}
