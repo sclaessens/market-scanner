@@ -1,0 +1,189 @@
+{
+  "schema_version": "chatgpt-portfolio-intelligence-context-v1",
+  "artifact_type": "market-engine-chatgpt-portfolio-intelligence-context",
+  "generated_at": "2026-07-07T10:15:00Z",
+  "run_id": "me-ci03-example-held-sizing-unavailable",
+  "portfolio_identity": {
+    "portfolio_id": "synthetic-non-production-portfolio",
+    "identity_state": "known",
+    "source_ref": "market-engine-portfolio-context-v1:portfolio-context-run-held"
+  },
+  "portfolio_snapshot_identity": {
+    "snapshot_id": "synthetic-snapshot-held",
+    "portfolio_context_run_id": "portfolio-context-run-held",
+    "portfolio_snapshot_time": "2026-07-07T09:50:00Z"
+  },
+  "source_artifact_refs": [
+    "market-engine-portfolio-context-v1:portfolio-context-run-held",
+    "sec-companyfacts-portfolio-review-v1:portfolio-review-run-held",
+    "market-engine-governor-buy-zone-position-management-explanation-v1:governor-run-held"
+  ],
+  "inclusion": {
+    "mode": "embedded_subcontext",
+    "chatgpt_advisory_context_schema_version": "chatgpt-advisory-context-v1",
+    "semantic_override_allowed": false
+  },
+  "availability": {
+    "state": "available",
+    "reason_codes": [
+      "position_sizing_not_authorized"
+    ],
+    "mandatory_caveats": [
+      "The position is proven, but exact sizing is unavailable."
+    ]
+  },
+  "currency_context": {
+    "portfolio_base_currency": "EUR",
+    "valuation_currency": "EUR",
+    "fx_context_state": "not_applicable"
+  },
+  "timestamp_context": {
+    "context_generated_at": "2026-07-07T10:15:00Z",
+    "portfolio_snapshot_time": "2026-07-07T09:50:00Z",
+    "market_valuation_time": "2026-07-07T09:50:00Z",
+    "portfolio_review_time": "2026-07-07T09:52:00Z",
+    "governor_interpretation_time": "2026-07-07T09:54:00Z"
+  },
+  "holdings": [
+    {
+      "ticker": "ASML",
+      "position_state": "held",
+      "quantity": 4,
+      "quantity_unit": "shares",
+      "market_value": 3200,
+      "market_value_currency": "EUR",
+      "portfolio_weight_pct": 8.3,
+      "cost_basis": null,
+      "unrealized_result": null,
+      "freshness": {
+        "holdings_freshness": "fresh",
+        "valuation_freshness": "fresh"
+      },
+      "provenance": {
+        "artifact_ref": "market-engine-portfolio-context-v1:portfolio-context-run-held",
+        "observed_at": "2026-07-07T09:50:00Z"
+      }
+    }
+  ],
+  "exposure_context": {
+    "entries": [
+      {
+        "exposure_type": "single_name",
+        "exposure_key": "ASML",
+        "value": 8.3,
+        "unit": "percent_of_portfolio",
+        "source_ref": "market-engine-portfolio-context-v1:portfolio-context-run-held",
+        "timestamp": "2026-07-07T09:50:00Z",
+        "completeness": "complete_for_reviewed_ticker",
+        "confidence_or_uncertainty": "source_provenanced"
+      }
+    ],
+    "unsupported_families": [
+      "thematic_exposure",
+      "factor_exposure"
+    ]
+  },
+  "concentration_context": {
+    "states": [
+      {
+        "ticker": "ASML",
+        "state": "concentration_requires_review",
+        "source_ref": "sec-companyfacts-portfolio-review-v1:portfolio-review-run-held",
+        "reason_codes": [
+          "review_above_threshold"
+        ]
+      }
+    ],
+    "warnings": [
+      "Concentration is a review context, not a sizing instruction."
+    ]
+  },
+  "cash_context": {
+    "state": "not_provided",
+    "amount": null,
+    "currency": null,
+    "deployable_cash_state": "unknown"
+  },
+  "allocation_context": {
+    "current_exposure_available": true,
+    "target_allocation_available": false,
+    "recommended_allocation_available": false,
+    "position_sizing_available": false
+  },
+  "portfolio_fit_context": {
+    "portfolio_review_state": "portfolio_review_required",
+    "portfolio_review_category": "portfolio_fit_context_review",
+    "governor_position_management_state": "add_review_context",
+    "handoff_readiness_state": "ready_for_decision_engine_review",
+    "fit_does_not_authorize_sizing": true
+  },
+  "recommendation_to_position_relationship": {
+    "ticker": "ASML",
+    "state": "recommendation_for_held_instrument",
+    "source_refs": [
+      "sec-companyfacts-portfolio-review-v1:portfolio-review-run-held",
+      "market-engine-governor-buy-zone-position-management-explanation-v1:governor-run-held"
+    ]
+  },
+  "missingness": {
+    "states": [
+      {
+        "family": "position_sizing",
+        "state": "not_provided"
+      },
+      {
+        "family": "target_allocation",
+        "state": "not_provided"
+      },
+      {
+        "family": "cash",
+        "state": "not_provided"
+      }
+    ]
+  },
+  "freshness": {
+    "holdings_freshness": "fresh",
+    "valuation_freshness": "fresh",
+    "cash_freshness": "not_applicable",
+    "portfolio_review_freshness": "fresh",
+    "governor_interpretation_freshness": "fresh",
+    "exposure_freshness": "fresh",
+    "concentration_freshness": "fresh"
+  },
+  "provenance": {
+    "free_floating_portfolio_facts_present": false,
+    "artifact_refs": [
+      "market-engine-portfolio-context-v1:portfolio-context-run-held",
+      "sec-companyfacts-portfolio-review-v1:portfolio-review-run-held",
+      "market-engine-governor-buy-zone-position-management-explanation-v1:governor-run-held"
+    ]
+  },
+  "advisory_permission_boundary": {
+    "explain_allowed": [
+      "held_state",
+      "current_weight",
+      "concentration_review",
+      "governor_position_management_context"
+    ],
+    "conditional_interpretation_allowed": [
+      "why_sizing_is_unavailable"
+    ],
+    "determination_forbidden": [
+      "number_of_shares_to_buy",
+      "amount_of_cash_to_deploy",
+      "target_weight",
+      "rebalance_instruction"
+    ]
+  },
+  "validation": {
+    "contract_valid": true,
+    "validation_state": "valid_with_warnings",
+    "errors": [],
+    "warnings": [
+      "Position sizing remains unavailable."
+    ],
+    "blocked_reasons": [],
+    "unsupported_fields": [],
+    "semantic_boundary_version": "me-ci03-v1"
+  }
+}
