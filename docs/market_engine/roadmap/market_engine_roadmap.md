@@ -205,7 +205,7 @@ Output and ChatGPT Advisory Context contracts.
 The new planning order is:
 
 ```text
-ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption
+ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption (completed)
   -> ME-CI02 - Define ChatGPT Advisory Context Contract
   -> ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context
   -> ME-CI04 - Define explainability/change-rationale contract
@@ -219,6 +219,35 @@ ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption
 
 ME-CI, ME-PI, ME-PS, and ME-NL are introduced by ME-RM06 because no existing
 job-family IDs used those prefixes.
+
+### ME-CI01 - Structured Decision Output contract
+
+Status: COMPLETED DOCS-FIRST CONTRACT
+
+ME-CI01 defines Structured Decision Output v1 as the stable machine-readable
+interface between Market Engine decision artifacts and future consumers.
+
+Approved contract identifiers:
+
+```text
+schema_version: structured-decision-output-v1
+artifact_type: market-engine-structured-decision-output
+```
+
+The contract defines field semantics for instrument identity, data coverage,
+decision state, scores, portfolio context, risk, levels, thesis, evidence,
+explainability, consumer guidance, and validation. It includes example artifacts
+for actionable-candidate and blocked/descriptive-only cases.
+
+ME-CI01 does not implement runtime behavior, Decision Engine semantics,
+ChatGPT integration, Notification Layer integration, provider behavior,
+portfolio/watchlist writes, UI, dashboard, or delivery behavior.
+
+Next:
+
+```text
+ME-CI02 - Define ChatGPT Advisory Context Contract
+```
 
 ## Active Planning Rule
 

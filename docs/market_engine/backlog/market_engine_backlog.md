@@ -3900,7 +3900,7 @@ contracts are stable.
 
 Follow-up backlog items:
 
-* ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption.
+* ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption. Completed by ME-CI01.
 * ME-CI02 - Define ChatGPT Advisory Context Contract.
 * ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context.
 * ME-CI04 - Define explainability/change-rationale contract.
@@ -3915,3 +3915,64 @@ ME-RM06 changes documentation only. It does not add runtime code, tests,
 scripts, CLI behavior, provider calls, ChatGPT API integration, Telegram,
 Messenger, Signal, email implementation, portfolio/watchlist writes, production
 integrations, or Decision Engine semantic changes.
+
+### ME-CI01 - Structured Decision Output contract
+
+Status: COMPLETED DOCS-FIRST CONTRACT
+
+Goal: define Structured Decision Output v1 as the stable machine-readable
+interface between Market Engine decision artifacts and consumers including
+ChatGPT Advisory Layer, Notification Layer, dashboards, future frontends, and
+audit/replay tooling.
+
+Scope:
+
+* contract documentation;
+* JSON examples;
+* field semantics;
+* required and optional field behavior;
+* versioning;
+* compatibility rules;
+* fail-closed rules;
+* consumer guidance;
+* roadmap/backlog/audit updates.
+
+Non-goals:
+
+* no runtime code;
+* no Decision Engine semantic changes;
+* no ChatGPT API integration;
+* no notification integration;
+* no provider, yfinance, SEC, or EDGAR changes;
+* no portfolio/watchlist writes;
+* no UI or dashboard implementation.
+
+Acceptance criteria:
+
+* Structured Decision Output v1 is versioned as `structured-decision-output-v1`.
+* Top-level object and field semantics are documented.
+* Required and optional fields are identified.
+* Fail-closed behavior is documented.
+* Consumer rules for ChatGPT Advisory Layer, Notification Layer, and dashboards
+  are documented.
+* Coverage, readiness, and actionability are explicit.
+* Scores may be null while engines are absent.
+* Consumers may not invent missing values.
+* Future Conviction, Position Sizing, and Portfolio Intelligence are supported
+  without being implemented.
+* Example artifacts exist.
+* No runtime code is changed.
+
+Dependencies:
+
+* ME-RM06 delivery roadmap reposition.
+
+Follow-ups:
+
+* ME-CI02 - ChatGPT Advisory Context Contract.
+* ME-CI03 - ChatGPT-readable Portfolio Intelligence context.
+* ME-CI04 - explainability/change-rationale contract.
+* ME-CI05 - daily ChatGPT-ready advisory artifact.
+* ME-PI01 - Portfolio Intelligence exposure contract.
+* ME-PS01 - Position Sizing decision contract.
+* ME-NL01 - channel-neutral Notification Layer contract.
