@@ -117,10 +117,108 @@ These sprints are not rejected and not blocked. They are intentionally deferred 
 
 * ME-CANDIDATE03 - Candidate classification QA/review contract.
 * ME-OUT03 - Operator report readability/polish improvements.
-* ME-DL03 - Non-production delivery preview.
+* ME-DL03 - Non-production delivery preview, now subordinated to the channel-neutral Notification Layer after stable Structured Decision Output and ChatGPT Advisory Layer contracts.
 * ME-PR03 - Approved portfolio context source/persistence contract.
 * ME-DE03 - Decision Engine handoff review hardening.
 * ME-QAxx / ME-GOVxx - Additional QA/governance only from concrete run evidence.
+
+## ME-RM06 Delivery Reposition
+
+ME-RM06 repositions the old implicit Telegram-first delivery direction.
+Telegram-first long-form delivery is no longer the primary user-facing path.
+The approved planning direction is now:
+
+```text
+Market Engine
+-> Structured Artifacts / Structured Decision Output
+-> ChatGPT Advisory Layer
+-> user
+```
+
+Compact daily attention messages move to a channel-neutral path:
+
+```text
+Market Engine
+-> Notification Layer
+-> Messenger / Signal / Telegram / email / later adapters
+```
+
+Market Engine remains the reproducible analysis and artifact engine. GitHub and
+committed or generated artifacts remain the source of truth. ChatGPT Advisory
+Layer is the primary interactive interface over those artifacts for explanation,
+comparison, scenario review, score-change interpretation, portfolio questions,
+and Decision Engine output interpretation. ChatGPT is not the calculation
+engine, allocation authority, broker layer, or source of portfolio mutation.
+
+Structured Decision Output and ChatGPT context contracts must precede
+notification delivery. Conviction scoring, Position Sizing, and Portfolio
+Intelligence must also be defined before Messenger, Signal, Telegram, email, or
+other notification adapters are selected.
+
+### ChatGPT Advisory Layer
+
+ChatGPT Advisory Layer is the primary interactive interface above structured
+Market Engine artifacts.
+
+It may use reproducible Market Engine outputs to explain recommendations,
+compare tickers, summarize portfolio state, review scenario differences, and
+interpret Decision Engine output. It must not become the upstream calculation
+engine, invent missing evidence, bypass artifact provenance, place orders,
+mutate portfolio/watchlist state, or override Decision Engine authority.
+
+### Structured Decision Output
+
+Structured Decision Output is the stable machine-readable contract family that
+will make Decision Engine output safe for ChatGPT consumption.
+
+Candidate fields include ticker, action, conviction, confidence, risk, data
+coverage, portfolio fit, buy zone, add zone, trim zone, invalidation level,
+thesis changes, and explanation references. These fields require explicit
+contract approval before runtime use.
+
+### Portfolio Intelligence
+
+Portfolio Intelligence will define how approved portfolio context can be
+represented for advisory interpretation, including existing positions,
+concentration risk, sector and theme exposure, AI/datacenter/semiconductor
+overlap, cash context, position size, and correlation risk.
+
+### Position Sizing
+
+Position Sizing will define the approved downstream decision contract for
+position-management output such as do-not-add, cautious-add, normal-add,
+aggressive-add, trim, or exit states. Position sizing remains downstream and
+requires approved Decision Engine authority before it can affect allocation.
+
+### Notification Layer
+
+Notification Layer is channel-neutral compact daily signaling only. It may later
+support Messenger, Signal, Telegram, email, or other adapters.
+
+Notification payloads should be short, such as portfolio-stable status,
+notable changes, new opportunities, warnings, and prompts to open ChatGPT for
+detail analysis. Notification Layer must follow stable Structured Decision
+Output and ChatGPT Advisory Context contracts.
+
+### Repositioned sequence
+
+The new planning order is:
+
+```text
+ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption
+  -> ME-CI02 - Define ChatGPT Advisory Context Contract
+  -> ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context
+  -> ME-CI04 - Define explainability/change-rationale contract
+  -> ME-CI05 - Produce daily ChatGPT-ready advisory artifact
+  -> ME-PI01 - Define Portfolio Intelligence exposure contract
+  -> ME-PS01 - Define Position Sizing decision contract
+  -> ME-NL01 - Reframe notification layer as channel-neutral compact summary
+  -> ME-NL02 - Define daily notification payload contract
+  -> ME-NL03 - Select first notification adapter after structured outputs stabilize
+```
+
+ME-CI, ME-PI, ME-PS, and ME-NL are introduced by ME-RM06 because no existing
+job-family IDs used those prefixes.
 
 ## Active Planning Rule
 

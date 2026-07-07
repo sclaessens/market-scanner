@@ -302,6 +302,10 @@ Outcome: Job-scoped sprint naming is approved and documented in `docs/market_eng
 | `ME-SD` | Setup Detection jobs | Detect non-actionable setups and patterns from approved observation inputs |
 | `ME-PR` | Portfolio Review jobs | Apply portfolio-specific context such as positions, allocation, exposure, concentration, and portfolio fit |
 | `ME-DL` | Delivery jobs | Deliver already-approved outputs through reports, Telegram, dashboards, exports, or other user-facing channels |
+| `ME-CI` | ChatGPT Advisory Integration jobs | Define ChatGPT Advisory Layer and Structured Decision Output contracts for artifact-grounded interactive explanation |
+| `ME-PI` | Portfolio Intelligence jobs | Define approved portfolio exposure and context contracts for downstream interpretation |
+| `ME-PS` | Position Sizing jobs | Define downstream position-sizing decision contracts without bypassing Decision Engine authority |
+| `ME-NL` | Notification Layer jobs | Define channel-neutral compact notification payloads and later adapters after structured outputs stabilize |
 | `ME-QA` | Cross-job quality / testing / CI | Contract tests, regression tests, compatibility checks, CI gates, cross-job quality enforcement |
 | `ME-DATA` | Data governance / persistence / retention | Shared data layout, persistence policy, retention policy, cache lifecycle, schema storage, and data governance |
 
@@ -3865,3 +3869,49 @@ Next:
 ```text
 ME-DS01 - Define Dispatch Station output contract for Governor reports
 ```
+
+### ME-RM06 - Reposition Delivery Layer around ChatGPT Advisory Integration
+
+Status: COMPLETED DOCS-ONLY ROADMAP REPOSITION
+
+ME-RM06 formally replaces the old implicit Telegram-first delivery direction
+with a structured advisory sequence:
+
+```text
+Market Engine
+-> Structured Artifacts / Structured Decision Output
+-> ChatGPT Advisory Layer
+-> user
+```
+
+Compact channel output is repositioned as Notification Layer:
+
+```text
+Market Engine
+-> Notification Layer
+-> Messenger / Signal / Telegram / email / later adapters
+```
+
+The backlog now treats ChatGPT Advisory Layer as the primary interactive user
+interface over reproducible Market Engine artifacts. GitHub and artifacts remain
+the source of truth. Notification adapters are deferred until structured output,
+conviction, Position Sizing, Portfolio Intelligence, and ChatGPT context
+contracts are stable.
+
+Follow-up backlog items:
+
+* ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption.
+* ME-CI02 - Define ChatGPT Advisory Context Contract.
+* ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context.
+* ME-CI04 - Define explainability/change-rationale contract.
+* ME-CI05 - Produce daily ChatGPT-ready advisory artifact.
+* ME-PI01 - Define Portfolio Intelligence exposure contract.
+* ME-PS01 - Define Position Sizing decision contract.
+* ME-NL01 - Reframe notification layer as channel-neutral compact summary.
+* ME-NL02 - Define daily notification payload contract.
+* ME-NL03 - Select first notification adapter after structured outputs stabilize.
+
+ME-RM06 changes documentation only. It does not add runtime code, tests,
+scripts, CLI behavior, provider calls, ChatGPT API integration, Telegram,
+Messenger, Signal, email implementation, portfolio/watchlist writes, production
+integrations, or Decision Engine semantic changes.
