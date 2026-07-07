@@ -206,7 +206,7 @@ The new planning order is:
 
 ```text
 ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption (completed)
-  -> ME-CI02 - Define ChatGPT Advisory Context Contract
+  -> ME-CI02 - Define ChatGPT Advisory Context Contract (completed)
   -> ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context
   -> ME-CI04 - Define explainability/change-rationale contract
   -> ME-CI05 - Produce daily ChatGPT-ready advisory artifact
@@ -247,6 +247,43 @@ Next:
 
 ```text
 ME-CI02 - Define ChatGPT Advisory Context Contract
+```
+
+### ME-CI02 - ChatGPT Advisory Context Contract
+
+Status: COMPLETED DOCS-ONLY CONTRACT
+
+ME-CI02 defines the controlled ChatGPT Advisory Context envelope:
+
+```text
+schema_version: chatgpt-advisory-context-v1
+artifact_type: market-engine-chatgpt-advisory-context
+```
+
+The contract composes ME-CI01 Structured Decision Output with Governor,
+Dispatch Station, provenance, freshness, uncertainty, readiness, blocker,
+portfolio-boundary, and recommendation-boundary context.
+
+Allowed advisory eligibility states are:
+
+```text
+eligible
+descriptive_only
+blocked
+```
+
+ChatGPT may explain approved context, but it must not invent missing evidence,
+override readiness, ignore blockers, treat stale data as current, infer
+portfolio state, create actionability, or replace Decision Engine authority.
+
+ME-CI02 is docs-only. It adds no runtime context assembler, ChatGPT API call,
+prompt runner, notification adapter, provider behavior, portfolio/watchlist
+write, or Decision Engine semantic change.
+
+Next:
+
+```text
+ME-CI03 - ChatGPT-readable Portfolio Intelligence context
 ```
 
 ## Active Planning Rule

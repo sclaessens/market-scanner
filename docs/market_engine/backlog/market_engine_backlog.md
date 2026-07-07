@@ -3901,7 +3901,7 @@ contracts are stable.
 Follow-up backlog items:
 
 * ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption. Completed by ME-CI01.
-* ME-CI02 - Define ChatGPT Advisory Context Contract.
+* ME-CI02 - Define ChatGPT Advisory Context Contract. Completed by ME-CI02.
 * ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context.
 * ME-CI04 - Define explainability/change-rationale contract.
 * ME-CI05 - Produce daily ChatGPT-ready advisory artifact.
@@ -3969,7 +3969,66 @@ Dependencies:
 
 Follow-ups:
 
-* ME-CI02 - ChatGPT Advisory Context Contract.
+* ME-CI02 - ChatGPT Advisory Context Contract. Completed by ME-CI02.
+* ME-CI03 - ChatGPT-readable Portfolio Intelligence context.
+* ME-CI04 - explainability/change-rationale contract.
+* ME-CI05 - daily ChatGPT-ready advisory artifact.
+* ME-PI01 - Portfolio Intelligence exposure contract.
+* ME-PS01 - Position Sizing decision contract.
+* ME-NL01 - channel-neutral Notification Layer contract.
+
+### ME-CI02 - ChatGPT Advisory Context Contract
+
+Status: COMPLETED DOCS-ONLY CONTRACT
+
+Goal: define `chatgpt-advisory-context-v1`, the controlled, evidence-backed
+context envelope that a future ChatGPT Advisory Layer may consume.
+
+Scope:
+
+* contract documentation;
+* eligible, descriptive-only, and blocked examples;
+* provenance, freshness, uncertainty, readiness, and blocker semantics;
+* ME-CI01 Structured Decision Output consumption rules;
+* Governor and Dispatch Station context boundaries;
+* portfolio and recommendation boundaries;
+* prohibited inputs and prohibited inferences;
+* fail-closed matrix;
+* audit, roadmap, and backlog updates.
+
+Non-goals:
+
+* no ChatGPT API integration;
+* no prompt runner;
+* no LLM runtime;
+* no Telegram, Messenger, Signal, email, dashboard, or notification
+  integration;
+* no provider, yfinance, SEC, or EDGAR changes;
+* no portfolio/watchlist writes;
+* no Decision Engine, Governor, Dispatch Station, Recommendation Review, or
+  Portfolio Review semantic redesign.
+
+Acceptance criteria:
+
+* Contract name and version are explicit.
+* Advisory eligibility states are defined.
+* Provenance, freshness, uncertainty, readiness, and blockers are represented.
+* ME-CI01 Structured Decision Output consumption is defined.
+* Governor and Dispatch Station integration boundaries are documented.
+* Portfolio context and recommendation boundaries are explicit.
+* Prohibited inputs and prohibited inferences are listed.
+* Fail-closed behavior is documented.
+* Examples exist for eligible, descriptive-only, and blocked advisory contexts.
+* No runtime code is changed.
+
+Dependencies:
+
+* ME-DS01 - Dispatch Station Governor report output contract.
+* ME-RM06 - ChatGPT advisory delivery roadmap reposition.
+* ME-CI01 - Structured Decision Output contract.
+
+Follow-ups:
+
 * ME-CI03 - ChatGPT-readable Portfolio Intelligence context.
 * ME-CI04 - explainability/change-rationale contract.
 * ME-CI05 - daily ChatGPT-ready advisory artifact.
