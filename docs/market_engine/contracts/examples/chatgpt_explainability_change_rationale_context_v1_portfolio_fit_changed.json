@@ -1,0 +1,89 @@
+{
+  "schema_version": "chatgpt-explainability-change-rationale-context-v1",
+  "artifact_type": "market-engine-chatgpt-explainability-change-rationale-context",
+  "generated_at": "2026-07-07T11:20:00Z",
+  "run_id": "me-ci04-example-portfolio-fit-changed",
+  "instrument": {
+    "ticker": "COST",
+    "asset_type": "equity"
+  },
+  "current_run_identity": {
+    "run_id": "current-run-005",
+    "artifact_refs": [
+      "chatgpt-advisory-context-v1:current-run-005",
+      "chatgpt-portfolio-intelligence-context-v1:current-run-005"
+    ]
+  },
+  "reference_run_identity": {
+    "reference_type": "previous_comparable_run",
+    "run_id": "prior-run-005",
+    "artifact_refs": [
+      "chatgpt-advisory-context-v1:prior-run-005",
+      "chatgpt-portfolio-intelligence-context-v1:prior-run-005"
+    ]
+  },
+  "comparison_window": {
+    "mode": "prior_to_current",
+    "current_as_of": "2026-07-07T11:20:00Z",
+    "reference_as_of": "2026-07-01T11:20:00Z"
+  },
+  "availability": {
+    "state": "available",
+    "reason_codes": [
+      "portfolio_context_changed",
+      "standalone_recommendation_unchanged"
+    ]
+  },
+  "change_classification": {
+    "classification": "mixed_change",
+    "materiality": "not_claimed"
+  },
+  "state_transition": {
+    "previous_state": "portfolio_context_partial",
+    "current_state": "portfolio_context_supported",
+    "transition_type": "portfolio_fit_context_changed",
+    "portfolio_impact": "portfolio_context_availability_improved",
+    "blockers_resolved": [
+      "missing_current_ticker_exposure_pct"
+    ],
+    "blockers_persisted": []
+  },
+  "portfolio_rationale": {
+    "standalone_recommendation_state_previous": "human_review_required",
+    "standalone_recommendation_state_current": "human_review_required",
+    "portfolio_fit_previous": "portfolio_context_partial",
+    "portfolio_fit_current": "portfolio_context_supported",
+    "safe_boundary": "Portfolio fit changed while standalone Recommendation Review state remained unchanged."
+  },
+  "reason_attribution": [
+    {
+      "reason_code": "portfolio_context_availability_improved",
+      "level": "explicit_upstream_reason",
+      "causal_scope": "portfolio_fit_only"
+    },
+    {
+      "reason_code": "standalone_recommendation_changed",
+      "level": "prohibited_inference"
+    }
+  ],
+  "permission_boundary": {
+    "allowed": [
+      "explain_portfolio_fit_change",
+      "separate_portfolio_and_standalone_rationale"
+    ],
+    "forbidden": [
+      "claim_standalone_recommendation_improved",
+      "infer_allocation_rationale",
+      "infer_position_size"
+    ]
+  },
+  "validation": {
+    "contract_valid": true,
+    "validation_state": "fully_explainable",
+    "errors": [],
+    "warnings": [],
+    "blocked_reasons": [],
+    "unsupported_claims": [],
+    "semantic_boundary_version": "me-ci04-v1"
+  }
+}

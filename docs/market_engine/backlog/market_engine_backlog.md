@@ -3903,7 +3903,7 @@ Follow-up backlog items:
 * ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption. Completed by ME-CI01.
 * ME-CI02 - Define ChatGPT Advisory Context Contract. Completed by ME-CI02.
 * ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context. Completed by ME-CI03.
-* ME-CI04 - Define explainability/change-rationale contract.
+* ME-CI04 - Define explainability/change-rationale contract. Completed by ME-CI04.
 * ME-CI05 - Produce daily ChatGPT-ready advisory artifact.
 * ME-PI01 - Define Portfolio Intelligence exposure contract.
 * ME-PS01 - Define Position Sizing decision contract.
@@ -3971,7 +3971,7 @@ Follow-ups:
 
 * ME-CI02 - ChatGPT Advisory Context Contract. Completed by ME-CI02.
 * ME-CI03 - ChatGPT-readable Portfolio Intelligence context. Completed by ME-CI03.
-* ME-CI04 - explainability/change-rationale contract.
+* ME-CI04 - explainability/change-rationale contract. Completed by ME-CI04.
 * ME-CI05 - daily ChatGPT-ready advisory artifact.
 * ME-PI01 - Portfolio Intelligence exposure contract.
 * ME-PS01 - Position Sizing decision contract.
@@ -4100,8 +4100,84 @@ Dependencies:
 
 Follow-ups:
 
-* ME-CI04 - explainability/change-rationale contract.
+* ME-CI04 - explainability/change-rationale contract. Completed by ME-CI04.
 * ME-CI05 - daily ChatGPT-ready advisory artifact.
 * ME-PI01 - Portfolio Intelligence exposure contract.
 * future typed schema / validator.
 * future deterministic advisory context assembler.
+
+### ME-CI04 - Explainability / Change-Rationale Contract
+
+Status: COMPLETED DOCS-ONLY CONTRACT
+
+Goal: define `chatgpt-explainability-change-rationale-context-v1`, the
+controlled explainability and change-rationale contract for the ChatGPT advisory
+architecture.
+
+Scope:
+
+* source-of-truth matrix for explanation families;
+* relation to ME-CI01, ME-CI02, and ME-CI03;
+* explanation availability states;
+* current-state rationale;
+* change classification;
+* state transition and evidence delta semantics;
+* reason attribution levels;
+* blocker delta and uncertainty delta;
+* freshness-driven rationale;
+* portfolio rationale;
+* unchanged conclusion semantics;
+* contradiction handling;
+* permission matrix;
+* use-case matrix;
+* temporal comparison rules;
+* fail-closed matrix;
+* JSON examples.
+
+Non-goals:
+
+* no runtime explainability engine;
+* no temporal diff runtime;
+* no artifact comparison engine;
+* no causal attribution engine;
+* no materiality engine;
+* no typed schema or validator;
+* no ChatGPT API integration;
+* no prompt template;
+* no provider, yfinance, SEC, or EDGAR change;
+* no broker integration;
+* no portfolio or watchlist writes;
+* no allocation, position sizing, or rebalancing engine;
+* no Decision Engine, Governor, Recommendation Review, Portfolio Review,
+  Dispatch Station, reporting, delivery, or notification semantic change.
+
+Acceptance criteria:
+
+* Contract identity is explicit:
+  `chatgpt-explainability-change-rationale-context-v1`.
+* Canonical explanation sources are documented.
+* Reason attribution prevents unsupported causal claims.
+* Temporal comparison distinguishes current, reference, previous comparable,
+  previous chronological, and baseline runs.
+* Unchanged conclusion does not imply no evidence changed.
+* Portfolio rationale remains separate from standalone recommendation rationale.
+* Fail-closed behavior is documented.
+* JSON examples validate.
+* No runtime code is changed.
+
+Dependencies:
+
+* ME-RM06 - ChatGPT advisory delivery roadmap reposition.
+* ME-CI01 - Structured Decision Output contract.
+* ME-CI02 - ChatGPT Advisory Context Contract.
+* ME-CI03 - ChatGPT-readable Portfolio Intelligence Context.
+* Recommendation Review, Portfolio Review, Decision Engine handoff, Governor,
+  Dispatch Station, readiness, provenance, freshness, and uncertainty contracts.
+
+Follow-ups:
+
+* ME-CI05 - daily ChatGPT-ready advisory artifact.
+* future typed schema / validator.
+* future deterministic advisory context assembler.
+* future prompt contract.
+* future controlled advisory dry run.

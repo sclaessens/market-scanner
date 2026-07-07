@@ -1,0 +1,82 @@
+{
+  "schema_version": "chatgpt-explainability-change-rationale-context-v1",
+  "artifact_type": "market-engine-chatgpt-explainability-change-rationale-context",
+  "generated_at": "2026-07-07T11:00:00Z",
+  "run_id": "me-ci04-example-current-state",
+  "instrument": {
+    "ticker": "ASML",
+    "asset_type": "equity"
+  },
+  "current_run_identity": {
+    "run_id": "current-run-001",
+    "artifact_refs": [
+      "structured-decision-output-v1:current-run-001",
+      "chatgpt-advisory-context-v1:current-run-001"
+    ]
+  },
+  "reference_run_identity": null,
+  "comparison_window": {
+    "mode": "current_state_only",
+    "reference_required": false
+  },
+  "availability": {
+    "state": "available",
+    "reason_codes": []
+  },
+  "current_state_rationale": {
+    "current_state": "descriptive_only",
+    "state_source": "chatgpt-advisory-context-v1:current-run-001",
+    "supporting_evidence": [
+      {
+        "summary_code": "fundamental_observations_present",
+        "source_ref": "sec-companyfacts-analysis-review-v1:analysis-run-001",
+        "attribution_level": "supported_contributing_factor"
+      }
+    ],
+    "opposing_evidence": [],
+    "blockers": [
+      {
+        "summary_code": "portfolio_context_missing",
+        "source_ref": "sec-companyfacts-portfolio-review-v1:portfolio-run-001",
+        "attribution_level": "explicit_upstream_reason"
+      }
+    ],
+    "uncertainty": [
+      {
+        "summary_code": "setup_context_unavailable",
+        "source_ref": "chatgpt-advisory-context-v1:current-run-001"
+      }
+    ],
+    "limitations": [
+      "Current-state explanation only; no change rationale requested."
+    ]
+  },
+  "reason_attribution": [
+    {
+      "reason_code": "portfolio_context_missing",
+      "level": "explicit_upstream_reason",
+      "allowed_wording": "Upstream context identifies missing portfolio context as a blocker."
+    }
+  ],
+  "permission_boundary": {
+    "allowed": [
+      "explain_current_state",
+      "name_explicit_reasons",
+      "explain_blockers"
+    ],
+    "forbidden": [
+      "infer_root_cause",
+      "claim_material_change",
+      "create_recommendation"
+    ]
+  },
+  "validation": {
+    "contract_valid": true,
+    "validation_state": "fully_explainable",
+    "errors": [],
+    "warnings": [],
+    "blocked_reasons": [],
+    "unsupported_claims": [],
+    "semantic_boundary_version": "me-ci04-v1"
+  }
+}

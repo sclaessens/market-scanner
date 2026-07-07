@@ -1,0 +1,100 @@
+{
+  "schema_version": "chatgpt-explainability-change-rationale-context-v1",
+  "artifact_type": "market-engine-chatgpt-explainability-change-rationale-context",
+  "generated_at": "2026-07-07T11:10:00Z",
+  "run_id": "me-ci04-example-unchanged-mixed-delta",
+  "instrument": {
+    "ticker": "NVDA",
+    "asset_type": "equity"
+  },
+  "current_run_identity": {
+    "run_id": "current-run-003",
+    "artifact_refs": [
+      "chatgpt-advisory-context-v1:current-run-003"
+    ]
+  },
+  "reference_run_identity": {
+    "reference_type": "previous_comparable_run",
+    "run_id": "prior-run-003",
+    "artifact_refs": [
+      "chatgpt-advisory-context-v1:prior-run-003"
+    ]
+  },
+  "comparison_window": {
+    "mode": "prior_to_current",
+    "current_as_of": "2026-07-07T11:10:00Z",
+    "reference_as_of": "2026-07-01T11:10:00Z"
+  },
+  "availability": {
+    "state": "partial",
+    "reason_codes": [
+      "mixed_evidence_delta",
+      "causal_attribution_limited"
+    ]
+  },
+  "change_classification": {
+    "classification": "mixed_change",
+    "state_changed": false,
+    "materiality": "not_claimed"
+  },
+  "unchanged_conclusion_rationale": {
+    "pattern": "conclusion_unchanged_mixed_changes",
+    "previous_state": "eligible",
+    "current_state": "eligible",
+    "safe_summary_code": "same_eligibility_with_mixed_evidence_delta",
+    "forbidden_summary": "nothing_changed"
+  },
+  "evidence_delta": [
+    {
+      "evidence_family": "fundamental_observations",
+      "previous_state": "available",
+      "current_state": "available",
+      "change_type": "unchanged",
+      "attribution_level": "associated_change_only"
+    },
+    {
+      "evidence_family": "freshness",
+      "previous_state": "fresh",
+      "current_state": "mixed",
+      "change_type": "became_stale",
+      "attribution_level": "supported_contributing_factor"
+    },
+    {
+      "evidence_family": "portfolio_context",
+      "previous_state": "partial",
+      "current_state": "available",
+      "change_type": "refreshed",
+      "attribution_level": "supported_contributing_factor"
+    }
+  ],
+  "reason_attribution": [
+    {
+      "reason_code": "mixed_changes_do_not_change_eligibility",
+      "level": "supported_contributing_factor",
+      "causal_exclusivity": false
+    }
+  ],
+  "permission_boundary": {
+    "allowed": [
+      "explain_unchanged_conclusion",
+      "describe_mixed_evidence_delta",
+      "explain_freshness_caveat"
+    ],
+    "forbidden": [
+      "say_nothing_changed",
+      "claim_offsetting_causes_without_upstream_support",
+      "rank_factor_importance"
+    ]
+  },
+  "validation": {
+    "contract_valid": true,
+    "validation_state": "eligible_with_mandatory_caveat",
+    "errors": [],
+    "warnings": [
+      "Mixed deltas do not prove causal offset."
+    ],
+    "blocked_reasons": [],
+    "unsupported_claims": [],
+    "semantic_boundary_version": "me-ci04-v1"
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "schema_version": "chatgpt-explainability-change-rationale-context-v1",
+  "artifact_type": "market-engine-chatgpt-explainability-change-rationale-context",
+  "generated_at": "2026-07-07T11:05:00Z",
+  "run_id": "me-ci04-example-recommendation-strengthened",
+  "instrument": {
+    "ticker": "AMD",
+    "asset_type": "equity"
+  },
+  "current_run_identity": {
+    "run_id": "current-run-002",
+    "artifact_refs": [
+      "structured-decision-output-v1:current-run-002"
+    ]
+  },
+  "reference_run_identity": {
+    "reference_type": "previous_comparable_run",
+    "run_id": "prior-run-002",
+    "artifact_refs": [
+      "structured-decision-output-v1:prior-run-002"
+    ]
+  },
+  "comparison_window": {
+    "mode": "prior_to_current",
+    "current_as_of": "2026-07-07T11:00:00Z",
+    "reference_as_of": "2026-07-01T11:00:00Z"
+  },
+  "availability": {
+    "state": "available",
+    "reason_codes": []
+  },
+  "change_classification": {
+    "classification": "state_changed",
+    "materiality": "not_claimed",
+    "materiality_reason": "No upstream materiality threshold is defined."
+  },
+  "state_transition": {
+    "previous_state": "descriptive_only",
+    "current_state": "eligible",
+    "transition_type": "advisory_eligibility_changed",
+    "readiness_impact": "improved_to_advisory_eligible",
+    "eligibility_impact": "eligible",
+    "blockers_added": [],
+    "blockers_resolved": [
+      "missing_setup_context"
+    ],
+    "blockers_persisted": []
+  },
+  "evidence_delta": [
+    {
+      "evidence_family": "setup_context",
+      "identifier": "setup-run-002",
+      "previous_state": "missing",
+      "current_state": "available",
+      "change_type": "added",
+      "attribution_level": "explicit_upstream_reason",
+      "affected_downstream_states": [
+        "advisory_eligibility"
+      ]
+    },
+    {
+      "evidence_family": "portfolio_context",
+      "identifier": "portfolio-run-002",
+      "previous_state": "available",
+      "current_state": "available",
+      "change_type": "unchanged",
+      "attribution_level": "associated_change_only",
+      "affected_downstream_states": []
+    }
+  ],
+  "reason_attribution": [
+    {
+      "reason_code": "missing_setup_context_resolved",
+      "level": "explicit_upstream_reason",
+      "causal_exclusivity": false
+    }
+  ],
+  "permission_boundary": {
+    "allowed": [
+      "describe_state_transition",
+      "describe_evidence_delta",
+      "name_explicit_reasons"
+    ],
+    "requires_caveat": [
+      "do_not_claim_materially_strengthened"
+    ],
+    "forbidden": [
+      "claim_exclusive_cause",
+      "invent_materiality",
+      "create_actionable_recommendation"
+    ]
+  },
+  "validation": {
+    "contract_valid": true,
+    "validation_state": "fully_explainable",
+    "errors": [],
+    "warnings": [
+      "Materiality is not claimable."
+    ],
+    "blocked_reasons": [],
+    "unsupported_claims": [],
+    "semantic_boundary_version": "me-ci04-v1"
+  }
+}
