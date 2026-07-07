@@ -1,0 +1,114 @@
+{
+  "schema_version": "chatgpt-advisory-context-v1",
+  "artifact_type": "market-engine-chatgpt-advisory-context",
+  "generated_at": "2026-07-07T13:00:00Z",
+  "run_id": "me-ci02-example-descriptive-only",
+  "ticker": "DESCX",
+  "instrument": {
+    "ticker": "DESCX",
+    "name": "Descriptive Example Corp.",
+    "asset_type": "equity",
+    "exchange": "EXAMPLE",
+    "currency": "USD"
+  },
+  "source_artifact_refs": ["artifact:analysis_context:DESCX:2026-07-07"],
+  "advisory_eligibility": {
+    "state": "descriptive_only",
+    "reason_codes": ["company_profile_only_context_non_actionable"],
+    "allowed_scope": ["explain_observations", "describe_missing_evidence"],
+    "required_disclosures": ["descriptive_only", "not_actionable"],
+    "blocking_reasons": ["missing_structured_decision_output"]
+  },
+  "structured_decision_output": {
+    "schema_version": null,
+    "artifact_ref": null,
+    "embedded_fields": [],
+    "fields_referenced_only": [],
+    "semantic_override_allowed": false
+  },
+  "governor_context": {
+    "included": false,
+    "artifact_refs": [],
+    "readiness": "not_available",
+    "blockers": ["governor_output_missing"],
+    "warnings": ["descriptive_only"],
+    "authority_flags": {
+      "execution_authorized": false,
+      "portfolio_mutation_authorized": false,
+      "order_generation_authorized": false
+    }
+  },
+  "dispatch_station_context": {
+    "include_mode": "not_included",
+    "artifact_ref": null,
+    "sections_allowed": [],
+    "semantic_source_of_truth": false
+  },
+  "provenance_context": {
+    "evidence_families_present": ["company_profile"],
+    "evidence_families_missing": ["structured_decision_output", "governor", "portfolio_context"],
+    "artifact_refs": ["artifact:company_profile_context:DESCX:2026-07-07"],
+    "lineage_refs": ["lineage:company_profile_only:DESCX"],
+    "missing_provenance": [],
+    "raw_payload_included": false
+  },
+  "freshness_context": {
+    "global_freshness_status": "fresh",
+    "family_freshness": [
+      {
+        "family": "company_profile",
+        "status": "fresh",
+        "as_of": "2026-07-07T12:00:00Z"
+      }
+    ],
+    "stale_markers": [],
+    "stale_reasons": [],
+    "unknown_freshness": []
+  },
+  "uncertainty_context": {
+    "confidence": 45,
+    "uncertainty_level": "high",
+    "missing_evidence": ["structured_decision_output", "portfolio_context", "approved_price_context"],
+    "contradictory_evidence": [],
+    "unresolved_blockers": ["missing_decision_context"],
+    "assumptions": [],
+    "limitations": ["descriptive_only", "not_recommendation_ready"]
+  },
+  "portfolio_context_boundary": {
+    "portfolio_context_present": false,
+    "approved_context_ref": null,
+    "portfolio_specific_advisory_allowed": false,
+    "forbidden_if_missing": ["position_size", "cash_dependency", "allocation", "add_or_reduce_guidance"]
+  },
+  "recommendation_boundary": {
+    "upstream_readiness": "descriptive_only",
+    "evidence_summary_allowed": true,
+    "analytical_interpretation_allowed": false,
+    "recommendation_interpretation_allowed": false,
+    "advisory_wording_allowed": false,
+    "max_actionability_claim": "none"
+  },
+  "human_advisory_guidance": {
+    "allowed_interpretation_scope": ["explain_observations", "explain_missing_evidence"],
+    "prohibited_inference_scope": ["recommendation", "actionability", "portfolio_sizing"],
+    "mandatory_caveats": ["descriptive_only", "insufficient_context_for_recommendation"],
+    "required_blocker_disclosure": ["missing_structured_decision_output"],
+    "required_stale_data_disclosure": [],
+    "required_uncertainty_disclosure": ["high_uncertainty"]
+  },
+  "prohibited_inputs": ["raw_unvalidated_web_snippets", "unsupported_target_price"],
+  "prohibited_inferences": ["recommendation_from_company_profile_only", "portfolio_state_from_absence"],
+  "fail_closed": {
+    "context_status": "valid_with_warnings",
+    "advisory_status": "descriptive_only",
+    "reason_codes": ["missing_structured_decision_output"],
+    "recoverable": true,
+    "allowed_fallback_scope": ["descriptive_explanation"]
+  },
+  "validation": {
+    "contract_status": "valid_with_warnings",
+    "required_fields_present": true,
+    "semantic_warnings": ["descriptive_only_must_not_be_treated_as_actionable"],
+    "fail_closed_reason": null
+  }
+}

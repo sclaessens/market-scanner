@@ -1,0 +1,123 @@
+{
+  "schema_version": "chatgpt-advisory-context-v1",
+  "artifact_type": "market-engine-chatgpt-advisory-context",
+  "generated_at": "2026-07-07T13:00:00Z",
+  "run_id": "me-ci02-example-eligible",
+  "ticker": "EXMPL",
+  "instrument": {
+    "ticker": "EXMPL",
+    "name": "Example Semiconductors Inc.",
+    "asset_type": "equity",
+    "exchange": "EXAMPLE",
+    "currency": "USD"
+  },
+  "source_artifact_refs": [
+    "artifact:structured_decision_output:EXMPL:2026-07-07",
+    "artifact:governor_report:EXMPL:2026-07-07",
+    "artifact:dispatch_station_report:EXMPL:2026-07-07"
+  ],
+  "advisory_eligibility": {
+    "state": "eligible",
+    "reason_codes": ["structured_decision_output_valid", "fresh_required_context"],
+    "allowed_scope": ["explain_decision_state", "compare_with_context", "scenario_discussion"],
+    "required_disclosures": ["human_review_required"],
+    "blocking_reasons": []
+  },
+  "structured_decision_output": {
+    "schema_version": "structured-decision-output-v1",
+    "artifact_ref": "artifact:structured_decision_output:EXMPL:2026-07-07",
+    "embedded_fields": ["data_coverage", "decision", "scores", "portfolio_context", "risk", "levels", "validation"],
+    "fields_referenced_only": ["full_evidence"],
+    "semantic_override_allowed": false
+  },
+  "governor_context": {
+    "included": true,
+    "artifact_refs": ["artifact:governor_evaluation:EXMPL:2026-07-07"],
+    "readiness": "evaluation_report",
+    "blockers": [],
+    "warnings": ["human_review_required"],
+    "authority_flags": {
+      "execution_authorized": false,
+      "portfolio_mutation_authorized": false,
+      "order_generation_authorized": false
+    }
+  },
+  "dispatch_station_context": {
+    "include_mode": "summary_allowed",
+    "artifact_ref": "artifact:dispatch_station_report:EXMPL:2026-07-07",
+    "sections_allowed": ["executive_summary", "evidence_readiness", "risk_and_limitations"],
+    "semantic_source_of_truth": false
+  },
+  "provenance_context": {
+    "evidence_families_present": ["structured_decision_output", "governor", "dispatch_station", "portfolio_context"],
+    "evidence_families_missing": [],
+    "artifact_refs": ["artifact:structured_decision_output:EXMPL:2026-07-07"],
+    "lineage_refs": ["lineage:source_to_governor:EXMPL"],
+    "missing_provenance": [],
+    "raw_payload_included": false
+  },
+  "freshness_context": {
+    "global_freshness_status": "fresh",
+    "family_freshness": [
+      {
+        "family": "structured_decision_output",
+        "status": "fresh",
+        "as_of": "2026-07-07T12:00:00Z"
+      },
+      {
+        "family": "portfolio_context",
+        "status": "fresh",
+        "as_of": "2026-07-07T12:00:00Z"
+      }
+    ],
+    "stale_markers": [],
+    "stale_reasons": [],
+    "unknown_freshness": []
+  },
+  "uncertainty_context": {
+    "confidence": 82,
+    "uncertainty_level": "medium",
+    "missing_evidence": [],
+    "contradictory_evidence": [],
+    "unresolved_blockers": [],
+    "assumptions": ["synthetic_example_values"],
+    "limitations": ["not_production_advice", "human_review_required"]
+  },
+  "portfolio_context_boundary": {
+    "portfolio_context_present": true,
+    "approved_context_ref": "artifact:portfolio_review:EXMPL:2026-07-07",
+    "portfolio_specific_advisory_allowed": true,
+    "forbidden_if_missing": ["position_size", "cash_dependency", "allocation"]
+  },
+  "recommendation_boundary": {
+    "upstream_readiness": "eligible",
+    "evidence_summary_allowed": true,
+    "analytical_interpretation_allowed": true,
+    "recommendation_interpretation_allowed": true,
+    "advisory_wording_allowed": true,
+    "max_actionability_claim": "structured_decision_output"
+  },
+  "human_advisory_guidance": {
+    "allowed_interpretation_scope": ["explain", "compare", "scenario_discussion"],
+    "prohibited_inference_scope": ["order_generation", "broker_instruction", "invent_missing_values"],
+    "mandatory_caveats": ["human_review_required"],
+    "required_blocker_disclosure": [],
+    "required_stale_data_disclosure": [],
+    "required_uncertainty_disclosure": ["confidence_not_certainty"]
+  },
+  "prohibited_inputs": ["raw_unvalidated_web_snippets", "broker_secrets"],
+  "prohibited_inferences": ["portfolio_mutation", "order_generation", "override_structured_decision_output"],
+  "fail_closed": {
+    "context_status": "valid",
+    "advisory_status": "eligible",
+    "reason_codes": [],
+    "recoverable": true,
+    "allowed_fallback_scope": []
+  },
+  "validation": {
+    "contract_status": "valid",
+    "required_fields_present": true,
+    "semantic_warnings": ["synthetic_example_only"],
+    "fail_closed_reason": null
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "schema_version": "chatgpt-advisory-context-v1",
+  "artifact_type": "market-engine-chatgpt-advisory-context",
+  "generated_at": "2026-07-07T13:00:00Z",
+  "run_id": "me-ci02-example-blocked",
+  "ticker": "BLKAD",
+  "instrument": {
+    "ticker": "BLKAD",
+    "name": "Blocked Advisory Example",
+    "asset_type": "equity",
+    "exchange": "EXAMPLE",
+    "currency": "USD"
+  },
+  "source_artifact_refs": ["artifact:structured_decision_output:BLKAD:2026-07-07"],
+  "advisory_eligibility": {
+    "state": "blocked",
+    "reason_codes": ["stale_critical_evidence", "conflicting_readiness_states"],
+    "allowed_scope": ["explain_blockers"],
+    "required_disclosures": ["blocked", "stale_critical_evidence"],
+    "blocking_reasons": ["stale_price_context", "governor_dispatch_conflict"]
+  },
+  "structured_decision_output": {
+    "schema_version": "structured-decision-output-v1",
+    "artifact_ref": "artifact:structured_decision_output:BLKAD:2026-07-07",
+    "embedded_fields": ["validation", "data_coverage", "decision"],
+    "fields_referenced_only": ["scores", "levels", "evidence"],
+    "semantic_override_allowed": false
+  },
+  "governor_context": {
+    "included": true,
+    "artifact_refs": ["artifact:governor_evaluation:BLKAD:2026-07-07"],
+    "readiness": "blocked",
+    "blockers": ["stale_price_context"],
+    "warnings": ["do_not_use_for_recommendation"],
+    "authority_flags": {
+      "execution_authorized": false,
+      "portfolio_mutation_authorized": false,
+      "order_generation_authorized": false
+    }
+  },
+  "dispatch_station_context": {
+    "include_mode": "artifact_reference_only",
+    "artifact_ref": "artifact:dispatch_station_report:BLKAD:2026-07-07",
+    "sections_allowed": [],
+    "semantic_source_of_truth": false
+  },
+  "provenance_context": {
+    "evidence_families_present": ["structured_decision_output", "governor"],
+    "evidence_families_missing": ["fresh_price_context"],
+    "artifact_refs": ["artifact:structured_decision_output:BLKAD:2026-07-07"],
+    "lineage_refs": ["lineage:governor:BLKAD"],
+    "missing_provenance": ["price_context_provenance"],
+    "raw_payload_included": false
+  },
+  "freshness_context": {
+    "global_freshness_status": "stale",
+    "family_freshness": [
+      {
+        "family": "approved_price_context",
+        "status": "stale",
+        "as_of": "2026-06-01T12:00:00Z"
+      }
+    ],
+    "stale_markers": ["approved_price_context"],
+    "stale_reasons": ["older_than_policy_threshold"],
+    "unknown_freshness": []
+  },
+  "uncertainty_context": {
+    "confidence": null,
+    "uncertainty_level": "blocked",
+    "missing_evidence": ["fresh_price_context"],
+    "contradictory_evidence": ["governor_dispatch_readiness_mismatch"],
+    "unresolved_blockers": ["stale_price_context", "conflicting_readiness_states"],
+    "assumptions": [],
+    "limitations": ["advisory_blocked"]
+  },
+  "portfolio_context_boundary": {
+    "portfolio_context_present": false,
+    "approved_context_ref": null,
+    "portfolio_specific_advisory_allowed": false,
+    "forbidden_if_missing": ["position_size", "allocation", "add_or_reduce_guidance"]
+  },
+  "recommendation_boundary": {
+    "upstream_readiness": "blocked",
+    "evidence_summary_allowed": true,
+    "analytical_interpretation_allowed": false,
+    "recommendation_interpretation_allowed": false,
+    "advisory_wording_allowed": false,
+    "max_actionability_claim": "none"
+  },
+  "human_advisory_guidance": {
+    "allowed_interpretation_scope": ["explain_blockers"],
+    "prohibited_inference_scope": ["recommendation", "actionability", "freshness_override"],
+    "mandatory_caveats": ["blocked", "stale_critical_evidence"],
+    "required_blocker_disclosure": ["stale_price_context", "conflicting_readiness_states"],
+    "required_stale_data_disclosure": ["approved_price_context"],
+    "required_uncertainty_disclosure": ["confidence_unavailable"]
+  },
+  "prohibited_inputs": ["stale_snapshot_without_marker", "current_price_without_timestamp"],
+  "prohibited_inferences": ["ignore_readiness_blocker", "treat_stale_as_current"],
+  "fail_closed": {
+    "context_status": "context_invalid",
+    "advisory_status": "blocked",
+    "reason_codes": ["stale_critical_evidence", "conflicting_readiness_states"],
+    "recoverable": true,
+    "allowed_fallback_scope": ["blocker_explanation_only"]
+  },
+  "validation": {
+    "contract_status": "fail_closed",
+    "required_fields_present": true,
+    "semantic_warnings": [],
+    "fail_closed_reason": "stale_critical_evidence"
+  }
+}
