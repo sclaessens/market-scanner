@@ -1,0 +1,70 @@
+{
+  "schema_version": "chatgpt-explainability-change-rationale-context-v1",
+  "artifact_type": "market-engine-chatgpt-explainability-change-rationale-context",
+  "generated_at": "2026-07-07T11:15:00Z",
+  "run_id": "me-ci04-example-change-unavailable",
+  "instrument": {
+    "ticker": "META",
+    "asset_type": "equity"
+  },
+  "current_run_identity": {
+    "run_id": "current-run-004",
+    "artifact_refs": [
+      "chatgpt-advisory-context-v1:current-run-004"
+    ]
+  },
+  "reference_run_identity": null,
+  "comparison_window": {
+    "mode": "requested_but_unavailable",
+    "reference_required": true,
+    "missing_reason": "no_prior_comparable_run"
+  },
+  "availability": {
+    "state": "not_comparable",
+    "reason_codes": [
+      "missing_reference_run",
+      "causal_attribution_unsupported"
+    ]
+  },
+  "current_state_rationale": {
+    "current_state": "descriptive_only",
+    "state_source": "chatgpt-advisory-context-v1:current-run-004",
+    "explain_current_state_allowed": true
+  },
+  "change_classification": {
+    "classification": "not_comparable",
+    "materiality": "not_claimed"
+  },
+  "state_transition": null,
+  "evidence_delta": [],
+  "reason_attribution": [
+    {
+      "reason_code": "change_rationale_unavailable",
+      "level": "unknown"
+    }
+  ],
+  "permission_boundary": {
+    "allowed": [
+      "explain_current_state",
+      "explain_why_change_rationale_unavailable"
+    ],
+    "forbidden": [
+      "infer_no_change",
+      "reconstruct_prior_state",
+      "claim_root_cause"
+    ]
+  },
+  "validation": {
+    "contract_valid": true,
+    "validation_state": "change_rationale_unavailable",
+    "errors": [],
+    "warnings": [
+      "No prior comparable run is available."
+    ],
+    "blocked_reasons": [],
+    "unsupported_claims": [
+      "why_changed_since_previous_analysis"
+    ],
+    "semantic_boundary_version": "me-ci04-v1"
+  }
+}

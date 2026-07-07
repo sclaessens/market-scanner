@@ -208,7 +208,7 @@ The new planning order is:
 ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption (completed)
   -> ME-CI02 - Define ChatGPT Advisory Context Contract (completed)
   -> ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context (completed)
-  -> ME-CI04 - Define explainability/change-rationale contract
+  -> ME-CI04 - Define explainability/change-rationale contract (completed)
   -> ME-CI05 - Produce daily ChatGPT-ready advisory artifact
   -> ME-PI01 - Define Portfolio Intelligence exposure contract
   -> ME-PS01 - Define Position Sizing decision contract
@@ -328,6 +328,54 @@ Next:
 
 ```text
 ME-CI04 - Define explainability/change-rationale contract
+```
+
+### ME-CI04 - Explainability / Change-Rationale Contract
+
+Status: COMPLETED DOCS-ONLY CONTRACT
+
+ME-CI04 defines the controlled Explainability / Change-Rationale Context:
+
+```text
+schema_version: chatgpt-explainability-change-rationale-context-v1
+artifact_type: market-engine-chatgpt-explainability-change-rationale-context
+```
+
+The contract composes ME-CI01 Structured Decision Output, ME-CI02 Advisory
+Context, ME-CI03 Portfolio Intelligence Context, Recommendation Review,
+Portfolio Review, Decision Engine handoff, Governor explanations, Dispatch
+Station presentation context, readiness, provenance, freshness, uncertainty,
+and blockers.
+
+ME-CI04 defines reason attribution levels:
+
+```text
+explicit_upstream_reason
+supported_contributing_factor
+associated_change_only
+unknown
+prohibited_inference
+```
+
+It preserves these boundaries:
+
+```text
+no prior comparable run != no change
+missing evidence delta != unchanged evidence
+same recommendation state != same underlying evidence
+changed recommendation state != one proven causal reason
+```
+
+ME-CI04 is docs-only. It adds no runtime explainability engine, temporal diff
+engine, causal attribution engine, materiality engine, schema validator,
+deterministic assembler, ChatGPT API call, prompt runner, provider behavior,
+portfolio/watchlist write, allocation engine, sizing engine, rebalancing engine,
+or Decision Engine semantic change.
+
+Next:
+
+```text
+ME-CI05 - Produce daily ChatGPT-ready advisory artifact
 ```
 
 ## Active Planning Rule
