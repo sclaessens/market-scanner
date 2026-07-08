@@ -378,6 +378,60 @@ Next:
 ME-CI05 - Produce daily ChatGPT-ready advisory artifact
 ```
 
+### ME-CI05 - Daily ChatGPT-ready advisory artifact
+
+Status: COMPLETED RUNTIME COMPOSITION LAYER
+
+ME-CI05 introduces the first deterministic local composition layer for:
+
+```text
+schema_version: market-engine-chatgpt-ready-advisory-artifact-v1
+artifact_type: market-engine-chatgpt-ready-advisory-artifact
+```
+
+It assembles explicit local Market Engine JSON artifacts into a ChatGPT-ready
+advisory artifact while preserving Structured Decision Output, Portfolio
+Intelligence, Explainability, Governor, Dispatch, provenance, freshness,
+uncertainty, blocker, and missingness boundaries.
+
+ME-CI05 does not call ChatGPT, execute prompts, generate advisory prose, fetch
+market data, deliver notifications, write portfolio or watchlist state, contact
+brokers, or change Decision Engine authority.
+
+Next:
+
+```text
+ME-CI06 - Advisory artifact schema validation and contract enforcement
+```
+
+### ME-CI06 - Advisory artifact schema validation and contract enforcement
+
+Status: COMPLETED RUNTIME CONTRACT ENFORCEMENT
+
+ME-CI06 adds deterministic, fail-closed validation for the ME-CI05 advisory
+artifact. It enforces:
+
+* top-level artifact shape;
+* contract identity, artifact type, and schema version;
+* embedded, referenced, and absent context semantics;
+* Structured Decision Output, Portfolio Intelligence, Explainability, Governor,
+  and Dispatch context compatibility;
+* cross-context ticker and run identity consistency;
+* missingness and freshness boundaries;
+* contextual forbidden authority fields;
+* validation evidence in persisted artifacts and manifests.
+
+ME-CI06 makes a validated deterministic ChatGPT-ready advisory artifact
+possible. It does not generate ChatGPT advisory answers, call OpenAI APIs,
+execute prompts, deliver notifications, contact brokers, mutate portfolio or
+watchlist state, or add allocation authority.
+
+Next:
+
+```text
+ME-CI07 - Define ChatGPT advisory prompt and response-grounding contract
+```
+
 ## Active Planning Rule
 
 After ME-RM03, do not insert manual operator package preparation, QA, polish, delivery, portfolio, governance, or candidate-classification refinement sprints ahead of ME-SA01 unless a concrete blocker is discovered in the automated cached-source acquisition contract. The project should first define application-owned source acquisition before continuing real cached-source execution or operator preview work.
