@@ -1,0 +1,117 @@
+{
+  "schema_version": "chatgpt-advisory-response-grounding-v1",
+  "artifact_type": "market-engine-chatgpt-advisory-response-grounding-example",
+  "response_identity": {
+    "response_id": "synthetic-partial-001",
+    "response_mode": "partial_answer",
+    "generated_at": "2026-07-08T12:02:00Z",
+    "non_production_example": true
+  },
+  "source_artifact_identity": {
+    "schema_version": "market-engine-chatgpt-ready-advisory-artifact-v1",
+    "artifact_type": "market-engine-chatgpt-ready-advisory-artifact",
+    "run_id": "synthetic-run-003",
+    "validation_status": "valid",
+    "validation_issue_count": 0
+  },
+  "instrument_identity": {
+    "ticker": "PARTL",
+    "name": "Partial Example Corporation",
+    "asset_type": "equity"
+  },
+  "question_classification": {
+    "question_class": "portfolio_context_question",
+    "requested_scope": "explain current state and portfolio impact",
+    "required_context_families": [
+      "structured_decision_output",
+      "portfolio_intelligence_context"
+    ],
+    "unavailable_context_families": [
+      "portfolio_intelligence_context"
+    ]
+  },
+  "response_mode": "partial_answer",
+  "summary": "The current synthetic state can be described, but portfolio impact cannot be determined because portfolio context is absent.",
+  "assessment": [
+    {
+      "claim_id": "claim-001",
+      "claim_type": "upstream_state_description",
+      "text": "The source artifact contains a current non-production state for the instrument.",
+      "grounding_ref_ids": [
+        "ref-001"
+      ]
+    }
+  ],
+  "evidence_supporting": [
+    {
+      "claim_id": "claim-002",
+      "claim_type": "evidence_summary",
+      "text": "Structured context is available for the instrument-level explanation.",
+      "grounding_ref_ids": [
+        "ref-001"
+      ]
+    }
+  ],
+  "evidence_opposing": [],
+  "blockers": [
+    {
+      "claim_id": "claim-003",
+      "claim_type": "missingness_statement",
+      "text": "Portfolio context is absent."
+    }
+  ],
+  "uncertainty": [
+    {
+      "claim_id": "claim-004",
+      "claim_type": "uncertainty_statement",
+      "text": "Any portfolio-specific interpretation would be unsupported."
+    }
+  ],
+  "freshness_caveats": [],
+  "portfolio_context": {
+    "availability": "absent",
+    "disclosure_required": true,
+    "claims": []
+  },
+  "change_rationale": {
+    "availability": "not_requested",
+    "attribution_level": "not_applicable",
+    "claims": []
+  },
+  "required_disclosures": [
+    "missing_portfolio_disclosure",
+    "non_production_example"
+  ],
+  "unable_to_determine": [
+    {
+      "claim_id": "claim-005",
+      "claim_type": "missingness_statement",
+      "text": "Portfolio impact, position relationship, exposure effect, and concentration impact cannot be determined."
+    }
+  ],
+  "evidence_references": [
+    {
+      "ref_id": "ref-001",
+      "claim_id": "claim-001",
+      "claim_type": "upstream_state_description",
+      "source_context_family": "structured_decision_output",
+      "artifact_ref": "synthetic-advisory-artifact-003",
+      "run_id": "synthetic-run-003",
+      "path": "$.structured_decision_output",
+      "support_type": "summarized"
+    }
+  ],
+  "grounding_summary": {
+    "status": "partially_grounded",
+    "issue_count": 0,
+    "issues": []
+  },
+  "authority_boundary": {
+    "allocation_authority": false,
+    "position_sizing_authority": false,
+    "execution_authority": false,
+    "broker_authority": false,
+    "portfolio_write_authority": false,
+    "watchlist_write_authority": false
+  }
+}
