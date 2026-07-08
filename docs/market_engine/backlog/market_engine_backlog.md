@@ -38,6 +38,25 @@ Backlog items do not authorize implementation unless the sprint scope explicitly
 * Cross-job work must be explicitly labeled as governance, QA, data governance, or integration contract work.
 * Analysis, recommendation, portfolio review, and delivery authority must remain separated.
 
+## Current ChatGPT Advisory Artifact Chain
+
+The current ME-CI advisory chain is:
+
+```text
+ME-CI01 - Structured Decision Output contract (completed)
+  -> ME-CI02 - ChatGPT Advisory Context Contract (completed)
+  -> ME-CI03 - ChatGPT-readable Portfolio Intelligence Context (completed)
+  -> ME-CI04 - Explainability / Change-Rationale Contract (completed)
+  -> ME-CI05 - Daily ChatGPT-ready advisory artifact (completed)
+  -> ME-CI06 - Advisory artifact schema validation and contract enforcement (completed)
+  -> ME-CI07 - Define ChatGPT advisory prompt and response-grounding contract (next)
+```
+
+ME-CI06 enables a validated deterministic ChatGPT-ready advisory artifact. It
+does not enable ChatGPT advisory answer generation, prompt execution, OpenAI API
+integration, notification delivery, broker integration, portfolio mutation,
+watchlist mutation, or autonomous decision making.
+
 ## Historical Foundation Phase
 
 `ME01–ME13` remain historical foundation sprints and must not be renumbered.

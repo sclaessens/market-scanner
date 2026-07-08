@@ -7,6 +7,12 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Mapping
 
+from market_engine.advisory.advisory_artifact_validation import (
+    ADVISORY_ARTIFACT_VALIDATOR_VERSION,
+    validation_evidence_payload,
+    validate_chatgpt_ready_advisory_artifact,
+)
+
 
 CHATGPT_READY_ADVISORY_ARTIFACT_SCHEMA_VERSION = (
     "market-engine-chatgpt-ready-advisory-artifact-v1"
@@ -384,6 +390,7 @@ def compose_chatgpt_ready_advisory_artifact_from_directory(
         artifact,
         output_root=output_root,
         allow_overwrite=allow_overwrite,
+        validated_at=generated_at,
     )
 
 
@@ -392,6 +399,7 @@ def persist_chatgpt_ready_advisory_artifact(
     *,
     output_root: Path | str = CHATGPT_READY_ADVISORY_ARTIFACT_PATH_CATEGORY,
     allow_overwrite: bool = False,
+    validated_at: str | None = None,
 ) -> ChatGPTReadyAdvisoryArtifactPersistenceResult:
     payload = _validated_advisory_artifact(artifact)
     run_id = _safe_path_segment(
@@ -402,6 +410,25 @@ def persist_chatgpt_ready_advisory_artifact(
         payload["instrument_identity"]["ticker"],
         field_name="ticker",
     )
+    validation_result = validate_chatgpt_ready_advisory_artifact(payload)
+    if not validation_result.valid:
+        issue_codes = ", ".join(issue.code for issue in validation_result.issues)
+        raise ChatGPTReadyAdvisoryArtifactError(
+            "ChatGPT-ready advisory artifact failed contract validation: "
+            + issue_codes
+        )
+    validation_timestamp = validated_at or payload["generated_at"]
+    validation_evidence = validation_evidence_payload(
+        validation_result,
+        validated_at=validation_timestamp,
+    )
+    payload = {
+        **payload,
+        "validation_summary": {
+            **payload["validation_summary"],
+            "contract_validation": validation_evidence,
+        },
+    }
     root = _validated_output_root(output_root)
     root_resolved = root.resolve()
     run_directory = _resolved_child(root_resolved, run_id)
@@ -427,6 +454,11 @@ def persist_chatgpt_ready_advisory_artifact(
         "generated_at": payload["generated_at"],
         "composition_state": payload["composition_status"]["state"],
         "advisory_eligibility_state": payload["advisory_eligibility"]["state"],
+        "validation_status": validation_result.status,
+        "validator_version": ADVISORY_ARTIFACT_VALIDATOR_VERSION,
+        "validated_schema_version": validation_result.validated_schema_version,
+        "validation_timestamp": validation_timestamp,
+        "validation_issue_count": len(validation_result.issues),
         "artifact_relative_path": _relative_posix(artifact_path, root_resolved),
         "manifest_relative_path": _relative_posix(manifest_path, root_resolved),
     }
