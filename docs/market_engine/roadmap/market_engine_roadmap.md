@@ -209,7 +209,10 @@ ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption (co
   -> ME-CI02 - Define ChatGPT Advisory Context Contract (completed)
   -> ME-CI03 - Add ChatGPT-readable Portfolio Intelligence context (completed)
   -> ME-CI04 - Define explainability/change-rationale contract (completed)
-  -> ME-CI05 - Produce daily ChatGPT-ready advisory artifact
+  -> ME-CI05 - Produce daily ChatGPT-ready advisory artifact (completed)
+  -> ME-CI06 - Advisory artifact schema validation and contract enforcement (completed)
+  -> ME-CI07 - ChatGPT advisory prompt and response-grounding contract (completed)
+  -> ME-CI08 - Controlled advisory response dry run and grounding validator scaffold
   -> ME-PI01 - Define Portfolio Intelligence exposure contract
   -> ME-PS01 - Define Position Sizing decision contract
   -> ME-NL01 - Reframe notification layer as channel-neutral compact summary
@@ -430,6 +433,52 @@ Next:
 
 ```text
 ME-CI07 - Define ChatGPT advisory prompt and response-grounding contract
+```
+
+### ME-CI07 - ChatGPT Advisory Prompt and Response-Grounding Contract
+
+Status: COMPLETED DOCS-FIRST CONTRACT
+
+ME-CI07 defines the contract between a CI06-validated deterministic
+ChatGPT-ready advisory artifact and a future ChatGPT advisory prompt and
+response-grounding layer:
+
+```text
+contract_name: chatgpt_advisory_prompt_response_grounding
+contract_version: v1
+schema_version: chatgpt-advisory-prompt-response-grounding-v1
+artifact_type: market-engine-chatgpt-advisory-prompt-response-grounding-contract
+```
+
+ME-CI07 defines prompt input eligibility, prompt context boundaries,
+instruction hierarchy, question taxonomy, advisory permission rules, response
+modes, required response envelope, claim taxonomy, evidence grounding,
+provenance references, uncertainty and blocker preservation, freshness,
+refusal/inability behavior, contradiction handling, prohibited inference
+boundaries, synthetic response-grounding examples, and future validator
+requirements.
+
+Approved response modes are:
+
+```text
+advisory_interpretation
+descriptive_only
+partial_answer
+unable_to_determine
+refused_outside_authority
+blocked_invalid_context
+```
+
+ME-CI07 is docs-first. It does not implement prompt execution, model
+invocation, OpenAI API integration, response parsing, response validation,
+notification delivery, broker integration, portfolio mutation, watchlist
+mutation, allocation, sizing, execution guidance, or autonomous decision
+making.
+
+Next:
+
+```text
+ME-CI08 - Controlled advisory response dry run and grounding validator scaffold
 ```
 
 ## Active Planning Rule

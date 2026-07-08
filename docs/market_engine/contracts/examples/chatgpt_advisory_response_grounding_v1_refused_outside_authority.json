@@ -1,0 +1,92 @@
+{
+  "schema_version": "chatgpt-advisory-response-grounding-v1",
+  "artifact_type": "market-engine-chatgpt-advisory-response-grounding-example",
+  "response_identity": {
+    "response_id": "synthetic-refused-001",
+    "response_mode": "refused_outside_authority",
+    "generated_at": "2026-07-08T12:04:00Z",
+    "non_production_example": true
+  },
+  "source_artifact_identity": {
+    "schema_version": "market-engine-chatgpt-ready-advisory-artifact-v1",
+    "artifact_type": "market-engine-chatgpt-ready-advisory-artifact",
+    "run_id": "synthetic-run-005",
+    "validation_status": "valid",
+    "validation_issue_count": 0
+  },
+  "instrument_identity": {
+    "ticker": "REFUS",
+    "name": "Refusal Example Corporation",
+    "asset_type": "equity"
+  },
+  "question_classification": {
+    "question_class": "sizing_question",
+    "requested_scope": "provide exact position size",
+    "required_context_families": [
+      "approved_sizing_authority"
+    ],
+    "unavailable_context_families": [
+      "approved_sizing_authority"
+    ]
+  },
+  "response_mode": "refused_outside_authority",
+  "summary": "The requested exact position size is outside the authority of the advisory response contract.",
+  "assessment": [],
+  "evidence_supporting": [],
+  "evidence_opposing": [],
+  "blockers": [
+    {
+      "claim_id": "claim-001",
+      "claim_type": "authority_boundary_statement",
+      "text": "No approved sizing authority is present."
+    }
+  ],
+  "uncertainty": [],
+  "freshness_caveats": [],
+  "portfolio_context": {
+    "availability": "not_authoritative_for_sizing",
+    "disclosure_required": true,
+    "claims": []
+  },
+  "change_rationale": {
+    "availability": "not_requested",
+    "attribution_level": "not_applicable",
+    "claims": []
+  },
+  "required_disclosures": [
+    "authority_disclosure",
+    "non_production_example"
+  ],
+  "unable_to_determine": [
+    {
+      "claim_id": "claim-002",
+      "claim_type": "authority_boundary_statement",
+      "text": "Exact shares, exact cash amount, target weight, and order instructions are not authorized."
+    }
+  ],
+  "evidence_references": [
+    {
+      "ref_id": "ref-001",
+      "claim_id": "claim-001",
+      "claim_type": "authority_boundary_statement",
+      "source_context_family": "response_contract",
+      "artifact_ref": "me-ci07-contract",
+      "run_id": "synthetic-run-005",
+      "path": "$.authority_boundary.position_sizing_authority",
+      "support_type": "direct"
+    }
+  ],
+  "grounding_summary": {
+    "status": "blocked",
+    "issue_count": 0,
+    "issues": []
+  },
+  "authority_boundary": {
+    "allocation_authority": false,
+    "position_sizing_authority": false,
+    "execution_authority": false,
+    "broker_authority": false,
+    "portfolio_write_authority": false,
+    "watchlist_write_authority": false
+  }
+}

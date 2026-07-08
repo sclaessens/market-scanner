@@ -1,0 +1,109 @@
+{
+  "schema_version": "chatgpt-advisory-response-grounding-v1",
+  "artifact_type": "market-engine-chatgpt-advisory-response-grounding-example",
+  "response_identity": {
+    "response_id": "synthetic-descriptive-001",
+    "response_mode": "descriptive_only",
+    "generated_at": "2026-07-08T12:01:00Z",
+    "non_production_example": true
+  },
+  "source_artifact_identity": {
+    "schema_version": "market-engine-chatgpt-ready-advisory-artifact-v1",
+    "artifact_type": "market-engine-chatgpt-ready-advisory-artifact",
+    "run_id": "synthetic-run-002",
+    "validation_status": "valid",
+    "validation_issue_count": 0
+  },
+  "instrument_identity": {
+    "ticker": "DESCR",
+    "name": "Descriptive Example Corporation",
+    "asset_type": "equity"
+  },
+  "question_classification": {
+    "question_class": "missing_evidence_question",
+    "requested_scope": "describe available and missing context",
+    "required_context_families": [
+      "advisory_context"
+    ],
+    "unavailable_context_families": [
+      "portfolio_intelligence_context",
+      "explainability_context"
+    ]
+  },
+  "response_mode": "descriptive_only",
+  "summary": "The synthetic artifact can describe available context and missing context only. It cannot support a recommendation-like answer.",
+  "assessment": [
+    {
+      "claim_id": "claim-001",
+      "claim_type": "missingness_statement",
+      "text": "Portfolio and change-rationale context are absent in this example.",
+      "grounding_ref_ids": [
+        "ref-001"
+      ]
+    }
+  ],
+  "evidence_supporting": [],
+  "evidence_opposing": [],
+  "blockers": [
+    {
+      "claim_id": "claim-002",
+      "claim_type": "missingness_statement",
+      "text": "The artifact is descriptive-only for this question because required context families are absent."
+    }
+  ],
+  "uncertainty": [],
+  "freshness_caveats": [
+    {
+      "family": "portfolio_intelligence_context",
+      "freshness_state": "not_applicable",
+      "text": "No portfolio context was supplied."
+    }
+  ],
+  "portfolio_context": {
+    "availability": "absent",
+    "disclosure_required": true,
+    "claims": []
+  },
+  "change_rationale": {
+    "availability": "absent",
+    "attribution_level": "unknown",
+    "claims": []
+  },
+  "required_disclosures": [
+    "descriptive_only_disclosure",
+    "missing_portfolio_disclosure",
+    "non_production_example"
+  ],
+  "unable_to_determine": [
+    {
+      "claim_id": "claim-003",
+      "claim_type": "missingness_statement",
+      "text": "Portfolio impact cannot be determined because portfolio context is absent."
+    }
+  ],
+  "evidence_references": [
+    {
+      "ref_id": "ref-001",
+      "claim_id": "claim-001",
+      "claim_type": "missingness_statement",
+      "source_context_family": "advisory_context",
+      "artifact_ref": "synthetic-advisory-artifact-002",
+      "run_id": "synthetic-run-002",
+      "path": "$.composition.missing_context",
+      "support_type": "direct"
+    }
+  ],
+  "grounding_summary": {
+    "status": "grounded_with_mandatory_caveats",
+    "issue_count": 0,
+    "issues": []
+  },
+  "authority_boundary": {
+    "allocation_authority": false,
+    "position_sizing_authority": false,
+    "execution_authority": false,
+    "broker_authority": false,
+    "portfolio_write_authority": false,
+    "watchlist_write_authority": false
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "schema_version": "chatgpt-advisory-response-grounding-v1",
+  "artifact_type": "market-engine-chatgpt-advisory-response-grounding-example",
+  "response_identity": {
+    "response_id": "synthetic-grounded-001",
+    "response_mode": "advisory_interpretation",
+    "generated_at": "2026-07-08T12:00:00Z",
+    "non_production_example": true
+  },
+  "source_artifact_identity": {
+    "schema_version": "market-engine-chatgpt-ready-advisory-artifact-v1",
+    "artifact_type": "market-engine-chatgpt-ready-advisory-artifact",
+    "run_id": "synthetic-run-001",
+    "validation_status": "valid",
+    "validation_issue_count": 0
+  },
+  "instrument_identity": {
+    "ticker": "EXMPL",
+    "name": "Example Corporation",
+    "asset_type": "equity"
+  },
+  "question_classification": {
+    "question_class": "current_state_explanation",
+    "requested_scope": "explain current advisory state",
+    "required_context_families": [
+      "structured_decision_output",
+      "advisory_context",
+      "governor_context"
+    ],
+    "unavailable_context_families": []
+  },
+  "response_mode": "advisory_interpretation",
+  "summary": "The supplied synthetic context supports a bounded explanation of the current advisory state. It does not authorize allocation, sizing, or execution guidance.",
+  "assessment": [
+    {
+      "claim_id": "claim-001",
+      "claim_type": "supported_interpretation",
+      "text": "The current state is supported by aligned synthetic Structured Decision Output and Governor context.",
+      "grounding_ref_ids": [
+        "ref-001",
+        "ref-002"
+      ]
+    }
+  ],
+  "evidence_supporting": [
+    {
+      "claim_id": "claim-002",
+      "claim_type": "evidence_summary",
+      "text": "Synthetic factor evidence is complete enough for a current-state explanation.",
+      "grounding_ref_ids": [
+        "ref-002"
+      ]
+    }
+  ],
+  "evidence_opposing": [],
+  "blockers": [],
+  "uncertainty": [
+    {
+      "claim_id": "claim-003",
+      "claim_type": "uncertainty_statement",
+      "text": "The example does not include live market data and is non-production."
+    }
+  ],
+  "freshness_caveats": [
+    {
+      "family": "governor_context",
+      "freshness_state": "fresh",
+      "text": "Freshness is synthetic and bounded to this example."
+    }
+  ],
+  "portfolio_context": {
+    "availability": "not_requested",
+    "disclosure_required": false,
+    "claims": []
+  },
+  "change_rationale": {
+    "availability": "not_requested",
+    "attribution_level": "not_applicable",
+    "claims": []
+  },
+  "required_disclosures": [
+    "non_production_example"
+  ],
+  "unable_to_determine": [],
+  "evidence_references": [
+    {
+      "ref_id": "ref-001",
+      "claim_id": "claim-001",
+      "claim_type": "supported_interpretation",
+      "source_context_family": "structured_decision_output",
+      "artifact_ref": "synthetic-advisory-artifact-001",
+      "run_id": "synthetic-run-001",
+      "path": "$.structured_decision_output.decision_state",
+      "support_type": "direct"
+    },
+    {
+      "ref_id": "ref-002",
+      "claim_id": "claim-001",
+      "claim_type": "supported_interpretation",
+      "source_context_family": "governor_context",
+      "artifact_ref": "synthetic-advisory-artifact-001",
+      "run_id": "synthetic-run-001",
+      "path": "$.governor_context.factor_summary",
+      "support_type": "interpreted"
+    }
+  ],
+  "grounding_summary": {
+    "status": "grounded",
+    "issue_count": 0,
+    "issues": []
+  },
+  "authority_boundary": {
+    "allocation_authority": false,
+    "position_sizing_authority": false,
+    "execution_authority": false,
+    "broker_authority": false,
+    "portfolio_write_authority": false,
+    "watchlist_write_authority": false
+  }
+}
