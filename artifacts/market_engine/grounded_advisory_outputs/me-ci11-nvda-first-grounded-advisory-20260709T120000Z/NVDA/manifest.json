@@ -4,6 +4,7 @@
   "artifact_directory": "/Users/sclaessens/Documents/market-scanner/artifacts/market_engine/grounded_advisory_outputs/me-ci11-nvda-first-grounded-advisory-20260709T120000Z/NVDA",
   "broker_action_performed": false,
   "delivery_performed": false,
+  "grounding_validator": "ME-CI09.validate_advisory_response_grounding",
   "local_only": true,
   "manifest_format_version": "market-engine-grounded-advisory-output-manifest-v1",
   "non_production_artifact": true,

@@ -63,7 +63,7 @@ The blocked run persisted local artifacts under:
 artifacts/market_engine/grounded_advisory_outputs/me-ci11-nvda-first-grounded-advisory-20260709T120000Z/NVDA/
 ```
 
-Those persisted artifacts remain blocker evidence from the original run attempt. They are not evidence of a successful provider response or successful CI09-grounded model output.
+Those persisted artifacts were regenerated after PR review remediation and now match the corrected CI09-aware runtime shape. They remain blocker evidence only. They are not evidence of a successful provider response or successful CI09-grounded model output because invocation stopped before any provider response existed.
 
 ## Non-goals
 

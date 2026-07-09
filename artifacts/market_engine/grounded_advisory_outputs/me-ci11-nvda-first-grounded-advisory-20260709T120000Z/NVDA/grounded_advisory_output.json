@@ -4,96 +4,55 @@
     {
       "evidence_family": "readiness",
       "evidence_ref_id": "readiness:analysis_context",
-      "path": "$.payload.analysis_context_readiness",
+      "projection_path": "$.structured_decision_context.payload.evidence_catalog[0].summary",
+      "source_path": "$.payload.analysis_context_readiness",
       "summary": "Readiness is partial_analysis with actionable_review_allowed=False and decision_engine_ready=False."
     },
     {
       "evidence_family": "blocked_state",
       "evidence_ref_id": "blocked:stage",
-      "path": "$.payload.blocked_stage",
+      "projection_path": "$.structured_decision_context.payload.evidence_catalog[1].summary",
+      "source_path": "$.payload.blocked_stage",
       "summary": "Dry-run is blocked at portfolio_review."
     },
     {
       "evidence_family": "blocked_state",
-      "evidence_ref_id": "blocked:reason:0",
-      "path": "$.payload.blocked_reasons",
+      "evidence_ref_id": "blocked:payload:0",
+      "projection_path": "$.structured_decision_context.payload.evidence_catalog[2].summary",
+      "source_path": "$.payload.blocked_reasons[0]",
       "summary": "Stage preserves an upstream blocked state."
     },
     {
       "evidence_family": "blocked_state",
-      "evidence_ref_id": "blocked:reason:1",
-      "path": "$.payload.blocked_reasons",
+      "evidence_ref_id": "blocked:readiness:0",
+      "projection_path": "$.structured_decision_context.payload.evidence_catalog[3].summary",
+      "source_path": "$.payload.analysis_context_readiness.blocked_reasons[0]",
       "summary": "missing_setup_or_price_context"
     },
     {
       "evidence_family": "missing_data",
-      "evidence_ref_id": "missing:data:0",
-      "path": "$.payload.missing_data_summary",
+      "evidence_ref_id": "missing:summary:0",
+      "projection_path": "$.structured_decision_context.payload.evidence_catalog[4].summary",
+      "source_path": "$.payload.missing_data_summary[0]",
       "summary": "portfolio_context"
     },
     {
       "evidence_family": "missing_data",
-      "evidence_ref_id": "missing:data:1",
-      "path": "$.payload.missing_data_summary",
+      "evidence_ref_id": "missing:readiness:0",
+      "projection_path": "$.structured_decision_context.payload.evidence_catalog[5].summary",
+      "source_path": "$.payload.analysis_context_readiness.evidence_families_missing[0]",
       "summary": "setup_price_market"
     },
     {
       "evidence_family": "recommendation_review",
       "evidence_ref_id": "recommendation:review",
-      "path": "$.payload.provenance_summary.portfolio_review.recommendation_review_provenance",
+      "projection_path": "$.structured_decision_context.payload.evidence_catalog[6].summary",
+      "source_path": "$.payload.provenance_summary.portfolio_review.recommendation_review_provenance",
       "summary": "Recommendation Review state is human_review_required and category is analysis_mixed_or_conflicted."
-    },
-    {
-      "evidence_family": "setup_detection",
-      "evidence_ref_id": "setup:evidence:0",
-      "path": "$.payload.provenance_summary",
-      "summary": "Setup Detection could not assess this setup from the approved inputs."
-    },
-    {
-      "evidence_family": "setup_detection",
-      "evidence_ref_id": "setup:evidence:1",
-      "path": "$.payload.provenance_summary",
-      "summary": "Balance-sheet evidence setup is not assessed by the current SEC CompanyFacts setup detection scope."
-    },
-    {
-      "evidence_family": "setup_detection",
-      "evidence_ref_id": "setup:evidence:2",
-      "path": "$.payload.provenance_summary",
-      "summary": "Setup Detection reports detected setup evidence from approved upstream observations."
-    },
-    {
-      "evidence_family": "setup_detection",
-      "evidence_ref_id": "setup:evidence:3",
-      "path": "$.payload.provenance_summary",
-      "summary": "Required fundamental observations are available for setup detection."
-    },
-    {
-      "evidence_family": "setup_detection",
-      "evidence_ref_id": "setup:evidence:4",
-      "path": "$.payload.provenance_summary",
-      "summary": "Setup Detection review requires human review because setup evidence is partial, conflicted, blocked, or not assessed."
-    },
-    {
-      "evidence_family": "setup_detection",
-      "evidence_ref_id": "setup:evidence:5",
-      "path": "$.payload.provenance_summary",
-      "summary": "Setup Detection did not detect this setup from the approved inputs."
-    },
-    {
-      "evidence_family": "setup_detection",
-      "evidence_ref_id": "setup:evidence:6",
-      "path": "$.payload.provenance_summary",
-      "summary": "No upstream data limitation setup is detected."
-    },
-    {
-      "evidence_family": "setup_detection",
-      "evidence_ref_id": "setup:evidence:7",
-      "path": "$.payload.provenance_summary",
-      "summary": "Setup-aware Analysis Review is partial, conflicted, or requires human review."
     }
   ],
   "artifact_type": "market-engine-grounded-advisory-output",
-  "confidence_and_evidence_quality": "No successful grounded model response was accepted.",
+  "confidence_and_evidence_quality": "No successful CI09-grounded model response was accepted.",
   "executive_conclusion": "No grounded advisory conclusion was generated because the model invocation boundary is blocked: OPENAI_API_KEY and MARKET_ENGINE_ADVISORY_MODEL or OPENAI_MODEL are required for real invocation.",
   "generated_at": "2026-07-09T12:00:00Z",
   "instrument_identity": {
@@ -129,16 +88,19 @@
   },
   "practical_interpretation": "Treat this as a blocked/non-actionable advisory generation result. Review the source artifact and invocation blocker before using any advisory output.",
   "provenance_trace": {
-    "invocation_request_hash": "cf09c624d010b7d5665749f160f86845c4b3af79023f8802c624dffe1ae530ad",
+    "grounding_validator": "ME-CI09.validate_advisory_response_grounding",
+    "idempotency_key": "622114c7b554209fac1af5f1093f33c8e7a1ae365de33b6f05ec6d7ed3d4fc35",
+    "invocation_request_hash": "1e8c9948f7acbeabe92e67a251db63946cc9bc1c95c5989c28e70753ecda98e0",
+    "prompt_package_hash": "1b22a9bb11a555e514906a5d1414845e6dd5da43a199f6a00cb0539469eef6e8",
     "raw_output_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
   "risk_evidence_references": [
     "readiness:analysis_context",
     "blocked:stage",
-    "blocked:reason:0",
-    "blocked:reason:1",
-    "missing:data:0",
-    "missing:data:1"
+    "blocked:payload:0",
+    "blocked:readiness:0",
+    "missing:summary:0",
+    "missing:readiness:0"
   ],
   "run_id": "me-ci11-nvda-first-grounded-advisory-20260709T120000Z",
   "schema_version": "market-engine-grounded-advisory-output-v1",
@@ -148,6 +110,7 @@
     "input_mode": "cached_source_snapshot",
     "path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/NVDA/dry_run.json",
     "run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-nvda",
+    "sha256": "65883fbe740db170a471bb5a2b98366bd906a2452fbc4db3135927b6cec9d6d0",
     "type": "market_engine_end_to_end_dry_run"
   },
   "source_readiness": {
@@ -169,6 +132,7 @@
   "supporting_evidence_references": [],
   "ticker": "NVDA",
   "validation_result": {
+    "grounding_status": null,
     "issues": [
       {
         "code": "invocation_not_completed",

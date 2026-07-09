@@ -1,4 +1,5 @@
 {
+  "grounding_status": null,
   "issues": [
     {
       "code": "invocation_not_completed",

@@ -1353,7 +1353,7 @@ def _render_report(output: Mapping[str, Any]) -> str:
         [
             f"# Grounded Advisory Report - {output['ticker']}",
             "",
-            "This report is based only on the referenced Market Engine artifact and is accepted only after CI09 grounding validation.",
+            "This report is based only on the referenced Market Engine artifact. Successful advisory conclusions are accepted only after CI09 grounding validation.",
             "",
             "## Instrument and context",
             "",

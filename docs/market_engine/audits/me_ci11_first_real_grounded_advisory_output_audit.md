@@ -167,15 +167,17 @@ python -m market_engine.advisory.grounded_advisory_output_command \
   --artifact artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/NVDA/dry_run.json \
   --output-root artifacts/market_engine/grounded_advisory_outputs \
   --run-id me-ci11-nvda-first-grounded-advisory-20260709T120000Z \
-  --generated-at 2026-07-09T12:00:00Z
+  --generated-at 2026-07-09T12:00:00Z \
+  --allow-overwrite
 ```
 
-Observed pre-remediation run result remains valid audit evidence for the missing local configuration blocker:
+Observed regenerated run result remains valid audit evidence for the missing local configuration blocker:
 
 ```text
 advisory_status: blocked_invocation_not_configured
 invocation_state: request_blocked
 validation_status: invalid
+grounding_status: null
 ```
 
 Blocker:
@@ -184,7 +186,7 @@ Blocker:
 OPENAI_API_KEY and MARKET_ENGINE_ADVISORY_MODEL or OPENAI_MODEL are required for real invocation.
 ```
 
-The persisted blocked run artifacts predate the PR review remediation and must not be interpreted as evidence of a successful provider response or successful CI09-grounded model output.
+The persisted blocked run artifacts were regenerated after the PR review remediation so their evidence catalog, report, manifest and invocation request match the corrected CI09-aware runtime. They must not be interpreted as evidence of a successful provider response or successful CI09-grounded model output because no parsed provider response existed to hand to CI09.
 
 ## Fail-closed behavior
 
@@ -227,6 +229,31 @@ The CI11 test module now covers:
 - model-sensitive idempotency keys;
 - provider request structured-output constraint;
 - output token budget.
+
+Final local validation after PR review remediation:
+
+```text
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m py_compile src/market_engine/advisory/grounded_advisory_output.py src/market_engine/advisory/grounded_advisory_orchestration.py src/market_engine/advisory/grounded_advisory_runtime.py src/market_engine/advisory/grounded_advisory_output_command.py
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -c 'from market_engine.advisory.grounded_advisory_output import ADVISORY_MODEL_RESPONSE_SCHEMA_VERSION, ModelInvocationResult, OpenAIResponsesInvoker, generate_grounded_advisory_output; from market_engine.advisory.grounded_advisory_runtime import _openai_request_payload; print("imports_ok")'
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest tests/market_engine/advisory/test_grounded_advisory_output.py -q
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest tests/market_engine/advisory/test_advisory_response_grounding.py tests/market_engine/advisory/test_advisory_response_grounding_hardening.py -q
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest tests/market_engine/advisory -q
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest tests/market_engine -q
+PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m pytest -q
+git diff --check
+```
+
+Observed results:
+
+```text
+imports_ok
+CI11 targeted tests: 11 passed
+CI09 grounding tests: 73 passed
+advisory tests: 155 passed
+Market Engine tests: 882 passed
+full test suite: 1549 passed
+git diff --check: passed
+```
 
 ## Governance review
 

@@ -8,7 +8,11 @@
   "provider_name": "not_configured",
   "provider_request_id": null,
   "raw_output": null,
+  "raw_output_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "raw_output_is_grounded": false,
-  "schema_version": "market-engine-raw-model-response-v1",
+  "raw_provider_response": null,
+  "raw_provider_response_hash": null,
+  "received_at": null,
+  "schema_version": "market-engine-raw-model-response-v2",
   "usage_metadata": {}
 }
