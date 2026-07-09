@@ -50,12 +50,13 @@ ME-CI01 - Structured Decision Output contract (completed)
   -> ME-CI05 - Daily ChatGPT-ready advisory artifact (completed)
   -> ME-CI06 - Advisory artifact schema validation and contract enforcement (completed)
   -> ME-CI07 - ChatGPT advisory prompt and response-grounding contract (completed)
-  -> ME-CI08 - Controlled advisory response dry run and grounding validator scaffold (next)
+  -> ME-CI08 - Controlled advisory response dry run and grounding validator scaffold (completed)
+  -> ME-CI09 - Harden advisory response grounding fixtures and validator coverage (next)
 ```
 
-ME-CI07 defines the prompt and response-grounding contract for future advisory
-answers over a CI06-validated deterministic ChatGPT-ready advisory artifact. It
-does not enable ChatGPT advisory answer generation, prompt execution, OpenAI API
+ME-CI08 implements the first local deterministic dry-run and grounding
+validator scaffold over explicit synthetic response fixtures. It does not
+enable real ChatGPT advisory answer generation, prompt execution, OpenAI API
 integration, notification delivery, broker integration, portfolio mutation,
 watchlist mutation, allocation, sizing, execution, or autonomous decision
 making.

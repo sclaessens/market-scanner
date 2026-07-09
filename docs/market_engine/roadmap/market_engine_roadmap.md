@@ -212,7 +212,8 @@ ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption (co
   -> ME-CI05 - Produce daily ChatGPT-ready advisory artifact (completed)
   -> ME-CI06 - Advisory artifact schema validation and contract enforcement (completed)
   -> ME-CI07 - ChatGPT advisory prompt and response-grounding contract (completed)
-  -> ME-CI08 - Controlled advisory response dry run and grounding validator scaffold
+  -> ME-CI08 - Controlled advisory response dry run and grounding validator scaffold (completed)
+  -> ME-CI09 - Harden advisory response grounding fixtures and validator coverage
   -> ME-PI01 - Define Portfolio Intelligence exposure contract
   -> ME-PS01 - Define Position Sizing decision contract
   -> ME-NL01 - Reframe notification layer as channel-neutral compact summary
@@ -479,6 +480,42 @@ Next:
 
 ```text
 ME-CI08 - Controlled advisory response dry run and grounding validator scaffold
+```
+
+### ME-CI08 - Controlled Advisory Response Dry Run and Grounding Validator Scaffold
+
+Status: COMPLETED LOCAL RUNTIME SCAFFOLD
+
+ME-CI08 implements the first deterministic local execution layer above the
+ME-CI07 prompt and response-grounding contract. It consumes a CI06-valid
+ChatGPT-ready advisory artifact, builds a controlled prompt package, loads an
+explicit synthetic response fixture, validates the response envelope, validates
+claim and evidence grounding, enforces disclosures and authority boundaries,
+computes a deterministic grounding result, and persists local non-production
+dry-run artifacts.
+
+ME-CI08 adds:
+
+* deterministic prompt package builder;
+* response-grounding validator scaffold;
+* controlled synthetic response dry-run runner;
+* local CLI;
+* local non-production prompt package, synthetic response, grounding result,
+  dry-run summary, and manifest artifacts;
+* deterministic advisory tests.
+
+ME-CI08 is local-only, deterministic, model-free, provider-free, delivery-free,
+non-production, and fail-closed. It does not call OpenAI or ChatGPT APIs,
+invoke models, execute prompts, add provider calls, send notifications, contact
+brokers, mutate portfolio or watchlist state, create allocation, sizing,
+target-weight, order, execution, causality, or materiality authority, or change
+Decision Engine, Governor, Recommendation Review, or Portfolio Review
+semantics.
+
+Next:
+
+```text
+ME-CI09 - Harden advisory response grounding fixtures and validator coverage
 ```
 
 ## Active Planning Rule
