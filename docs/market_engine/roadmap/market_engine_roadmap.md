@@ -214,7 +214,8 @@ ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption (co
   -> ME-CI07 - ChatGPT advisory prompt and response-grounding contract (completed)
   -> ME-CI08 - Controlled advisory response dry run and grounding validator scaffold (completed)
   -> ME-CI09 - Harden advisory response grounding fixtures and validator coverage (completed)
-  -> ME-CI10 - Define controlled model invocation boundary contract
+  -> ME-CI10 - Define controlled model invocation boundary contract (completed)
+  -> ME-CI11 - Implement controlled local model invocation adapter scaffold
   -> ME-PI01 - Define Portfolio Intelligence exposure contract
   -> ME-PS01 - Define Position Sizing decision contract
   -> ME-NL01 - Reframe notification layer as channel-neutral compact summary

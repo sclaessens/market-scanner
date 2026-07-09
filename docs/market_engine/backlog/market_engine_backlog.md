@@ -52,7 +52,8 @@ ME-CI01 - Structured Decision Output contract (completed)
   -> ME-CI07 - ChatGPT advisory prompt and response-grounding contract (completed)
   -> ME-CI08 - Controlled advisory response dry run and grounding validator scaffold (completed)
   -> ME-CI09 - Harden advisory response grounding fixtures and validator coverage (completed)
-  -> ME-CI10 - Define controlled model invocation boundary contract (next)
+  -> ME-CI10 - Define controlled model invocation boundary contract (completed)
+  -> ME-CI11 - Implement controlled local model invocation adapter scaffold (next)
 ```
 
 ME-CI08 implements the first local deterministic dry-run and grounding
@@ -69,6 +70,15 @@ partial-answer completeness, family-level freshness relevance, blocker
 preservation, Dispatch contradiction coverage, lineage validation, and
 deterministic issue ordering. It remains local-only, deterministic, model-free,
 provider-free, delivery-free, non-production, and fail-closed.
+
+ME-CI10 defines the controlled model invocation boundary contract for a future
+provider/model implementation. It documents invocation eligibility, input
+boundaries, context minimization, request and result envelopes, run/invocation
+identity, idempotency, provider/model identity, capability requirements,
+budgets, timeout/retry semantics, raw response capture, parser boundary,
+grounding handoff, failure taxonomy, fail-closed behavior, and future
+implementation tests. It is docs-only and does not add model invocation,
+provider calls, parser runtime, delivery, or downstream authority.
 
 ## Historical Foundation Phase
 
