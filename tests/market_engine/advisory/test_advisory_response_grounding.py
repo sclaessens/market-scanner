@@ -84,7 +84,7 @@ def test_valid_refusal_outside_authority_validates_with_caveat() -> None:
         }
     ]
     response["required_disclosures"] = ["authority_disclosure"]
-    response["grounding_summary"]["status"] = "blocked"
+    response["grounding_summary"]["status"] = "grounded_with_mandatory_caveats"
 
     result = validate_advisory_response_grounding(
         source_artifact=source,
@@ -130,6 +130,13 @@ def test_valid_contradiction_disclosure_partial_response_is_allowed() -> None:
     prompt = _prompt(source, "current_state_explanation")
     response = _response(prompt, response_mode="partial_answer")
     response["required_disclosures"] = ["contradiction_disclosure"]
+    response["unable_to_determine"] = [
+        {
+            "claim_id": "claim-003",
+            "claim_type": "missingness_statement",
+            "text": "The conflicting Dispatch presentation cannot be used as canonical state.",
+        }
+    ]
     response["grounding_summary"]["status"] = "partially_grounded"
 
     result = validate_advisory_response_grounding(

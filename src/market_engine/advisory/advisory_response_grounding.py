@@ -137,9 +137,12 @@ BLOCKING_CODES = frozenset(
 )
 UNGROUNDED_CODES = frozenset(
     {
+        "declared_grounding_status_mismatch",
+        "duplicate_evidence_reference",
         "missing_evidence_reference",
         "unknown_claim_reference",
         "claim_type_mismatch",
+        "support_type_incompatible",
         "invalid_context_family",
         "invalid_artifact_reference",
         "run_identity_mismatch",
@@ -151,8 +154,33 @@ UNGROUNDED_CODES = frozenset(
         "unsupported_materiality_claim",
         "freshness_conflict",
         "blocker_omission",
+        "partial_answer_incomplete",
     }
 )
+FAMILY_PATH_ROOTS = {
+    "structured_decision_output": "$.structured_decision_context",
+    "advisory_context": "$.advisory_eligibility",
+    "portfolio_intelligence_context": "$.portfolio_intelligence_context",
+    "explainability_change_rationale_context": (
+        "$.explainability_change_rationale_context"
+    ),
+    "governor_context": "$.governor_context",
+    "dispatch_context": "$.dispatch_context",
+    "provenance_context": "$.provenance_context",
+    "freshness_context": "$.freshness_context",
+    "uncertainty_context": "$.uncertainty_context",
+    "blockers": "$.blockers",
+    "missing_context": "$.missing_context",
+}
+SUPPORT_TYPE_COMPATIBILITY = {
+    "direct_artifact_fact": {"direct"},
+    "upstream_state_description": {"direct", "summarized"},
+    "evidence_summary": {"direct", "summarized"},
+    "explicit_upstream_reason": {"direct", "summarized"},
+    "supported_interpretation": {"direct", "summarized", "interpreted"},
+    "conditional_interpretation": {"conditional"},
+    "associated_change": {"associated_only", "summarized"},
+}
 PATH_RE = re.compile(r"^\$(?:\.[A-Za-z_][A-Za-z0-9_-]*|\[\d+\])*$")
 
 
@@ -246,6 +274,7 @@ def validate_advisory_response_grounding(
     _validate_duplicate_claim_ids(response, issues)
     claims = _collect_claims(response)
     references = _references(response)
+    _validate_duplicate_references(references, issues)
     material_claim_ids = _validate_claims(claims, references, issues)
     grounded_claim_ids = _validate_references(
         source_artifact,
@@ -260,6 +289,14 @@ def validate_advisory_response_grounding(
     _validate_freshness(prompt_package, claims, response, issues)
     _validate_blockers(source_artifact, response, issues)
     _validate_dispatch_contradiction(source_artifact, response, issues)
+    _validate_summary_consistency(source_artifact, prompt_package, response, issues)
+    _validate_partial_answer_completeness(
+        prompt_package,
+        response,
+        material_claim_ids,
+        grounded_claim_ids,
+        issues,
+    )
     return _result(
         response_mode if isinstance(response_mode, str) else None,
         len(material_claim_ids),
@@ -461,6 +498,24 @@ def _validate_mode_context_consistency(
                 actual=response_mode,
             )
         )
+    if response_mode == "blocked_invalid_context" and response.get("assessment"):
+        issues.append(
+            _issue(
+                "semantic_override_detected",
+                "$.assessment",
+                "Blocked responses must not publish affirmative advisory assessment content.",
+                issue_family="mode",
+            )
+        )
+    if response_mode == "unable_to_determine" and response.get("assessment"):
+        issues.append(
+            _issue(
+                "semantic_override_detected",
+                "$.assessment",
+                "Unable-to-determine responses must not publish affirmative material assessment content.",
+                issue_family="mode",
+            )
+        )
 
 
 def _collect_claims(response: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
@@ -620,6 +675,37 @@ def _references(response: Mapping[str, Any]) -> list[Mapping[str, Any]]:
     return [ref for ref in refs if isinstance(ref, Mapping)] if isinstance(refs, list) else []
 
 
+def _validate_duplicate_references(
+    references: list[Mapping[str, Any]],
+    issues: list[AdvisoryResponseGroundingIssue],
+) -> None:
+    seen: dict[tuple[Any, ...], int] = {}
+    for index, ref in enumerate(references):
+        signature = (
+            ref.get("claim_id"),
+            ref.get("claim_type"),
+            ref.get("source_context_family"),
+            ref.get("artifact_ref"),
+            ref.get("run_id"),
+            ref.get("path"),
+            ref.get("support_type"),
+        )
+        if signature in seen:
+            issues.append(
+                _issue(
+                    "duplicate_evidence_reference",
+                    f"$.evidence_references[{index}]",
+                    "Exact duplicate evidence references are ambiguous and must be removed.",
+                    issue_family="grounding",
+                    claim_id=str(ref.get("claim_id")),
+                    expected=f"unique reference; first seen at index {seen[signature]}",
+                    actual="duplicate reference",
+                )
+            )
+        else:
+            seen[signature] = index
+
+
 def _validate_references(
     source_artifact: Mapping[str, Any],
     prompt_package: Mapping[str, Any],
@@ -681,6 +767,20 @@ def _validate_references(
                     actual=ref.get("support_type"),
                 )
             )
+        elif claim_type in SUPPORT_TYPE_COMPATIBILITY and ref.get(
+            "support_type"
+        ) not in SUPPORT_TYPE_COMPATIBILITY[str(claim_type)]:
+            issues.append(
+                _issue(
+                    "support_type_incompatible",
+                    f"{path}.support_type",
+                    "Evidence support type is incompatible with the claim type.",
+                    issue_family="grounding",
+                    claim_id=str(claim_id),
+                    expected=sorted(SUPPORT_TYPE_COMPATIBILITY[str(claim_type)]),
+                    actual=ref.get("support_type"),
+                )
+            )
         if ref.get("support_type") == "associated_only" and claim_type in {
             "explicit_upstream_reason",
             "supported_interpretation",
@@ -694,6 +794,25 @@ def _validate_references(
                     claim_id=str(claim_id),
                 )
             )
+        if isinstance(family, str) and family in FAMILY_PATH_ROOTS:
+            expected_root = FAMILY_PATH_ROOTS[family]
+            ref_path_value = ref.get("path")
+            if isinstance(ref_path_value, str) and not (
+                ref_path_value == expected_root
+                or ref_path_value.startswith(expected_root + ".")
+                or ref_path_value.startswith(expected_root + "[")
+            ):
+                issues.append(
+                    _issue(
+                        "evidence_path_not_allowed",
+                        f"{path}.path",
+                        "Evidence path must stay inside the declared source context family.",
+                        issue_family="grounding",
+                        claim_id=str(claim_id),
+                        expected=expected_root,
+                        actual=ref_path_value,
+                    )
+                )
         if ref.get("artifact_ref") not in _allowed_artifact_refs(source_artifact, prompt_package):
             issues.append(
                 _issue(
@@ -730,6 +849,18 @@ def _validate_references(
                 )
             )
             continue
+        if claim_type not in NON_MATERIAL_CLAIM_TYPES and _broad_material_path(ref_path):
+            issues.append(
+                _issue(
+                    "evidence_path_not_allowed",
+                    f"{path}.path",
+                    "Material claims require a specific evidence-bearing path, not a broad parent context path.",
+                    issue_family="grounding",
+                    claim_id=str(claim_id),
+                    actual=ref_path,
+                )
+            )
+            continue
         resolved = _resolve_path(source_artifact, ref_path)
         if not resolved.exists:
             issues.append(
@@ -737,6 +868,18 @@ def _validate_references(
                     "evidence_path_not_found",
                     f"{path}.path",
                     "Evidence path was not found in the source artifact.",
+                    issue_family="grounding",
+                    claim_id=str(claim_id),
+                    actual=ref_path,
+                )
+            )
+            continue
+        if _resolved_context_is_unavailable(resolved.value) and claim_type not in NON_MATERIAL_CLAIM_TYPES:
+            issues.append(
+                _issue(
+                    "evidence_path_not_allowed",
+                    f"{path}.path",
+                    "Referenced or absent context cannot be treated as embedded local proof for a material claim.",
                     issue_family="grounding",
                     claim_id=str(claim_id),
                     actual=ref_path,
@@ -897,6 +1040,24 @@ def _validate_authority(
                     claim_id=claim_id,
                 )
             )
+        if any(
+            phrase in text
+            for phrase in (
+                "full portfolio fit",
+                "portfolio fit is positive",
+                "sell now",
+                "should sell",
+            )
+        ):
+            issues.append(
+                _issue(
+                    "semantic_override_detected",
+                    path,
+                    "Portfolio-context or concentration wording must not become portfolio-fit or sell instruction.",
+                    issue_family="authority",
+                    claim_id=claim_id,
+                )
+            )
         if claim_type == "unsupported_materiality_claim" or "materially changed" in text:
             issues.append(
                 _issue(
@@ -929,6 +1090,17 @@ def _validate_freshness(
     freshness = _object(selected.get("freshness_context"))
     global_status = freshness.get("global_freshness_status")
     present_disclosures = set(_list_of_text(response.get("required_disclosures")))
+    used_families = {
+        ref.get("source_context_family")
+        for ref in _references(response)
+        if isinstance(ref.get("source_context_family"), str)
+    }
+    relevant_statuses = set()
+    family_freshness = freshness.get("family_freshness")
+    if isinstance(family_freshness, list):
+        for item in family_freshness:
+            if isinstance(item, Mapping) and item.get("family") in used_families:
+                relevant_statuses.add(item.get("status"))
     if global_status == "unknown" and "unknown_freshness_disclosure" not in present_disclosures:
         for claim_id, claim in claims.items():
             if "current" in str(claim.get("text", "")).lower():
@@ -941,7 +1113,10 @@ def _validate_freshness(
                         claim_id=claim_id,
                     )
                 )
-    if global_status == "stale" and "staleness_disclosure" not in present_disclosures:
+    if (
+        (global_status == "stale" or "stale" in relevant_statuses)
+        and "staleness_disclosure" not in present_disclosures
+    ):
         issues.append(
             _issue(
                 "required_disclosure_missing",
@@ -949,6 +1124,16 @@ def _validate_freshness(
                 "Stale relevant context requires staleness disclosure.",
                 issue_family="freshness",
                 expected="staleness_disclosure",
+            )
+        )
+    if "unknown" in relevant_statuses and "unknown_freshness_disclosure" not in present_disclosures:
+        issues.append(
+            _issue(
+                "required_disclosure_missing",
+                "$.required_disclosures",
+                "Unknown relevant context freshness requires unknown freshness disclosure.",
+                issue_family="freshness",
+                expected="unknown_freshness_disclosure",
             )
         )
 
@@ -962,6 +1147,7 @@ def _validate_blockers(
     if not source_blockers:
         return
     response_blockers_text = str(response.get("blockers", "")).lower()
+    summary = str(response.get("summary", "")).lower()
     for blocker in source_blockers:
         if blocker.lower() not in response_blockers_text:
             issues.append(
@@ -973,6 +1159,26 @@ def _validate_blockers(
                     expected=blocker,
                 )
             )
+    if source_blockers and any(
+        phrase in summary
+        for phrase in (
+            "no relevant blockers",
+            "no blockers",
+            "blockers are resolved",
+            "blocker resolved",
+            "main blocker",
+        )
+    ):
+        issues.append(
+            _issue(
+                "blocker_omission",
+                "$.summary",
+                "Summary must not neutralize, resolve, or rank source blockers without upstream support.",
+                issue_family="blocker",
+                expected=source_blockers,
+                actual=response.get("summary"),
+            )
+        )
 
 
 def _validate_dispatch_contradiction(
@@ -999,6 +1205,131 @@ def _validate_dispatch_contradiction(
                     expected="contradiction_disclosure",
                 )
             )
+        summary = str(response.get("summary", "")).lower()
+        if str(dispatch_decision).lower() in summary and str(sdo_action).lower() not in summary:
+            issues.append(
+                _issue(
+                    "contradiction_not_disclosed",
+                    "$.summary",
+                    "Response must not cherry-pick Dispatch presentation over canonical Structured Decision Output.",
+                    issue_family="contradiction",
+                    expected=sdo_action,
+                    actual=dispatch_decision,
+                )
+            )
+
+
+def _validate_summary_consistency(
+    source_artifact: Mapping[str, Any],
+    prompt_package: Mapping[str, Any],
+    response: Mapping[str, Any],
+    issues: list[AdvisoryResponseGroundingIssue],
+) -> None:
+    summary = str(response.get("summary", "")).lower()
+    response_mode = response.get("response_mode")
+    question_class = _nested_text(prompt_package, ("question_classification", "question_class"))
+    if any(
+        phrase in summary
+        for phrase in (
+            "you should buy",
+            "sell now",
+            "buy exactly",
+            "exact shares",
+            "exact cash amount",
+            "target weight",
+            "place an order",
+        )
+    ):
+        issues.append(
+            _issue(
+                "semantic_override_detected",
+                "$.summary",
+                "Summary contains deterministic authority-expansion wording.",
+                issue_family="authority",
+            )
+        )
+    if response_mode == "descriptive_only" and any(
+        phrase in summary
+        for phrase in ("upgrade", "downgrade", "recommended action", "actionable")
+    ):
+        issues.append(
+            _issue(
+                "semantic_override_detected",
+                "$.summary",
+                "Descriptive-only responses must not upgrade into recommendation-like wording.",
+                issue_family="mode",
+            )
+        )
+    if question_class in {"change_rationale_question", "comparative_question"} and any(
+        phrase in summary
+        for phrase in ("nothing changed", "unchanged", "the main reason", "root cause")
+    ):
+        selected = _object(prompt_package.get("selected_context"))
+        explainability = _object(selected.get("explainability_change_rationale_context"))
+        if explainability.get("availability_state") in {"unavailable", "not_comparable", "absent"} or explainability.get("payload") is None:
+            issues.append(
+                _issue(
+                    "unsupported_causal_claim",
+                    "$.summary",
+                    "Change-rationale summary wording is unsupported by comparable explainability context.",
+                    issue_family="explainability",
+                )
+            )
+    if response_mode in {"unable_to_determine", "refused_outside_authority"} and any(
+        phrase in summary
+        for phrase in ("therefore buy", "therefore sell", "portfolio fit is positive")
+    ):
+        issues.append(
+            _issue(
+                "semantic_override_detected",
+                "$.summary",
+                "Refusal or inability response must not contain affirmative advisory conclusions.",
+                issue_family="mode",
+            )
+        )
+
+
+def _validate_partial_answer_completeness(
+    prompt_package: Mapping[str, Any],
+    response: Mapping[str, Any],
+    material_claim_ids: set[str],
+    grounded_claim_ids: set[str],
+    issues: list[AdvisoryResponseGroundingIssue],
+) -> None:
+    if response.get("response_mode") != "partial_answer":
+        return
+    if not material_claim_ids.intersection(grounded_claim_ids):
+        issues.append(
+            _issue(
+                "partial_answer_incomplete",
+                "$.assessment",
+                "Partial answers require at least one grounded supported part.",
+                issue_family="mode",
+            )
+        )
+    if not response.get("unable_to_determine"):
+        issues.append(
+            _issue(
+                "partial_answer_incomplete",
+                "$.unable_to_determine",
+                "Partial answers require explicit unable_to_determine entries for unsupported parts.",
+                issue_family="mode",
+            )
+        )
+    missing_required = _nested_list(
+        prompt_package,
+        ("question_classification", "missing_required_context_families"),
+    )
+    if missing_required and not response.get("unable_to_determine"):
+        issues.append(
+            _issue(
+                "partial_answer_incomplete",
+                "$.unable_to_determine",
+                "Missing required context families must be reflected in unable_to_determine.",
+                issue_family="mode",
+                expected=missing_required,
+            )
+        )
 
 
 def _result(
@@ -1009,7 +1340,7 @@ def _result(
     *,
     response: Mapping[str, Any] | None = None,
 ) -> AdvisoryResponseGroundingResult:
-    ordered = tuple(sorted(issues, key=lambda issue: (issue.path, issue.code, issue.claim_id or "")))
+    ordered = tuple(sorted(issues, key=_issue_sort_key))
     codes = {issue.code for issue in ordered}
     if codes & BLOCKING_CODES:
         status = "blocked"
@@ -1025,6 +1356,25 @@ def _result(
         status = "grounded_with_mandatory_caveats"
     else:
         status = "grounded"
+    if response is not None:
+        declared_status = _nested_text(response, ("grounding_summary", "status"))
+        if declared_status in GROUNDING_STATUSES and declared_status != status:
+            issues.append(
+                _issue(
+                    "declared_grounding_status_mismatch",
+                    "$.grounding_summary.status",
+                    "Response-declared grounding status must match deterministic validator status.",
+                    issue_family="grounding",
+                    expected=status,
+                    actual=declared_status,
+                )
+            )
+            ordered = tuple(sorted(issues, key=_issue_sort_key))
+            codes = {issue.code for issue in ordered}
+            if codes & BLOCKING_CODES:
+                status = "blocked"
+            elif codes & UNGROUNDED_CODES or ordered:
+                status = "ungrounded"
     return AdvisoryResponseGroundingResult(
         status=status,
         issues=ordered,
@@ -1073,6 +1423,30 @@ def _resolve_path(payload: Mapping[str, Any], path: str) -> _ResolvedPath:
     return _ResolvedPath(True, current)
 
 
+def _broad_material_path(path: str) -> bool:
+    return path in {
+        "$",
+        "$.structured_decision_context",
+        "$.structured_decision_context.payload",
+        "$.portfolio_intelligence_context",
+        "$.portfolio_intelligence_context.payload",
+        "$.explainability_change_rationale_context",
+        "$.explainability_change_rationale_context.payload",
+        "$.governor_context",
+        "$.governor_context.payload",
+        "$.dispatch_context",
+        "$.dispatch_context.payload",
+    }
+
+
+def _resolved_context_is_unavailable(value: Any) -> bool:
+    return (
+        isinstance(value, Mapping)
+        and value.get("include_mode") in {"absent", "referenced_context"}
+        and value.get("payload") is None
+    )
+
+
 def _context_absent(value: Any) -> bool:
     if not isinstance(value, Mapping):
         return True
@@ -1096,6 +1470,24 @@ def _nested_text(payload: Mapping[str, Any], path: tuple[str, ...]) -> str | Non
             return None
         current = current.get(segment)
     return current if isinstance(current, str) else None
+
+
+def _nested_list(payload: Mapping[str, Any], path: tuple[str, ...]) -> list[Any]:
+    current: Any = payload
+    for segment in path:
+        if not isinstance(current, Mapping):
+            return []
+        current = current.get(segment)
+    return list(current) if isinstance(current, list) else []
+
+
+def _issue_sort_key(issue: AdvisoryResponseGroundingIssue) -> tuple[str, str, str, str]:
+    return (
+        issue.path,
+        issue.code,
+        issue.claim_id or "",
+        issue.issue_family or "",
+    )
 
 
 def _forbidden_claim_code(claim_type: str) -> str:
