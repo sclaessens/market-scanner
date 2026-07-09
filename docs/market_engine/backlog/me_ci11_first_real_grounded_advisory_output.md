@@ -2,7 +2,7 @@
 
 Owner roles: Product Owner / Technical Architect / Development Lead / QA Lead / Governance Auditor / Operator
 
-Status: IMPLEMENTED WITH REAL INVOCATION BLOCKED BY LOCAL CONFIGURATION
+Status: IMPLEMENTED WITH REAL INVOCATION BLOCKED BY LOCAL CONFIGURATION; PR REVIEW REMEDIATION APPLIED
 
 ## Goal
 
@@ -12,23 +12,45 @@ Generate a local grounded advisory output artifact set and readable report from 
 
 ME-CI11 implements:
 
-* source artifact validation for the selected Market Engine dry-run artifact path;
-* deterministic grounded advisory input packaging;
-* CI10-shaped invocation request generation;
-* a single-provider non-streaming OpenAI Responses invocation boundary;
-* raw response capture;
-* strict JSON parser behavior;
-* allowed-evidence grounding validation;
-* structured advisory output persistence;
-* readable `advisory_report.md` rendering;
-* local manifest and traceability metadata;
-* fail-closed behavior for missing invocation configuration and invalid model output.
+- source artifact validation for the selected Market Engine dry-run artifact path;
+- deterministic evidence catalog generation with exact source paths;
+- deterministic grounded advisory input packaging;
+- CI10-shaped invocation request generation and pre-invocation validation;
+- a single-provider non-streaming OpenAI Responses invocation boundary;
+- provider-side strict structured output;
+- bounded output tokens and bounded input size;
+- model/provider/configuration-sensitive idempotency;
+- raw provider response capture and hashing;
+- strict JSON schema/type/enum parsing;
+- explicit claim-to-evidence references;
+- direct grounding handoff to `ME-CI09.validate_advisory_response_grounding`;
+- structured advisory output persistence;
+- readable `advisory_report.md` rendering;
+- local manifest and traceability metadata;
+- fail-closed behavior for missing invocation configuration and invalid or ungrounded model output.
+
+## PR review remediation
+
+The first CI11 implementation used a new evidence-reference containment validator instead of the established CI09 grounding chain. PR review classified that as a merge blocker.
+
+The branch was corrected before merge:
+
+```text
+strict response parse
+  -> structured claim/evidence projection
+  -> ME-CI09 validate_advisory_response_grounding(...)
+  -> accepted structured advisory output
+```
+
+Simple allowlist containment is no longer treated as equivalent to grounding validation.
+
+The remediation also corrected evidence source paths, removed generic recursive setup-message harvesting, added deterministic invocation validation, added strict provider structured output, added output budgeting, strengthened idempotency material, expanded raw provider response capture, added output path containment checks, and expanded regression tests.
 
 ## Outcome
 
 The flow was executed against a real NVDA Market Engine artifact from the ME-RUN28 cached-source batch output.
 
-The run failed closed before provider invocation because the local environment did not define required model configuration:
+The recorded run failed closed before provider invocation because the local environment did not define required model configuration:
 
 ```text
 OPENAI_API_KEY
@@ -41,7 +63,7 @@ The blocked run persisted local artifacts under:
 artifacts/market_engine/grounded_advisory_outputs/me-ci11-nvda-first-grounded-advisory-20260709T120000Z/NVDA/
 ```
 
-The generated report is readable and correctly states that no grounded advisory conclusion was generated because invocation was not configured.
+Those persisted artifacts remain blocker evidence from the original run attempt. They are not evidence of a successful provider response or successful CI09-grounded model output.
 
 ## Non-goals
 
@@ -53,4 +75,4 @@ ME-CI11 does not add production execution, provider refresh, model browsing, mod
 ME-CI11B - Execute configured real grounded advisory model invocation
 ```
 
-ME-CI11B should use the ME-CI11 runtime, add only approved non-production invocation configuration, and produce the first successful grounded model response and report.
+ME-CI11B should use the corrected ME-CI11 runtime, add only approved non-production invocation configuration, and produce the first successful provider response that passes strict parsing and ME-CI09 grounding validation before report rendering.
