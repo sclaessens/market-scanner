@@ -1,0 +1,14 @@
+{
+  "artifact_type": "market-engine-raw-model-response",
+  "delivery_eligible": false,
+  "error_message": "OPENAI_API_KEY and MARKET_ENGINE_ADVISORY_MODEL or OPENAI_MODEL are required for real invocation.",
+  "finish_reason": null,
+  "invocation_state": "request_blocked",
+  "model_name": "not_configured",
+  "provider_name": "not_configured",
+  "provider_request_id": null,
+  "raw_output": null,
+  "raw_output_is_grounded": false,
+  "schema_version": "market-engine-raw-model-response-v1",
+  "usage_metadata": {}
+}

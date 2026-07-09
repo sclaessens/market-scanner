@@ -2,7 +2,7 @@
 
 Owner roles: Product Owner / Technical Architect / Development Lead / QA Lead / Governance Auditor / Operator
 
-Status: NEXT ACTIVE ADVISORY SPRINT
+Status: IMPLEMENTED WITH REAL INVOCATION BLOCKED BY LOCAL CONFIGURATION
 
 ## Roadmap position
 
@@ -15,14 +15,17 @@ ME-CI05 - Daily ChatGPT-ready advisory artifact
   -> ME-CI08 - Local synthetic advisory dry-run scaffold
   -> ME-CI09 - Grounding validator hardening
   -> ME-CI10 - Controlled model invocation boundary contract
-  -> ME-CI11 - First real grounded advisory output
+  -> ME-CI11 - First real grounded advisory output flow and blocked real invocation evidence
+  -> ME-CI11B - Configured real grounded model invocation
 ```
 
 ## Purpose
 
-ME-CI11 must produce the first real user-readable advisory output from the application for one real ticker.
+ME-CI11 must produce the first user-readable advisory output flow from the application for one real ticker and persist fail-closed evidence when a real provider invocation cannot be configured.
 
 The sprint is output-first. It is not complete when an adapter, parser, provider wrapper, or invocation abstraction merely exists.
+
+ME-CI11 implementation selected a real NVDA Market Engine artifact and produced a local blocked advisory report. The real model response portion of the original hard Definition of Done remains open because the local environment did not provide `OPENAI_API_KEY` and did not provide `MARKET_ENGINE_ADVISORY_MODEL` or `OPENAI_MODEL`.
 
 ## Required path
 
@@ -52,6 +55,12 @@ ME-CI11 is complete only when:
 - at least one grounded path produces `advisory_report.md`;
 - the report is readable without opening the JSON internals;
 - the report remains traceable to source artifact, prompt package, invocation, raw response, parsed response, grounding result, and manifest.
+
+## Implementation note
+
+The ME-CI11 implementation completed the local runtime, parser, grounding containment, report rendering, test coverage, and blocked real-run artifact persistence. The selected NVDA run failed closed at invocation configuration with `blocked_invocation_not_configured`.
+
+The first successful real model output is therefore explicitly moved to ME-CI11B rather than being silently treated as complete.
 
 ## Required visible content
 
@@ -95,7 +104,7 @@ No generic multi-provider routing, fallback-model policy, notification adapter, 
 ## Next
 
 ```text
-ME-CI12 - Render grounded response as a high-quality human-readable stock report
+ME-CI11B - Execute configured real grounded advisory model invocation
 ```
 
-ME-CI12 must use CI11 real-run evidence to improve report readability and consistency. It must not reopen pre-output architecture loops.
+ME-CI11B must use the ME-CI11 runtime and approved non-production model configuration to obtain, parse, validate, and render one successful real provider response before ME-CI12 starts report-quality polishing.

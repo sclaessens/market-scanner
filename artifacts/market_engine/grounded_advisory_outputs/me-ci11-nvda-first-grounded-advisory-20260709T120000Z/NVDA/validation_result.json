@@ -1,0 +1,15 @@
+{
+  "issues": [
+    {
+      "code": "invocation_not_completed",
+      "message": "OPENAI_API_KEY and MARKET_ENGINE_ADVISORY_MODEL or OPENAI_MODEL are required for real invocation.",
+      "path": "$.invocation"
+    },
+    {
+      "code": "missing_parsed_response",
+      "path": "$.model_response"
+    }
+  ],
+  "status": "invalid",
+  "valid": false
+}
