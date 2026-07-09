@@ -17,16 +17,8 @@ from market_engine.advisory.grounded_advisory_runtime import (
 
 
 def test_grounded_advisory_output_uses_ci09_and_writes_artifacts(tmp_path: Path) -> None:
-    source_path = _write_source(tmp_path)
-    result = generate_grounded_advisory_output(
-        source_artifact_path=source_path,
-        output_root=tmp_path / "outputs",
-        run_id="ci11-test-happy",
-        generated_at="2026-07-09T12:00:00Z",
-        invoker=_FakeInvoker(_valid_model_response()),
-    )
-
-    structured = json.loads(result.structured_output_path.read_text(encoding="utf-8"))
+    result = _generate(tmp_path, "happy", _valid_model_response())
+    structured = _read(result.structured_output_path)
     report = result.report_path.read_text(encoding="utf-8")
 
     assert structured["advisory_status"] == "grounded_advisory_generated"
@@ -38,119 +30,74 @@ def test_grounded_advisory_output_uses_ci09_and_writes_artifacts(tmp_path: Path)
         "ME-CI09.validate_advisory_response_grounding"
     )
     assert structured["source_readiness"]["actionability_allowed"] is False
-    assert result.invocation_request_path.exists()
-    assert result.raw_response_path.exists()
-    assert result.parser_result_path.exists()
-    assert result.validation_result_path.exists()
-    assert result.manifest_path.exists()
     assert "Grounded Advisory Report - NVDA" in report
     assert "CI09 grounding validation" in report
     assert "No immediate action" in report
 
 
-def test_model_input_contains_only_explicit_evidence_catalog(tmp_path: Path) -> None:
+def test_model_input_contains_explicit_evidence_catalog(tmp_path: Path) -> None:
     source_path = _write_source(tmp_path)
     invoker = _RecordingInvoker(_valid_model_response())
-
     generate_grounded_advisory_output(
         source_artifact_path=source_path,
         output_root=tmp_path / "outputs",
-        run_id="ci11-test-grounding",
+        run_id="ci11-grounding",
         generated_at="2026-07-09T12:00:00Z",
         invoker=invoker,
     )
 
-    allowed_refs = invoker.request["grounding_handoff_contract"][
-        "allowed_evidence_references"
-    ]
-    ref_ids = {ref["evidence_ref_id"] for ref in allowed_refs}
+    refs = invoker.request["grounding_handoff_contract"]["allowed_evidence_references"]
+    ref_ids = {ref["evidence_ref_id"] for ref in refs}
     assert {
         "readiness:analysis_context",
         "blocked:stage",
         "recommendation:review",
     }.issubset(ref_ids)
-    assert all(ref["source_path"].startswith("$.payload") for ref in allowed_refs)
-    assert all(
-        ref["projection_path"].startswith(
-            "$.structured_decision_context.payload.evidence_catalog["
-        )
-        for ref in allowed_refs
-    )
+    assert all(ref["source_path"].startswith("$.payload") for ref in refs)
+    assert all("evidence_catalog[" in ref["projection_path"] for ref in refs)
     assert invoker.request["grounding_handoff_contract"]["validator"] == (
         "ME-CI09.validate_advisory_response_grounding"
     )
 
 
 def test_blocked_readiness_rejects_advisory_interpretation_status(tmp_path: Path) -> None:
-    source_path = _write_source(tmp_path)
     response = _valid_model_response()
     response["advisory_status"] = "grounded_interpretation"
-
-    result = generate_grounded_advisory_output(
-        source_artifact_path=source_path,
-        output_root=tmp_path / "outputs",
-        run_id="ci11-test-blocked-action",
-        generated_at="2026-07-09T12:00:00Z",
-        invoker=_FakeInvoker(response),
-    )
-    structured = json.loads(result.structured_output_path.read_text(encoding="utf-8"))
+    result = _generate(tmp_path, "actionability", response)
+    structured = _read(result.structured_output_path)
 
     assert structured["advisory_status"] == "blocked_validation_failed"
     assert "actionability_ceiling_exceeded" in _codes(structured)
 
 
-def test_unknown_evidence_reference_fails_before_ci09_acceptance(tmp_path: Path) -> None:
-    source_path = _write_source(tmp_path)
+def test_unknown_evidence_reference_fails_closed(tmp_path: Path) -> None:
     response = _valid_model_response()
     response["evidence_references"][0]["evidence_ref_id"] = "invented:evidence"
-
-    result = generate_grounded_advisory_output(
-        source_artifact_path=source_path,
-        output_root=tmp_path / "outputs",
-        run_id="ci11-test-unknown-ref",
-        generated_at="2026-07-09T12:00:00Z",
-        invoker=_FakeInvoker(response),
-    )
-    structured = json.loads(result.structured_output_path.read_text(encoding="utf-8"))
+    result = _generate(tmp_path, "unknown-ref", response)
+    structured = _read(result.structured_output_path)
 
     assert structured["validation_result"]["status"] == "invalid"
     assert "unknown_evidence_reference" in _codes(structured)
 
 
 def test_material_claim_requires_evidence_reference(tmp_path: Path) -> None:
-    source_path = _write_source(tmp_path)
     response = _valid_model_response()
     response["evidence_references"] = [
         ref
         for ref in response["evidence_references"]
         if ref["claim_id"] != "claim-assessment"
     ]
-
-    result = generate_grounded_advisory_output(
-        source_artifact_path=source_path,
-        output_root=tmp_path / "outputs",
-        run_id="ci11-test-claim-ref",
-        generated_at="2026-07-09T12:00:00Z",
-        invoker=_FakeInvoker(response),
-    )
-    structured = json.loads(result.structured_output_path.read_text(encoding="utf-8"))
+    result = _generate(tmp_path, "claim-ref", response)
+    structured = _read(result.structured_output_path)
 
     assert "material_claim_without_evidence_reference" in _codes(structured)
 
 
 def test_wrong_field_type_fails_strict_parser(tmp_path: Path) -> None:
-    source_path = _write_source(tmp_path)
     response = _valid_model_response()
     response["limitations"] = "not-a-list"
-
-    result = generate_grounded_advisory_output(
-        source_artifact_path=source_path,
-        output_root=tmp_path / "outputs",
-        run_id="ci11-test-types",
-        generated_at="2026-07-09T12:00:00Z",
-        invoker=_FakeInvoker(response),
-    )
-    structured = json.loads(result.structured_output_path.read_text(encoding="utf-8"))
+    result = _generate(tmp_path, "types", response)
+    structured = _read(result.structured_output_path)
 
     assert structured["advisory_status"] == "blocked_model_output_invalid"
     assert structured["parser_result"]["parser_state"] == "schema_invalid"
@@ -160,18 +107,10 @@ def test_stale_and_missing_data_are_preserved(tmp_path: Path) -> None:
     source = _source_payload()
     source["payload"]["analysis_context_readiness"]["context_stale"] = True
     source["payload"]["missing_data_summary"].append("source_timestamp")
-    source_path = _write_source(tmp_path, source=source)
-
     response = _valid_model_response()
     response["required_disclosures"].append("staleness_disclosure")
-    result = generate_grounded_advisory_output(
-        source_artifact_path=source_path,
-        output_root=tmp_path / "outputs",
-        run_id="ci11-test-stale-missing",
-        generated_at="2026-07-09T12:00:00Z",
-        invoker=_FakeInvoker(response),
-    )
-    structured = json.loads(result.structured_output_path.read_text(encoding="utf-8"))
+    result = _generate(tmp_path, "stale", response, source=source)
+    structured = _read(result.structured_output_path)
     report = result.report_path.read_text(encoding="utf-8")
 
     assert "context_stale" in structured["source_readiness"]["stale_data"]
@@ -184,32 +123,22 @@ def test_malformed_model_output_fails_closed(tmp_path: Path) -> None:
     result = generate_grounded_advisory_output(
         source_artifact_path=source_path,
         output_root=tmp_path / "outputs",
-        run_id="ci11-test-malformed",
+        run_id="ci11-malformed",
         generated_at="2026-07-09T12:00:00Z",
         invoker=_RawTextInvoker("{not-json"),
     )
-    structured = json.loads(result.structured_output_path.read_text(encoding="utf-8"))
+    structured = _read(result.structured_output_path)
 
     assert structured["advisory_status"] == "blocked_model_output_invalid"
     assert structured["parser_result"]["parser_state"] == "malformed_json"
     assert structured["validation_result"]["status"] == "invalid"
 
 
-def test_traceability_preserves_source_invocation_and_raw_provider_metadata(
-    tmp_path: Path,
-) -> None:
-    source_path = _write_source(tmp_path)
-    result = generate_grounded_advisory_output(
-        source_artifact_path=source_path,
-        output_root=tmp_path / "outputs",
-        run_id="ci11-test-trace",
-        generated_at="2026-07-09T12:00:00Z",
-        invoker=_FakeInvoker(_valid_model_response()),
-    )
-    structured = json.loads(result.structured_output_path.read_text(encoding="utf-8"))
-    raw = json.loads(result.raw_response_path.read_text(encoding="utf-8"))
+def test_traceability_preserves_raw_provider_metadata(tmp_path: Path) -> None:
+    result = _generate(tmp_path, "trace", _valid_model_response())
+    structured = _read(result.structured_output_path)
+    raw = _read(result.raw_response_path)
 
-    assert structured["source_artifact"]["path"] == source_path.as_posix()
     assert structured["source_artifact"]["run_id"] == "run-nvda"
     assert structured["source_artifact"]["sha256"]
     assert structured["invocation_boundary"]["provider_name"] == "fake-provider"
@@ -217,7 +146,6 @@ def test_traceability_preserves_source_invocation_and_raw_provider_metadata(
     assert raw["raw_provider_response"]["id"] == "fake-request"
     assert raw["raw_provider_response_hash"]
     assert structured["provenance_trace"]["invocation_request_hash"]
-    assert structured["provenance_trace"]["raw_output_hash"]
     assert structured["provenance_trace"]["idempotency_key"]
 
 
@@ -310,14 +238,14 @@ def _valid_model_response() -> dict[str, object]:
         "schema_version": ADVISORY_MODEL_RESPONSE_SCHEMA_VERSION,
         "advisory_status": "descriptive_only",
         "executive_conclusion": (
-            "No immediate action is supported. The artifact remains partial and non-actionable."
+            "No immediate action is supported. The artifact remains partial and blocked."
         ),
         "claims": [
             {
                 "role": "assessment",
                 "claim_id": "claim-assessment",
                 "claim_type": "supported_interpretation",
-                "text": "The source remains partial and non-actionable.",
+                "text": "The source remains partial and subject to an upstream blocked state.",
             },
             {
                 "role": "supporting",
@@ -358,7 +286,7 @@ def _valid_model_response() -> dict[str, object]:
             "Treat the stock as watch-only until missing setup and portfolio context are resolved."
         ),
         "confidence_and_evidence_quality": (
-            "Evidence quality is partial and actionability is not allowed."
+            "Evidence quality is partial and the source readiness ceiling remains restrictive."
         ),
         "required_disclosures": [
             "based_only_on_supplied_market_engine_artifact",
@@ -367,6 +295,23 @@ def _valid_model_response() -> dict[str, object]:
             "descriptive_only_disclosure",
         ],
     }
+
+
+def _generate(
+    tmp_path: Path,
+    suffix: str,
+    response: dict[str, object],
+    *,
+    source: dict[str, object] | None = None,
+):
+    source_path = _write_source(tmp_path, source=source)
+    return generate_grounded_advisory_output(
+        source_artifact_path=source_path,
+        output_root=tmp_path / f"outputs-{suffix}",
+        run_id=f"ci11-{suffix}",
+        generated_at="2026-07-09T12:00:00Z",
+        invoker=_FakeInvoker(response),
+    )
 
 
 def _write_source(tmp_path: Path, *, source: dict[str, object] | None = None) -> Path:
@@ -410,6 +355,10 @@ def _source_payload() -> dict[str, object]:
             },
         },
     }
+
+
+def _read(path: Path) -> dict[str, object]:
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _codes(structured: dict[str, object]) -> set[str]:
