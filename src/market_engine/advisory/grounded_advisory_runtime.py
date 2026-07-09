@@ -1,18 +1,16 @@
 from __future__ import annotations
 
-import argparse
 import hashlib
 import json
 import os
 import re
-import sys
 import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Mapping, Protocol, Sequence, TextIO
+from typing import Any, Mapping, Protocol, Sequence
 
 from market_engine.advisory.advisory_response_grounding import (
     RESPONSE_SCHEMA_VERSION as CI09_RESPONSE_SCHEMA_VERSION,
@@ -106,119 +104,6 @@ class GroundedAdvisoryGenerationResult:
     summary: dict[str, Any]
 
 
-def generate_grounded_advisory_output(
-    *,
-    source_artifact_path: Path | str,
-    output_root: Path | str = DEFAULT_OUTPUT_ROOT,
-    run_id: str,
-    generated_at: str,
-    invoker: ModelInvoker | None = None,
-    allow_overwrite: bool = False,
-) -> GroundedAdvisoryGenerationResult:
-    source_path = Path(source_artifact_path)
-    source_artifact = _read_json_object(source_path)
-    source_validation = _validate_source_artifact(source_artifact)
-    source_summary = _source_summary(source_artifact, source_path)
-    ticker = _safe_path_segment(source_summary["ticker"], "ticker")
-    safe_run_id = _safe_path_segment(run_id, "run_id")
-    output_root_path = _validated_output_root(output_root)
-    output_directory = _resolved_child(
-        _resolved_child(output_root_path.resolve(), safe_run_id), ticker
-    )
-    if output_directory.exists() and not allow_overwrite:
-        raise GroundedAdvisoryOutputError(
-            f"Grounded advisory output directory already exists: {output_directory}"
-        )
-    if output_directory.exists() and allow_overwrite:
-        _remove_tree(output_directory)
-    output_directory.mkdir(parents=True, exist_ok=False)
-
-    invocation_request = _build_invocation_request(
-        source_artifact=source_artifact,
-        source_path=source_path,
-        source_validation=source_validation,
-        source_summary=source_summary,
-        run_id=safe_run_id,
-        generated_at=generated_at,
-    )
-    request_validation = _validate_invocation_request(invocation_request)
-    if not source_validation["valid"]:
-        invocation_result = _blocked_invocation_result(
-            "Source artifact failed pre-invocation validation."
-        )
-    elif not request_validation["valid"]:
-        invocation_result = _blocked_invocation_result(
-            "Invocation request failed deterministic CI10 pre-invocation validation."
-        )
-    else:
-        invocation_result = (invoker or OpenAIResponsesInvoker.from_environment()).invoke(
-            invocation_request
-        )
-
-    parser_result = _parse_model_response(invocation_result.raw_output)
-    validation_result = _validate_model_response(
-        parsed_response=parser_result.get("parsed_response"),
-        invocation_result=invocation_result,
-        source_summary=source_summary,
-        source_validation=source_validation,
-        invocation_request=invocation_request,
-        request_validation=request_validation,
-        run_id=safe_run_id,
-    )
-    structured_output = _structured_output(
-        source_summary=source_summary,
-        invocation_request=invocation_request,
-        invocation_result=invocation_result,
-        parser_result=parser_result,
-        validation_result=validation_result,
-        run_id=safe_run_id,
-        generated_at=generated_at,
-    )
-    report = _render_report(structured_output)
-    manifest = _manifest(
-        output_directory=output_directory,
-        structured_output=structured_output,
-        run_id=safe_run_id,
-        ticker=ticker,
-    )
-
-    invocation_request_path = output_directory / "invocation_request.json"
-    raw_response_path = output_directory / "raw_model_response.json"
-    parser_result_path = output_directory / "parser_result.json"
-    validation_result_path = output_directory / "validation_result.json"
-    structured_output_path = output_directory / "grounded_advisory_output.json"
-    report_path = output_directory / "advisory_report.md"
-    manifest_path = output_directory / "manifest.json"
-    _write_json(invocation_request_path, invocation_request)
-    _write_json(raw_response_path, _raw_response_payload(invocation_result))
-    _write_json(parser_result_path, parser_result)
-    _write_json(validation_result_path, validation_result)
-    _write_json(structured_output_path, structured_output)
-    report_path.write_text(report, encoding="utf-8")
-    _write_json(manifest_path, manifest)
-
-    return GroundedAdvisoryGenerationResult(
-        output_directory=output_directory,
-        structured_output_path=structured_output_path,
-        report_path=report_path,
-        invocation_request_path=invocation_request_path,
-        raw_response_path=raw_response_path,
-        parser_result_path=parser_result_path,
-        validation_result_path=validation_result_path,
-        manifest_path=manifest_path,
-        summary={
-            "run_id": safe_run_id,
-            "ticker": ticker,
-            "advisory_status": structured_output["advisory_status"],
-            "validation_status": validation_result["status"],
-            "grounding_status": validation_result.get("grounding_status"),
-            "invocation_state": invocation_result.invocation_state,
-            "structured_output_path": structured_output_path.as_posix(),
-            "report_path": report_path.as_posix(),
-        },
-    )
-
-
 class OpenAIResponsesInvoker:
     """Single-provider non-streaming CI10 boundary with structured output."""
 
@@ -304,51 +189,6 @@ class MissingConfigInvoker:
 
     def invoke(self, request: Mapping[str, Any]) -> ModelInvocationResult:
         return _blocked_invocation_result(self._reason)
-
-
-def run_grounded_advisory_output_command(
-    argv: Sequence[str] | None = None,
-    *,
-    stdout: TextIO | None = None,
-    stderr: TextIO | None = None,
-) -> int:
-    output_stream = stdout or sys.stdout
-    error_stream = stderr or sys.stderr
-    args = _argument_parser().parse_args(argv)
-    try:
-        result = generate_grounded_advisory_output(
-            source_artifact_path=args.artifact,
-            output_root=args.output_root,
-            run_id=args.run_id,
-            generated_at=args.generated_at,
-            allow_overwrite=args.allow_overwrite,
-        )
-    except GroundedAdvisoryOutputError as exc:
-        print(str(exc), file=error_stream)
-        return 2
-    json.dump(result.summary, output_stream, indent=2, sort_keys=True)
-    output_stream.write("\n")
-    return 0 if result.summary["validation_status"] == "valid" else 2
-
-
-def main() -> None:
-    raise SystemExit(run_grounded_advisory_output_command())
-
-
-def _argument_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="market-engine-grounded-advisory-output",
-        description=(
-            "Generate a local grounded advisory output from one existing Market Engine artifact. "
-            "The command preserves the CI10 invocation boundary and executes CI09 grounding validation."
-        ),
-    )
-    parser.add_argument("--artifact", required=True)
-    parser.add_argument("--output-root", default=DEFAULT_OUTPUT_ROOT)
-    parser.add_argument("--run-id", required=True)
-    parser.add_argument("--generated-at", required=True)
-    parser.add_argument("--allow-overwrite", action="store_true")
-    return parser
 
 
 def _validate_source_artifact(source_artifact: Mapping[str, Any]) -> dict[str, Any]:
@@ -1664,7 +1504,3 @@ def _remove_tree(path: Path) -> None:
         else:
             child.rmdir()
     path.rmdir()
-
-
-if __name__ == "__main__":
-    main()

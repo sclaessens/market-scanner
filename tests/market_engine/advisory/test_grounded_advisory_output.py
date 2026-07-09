@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import urllib.error
 from pathlib import Path
 
 import pytest
@@ -8,8 +9,10 @@ import pytest
 from market_engine.advisory.grounded_advisory_output import (
     ADVISORY_MODEL_RESPONSE_SCHEMA_VERSION,
     ModelInvocationResult,
+    OpenAIResponsesInvoker,
     generate_grounded_advisory_output,
 )
+from market_engine.advisory import grounded_advisory_runtime as runtime
 from market_engine.advisory.grounded_advisory_runtime import (
     MAX_OUTPUT_TOKENS,
     _openai_request_payload,
@@ -196,6 +199,100 @@ def test_openai_payload_enforces_schema_and_output_budget(tmp_path: Path) -> Non
     assert payload["text"]["format"]["schema"]["additionalProperties"] is False
 
 
+def test_openai_invoker_captures_provider_refusal(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    request = _captured_invocation_request(tmp_path, "provider-refusal")
+    monkeypatch.setattr(
+        runtime.urllib.request,
+        "urlopen",
+        lambda http_request, timeout: _FakeHttpResponse(
+            {
+                "id": "resp-refusal",
+                "status": "completed",
+                "output": [
+                    {
+                        "content": [
+                            {
+                                "type": "refusal",
+                                "refusal": "Request refused by provider policy.",
+                            }
+                        ]
+                    }
+                ],
+                "usage": {"input_tokens": 10, "output_tokens": 2},
+            }
+        ),
+    )
+
+    result = OpenAIResponsesInvoker(
+        api_key="test-key", model="test-model", base_url="https://example.invalid/v1"
+    ).invoke(request)
+
+    assert result.invocation_state == "provider_refusal"
+    assert result.provider_name == "openai"
+    assert result.model_name == "test-model"
+    assert result.provider_request_id == "resp-refusal"
+    assert result.error_message == "Request refused by provider policy."
+    assert result.raw_output is None
+    assert result.raw_provider_response["status"] == "completed"
+    assert result.received_at
+
+
+def test_openai_invoker_captures_truncated_response(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    request = _captured_invocation_request(tmp_path, "provider-truncated")
+    monkeypatch.setattr(
+        runtime.urllib.request,
+        "urlopen",
+        lambda http_request, timeout: _FakeHttpResponse(
+            {
+                "id": "resp-truncated",
+                "status": "incomplete",
+                "incomplete_details": {"reason": "max_output_tokens"},
+                "output_text": "{}",
+                "usage": {"input_tokens": 10, "output_tokens": MAX_OUTPUT_TOKENS},
+            }
+        ),
+    )
+
+    result = OpenAIResponsesInvoker(
+        api_key="test-key", model="test-model", base_url="https://example.invalid/v1"
+    ).invoke(request)
+
+    assert result.invocation_state == "truncated_response"
+    assert result.provider_request_id == "resp-truncated"
+    assert result.finish_reason == "max_output_tokens"
+    assert result.error_message == "Provider response incomplete: max_output_tokens"
+    assert result.raw_output == "{}"
+    assert result.raw_provider_response["status"] == "incomplete"
+    assert result.received_at
+
+
+def test_openai_invoker_captures_provider_network_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    request = _captured_invocation_request(tmp_path, "provider-network")
+
+    def raise_network_error(http_request, timeout):
+        raise urllib.error.URLError("network unavailable")
+
+    monkeypatch.setattr(runtime.urllib.request, "urlopen", raise_network_error)
+
+    result = OpenAIResponsesInvoker(
+        api_key="test-key", model="test-model", base_url="https://example.invalid/v1"
+    ).invoke(request)
+
+    assert result.invocation_state == "provider_failure"
+    assert result.provider_name == "openai"
+    assert result.model_name == "test-model"
+    assert "network unavailable" in str(result.error_message)
+    assert result.raw_output is None
+    assert result.raw_provider_response is None
+    assert result.received_at is None
+
+
 class _FakeInvoker:
     def __init__(self, response: dict[str, object]) -> None:
         self.response = response
@@ -231,6 +328,20 @@ class _RawTextInvoker:
             model_name="fake-model",
             raw_output=self.raw_text,
         )
+
+
+class _FakeHttpResponse:
+    def __init__(self, payload: dict[str, object]) -> None:
+        self.payload = payload
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, traceback):
+        return False
+
+    def read(self) -> bytes:
+        return json.dumps(self.payload).encode("utf-8")
 
 
 def _valid_model_response() -> dict[str, object]:
@@ -312,6 +423,19 @@ def _generate(
         generated_at="2026-07-09T12:00:00Z",
         invoker=_FakeInvoker(response),
     )
+
+
+def _captured_invocation_request(tmp_path: Path, suffix: str):
+    source_path = _write_source(tmp_path)
+    invoker = _RecordingInvoker(_valid_model_response())
+    generate_grounded_advisory_output(
+        source_artifact_path=source_path,
+        output_root=tmp_path / f"outputs-{suffix}",
+        run_id=f"ci11-{suffix}",
+        generated_at="2026-07-09T12:00:00Z",
+        invoker=invoker,
+    )
+    return invoker.request
 
 
 def _write_source(tmp_path: Path, *, source: dict[str, object] | None = None) -> Path:
