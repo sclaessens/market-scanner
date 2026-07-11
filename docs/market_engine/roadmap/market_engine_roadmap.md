@@ -215,7 +215,9 @@ ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption (co
   -> ME-CI08 - Controlled advisory response dry run and grounding validator scaffold (completed)
   -> ME-CI09 - Harden advisory response grounding fixtures and validator coverage (completed)
   -> ME-CI10 - Define controlled model invocation boundary contract (completed)
-  -> ME-CI11 - Implement controlled local model invocation adapter scaffold
+  -> ME-CI11 - First real grounded advisory output flow (implemented with invocation blocked by local configuration)
+  -> ME-CI11B - Execute configured real grounded advisory model invocation
+  -> ME-CI12 - Render grounded response as a high-quality human-readable stock report
   -> ME-PI01 - Define Portfolio Intelligence exposure contract
   -> ME-PS01 - Define Position Sizing decision contract
   -> ME-NL01 - Reframe notification layer as channel-neutral compact summary
@@ -225,6 +227,13 @@ ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption (co
 
 ME-CI, ME-PI, ME-PS, and ME-NL are introduced by ME-RM06 because no existing
 job-family IDs used those prefixes.
+
+ME-CI11 selected a real NVDA Market Engine artifact and generated local
+grounded advisory output artifacts and a readable blocked report. The provider
+call did not execute because the local environment lacked `OPENAI_API_KEY` and
+model configuration. ME-CI11B is inserted before ME-CI12 so that report-quality
+polish uses successful real-run evidence rather than a blocked invocation
+artifact.
 
 ### ME-CI01 - Structured Decision Output contract
 

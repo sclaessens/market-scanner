@@ -2,7 +2,7 @@
 
 Owner roles: Product Owner / Technical Architect / Development Lead / QA Lead / Governance Auditor / Operator
 
-Status: NEXT ACTIVE ADVISORY SPRINT
+Status: IMPLEMENTED WITH REAL INVOCATION BLOCKED BY LOCAL CONFIGURATION; PR REVIEW REMEDIATION APPLIED
 
 ## Roadmap position
 
@@ -15,25 +15,30 @@ ME-CI05 - Daily ChatGPT-ready advisory artifact
   -> ME-CI08 - Local synthetic advisory dry-run scaffold
   -> ME-CI09 - Grounding validator hardening
   -> ME-CI10 - Controlled model invocation boundary contract
-  -> ME-CI11 - First real grounded advisory output
+  -> ME-CI11 - First real grounded advisory output flow and blocked real invocation evidence
+  -> ME-CI11B - Configured real grounded model invocation
 ```
 
 ## Purpose
 
-ME-CI11 must produce the first real user-readable advisory output from the application for one real ticker.
+ME-CI11 must produce the first user-readable advisory output flow from the application for one real ticker and persist fail-closed evidence when a real provider invocation cannot be configured.
 
 The sprint is output-first. It is not complete when an adapter, parser, provider wrapper, or invocation abstraction merely exists.
+
+ME-CI11 selected a real NVDA Market Engine artifact and produced a local blocked advisory report. The real model response portion of the original hard Definition of Done remains open because the local environment did not provide `OPENAI_API_KEY` and did not provide `MARKET_ENGINE_ADVISORY_MODEL` or `OPENAI_MODEL`.
 
 ## Required path
 
 ```text
 real Market Engine ticker artifact
   -> source validation
-  -> deterministic prompt package
+  -> deterministic evidence catalog and prompt package
+  -> deterministic CI10 pre-invocation validation
   -> controlled non-production model invocation
-  -> raw response capture
+  -> raw provider response capture
   -> strict structured parse
-  -> mandatory CI09 grounding validation
+  -> structured claim/evidence projection
+  -> mandatory ME-CI09 grounding validation
   -> readable advisory_report.md
 ```
 
@@ -46,12 +51,31 @@ ME-CI11 is complete only when:
 - the prompt package is built from approved context;
 - one real model invocation occurs under CI10 boundaries;
 - invocation metadata and raw response are persisted locally;
-- the raw response is strictly parsed into the CI07 response shape;
-- CI09 grounding validation executes on the parsed response;
+- the raw response is strictly parsed into the approved structured response shape;
+- ME-CI09 grounding validation executes on the parsed response projection;
 - failed, malformed, ungrounded, or blocked responses do not produce a successful advisory report;
 - at least one grounded path produces `advisory_report.md`;
 - the report is readable without opening the JSON internals;
 - the report remains traceable to source artifact, prompt package, invocation, raw response, parsed response, grounding result, and manifest.
+
+## Implementation note
+
+The first PR implementation used a parallel evidence-reference containment validator. PR review classified that as a merge blocker because it bypassed the established ME-CI09 grounding authority.
+
+The PR branch was corrected before merge:
+
+```text
+strict parser
+  -> explicit claim/evidence linkage
+  -> ME-CI09 validate_advisory_response_grounding(...)
+  -> accepted advisory output
+```
+
+The remediation also added exact evidence source paths, deterministic CI10 request validation, provider-side strict structured output, bounded output tokens, model/provider/configuration-sensitive idempotency, expanded raw provider response capture, safe output path containment, and stronger regression coverage.
+
+The selected NVDA run still failed closed at invocation configuration with `blocked_invocation_not_configured`. The persisted run evidence therefore remains blocker evidence, not successful model-output evidence.
+
+The first successful real model output is explicitly moved to ME-CI11B rather than being silently treated as complete.
 
 ## Required visible content
 
@@ -95,7 +119,7 @@ No generic multi-provider routing, fallback-model policy, notification adapter, 
 ## Next
 
 ```text
-ME-CI12 - Render grounded response as a high-quality human-readable stock report
+ME-CI11B - Execute configured real grounded advisory model invocation
 ```
 
-ME-CI12 must use CI11 real-run evidence to improve report readability and consistency. It must not reopen pre-output architecture loops.
+ME-CI11B must use the corrected ME-CI11 runtime and approved non-production model configuration to obtain, strictly parse, ME-CI09-ground, validate, and render one successful real provider response before ME-CI12 starts report-quality polishing.

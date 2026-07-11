@@ -1,0 +1,11 @@
+{
+  "issues": [
+    {
+      "code": "empty_response",
+      "path": "$"
+    }
+  ],
+  "parsed_response": null,
+  "parser_state": "empty_response",
+  "status": "invalid"
+}

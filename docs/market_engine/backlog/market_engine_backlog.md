@@ -53,7 +53,8 @@ ME-CI01 - Structured Decision Output contract (completed)
   -> ME-CI08 - Controlled advisory response dry run and grounding validator scaffold (completed)
   -> ME-CI09 - Harden advisory response grounding fixtures and validator coverage (completed)
   -> ME-CI10 - Define controlled model invocation boundary contract (completed)
-  -> ME-CI11 - Implement controlled local model invocation adapter scaffold (next)
+  -> ME-CI11 - First real grounded advisory output flow (implemented with invocation blocked by local configuration)
+  -> ME-CI11B - Execute configured real grounded advisory model invocation (next)
 ```
 
 ME-CI08 implements the first local deterministic dry-run and grounding
@@ -79,6 +80,19 @@ budgets, timeout/retry semantics, raw response capture, parser boundary,
 grounding handoff, failure taxonomy, fail-closed behavior, and future
 implementation tests. It is docs-only and does not add model invocation,
 provider calls, parser runtime, delivery, or downstream authority.
+
+ME-CI11 implements the local grounded advisory output flow from a real Market
+Engine artifact through source validation, deterministic input packaging,
+CI10-shaped invocation request generation, raw-response capture, strict parser
+behavior, allowed-evidence grounding validation, structured output persistence,
+readable report rendering, and manifest persistence. The first real NVDA run
+failed closed before provider invocation because required local model
+configuration was absent. ME-CI11 therefore does not claim a successful real
+model advisory response.
+
+ME-CI11B is the next active advisory sprint. It must use the ME-CI11 runtime
+with approved non-production model configuration to obtain, parse, ground,
+validate, and render one successful real provider response.
 
 ## Historical Foundation Phase
 
