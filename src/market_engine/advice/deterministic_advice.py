@@ -7,6 +7,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Mapping
 
+from market_engine.advice.setup_price_market_context import (
+    extract_setup_price_market_context,
+)
+
 
 ADVICE_INDEX_SCHEMA_VERSION = "market-engine-advice-index-v1"
 ADVICE_INDEX_ARTIFACT_TYPE = "market-engine-deterministic-advice-index"
@@ -143,11 +147,12 @@ def render_advice_markdown(advice_index: Mapping[str, Any]) -> str:
             "",
             "## Advice Table",
             "",
-            "| Ticker | Advice | Confidence | Readiness | Primary reason | Missing for buy candidate | Next action |",
-            "|---|---|---|---|---|---|---|",
+            "| Ticker | Advice | Confidence | Readiness | Setup | Trend | Price position | Risk | Primary reason | Missing for buy candidate | Next action |",
+            "|---|---|---|---|---|---|---|---|---|---|---|",
         ]
     )
     for row in advice_index.get("tickers") or ():
+        setup_context = _mapping(row.get("setup_price_market_context"))
         rows.append(
             "| "
             + " | ".join(
@@ -156,6 +161,10 @@ def render_advice_markdown(advice_index: Mapping[str, Any]) -> str:
                     _md(row.get("advice")),
                     _md(row.get("confidence")),
                     _md(row.get("advice_readiness")),
+                    _md(setup_context.get("setup_state")),
+                    _md(setup_context.get("trend_state")),
+                    _md(setup_context.get("price_position")),
+                    _md(setup_context.get("risk_state")),
                     _md(row.get("primary_reason")),
                     _md(", ".join(row.get("missing_for_buy_candidate") or ())),
                     _md(row.get("next_action")),
@@ -181,6 +190,7 @@ def _advice_for_ticker(row: Mapping[str, Any]) -> dict[str, Any]:
         "blockers": advice["blockers"],
         "missing_for_buy_candidate": advice["missing_for_buy_candidate"],
         "next_action": advice["next_action"],
+        "setup_price_market_context": context.setup_price_market_context,
         "source_status": _string(row.get("status")),
         "readiness_level": _string(row.get("readiness_level")),
         "context_stale": bool(row.get("context_stale")),
@@ -216,6 +226,18 @@ def _apply_rules(context: "_AdviceContext") -> dict[str, Any]:
             "Collect fundamental context before assigning an advice label.",
         )
 
+    if context.setup_price_market_context_invalid:
+        return _result(
+            "unable_to_advise",
+            "low",
+            "not_ready",
+            "Setup/price/market context is invalid.",
+            ["valid_artifact_available", "setup_price_market_context_invalid"],
+            context.blockers,
+            context.missing_for_buy_candidate or ["valid_setup_price_market_context"],
+            "Repair setup/price/market context before assigning an advice label.",
+        )
+
     if context.has_serious_negative_signal:
         return _result(
             "avoid_for_now",
@@ -227,6 +249,52 @@ def _apply_rules(context: "_AdviceContext") -> dict[str, Any]:
             context.missing_for_buy_candidate,
             "Avoid for now and resolve the unsupported or conflicting evidence first.",
         )
+
+    if context.setup_price_market_context_usable:
+        if context.setup_avoid_signal:
+            return _result(
+                "avoid_for_now",
+                "medium",
+                "partial",
+                "Setup/price/market context indicates a weak, downtrend, breakdown, or elevated-risk setup.",
+                ["valid_artifact_available", "setup_price_market_context_available", "setup_avoid_signal"],
+                context.blockers,
+                context.missing_for_buy_candidate,
+                "Avoid for now until setup, price position, or risk improves.",
+            )
+        if context.setup_wait_for_price_signal:
+            return _result(
+                "wait_for_price",
+                "medium",
+                "partial",
+                "Setup/price/market context is constructive, but price is above the preferred entry zone.",
+                ["valid_artifact_available", "setup_price_market_context_available", "price_above_preferred_entry"],
+                context.blockers,
+                context.missing_for_buy_candidate,
+                "Wait for price to return closer to the preferred entry zone.",
+            )
+        if context.setup_buy_candidate_signal and not context.has_hard_blockers:
+            return _result(
+                "buy_candidate",
+                "medium",
+                "partial",
+                "Setup/price/market context is constructive and price is near a reasonable entry zone.",
+                ["valid_artifact_available", "setup_price_market_context_available", "constructive_setup_price_context"],
+                context.blockers,
+                context.missing_for_buy_candidate,
+                "Review manually as a buy candidate; no order is created.",
+            )
+        if context.setup_context_unknown_or_partial:
+            return _result(
+                "watchlist",
+                "low",
+                "partial",
+                "Setup/price/market context is partial or inconclusive.",
+                ["valid_artifact_available", "setup_price_market_context_partial"],
+                context.blockers,
+                context.missing_for_buy_candidate,
+                "Keep on watchlist while improving setup/price/market evidence.",
+            )
 
     if context.has_existing_position:
         if context.position_loss_or_high_risk:
@@ -345,11 +413,16 @@ class _AdviceContext:
         self.row = row
         self.payload = payload
         self.artifact_error = artifact_error
+        self.setup_price_market_context = extract_setup_price_market_context(
+            row,
+            payload,
+        ).to_payload()
         self.blockers = _unique_strings(
             row.get("blocked_reasons"),
             row.get("readiness_blocked_reasons"),
             [row.get("blocked_stage")] if row.get("blocked_stage") else [],
             [artifact_error] if artifact_error else [],
+            self.setup_price_market_context.get("blocked_reasons"),
         )
 
     @property
@@ -372,6 +445,8 @@ class _AdviceContext:
 
     @property
     def setup_price_missing(self) -> bool:
+        if self.setup_price_market_context_usable:
+            return False
         return "setup_price_market" in _strings(
             self.row.get("evidence_families_missing")
         ) or "missing_setup_or_price_context" in _strings(
@@ -380,8 +455,10 @@ class _AdviceContext:
 
     @property
     def setup_price_present(self) -> bool:
-        return not self.setup_price_missing and "setup_price_context" in _strings(
+        return self.setup_price_market_context_usable or (
+            not self.setup_price_missing and "setup_price_context" in _strings(
             self.payload.get("available_context_families")
+            )
         )
 
     @property
@@ -390,7 +467,61 @@ class _AdviceContext:
 
     @property
     def has_hard_blockers(self) -> bool:
-        return bool(self.row.get("blocked_stage") or _strings(self.row.get("blocked_reasons")))
+        blockers = set(_strings(self.row.get("blocked_reasons")))
+        allowed_blockers = {"Stage preserves an upstream blocked state."}
+        stage = self.row.get("blocked_stage")
+        if stage and stage != "portfolio_review":
+            return True
+        return bool(blockers - allowed_blockers)
+
+    @property
+    def setup_price_market_context_usable(self) -> bool:
+        return self.setup_price_market_context.get("context_status") in {
+            "available",
+            "partial",
+        }
+
+    @property
+    def setup_price_market_context_invalid(self) -> bool:
+        return self.setup_price_market_context.get("context_status") == "invalid"
+
+    @property
+    def setup_avoid_signal(self) -> bool:
+        context = self.setup_price_market_context
+        return (
+            context.get("trend_state") == "downtrend"
+            or context.get("setup_state") == "weak_setup"
+            or context.get("price_position") == "below_support_or_breakdown"
+            or context.get("risk_state") in {"elevated", "high"}
+        )
+
+    @property
+    def setup_wait_for_price_signal(self) -> bool:
+        context = self.setup_price_market_context
+        return (
+            context.get("trend_state") == "uptrend"
+            and context.get("setup_state") in {"breakout_candidate", "pullback_watch"}
+            and context.get("price_position") == "above_preferred_entry"
+        )
+
+    @property
+    def setup_buy_candidate_signal(self) -> bool:
+        context = self.setup_price_market_context
+        return (
+            context.get("trend_state") == "uptrend"
+            and context.get("setup_state") in {"breakout_candidate", "pullback_watch"}
+            and context.get("price_position") in {"near_entry_zone", "fair_zone"}
+            and context.get("risk_state") in {"normal", "unknown"}
+        )
+
+    @property
+    def setup_context_unknown_or_partial(self) -> bool:
+        context = self.setup_price_market_context
+        return (
+            context.get("context_status") == "partial"
+            or context.get("setup_state") == "unknown"
+            or context.get("price_position") == "unknown"
+        )
 
     @property
     def missing_fundamental_context(self) -> bool:
@@ -454,6 +585,7 @@ class _AdviceContext:
         missing: list[str] = []
         if self.setup_price_missing:
             missing.append("setup_price_market_context")
+        missing.extend(_strings(self.setup_price_market_context.get("missing")))
         if "portfolio_context" in _strings(self.row.get("missing_data_summary")):
             missing.append("portfolio_context")
         if self.missing_fundamental_context:
@@ -505,6 +637,10 @@ def _advice_summary_payload(advice_index: Mapping[str, Any]) -> dict[str, Any]:
         "watchlist_or_better_count": summary.get("watchlist_or_better_count", 0),
         "unable_to_advise_count": summary.get("unable_to_advise_count", 0),
         "top_missing_for_buy_candidate": summary.get("top_missing_for_buy_candidate", {}),
+        "setup_price_market_context_counts": summary.get(
+            "setup_price_market_context_counts",
+            {},
+        ),
         "next_baseline_sprint": "ME-ADV02 - 500-ticker advice batch output",
     }
 
@@ -529,8 +665,11 @@ def _summary(rows: list[Mapping[str, Any]]) -> dict[str, Any]:
     advice_counts = Counter(row["advice"] for row in rows)
     confidence_counts = Counter(row["confidence"] for row in rows)
     missing_counts: Counter[str] = Counter()
+    setup_context_counts: Counter[str] = Counter()
     for row in rows:
         missing_counts.update(row.get("missing_for_buy_candidate") or ())
+        setup_context = _mapping(row.get("setup_price_market_context"))
+        setup_context_counts.update([_string(setup_context.get("context_status")) or "missing"])
     return {
         "tickers_total": len(rows),
         "advice_counts": {label: advice_counts.get(label, 0) for label in ADVICE_LABELS},
@@ -547,6 +686,10 @@ def _summary(rows: list[Mapping[str, Any]]) -> dict[str, Any]:
         "actionable_output_count": sum(advice_counts.get(label, 0) for label in ACTIONABLE_OUTPUTS),
         "watchlist_or_better_count": sum(advice_counts.get(label, 0) for label in WATCHLIST_OR_BETTER),
         "top_missing_for_buy_candidate": dict(sorted(missing_counts.items())),
+        "setup_price_market_context_counts": {
+            value: setup_context_counts.get(value, 0)
+            for value in ("available", "partial", "missing", "invalid")
+        },
     }
 
 

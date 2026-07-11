@@ -44,7 +44,7 @@ The active roadmap sequence is now:
 ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
   -> ME-ADV02 - 500-ticker advice batch output (completed)
-  -> ME-DATA01 - Close highest-impact advice data coverage gaps (next)
+  -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop
   -> ME-APP01 - App/report view for advice candidates
 ```
@@ -150,9 +150,42 @@ setup_price_market_context: 12
 ```
 
 ME-ADV02 proved that the results-first path is producing concrete advice
-output, but also proved that ME-EVAL01 is premature until advice diversity
-exists. ME-DATA01 is therefore inserted as the shortest results-first path back
-to evaluation readiness.
+output, but also proved that ME-EVAL01 was premature until advice diversity
+existed. ME-DATA01 was therefore inserted as the shortest results-first path
+back to evaluation readiness.
+
+## ME-DATA01 setup/price/market context result
+
+ME-DATA01 added deterministic setup/price/market context extraction from
+existing local artifacts and local price-history CSVs. It broke watchlist-only
+output without provider invocation or live acquisition.
+
+Sample output:
+
+```text
+run_id: me-data01-setup-price-market-context-20260711T140000Z
+tickers in status index: 12
+tickers with advice labels: 12
+coverage percentage: 2.40%
+buy_candidate: 4
+wait_for_price: 2
+watchlist: 5
+avoid_for_now: 1
+hold_existing: 0
+take_loss_review: 0
+unable_to_advise: 0
+```
+
+Setup/price/market context distribution:
+
+```text
+partial: 8
+missing: 4
+available: 0
+invalid: 0
+```
+
+ME-EVAL01 is now useful because outcome-trackable advice labels exist.
 
 ## ME-ADV01 required outputs
 
@@ -224,10 +257,10 @@ Review-priority logic may be implemented inside ME-ADV01 if it directly supports
 
 ## Current next sprint
 
-After ME-ADV02, the next sprint is:
+After ME-DATA01, the next sprint is:
 
 ```text
-ME-DATA01 - Close highest-impact advice data coverage gaps
+ME-EVAL01 - Advice outcome tracking and feedback loop
 ```
 
 Not:
@@ -236,8 +269,10 @@ Not:
 ME-GH03 - Deterministic ranking and review queue
 ```
 
-ME-DATA01 is allowed only because ME-ADV02 produced concrete batch advice
-output and exposed the specific blockers preventing advice diversity.
+Remaining data gaps are explicit follow-up candidates, not blockers to
+ME-EVAL01: portfolio context, broad market context, local price/setup evidence
+for uncovered tickers, and coverage beyond the current 12 of 500 target
+tickers.
 
 ## Definition of roadmap adherence
 

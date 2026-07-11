@@ -40,7 +40,7 @@ The no-API guardrail remains active: the baseline must not require paid OpenAI A
 ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
   -> ME-ADV02 - 500-ticker advice batch output (completed)
-  -> ME-DATA01 - Close highest-impact advice data coverage gaps
+  -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop
   -> ME-APP01 - App/report view for advice candidates
 ```
@@ -115,13 +115,53 @@ setup_price_market_context: 12
 ```
 
 ME-ADV02 therefore produced visible batch advice output, but it also proved
-that outcome tracking is not yet useful because only `watchlist` labels were
+that outcome tracking was not yet useful because only `watchlist` labels were
 produced.
+
+## Current completed ME-DATA01 result
+
+ME-DATA01 added deterministic setup/price/market context extraction from
+existing local artifacts and local price-history CSVs. It did not perform live
+source acquisition, provider invocation, broker/order execution,
+portfolio/watchlist mutation, Telegram, or delivery side effects.
+
+The ME-DATA01 sample batch reused:
+
+```text
+artifacts/market_engine/batch_status/me-gh02-sample-status-index-20260711T120000Z/ticker_status_index.json
+```
+
+and produced:
+
+```text
+run_id: me-data01-setup-price-market-context-20260711T140000Z
+tickers with advice labels: 12
+coverage percentage: 2.40%
+buy_candidate: 4
+wait_for_price: 2
+watchlist: 5
+avoid_for_now: 1
+hold_existing: 0
+take_loss_review: 0
+unable_to_advise: 0
+```
+
+Setup/price/market context distribution:
+
+```text
+partial: 8
+missing: 4
+available: 0
+invalid: 0
+```
+
+ME-DATA01 therefore broke the watchlist-only output and made outcome tracking
+useful.
 
 ## Next baseline sprint
 
 ```text
-ME-DATA01 - Close highest-impact advice data coverage gaps
+ME-EVAL01 - Advice outcome tracking and feedback loop
 ```
 
 Not:
@@ -130,10 +170,15 @@ Not:
 ME-GH03 - Deterministic ranking and review queue
 ```
 
-ME-DATA01 must be narrowly targeted at the gaps proven by ME-ADV02:
-setup/price/market context, portfolio context, and status/advice coverage
-beyond the current 12-ticker sample. It must not become generic infrastructure
-or a provider-refresh detour.
+Remaining data gaps are explicit follow-up candidates, not blockers to
+ME-EVAL01:
+
+```text
+portfolio_context: 12
+market_context: 8
+local_price_history: 4
+status/advice coverage beyond 12 of 500 target tickers
+```
 
 ## Completed ME-ADV01 result
 

@@ -1,0 +1,45 @@
+{
+  "advice_counts": {
+    "avoid_for_now": 1,
+    "buy_candidate": 4,
+    "hold_existing": 0,
+    "take_loss_review": 0,
+    "unable_to_advise": 0,
+    "wait_for_price": 2,
+    "watchlist": 5
+  },
+  "buy_candidate_count": 4,
+  "confidence_counts": {
+    "high": 0,
+    "low": 5,
+    "medium": 7
+  },
+  "coverage_percentage": 2.4,
+  "evaluation_readiness": {
+    "ready_for_outcome_tracking": true,
+    "reason": "At least one outcome-trackable advice label was produced.",
+    "recommended_next_sprint": "ME-EVAL01 - Advice outcome tracking and feedback loop"
+  },
+  "recommended_next_sprint": "ME-EVAL01 - Advice outcome tracking and feedback loop",
+  "run_id": "me-data01-setup-price-market-context-20260711T140000Z",
+  "schema_version": "market-engine-advice-batch-summary-v1",
+  "setup_price_market_context_counts": {
+    "available": 0,
+    "invalid": 0,
+    "missing": 4,
+    "partial": 8
+  },
+  "target_size": 500,
+  "tickers_in_status_index": 12,
+  "tickers_with_advice": 12,
+  "top_missing_for_buy_candidate": {
+    "local_price_history": 4,
+    "market_context": 8,
+    "portfolio_context": 12,
+    "price_level_context": 4,
+    "setup_detection": 4,
+    "setup_price_market_context": 4
+  },
+  "unable_to_advise_count": 0,
+  "watchlist_or_better_count": 11
+}
