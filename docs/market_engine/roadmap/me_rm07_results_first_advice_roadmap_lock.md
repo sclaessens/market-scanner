@@ -42,8 +42,8 @@ The active roadmap sequence is now:
 
 ```text
 ME-GH02 - Batch artifact discovery and ticker status index
-  -> ME-ADV01 - Minimal deterministic advice engine v1
-  -> ME-ADV02 - 500-ticker advice batch output
+  -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
+  -> ME-ADV02 - 500-ticker advice batch output (next)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop
   -> ME-APP01 - App/report view for advice candidates
 ```
@@ -72,9 +72,9 @@ Exceptions are allowed only when a concrete blocker makes ME-ADV01, ME-ADV02, ME
 - which canonical roadmap step resumes after the exception.
 ```
 
-## Advice labels required from ME-ADV01
+## Advice labels produced by ME-ADV01
 
-ME-ADV01 must introduce a minimal deterministic advice engine that produces one advice label per ticker.
+ME-ADV01 introduced a minimal deterministic advice engine that produces one advice label per ticker.
 
 Allowed v1 labels:
 
@@ -91,13 +91,13 @@ unable_to_advise
 Human-facing labels:
 
 ```text
-Kopen mogelijk
-Wachten op betere prijs
-Opvolgen
-Voorlopig vermijden
-Bestaande positie houden
-Verlies nemen bekijken
-Geen advies mogelijk
+buy_candidate = buy candidate for manual review
+wait_for_price = wait for better price or timing context
+watchlist = follow manually, not yet a buy candidate
+avoid_for_now = avoid for now
+hold_existing = existing position can remain under manual review
+take_loss_review = existing position needs manual loss/risk review
+unable_to_advise = deterministic advice is not possible from available artifacts
 ```
 
 ## Minimal v1 rule posture
@@ -121,7 +121,7 @@ These rules may be imperfect. That is acceptable because ME-EVAL01 exists to mea
 
 ## ME-ADV01 required outputs
 
-ME-ADV01 must produce:
+ME-ADV01 produces:
 
 ```text
 artifacts/market_engine/advice_runs/<run_id>/
@@ -132,7 +132,7 @@ artifacts/market_engine/advice_runs/<run_id>/
   advice_summary.json
 ```
 
-Each ticker row must include at minimum:
+Each ticker row includes at minimum:
 
 ```text
 ticker
@@ -189,10 +189,10 @@ Review-priority logic may be implemented inside ME-ADV01 if it directly supports
 
 ## Current next sprint
 
-After ME-GH02 is merged, the next sprint is:
+After ME-ADV01, the next sprint is:
 
 ```text
-ME-ADV01 - Minimal deterministic advice engine v1
+ME-ADV02 - 500-ticker advice batch output
 ```
 
 Not:

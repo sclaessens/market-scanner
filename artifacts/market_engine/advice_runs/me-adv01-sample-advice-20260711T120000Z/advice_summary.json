@@ -1,0 +1,27 @@
+{
+  "actionable_output_count": 12,
+  "advice_counts": {
+    "avoid_for_now": 0,
+    "buy_candidate": 0,
+    "hold_existing": 0,
+    "take_loss_review": 0,
+    "unable_to_advise": 0,
+    "wait_for_price": 0,
+    "watchlist": 12
+  },
+  "confidence_counts": {
+    "high": 0,
+    "low": 12,
+    "medium": 0
+  },
+  "next_baseline_sprint": "ME-ADV02 - 500-ticker advice batch output",
+  "run_id": "me-adv01-sample-advice-20260711T120000Z",
+  "schema_version": "market-engine-advice-summary-v1",
+  "tickers_total": 12,
+  "top_missing_for_buy_candidate": {
+    "portfolio_context": 12,
+    "setup_price_market_context": 12
+  },
+  "unable_to_advise_count": 0,
+  "watchlist_or_better_count": 12
+}
