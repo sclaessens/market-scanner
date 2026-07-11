@@ -217,7 +217,8 @@ ME-CI01 - Define Structured Decision Output contract for ChatGPT consumption (co
   -> ME-CI10 - Define controlled model invocation boundary contract (completed)
   -> ME-CI11 - First real grounded advisory output flow (implemented with invocation blocked by local configuration)
   -> ME-CI11B - Execute configured real grounded advisory model invocation (blocked by missing local OPENAI_API_KEY)
-  -> ME-CI11C - Run configured provider invocation with local API key
+  -> ME-CI11C - Run configured provider invocation with local API key (blocked by Codex command process env propagation)
+  -> ME-CI11D - Fix Codex command process provider environment propagation
   -> ME-CI12 - Batch grounded advisory runner for ticker universe
   -> ME-PI01 - Define Portfolio Intelligence exposure contract
   -> ME-PS01 - Define Position Sizing decision contract
@@ -235,9 +236,11 @@ call did not execute because the local environment lacked `OPENAI_API_KEY` and
 model configuration. ME-CI11B reran the corrected universal CI11 command path
 with explicit non-production model configuration for NVDA and AMD. Both runs
 failed closed before provider invocation because `OPENAI_API_KEY` was still
-absent. The exact next step is ME-CI11C: provide credentials outside repository
-content and rerun the same universal command path before batch processing or
-report-quality expansion.
+absent. ME-CI11C then supplied `MARKET_ENGINE_ADVISORY_MODEL=gpt-4.1-mini` in
+the command environment, but the Codex command process still did not contain a
+non-empty `OPENAI_API_KEY`. The exact next step is ME-CI11D: fix provider
+environment propagation into the Codex command process and rerun the same
+universal command path before batch processing or report-quality expansion.
 
 ### ME-CI01 - Structured Decision Output contract
 
