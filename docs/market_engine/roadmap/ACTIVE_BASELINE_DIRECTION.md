@@ -28,8 +28,14 @@ docs/market_engine/backlog/me_gh01_github_first_no_api_baseline_backlog.md
 
 Any older roadmap text that points to provider invocation, API-key propagation, paid OpenAI API advisory generation, or ME-CI11D as the next baseline step is superseded for baseline planning.
 
-Next baseline sprint:
+Current completed baseline implementation:
 
 ```text
 ME-GH02 - Batch artifact discovery and ticker status index
+```
+
+Next baseline sprint:
+
+```text
+ME-GH03 - Deterministic ranking and review queue
 ```

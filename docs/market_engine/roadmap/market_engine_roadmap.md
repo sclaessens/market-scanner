@@ -97,6 +97,31 @@ Completed job-scoped chain:
 
 ## Active Next Direction
 
+## Active GitHub-first Baseline Direction
+
+The active baseline chain for 500-ticker progress is:
+
+```text
+ME-GH01 - Lock GitHub-first no-API baseline and redirect roadmap (completed)
+  -> ME-GH02 - Batch artifact discovery and ticker status index (completed)
+  -> ME-GH03 - Deterministic ranking and review queue (next)
+```
+
+ME-GH02 implemented deterministic discovery and ticker status indexing over
+existing Market Engine dry-run artifacts. The implementation writes
+`manifest.json`, `ticker_status_index.json`, `ticker_status_index.md`,
+`discovery_summary.json`, and `failures.json` under
+`artifacts/market_engine/batch_status/<run_id>/`.
+
+Provider advisory output remains optional/deferred and is not part of the
+baseline. The baseline requires no OpenAI API key, performs no provider
+invocation, performs no source acquisition, and adds no ranking, recommendation,
+allocation, broker, portfolio, watchlist, Telegram, or delivery side effects.
+
+ME-GH03 is the next baseline sprint: deterministic ranking and review queue.
+That review queue must remain non-actionable and separate from BUY/SELL/HOLD,
+allocation, sizing, conviction, and Decision Engine authority.
+
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 
 Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Development Lead / QA Lead / Governance Auditor

@@ -1,0 +1,434 @@
+{
+  "artifact_root": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z",
+  "artifact_type": "market-engine-ticker-status-index",
+  "generated_at": "2026-07-11T12:00:00Z",
+  "run_id": "me-gh02-sample-status-index-20260711T120000Z",
+  "schema_version": "market-engine-ticker-status-index-v1",
+  "summary": {
+    "actionable_review_allowed_count": 0,
+    "artifacts_discovered": 12,
+    "artifacts_invalid": 0,
+    "artifacts_valid": 12,
+    "decision_engine_ready_count": 0,
+    "readiness_counts": {
+      "partial_analysis": 12
+    },
+    "stale_count": 0,
+    "status_counts": {
+      "blocked": 12
+    },
+    "tickers_total": 12,
+    "tickers_with_valid_artifact": 12,
+    "tickers_without_valid_artifact": 0
+  },
+  "tickers": [
+    {
+      "actionable_review_allowed": false,
+      "artifact_created_at": "2026-07-02T11:56:52Z",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/AMD/dry_run.json",
+      "artifact_sha256": "596275731a52e05c64271ddf4966ffce31697e90a48103bdcfcf84bfa19379f0",
+      "blocked_reasons": [
+        "Stage preserves an upstream blocked state."
+      ],
+      "blocked_stage": "portfolio_review",
+      "candidate_artifact_count": 1,
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "dry_run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-amd",
+      "evidence_families_missing": [
+        "setup_price_market"
+      ],
+      "input_mode": "cached_source_snapshot",
+      "invalid_candidate_count": 0,
+      "invalid_reasons": [],
+      "missing_data_summary": [
+        "portfolio_context"
+      ],
+      "provenance": {
+        "recommendation_review_category": null,
+        "recommendation_review_state": null,
+        "source_refresh_snapshot_id": "AMD_companyfacts"
+      },
+      "readiness_blocked_reasons": [
+        "missing_setup_or_price_context"
+      ],
+      "readiness_level": "partial_analysis",
+      "status": "blocked",
+      "ticker": "AMD"
+    },
+    {
+      "actionable_review_allowed": false,
+      "artifact_created_at": "2026-07-02T11:56:52Z",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/ASML/dry_run.json",
+      "artifact_sha256": "fe0232f94cba323192b79909bdcddf41e592ae19583a3d739f1b9b9e4b641ce5",
+      "blocked_reasons": [
+        "Stage preserves an upstream blocked state."
+      ],
+      "blocked_stage": "portfolio_review",
+      "candidate_artifact_count": 1,
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "dry_run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-asml",
+      "evidence_families_missing": [
+        "setup_price_market"
+      ],
+      "input_mode": "cached_source_snapshot",
+      "invalid_candidate_count": 0,
+      "invalid_reasons": [],
+      "missing_data_summary": [
+        "portfolio_context"
+      ],
+      "provenance": {
+        "recommendation_review_category": null,
+        "recommendation_review_state": null,
+        "source_refresh_snapshot_id": "ASML_companyfacts"
+      },
+      "readiness_blocked_reasons": [
+        "missing_setup_or_price_context"
+      ],
+      "readiness_level": "partial_analysis",
+      "status": "blocked",
+      "ticker": "ASML"
+    },
+    {
+      "actionable_review_allowed": false,
+      "artifact_created_at": "2026-07-02T11:56:52Z",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/AVGO/dry_run.json",
+      "artifact_sha256": "54cf87bab20b95dd8f340698cf8f77bc47037f82f580c0c6164a761a8e97f04d",
+      "blocked_reasons": [
+        "Stage preserves an upstream blocked state."
+      ],
+      "blocked_stage": "portfolio_review",
+      "candidate_artifact_count": 1,
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "dry_run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-avgo",
+      "evidence_families_missing": [
+        "setup_price_market"
+      ],
+      "input_mode": "cached_source_snapshot",
+      "invalid_candidate_count": 0,
+      "invalid_reasons": [],
+      "missing_data_summary": [
+        "portfolio_context"
+      ],
+      "provenance": {
+        "recommendation_review_category": null,
+        "recommendation_review_state": null,
+        "source_refresh_snapshot_id": "AVGO_companyfacts"
+      },
+      "readiness_blocked_reasons": [
+        "missing_setup_or_price_context"
+      ],
+      "readiness_level": "partial_analysis",
+      "status": "blocked",
+      "ticker": "AVGO"
+    },
+    {
+      "actionable_review_allowed": false,
+      "artifact_created_at": "2026-07-02T11:56:52Z",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/CLS/dry_run.json",
+      "artifact_sha256": "563bcc737339def259dd9b795dc095e399c0d2462a8eefec8dbdf30ebba65fce",
+      "blocked_reasons": [
+        "Stage preserves an upstream blocked state."
+      ],
+      "blocked_stage": "portfolio_review",
+      "candidate_artifact_count": 1,
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "dry_run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-cls",
+      "evidence_families_missing": [
+        "setup_price_market"
+      ],
+      "input_mode": "cached_source_snapshot",
+      "invalid_candidate_count": 0,
+      "invalid_reasons": [],
+      "missing_data_summary": [
+        "portfolio_context"
+      ],
+      "provenance": {
+        "recommendation_review_category": null,
+        "recommendation_review_state": null,
+        "source_refresh_snapshot_id": "CLS_companyfacts"
+      },
+      "readiness_blocked_reasons": [
+        "missing_setup_or_price_context"
+      ],
+      "readiness_level": "partial_analysis",
+      "status": "blocked",
+      "ticker": "CLS"
+    },
+    {
+      "actionable_review_allowed": false,
+      "artifact_created_at": "2026-07-02T11:56:52Z",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/COST/dry_run.json",
+      "artifact_sha256": "804572470fbc3fb6523a6300cddb604924be023710e3d7257cda0ba592282d76",
+      "blocked_reasons": [
+        "Stage preserves an upstream blocked state."
+      ],
+      "blocked_stage": "portfolio_review",
+      "candidate_artifact_count": 1,
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "dry_run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-cost",
+      "evidence_families_missing": [
+        "setup_price_market"
+      ],
+      "input_mode": "cached_source_snapshot",
+      "invalid_candidate_count": 0,
+      "invalid_reasons": [],
+      "missing_data_summary": [
+        "portfolio_context"
+      ],
+      "provenance": {
+        "recommendation_review_category": null,
+        "recommendation_review_state": null,
+        "source_refresh_snapshot_id": "COST_companyfacts"
+      },
+      "readiness_blocked_reasons": [
+        "missing_setup_or_price_context"
+      ],
+      "readiness_level": "partial_analysis",
+      "status": "blocked",
+      "ticker": "COST"
+    },
+    {
+      "actionable_review_allowed": false,
+      "artifact_created_at": "2026-07-02T11:56:52Z",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/CRDO/dry_run.json",
+      "artifact_sha256": "e1ab78ef82e863d9f3ea757099016eb0124dc5dbf7919f8749e87cf2c31d0c24",
+      "blocked_reasons": [
+        "Stage preserves an upstream blocked state."
+      ],
+      "blocked_stage": "portfolio_review",
+      "candidate_artifact_count": 1,
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "dry_run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-crdo",
+      "evidence_families_missing": [
+        "setup_price_market"
+      ],
+      "input_mode": "cached_source_snapshot",
+      "invalid_candidate_count": 0,
+      "invalid_reasons": [],
+      "missing_data_summary": [
+        "portfolio_context"
+      ],
+      "provenance": {
+        "recommendation_review_category": null,
+        "recommendation_review_state": null,
+        "source_refresh_snapshot_id": "CRDO_companyfacts"
+      },
+      "readiness_blocked_reasons": [
+        "missing_setup_or_price_context"
+      ],
+      "readiness_level": "partial_analysis",
+      "status": "blocked",
+      "ticker": "CRDO"
+    },
+    {
+      "actionable_review_allowed": false,
+      "artifact_created_at": "2026-07-02T11:56:52Z",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/IREN/dry_run.json",
+      "artifact_sha256": "1461cc315d790e0a2e83bd065a77979a4bb0b1a00fd3d57e11906f30e67ee89d",
+      "blocked_reasons": [
+        "Stage preserves an upstream blocked state."
+      ],
+      "blocked_stage": "portfolio_review",
+      "candidate_artifact_count": 1,
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "dry_run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-iren",
+      "evidence_families_missing": [
+        "setup_price_market"
+      ],
+      "input_mode": "cached_source_snapshot",
+      "invalid_candidate_count": 0,
+      "invalid_reasons": [],
+      "missing_data_summary": [
+        "portfolio_context"
+      ],
+      "provenance": {
+        "recommendation_review_category": null,
+        "recommendation_review_state": null,
+        "source_refresh_snapshot_id": "IREN_companyfacts"
+      },
+      "readiness_blocked_reasons": [
+        "missing_setup_or_price_context"
+      ],
+      "readiness_level": "partial_analysis",
+      "status": "blocked",
+      "ticker": "IREN"
+    },
+    {
+      "actionable_review_allowed": false,
+      "artifact_created_at": "2026-07-02T11:56:52Z",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/META/dry_run.json",
+      "artifact_sha256": "32600e95c37bbe889406b7085f234cbb32081f3effdda98c32507c4d0e2ff1a4",
+      "blocked_reasons": [
+        "Stage preserves an upstream blocked state."
+      ],
+      "blocked_stage": "portfolio_review",
+      "candidate_artifact_count": 1,
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "dry_run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-meta",
+      "evidence_families_missing": [
+        "setup_price_market"
+      ],
+      "input_mode": "cached_source_snapshot",
+      "invalid_candidate_count": 0,
+      "invalid_reasons": [],
+      "missing_data_summary": [
+        "portfolio_context"
+      ],
+      "provenance": {
+        "recommendation_review_category": null,
+        "recommendation_review_state": null,
+        "source_refresh_snapshot_id": "META_companyfacts"
+      },
+      "readiness_blocked_reasons": [
+        "missing_setup_or_price_context"
+      ],
+      "readiness_level": "partial_analysis",
+      "status": "blocked",
+      "ticker": "META"
+    },
+    {
+      "actionable_review_allowed": false,
+      "artifact_created_at": "2026-07-02T11:56:52Z",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/MSFT/dry_run.json",
+      "artifact_sha256": "473bab82616a960b2c0782ad909b065871515ad374bb02b9a6a49360de1b10da",
+      "blocked_reasons": [
+        "Stage preserves an upstream blocked state."
+      ],
+      "blocked_stage": "portfolio_review",
+      "candidate_artifact_count": 1,
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "dry_run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-msft",
+      "evidence_families_missing": [
+        "setup_price_market"
+      ],
+      "input_mode": "cached_source_snapshot",
+      "invalid_candidate_count": 0,
+      "invalid_reasons": [],
+      "missing_data_summary": [
+        "portfolio_context"
+      ],
+      "provenance": {
+        "recommendation_review_category": null,
+        "recommendation_review_state": null,
+        "source_refresh_snapshot_id": "MSFT_companyfacts"
+      },
+      "readiness_blocked_reasons": [
+        "missing_setup_or_price_context"
+      ],
+      "readiness_level": "partial_analysis",
+      "status": "blocked",
+      "ticker": "MSFT"
+    },
+    {
+      "actionable_review_allowed": false,
+      "artifact_created_at": "2026-07-02T11:56:52Z",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/NVDA/dry_run.json",
+      "artifact_sha256": "8c6bfff911ad579b7df4fda26ea83269805ffc7e5a094ea0aff34ddd8d10825f",
+      "blocked_reasons": [
+        "Stage preserves an upstream blocked state."
+      ],
+      "blocked_stage": "portfolio_review",
+      "candidate_artifact_count": 1,
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "dry_run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-nvda",
+      "evidence_families_missing": [
+        "setup_price_market"
+      ],
+      "input_mode": "cached_source_snapshot",
+      "invalid_candidate_count": 0,
+      "invalid_reasons": [],
+      "missing_data_summary": [
+        "portfolio_context"
+      ],
+      "provenance": {
+        "recommendation_review_category": null,
+        "recommendation_review_state": null,
+        "source_refresh_snapshot_id": "NVDA_companyfacts"
+      },
+      "readiness_blocked_reasons": [
+        "missing_setup_or_price_context"
+      ],
+      "readiness_level": "partial_analysis",
+      "status": "blocked",
+      "ticker": "NVDA"
+    },
+    {
+      "actionable_review_allowed": false,
+      "artifact_created_at": "2026-07-02T11:56:52Z",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/TSM/dry_run.json",
+      "artifact_sha256": "1000d4ba4f8035c6d40d4bada7bc0a168cad3625c1408f62a96717b18ef3ba5c",
+      "blocked_reasons": [
+        "Stage preserves an upstream blocked state."
+      ],
+      "blocked_stage": "portfolio_review",
+      "candidate_artifact_count": 1,
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "dry_run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-tsm",
+      "evidence_families_missing": [
+        "setup_price_market"
+      ],
+      "input_mode": "cached_source_snapshot",
+      "invalid_candidate_count": 0,
+      "invalid_reasons": [],
+      "missing_data_summary": [
+        "portfolio_context"
+      ],
+      "provenance": {
+        "recommendation_review_category": null,
+        "recommendation_review_state": null,
+        "source_refresh_snapshot_id": "TSM_companyfacts"
+      },
+      "readiness_blocked_reasons": [
+        "missing_setup_or_price_context"
+      ],
+      "readiness_level": "partial_analysis",
+      "status": "blocked",
+      "ticker": "TSM"
+    },
+    {
+      "actionable_review_allowed": false,
+      "artifact_created_at": "2026-07-02T11:56:52Z",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/VRT/dry_run.json",
+      "artifact_sha256": "59b1d5bbe5b790520d833def3822f0197a580de5be9f804a573af2e9abc867fd",
+      "blocked_reasons": [
+        "Stage preserves an upstream blocked state."
+      ],
+      "blocked_stage": "portfolio_review",
+      "candidate_artifact_count": 1,
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "dry_run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-vrt",
+      "evidence_families_missing": [
+        "setup_price_market"
+      ],
+      "input_mode": "cached_source_snapshot",
+      "invalid_candidate_count": 0,
+      "invalid_reasons": [],
+      "missing_data_summary": [
+        "portfolio_context"
+      ],
+      "provenance": {
+        "recommendation_review_category": null,
+        "recommendation_review_state": null,
+        "source_refresh_snapshot_id": "VRT_companyfacts"
+      },
+      "readiness_blocked_reasons": [
+        "missing_setup_or_price_context"
+      ],
+      "readiness_level": "partial_analysis",
+      "status": "blocked",
+      "ticker": "VRT"
+    }
+  ]
+}

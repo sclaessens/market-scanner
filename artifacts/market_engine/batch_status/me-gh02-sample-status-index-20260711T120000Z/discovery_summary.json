@@ -1,0 +1,16 @@
+{
+  "artifact_root": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z",
+  "dry_run_artifacts_seen": 12,
+  "duplicate_ticker_candidates": 0,
+  "files_scanned": 41,
+  "invalid_dry_run_artifacts": 0,
+  "json_files_seen": 40,
+  "selection_rule": [
+    "valid artifacts before invalid artifacts",
+    "newest artifact_created_at",
+    "newest file modified time",
+    "lexicographically smallest path"
+  ],
+  "tickers_seen": 12,
+  "valid_dry_run_artifacts": 12
+}

@@ -1,0 +1,20 @@
+{
+  "artifact_root": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z",
+  "artifact_type": "market-engine-batch-status-run-manifest",
+  "baseline_guardrail": {
+    "openai_api_required": false,
+    "provider_invocation_allowed": false,
+    "ranking_performed": false,
+    "recommendation_semantics_performed": false,
+    "source_acquisition_performed": false
+  },
+  "generated_at": "2026-07-11T12:00:00Z",
+  "outputs": {
+    "discovery_summary": "discovery_summary.json",
+    "failures": "failures.json",
+    "ticker_status_index_json": "ticker_status_index.json",
+    "ticker_status_index_md": "ticker_status_index.md"
+  },
+  "run_id": "me-gh02-sample-status-index-20260711T120000Z",
+  "schema_version": "market-engine-batch-status-run-manifest-v1"
+}

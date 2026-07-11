@@ -37,7 +37,7 @@ The active baseline roadmap is GitHub-first and no-paid-API by default.
 
 ```text
 ME-GH01 - Lock GitHub-first no-API baseline and redirect roadmap
-  -> ME-GH02 - Batch artifact discovery and ticker status index
+  -> ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-GH03 - Deterministic ranking and review queue
   -> ME-GH04 - ChatGPT-readable batch analysis package
   -> ME-GH05 - GitHub Actions manual/scheduled batch run
@@ -69,19 +69,19 @@ Non-scope:
 
 ## ME-GH02 - Batch artifact discovery and ticker status index
 
-Status: NEXT BASELINE IMPLEMENTATION SPRINT
+Status: COMPLETED BASELINE IMPLEMENTATION SPRINT
 
 Goal: create a deterministic batch index over existing Market Engine artifacts so the system can summarize ticker readiness, blockers, freshness and available analysis context without requiring paid model calls.
 
-Expected output:
+Implemented output:
 
 ```text
-artifacts/market_engine/batch_runs/<run_id>/
+artifacts/market_engine/batch_status/<run_id>/
   manifest.json
   ticker_status_index.json
   ticker_status_index.md
+  discovery_summary.json
   failures.json
-  data_freshness_summary.json
 ```
 
 Required per-ticker fields:
@@ -97,7 +97,7 @@ Required per-ticker fields:
 * setup/fundamental/derived observation availability
 * recommendation-review boundary state
 * portfolio context availability where already present
-* status: `review_ready`, `blocked_missing_data`, `blocked_stale_data`, `blocked_source_unavailable`, `blocked_runtime_error`, or `not_supported`
+* status: `review_ready`, `descriptive_only`, `blocked`, `stale`, `invalid_artifact`, or `missing_artifact`
 
 Non-scope:
 
@@ -106,9 +106,17 @@ Non-scope:
 * No ticker-specific special cases.
 * No scoring semantics that create BUY/SELL/HOLD or allocation authority.
 
+Sample evidence:
+
+```text
+artifacts/market_engine/batch_status/me-gh02-sample-status-index-20260711T120000Z/
+```
+
+The sample run indexed 12 valid ME-RUN28 dry-run artifacts. All 12 tickers were preserved as `blocked` with `partial_analysis` readiness because the source artifacts preserve upstream blocked portfolio-review state. Provider advisory output remains optional/deferred and is not part of the baseline.
+
 ## ME-GH03 - Deterministic ranking and review queue
 
-Status: PLANNED AFTER ME-GH02
+Status: NEXT BASELINE IMPLEMENTATION SPRINT
 
 Goal: produce deterministic non-actionable review queues from batch status data.
 
