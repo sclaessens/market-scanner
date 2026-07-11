@@ -38,7 +38,7 @@ The no-API guardrail remains active: the baseline must not require paid OpenAI A
 
 ```text
 ME-GH02 - Batch artifact discovery and ticker status index
-  -> ME-ADV01 - Minimal deterministic advice engine v1
+  -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
   -> ME-ADV02 - 500-ticker advice batch output
   -> ME-EVAL01 - Advice outcome tracking and feedback loop
   -> ME-APP01 - App/report view for advice candidates
@@ -63,12 +63,18 @@ Every future baseline sprint must directly support at least one of these outcome
 
 If a sprint does not directly support one of those outcomes, it is not part of the baseline roadmap.
 
+## Current completed baseline implementation
+
+ME-ADV01 produced deterministic advice labels from the ME-GH02 ticker status
+index and linked dry-run artifacts. The sample run produced concrete
+`watchlist` labels for the 12 ME-GH02 sample tickers and did not require
+OpenAI API, provider invocation, source acquisition, live data refresh, broker
+orders, portfolio/watchlist mutation, Telegram, or delivery side effects.
+
 ## Next baseline sprint
 
-After ME-GH02 is merged, the next baseline sprint is:
-
 ```text
-ME-ADV01 - Minimal deterministic advice engine v1
+ME-ADV02 - 500-ticker advice batch output
 ```
 
 Not:
@@ -77,9 +83,9 @@ Not:
 ME-GH03 - Deterministic ranking and review queue
 ```
 
-## Required ME-ADV01 result
+## Completed ME-ADV01 result
 
-ME-ADV01 must produce deterministic advice output with labels such as:
+ME-ADV01 produces deterministic advice output with labels:
 
 ```text
 buy_candidate

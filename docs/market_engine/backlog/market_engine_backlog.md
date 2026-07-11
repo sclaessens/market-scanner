@@ -38,28 +38,33 @@ Backlog items do not authorize implementation unless the sprint scope explicitly
 * Cross-job work must be explicitly labeled as governance, QA, data governance, or integration contract work.
 * Analysis, recommendation, portfolio review, and delivery authority must remain separated.
 
-## Active GitHub-first Baseline Chain
+## Active Results-first Advice Baseline Chain
 
 The active baseline chain for 500-ticker progress is now:
 
 ```text
-ME-GH01 - Lock GitHub-first no-API baseline and redirect roadmap (completed)
-  -> ME-GH02 - Batch artifact discovery and ticker status index (completed)
-  -> ME-GH03 - Deterministic ranking and review queue (next)
+ME-GH02 - Batch artifact discovery and ticker status index (completed)
+  -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
+  -> ME-ADV02 - 500-ticker advice batch output (next)
+  -> ME-EVAL01 - Advice outcome tracking and feedback loop
+  -> ME-APP01 - App/report view for advice candidates
 ```
 
-ME-GH02 implemented deterministic discovery and ticker status indexing over
-existing Market Engine dry-run artifacts. It writes `manifest.json`,
-`ticker_status_index.json`, `ticker_status_index.md`, `discovery_summary.json`,
-and `failures.json` under `artifacts/market_engine/batch_status/<run_id>/`.
-It requires no OpenAI API key, performs no provider invocation, performs no
-source acquisition, and adds no ranking, recommendation, allocation, broker,
-portfolio, watchlist, Telegram, or delivery side effects.
+ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
+the ME-GH02 `ticker_status_index.json` and linked dry-run artifacts, writes
+`manifest.json`, `advice_index.json`, `advice_index.md`,
+`advice_summary.json`, and `unable_to_advise.json` under
+`artifacts/market_engine/advice_runs/<run_id>/`, and produces one advice label
+per ticker.
 
-ME-GH03 is the next baseline sprint. It may build a deterministic review queue
-from the ME-GH02 status index, but it must keep review priority separate from
-investment recommendation, BUY/SELL/HOLD action semantics, allocation, sizing,
-conviction, and Decision Engine authority.
+ME-ADV01 requires no OpenAI API key, performs no provider invocation, performs
+no source acquisition or live data refresh, and adds no broker/order execution,
+portfolio/watchlist mutation, Telegram, or delivery side effects.
+
+ME-ADV02 is the next baseline sprint. It must scale the deterministic advice
+output path toward a broader ticker universe, preserving the no-API baseline
+and keeping advice labels separate from broker execution, portfolio mutation,
+and Decision Engine authority.
 
 ## Current ChatGPT Advisory Artifact Chain
 
