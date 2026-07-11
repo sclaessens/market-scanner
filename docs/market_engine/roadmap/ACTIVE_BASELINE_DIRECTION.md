@@ -1,41 +1,94 @@
 # Active Baseline Direction
 
-Status: ACTIVE BASELINE POINTER
+Status: ACTIVE RESULTS-FIRST BASELINE POINTER
 
-The active baseline direction for Market Engine is now:
+## Active product objective
+
+The active Market Engine baseline is now:
 
 ```text
-GitHub-first deterministic batch analysis without mandatory paid OpenAI API usage.
+Process a broad ticker universe, such as 500 tickers,
+produce deterministic advice labels,
+then evaluate which advice rules work and which do not.
 ```
 
-Canonical guardrail:
+The baseline is not allowed to drift into additional standalone preparation layers before advice output unless a concrete blocker makes the advice path technically impossible.
+
+## Canonical roadmap lock
+
+```text
+docs/market_engine/roadmap/me_rm07_results_first_advice_roadmap_lock.md
+```
+
+## Canonical backlog lock
+
+```text
+docs/market_engine/backlog/me_rm07_results_first_advice_backlog.md
+```
+
+## Supporting no-API guardrail
 
 ```text
 docs/market_engine/governance/me_gh01_github_first_no_api_baseline_guardrail.md
 ```
 
-Canonical roadmap lock:
+The no-API guardrail remains active: the baseline must not require paid OpenAI API usage or provider invocation.
 
-```text
-docs/market_engine/roadmap/me_gh01_github_first_no_api_baseline_roadmap.md
-```
-
-Canonical backlog entry:
-
-```text
-docs/market_engine/backlog/me_gh01_github_first_no_api_baseline_backlog.md
-```
-
-Any older roadmap text that points to provider invocation, API-key propagation, paid OpenAI API advisory generation, or ME-CI11D as the next baseline step is superseded for baseline planning.
-
-Current completed baseline implementation:
+## Current baseline sequence
 
 ```text
 ME-GH02 - Batch artifact discovery and ticker status index
+  -> ME-ADV01 - Minimal deterministic advice engine v1
+  -> ME-ADV02 - 500-ticker advice batch output
+  -> ME-EVAL01 - Advice outcome tracking and feedback loop
+  -> ME-APP01 - App/report view for advice candidates
 ```
 
-Next baseline sprint:
+## Superseded baseline pointers
+
+Any older roadmap text that points to provider invocation, API-key propagation, paid OpenAI API advisory generation, ME-CI11D, ME-CI12 provider batch output, or a standalone ME-GH03 ranking/review queue as the next baseline step is superseded for baseline planning.
+
+Review-priority logic may be implemented inside ME-ADV01 if it directly supports advice label production, but it must not become a standalone detour before advice output.
+
+## No-deviation rule
+
+Every future baseline sprint must directly support at least one of these outcomes:
+
+```text
+1. process more tickers;
+2. make more tickers advice-ready;
+3. produce advice labels;
+4. evaluate advice quality.
+```
+
+If a sprint does not directly support one of those outcomes, it is not part of the baseline roadmap.
+
+## Next baseline sprint
+
+After ME-GH02 is merged, the next baseline sprint is:
+
+```text
+ME-ADV01 - Minimal deterministic advice engine v1
+```
+
+Not:
 
 ```text
 ME-GH03 - Deterministic ranking and review queue
 ```
+
+## Required ME-ADV01 result
+
+ME-ADV01 must produce deterministic advice output with labels such as:
+
+```text
+buy_candidate
+wait_for_price
+watchlist
+avoid_for_now
+hold_existing
+take_loss_review
+unable_to_advise
+```
+
+The first target is visible advice output, not another abstract readiness layer.
