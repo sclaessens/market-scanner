@@ -104,7 +104,8 @@ The active baseline chain for 500-ticker progress is:
 ```text
 ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
-  -> ME-ADV02 - 500-ticker advice batch output (next)
+  -> ME-ADV02 - 500-ticker advice batch output (completed)
+  -> ME-DATA01 - Close highest-impact advice data coverage gaps (next)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop
   -> ME-APP01 - App/report view for advice candidates
 ```
@@ -121,8 +122,19 @@ invocation, performs no source acquisition or live data refresh, and adds no
 broker/order execution, portfolio/watchlist mutation, Telegram, or delivery
 side effects.
 
-ME-ADV02 is the next baseline sprint: 500-ticker advice batch output. It must
-scale deterministic advice output while preserving the no-API and no-side-effect
+ME-ADV02 implemented 500-target advice batch output. The sample batch consumed
+the widest available ME-GH02 status index, produced advice labels for all 12
+available tickers, and reported 2.40% coverage against a 500-ticker target.
+The output distribution was `watchlist: 12` with no `buy_candidate`,
+`wait_for_price`, `avoid_for_now`, `hold_existing`, `take_loss_review`, or
+`unable_to_advise` labels.
+
+ME-ADV02 therefore produced the required visible batch advice output, but it
+also proved that ME-EVAL01 is premature until advice diversity exists. The
+next baseline sprint is ME-DATA01, narrowly scoped to closing the
+highest-impact gaps shown by ME-ADV02: `portfolio_context`,
+`setup_price_market_context`, and status/advice coverage beyond the current
+12-ticker sample. ME-DATA01 must preserve the no-API and no-side-effect
 baseline.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary

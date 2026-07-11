@@ -5,9 +5,17 @@ from market_engine.advice.deterministic_advice import (
     build_advice_index,
     write_advice_outputs,
 )
+from market_engine.advice.advice_batch import (
+    build_advice_batch,
+    run_advice_batch,
+    write_advice_batch_outputs,
+)
 
 __all__ = [
     "ADVICE_LABELS",
+    "build_advice_batch",
     "build_advice_index",
+    "run_advice_batch",
+    "write_advice_batch_outputs",
     "write_advice_outputs",
 ]

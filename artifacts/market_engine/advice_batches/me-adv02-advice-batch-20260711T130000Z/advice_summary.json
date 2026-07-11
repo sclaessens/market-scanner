@@ -1,0 +1,35 @@
+{
+  "advice_counts": {
+    "avoid_for_now": 0,
+    "buy_candidate": 0,
+    "hold_existing": 0,
+    "take_loss_review": 0,
+    "unable_to_advise": 0,
+    "wait_for_price": 0,
+    "watchlist": 12
+  },
+  "buy_candidate_count": 0,
+  "confidence_counts": {
+    "high": 0,
+    "low": 12,
+    "medium": 0
+  },
+  "coverage_percentage": 2.4,
+  "evaluation_readiness": {
+    "ready_for_outcome_tracking": false,
+    "reason": "Only watchlist labels were produced; price/setup or portfolio context is needed before outcome tracking can evaluate advice quality.",
+    "recommended_next_sprint": "ME-DATA01 - Close highest-impact advice data coverage gaps"
+  },
+  "recommended_next_sprint": "ME-DATA01 - Close highest-impact advice data coverage gaps",
+  "run_id": "me-adv02-advice-batch-20260711T130000Z",
+  "schema_version": "market-engine-advice-batch-summary-v1",
+  "target_size": 500,
+  "tickers_in_status_index": 12,
+  "tickers_with_advice": 12,
+  "top_missing_for_buy_candidate": {
+    "portfolio_context": 12,
+    "setup_price_market_context": 12
+  },
+  "unable_to_advise_count": 0,
+  "watchlist_or_better_count": 12
+}

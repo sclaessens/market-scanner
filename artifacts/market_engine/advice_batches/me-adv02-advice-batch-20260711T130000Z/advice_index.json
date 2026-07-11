@@ -1,0 +1,406 @@
+{
+  "artifact_type": "market-engine-deterministic-advice-batch-index",
+  "generated_at": "2026-07-11T13:00:00Z",
+  "input": {
+    "source_ticker_status_index_path": "artifacts/market_engine/batch_status/me-gh02-sample-status-index-20260711T120000Z/ticker_status_index.json",
+    "target_size": 500,
+    "target_universe_path": null,
+    "ticker_status_index_path": "artifacts/market_engine/batch_status/me-gh02-sample-status-index-20260711T120000Z/ticker_status_index.json",
+    "ticker_status_index_run_id": "me-gh02-sample-status-index-20260711T120000Z",
+    "ticker_status_index_sha256": "894de258d5d178f4bd6541848d1377eebcb5890861cf7620cfde7b1a00694774"
+  },
+  "run_id": "me-adv02-advice-batch-20260711T130000Z",
+  "schema_version": "market-engine-advice-batch-index-v1",
+  "summary": {
+    "actionable_output_count": 12,
+    "advice_counts": {
+      "avoid_for_now": 0,
+      "buy_candidate": 0,
+      "hold_existing": 0,
+      "take_loss_review": 0,
+      "unable_to_advise": 0,
+      "wait_for_price": 0,
+      "watchlist": 12
+    },
+    "avoid_for_now_count": 0,
+    "buy_candidate_count": 0,
+    "confidence_counts": {
+      "high": 0,
+      "low": 12,
+      "medium": 0
+    },
+    "hold_existing_count": 0,
+    "take_loss_review_count": 0,
+    "tickers_total": 12,
+    "top_missing_for_buy_candidate": {
+      "portfolio_context": 12,
+      "setup_price_market_context": 12
+    },
+    "unable_to_advise_count": 0,
+    "wait_for_price_count": 0,
+    "watchlist_count": 12,
+    "watchlist_or_better_count": 12
+  },
+  "tickers": [
+    {
+      "actionable_review_allowed": false,
+      "advice": "watchlist",
+      "advice_readiness": "partial",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/AMD/dry_run.json",
+      "artifact_sha256": "596275731a52e05c64271ddf4966ffce31697e90a48103bdcfcf84bfa19379f0",
+      "blockers": [
+        "Stage preserves an upstream blocked state.",
+        "missing_setup_or_price_context",
+        "portfolio_review"
+      ],
+      "confidence": "low",
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "missing_for_buy_candidate": [
+        "portfolio_context",
+        "setup_price_market_context"
+      ],
+      "next_action": "Collect setup/price context before considering buy_candidate.",
+      "primary_reason": "Valid non-stale artifact exists, but setup/price and portfolio context are missing.",
+      "readiness_level": "partial_analysis",
+      "reasons": [
+        "valid_artifact_available",
+        "context_not_stale",
+        "partial_analysis_available",
+        "setup_price_context_missing"
+      ],
+      "source_status": "blocked",
+      "ticker": "AMD"
+    },
+    {
+      "actionable_review_allowed": false,
+      "advice": "watchlist",
+      "advice_readiness": "partial",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/ASML/dry_run.json",
+      "artifact_sha256": "fe0232f94cba323192b79909bdcddf41e592ae19583a3d739f1b9b9e4b641ce5",
+      "blockers": [
+        "Stage preserves an upstream blocked state.",
+        "missing_setup_or_price_context",
+        "portfolio_review"
+      ],
+      "confidence": "low",
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "missing_for_buy_candidate": [
+        "portfolio_context",
+        "setup_price_market_context"
+      ],
+      "next_action": "Collect setup/price context before considering buy_candidate.",
+      "primary_reason": "Valid non-stale artifact exists, but setup/price and portfolio context are missing.",
+      "readiness_level": "partial_analysis",
+      "reasons": [
+        "valid_artifact_available",
+        "context_not_stale",
+        "partial_analysis_available",
+        "setup_price_context_missing"
+      ],
+      "source_status": "blocked",
+      "ticker": "ASML"
+    },
+    {
+      "actionable_review_allowed": false,
+      "advice": "watchlist",
+      "advice_readiness": "partial",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/AVGO/dry_run.json",
+      "artifact_sha256": "54cf87bab20b95dd8f340698cf8f77bc47037f82f580c0c6164a761a8e97f04d",
+      "blockers": [
+        "Stage preserves an upstream blocked state.",
+        "missing_setup_or_price_context",
+        "portfolio_review"
+      ],
+      "confidence": "low",
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "missing_for_buy_candidate": [
+        "portfolio_context",
+        "setup_price_market_context"
+      ],
+      "next_action": "Collect setup/price context before considering buy_candidate.",
+      "primary_reason": "Valid non-stale artifact exists, but setup/price and portfolio context are missing.",
+      "readiness_level": "partial_analysis",
+      "reasons": [
+        "valid_artifact_available",
+        "context_not_stale",
+        "partial_analysis_available",
+        "setup_price_context_missing"
+      ],
+      "source_status": "blocked",
+      "ticker": "AVGO"
+    },
+    {
+      "actionable_review_allowed": false,
+      "advice": "watchlist",
+      "advice_readiness": "partial",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/CLS/dry_run.json",
+      "artifact_sha256": "563bcc737339def259dd9b795dc095e399c0d2462a8eefec8dbdf30ebba65fce",
+      "blockers": [
+        "Stage preserves an upstream blocked state.",
+        "missing_setup_or_price_context",
+        "portfolio_review"
+      ],
+      "confidence": "low",
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "missing_for_buy_candidate": [
+        "portfolio_context",
+        "setup_price_market_context"
+      ],
+      "next_action": "Collect setup/price context before considering buy_candidate.",
+      "primary_reason": "Valid non-stale artifact exists, but setup/price and portfolio context are missing.",
+      "readiness_level": "partial_analysis",
+      "reasons": [
+        "valid_artifact_available",
+        "context_not_stale",
+        "partial_analysis_available",
+        "setup_price_context_missing"
+      ],
+      "source_status": "blocked",
+      "ticker": "CLS"
+    },
+    {
+      "actionable_review_allowed": false,
+      "advice": "watchlist",
+      "advice_readiness": "partial",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/COST/dry_run.json",
+      "artifact_sha256": "804572470fbc3fb6523a6300cddb604924be023710e3d7257cda0ba592282d76",
+      "blockers": [
+        "Stage preserves an upstream blocked state.",
+        "missing_setup_or_price_context",
+        "portfolio_review"
+      ],
+      "confidence": "low",
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "missing_for_buy_candidate": [
+        "portfolio_context",
+        "setup_price_market_context"
+      ],
+      "next_action": "Collect setup/price context before considering buy_candidate.",
+      "primary_reason": "Valid non-stale artifact exists, but setup/price and portfolio context are missing.",
+      "readiness_level": "partial_analysis",
+      "reasons": [
+        "valid_artifact_available",
+        "context_not_stale",
+        "partial_analysis_available",
+        "setup_price_context_missing"
+      ],
+      "source_status": "blocked",
+      "ticker": "COST"
+    },
+    {
+      "actionable_review_allowed": false,
+      "advice": "watchlist",
+      "advice_readiness": "partial",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/CRDO/dry_run.json",
+      "artifact_sha256": "e1ab78ef82e863d9f3ea757099016eb0124dc5dbf7919f8749e87cf2c31d0c24",
+      "blockers": [
+        "Stage preserves an upstream blocked state.",
+        "missing_setup_or_price_context",
+        "portfolio_review"
+      ],
+      "confidence": "low",
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "missing_for_buy_candidate": [
+        "portfolio_context",
+        "setup_price_market_context"
+      ],
+      "next_action": "Collect setup/price context before considering buy_candidate.",
+      "primary_reason": "Valid non-stale artifact exists, but setup/price and portfolio context are missing.",
+      "readiness_level": "partial_analysis",
+      "reasons": [
+        "valid_artifact_available",
+        "context_not_stale",
+        "partial_analysis_available",
+        "setup_price_context_missing"
+      ],
+      "source_status": "blocked",
+      "ticker": "CRDO"
+    },
+    {
+      "actionable_review_allowed": false,
+      "advice": "watchlist",
+      "advice_readiness": "partial",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/IREN/dry_run.json",
+      "artifact_sha256": "1461cc315d790e0a2e83bd065a77979a4bb0b1a00fd3d57e11906f30e67ee89d",
+      "blockers": [
+        "Stage preserves an upstream blocked state.",
+        "missing_setup_or_price_context",
+        "portfolio_review"
+      ],
+      "confidence": "low",
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "missing_for_buy_candidate": [
+        "portfolio_context",
+        "setup_price_market_context"
+      ],
+      "next_action": "Collect setup/price context before considering buy_candidate.",
+      "primary_reason": "Valid non-stale artifact exists, but setup/price and portfolio context are missing.",
+      "readiness_level": "partial_analysis",
+      "reasons": [
+        "valid_artifact_available",
+        "context_not_stale",
+        "partial_analysis_available",
+        "setup_price_context_missing"
+      ],
+      "source_status": "blocked",
+      "ticker": "IREN"
+    },
+    {
+      "actionable_review_allowed": false,
+      "advice": "watchlist",
+      "advice_readiness": "partial",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/META/dry_run.json",
+      "artifact_sha256": "32600e95c37bbe889406b7085f234cbb32081f3effdda98c32507c4d0e2ff1a4",
+      "blockers": [
+        "Stage preserves an upstream blocked state.",
+        "missing_setup_or_price_context",
+        "portfolio_review"
+      ],
+      "confidence": "low",
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "missing_for_buy_candidate": [
+        "portfolio_context",
+        "setup_price_market_context"
+      ],
+      "next_action": "Collect setup/price context before considering buy_candidate.",
+      "primary_reason": "Valid non-stale artifact exists, but setup/price and portfolio context are missing.",
+      "readiness_level": "partial_analysis",
+      "reasons": [
+        "valid_artifact_available",
+        "context_not_stale",
+        "partial_analysis_available",
+        "setup_price_context_missing"
+      ],
+      "source_status": "blocked",
+      "ticker": "META"
+    },
+    {
+      "actionable_review_allowed": false,
+      "advice": "watchlist",
+      "advice_readiness": "partial",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/MSFT/dry_run.json",
+      "artifact_sha256": "473bab82616a960b2c0782ad909b065871515ad374bb02b9a6a49360de1b10da",
+      "blockers": [
+        "Stage preserves an upstream blocked state.",
+        "missing_setup_or_price_context",
+        "portfolio_review"
+      ],
+      "confidence": "low",
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "missing_for_buy_candidate": [
+        "portfolio_context",
+        "setup_price_market_context"
+      ],
+      "next_action": "Collect setup/price context before considering buy_candidate.",
+      "primary_reason": "Valid non-stale artifact exists, but setup/price and portfolio context are missing.",
+      "readiness_level": "partial_analysis",
+      "reasons": [
+        "valid_artifact_available",
+        "context_not_stale",
+        "partial_analysis_available",
+        "setup_price_context_missing"
+      ],
+      "source_status": "blocked",
+      "ticker": "MSFT"
+    },
+    {
+      "actionable_review_allowed": false,
+      "advice": "watchlist",
+      "advice_readiness": "partial",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/NVDA/dry_run.json",
+      "artifact_sha256": "8c6bfff911ad579b7df4fda26ea83269805ffc7e5a094ea0aff34ddd8d10825f",
+      "blockers": [
+        "Stage preserves an upstream blocked state.",
+        "missing_setup_or_price_context",
+        "portfolio_review"
+      ],
+      "confidence": "low",
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "missing_for_buy_candidate": [
+        "portfolio_context",
+        "setup_price_market_context"
+      ],
+      "next_action": "Collect setup/price context before considering buy_candidate.",
+      "primary_reason": "Valid non-stale artifact exists, but setup/price and portfolio context are missing.",
+      "readiness_level": "partial_analysis",
+      "reasons": [
+        "valid_artifact_available",
+        "context_not_stale",
+        "partial_analysis_available",
+        "setup_price_context_missing"
+      ],
+      "source_status": "blocked",
+      "ticker": "NVDA"
+    },
+    {
+      "actionable_review_allowed": false,
+      "advice": "watchlist",
+      "advice_readiness": "partial",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/TSM/dry_run.json",
+      "artifact_sha256": "1000d4ba4f8035c6d40d4bada7bc0a168cad3625c1408f62a96717b18ef3ba5c",
+      "blockers": [
+        "Stage preserves an upstream blocked state.",
+        "missing_setup_or_price_context",
+        "portfolio_review"
+      ],
+      "confidence": "low",
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "missing_for_buy_candidate": [
+        "portfolio_context",
+        "setup_price_market_context"
+      ],
+      "next_action": "Collect setup/price context before considering buy_candidate.",
+      "primary_reason": "Valid non-stale artifact exists, but setup/price and portfolio context are missing.",
+      "readiness_level": "partial_analysis",
+      "reasons": [
+        "valid_artifact_available",
+        "context_not_stale",
+        "partial_analysis_available",
+        "setup_price_context_missing"
+      ],
+      "source_status": "blocked",
+      "ticker": "TSM"
+    },
+    {
+      "actionable_review_allowed": false,
+      "advice": "watchlist",
+      "advice_readiness": "partial",
+      "artifact_path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/VRT/dry_run.json",
+      "artifact_sha256": "59b1d5bbe5b790520d833def3822f0197a580de5be9f804a573af2e9abc867fd",
+      "blockers": [
+        "Stage preserves an upstream blocked state.",
+        "missing_setup_or_price_context",
+        "portfolio_review"
+      ],
+      "confidence": "low",
+      "context_stale": false,
+      "decision_engine_ready": false,
+      "missing_for_buy_candidate": [
+        "portfolio_context",
+        "setup_price_market_context"
+      ],
+      "next_action": "Collect setup/price context before considering buy_candidate.",
+      "primary_reason": "Valid non-stale artifact exists, but setup/price and portfolio context are missing.",
+      "readiness_level": "partial_analysis",
+      "reasons": [
+        "valid_artifact_available",
+        "context_not_stale",
+        "partial_analysis_available",
+        "setup_price_context_missing"
+      ],
+      "source_status": "blocked",
+      "ticker": "VRT"
+    }
+  ]
+}

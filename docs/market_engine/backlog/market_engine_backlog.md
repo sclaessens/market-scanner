@@ -45,7 +45,8 @@ The active baseline chain for 500-ticker progress is now:
 ```text
 ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
-  -> ME-ADV02 - 500-ticker advice batch output (next)
+  -> ME-ADV02 - 500-ticker advice batch output (completed)
+  -> ME-DATA01 - Close highest-impact advice data coverage gaps (next)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop
   -> ME-APP01 - App/report view for advice candidates
 ```
@@ -61,10 +62,22 @@ ME-ADV01 requires no OpenAI API key, performs no provider invocation, performs
 no source acquisition or live data refresh, and adds no broker/order execution,
 portfolio/watchlist mutation, Telegram, or delivery side effects.
 
-ME-ADV02 is the next baseline sprint. It must scale the deterministic advice
-output path toward a broader ticker universe, preserving the no-API baseline
-and keeping advice labels separate from broker execution, portfolio mutation,
-and Decision Engine authority.
+ME-ADV02 scaled the deterministic advice output path into batch output. It
+writes batch advice artifacts under
+`artifacts/market_engine/advice_batches/<run_id>/`, including per-label
+markdown reports, `missing_data_report.md`, and `coverage_report.md`.
+
+The ME-ADV02 sample run produced advice output for all 12 tickers in the
+widest available ME-GH02 status index and reported 2.40% coverage against a
+500-ticker target. All 12 labels were `watchlist`, with `portfolio_context`
+and `setup_price_market_context` missing for all covered tickers.
+
+ME-DATA01 is the next baseline sprint because ME-ADV02 proved that evaluation
+is premature until the highest-impact advice data gaps are closed. ME-DATA01
+must be tightly scoped to setup/price/market context, portfolio context, and
+broader status/advice coverage. It must preserve the no-API baseline and keep
+advice labels separate from broker execution, portfolio mutation, and Decision
+Engine authority.
 
 ## Current ChatGPT Advisory Artifact Chain
 
