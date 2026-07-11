@@ -55,7 +55,8 @@ ME-CI01 - Structured Decision Output contract (completed)
   -> ME-CI10 - Define controlled model invocation boundary contract (completed)
   -> ME-CI11 - First real grounded advisory output flow (implemented with invocation blocked by local configuration)
   -> ME-CI11B - Execute configured real grounded advisory model invocation (blocked by missing local OPENAI_API_KEY)
-  -> ME-CI11C - Run configured provider invocation with local API key (next after credentials are available)
+  -> ME-CI11C - Run configured provider invocation with local API key (blocked by Codex command process env propagation)
+  -> ME-CI11D - Fix Codex command process provider environment propagation (next)
 ```
 
 ME-CI08 implements the first local deterministic dry-run and grounding
@@ -98,11 +99,16 @@ because the local environment did not contain `OPENAI_API_KEY`. The exact
 blocker is local provider credentials, not source artifacts, parser behavior,
 CI09 grounding logic, or ticker-specific runtime behavior.
 
-ME-CI11C is the next advisory sprint once credentials are available outside
-repository content. It must rerun the same universal CI11 command path with
-`OPENAI_API_KEY` present and `MARKET_ENGINE_ADVISORY_MODEL` explicitly set to
-obtain, parse, ground, validate, and render one successful real provider
-response before any batch or report-quality expansion.
+ME-CI11C attempted the same universal CI11 command path with
+`MARKET_ENGINE_ADVISORY_MODEL=gpt-4.1-mini` explicitly set. The persisted
+invocation requests prove the model was included, but the Codex command process
+did not contain a non-empty `OPENAI_API_KEY`. NVDA and AMD therefore failed
+closed before provider invocation with `blocked_invocation_not_configured`.
+
+ME-CI11D is the next advisory sprint. It must fix only the process-environment
+propagation issue so the exact command process used by Codex sees a non-empty
+`OPENAI_API_KEY`, then rerun the same universal CI11 command path before any
+batch or report-quality expansion.
 
 ## Historical Foundation Phase
 

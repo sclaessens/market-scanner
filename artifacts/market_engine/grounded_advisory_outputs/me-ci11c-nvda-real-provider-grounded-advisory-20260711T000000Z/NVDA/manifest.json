@@ -1,0 +1,15 @@
+{
+  "advisory_status": "blocked_invocation_not_configured",
+  "artifact_count": 6,
+  "artifact_directory": "/Users/sclaessens/Documents/market-scanner/artifacts/market_engine/grounded_advisory_outputs/me-ci11c-nvda-real-provider-grounded-advisory-20260711T000000Z/NVDA",
+  "broker_action_performed": false,
+  "delivery_performed": false,
+  "grounding_validator": "ME-CI09.validate_advisory_response_grounding",
+  "local_only": true,
+  "manifest_format_version": "market-engine-grounded-advisory-output-manifest-v1",
+  "non_production_artifact": true,
+  "portfolio_write_performed": false,
+  "run_id": "me-ci11c-nvda-real-provider-grounded-advisory-20260711T000000Z",
+  "ticker": "NVDA",
+  "watchlist_write_performed": false
+}

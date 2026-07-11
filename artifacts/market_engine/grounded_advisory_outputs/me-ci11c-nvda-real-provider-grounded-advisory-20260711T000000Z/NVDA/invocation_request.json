@@ -1,0 +1,264 @@
+{
+  "attempt_identity": {
+    "attempt_id": "me-ci11c-nvda-real-provider-grounded-advisory-20260711T000000Z-attempt-1",
+    "attempt_sequence": 1
+  },
+  "audit_context": {
+    "source_validation": {
+      "issues": [],
+      "status": "valid",
+      "valid": true
+    }
+  },
+  "budget_limits": {
+    "max_input_characters": 120000,
+    "max_output_tokens": 1200
+  },
+  "data_handling_policy": {
+    "external_browsing_allowed": false,
+    "persist_secrets": false
+  },
+  "grounding_handoff_contract": {
+    "allowed_evidence_references": [
+      {
+        "evidence_family": "readiness",
+        "evidence_ref_id": "readiness:analysis_context",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[0].summary",
+        "source_path": "$.payload.analysis_context_readiness",
+        "summary": "Readiness is partial_analysis with actionable_review_allowed=False and decision_engine_ready=False."
+      },
+      {
+        "evidence_family": "blocked_state",
+        "evidence_ref_id": "blocked:stage",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[1].summary",
+        "source_path": "$.payload.blocked_stage",
+        "summary": "Dry-run is blocked at portfolio_review."
+      },
+      {
+        "evidence_family": "blocked_state",
+        "evidence_ref_id": "blocked:payload:0",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[2].summary",
+        "source_path": "$.payload.blocked_reasons[0]",
+        "summary": "Stage preserves an upstream blocked state."
+      },
+      {
+        "evidence_family": "blocked_state",
+        "evidence_ref_id": "blocked:readiness:0",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[3].summary",
+        "source_path": "$.payload.analysis_context_readiness.blocked_reasons[0]",
+        "summary": "missing_setup_or_price_context"
+      },
+      {
+        "evidence_family": "missing_data",
+        "evidence_ref_id": "missing:summary:0",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[4].summary",
+        "source_path": "$.payload.missing_data_summary[0]",
+        "summary": "portfolio_context"
+      },
+      {
+        "evidence_family": "missing_data",
+        "evidence_ref_id": "missing:readiness:0",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[5].summary",
+        "source_path": "$.payload.analysis_context_readiness.evidence_families_missing[0]",
+        "summary": "setup_price_market"
+      },
+      {
+        "evidence_family": "recommendation_review",
+        "evidence_ref_id": "recommendation:review",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[6].summary",
+        "source_path": "$.payload.provenance_summary.portfolio_review.recommendation_review_provenance",
+        "summary": "Recommendation Review state is human_review_required and category is analysis_mixed_or_conflicted."
+      }
+    ],
+    "fail_closed_on_invalid_reference": true,
+    "validator": "ME-CI09.validate_advisory_response_grounding"
+  },
+  "idempotency_policy": {
+    "idempotency_key": "0eb0bf73661bd92888b04049088762c584b71842012ed51ada95f8b825e87002",
+    "material": {
+      "budget_profile": {
+        "max_output_tokens": 1200
+      },
+      "configuration_profile": "ci11-nonproduction-structured-v1",
+      "model": "gpt-4.1-mini",
+      "permitted_use_case": "bounded_current_state_interpretation",
+      "prompt_package_hash": "1b22a9bb11a555e514906a5d1414845e6dd5da43a199f6a00cb0539469eef6e8",
+      "provider": "openai",
+      "question_class": "current_state_explanation",
+      "response_schema": "market-engine-grounded-advisory-model-response-v2",
+      "source_artifact_hash": "65883fbe740db170a471bb5a2b98366bd906a2452fbc4db3135927b6cec9d6d0"
+    }
+  },
+  "input_context": {
+    "allowed_evidence_references": [
+      {
+        "evidence_family": "readiness",
+        "evidence_ref_id": "readiness:analysis_context",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[0].summary",
+        "source_path": "$.payload.analysis_context_readiness",
+        "summary": "Readiness is partial_analysis with actionable_review_allowed=False and decision_engine_ready=False."
+      },
+      {
+        "evidence_family": "blocked_state",
+        "evidence_ref_id": "blocked:stage",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[1].summary",
+        "source_path": "$.payload.blocked_stage",
+        "summary": "Dry-run is blocked at portfolio_review."
+      },
+      {
+        "evidence_family": "blocked_state",
+        "evidence_ref_id": "blocked:payload:0",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[2].summary",
+        "source_path": "$.payload.blocked_reasons[0]",
+        "summary": "Stage preserves an upstream blocked state."
+      },
+      {
+        "evidence_family": "blocked_state",
+        "evidence_ref_id": "blocked:readiness:0",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[3].summary",
+        "source_path": "$.payload.analysis_context_readiness.blocked_reasons[0]",
+        "summary": "missing_setup_or_price_context"
+      },
+      {
+        "evidence_family": "missing_data",
+        "evidence_ref_id": "missing:summary:0",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[4].summary",
+        "source_path": "$.payload.missing_data_summary[0]",
+        "summary": "portfolio_context"
+      },
+      {
+        "evidence_family": "missing_data",
+        "evidence_ref_id": "missing:readiness:0",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[5].summary",
+        "source_path": "$.payload.analysis_context_readiness.evidence_families_missing[0]",
+        "summary": "setup_price_market"
+      },
+      {
+        "evidence_family": "recommendation_review",
+        "evidence_ref_id": "recommendation:review",
+        "projection_path": "$.structured_decision_context.payload.evidence_catalog[6].summary",
+        "source_path": "$.payload.provenance_summary.portfolio_review.recommendation_review_provenance",
+        "summary": "Recommendation Review state is human_review_required and category is analysis_mixed_or_conflicted."
+      }
+    ],
+    "artifact_type": "market-engine-grounded-advisory-input-package",
+    "forbidden_inferences": [
+      "invented_current_price",
+      "invented_target_price",
+      "invented_entry_level",
+      "invented_stop_loss",
+      "invented_news",
+      "stronger_than_upstream_recommendation",
+      "blocked_artifact_as_actionable_advice"
+    ],
+    "instrument_identity": {
+      "instrument": "NVDA",
+      "ticker": "NVDA"
+    },
+    "mandatory_disclosures": [
+      "based_only_on_supplied_market_engine_artifact",
+      "not_broker_or_order_instruction",
+      "blocked_or_partial_states_remain_non_actionable"
+    ],
+    "question": "What does the Market Engine artifact say about this stock, and what cautious conclusion is supported by the available evidence?",
+    "question_classification": {
+      "permitted_use_case": "bounded_current_state_interpretation",
+      "question_class": "current_state_explanation"
+    },
+    "required_response_schema": "market-engine-grounded-advisory-model-response-v2",
+    "schema_version": "market-engine-grounded-advisory-input-package-v2",
+    "selected_context": {
+      "missing_data": [
+        "portfolio_context",
+        "setup_price_market"
+      ],
+      "readiness": {
+        "actionable_review_allowed": false,
+        "blocked_reasons": [
+          "Stage preserves an upstream blocked state.",
+          "missing_setup_or_price_context"
+        ],
+        "blocked_stage": "portfolio_review",
+        "decision_engine_ready": false,
+        "readiness_level": "partial_analysis"
+      },
+      "recommendation_review": {
+        "category": "analysis_mixed_or_conflicted",
+        "state": "human_review_required"
+      },
+      "stale_data": []
+    },
+    "source_artifact_identity": {
+      "format": "market-engine-local-dry-run-artifact-v1",
+      "path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/NVDA/dry_run.json",
+      "run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-nvda",
+      "sha256": "65883fbe740db170a471bb5a2b98366bd906a2452fbc4db3135927b6cec9d6d0",
+      "type": "market_engine_end_to_end_dry_run"
+    }
+  },
+  "instruction_contract": {
+    "system_boundary": "Use only supplied Market Engine context. Do not invent facts, prices, news, targets, sizing, allocation, or execution guidance. Every material claim must carry a claim_id and at least one evidence reference.",
+    "user_question_cannot_override_boundary": true
+  },
+  "instrument_identity": {
+    "instrument": "NVDA",
+    "ticker": "NVDA"
+  },
+  "invocation_identity": {
+    "invocation_id": "me-ci11c-nvda-real-provider-grounded-advisory-20260711T000000Z"
+  },
+  "invocation_request_identity": {
+    "artifact_type": "market-engine-controlled-model-invocation-request",
+    "contract_name": "controlled_model_invocation_boundary",
+    "contract_version": "v1",
+    "generated_at": "2026-07-11T00:00:00Z",
+    "request_id": "me-ci11c-nvda-real-provider-grounded-advisory-20260711T000000Z",
+    "schema_version": "market-engine-controlled-model-invocation-boundary-v1"
+  },
+  "model_capability_profile": {
+    "external_browsing_allowed": false,
+    "non_streaming_required": true,
+    "structured_json_output_required": true,
+    "tool_use_allowed": false
+  },
+  "model_identity": {
+    "configuration_profile_id": "ci11-nonproduction-structured-v1",
+    "model_name": "gpt-4.1-mini"
+  },
+  "permitted_use_case": "bounded_current_state_interpretation",
+  "provider_identity": {
+    "provider_api_family": "responses",
+    "provider_name": "openai"
+  },
+  "question_classification": {
+    "permitted_use_case": "bounded_current_state_interpretation",
+    "question_class": "current_state_explanation"
+  },
+  "response_schema_contract": {
+    "artifact_type": "market-engine-grounded-advisory-model-response",
+    "schema_version": "market-engine-grounded-advisory-model-response-v2",
+    "strict": true
+  },
+  "retry_policy": {
+    "max_attempts": 1,
+    "retry_enabled": false
+  },
+  "run_identity": {
+    "run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-nvda"
+  },
+  "source_artifact_identity": {
+    "format": "market-engine-local-dry-run-artifact-v1",
+    "path": "artifacts/market_engine/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/cached_source_batch/me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z/NVDA/dry_run.json",
+    "run_id": "me-run28-expanded-supported-universe-acquisition-dry-run-classification-20260702T115652Z-nvda",
+    "sha256": "65883fbe740db170a471bb5a2b98366bd906a2452fbc4db3135927b6cec9d6d0",
+    "type": "market_engine_end_to_end_dry_run"
+  },
+  "source_prompt_package_identity": {
+    "artifact_type": "market-engine-grounded-advisory-input-package",
+    "schema_version": "market-engine-grounded-advisory-input-package-v2",
+    "sha256": "1b22a9bb11a555e514906a5d1414845e6dd5da43a199f6a00cb0539469eef6e8"
+  },
+  "timeout_policy": {
+    "total_invocation_timeout_seconds": 60
+  }
+}
