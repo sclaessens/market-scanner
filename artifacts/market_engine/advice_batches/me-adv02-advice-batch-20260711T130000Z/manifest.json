@@ -1,0 +1,33 @@
+{
+  "artifact_type": "market-engine-deterministic-advice-batch-manifest",
+  "baseline_guardrail": {
+    "advice_labels_produced": true,
+    "broker_order_execution_performed": false,
+    "openai_api_required": false,
+    "portfolio_watchlist_mutation_performed": false,
+    "provider_invocation_allowed": false,
+    "source_acquisition_performed": false
+  },
+  "generated_at": "2026-07-11T13:00:00Z",
+  "input": {
+    "target_size": 500,
+    "target_universe_path": null,
+    "ticker_status_index_path": "artifacts/market_engine/batch_status/me-gh02-sample-status-index-20260711T120000Z/ticker_status_index.json",
+    "ticker_status_index_run_id": "me-gh02-sample-status-index-20260711T120000Z"
+  },
+  "next_baseline_sprint": "ME-DATA01 - Close highest-impact advice data coverage gaps",
+  "outputs": {
+    "advice_index_json": "advice_index.json",
+    "advice_index_md": "advice_index.md",
+    "advice_summary_json": "advice_summary.json",
+    "avoid_for_now_md": "avoid_for_now.md",
+    "buy_candidates_md": "buy_candidates.md",
+    "coverage_report_md": "coverage_report.md",
+    "missing_data_report_md": "missing_data_report.md",
+    "unable_to_advise_md": "unable_to_advise.md",
+    "wait_for_price_md": "wait_for_price.md",
+    "watchlist_md": "watchlist.md"
+  },
+  "run_id": "me-adv02-advice-batch-20260711T130000Z",
+  "schema_version": "market-engine-advice-batch-manifest-v1"
+}

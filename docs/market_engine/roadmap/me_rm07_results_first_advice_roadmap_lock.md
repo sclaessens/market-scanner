@@ -43,7 +43,8 @@ The active roadmap sequence is now:
 ```text
 ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
-  -> ME-ADV02 - 500-ticker advice batch output (next)
+  -> ME-ADV02 - 500-ticker advice batch output (completed)
+  -> ME-DATA01 - Close highest-impact advice data coverage gaps (next)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop
   -> ME-APP01 - App/report view for advice candidates
 ```
@@ -63,7 +64,7 @@ Every future baseline sprint must directly contribute to at least one of these o
 
 If a proposed sprint does not directly contribute to one of those four outcomes, it is not part of the baseline roadmap.
 
-Exceptions are allowed only when a concrete blocker makes ME-ADV01, ME-ADV02, ME-EVAL01, or ME-APP01 technically impossible. Any exception must document:
+Exceptions are allowed only when a concrete blocker makes ME-ADV01, ME-ADV02, ME-DATA01, ME-EVAL01, or ME-APP01 technically impossible. Any exception must document:
 
 ```text
 - the blocker;
@@ -118,6 +119,40 @@ existing position with acceptable state -> hold_existing
 ```
 
 These rules may be imperfect. That is acceptable because ME-EVAL01 exists to measure and improve them.
+
+## ME-ADV02 batch output result
+
+ME-ADV02 produced deterministic advice batch output from the widest available
+ME-GH02 status index and reported coverage against a 500-ticker target.
+
+Sample output:
+
+```text
+run_id: me-adv02-advice-batch-20260711T130000Z
+tickers in status index: 12
+tickers with advice labels: 12
+tickers missing artifact/status: 488
+coverage percentage: 2.40%
+watchlist: 12
+buy_candidate: 0
+wait_for_price: 0
+avoid_for_now: 0
+hold_existing: 0
+take_loss_review: 0
+unable_to_advise: 0
+```
+
+Top missing inputs:
+
+```text
+portfolio_context: 12
+setup_price_market_context: 12
+```
+
+ME-ADV02 proved that the results-first path is producing concrete advice
+output, but also proved that ME-EVAL01 is premature until advice diversity
+exists. ME-DATA01 is therefore inserted as the shortest results-first path back
+to evaluation readiness.
 
 ## ME-ADV01 required outputs
 
@@ -189,10 +224,10 @@ Review-priority logic may be implemented inside ME-ADV01 if it directly supports
 
 ## Current next sprint
 
-After ME-ADV01, the next sprint is:
+After ME-ADV02, the next sprint is:
 
 ```text
-ME-ADV02 - 500-ticker advice batch output
+ME-DATA01 - Close highest-impact advice data coverage gaps
 ```
 
 Not:
@@ -200,6 +235,9 @@ Not:
 ```text
 ME-GH03 - Deterministic ranking and review queue
 ```
+
+ME-DATA01 is allowed only because ME-ADV02 produced concrete batch advice
+output and exposed the specific blockers preventing advice diversity.
 
 ## Definition of roadmap adherence
 
