@@ -8,6 +8,14 @@ from typing import Sequence, TextIO
 
 from market_engine.advisory import grounded_advisory_runtime as runtime
 
+_PROVIDER_DISABLED_REASON = (
+    "Provider invocation is disabled by default for the GitHub-first no-API "
+    "baseline. The baseline path must prepare deterministic Market Engine "
+    "artifacts for ChatGPT interpretation without calling the OpenAI API. Pass "
+    "an explicit test invoker for fixture-based validation; do not use the "
+    "default command path for real provider calls."
+)
+
 
 def generate_grounded_advisory_output(
     *,
@@ -53,10 +61,10 @@ def generate_grounded_advisory_output(
         invocation_result = runtime._blocked_invocation_result(
             "Invocation request failed deterministic CI10 pre-invocation validation."
         )
+    elif invoker is not None:
+        invocation_result = invoker.invoke(invocation_request)
     else:
-        invocation_result = (
-            invoker or runtime.OpenAIResponsesInvoker.from_environment()
-        ).invoke(invocation_request)
+        invocation_result = runtime._blocked_invocation_result(_PROVIDER_DISABLED_REASON)
 
     parser_result = runtime._parse_model_response(invocation_result.raw_output)
     parsed_response = (
@@ -164,8 +172,9 @@ def _argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="market-engine-grounded-advisory-output",
         description=(
-            "Generate a local grounded advisory output through CI10 invocation controls and "
-            "the shared ME-CI09 grounding validator."
+            "Generate a local grounded advisory output from a supplied artifact. "
+            "The GitHub-first baseline command path is provider-disabled by default "
+            "and never calls the OpenAI API."
         ),
     )
     parser.add_argument("--artifact", required=True)
