@@ -105,7 +105,7 @@ The active baseline chain for 500-ticker progress is:
 ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
   -> ME-ADV02 - 500-ticker advice batch output (completed)
-  -> ME-DATA01 - Close highest-impact advice data coverage gaps (next)
+  -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop
   -> ME-APP01 - App/report view for advice candidates
 ```
@@ -130,12 +130,18 @@ The output distribution was `watchlist: 12` with no `buy_candidate`,
 `unable_to_advise` labels.
 
 ME-ADV02 therefore produced the required visible batch advice output, but it
-also proved that ME-EVAL01 is premature until advice diversity exists. The
-next baseline sprint is ME-DATA01, narrowly scoped to closing the
-highest-impact gaps shown by ME-ADV02: `portfolio_context`,
-`setup_price_market_context`, and status/advice coverage beyond the current
-12-ticker sample. ME-DATA01 must preserve the no-API and no-side-effect
-baseline.
+also proved that ME-EVAL01 was premature until advice diversity existed.
+
+ME-DATA01 then added deterministic setup/price/market context from existing
+local artifacts and local price-history CSVs. The sample output changed from
+`watchlist: 12` to `buy_candidate: 4`, `wait_for_price: 2`,
+`avoid_for_now: 1`, and `watchlist: 5`. ME-DATA01 preserved the no-API and
+no-side-effect baseline.
+
+ME-EVAL01 is now the next baseline sprint because outcome-trackable advice
+labels exist. Remaining data gaps remain explicit follow-ups: portfolio
+context, broad market context, local price/setup evidence for uncovered
+tickers, and coverage beyond 12 of the 500 target tickers.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 

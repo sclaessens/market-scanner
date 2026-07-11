@@ -46,7 +46,7 @@ The active baseline chain for 500-ticker progress is now:
 ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
   -> ME-ADV02 - 500-ticker advice batch output (completed)
-  -> ME-DATA01 - Close highest-impact advice data coverage gaps (next)
+  -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop
   -> ME-APP01 - App/report view for advice candidates
 ```
@@ -72,12 +72,18 @@ widest available ME-GH02 status index and reported 2.40% coverage against a
 500-ticker target. All 12 labels were `watchlist`, with `portfolio_context`
 and `setup_price_market_context` missing for all covered tickers.
 
-ME-DATA01 is the next baseline sprint because ME-ADV02 proved that evaluation
-is premature until the highest-impact advice data gaps are closed. ME-DATA01
-must be tightly scoped to setup/price/market context, portfolio context, and
-broader status/advice coverage. It must preserve the no-API baseline and keep
-advice labels separate from broker execution, portfolio mutation, and Decision
-Engine authority.
+ME-DATA01 closed the highest-impact setup/price/market coverage gap enough to
+break watchlist-only output. It reused existing local dry-run artifacts and
+local price-history CSVs, added deterministic setup/price/market context, and
+reran the batch output. The sample changed from `watchlist: 12` to
+`buy_candidate: 4`, `wait_for_price: 2`, `avoid_for_now: 1`, and
+`watchlist: 5`.
+
+ME-EVAL01 is the next baseline sprint because ME-DATA01 produced
+outcome-trackable advice diversity. Remaining data gaps are explicit and
+deferred: portfolio context for all 12 sample tickers, broad market context for
+8 tickers, local price/setup evidence for 4 tickers, and coverage beyond the
+current 12 of 500 target tickers.
 
 ## Current ChatGPT Advisory Artifact Chain
 

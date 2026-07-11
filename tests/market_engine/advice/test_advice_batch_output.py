@@ -68,8 +68,9 @@ def test_watchlist_report_contains_watchlist_tickers_sorted(tmp_path: Path) -> N
     output_dir = _run_batch(tmp_path, index_path)
 
     watchlist = (output_dir / "watchlist.md").read_text()
-    assert "| AAA | low |" in watchlist
-    assert "| BBB | low |" in watchlist
+    assert "| Ticker | Confidence | Setup | Trend | Price position | Risk | Reason | Missing for buy candidate | Next action |" in watchlist
+    assert "| AAA | low | unknown | unknown | unknown | unknown |" in watchlist
+    assert "| BBB | low | unknown | unknown | unknown | unknown |" in watchlist
     assert watchlist.index("| AAA |") < watchlist.index("| BBB |")
 
 
@@ -88,6 +89,7 @@ def test_missing_data_report_counts_missing_inputs(tmp_path: Path) -> None:
     assert "| portfolio_context | 2 |" in report
     assert "| setup_price_market_context | 2 |" in report
     assert "| fundamental_context | 1 |" in report
+    assert "| Ticker | Advice | Setup | Trend | Price position | Risk | Missing for buy candidate | Blockers |" in report
 
 
 def test_coverage_report_and_summary_include_target_size_and_percentage(
@@ -129,7 +131,7 @@ def test_summary_marks_all_watchlist_batch_not_ready_for_evaluation(
     assert summary["evaluation_readiness"]["ready_for_outcome_tracking"] is False
     assert "Only watchlist labels were produced" in summary["evaluation_readiness"]["reason"]
     assert summary["recommended_next_sprint"] == (
-        "ME-DATA01 - Close highest-impact advice data coverage gaps"
+        "ME-DATA02 - Import local price/setup snapshots for advice diversity"
     )
 
 

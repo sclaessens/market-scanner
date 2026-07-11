@@ -208,16 +208,21 @@ def render_label_report(advice_index: Mapping[str, Any], label: str) -> str:
     if label == "unable_to_advise":
         output.extend(
             [
-                "| Ticker | Reason | Missing for advice | Next action |",
-                "|---|---|---|---|",
+                "| Ticker | Setup | Trend | Price position | Risk | Reason | Missing for advice | Next action |",
+                "|---|---|---|---|---|---|---|---|",
             ]
         )
         for row in rows:
+            setup_context = _setup_context(row)
             output.append(
                 "| "
                 + " | ".join(
                     (
                         _md(row.get("ticker")),
+                        _md(setup_context.get("setup_state")),
+                        _md(setup_context.get("trend_state")),
+                        _md(setup_context.get("price_position")),
+                        _md(setup_context.get("risk_state")),
                         _md(row.get("primary_reason")),
                         _md(", ".join(row.get("missing_for_buy_candidate") or ())),
                         _md(row.get("next_action")),
@@ -231,17 +236,22 @@ def render_label_report(advice_index: Mapping[str, Any], label: str) -> str:
     if label == "avoid_for_now":
         output.extend(
             [
-                "| Ticker | Confidence | Reason | Blockers | Next action |",
-                "|---|---|---|---|---|",
+                "| Ticker | Confidence | Setup | Trend | Price position | Risk | Reason | Blockers | Next action |",
+                "|---|---|---|---|---|---|---|---|---|",
             ]
         )
         for row in rows:
+            setup_context = _setup_context(row)
             output.append(
                 "| "
                 + " | ".join(
                     (
                         _md(row.get("ticker")),
                         _md(row.get("confidence")),
+                        _md(setup_context.get("setup_state")),
+                        _md(setup_context.get("trend_state")),
+                        _md(setup_context.get("price_position")),
+                        _md(setup_context.get("risk_state")),
                         _md(row.get("primary_reason")),
                         _md(", ".join(row.get("blockers") or ())),
                         _md(row.get("next_action")),
@@ -259,17 +269,22 @@ def render_label_report(advice_index: Mapping[str, Any], label: str) -> str:
     )
     output.extend(
         [
-            f"| Ticker | Confidence | Reason | {missing_header} | Next action |",
-            "|---|---|---|---|---|",
+            f"| Ticker | Confidence | Setup | Trend | Price position | Risk | Reason | {missing_header} | Next action |",
+            "|---|---|---|---|---|---|---|---|---|",
         ]
     )
     for row in rows:
+        setup_context = _setup_context(row)
         output.append(
             "| "
             + " | ".join(
                 (
                     _md(row.get("ticker")),
                     _md(row.get("confidence")),
+                    _md(setup_context.get("setup_state")),
+                    _md(setup_context.get("trend_state")),
+                    _md(setup_context.get("price_position")),
+                    _md(setup_context.get("risk_state")),
                     _md(row.get("primary_reason")),
                     _md(", ".join(row.get("missing_for_buy_candidate") or ())),
                     _md(row.get("next_action")),
@@ -302,17 +317,22 @@ def render_missing_data_report(advice_index: Mapping[str, Any]) -> str:
             "",
             "## Missing Inputs By Ticker",
             "",
-            "| Ticker | Advice | Missing for buy candidate | Blockers |",
-            "|---|---|---|---|",
+            "| Ticker | Advice | Setup | Trend | Price position | Risk | Missing for buy candidate | Blockers |",
+            "|---|---|---|---|---|---|---|---|",
         ]
     )
     for row in _advice_rows(advice_index):
+        setup_context = _setup_context(row)
         rows.append(
             "| "
             + " | ".join(
                 (
                     _md(row.get("ticker")),
                     _md(row.get("advice")),
+                    _md(setup_context.get("setup_state")),
+                    _md(setup_context.get("trend_state")),
+                    _md(setup_context.get("price_position")),
+                    _md(setup_context.get("risk_state")),
                     _md(", ".join(row.get("missing_for_buy_candidate") or ())),
                     _md(", ".join(row.get("blockers") or ())),
                 )
@@ -357,6 +377,18 @@ def render_coverage_report(batch: Mapping[str, Any]) -> str:
     rows.extend(
         [
             "",
+            "## Setup/Price/Market Context",
+            "",
+            "| Context status | Count |",
+            "|---|---:|",
+        ]
+    )
+    setup_counts = summary.get("setup_price_market_context_counts") or {}
+    for status in ("available", "partial", "missing", "invalid"):
+        rows.append(f"| {status} | {setup_counts.get(status, 0)} |")
+    rows.extend(
+        [
+            "",
             "## Interpretation",
             "",
             f"- What worked: {coverage.get('tickers_with_advice')} ticker(s) received deterministic advice labels from the available status index.",
@@ -398,6 +430,10 @@ def _batch_summary(
         "unable_to_advise_count": advice_counts.get("unable_to_advise", 0),
         "top_missing_for_buy_candidate": advice_summary.get("top_missing_for_buy_candidate")
         or {},
+        "setup_price_market_context_counts": advice_summary.get(
+            "setup_price_market_context_counts",
+        )
+        or {},
         "evaluation_readiness": readiness,
         "recommended_next_sprint": readiness["recommended_next_sprint"],
     }
@@ -422,7 +458,7 @@ def _evaluation_readiness(advice_counts: Mapping[str, int]) -> dict[str, Any]:
                 "context is needed before outcome tracking can evaluate advice "
                 "quality."
             ),
-            "recommended_next_sprint": "ME-DATA01 - Close highest-impact advice data coverage gaps",
+            "recommended_next_sprint": "ME-DATA02 - Import local price/setup snapshots for advice diversity",
         }
     return {
         "ready_for_outcome_tracking": False,
@@ -431,7 +467,7 @@ def _evaluation_readiness(advice_counts: Mapping[str, int]) -> dict[str, Any]:
             "or portfolio context is needed before outcome tracking can evaluate "
             "advice quality."
         ),
-        "recommended_next_sprint": "ME-DATA01 - Close highest-impact advice data coverage gaps",
+        "recommended_next_sprint": "ME-DATA02 - Import local price/setup snapshots for advice diversity",
     }
 
 
@@ -569,6 +605,11 @@ def _advice_rows(advice_index: Mapping[str, Any]) -> list[Mapping[str, Any]]:
         [row for row in advice_index.get("tickers") or () if isinstance(row, dict)],
         key=lambda row: str(row.get("ticker") or ""),
     )
+
+
+def _setup_context(row: Mapping[str, Any]) -> Mapping[str, Any]:
+    value = row.get("setup_price_market_context")
+    return value if isinstance(value, dict) else {}
 
 
 def _missing_phrase(top_missing: Mapping[str, int]) -> str:
