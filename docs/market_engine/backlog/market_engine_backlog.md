@@ -54,7 +54,8 @@ ME-CI01 - Structured Decision Output contract (completed)
   -> ME-CI09 - Harden advisory response grounding fixtures and validator coverage (completed)
   -> ME-CI10 - Define controlled model invocation boundary contract (completed)
   -> ME-CI11 - First real grounded advisory output flow (implemented with invocation blocked by local configuration)
-  -> ME-CI11B - Execute configured real grounded advisory model invocation (next)
+  -> ME-CI11B - Execute configured real grounded advisory model invocation (blocked by missing local OPENAI_API_KEY)
+  -> ME-CI11C - Run configured provider invocation with local API key (next after credentials are available)
 ```
 
 ME-CI08 implements the first local deterministic dry-run and grounding
@@ -90,9 +91,18 @@ failed closed before provider invocation because required local model
 configuration was absent. ME-CI11 therefore does not claim a successful real
 model advisory response.
 
-ME-CI11B is the next active advisory sprint. It must use the ME-CI11 runtime
-with approved non-production model configuration to obtain, parse, ground,
-validate, and render one successful real provider response.
+ME-CI11B used the corrected ME-CI11 runtime with explicit non-production model
+configuration and attempted the primary NVDA run plus an AMD smoke run through
+the same command path. Both runs failed closed before provider invocation
+because the local environment did not contain `OPENAI_API_KEY`. The exact
+blocker is local provider credentials, not source artifacts, parser behavior,
+CI09 grounding logic, or ticker-specific runtime behavior.
+
+ME-CI11C is the next advisory sprint once credentials are available outside
+repository content. It must rerun the same universal CI11 command path with
+`OPENAI_API_KEY` present and `MARKET_ENGINE_ADVISORY_MODEL` explicitly set to
+obtain, parse, ground, validate, and render one successful real provider
+response before any batch or report-quality expansion.
 
 ## Historical Foundation Phase
 
