@@ -48,7 +48,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-ADV02 - 500-ticker advice batch output (completed)
   -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
-  -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
+  -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots (completed)
+  -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes
   -> ME-APP01 - App/report view for advice candidates
 ```
 
@@ -89,10 +90,18 @@ The sample evaluation run
 outcomes, and marked 12 unresolved outcomes. The unresolved reasons were
 `insufficient_forward_data: 8` and `missing_price_history: 4`.
 
-ME-EVAL02 is the next baseline sprint because the feedback loop exists but
-needs later local snapshots to resolve horizons after the recent advice date.
-ME-DATA02 remains a follow-up candidate for importing missing local
-price-history CSVs for `CLS`, `CRDO`, `IREN`, and `VRT`.
+ME-EVAL02 added the local refresh flow for existing unresolved advice outcomes.
+It consumes the ME-EVAL01 `advice_outcome_index.json`, selects unresolved
+outcomes, reloads the original advice context without regenerating advice,
+uses the latest supplied local price-history root, and writes
+`refresh_outcome_index.json`, `refresh_report.md`,
+`missing_price_history.json`, and `manifest.json` under
+`artifacts/market_engine/evaluation_refresh_runs/<run_id>/`.
+
+The ME-EVAL02 real-world run
+`me-eval02-refresh-local-snapshots-20260712T130000Z` selected 12 unresolved
+outcomes, resolved 0, kept 8 as `insufficient_forward_data`, and reported
+4 as `missing_price_history`: `CLS`, `CRDO`, `IREN`, and `VRT`.
 
 ### ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
 
@@ -100,7 +109,7 @@ Owner roles: Product Owner / Data Steward / Development Lead / QA Lead / Governa
 
 Job family: ME-EVAL / Outcome evaluation
 
-Status: NEXT BASELINE SPRINT AFTER ME-EVAL01
+Status: COMPLETED
 
 Goal: rerun deterministic advice outcome evaluation against later local
 snapshots so unresolved ME-EVAL01 horizons can become resolved without live
@@ -111,16 +120,18 @@ download, broker/order execution, portfolio/watchlist mutation, Telegram,
 delivery side effects, Decision Engine allocation authority changes, or advice
 rule rewrites.
 
-### ME-DATA02 - Import missing local price history for unresolved outcomes
+### ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes
 
 Owner roles: Product Owner / Data Steward / Development Lead / QA Lead / Governance Auditor
 
 Job family: ME-DATA / Local data coverage
 
-Status: FOLLOW-UP CANDIDATE AFTER ME-EVAL01
+Status: NEXT BASELINE SPRINT AFTER ME-EVAL02
 
 Goal: make local price-history CSVs available for unresolved evaluation
-tickers that currently have no `data/processed/<ticker>.csv`.
+tickers that currently have no `data/processed/<ticker>.csv`, and make later
+local snapshots available for tickers that still have insufficient forward
+data after the advice date.
 
 Scope: local data import or fixture/snapshot ingestion only when explicitly
 approved. No live download, provider refresh, API use, broker/order execution,

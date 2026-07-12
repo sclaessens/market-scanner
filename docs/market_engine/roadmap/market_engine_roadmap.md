@@ -107,7 +107,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-ADV02 - 500-ticker advice batch output (completed)
   -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
-  -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
+  -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots (completed)
+  -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes
   -> ME-APP01 - App/report view for advice candidates
 ```
 
@@ -154,11 +155,22 @@ The ME-EVAL01 sample run
 loop now exists, but rule quality cannot yet be judged from the current local
 sample.
 
-ME-EVAL02 is now the next baseline sprint because the dominant blocker is
-insufficient local forward price history after the recent advice date.
-`ME-DATA02 - Import missing local price history for unresolved outcomes`
-remains a follow-up candidate for the four tickers with missing local
-price-history CSVs.
+ME-EVAL02 implemented a manual local refresh flow for existing unresolved
+advice outcomes. It reuses the original ME-EVAL01 evaluation context, does not
+regenerate advice, reruns outcome evaluation against the supplied local
+price-history root, and writes a compact refresh run artifact.
+
+The ME-EVAL02 real-world refresh run
+`me-eval02-refresh-local-snapshots-20260712T130000Z` selected 12 unresolved
+outcomes, resolved 0, kept 8 as `insufficient_forward_data`, and reported
+4 as `missing_price_history`: `CLS`, `CRDO`, `IREN`, and `VRT`. It proves the
+refresh mechanism works, but current local data still cannot resolve the
+sample outcomes.
+
+ME-DATA02 is now the next baseline sprint because the remaining blocker is
+local price-snapshot availability: later snapshots for the 8 insufficient
+forward-data tickers and missing local CSVs for the 4 missing-price-history
+tickers.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 
