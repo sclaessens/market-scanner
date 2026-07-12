@@ -37,16 +37,40 @@ def build_advice_outcome_evaluation(
     price_data_root: str | Path,
     run_id: str,
     horizons: Sequence[Mapping[str, int | str]] = DEFAULT_HORIZONS,
+    ticker_filter: Sequence[str] | None = None,
+) -> dict[str, Any]:
+    advice_path = Path(advice_index_path)
+    advice_index = json.loads(advice_path.read_text(encoding="utf-8"))
+    return build_advice_outcome_evaluation_from_index(
+        advice_index,
+        advice_index_path=advice_path,
+        price_data_root=price_data_root,
+        run_id=run_id,
+        horizons=horizons,
+        ticker_filter=ticker_filter,
+    )
+
+
+def build_advice_outcome_evaluation_from_index(
+    advice_index: Mapping[str, Any],
+    *,
+    advice_index_path: str | Path,
+    price_data_root: str | Path,
+    run_id: str,
+    horizons: Sequence[Mapping[str, int | str]] = DEFAULT_HORIZONS,
+    ticker_filter: Sequence[str] | None = None,
 ) -> dict[str, Any]:
     advice_path = Path(advice_index_path)
     price_root = Path(price_data_root)
-    advice_index = json.loads(advice_path.read_text(encoding="utf-8"))
     generated_at = _generated_at_from_run_id(run_id)
     anchor = _advice_anchor(advice_index)
     normalized_horizons = _normalize_horizons(horizons)
+    allowed_tickers = {ticker.upper() for ticker in ticker_filter or ()}
 
     ticker_rows = []
     for row in _advice_rows(advice_index):
+        if allowed_tickers and str(row.get("ticker") or "").upper() not in allowed_tickers:
+            continue
         ticker_rows.append(
             _evaluate_ticker(
                 row,
@@ -121,6 +145,7 @@ def run_advice_outcome_evaluation(
     output_root: str | Path,
     run_id: str,
     horizons: Sequence[Mapping[str, int | str]] = DEFAULT_HORIZONS,
+    ticker_filter: Sequence[str] | None = None,
     allow_overwrite: bool = False,
 ) -> tuple[dict[str, Any], Path]:
     evaluation = build_advice_outcome_evaluation(
@@ -128,6 +153,7 @@ def run_advice_outcome_evaluation(
         price_data_root=price_data_root,
         run_id=run_id,
         horizons=horizons,
+        ticker_filter=ticker_filter,
     )
     output_dir = write_advice_outcome_evaluation(
         evaluation,
@@ -428,6 +454,32 @@ def resolve_price_history_path(price_data_root: str | Path, ticker: str) -> Path
                 return matches[0]
     matches = sorted(path for path in root.glob("**/*.csv") if path.stem.upper() == ticker.upper())
     return matches[0] if matches else None
+
+
+def price_history_snapshot_summary(price_data_root: str | Path, ticker: str) -> dict[str, Any]:
+    price_path = resolve_price_history_path(price_data_root, ticker)
+    if price_path is None:
+        return {
+            "status": "missing_price_history",
+            "path": None,
+            "last_available_date": None,
+            "rows": 0,
+        }
+    history = _read_price_history(price_path)
+    if history["status"] != "ok":
+        return {
+            "status": history["reason"],
+            "path": price_path.as_posix(),
+            "last_available_date": None,
+            "rows": 0,
+        }
+    rows = history["rows"]
+    return {
+        "status": "available",
+        "path": price_path.as_posix(),
+        "last_available_date": rows[-1]["date"].isoformat(),
+        "rows": len(rows),
+    }
 
 
 def _read_price_history(path: Path) -> dict[str, Any]:

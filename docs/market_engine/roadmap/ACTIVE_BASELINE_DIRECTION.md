@@ -42,7 +42,8 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-ADV02 - 500-ticker advice batch output (completed)
   -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
-  -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
+  -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots (completed)
+  -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes
   -> ME-APP01 - App/report view for advice candidates
 ```
 
@@ -209,10 +210,41 @@ yet resolve sample outcomes. The dominant blocker is insufficient local forward
 history after the recent advice date. Four tickers also lack local
 price-history CSVs.
 
+## Current completed ME-EVAL02 result
+
+ME-EVAL02 added a manual local refresh flow for existing unresolved advice
+outcomes. It does not implement a scheduler. It can be rerun later when newer
+local price-history snapshots are available.
+
+The sample refresh run used:
+
+```text
+input evaluation artifact: artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json
+run_id: me-eval02-refresh-local-snapshots-20260712T130000Z
+price_history_root: data/processed
+```
+
+and produced:
+
+```text
+selected_outcomes: 12
+resolved: 0
+still_unresolved: 12
+insufficient_forward_data: 8
+missing_price_history: 4
+missing_price_history_tickers: CLS, CRDO, IREN, VRT
+other_blockers: 0
+```
+
+ME-EVAL02 proves unresolved advice outcomes can be deterministically retried
+against local snapshots. Current local data still cannot resolve any sample
+outcome because the local price histories stop before the advice date and four
+tickers have no local price-history CSV.
+
 ## Next baseline sprint
 
 ```text
-ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
+ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes
 ```
 
 Not:
@@ -222,7 +254,7 @@ ME-GH03 - Deterministic ranking and review queue
 ```
 
 Remaining data gaps are explicit follow-up candidates, not blockers to
-ME-EVAL02:
+ME-DATA02:
 
 ```text
 portfolio_context: 12
