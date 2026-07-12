@@ -47,7 +47,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
   -> ME-ADV02 - 500-ticker advice batch output (completed)
   -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
-  -> ME-EVAL01 - Advice outcome tracking and feedback loop
+  -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
+  -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
   -> ME-APP01 - App/report view for advice candidates
 ```
 
@@ -79,11 +80,52 @@ reran the batch output. The sample changed from `watchlist: 12` to
 `buy_candidate: 4`, `wait_for_price: 2`, `avoid_for_now: 1`, and
 `watchlist: 5`.
 
-ME-EVAL01 is the next baseline sprint because ME-DATA01 produced
-outcome-trackable advice diversity. Remaining data gaps are explicit and
-deferred: portfolio context for all 12 sample tickers, broad market context for
-8 tickers, local price/setup evidence for 4 tickers, and coverage beyond the
-current 12 of 500 target tickers.
+ME-EVAL01 created the first deterministic advice feedback loop. It records the
+advice label and advice-date anchor, reads local price-history CSVs only,
+computes 5/21/63 trading-day outcomes where possible, writes unresolved
+outcomes separately, aggregates label performance, and produces rule feedback.
+The sample evaluation run
+`me-eval01-advice-outcomes-20260712T120000Z` evaluated 12 tickers, resolved 0
+outcomes, and marked 12 unresolved outcomes. The unresolved reasons were
+`insufficient_forward_data: 8` and `missing_price_history: 4`.
+
+ME-EVAL02 is the next baseline sprint because the feedback loop exists but
+needs later local snapshots to resolve horizons after the recent advice date.
+ME-DATA02 remains a follow-up candidate for importing missing local
+price-history CSVs for `CLS`, `CRDO`, `IREN`, and `VRT`.
+
+### ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
+
+Owner roles: Product Owner / Data Steward / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-EVAL / Outcome evaluation
+
+Status: NEXT BASELINE SPRINT AFTER ME-EVAL01
+
+Goal: rerun deterministic advice outcome evaluation against later local
+snapshots so unresolved ME-EVAL01 horizons can become resolved without live
+provider acquisition.
+
+Scope: local evaluation refresh only. No OpenAI API, provider invocation, live
+download, broker/order execution, portfolio/watchlist mutation, Telegram,
+delivery side effects, Decision Engine allocation authority changes, or advice
+rule rewrites.
+
+### ME-DATA02 - Import missing local price history for unresolved outcomes
+
+Owner roles: Product Owner / Data Steward / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-DATA / Local data coverage
+
+Status: FOLLOW-UP CANDIDATE AFTER ME-EVAL01
+
+Goal: make local price-history CSVs available for unresolved evaluation
+tickers that currently have no `data/processed/<ticker>.csv`.
+
+Scope: local data import or fixture/snapshot ingestion only when explicitly
+approved. No live download, provider refresh, API use, broker/order execution,
+portfolio/watchlist mutation, Telegram, delivery side effects, or advice rule
+changes.
 
 ## Current ChatGPT Advisory Artifact Chain
 

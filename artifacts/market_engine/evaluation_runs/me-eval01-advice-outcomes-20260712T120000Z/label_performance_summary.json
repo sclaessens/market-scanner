@@ -1,0 +1,62 @@
+{
+  "labels": {
+    "avoid_for_now": {
+      "average_return_by_horizon": {
+        "1m": null,
+        "1w": null,
+        "3m": null
+      },
+      "count": 1,
+      "preliminary_outcome_counts": {
+        "unresolved": 1
+      },
+      "resolved_count": 0,
+      "unresolved_count": 1
+    },
+    "buy_candidate": {
+      "average_return_by_horizon": {
+        "1m": null,
+        "1w": null,
+        "3m": null
+      },
+      "count": 4,
+      "preliminary_outcome_counts": {
+        "unresolved": 4
+      },
+      "resolved_count": 0,
+      "unresolved_count": 4
+    },
+    "wait_for_price": {
+      "average_return_by_horizon": {
+        "1m": null,
+        "1w": null,
+        "3m": null
+      },
+      "count": 2,
+      "preliminary_outcome_counts": {
+        "unresolved": 2
+      },
+      "resolved_count": 0,
+      "unresolved_count": 2
+    },
+    "watchlist": {
+      "average_return_by_horizon": {
+        "1m": null,
+        "1w": null,
+        "3m": null
+      },
+      "count": 5,
+      "preliminary_outcome_counts": {
+        "unresolved": 5
+      },
+      "resolved_count": 0,
+      "unresolved_count": 5
+    }
+  },
+  "limitations": [
+    "Outcome data may be unresolved when local price history does not extend beyond the advice date.",
+    "This is preliminary outcome tracking, not a full backtest."
+  ],
+  "run_id": "me-eval01-advice-outcomes-20260712T120000Z",
+  "schema_version": "market-engine-label-performance-summary-v1"
+}

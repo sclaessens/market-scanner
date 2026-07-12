@@ -106,7 +106,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
   -> ME-ADV02 - 500-ticker advice batch output (completed)
   -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
-  -> ME-EVAL01 - Advice outcome tracking and feedback loop
+  -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
+  -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
   -> ME-APP01 - App/report view for advice candidates
 ```
 
@@ -138,10 +139,26 @@ local artifacts and local price-history CSVs. The sample output changed from
 `avoid_for_now: 1`, and `watchlist: 5`. ME-DATA01 preserved the no-API and
 no-side-effect baseline.
 
-ME-EVAL01 is now the next baseline sprint because outcome-trackable advice
-labels exist. Remaining data gaps remain explicit follow-ups: portfolio
-context, broad market context, local price/setup evidence for uncovered
-tickers, and coverage beyond 12 of the 500 target tickers.
+ME-EVAL01 implemented deterministic advice outcome tracking. It consumes the
+ME-DATA01 `advice_index.json`, reads local `data/processed` price-history CSVs
+only, computes 1-week, 1-month, and 3-month horizon outcomes where enough
+local forward rows exist, and writes `manifest.json`,
+`advice_outcome_index.json`, `advice_outcome_report.md`,
+`label_performance_summary.json`, `rule_feedback_report.md`, and
+`unresolved_outcomes.json`.
+
+The ME-EVAL01 sample run
+`me-eval01-advice-outcomes-20260712T120000Z` evaluated 12 tickers and produced
+0 resolved outcomes and 12 unresolved outcomes. Unresolved reasons were
+`insufficient_forward_data: 8` and `missing_price_history: 4`. The feedback
+loop now exists, but rule quality cannot yet be judged from the current local
+sample.
+
+ME-EVAL02 is now the next baseline sprint because the dominant blocker is
+insufficient local forward price history after the recent advice date.
+`ME-DATA02 - Import missing local price history for unresolved outcomes`
+remains a follow-up candidate for the four tickers with missing local
+price-history CSVs.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 
