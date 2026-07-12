@@ -43,7 +43,8 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
   -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots (completed)
-  -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes
+  -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes (implementation complete / coverage partial)
+  -> ME-DATA03 - Operator-supplied local price snapshot import for ME-EVAL blockers
   -> ME-APP01 - App/report view for advice candidates
 ```
 
@@ -241,10 +242,59 @@ against local snapshots. Current local data still cannot resolve any sample
 outcome because the local price histories stop before the advice date and four
 tickers have no local price-history CSV.
 
+## Current completed ME-DATA02 result
+
+ME-DATA02 added a canonical local market-data universe configuration and a
+deterministic local coverage/import command:
+
+```text
+config/market_engine/universes/canonical_universe.json
+src/market_engine/data/local_market_data_universe.py
+src/market_engine/data/supported_universe_price_history_command.py
+```
+
+The full report-only data run used:
+
+```text
+run_id: me-data02-full-coverage-report-only-20260712T142000Z
+price_history_root: data/processed
+```
+
+and produced:
+
+```text
+total_canonical_instruments: 308
+unique_equities: 299
+etf_count: 9
+context_count: 3
+valid: 0
+imported: 0
+refreshed: 0
+missing: 12
+insufficient: 293
+invalid: 1
+unsupported: 2
+completion_status: completed_with_blockers
+```
+
+ME-DATA02 did not claim full S&P 500, Nasdaq-100, S&P MidCap 400, or STOXX
+Europe coverage because no reproducible local membership source was present in
+the repository. Those layers are explicitly blocked in the universe
+configuration.
+
+The post-ME-DATA02 ME-EVAL02 refresh check remained:
+
+```text
+resolved: 0
+insufficient_forward_data: 8
+missing_price_history: 4
+missing_price_history_tickers: CLS, CRDO, IREN, VRT
+```
+
 ## Next baseline sprint
 
 ```text
-ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes
+ME-DATA03 - Operator-supplied local price snapshot import for ME-EVAL blockers
 ```
 
 Not:
@@ -254,7 +304,7 @@ ME-GH03 - Deterministic ranking and review queue
 ```
 
 Remaining data gaps are explicit follow-up candidates, not blockers to
-ME-DATA02:
+ME-DATA03:
 
 ```text
 portfolio_context: 12

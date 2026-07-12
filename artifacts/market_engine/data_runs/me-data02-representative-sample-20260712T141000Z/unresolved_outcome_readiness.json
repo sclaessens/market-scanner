@@ -1,0 +1,73 @@
+{
+  "covered_critical_tickers": [
+    "ASML",
+    "CLS",
+    "NVDA"
+  ],
+  "critical_tickers_total": 12,
+  "not_ready_count": 3,
+  "outcomes": [
+    {
+      "artifactpath": "data/processed/ASML.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:asml",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ASML",
+      "start_date": "2025-04-30",
+      "symbol": "ASML",
+      "universe_memberships": [
+        "europe_large_cap_defined",
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CLS.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:cls",
+      "note": "No local price-history CSV found.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "CLS",
+      "start_date": null,
+      "symbol": "CLS",
+      "universe_memberships": [
+        "explicit_supplemental_watch"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/NVDA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:nvda",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NVDA",
+      "start_date": "2025-04-30",
+      "symbol": "NVDA",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    }
+  ],
+  "ready_count": 0,
+  "schema_version": "market-engine-unresolved-outcome-readiness-v1"
+}

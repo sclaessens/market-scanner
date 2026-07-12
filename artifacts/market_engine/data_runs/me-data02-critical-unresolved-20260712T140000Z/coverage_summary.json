@@ -1,0 +1,32 @@
+{
+  "schema_version": "market-engine-local-market-data-coverage-summary-v1",
+  "status_counts": {
+    "insufficient_forward_data": 8,
+    "missing_price_history": 4
+  },
+  "summary": {
+    "completion_status": "completed_with_blockers",
+    "context_count": 3,
+    "etf_count": 9,
+    "failed": 0,
+    "imported": 0,
+    "insufficient": 8,
+    "invalid": 0,
+    "layer_counts": {
+      "etf_context": 9,
+      "europe_large_cap_defined": 4,
+      "explicit_supplemental_watch": 12,
+      "local_price_history_covered": 294,
+      "market_context": 3
+    },
+    "missing": 4,
+    "refreshed": 0,
+    "selected_instruments": 12,
+    "skipped": 0,
+    "stale": 0,
+    "total_canonical_instruments": 308,
+    "unique_equities": 299,
+    "unsupported": 0,
+    "valid": 0
+  }
+}

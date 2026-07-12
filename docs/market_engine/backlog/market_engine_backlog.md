@@ -49,7 +49,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
   -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots (completed)
-  -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes
+  -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes (implementation complete / coverage partial)
+  -> ME-DATA03 - Operator-supplied local price snapshot import for ME-EVAL blockers
   -> ME-APP01 - App/report view for advice candidates
 ```
 
@@ -126,7 +127,7 @@ Owner roles: Product Owner / Data Steward / Development Lead / QA Lead / Governa
 
 Job family: ME-DATA / Local data coverage
 
-Status: NEXT BASELINE SPRINT AFTER ME-EVAL02
+Status: IMPLEMENTATION COMPLETE / ACQUISITION COVERAGE PARTIAL
 
 Goal: make local price-history CSVs available for unresolved evaluation
 tickers that currently have no `data/processed/<ticker>.csv`, and make later
@@ -136,6 +137,46 @@ data after the advice date.
 Scope: local data import or fixture/snapshot ingestion only when explicitly
 approved. No live download, provider refresh, API use, broker/order execution,
 portfolio/watchlist mutation, Telegram, delivery side effects, or advice rule
+changes.
+
+ME-DATA02 created a canonical local market-data universe config and local
+coverage command. The full report-only run
+`me-data02-full-coverage-report-only-20260712T142000Z` produced 308 canonical
+instruments, 299 unique equities, 9 ETFs, and 3 market-context instruments.
+It did not claim full 1,000+ index coverage because no reproducible local S&P
+500, Nasdaq-100, S&P MidCap 400, or STOXX Europe membership source was present.
+
+Coverage remains partial:
+
+- valid current snapshots: 0
+- imported: 0
+- refreshed: 0
+- missing: 12
+- insufficient: 293
+- invalid: 1
+- unsupported mappings: 2
+
+The ME-EVAL02 critical run remained blocked: 8
+`insufficient_forward_data`, 4 `missing_price_history` (`CLS`, `CRDO`,
+`IREN`, `VRT`).
+
+### ME-DATA03 - Operator-supplied local price snapshot import for ME-EVAL blockers
+
+Owner roles: Product Owner / Data Steward / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-DATA / Local data coverage
+
+Status: NEXT BASELINE SPRINT AFTER ME-DATA02
+
+Goal: provide approved local CSV snapshots for the 12 critical ME-EVAL
+unresolved outcome tickers, including missing snapshots for `CLS`, `CRDO`,
+`IREN`, and `VRT`, and sufficient forward rows after the original advice date
+for the other 8 tickers.
+
+Scope: operator-supplied local snapshot import and validation only. No live
+download, new provider architecture, broker/order execution, portfolio or
+watchlist mutation, advice generation, outcome-rule changes, Telegram,
+scheduler, queue, daemon, machine learning, or recommendation threshold
 changes.
 
 ## Current ChatGPT Advisory Artifact Chain
