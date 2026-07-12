@@ -1,0 +1,25 @@
+{
+  "artifact_type": "market-engine-advice-outcome-evaluation-run-manifest",
+  "baseline_guardrail": {
+    "broker_order_execution_performed": false,
+    "live_source_acquisition_performed": false,
+    "openai_api_required": false,
+    "portfolio_watchlist_mutation_performed": false,
+    "provider_invocation_allowed": false
+  },
+  "generated_at": "2026-07-12T12:00:00Z",
+  "input": {
+    "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+    "price_data_root": "data/processed"
+  },
+  "next_baseline_sprint": "ME-EVAL02 - Extend outcome tracking with scheduled/future refresh or local snapshot import",
+  "outputs": {
+    "advice_outcome_index_json": "advice_outcome_index.json",
+    "advice_outcome_report_md": "advice_outcome_report.md",
+    "label_performance_summary_json": "label_performance_summary.json",
+    "rule_feedback_report_md": "rule_feedback_report.md",
+    "unresolved_outcomes_json": "unresolved_outcomes.json"
+  },
+  "run_id": "me-eval01-advice-outcomes-20260712T120000Z",
+  "schema_version": "market-engine-evaluation-run-manifest-v1"
+}

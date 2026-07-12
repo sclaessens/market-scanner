@@ -1,0 +1,106 @@
+{
+  "reason_counts": {
+    "insufficient_forward_data": 8,
+    "missing_price_history": 4
+  },
+  "run_id": "me-eval01-advice-outcomes-20260712T120000Z",
+  "schema_version": "market-engine-unresolved-advice-outcomes-v1",
+  "unresolved": [
+    {
+      "advice": "wait_for_price",
+      "price_source_path": "data/processed/AMD.csv",
+      "reasons": [
+        "insufficient_forward_data"
+      ],
+      "ticker": "AMD"
+    },
+    {
+      "advice": "buy_candidate",
+      "price_source_path": "data/processed/ASML.csv",
+      "reasons": [
+        "insufficient_forward_data"
+      ],
+      "ticker": "ASML"
+    },
+    {
+      "advice": "wait_for_price",
+      "price_source_path": "data/processed/AVGO.csv",
+      "reasons": [
+        "insufficient_forward_data"
+      ],
+      "ticker": "AVGO"
+    },
+    {
+      "advice": "watchlist",
+      "price_source_path": null,
+      "reasons": [
+        "missing_price_history"
+      ],
+      "ticker": "CLS"
+    },
+    {
+      "advice": "buy_candidate",
+      "price_source_path": "data/processed/COST.csv",
+      "reasons": [
+        "insufficient_forward_data"
+      ],
+      "ticker": "COST"
+    },
+    {
+      "advice": "watchlist",
+      "price_source_path": null,
+      "reasons": [
+        "missing_price_history"
+      ],
+      "ticker": "CRDO"
+    },
+    {
+      "advice": "watchlist",
+      "price_source_path": null,
+      "reasons": [
+        "missing_price_history"
+      ],
+      "ticker": "IREN"
+    },
+    {
+      "advice": "avoid_for_now",
+      "price_source_path": "data/processed/META.csv",
+      "reasons": [
+        "insufficient_forward_data"
+      ],
+      "ticker": "META"
+    },
+    {
+      "advice": "watchlist",
+      "price_source_path": "data/processed/MSFT.csv",
+      "reasons": [
+        "insufficient_forward_data"
+      ],
+      "ticker": "MSFT"
+    },
+    {
+      "advice": "buy_candidate",
+      "price_source_path": "data/processed/NVDA.csv",
+      "reasons": [
+        "insufficient_forward_data"
+      ],
+      "ticker": "NVDA"
+    },
+    {
+      "advice": "buy_candidate",
+      "price_source_path": "data/processed/TSM.csv",
+      "reasons": [
+        "insufficient_forward_data"
+      ],
+      "ticker": "TSM"
+    },
+    {
+      "advice": "watchlist",
+      "price_source_path": null,
+      "reasons": [
+        "missing_price_history"
+      ],
+      "ticker": "VRT"
+    }
+  ]
+}

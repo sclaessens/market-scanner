@@ -1,0 +1,375 @@
+{
+  "artifact_type": "market-engine-advice-outcome-index",
+  "generated_at": "2026-07-12T12:00:00Z",
+  "horizons": [
+    {
+      "name": "1w",
+      "trading_days": 5
+    },
+    {
+      "name": "1m",
+      "trading_days": 21
+    },
+    {
+      "name": "3m",
+      "trading_days": 63
+    }
+  ],
+  "input": {
+    "advice_index_generated_at": "2026-07-11T14:00:00Z",
+    "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+    "advice_index_run_id": "me-data01-setup-price-market-context-20260711T140000Z",
+    "price_data_root": "data/processed"
+  },
+  "run_id": "me-eval01-advice-outcomes-20260712T120000Z",
+  "schema_version": "market-engine-advice-outcome-index-v1",
+  "summary": {
+    "label_counts": {
+      "avoid_for_now": 1,
+      "buy_candidate": 4,
+      "wait_for_price": 2,
+      "watchlist": 5
+    },
+    "label_performance": {
+      "unresolved": 12
+    },
+    "resolved_by_horizon": {
+      "1m": 0,
+      "1w": 0,
+      "3m": 0
+    },
+    "resolved_outcomes": 0,
+    "tickers_total": 12,
+    "unresolved_outcomes": 12,
+    "unresolved_reasons": {
+      "insufficient_forward_data": 8,
+      "missing_price_history": 4
+    }
+  },
+  "tickers": [
+    {
+      "advice": "wait_for_price",
+      "advice_date": "2026-07-11",
+      "anchor_source": "advice_index.generated_at",
+      "confidence": "medium",
+      "entry_price": 347.215,
+      "label_interpretation": {
+        "expected_direction": "avoid_overpaying",
+        "preliminary_outcome": "unresolved"
+      },
+      "outcomes": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "price_source_path": "data/processed/AMD.csv",
+      "ticker": "AMD"
+    },
+    {
+      "advice": "buy_candidate",
+      "advice_date": "2026-07-11",
+      "anchor_source": "advice_index.generated_at",
+      "confidence": "medium",
+      "entry_price": 1423.3,
+      "label_interpretation": {
+        "expected_direction": "up_or_constructive",
+        "preliminary_outcome": "unresolved"
+      },
+      "outcomes": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "price_source_path": "data/processed/ASML.csv",
+      "ticker": "ASML"
+    },
+    {
+      "advice": "wait_for_price",
+      "advice_date": "2026-07-11",
+      "anchor_source": "advice_index.generated_at",
+      "confidence": "medium",
+      "entry_price": 412.0,
+      "label_interpretation": {
+        "expected_direction": "avoid_overpaying",
+        "preliminary_outcome": "unresolved"
+      },
+      "outcomes": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "price_source_path": "data/processed/AVGO.csv",
+      "ticker": "AVGO"
+    },
+    {
+      "advice": "watchlist",
+      "advice_date": "2026-07-11",
+      "anchor_source": "advice_index.generated_at",
+      "confidence": "low",
+      "entry_price": null,
+      "label_interpretation": {
+        "expected_direction": "neutral_observe",
+        "preliminary_outcome": "unresolved"
+      },
+      "outcomes": {
+        "1m": {
+          "reason": "missing_price_history",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "missing_price_history",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "missing_price_history",
+          "status": "unresolved"
+        }
+      },
+      "price_source_path": null,
+      "ticker": "CLS"
+    },
+    {
+      "advice": "buy_candidate",
+      "advice_date": "2026-07-11",
+      "anchor_source": "advice_index.generated_at",
+      "confidence": "medium",
+      "entry_price": 1010.215,
+      "label_interpretation": {
+        "expected_direction": "up_or_constructive",
+        "preliminary_outcome": "unresolved"
+      },
+      "outcomes": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "price_source_path": "data/processed/COST.csv",
+      "ticker": "COST"
+    },
+    {
+      "advice": "watchlist",
+      "advice_date": "2026-07-11",
+      "anchor_source": "advice_index.generated_at",
+      "confidence": "low",
+      "entry_price": null,
+      "label_interpretation": {
+        "expected_direction": "neutral_observe",
+        "preliminary_outcome": "unresolved"
+      },
+      "outcomes": {
+        "1m": {
+          "reason": "missing_price_history",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "missing_price_history",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "missing_price_history",
+          "status": "unresolved"
+        }
+      },
+      "price_source_path": null,
+      "ticker": "CRDO"
+    },
+    {
+      "advice": "watchlist",
+      "advice_date": "2026-07-11",
+      "anchor_source": "advice_index.generated_at",
+      "confidence": "low",
+      "entry_price": null,
+      "label_interpretation": {
+        "expected_direction": "neutral_observe",
+        "preliminary_outcome": "unresolved"
+      },
+      "outcomes": {
+        "1m": {
+          "reason": "missing_price_history",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "missing_price_history",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "missing_price_history",
+          "status": "unresolved"
+        }
+      },
+      "price_source_path": null,
+      "ticker": "IREN"
+    },
+    {
+      "advice": "avoid_for_now",
+      "advice_date": "2026-07-11",
+      "anchor_source": "advice_index.generated_at",
+      "confidence": "medium",
+      "entry_price": 605.94,
+      "label_interpretation": {
+        "expected_direction": "weak_or_down",
+        "preliminary_outcome": "unresolved"
+      },
+      "outcomes": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "price_source_path": "data/processed/META.csv",
+      "ticker": "META"
+    },
+    {
+      "advice": "watchlist",
+      "advice_date": "2026-07-11",
+      "anchor_source": "advice_index.generated_at",
+      "confidence": "low",
+      "entry_price": 405.42,
+      "label_interpretation": {
+        "expected_direction": "neutral_observe",
+        "preliminary_outcome": "unresolved"
+      },
+      "outcomes": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "price_source_path": "data/processed/MSFT.csv",
+      "ticker": "MSFT"
+    },
+    {
+      "advice": "buy_candidate",
+      "advice_date": "2026-07-11",
+      "anchor_source": "advice_index.generated_at",
+      "confidence": "medium",
+      "entry_price": 201.79,
+      "label_interpretation": {
+        "expected_direction": "up_or_constructive",
+        "preliminary_outcome": "unresolved"
+      },
+      "outcomes": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "price_source_path": "data/processed/NVDA.csv",
+      "ticker": "NVDA"
+    },
+    {
+      "advice": "buy_candidate",
+      "advice_date": "2026-07-11",
+      "anchor_source": "advice_index.generated_at",
+      "confidence": "medium",
+      "entry_price": 391.315,
+      "label_interpretation": {
+        "expected_direction": "up_or_constructive",
+        "preliminary_outcome": "unresolved"
+      },
+      "outcomes": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "price_source_path": "data/processed/TSM.csv",
+      "ticker": "TSM"
+    },
+    {
+      "advice": "watchlist",
+      "advice_date": "2026-07-11",
+      "anchor_source": "advice_index.generated_at",
+      "confidence": "low",
+      "entry_price": null,
+      "label_interpretation": {
+        "expected_direction": "neutral_observe",
+        "preliminary_outcome": "unresolved"
+      },
+      "outcomes": {
+        "1m": {
+          "reason": "missing_price_history",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "missing_price_history",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "missing_price_history",
+          "status": "unresolved"
+        }
+      },
+      "price_source_path": null,
+      "ticker": "VRT"
+    }
+  ]
+}

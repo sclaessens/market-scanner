@@ -41,7 +41,8 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
   -> ME-ADV02 - 500-ticker advice batch output (completed)
   -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
-  -> ME-EVAL01 - Advice outcome tracking and feedback loop
+  -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
+  -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
   -> ME-APP01 - App/report view for advice candidates
 ```
 
@@ -158,10 +159,60 @@ invalid: 0
 ME-DATA01 therefore broke the watchlist-only output and made outcome tracking
 useful.
 
+## Current completed ME-EVAL01 result
+
+ME-EVAL01 added deterministic advice outcome tracking under:
+
+```text
+src/market_engine/evaluation/
+```
+
+It consumes an advice batch `advice_index.json`, reads existing local
+`data/processed` price-history CSVs only, computes 5/21/63 trading-day horizon
+returns where enough local forward data exists, and writes an evaluation run
+under:
+
+```text
+artifacts/market_engine/evaluation_runs/<run_id>/
+```
+
+The sample run used:
+
+```text
+input advice_index: artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json
+run_id: me-eval01-advice-outcomes-20260712T120000Z
+price_data_root: data/processed
+```
+
+and produced:
+
+```text
+tickers_total: 12
+resolved_outcomes: 0
+unresolved_outcomes: 12
+resolved_by_horizon:
+  1w: 0
+  1m: 0
+  3m: 0
+unresolved_reasons:
+  insufficient_forward_data: 8
+  missing_price_history: 4
+label_counts:
+  buy_candidate: 4
+  wait_for_price: 2
+  watchlist: 5
+  avoid_for_now: 1
+```
+
+ME-EVAL01 therefore created the feedback loop, but current local data cannot
+yet resolve sample outcomes. The dominant blocker is insufficient local forward
+history after the recent advice date. Four tickers also lack local
+price-history CSVs.
+
 ## Next baseline sprint
 
 ```text
-ME-EVAL01 - Advice outcome tracking and feedback loop
+ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
 ```
 
 Not:
@@ -171,13 +222,14 @@ ME-GH03 - Deterministic ranking and review queue
 ```
 
 Remaining data gaps are explicit follow-up candidates, not blockers to
-ME-EVAL01:
+ME-EVAL02:
 
 ```text
 portfolio_context: 12
 market_context: 8
 local_price_history: 4
 status/advice coverage beyond 12 of 500 target tickers
+forward local price snapshots after the advice date
 ```
 
 ## Completed ME-ADV01 result
