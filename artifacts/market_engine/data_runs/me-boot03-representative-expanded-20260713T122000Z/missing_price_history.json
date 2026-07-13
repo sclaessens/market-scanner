@@ -1,0 +1,8 @@
+{
+  "run_id": "me-boot03-representative-expanded-20260713T122000Z",
+  "schema_version": "market-engine-local-market-data-missing-price-history-v1",
+  "tickers": [
+    "CLS",
+    "HO"
+  ]
+}

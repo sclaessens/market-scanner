@@ -1,0 +1,14 @@
+{
+  "schema_version": "market-engine-canonical-universe-source-v1",
+  "universe_id": "dax40",
+  "source_name": "Operator-controlled DAX 40 partial membership snapshot",
+  "snapshot_date": "2026-07-12",
+  "retrieval_date": "2026-07-13",
+  "provenance": "Local repository bootstrap from existing European project universe; full official constituent file not present.",
+  "status": "partial",
+  "known_limitations": ["Partial layer only; does not claim full DAX 40 membership."],
+  "constituents": [
+    {"symbol": "RHM", "source_symbol": "RHM.DE", "name": "Rheinmetall AG", "exchange": "XETRA", "country": "DE", "currency": "EUR", "sector": "Industrials", "source_mapping_status": "unsupported", "source_notes": "Primary-listing mapping requires operator validation."},
+    {"symbol": "SAP", "source_symbol": "SAP.DE", "name": "SAP SE", "exchange": "XETRA", "country": "DE", "currency": "EUR", "sector": "Technology", "source_mapping_status": "unsupported", "source_notes": "Primary-listing mapping requires operator validation."}
+  ]
+}

@@ -1,103 +1,1209 @@
 {
-  "schema_version": "market-engine-canonical-local-market-data-universe-config-v1",
-  "universe_version": "me-data02-canonical-local-market-data-universe-v1",
-  "snapshot_date": "2026-07-12",
-  "provenance": [
-    "data/market_engine/ticker_universe/ticker_universe.csv",
-    "data/market_engine/ticker_universe/professional_swing_universe/professional_swing_universe.csv",
-    "data/processed/*.csv",
-    "ME-EVAL02 unresolved outcome artifacts"
-  ],
-  "point_in_time_note": "This is a current local supported-universe snapshot, not a historical point-in-time index membership database.",
+  "blocked_layers": [],
   "layers": [
     {
-      "layer_id": "local_price_history_covered",
-      "description": "All symbols with existing local data/processed CSV price-history snapshots.",
-      "source_type": "local_price_history_directory",
-      "membership": "local_price_history_covered",
-      "asset_type": "equity",
-      "analysis_eligible": true,
       "advice_eligible": true,
+      "analysis_eligible": true,
+      "asset_type": "equity",
       "context_only": false,
       "country": "US",
       "currency": "USD",
+      "description": "All symbols with existing local data/processed CSV price-history snapshots.",
       "exchange": "UNKNOWN",
-      "provenance": "data/processed/*.csv"
+      "layer_id": "local_price_history_covered",
+      "membership": "local_price_history_covered",
+      "provenance": "data/processed/*.csv",
+      "source_type": "local_price_history_directory"
     },
     {
-      "layer_id": "explicit_supplemental_watch",
-      "description": "Controlled project and unresolved-evaluation supplemental universe.",
-      "source_type": "explicit_instruments",
-      "membership": "explicit_supplemental_watch",
-      "instruments": [
-        {"symbol": "CLS", "name": "Celestica Inc.", "sector": "Technology", "industry": "AI hardware supply chain"},
-        {"symbol": "CRDO", "name": "Credo Technology Group Holding Ltd", "sector": "Technology", "industry": "Semiconductors"},
-        {"symbol": "IREN", "name": "IREN Limited", "sector": "Technology", "industry": "AI/HPC infrastructure"},
-        {"symbol": "VRT", "name": "Vertiv Holdings Co", "sector": "Industrials", "industry": "Data center infrastructure"},
-        {"symbol": "NVDA", "name": "NVIDIA Corporation", "sector": "Technology", "industry": "Semiconductors"},
-        {"symbol": "AMD", "name": "Advanced Micro Devices Inc.", "sector": "Technology", "industry": "Semiconductors"},
-        {"symbol": "ASML", "name": "ASML Holding N.V.", "exchange": "EURONEXT", "country": "NL", "currency": "EUR", "sector": "Technology", "industry": "Semiconductor equipment"},
-        {"symbol": "AVGO", "name": "Broadcom Inc.", "sector": "Technology", "industry": "Semiconductors"},
-        {"symbol": "COST", "name": "Costco Wholesale Corporation", "sector": "Consumer Defensive"},
-        {"symbol": "META", "name": "Meta Platforms Inc.", "sector": "Communication Services"},
-        {"symbol": "MSFT", "name": "Microsoft Corporation", "sector": "Technology"},
-        {"symbol": "TSM", "name": "Taiwan Semiconductor Manufacturing Company Limited", "sector": "Technology", "industry": "Semiconductors"}
-      ]
-    },
-    {
-      "layer_id": "europe_large_cap_defined",
-      "description": "Explicit European large-cap/project selection until broader Europe membership is reproducibly sourced.",
-      "source_type": "explicit_instruments",
-      "membership": "europe_large_cap_defined",
-      "instruments": [
-        {"symbol": "ASML", "source_symbol": "ASML", "name": "ASML Holding N.V.", "exchange": "EURONEXT", "country": "NL", "currency": "EUR"},
-        {"symbol": "HO", "source_symbol": "HO", "name": "Thales S.A.", "exchange": "EURONEXT", "country": "FR", "currency": "EUR", "advice_eligible": false, "source_notes": "Manual review only in existing canonical ticker universe."},
-        {"symbol": "RHM", "source_symbol": "RHM", "name": "Rheinmetall AG", "exchange": "XETRA", "country": "DE", "currency": "EUR", "advice_eligible": false, "source_notes": "Future source mapping required."},
-        {"symbol": "ADYEN", "source_symbol": "ADYEN", "name": "Adyen N.V.", "exchange": "EURONEXT", "country": "NL", "currency": "EUR", "advice_eligible": false, "source_notes": "Future source mapping required."}
-      ]
-    },
-    {
-      "layer_id": "etf_context",
-      "description": "Compact ETF context universe.",
-      "source_type": "explicit_instruments",
-      "membership": "etf_context",
-      "asset_type": "etf",
-      "instruments": [
-        {"symbol": "SPY", "name": "SPDR S&P 500 ETF Trust"},
-        {"symbol": "QQQ", "name": "Invesco QQQ Trust"},
-        {"symbol": "IWM", "name": "iShares Russell 2000 ETF"},
-        {"symbol": "DIA", "name": "SPDR Dow Jones Industrial Average ETF Trust"},
-        {"symbol": "XLK", "name": "Technology Select Sector SPDR Fund"},
-        {"symbol": "XLF", "name": "Financial Select Sector SPDR Fund"},
-        {"symbol": "XLE", "name": "Energy Select Sector SPDR Fund"},
-        {"symbol": "SMH", "name": "VanEck Semiconductor ETF"},
-        {"symbol": "SOXX", "name": "iShares Semiconductor ETF"}
-      ]
-    },
-    {
-      "layer_id": "market_context",
-      "description": "Context-only market-regime instruments with supported local symbol mappings only when present.",
-      "source_type": "explicit_instruments",
-      "membership": "market_context",
-      "asset_type": "index",
+      "advice_eligible": true,
       "analysis_eligible": true,
-      "advice_eligible": false,
-      "context_only": true,
+      "asset_type": "etf",
+      "context_only": false,
+      "description": "Controlled ETF context universe",
       "instruments": [
-        {"symbol": "SPY", "name": "US broad market proxy", "asset_type": "etf"},
-        {"symbol": "QQQ", "name": "US growth/technology proxy", "asset_type": "etf"},
-        {"symbol": "GOLD", "name": "Gold equity/liquid proxy", "asset_type": "equity", "context_only": false, "advice_eligible": true}
-      ]
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSEARCA",
+          "name": "SPDR S&P 500 ETF Trust",
+          "source_provenance": [
+            {
+              "file_hash": "09d1e4dfec292464a929ef20cfdb5312f0d0b3f34cb3dbcf87ba79fe51e1f2a0",
+              "path": "config/market_engine/universes/sources/etfs.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled ETF context universe"
+            }
+          ],
+          "symbol": "SPY"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Invesco QQQ Trust",
+          "source_provenance": [
+            {
+              "file_hash": "09d1e4dfec292464a929ef20cfdb5312f0d0b3f34cb3dbcf87ba79fe51e1f2a0",
+              "path": "config/market_engine/universes/sources/etfs.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled ETF context universe"
+            }
+          ],
+          "symbol": "QQQ"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSEARCA",
+          "name": "iShares Russell 2000 ETF",
+          "source_provenance": [
+            {
+              "file_hash": "09d1e4dfec292464a929ef20cfdb5312f0d0b3f34cb3dbcf87ba79fe51e1f2a0",
+              "path": "config/market_engine/universes/sources/etfs.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled ETF context universe"
+            }
+          ],
+          "symbol": "IWM"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSEARCA",
+          "name": "SPDR Dow Jones Industrial Average ETF Trust",
+          "source_provenance": [
+            {
+              "file_hash": "09d1e4dfec292464a929ef20cfdb5312f0d0b3f34cb3dbcf87ba79fe51e1f2a0",
+              "path": "config/market_engine/universes/sources/etfs.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled ETF context universe"
+            }
+          ],
+          "symbol": "DIA"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSEARCA",
+          "name": "Technology Select Sector SPDR Fund",
+          "source_provenance": [
+            {
+              "file_hash": "09d1e4dfec292464a929ef20cfdb5312f0d0b3f34cb3dbcf87ba79fe51e1f2a0",
+              "path": "config/market_engine/universes/sources/etfs.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled ETF context universe"
+            }
+          ],
+          "symbol": "XLK"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSEARCA",
+          "name": "Financial Select Sector SPDR Fund",
+          "source_provenance": [
+            {
+              "file_hash": "09d1e4dfec292464a929ef20cfdb5312f0d0b3f34cb3dbcf87ba79fe51e1f2a0",
+              "path": "config/market_engine/universes/sources/etfs.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled ETF context universe"
+            }
+          ],
+          "symbol": "XLF"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSEARCA",
+          "name": "Energy Select Sector SPDR Fund",
+          "source_provenance": [
+            {
+              "file_hash": "09d1e4dfec292464a929ef20cfdb5312f0d0b3f34cb3dbcf87ba79fe51e1f2a0",
+              "path": "config/market_engine/universes/sources/etfs.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled ETF context universe"
+            }
+          ],
+          "symbol": "XLE"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "VanEck Semiconductor ETF",
+          "source_provenance": [
+            {
+              "file_hash": "09d1e4dfec292464a929ef20cfdb5312f0d0b3f34cb3dbcf87ba79fe51e1f2a0",
+              "path": "config/market_engine/universes/sources/etfs.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled ETF context universe"
+            }
+          ],
+          "symbol": "SMH"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "iShares Semiconductor ETF",
+          "source_provenance": [
+            {
+              "file_hash": "09d1e4dfec292464a929ef20cfdb5312f0d0b3f34cb3dbcf87ba79fe51e1f2a0",
+              "path": "config/market_engine/universes/sources/etfs.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled ETF context universe"
+            }
+          ],
+          "symbol": "SOXX"
+        }
+      ],
+      "layer_id": "etf_context",
+      "membership": "etf_context",
+      "provenance": "config/market_engine/universes/sources/etfs.json",
+      "source_type": "explicit_instruments"
+    },
+    {
+      "advice_eligible": true,
+      "analysis_eligible": true,
+      "asset_type": "equity",
+      "context_only": false,
+      "description": "Operator-controlled additional European large-cap partial snapshot",
+      "instruments": [
+        {
+          "country": "DK",
+          "currency": "USD",
+          "exchange": "NYSE",
+          "name": "Novo Nordisk A/S ADR",
+          "sector": "Healthcare",
+          "source_notes": "ADR mapping retained as separate from primary listing.",
+          "source_provenance": [
+            {
+              "file_hash": "1e4959221ff86f912009dbe11491ce2bcd673ff9469864dcdbaf06b7c58f4cc6",
+              "path": "config/market_engine/universes/sources/europe/additional_large_caps.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled additional European large-cap partial snapshot"
+            }
+          ],
+          "source_symbol": "NVO",
+          "symbol": "NVO"
+        },
+        {
+          "country": "GB",
+          "currency": "GBP",
+          "exchange": "LSE",
+          "name": "Rolls-Royce Holdings plc",
+          "sector": "Industrials",
+          "source_mapping_status": "unsupported",
+          "source_notes": "Primary-listing mapping requires operator validation.",
+          "source_provenance": [
+            {
+              "file_hash": "1e4959221ff86f912009dbe11491ce2bcd673ff9469864dcdbaf06b7c58f4cc6",
+              "path": "config/market_engine/universes/sources/europe/additional_large_caps.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled additional European large-cap partial snapshot"
+            }
+          ],
+          "source_symbol": "RR.L",
+          "symbol": "RR"
+        }
+      ],
+      "layer_id": "europe_additional_large_caps",
+      "membership": "europe_additional_large_caps",
+      "provenance": "config/market_engine/universes/sources/europe/additional_large_caps.json",
+      "source_type": "explicit_instruments"
+    },
+    {
+      "advice_eligible": true,
+      "analysis_eligible": true,
+      "asset_type": "equity",
+      "context_only": false,
+      "description": "Operator-controlled AEX partial membership snapshot",
+      "instruments": [
+        {
+          "country": "NL",
+          "currency": "EUR",
+          "exchange": "EURONEXT",
+          "name": "ASML Holding N.V.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "5d49d63665ca0d3bc7b03528d92641c0807b47d2cf2eff1118abeb6d364fa3df",
+              "path": "config/market_engine/universes/sources/europe/aex.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled AEX partial membership snapshot"
+            }
+          ],
+          "source_symbol": "ASML",
+          "symbol": "ASML"
+        },
+        {
+          "country": "NL",
+          "currency": "EUR",
+          "exchange": "EURONEXT",
+          "name": "Adyen N.V.",
+          "sector": "Financial Services",
+          "source_mapping_status": "unsupported",
+          "source_notes": "Primary-listing mapping requires operator validation.",
+          "source_provenance": [
+            {
+              "file_hash": "5d49d63665ca0d3bc7b03528d92641c0807b47d2cf2eff1118abeb6d364fa3df",
+              "path": "config/market_engine/universes/sources/europe/aex.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled AEX partial membership snapshot"
+            }
+          ],
+          "source_symbol": "ADYEN.AS",
+          "symbol": "ADYEN"
+        }
+      ],
+      "layer_id": "aex",
+      "membership": "aex",
+      "provenance": "config/market_engine/universes/sources/europe/aex.json",
+      "source_type": "explicit_instruments"
+    },
+    {
+      "advice_eligible": true,
+      "analysis_eligible": true,
+      "asset_type": "equity",
+      "context_only": false,
+      "description": "Operator-controlled BEL 20 partial membership snapshot",
+      "instruments": [
+        {
+          "country": "BE",
+          "currency": "EUR",
+          "exchange": "EURONEXT",
+          "name": "UCB S.A.",
+          "sector": "Healthcare",
+          "source_mapping_status": "unsupported",
+          "source_notes": "Primary-listing mapping requires operator validation.",
+          "source_provenance": [
+            {
+              "file_hash": "094b64f29ed63a4b9b236273dbc4f80f451ee877847c8fe9e57d7333779d58d4",
+              "path": "config/market_engine/universes/sources/europe/bel20.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled BEL 20 partial membership snapshot"
+            }
+          ],
+          "source_symbol": "UCB.BR",
+          "symbol": "UCB"
+        },
+        {
+          "country": "BE",
+          "currency": "EUR",
+          "exchange": "EURONEXT",
+          "name": "Anheuser-Busch InBev SA/NV",
+          "sector": "Consumer Defensive",
+          "source_mapping_status": "unsupported",
+          "source_notes": "Primary-listing mapping requires operator validation.",
+          "source_provenance": [
+            {
+              "file_hash": "094b64f29ed63a4b9b236273dbc4f80f451ee877847c8fe9e57d7333779d58d4",
+              "path": "config/market_engine/universes/sources/europe/bel20.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled BEL 20 partial membership snapshot"
+            }
+          ],
+          "source_symbol": "ABI.BR",
+          "symbol": "ABI"
+        }
+      ],
+      "layer_id": "bel20",
+      "membership": "bel20",
+      "provenance": "config/market_engine/universes/sources/europe/bel20.json",
+      "source_type": "explicit_instruments"
+    },
+    {
+      "advice_eligible": true,
+      "analysis_eligible": true,
+      "asset_type": "equity",
+      "context_only": false,
+      "description": "Operator-controlled CAC 40 partial membership snapshot",
+      "instruments": [
+        {
+          "advice_eligible": false,
+          "country": "FR",
+          "currency": "EUR",
+          "exchange": "EURONEXT",
+          "name": "Thales S.A.",
+          "sector": "Industrials",
+          "source_notes": "Manual-review-only European mapping retained from existing governance.",
+          "source_provenance": [
+            {
+              "file_hash": "27d4d927c3c34cc519c26cef101b14161260d8fcc7f90163f081d6ffff739a9e",
+              "path": "config/market_engine/universes/sources/europe/cac40.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled CAC 40 partial membership snapshot"
+            }
+          ],
+          "source_symbol": "HO",
+          "symbol": "HO"
+        },
+        {
+          "country": "FR",
+          "currency": "EUR",
+          "exchange": "EURONEXT",
+          "name": "LVMH Moet Hennessy Louis Vuitton SE",
+          "sector": "Consumer Cyclical",
+          "source_mapping_status": "unsupported",
+          "source_notes": "Primary-listing mapping requires operator validation.",
+          "source_provenance": [
+            {
+              "file_hash": "27d4d927c3c34cc519c26cef101b14161260d8fcc7f90163f081d6ffff739a9e",
+              "path": "config/market_engine/universes/sources/europe/cac40.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled CAC 40 partial membership snapshot"
+            }
+          ],
+          "source_symbol": "MC.PA",
+          "symbol": "MC"
+        }
+      ],
+      "layer_id": "cac40",
+      "membership": "cac40",
+      "provenance": "config/market_engine/universes/sources/europe/cac40.json",
+      "source_type": "explicit_instruments"
+    },
+    {
+      "advice_eligible": true,
+      "analysis_eligible": true,
+      "asset_type": "equity",
+      "context_only": false,
+      "description": "Operator-controlled DAX 40 partial membership snapshot",
+      "instruments": [
+        {
+          "country": "DE",
+          "currency": "EUR",
+          "exchange": "XETRA",
+          "name": "Rheinmetall AG",
+          "sector": "Industrials",
+          "source_mapping_status": "unsupported",
+          "source_notes": "Primary-listing mapping requires operator validation.",
+          "source_provenance": [
+            {
+              "file_hash": "857bc078eb7e5bffe84d68e827bc5f6a04c8ea2177d650bed9ed37dae78ae16d",
+              "path": "config/market_engine/universes/sources/europe/dax40.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled DAX 40 partial membership snapshot"
+            }
+          ],
+          "source_symbol": "RHM.DE",
+          "symbol": "RHM"
+        },
+        {
+          "country": "DE",
+          "currency": "EUR",
+          "exchange": "XETRA",
+          "name": "SAP SE",
+          "sector": "Technology",
+          "source_mapping_status": "unsupported",
+          "source_notes": "Primary-listing mapping requires operator validation.",
+          "source_provenance": [
+            {
+              "file_hash": "857bc078eb7e5bffe84d68e827bc5f6a04c8ea2177d650bed9ed37dae78ae16d",
+              "path": "config/market_engine/universes/sources/europe/dax40.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled DAX 40 partial membership snapshot"
+            }
+          ],
+          "source_symbol": "SAP.DE",
+          "symbol": "SAP"
+        }
+      ],
+      "layer_id": "dax40",
+      "membership": "dax40",
+      "provenance": "config/market_engine/universes/sources/europe/dax40.json",
+      "source_type": "explicit_instruments"
+    },
+    {
+      "advice_eligible": false,
+      "analysis_eligible": true,
+      "asset_type": "index",
+      "context_only": true,
+      "description": "Controlled market context instrument set",
+      "instruments": [
+        {
+          "asset_type": "etf",
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSEARCA",
+          "name": "US broad market proxy",
+          "source_provenance": [
+            {
+              "file_hash": "65f076a9d361cb017bca96dde1c3b1615aa11e70ab1e13583d5b13dd00d1231a",
+              "path": "config/market_engine/universes/sources/market_context.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled market context instrument set"
+            }
+          ],
+          "symbol": "SPY"
+        },
+        {
+          "asset_type": "etf",
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "US growth and technology proxy",
+          "source_provenance": [
+            {
+              "file_hash": "65f076a9d361cb017bca96dde1c3b1615aa11e70ab1e13583d5b13dd00d1231a",
+              "path": "config/market_engine/universes/sources/market_context.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled market context instrument set"
+            }
+          ],
+          "symbol": "QQQ"
+        },
+        {
+          "advice_eligible": true,
+          "asset_type": "equity",
+          "context_only": false,
+          "country": "CA",
+          "currency": "USD",
+          "exchange": "NYSE",
+          "name": "Gold equity/liquid proxy",
+          "source_provenance": [
+            {
+              "file_hash": "65f076a9d361cb017bca96dde1c3b1615aa11e70ab1e13583d5b13dd00d1231a",
+              "path": "config/market_engine/universes/sources/market_context.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled market context instrument set"
+            }
+          ],
+          "symbol": "GOLD"
+        }
+      ],
+      "layer_id": "market_context",
+      "membership": "market_context",
+      "provenance": "config/market_engine/universes/sources/market_context.json",
+      "source_type": "explicit_instruments"
+    },
+    {
+      "advice_eligible": true,
+      "analysis_eligible": true,
+      "asset_type": "equity",
+      "context_only": false,
+      "description": "Operator-controlled Nasdaq-100 partial membership snapshot",
+      "instruments": [
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Apple Inc.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "07d4e4303901315d9ca0bc25d30be0da7d239344c257581c0a354eb55b71f53a",
+              "path": "config/market_engine/universes/sources/nasdaq100.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled Nasdaq-100 partial membership snapshot"
+            }
+          ],
+          "symbol": "AAPL"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Microsoft Corporation",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "07d4e4303901315d9ca0bc25d30be0da7d239344c257581c0a354eb55b71f53a",
+              "path": "config/market_engine/universes/sources/nasdaq100.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled Nasdaq-100 partial membership snapshot"
+            }
+          ],
+          "symbol": "MSFT"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "NVIDIA Corporation",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "07d4e4303901315d9ca0bc25d30be0da7d239344c257581c0a354eb55b71f53a",
+              "path": "config/market_engine/universes/sources/nasdaq100.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled Nasdaq-100 partial membership snapshot"
+            }
+          ],
+          "symbol": "NVDA"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Amazon.com Inc.",
+          "sector": "Consumer Cyclical",
+          "source_provenance": [
+            {
+              "file_hash": "07d4e4303901315d9ca0bc25d30be0da7d239344c257581c0a354eb55b71f53a",
+              "path": "config/market_engine/universes/sources/nasdaq100.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled Nasdaq-100 partial membership snapshot"
+            }
+          ],
+          "symbol": "AMZN"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Meta Platforms Inc.",
+          "sector": "Communication Services",
+          "source_provenance": [
+            {
+              "file_hash": "07d4e4303901315d9ca0bc25d30be0da7d239344c257581c0a354eb55b71f53a",
+              "path": "config/market_engine/universes/sources/nasdaq100.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled Nasdaq-100 partial membership snapshot"
+            }
+          ],
+          "symbol": "META"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Broadcom Inc.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "07d4e4303901315d9ca0bc25d30be0da7d239344c257581c0a354eb55b71f53a",
+              "path": "config/market_engine/universes/sources/nasdaq100.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled Nasdaq-100 partial membership snapshot"
+            }
+          ],
+          "symbol": "AVGO"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Advanced Micro Devices Inc.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "07d4e4303901315d9ca0bc25d30be0da7d239344c257581c0a354eb55b71f53a",
+              "path": "config/market_engine/universes/sources/nasdaq100.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled Nasdaq-100 partial membership snapshot"
+            }
+          ],
+          "symbol": "AMD"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Costco Wholesale Corporation",
+          "sector": "Consumer Defensive",
+          "source_provenance": [
+            {
+              "file_hash": "07d4e4303901315d9ca0bc25d30be0da7d239344c257581c0a354eb55b71f53a",
+              "path": "config/market_engine/universes/sources/nasdaq100.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled Nasdaq-100 partial membership snapshot"
+            }
+          ],
+          "symbol": "COST"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Alphabet Inc. Class A",
+          "sector": "Communication Services",
+          "source_provenance": [
+            {
+              "file_hash": "07d4e4303901315d9ca0bc25d30be0da7d239344c257581c0a354eb55b71f53a",
+              "path": "config/market_engine/universes/sources/nasdaq100.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled Nasdaq-100 partial membership snapshot"
+            }
+          ],
+          "symbol": "GOOGL"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Tesla Inc.",
+          "sector": "Consumer Cyclical",
+          "source_provenance": [
+            {
+              "file_hash": "07d4e4303901315d9ca0bc25d30be0da7d239344c257581c0a354eb55b71f53a",
+              "path": "config/market_engine/universes/sources/nasdaq100.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled Nasdaq-100 partial membership snapshot"
+            }
+          ],
+          "symbol": "TSLA"
+        }
+      ],
+      "layer_id": "nasdaq100",
+      "membership": "nasdaq100",
+      "provenance": "config/market_engine/universes/sources/nasdaq100.json",
+      "source_type": "explicit_instruments"
+    },
+    {
+      "advice_eligible": true,
+      "analysis_eligible": true,
+      "asset_type": "equity",
+      "context_only": false,
+      "description": "Operator-controlled S&P MidCap 400 partial membership snapshot",
+      "instruments": [
+        {
+          "country": "CA",
+          "currency": "USD",
+          "exchange": "NYSE",
+          "industry": "AI hardware supply chain",
+          "name": "Celestica Inc.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "33eb06c9fc9e5452dd8a52ac1356510c3b51629cd4289953183573bb89898785",
+              "path": "config/market_engine/universes/sources/sp400.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P MidCap 400 partial membership snapshot"
+            }
+          ],
+          "symbol": "CLS"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "industry": "Semiconductors",
+          "name": "Credo Technology Group Holding Ltd",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "33eb06c9fc9e5452dd8a52ac1356510c3b51629cd4289953183573bb89898785",
+              "path": "config/market_engine/universes/sources/sp400.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P MidCap 400 partial membership snapshot"
+            }
+          ],
+          "symbol": "CRDO"
+        },
+        {
+          "country": "AU",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "industry": "AI/HPC infrastructure",
+          "name": "IREN Limited",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "33eb06c9fc9e5452dd8a52ac1356510c3b51629cd4289953183573bb89898785",
+              "path": "config/market_engine/universes/sources/sp400.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P MidCap 400 partial membership snapshot"
+            }
+          ],
+          "symbol": "IREN"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSE",
+          "industry": "Data center infrastructure",
+          "name": "Vertiv Holdings Co",
+          "sector": "Industrials",
+          "source_provenance": [
+            {
+              "file_hash": "33eb06c9fc9e5452dd8a52ac1356510c3b51629cd4289953183573bb89898785",
+              "path": "config/market_engine/universes/sources/sp400.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P MidCap 400 partial membership snapshot"
+            }
+          ],
+          "symbol": "VRT"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSE",
+          "name": "Jabil Inc.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "33eb06c9fc9e5452dd8a52ac1356510c3b51629cd4289953183573bb89898785",
+              "path": "config/market_engine/universes/sources/sp400.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P MidCap 400 partial membership snapshot"
+            }
+          ],
+          "symbol": "JBL"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSE",
+          "name": "Arista Networks Inc.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "33eb06c9fc9e5452dd8a52ac1356510c3b51629cd4289953183573bb89898785",
+              "path": "config/market_engine/universes/sources/sp400.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P MidCap 400 partial membership snapshot"
+            }
+          ],
+          "symbol": "ANET"
+        }
+      ],
+      "layer_id": "sp400",
+      "membership": "sp400",
+      "provenance": "config/market_engine/universes/sources/sp400.json",
+      "source_type": "explicit_instruments"
+    },
+    {
+      "advice_eligible": true,
+      "analysis_eligible": true,
+      "asset_type": "equity",
+      "context_only": false,
+      "description": "Operator-controlled S&P 500 partial membership snapshot",
+      "instruments": [
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Apple Inc.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "e6fb93a68172aafb68107fcf70cbc09b48878408ebce74db7690bf2ff52045be",
+              "path": "config/market_engine/universes/sources/sp500.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P 500 partial membership snapshot"
+            }
+          ],
+          "symbol": "AAPL"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Microsoft Corporation",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "e6fb93a68172aafb68107fcf70cbc09b48878408ebce74db7690bf2ff52045be",
+              "path": "config/market_engine/universes/sources/sp500.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P 500 partial membership snapshot"
+            }
+          ],
+          "symbol": "MSFT"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "industry": "Semiconductors",
+          "name": "NVIDIA Corporation",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "e6fb93a68172aafb68107fcf70cbc09b48878408ebce74db7690bf2ff52045be",
+              "path": "config/market_engine/universes/sources/sp500.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P 500 partial membership snapshot"
+            }
+          ],
+          "symbol": "NVDA"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Amazon.com Inc.",
+          "sector": "Consumer Cyclical",
+          "source_provenance": [
+            {
+              "file_hash": "e6fb93a68172aafb68107fcf70cbc09b48878408ebce74db7690bf2ff52045be",
+              "path": "config/market_engine/universes/sources/sp500.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P 500 partial membership snapshot"
+            }
+          ],
+          "symbol": "AMZN"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Meta Platforms Inc.",
+          "sector": "Communication Services",
+          "source_provenance": [
+            {
+              "file_hash": "e6fb93a68172aafb68107fcf70cbc09b48878408ebce74db7690bf2ff52045be",
+              "path": "config/market_engine/universes/sources/sp500.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P 500 partial membership snapshot"
+            }
+          ],
+          "symbol": "META"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "industry": "Semiconductors",
+          "name": "Broadcom Inc.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "e6fb93a68172aafb68107fcf70cbc09b48878408ebce74db7690bf2ff52045be",
+              "path": "config/market_engine/universes/sources/sp500.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P 500 partial membership snapshot"
+            }
+          ],
+          "symbol": "AVGO"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Costco Wholesale Corporation",
+          "sector": "Consumer Defensive",
+          "source_provenance": [
+            {
+              "file_hash": "e6fb93a68172aafb68107fcf70cbc09b48878408ebce74db7690bf2ff52045be",
+              "path": "config/market_engine/universes/sources/sp500.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P 500 partial membership snapshot"
+            }
+          ],
+          "symbol": "COST"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSE",
+          "name": "Berkshire Hathaway Inc. Class B",
+          "sector": "Financial Services",
+          "source_provenance": [
+            {
+              "file_hash": "e6fb93a68172aafb68107fcf70cbc09b48878408ebce74db7690bf2ff52045be",
+              "path": "config/market_engine/universes/sources/sp500.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P 500 partial membership snapshot"
+            }
+          ],
+          "symbol": "BRK.B"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSE",
+          "name": "JPMorgan Chase & Co.",
+          "sector": "Financial Services",
+          "source_provenance": [
+            {
+              "file_hash": "e6fb93a68172aafb68107fcf70cbc09b48878408ebce74db7690bf2ff52045be",
+              "path": "config/market_engine/universes/sources/sp500.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P 500 partial membership snapshot"
+            }
+          ],
+          "symbol": "JPM"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSE",
+          "name": "Eli Lilly and Company",
+          "sector": "Healthcare",
+          "source_provenance": [
+            {
+              "file_hash": "e6fb93a68172aafb68107fcf70cbc09b48878408ebce74db7690bf2ff52045be",
+              "path": "config/market_engine/universes/sources/sp500.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Operator-controlled S&P 500 partial membership snapshot"
+            }
+          ],
+          "symbol": "LLY"
+        }
+      ],
+      "layer_id": "sp500",
+      "membership": "sp500",
+      "provenance": "config/market_engine/universes/sources/sp500.json",
+      "source_type": "explicit_instruments"
+    },
+    {
+      "advice_eligible": true,
+      "analysis_eligible": true,
+      "asset_type": "equity",
+      "context_only": false,
+      "description": "Controlled supplemental project universe",
+      "instruments": [
+        {
+          "country": "CA",
+          "currency": "USD",
+          "exchange": "NYSE",
+          "industry": "AI hardware supply chain",
+          "name": "Celestica Inc.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "2e349f18fb5dda619bf146c18eb28fd60c47d2ac3f42e79ac8f62a4e6ae8346c",
+              "path": "config/market_engine/universes/sources/supplemental.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled supplemental project universe"
+            }
+          ],
+          "symbol": "CLS"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "industry": "Semiconductors",
+          "name": "Credo Technology Group Holding Ltd",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "2e349f18fb5dda619bf146c18eb28fd60c47d2ac3f42e79ac8f62a4e6ae8346c",
+              "path": "config/market_engine/universes/sources/supplemental.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled supplemental project universe"
+            }
+          ],
+          "symbol": "CRDO"
+        },
+        {
+          "country": "AU",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "industry": "AI/HPC infrastructure",
+          "name": "IREN Limited",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "2e349f18fb5dda619bf146c18eb28fd60c47d2ac3f42e79ac8f62a4e6ae8346c",
+              "path": "config/market_engine/universes/sources/supplemental.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled supplemental project universe"
+            }
+          ],
+          "symbol": "IREN"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NYSE",
+          "industry": "Data center infrastructure",
+          "name": "Vertiv Holdings Co",
+          "sector": "Industrials",
+          "source_provenance": [
+            {
+              "file_hash": "2e349f18fb5dda619bf146c18eb28fd60c47d2ac3f42e79ac8f62a4e6ae8346c",
+              "path": "config/market_engine/universes/sources/supplemental.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled supplemental project universe"
+            }
+          ],
+          "symbol": "VRT"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "industry": "Semiconductors",
+          "name": "NVIDIA Corporation",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "2e349f18fb5dda619bf146c18eb28fd60c47d2ac3f42e79ac8f62a4e6ae8346c",
+              "path": "config/market_engine/universes/sources/supplemental.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled supplemental project universe"
+            }
+          ],
+          "symbol": "NVDA"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "industry": "Semiconductors",
+          "name": "Advanced Micro Devices Inc.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "2e349f18fb5dda619bf146c18eb28fd60c47d2ac3f42e79ac8f62a4e6ae8346c",
+              "path": "config/market_engine/universes/sources/supplemental.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled supplemental project universe"
+            }
+          ],
+          "symbol": "AMD"
+        },
+        {
+          "country": "NL",
+          "currency": "EUR",
+          "exchange": "EURONEXT",
+          "industry": "Semiconductor equipment",
+          "name": "ASML Holding N.V.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "2e349f18fb5dda619bf146c18eb28fd60c47d2ac3f42e79ac8f62a4e6ae8346c",
+              "path": "config/market_engine/universes/sources/supplemental.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled supplemental project universe"
+            }
+          ],
+          "symbol": "ASML"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "industry": "Semiconductors",
+          "name": "Broadcom Inc.",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "2e349f18fb5dda619bf146c18eb28fd60c47d2ac3f42e79ac8f62a4e6ae8346c",
+              "path": "config/market_engine/universes/sources/supplemental.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled supplemental project universe"
+            }
+          ],
+          "symbol": "AVGO"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Costco Wholesale Corporation",
+          "sector": "Consumer Defensive",
+          "source_provenance": [
+            {
+              "file_hash": "2e349f18fb5dda619bf146c18eb28fd60c47d2ac3f42e79ac8f62a4e6ae8346c",
+              "path": "config/market_engine/universes/sources/supplemental.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled supplemental project universe"
+            }
+          ],
+          "symbol": "COST"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Meta Platforms Inc.",
+          "sector": "Communication Services",
+          "source_provenance": [
+            {
+              "file_hash": "2e349f18fb5dda619bf146c18eb28fd60c47d2ac3f42e79ac8f62a4e6ae8346c",
+              "path": "config/market_engine/universes/sources/supplemental.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled supplemental project universe"
+            }
+          ],
+          "symbol": "META"
+        },
+        {
+          "country": "US",
+          "currency": "USD",
+          "exchange": "NASDAQ",
+          "name": "Microsoft Corporation",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "2e349f18fb5dda619bf146c18eb28fd60c47d2ac3f42e79ac8f62a4e6ae8346c",
+              "path": "config/market_engine/universes/sources/supplemental.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled supplemental project universe"
+            }
+          ],
+          "symbol": "MSFT"
+        },
+        {
+          "country": "TW",
+          "currency": "USD",
+          "exchange": "NYSE",
+          "industry": "Semiconductors",
+          "name": "Taiwan Semiconductor Manufacturing Company Limited ADR",
+          "sector": "Technology",
+          "source_provenance": [
+            {
+              "file_hash": "2e349f18fb5dda619bf146c18eb28fd60c47d2ac3f42e79ac8f62a4e6ae8346c",
+              "path": "config/market_engine/universes/sources/supplemental.json",
+              "snapshot_date": "2026-07-12",
+              "source": "Controlled supplemental project universe"
+            }
+          ],
+          "symbol": "TSM"
+        }
+      ],
+      "layer_id": "explicit_supplemental_watch",
+      "membership": "explicit_supplemental_watch",
+      "provenance": "config/market_engine/universes/sources/supplemental.json",
+      "source_type": "explicit_instruments"
     }
   ],
-  "blocked_layers": [
-    {"layer_id": "sp500", "reason": "No reproducible local constituent source is present in the repository."},
-    {"layer_id": "nasdaq100_supplement", "reason": "No reproducible local constituent source is present in the repository."},
-    {"layer_id": "sp_midcap400", "reason": "No reproducible local constituent source is present in the repository."},
-    {"layer_id": "full_stoxx_europe600", "reason": "No reliable local membership or symbol mapping source is present in the repository."}
+  "point_in_time_note": "This is a current canonical universe snapshot assembled from versioned local source artifacts. It is not a historical point-in-time membership database.",
+  "provenance": [
+    "ME-EVAL02 unresolved outcome artifacts",
+    "config/market_engine/universes/sources/etfs.json",
+    "config/market_engine/universes/sources/europe/additional_large_caps.json",
+    "config/market_engine/universes/sources/europe/aex.json",
+    "config/market_engine/universes/sources/europe/bel20.json",
+    "config/market_engine/universes/sources/europe/cac40.json",
+    "config/market_engine/universes/sources/europe/dax40.json",
+    "config/market_engine/universes/sources/market_context.json",
+    "config/market_engine/universes/sources/nasdaq100.json",
+    "config/market_engine/universes/sources/sp400.json",
+    "config/market_engine/universes/sources/sp500.json",
+    "config/market_engine/universes/sources/supplemental.json",
+    "data/market_engine/ticker_universe/professional_swing_universe/professional_swing_universe.csv",
+    "data/market_engine/ticker_universe/ticker_universe.csv",
+    "data/processed/*.csv"
   ],
+  "schema_version": "market-engine-canonical-local-market-data-universe-config-v1",
+  "snapshot_date": "2026-07-13",
   "symbol_overrides": [
-    {"canonical_symbol": "BRK.B", "source_symbol": "BRK-B", "reason": "Local CSV uses hyphen for class-share symbol."},
-    {"canonical_symbol": "ASML", "source_symbol": "ASML", "reason": "Existing local CSV and project artifacts use ASML ADR/local-compatible symbol."}
-  ]
+    {
+      "canonical_symbol": "BRK.B",
+      "reason": "Local CSV uses hyphen for class-share symbol.",
+      "source_symbol": "BRK-B"
+    },
+    {
+      "canonical_symbol": "BF.B",
+      "reason": "Acquisition providers commonly use hyphen notation for class-share symbols.",
+      "source_symbol": "BF-B"
+    },
+    {
+      "canonical_symbol": "ASML",
+      "reason": "Existing local CSV and project artifacts use ASML ADR/local-compatible symbol.",
+      "source_symbol": "ASML"
+    },
+    {
+      "canonical_symbol": "ADYEN",
+      "mapping_status": "unsupported",
+      "reason": "Primary-listing source mapping requires operator-supplied validation before price acquisition.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "ADYEN.AS"
+    },
+    {
+      "canonical_symbol": "RHM",
+      "mapping_status": "unsupported",
+      "reason": "Primary-listing source mapping requires operator-supplied validation before price acquisition.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "RHM.DE"
+    }
+  ],
+  "universe_version": "me-boot03-authoritative-universe-local-price-history-bootstrap-v1"
 }

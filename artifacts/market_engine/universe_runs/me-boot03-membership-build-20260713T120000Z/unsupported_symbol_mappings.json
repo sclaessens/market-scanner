@@ -1,0 +1,111 @@
+{
+  "entries": [
+    {
+      "asset_type": "equity",
+      "country": "BE",
+      "currency": "EUR",
+      "exchange": "EURONEXT",
+      "instrument_id": "equity:abi",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "bel20"
+      ],
+      "notes": "Primary-listing mapping requires operator validation.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "ABI.BR",
+      "symbol": "ABI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "NL",
+      "currency": "EUR",
+      "exchange": "EURONEXT",
+      "instrument_id": "equity:adyen",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "aex"
+      ],
+      "notes": "Primary-listing source mapping requires operator-supplied validation before price acquisition.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "ADYEN.AS",
+      "symbol": "ADYEN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "FR",
+      "currency": "EUR",
+      "exchange": "EURONEXT",
+      "instrument_id": "equity:mc",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "cac40"
+      ],
+      "notes": "Primary-listing mapping requires operator validation.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "MC.PA",
+      "symbol": "MC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "DE",
+      "currency": "EUR",
+      "exchange": "XETRA",
+      "instrument_id": "equity:rhm",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "dax40"
+      ],
+      "notes": "Primary-listing source mapping requires operator-supplied validation before price acquisition.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "RHM.DE",
+      "symbol": "RHM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "GB",
+      "currency": "GBP",
+      "exchange": "LSE",
+      "instrument_id": "equity:rr",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "europe_additional_large_caps"
+      ],
+      "notes": "Primary-listing mapping requires operator validation.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "RR.L",
+      "symbol": "RR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "DE",
+      "currency": "EUR",
+      "exchange": "XETRA",
+      "instrument_id": "equity:sap",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "dax40"
+      ],
+      "notes": "Primary-listing mapping requires operator validation.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "SAP.DE",
+      "symbol": "SAP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "BE",
+      "currency": "EUR",
+      "exchange": "EURONEXT",
+      "instrument_id": "equity:ucb",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "bel20"
+      ],
+      "notes": "Primary-listing mapping requires operator validation.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "UCB.BR",
+      "symbol": "UCB"
+    }
+  ],
+  "run_id": "me-boot03-membership-build-20260713T120000Z",
+  "schema_version": "market-engine-canonical-universe-unsupported-symbol-mappings-v1"
+}

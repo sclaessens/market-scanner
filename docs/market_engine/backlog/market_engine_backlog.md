@@ -4394,3 +4394,40 @@ Follow-ups:
 * future deterministic advisory context assembler.
 * future prompt contract.
 * future controlled advisory dry run.
+
+### ME-BOOT03 - Bootstrap authoritative universe and local price-history coverage
+
+Status: IMPLEMENTATION COMPLETE / MEMBERSHIP AND PRICE-HISTORY COVERAGE PARTIAL
+
+ME-BOOT03 combines the planned ME-UNIV03 authoritative membership import and
+ME-DATA03 local price-history import responsibilities into one bootstrap sprint.
+
+Completed:
+
+* versioned local membership source snapshots under
+  `config/market_engine/universes/sources/`;
+* central symbol overrides under
+  `config/market_engine/universes/symbol_overrides.json`;
+* deterministic universe build command
+  `market_engine.data.canonical_universe_bootstrap_command`;
+* rebuilt canonical universe with 314 instruments;
+* source inventory, layer summary, overlap, symbol mapping, unsupported mapping,
+  excluded instrument, and report artifacts;
+* expanded data-run artifacts for imported, refreshed, insufficient, invalid,
+  unsupported, missing, and unresolved readiness outputs;
+* ME-EVAL02 refresh rerun after the bootstrap scan.
+
+Known partial status:
+
+* local source snapshots are controlled partials, not complete official index
+  membership files;
+* full 1,000+ canonical universe coverage is not claimed;
+* no operator-supplied forward price-history import root was present;
+* ME-EVAL02 remains unresolved with 8 insufficient-forward outcomes and 4
+  missing price histories.
+
+Next:
+
+```text
+ME-DATA04 - Operator-supplied forward price-history import for ME-EVAL blockers
+```

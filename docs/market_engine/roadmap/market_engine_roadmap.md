@@ -2312,3 +2312,37 @@ Next:
 ```text
 ME-DS01 - Define Dispatch Station output contract for Governor reports
 ```
+
+### ME-BOOT03 - Authoritative universe and local price-history bootstrap
+
+Status: IMPLEMENTATION COMPLETE / COVERAGE PARTIAL
+
+ME-BOOT03 extends the ME-DATA02 foundation with versioned local universe source
+snapshots, central symbol overrides, a deterministic canonical universe build
+command, universe-run artifacts, expanded data-run artifacts, and a post-bootstrap
+ME-EVAL02 refresh.
+
+Result:
+
+```text
+canonical instruments: 314
+source snapshots: 11
+full coverage valid snapshots: 0
+full coverage insufficient: 293
+full coverage missing: 13
+full coverage invalid: 1
+full coverage unsupported: 7
+ME-EVAL02 resolved: 0
+ME-EVAL02 unresolved: 12
+```
+
+ME-BOOT03 does not claim full S&P 500, Nasdaq-100, S&P MidCap 400, European
+large-cap, or 1,000+ instrument coverage because complete official local
+constituent files and operator-supplied forward price-history CSVs are not
+present in the repository.
+
+Next:
+
+```text
+ME-DATA04 - Operator-supplied forward price-history import for ME-EVAL blockers
+```

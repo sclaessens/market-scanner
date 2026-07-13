@@ -1,0 +1,192 @@
+{
+  "results": [
+    {
+      "artifactpath": "data/processed/ADYEN.AS.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:adyen",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "ADYEN.AS",
+      "start_date": null,
+      "symbol": "ADYEN",
+      "universe_memberships": [
+        "aex"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/AMD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "6f5f9b3428c5853d734fd3b72e6fc1c2e3607f5660cf526e1ac26686a745456f",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:amd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AMD",
+      "start_date": "2025-04-30",
+      "symbol": "AMD",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ASML.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "b46dc36a1e1a883fea3aa69ef90ddd740fd9039eeff44a3afc2d7cfb66020c33",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:asml",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ASML",
+      "start_date": "2025-04-30",
+      "symbol": "ASML",
+      "universe_memberships": [
+        "aex",
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CLS.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "equity:cls",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "CLS",
+      "start_date": null,
+      "symbol": "CLS",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "sp400"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/GOLD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "4ebe66c787b81afe1a6e22fc35d06176016ba37f8a8a8c2e508931345d910876",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:gold",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "GOLD",
+      "start_date": "2025-04-30",
+      "symbol": "GOLD",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "market_context"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HO.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "equity:ho",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "HO",
+      "start_date": null,
+      "symbol": "HO",
+      "universe_memberships": [
+        "cac40"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/NVDA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "0bc424bec82a6be78d32235990be35aeb6b027572e101205e4ba34210bc6ecba",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:nvda",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NVDA",
+      "start_date": "2025-04-30",
+      "symbol": "NVDA",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/RHM.DE.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:rhm",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "RHM.DE",
+      "start_date": null,
+      "symbol": "RHM",
+      "universe_memberships": [
+        "dax40"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/UCB.BR.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:ucb",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "UCB.BR",
+      "start_date": null,
+      "symbol": "UCB",
+      "universe_memberships": [
+        "bel20"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/SPY.csv",
+      "asset_type": "etf",
+      "blocker": "insufficient_history",
+      "checksum": "9103007832ae8910adbe1a95c31ee928b200bb0c7d91ec330db2277ba1366562",
+      "end_date": "2026-03-23",
+      "instrument_id": "etf:spy",
+      "note": "Local price history has fewer rows than the configured minimum.",
+      "row_count": 251,
+      "snapshotstatus": "insufficient_history",
+      "source_symbol": "SPY",
+      "start_date": "2025-03-24",
+      "symbol": "SPY",
+      "universe_memberships": [
+        "etf_context",
+        "local_price_history_covered",
+        "market_context"
+      ],
+      "validation_result": "limited"
+    }
+  ],
+  "run_id": "me-boot03-representative-expanded-20260713T122000Z",
+  "schema_version": "market-engine-local-market-data-instrument-results-v1"
+}

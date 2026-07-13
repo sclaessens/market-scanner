@@ -1,0 +1,125 @@
+{
+  "entries": [
+    {
+      "artifactpath": "data/processed/ABI.BR.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:abi",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "ABI.BR",
+      "start_date": null,
+      "symbol": "ABI",
+      "universe_memberships": [
+        "bel20"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/ADYEN.AS.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:adyen",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "ADYEN.AS",
+      "start_date": null,
+      "symbol": "ADYEN",
+      "universe_memberships": [
+        "aex"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/MC.PA.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:mc",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "MC.PA",
+      "start_date": null,
+      "symbol": "MC",
+      "universe_memberships": [
+        "cac40"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/RHM.DE.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:rhm",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "RHM.DE",
+      "start_date": null,
+      "symbol": "RHM",
+      "universe_memberships": [
+        "dax40"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/RR.L.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:rr",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "RR.L",
+      "start_date": null,
+      "symbol": "RR",
+      "universe_memberships": [
+        "europe_additional_large_caps"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/SAP.DE.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:sap",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "SAP.DE",
+      "start_date": null,
+      "symbol": "SAP",
+      "universe_memberships": [
+        "dax40"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/UCB.BR.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:ucb",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "UCB.BR",
+      "start_date": null,
+      "symbol": "UCB",
+      "universe_memberships": [
+        "bel20"
+      ],
+      "validation_result": "missing"
+    }
+  ],
+  "run_id": "me-boot03-full-coverage-report-only-20260713T123000Z",
+  "schema_version": "market-engine-local-market-data-unsupported-symbol-mappings-v1"
+}

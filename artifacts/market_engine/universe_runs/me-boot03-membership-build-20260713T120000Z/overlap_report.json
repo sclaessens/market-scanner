@@ -1,0 +1,70 @@
+{
+  "overlaps": [
+    {
+      "instrument_count": 1,
+      "left_layer": "aex",
+      "right_layer": "explicit_supplemental_watch"
+    },
+    {
+      "instrument_count": 1,
+      "left_layer": "aex",
+      "right_layer": "local_price_history_covered"
+    },
+    {
+      "instrument_count": 2,
+      "left_layer": "etf_context",
+      "right_layer": "local_price_history_covered"
+    },
+    {
+      "instrument_count": 2,
+      "left_layer": "etf_context",
+      "right_layer": "market_context"
+    },
+    {
+      "instrument_count": 8,
+      "left_layer": "explicit_supplemental_watch",
+      "right_layer": "local_price_history_covered"
+    },
+    {
+      "instrument_count": 6,
+      "left_layer": "explicit_supplemental_watch",
+      "right_layer": "nasdaq100"
+    },
+    {
+      "instrument_count": 4,
+      "left_layer": "explicit_supplemental_watch",
+      "right_layer": "sp400"
+    },
+    {
+      "instrument_count": 5,
+      "left_layer": "explicit_supplemental_watch",
+      "right_layer": "sp500"
+    },
+    {
+      "instrument_count": 3,
+      "left_layer": "local_price_history_covered",
+      "right_layer": "market_context"
+    },
+    {
+      "instrument_count": 10,
+      "left_layer": "local_price_history_covered",
+      "right_layer": "nasdaq100"
+    },
+    {
+      "instrument_count": 2,
+      "left_layer": "local_price_history_covered",
+      "right_layer": "sp400"
+    },
+    {
+      "instrument_count": 10,
+      "left_layer": "local_price_history_covered",
+      "right_layer": "sp500"
+    },
+    {
+      "instrument_count": 7,
+      "left_layer": "nasdaq100",
+      "right_layer": "sp500"
+    }
+  ],
+  "schema_version": "market-engine-canonical-universe-overlap-report-v1"
+}

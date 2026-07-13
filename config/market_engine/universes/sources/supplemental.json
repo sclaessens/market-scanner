@@ -1,0 +1,24 @@
+{
+  "schema_version": "market-engine-canonical-universe-source-v1",
+  "universe_id": "explicit_supplemental_watch",
+  "source_name": "Controlled supplemental project universe",
+  "snapshot_date": "2026-07-12",
+  "retrieval_date": "2026-07-13",
+  "provenance": "Local repository bootstrap from ME-EVAL02 unresolved outcomes and existing project ticker universe.",
+  "status": "active",
+  "known_limitations": ["Project universe only; not an index membership source."],
+  "constituents": [
+    {"symbol": "CLS", "name": "Celestica Inc.", "exchange": "NYSE", "country": "CA", "currency": "USD", "sector": "Technology", "industry": "AI hardware supply chain"},
+    {"symbol": "CRDO", "name": "Credo Technology Group Holding Ltd", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Technology", "industry": "Semiconductors"},
+    {"symbol": "IREN", "name": "IREN Limited", "exchange": "NASDAQ", "country": "AU", "currency": "USD", "sector": "Technology", "industry": "AI/HPC infrastructure"},
+    {"symbol": "VRT", "name": "Vertiv Holdings Co", "exchange": "NYSE", "country": "US", "currency": "USD", "sector": "Industrials", "industry": "Data center infrastructure"},
+    {"symbol": "NVDA", "name": "NVIDIA Corporation", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Technology", "industry": "Semiconductors"},
+    {"symbol": "AMD", "name": "Advanced Micro Devices Inc.", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Technology", "industry": "Semiconductors"},
+    {"symbol": "ASML", "name": "ASML Holding N.V.", "exchange": "EURONEXT", "country": "NL", "currency": "EUR", "sector": "Technology", "industry": "Semiconductor equipment"},
+    {"symbol": "AVGO", "name": "Broadcom Inc.", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Technology", "industry": "Semiconductors"},
+    {"symbol": "COST", "name": "Costco Wholesale Corporation", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Consumer Defensive"},
+    {"symbol": "META", "name": "Meta Platforms Inc.", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Communication Services"},
+    {"symbol": "MSFT", "name": "Microsoft Corporation", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Technology"},
+    {"symbol": "TSM", "name": "Taiwan Semiconductor Manufacturing Company Limited ADR", "exchange": "NYSE", "country": "TW", "currency": "USD", "sector": "Technology", "industry": "Semiconductors"}
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "entries": [
+    {
+      "artifactpath": "data/processed/STX.csv",
+      "asset_type": "equity",
+      "blocker": "validation_failed",
+      "checksum": null,
+      "end_date": null,
+      "instrument_id": "equity:stx",
+      "note": "Missing required OHLC columns: date",
+      "row_count": 0,
+      "snapshotstatus": "validation_failed",
+      "source_symbol": "STX",
+      "start_date": null,
+      "symbol": "STX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "failed"
+    }
+  ],
+  "run_id": "me-boot03-full-coverage-report-only-20260713T123000Z",
+  "schema_version": "market-engine-local-market-data-invalid-snapshots-v1"
+}

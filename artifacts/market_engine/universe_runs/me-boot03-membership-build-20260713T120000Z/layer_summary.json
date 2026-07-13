@@ -1,0 +1,140 @@
+{
+  "layers": [
+    {
+      "deduplicated_constituents": 9,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Compact context set, not a full ETF universe."
+      ],
+      "layer_id": "etf_context",
+      "raw_constituents": 9,
+      "source_name": "Controlled ETF context universe",
+      "status": "active",
+      "unique_instruments": 9
+    },
+    {
+      "deduplicated_constituents": 2,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Partial layer only; source mappings require future operator-supplied validation."
+      ],
+      "layer_id": "europe_additional_large_caps",
+      "raw_constituents": 2,
+      "source_name": "Operator-controlled additional European large-cap partial snapshot",
+      "status": "partial",
+      "unique_instruments": 2
+    },
+    {
+      "deduplicated_constituents": 2,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Partial layer only; does not claim full AEX membership."
+      ],
+      "layer_id": "aex",
+      "raw_constituents": 2,
+      "source_name": "Operator-controlled AEX partial membership snapshot",
+      "status": "partial",
+      "unique_instruments": 2
+    },
+    {
+      "deduplicated_constituents": 2,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Partial layer only; does not claim full BEL 20 membership."
+      ],
+      "layer_id": "bel20",
+      "raw_constituents": 2,
+      "source_name": "Operator-controlled BEL 20 partial membership snapshot",
+      "status": "partial",
+      "unique_instruments": 2
+    },
+    {
+      "deduplicated_constituents": 2,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Partial layer only; does not claim full CAC 40 membership."
+      ],
+      "layer_id": "cac40",
+      "raw_constituents": 2,
+      "source_name": "Operator-controlled CAC 40 partial membership snapshot",
+      "status": "partial",
+      "unique_instruments": 2
+    },
+    {
+      "deduplicated_constituents": 2,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Partial layer only; does not claim full DAX 40 membership."
+      ],
+      "layer_id": "dax40",
+      "raw_constituents": 2,
+      "source_name": "Operator-controlled DAX 40 partial membership snapshot",
+      "status": "partial",
+      "unique_instruments": 2
+    },
+    {
+      "deduplicated_constituents": 3,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Compact context set; no intraday, rates curve, or macro data acquisition added."
+      ],
+      "layer_id": "market_context",
+      "raw_constituents": 3,
+      "source_name": "Controlled market context instrument set",
+      "status": "active",
+      "unique_instruments": 3
+    },
+    {
+      "deduplicated_constituents": 10,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Partial layer only; does not claim full Nasdaq-100 membership.",
+        "Overlaps with S&P 500 are retained as multiple memberships."
+      ],
+      "layer_id": "nasdaq100",
+      "raw_constituents": 10,
+      "source_name": "Operator-controlled Nasdaq-100 partial membership snapshot",
+      "status": "partial",
+      "unique_instruments": 10
+    },
+    {
+      "deduplicated_constituents": 6,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Partial layer only; does not claim full S&P MidCap 400 membership.",
+        "Growth and project tickers are retained only when explicitly present in local project sources."
+      ],
+      "layer_id": "sp400",
+      "raw_constituents": 6,
+      "source_name": "Operator-controlled S&P MidCap 400 partial membership snapshot",
+      "status": "partial",
+      "unique_instruments": 6
+    },
+    {
+      "deduplicated_constituents": 10,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Partial layer only; does not claim full S&P 500 membership.",
+        "Use a future official index-provider or exchange-published constituent snapshot for full coverage."
+      ],
+      "layer_id": "sp500",
+      "raw_constituents": 10,
+      "source_name": "Operator-controlled S&P 500 partial membership snapshot",
+      "status": "partial",
+      "unique_instruments": 10
+    },
+    {
+      "deduplicated_constituents": 12,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Project universe only; not an index membership source."
+      ],
+      "layer_id": "explicit_supplemental_watch",
+      "raw_constituents": 12,
+      "source_name": "Controlled supplemental project universe",
+      "status": "active",
+      "unique_instruments": 12
+    }
+  ],
+  "schema_version": "market-engine-canonical-universe-layer-summary-v1"
+}
