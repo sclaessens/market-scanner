@@ -1,0 +1,22 @@
+{
+  "schema_version": "market-engine-canonical-universe-source-v1",
+  "universe_id": "etf_context",
+  "source_name": "Controlled ETF context universe",
+  "snapshot_date": "2026-07-12",
+  "retrieval_date": "2026-07-13",
+  "provenance": "Local repository bootstrap from existing ME-DATA02 ETF context set.",
+  "status": "active",
+  "asset_type": "etf",
+  "known_limitations": ["Compact context set, not a full ETF universe."],
+  "constituents": [
+    {"symbol": "SPY", "name": "SPDR S&P 500 ETF Trust", "exchange": "NYSEARCA", "country": "US", "currency": "USD"},
+    {"symbol": "QQQ", "name": "Invesco QQQ Trust", "exchange": "NASDAQ", "country": "US", "currency": "USD"},
+    {"symbol": "IWM", "name": "iShares Russell 2000 ETF", "exchange": "NYSEARCA", "country": "US", "currency": "USD"},
+    {"symbol": "DIA", "name": "SPDR Dow Jones Industrial Average ETF Trust", "exchange": "NYSEARCA", "country": "US", "currency": "USD"},
+    {"symbol": "XLK", "name": "Technology Select Sector SPDR Fund", "exchange": "NYSEARCA", "country": "US", "currency": "USD"},
+    {"symbol": "XLF", "name": "Financial Select Sector SPDR Fund", "exchange": "NYSEARCA", "country": "US", "currency": "USD"},
+    {"symbol": "XLE", "name": "Energy Select Sector SPDR Fund", "exchange": "NYSEARCA", "country": "US", "currency": "USD"},
+    {"symbol": "SMH", "name": "VanEck Semiconductor ETF", "exchange": "NASDAQ", "country": "US", "currency": "USD"},
+    {"symbol": "SOXX", "name": "iShares Semiconductor ETF", "exchange": "NASDAQ", "country": "US", "currency": "USD"}
+  ]
+}

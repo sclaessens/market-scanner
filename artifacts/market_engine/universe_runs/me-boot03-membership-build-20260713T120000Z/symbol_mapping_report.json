@@ -1,0 +1,4756 @@
+{
+  "duplicate_source_symbols": {},
+  "entries": [
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:aa",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AA",
+      "symbol": "AA"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:aapl",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AAPL",
+      "symbol": "AAPL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:abbv",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ABBV",
+      "symbol": "ABBV"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:abnb",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ABNB",
+      "symbol": "ABNB"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:adbe",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ADBE",
+      "symbol": "ADBE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:adi",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ADI",
+      "symbol": "ADI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:adp",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ADP",
+      "symbol": "ADP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:adsk",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ADSK",
+      "symbol": "ADSK"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:aep",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AEP",
+      "symbol": "AEP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:aig",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AIG",
+      "symbol": "AIG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:akam",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AKAM",
+      "symbol": "AKAM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:alb",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ALB",
+      "symbol": "ALB"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:all",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ALL",
+      "symbol": "ALL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:amat",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AMAT",
+      "symbol": "AMAT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:amd",
+      "mapping_status": "resolved",
+      "memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AMD",
+      "symbol": "AMD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:amgn",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AMGN",
+      "symbol": "AMGN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:amt",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AMT",
+      "symbol": "AMT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:amzn",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AMZN",
+      "symbol": "AMZN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:anet",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered",
+        "sp400"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ANET",
+      "symbol": "ANET"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:apd",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "APD",
+      "symbol": "APD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:aph",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "APH",
+      "symbol": "APH"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:app",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "APP",
+      "symbol": "APP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:asml",
+      "mapping_status": "resolved",
+      "memberships": [
+        "aex",
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "notes": "Existing local CSV and project artifacts use ASML ADR/local-compatible symbol.",
+      "source_mapping_status": "mapped",
+      "source_symbol": "ASML",
+      "symbol": "ASML"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:avb",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AVB",
+      "symbol": "AVB"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:avgo",
+      "mapping_status": "resolved",
+      "memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AVGO",
+      "symbol": "AVGO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:axp",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AXP",
+      "symbol": "AXP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:azo",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "AZO",
+      "symbol": "AZO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ba",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "BA",
+      "symbol": "BA"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:baba",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "BABA",
+      "symbol": "BABA"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:bac",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "BAC",
+      "symbol": "BAC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:bhp",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "BHP",
+      "symbol": "BHP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:biib",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "BIIB",
+      "symbol": "BIIB"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:bkng",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "BKNG",
+      "symbol": "BKNG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:bkr",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "BKR",
+      "symbol": "BKR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:blk",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "BLK",
+      "symbol": "BLK"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:bmy",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "BMY",
+      "symbol": "BMY"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:brk.b",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "notes": "Local CSV uses hyphen for class-share symbol.",
+      "source_mapping_status": "mapped",
+      "source_symbol": "BRK-B",
+      "symbol": "BRK.B"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:bsx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "BSX",
+      "symbol": "BSX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:bx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "BX",
+      "symbol": "BX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:c",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "C",
+      "symbol": "C"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cat",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CAT",
+      "symbol": "CAT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cb",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CB",
+      "symbol": "CB"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cci",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CCI",
+      "symbol": "CCI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ccj",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CCJ",
+      "symbol": "CCJ"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ccl",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CCL",
+      "symbol": "CCL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cdns",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CDNS",
+      "symbol": "CDNS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:chkp",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CHKP",
+      "symbol": "CHKP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:chrw",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CHRW",
+      "symbol": "CHRW"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ci",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CI",
+      "symbol": "CI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cl",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CL",
+      "symbol": "CL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "CA",
+      "currency": "USD",
+      "exchange": "NYSE",
+      "instrument_id": "equity:cls",
+      "mapping_status": "resolved",
+      "memberships": [
+        "explicit_supplemental_watch",
+        "sp400"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CLS",
+      "symbol": "CLS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cmcsa",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CMCSA",
+      "symbol": "CMCSA"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cme",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CME",
+      "symbol": "CME"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cmi",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CMI",
+      "symbol": "CMI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cof",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "COF",
+      "symbol": "COF"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cop",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "COP",
+      "symbol": "COP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cost",
+      "mapping_status": "resolved",
+      "memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "COST",
+      "symbol": "COST"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "NASDAQ",
+      "instrument_id": "equity:crdo",
+      "mapping_status": "resolved",
+      "memberships": [
+        "explicit_supplemental_watch",
+        "sp400"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CRDO",
+      "symbol": "CRDO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:crm",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CRM",
+      "symbol": "CRM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:crwd",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CRWD",
+      "symbol": "CRWD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:csco",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CSCO",
+      "symbol": "CSCO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:csx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CSX",
+      "symbol": "CSX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ctas",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CTAS",
+      "symbol": "CTAS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cvs",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CVS",
+      "symbol": "CVS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:cvx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "CVX",
+      "symbol": "CVX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:d",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "D",
+      "symbol": "D"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:dash",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DASH",
+      "symbol": "DASH"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:dd",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DD",
+      "symbol": "DD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ddog",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DDOG",
+      "symbol": "DDOG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:de",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DE",
+      "symbol": "DE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:dell",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DELL",
+      "symbol": "DELL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:dhi",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DHI",
+      "symbol": "DHI"
+    },
+    {
+      "asset_type": "etf",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "NYSEARCA",
+      "instrument_id": "etf:dia",
+      "mapping_status": "resolved",
+      "memberships": [
+        "etf_context"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DIA",
+      "symbol": "DIA"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:dis",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DIS",
+      "symbol": "DIS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:dlr",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DLR",
+      "symbol": "DLR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:docu",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DOCU",
+      "symbol": "DOCU"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:dow",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DOW",
+      "symbol": "DOW"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:dpz",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DPZ",
+      "symbol": "DPZ"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:duk",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DUK",
+      "symbol": "DUK"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:duol",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DUOL",
+      "symbol": "DUOL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:dvn",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DVN",
+      "symbol": "DVN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:dxcm",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "DXCM",
+      "symbol": "DXCM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ea",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "EA",
+      "symbol": "EA"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ebay",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "EBAY",
+      "symbol": "EBAY"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ecl",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ECL",
+      "symbol": "ECL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:el",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "EL",
+      "symbol": "EL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:elv",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ELV",
+      "symbol": "ELV"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:emr",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "EMR",
+      "symbol": "EMR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:enb",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ENB",
+      "symbol": "ENB"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:enph",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ENPH",
+      "symbol": "ENPH"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:eog",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "EOG",
+      "symbol": "EOG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:eqix",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "EQIX",
+      "symbol": "EQIX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:eqr",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "EQR",
+      "symbol": "EQR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:etn",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ETN",
+      "symbol": "ETN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:etsy",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ETSY",
+      "symbol": "ETSY"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ew",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "EW",
+      "symbol": "EW"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:exc",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "EXC",
+      "symbol": "EXC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:expd",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "EXPD",
+      "symbol": "EXPD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:f",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "F",
+      "symbol": "F"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:fast",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "FAST",
+      "symbol": "FAST"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:fcx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "FCX",
+      "symbol": "FCX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:fdx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "FDX",
+      "symbol": "FDX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:fis",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "FIS",
+      "symbol": "FIS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ftnt",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "FTNT",
+      "symbol": "FTNT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:gd",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "GD",
+      "symbol": "GD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ge",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "GE",
+      "symbol": "GE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:gehc",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "GEHC",
+      "symbol": "GEHC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:gild",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "GILD",
+      "symbol": "GILD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:glw",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "GLW",
+      "symbol": "GLW"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:gm",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "GM",
+      "symbol": "GM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:gold",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered",
+        "market_context"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "GOLD",
+      "symbol": "GOLD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:googl",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered",
+        "nasdaq100"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "GOOGL",
+      "symbol": "GOOGL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:gs",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "GS",
+      "symbol": "GS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:gww",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "GWW",
+      "symbol": "GWW"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:hal",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "HAL",
+      "symbol": "HAL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:hca",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "HCA",
+      "symbol": "HCA"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:hd",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "HD",
+      "symbol": "HD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:hei",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "HEI",
+      "symbol": "HEI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:hii",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "HII",
+      "symbol": "HII"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:hlt",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "HLT",
+      "symbol": "HLT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "FR",
+      "currency": "EUR",
+      "exchange": "EURONEXT",
+      "instrument_id": "equity:ho",
+      "mapping_status": "resolved",
+      "memberships": [
+        "cac40"
+      ],
+      "notes": "Manual-review-only European mapping retained from existing governance.",
+      "source_mapping_status": "mapped",
+      "source_symbol": "HO",
+      "symbol": "HO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:hon",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "HON",
+      "symbol": "HON"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:hpe",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "HPE",
+      "symbol": "HPE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:hpq",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "HPQ",
+      "symbol": "HPQ"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:hsy",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "HSY",
+      "symbol": "HSY"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ice",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ICE",
+      "symbol": "ICE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:idxx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "IDXX",
+      "symbol": "IDXX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:iex",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "IEX",
+      "symbol": "IEX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ilmn",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ILMN",
+      "symbol": "ILMN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:intc",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "INTC",
+      "symbol": "INTC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:intu",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "INTU",
+      "symbol": "INTU"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ip",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "IP",
+      "symbol": "IP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:iqv",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "IQV",
+      "symbol": "IQV"
+    },
+    {
+      "asset_type": "equity",
+      "country": "AU",
+      "currency": "USD",
+      "exchange": "NASDAQ",
+      "instrument_id": "equity:iren",
+      "mapping_status": "resolved",
+      "memberships": [
+        "explicit_supplemental_watch",
+        "sp400"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "IREN",
+      "symbol": "IREN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:isrg",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ISRG",
+      "symbol": "ISRG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:itw",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ITW",
+      "symbol": "ITW"
+    },
+    {
+      "asset_type": "etf",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "NYSEARCA",
+      "instrument_id": "etf:iwm",
+      "mapping_status": "resolved",
+      "memberships": [
+        "etf_context"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "IWM",
+      "symbol": "IWM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:jbl",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered",
+        "sp400"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "JBL",
+      "symbol": "JBL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:jd",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "JD",
+      "symbol": "JD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:jnj",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "JNJ",
+      "symbol": "JNJ"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:jpm",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "JPM",
+      "symbol": "JPM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:kdp",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "KDP",
+      "symbol": "KDP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:keys",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "KEYS",
+      "symbol": "KEYS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:khc",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "KHC",
+      "symbol": "KHC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:kkr",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "KKR",
+      "symbol": "KKR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:klac",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "KLAC",
+      "symbol": "KLAC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:kmb",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "KMB",
+      "symbol": "KMB"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:kmi",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "KMI",
+      "symbol": "KMI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ko",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "KO",
+      "symbol": "KO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:lcid",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "LCID",
+      "symbol": "LCID"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:len",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "LEN",
+      "symbol": "LEN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:lhx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "LHX",
+      "symbol": "LHX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:lin",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "LIN",
+      "symbol": "LIN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:lly",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "LLY",
+      "symbol": "LLY"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:lmt",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "LMT",
+      "symbol": "LMT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:lng",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "LNG",
+      "symbol": "LNG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:low",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "LOW",
+      "symbol": "LOW"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:lrcx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "LRCX",
+      "symbol": "LRCX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:lulu",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "LULU",
+      "symbol": "LULU"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:lvs",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "LVS",
+      "symbol": "LVS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:lyft",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "LYFT",
+      "symbol": "LYFT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ma",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MA",
+      "symbol": "MA"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mar",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MAR",
+      "symbol": "MAR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mcd",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MCD",
+      "symbol": "MCD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mchp",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MCHP",
+      "symbol": "MCHP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mco",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MCO",
+      "symbol": "MCO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mdb",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MDB",
+      "symbol": "MDB"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mdlz",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MDLZ",
+      "symbol": "MDLZ"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mdt",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MDT",
+      "symbol": "MDT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:meli",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MELI",
+      "symbol": "MELI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:meta",
+      "mapping_status": "resolved",
+      "memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "META",
+      "symbol": "META"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mo",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MO",
+      "symbol": "MO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mp",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MP",
+      "symbol": "MP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mpc",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MPC",
+      "symbol": "MPC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mpwr",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MPWR",
+      "symbol": "MPWR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mrk",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MRK",
+      "symbol": "MRK"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mrvl",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MRVL",
+      "symbol": "MRVL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ms",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MS",
+      "symbol": "MS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:msci",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MSCI",
+      "symbol": "MSCI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:msft",
+      "mapping_status": "resolved",
+      "memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MSFT",
+      "symbol": "MSFT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:msi",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MSI",
+      "symbol": "MSI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:mu",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "MU",
+      "symbol": "MU"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ndaq",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NDAQ",
+      "symbol": "NDAQ"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:nee",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NEE",
+      "symbol": "NEE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:nem",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NEM",
+      "symbol": "NEM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:net",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NET",
+      "symbol": "NET"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:nflx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NFLX",
+      "symbol": "NFLX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:nke",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NKE",
+      "symbol": "NKE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:noc",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NOC",
+      "symbol": "NOC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:now",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NOW",
+      "symbol": "NOW"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:nsc",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NSC",
+      "symbol": "NSC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:nue",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NUE",
+      "symbol": "NUE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:nvda",
+      "mapping_status": "resolved",
+      "memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NVDA",
+      "symbol": "NVDA"
+    },
+    {
+      "asset_type": "equity",
+      "country": "DK",
+      "currency": "USD",
+      "exchange": "NYSE",
+      "instrument_id": "equity:nvo",
+      "mapping_status": "resolved",
+      "memberships": [
+        "europe_additional_large_caps"
+      ],
+      "notes": "ADR mapping retained as separate from primary listing.",
+      "source_mapping_status": "mapped",
+      "source_symbol": "NVO",
+      "symbol": "NVO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:nvr",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NVR",
+      "symbol": "NVR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:nxe",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NXE",
+      "symbol": "NXE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:nxpi",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "NXPI",
+      "symbol": "NXPI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:o",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "O",
+      "symbol": "O"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:odfl",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ODFL",
+      "symbol": "ODFL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:oke",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "OKE",
+      "symbol": "OKE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:okta",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "OKTA",
+      "symbol": "OKTA"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:on",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ON",
+      "symbol": "ON"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:orcl",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ORCL",
+      "symbol": "ORCL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:orly",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ORLY",
+      "symbol": "ORLY"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:oxy",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "OXY",
+      "symbol": "OXY"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:panw",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PANW",
+      "symbol": "PANW"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:payx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PAYX",
+      "symbol": "PAYX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:pcar",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PCAR",
+      "symbol": "PCAR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:pcg",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PCG",
+      "symbol": "PCG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:pdd",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PDD",
+      "symbol": "PDD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:pep",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PEP",
+      "symbol": "PEP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:pfe",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PFE",
+      "symbol": "PFE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:pg",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PG",
+      "symbol": "PG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:pgr",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PGR",
+      "symbol": "PGR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ph",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PH",
+      "symbol": "PH"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:pkg",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PKG",
+      "symbol": "PKG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:pld",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PLD",
+      "symbol": "PLD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:pltr",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PLTR",
+      "symbol": "PLTR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:pm",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PM",
+      "symbol": "PM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ppg",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PPG",
+      "symbol": "PPG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:psa",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PSA",
+      "symbol": "PSA"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:psx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PSX",
+      "symbol": "PSX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:pypl",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "PYPL",
+      "symbol": "PYPL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:qcom",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "QCOM",
+      "symbol": "QCOM"
+    },
+    {
+      "asset_type": "etf",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "etf:qqq",
+      "mapping_status": "resolved",
+      "memberships": [
+        "etf_context",
+        "local_price_history_covered",
+        "market_context"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "QQQ",
+      "symbol": "QQQ"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:rblx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "RBLX",
+      "symbol": "RBLX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:rcl",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "RCL",
+      "symbol": "RCL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:regn",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "REGN",
+      "symbol": "REGN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:rio",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "RIO",
+      "symbol": "RIO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:rivn",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "RIVN",
+      "symbol": "RIVN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:roku",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ROKU",
+      "symbol": "ROKU"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:rop",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ROP",
+      "symbol": "ROP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:rost",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ROST",
+      "symbol": "ROST"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:rsg",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "RSG",
+      "symbol": "RSG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:rtx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "RTX",
+      "symbol": "RTX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:s",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "S",
+      "symbol": "S"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:sbux",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SBUX",
+      "symbol": "SBUX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:scco",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SCCO",
+      "symbol": "SCCO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:schw",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SCHW",
+      "symbol": "SCHW"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:se",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SE",
+      "symbol": "SE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:shop",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SHOP",
+      "symbol": "SHOP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:shw",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SHW",
+      "symbol": "SHW"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:slb",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SLB",
+      "symbol": "SLB"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:smci",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SMCI",
+      "symbol": "SMCI"
+    },
+    {
+      "asset_type": "etf",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "NASDAQ",
+      "instrument_id": "etf:smh",
+      "mapping_status": "resolved",
+      "memberships": [
+        "etf_context"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SMH",
+      "symbol": "SMH"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:snow",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SNOW",
+      "symbol": "SNOW"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:snps",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SNPS",
+      "symbol": "SNPS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:so",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SO",
+      "symbol": "SO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:sofi",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SOFI",
+      "symbol": "SOFI"
+    },
+    {
+      "asset_type": "etf",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "NASDAQ",
+      "instrument_id": "etf:soxx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "etf_context"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SOXX",
+      "symbol": "SOXX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:spg",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SPG",
+      "symbol": "SPG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:spgi",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SPGI",
+      "symbol": "SPGI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:spot",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SPOT",
+      "symbol": "SPOT"
+    },
+    {
+      "asset_type": "etf",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "etf:spy",
+      "mapping_status": "resolved",
+      "memberships": [
+        "etf_context",
+        "local_price_history_covered",
+        "market_context"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SPY",
+      "symbol": "SPY"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:sre",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SRE",
+      "symbol": "SRE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:stld",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "STLD",
+      "symbol": "STLD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:stx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "STX",
+      "symbol": "STX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:su",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SU",
+      "symbol": "SU"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:syk",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "SYK",
+      "symbol": "SYK"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:t",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "T",
+      "symbol": "T"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:tdg",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TDG",
+      "symbol": "TDG"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:team",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TEAM",
+      "symbol": "TEAM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:teck",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TECK",
+      "symbol": "TECK"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ter",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TER",
+      "symbol": "TER"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:tgt",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TGT",
+      "symbol": "TGT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:tjx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TJX",
+      "symbol": "TJX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:tmus",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TMUS",
+      "symbol": "TMUS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:trv",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TRV",
+      "symbol": "TRV"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:tsco",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TSCO",
+      "symbol": "TSCO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:tsla",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered",
+        "nasdaq100"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TSLA",
+      "symbol": "TSLA"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:tsm",
+      "mapping_status": "resolved",
+      "memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TSM",
+      "symbol": "TSM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:tt",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TT",
+      "symbol": "TT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ttwo",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TTWO",
+      "symbol": "TTWO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:twlo",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TWLO",
+      "symbol": "TWLO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:txn",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TXN",
+      "symbol": "TXN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:txt",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "TXT",
+      "symbol": "TXT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:u",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "U",
+      "symbol": "U"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:uber",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "UBER",
+      "symbol": "UBER"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:uec",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "UEC",
+      "symbol": "UEC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:unh",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "UNH",
+      "symbol": "UNH"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:unp",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "UNP",
+      "symbol": "UNP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:ups",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "UPS",
+      "symbol": "UPS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:v",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "V",
+      "symbol": "V"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:vale",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "VALE",
+      "symbol": "VALE"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:veev",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "VEEV",
+      "symbol": "VEEV"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:vici",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "VICI",
+      "symbol": "VICI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:vlo",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "VLO",
+      "symbol": "VLO"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "NYSE",
+      "instrument_id": "equity:vrt",
+      "mapping_status": "resolved",
+      "memberships": [
+        "explicit_supplemental_watch",
+        "sp400"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "VRT",
+      "symbol": "VRT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:vrtx",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "VRTX",
+      "symbol": "VRTX"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:vz",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "VZ",
+      "symbol": "VZ"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:wbd",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "WBD",
+      "symbol": "WBD"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:wday",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "WDAY",
+      "symbol": "WDAY"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:wdc",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "WDC",
+      "symbol": "WDC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:well",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "WELL",
+      "symbol": "WELL"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:wfc",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "WFC",
+      "symbol": "WFC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:wm",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "WM",
+      "symbol": "WM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:wmb",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "WMB",
+      "symbol": "WMB"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:wmt",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "WMT",
+      "symbol": "WMT"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:wynn",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "WYNN",
+      "symbol": "WYNN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:xel",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "XEL",
+      "symbol": "XEL"
+    },
+    {
+      "asset_type": "etf",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "NYSEARCA",
+      "instrument_id": "etf:xle",
+      "mapping_status": "resolved",
+      "memberships": [
+        "etf_context"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "XLE",
+      "symbol": "XLE"
+    },
+    {
+      "asset_type": "etf",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "NYSEARCA",
+      "instrument_id": "etf:xlf",
+      "mapping_status": "resolved",
+      "memberships": [
+        "etf_context"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "XLF",
+      "symbol": "XLF"
+    },
+    {
+      "asset_type": "etf",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "NYSEARCA",
+      "instrument_id": "etf:xlk",
+      "mapping_status": "resolved",
+      "memberships": [
+        "etf_context"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "XLK",
+      "symbol": "XLK"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:xom",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "XOM",
+      "symbol": "XOM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:yum",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "YUM",
+      "symbol": "YUM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:zbh",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ZBH",
+      "symbol": "ZBH"
+    },
+    {
+      "asset_type": "equity",
+      "country": "US",
+      "currency": "USD",
+      "exchange": "UNKNOWN",
+      "instrument_id": "equity:zs",
+      "mapping_status": "resolved",
+      "memberships": [
+        "local_price_history_covered"
+      ],
+      "notes": null,
+      "source_mapping_status": "mapped",
+      "source_symbol": "ZS",
+      "symbol": "ZS"
+    },
+    {
+      "asset_type": "equity",
+      "country": "BE",
+      "currency": "EUR",
+      "exchange": "EURONEXT",
+      "instrument_id": "equity:abi",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "bel20"
+      ],
+      "notes": "Primary-listing mapping requires operator validation.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "ABI.BR",
+      "symbol": "ABI"
+    },
+    {
+      "asset_type": "equity",
+      "country": "NL",
+      "currency": "EUR",
+      "exchange": "EURONEXT",
+      "instrument_id": "equity:adyen",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "aex"
+      ],
+      "notes": "Primary-listing source mapping requires operator-supplied validation before price acquisition.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "ADYEN.AS",
+      "symbol": "ADYEN"
+    },
+    {
+      "asset_type": "equity",
+      "country": "FR",
+      "currency": "EUR",
+      "exchange": "EURONEXT",
+      "instrument_id": "equity:mc",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "cac40"
+      ],
+      "notes": "Primary-listing mapping requires operator validation.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "MC.PA",
+      "symbol": "MC"
+    },
+    {
+      "asset_type": "equity",
+      "country": "DE",
+      "currency": "EUR",
+      "exchange": "XETRA",
+      "instrument_id": "equity:rhm",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "dax40"
+      ],
+      "notes": "Primary-listing source mapping requires operator-supplied validation before price acquisition.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "RHM.DE",
+      "symbol": "RHM"
+    },
+    {
+      "asset_type": "equity",
+      "country": "GB",
+      "currency": "GBP",
+      "exchange": "LSE",
+      "instrument_id": "equity:rr",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "europe_additional_large_caps"
+      ],
+      "notes": "Primary-listing mapping requires operator validation.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "RR.L",
+      "symbol": "RR"
+    },
+    {
+      "asset_type": "equity",
+      "country": "DE",
+      "currency": "EUR",
+      "exchange": "XETRA",
+      "instrument_id": "equity:sap",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "dax40"
+      ],
+      "notes": "Primary-listing mapping requires operator validation.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "SAP.DE",
+      "symbol": "SAP"
+    },
+    {
+      "asset_type": "equity",
+      "country": "BE",
+      "currency": "EUR",
+      "exchange": "EURONEXT",
+      "instrument_id": "equity:ucb",
+      "mapping_status": "unsupported",
+      "memberships": [
+        "bel20"
+      ],
+      "notes": "Primary-listing mapping requires operator validation.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "UCB.BR",
+      "symbol": "UCB"
+    }
+  ],
+  "schema_version": "market-engine-canonical-universe-symbol-mapping-report-v1"
+}

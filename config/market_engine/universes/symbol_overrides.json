@@ -1,0 +1,34 @@
+{
+  "schema_version": "market-engine-symbol-overrides-v1",
+  "overrides": [
+    {
+      "canonical_symbol": "BRK.B",
+      "source_symbol": "BRK-B",
+      "reason": "Local CSV uses hyphen for class-share symbol."
+    },
+    {
+      "canonical_symbol": "BF.B",
+      "source_symbol": "BF-B",
+      "reason": "Acquisition providers commonly use hyphen notation for class-share symbols."
+    },
+    {
+      "canonical_symbol": "ASML",
+      "source_symbol": "ASML",
+      "reason": "Existing local CSV and project artifacts use ASML ADR/local-compatible symbol."
+    },
+    {
+      "canonical_symbol": "ADYEN",
+      "source_symbol": "ADYEN.AS",
+      "source_mapping_status": "unsupported",
+      "mapping_status": "unsupported",
+      "reason": "Primary-listing source mapping requires operator-supplied validation before price acquisition."
+    },
+    {
+      "canonical_symbol": "RHM",
+      "source_symbol": "RHM.DE",
+      "source_mapping_status": "unsupported",
+      "mapping_status": "unsupported",
+      "reason": "Primary-listing source mapping requires operator-supplied validation before price acquisition."
+    }
+  ]
+}

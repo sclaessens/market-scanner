@@ -1,0 +1,39 @@
+{
+  "schema_version": "market-engine-local-market-data-coverage-summary-v1",
+  "status_counts": {
+    "insufficient_forward_data": 8,
+    "missing_price_history": 4
+  },
+  "summary": {
+    "completion_status": "completed_with_blockers",
+    "context_count": 3,
+    "etf_count": 9,
+    "failed": 0,
+    "imported": 0,
+    "insufficient": 8,
+    "invalid": 0,
+    "layer_counts": {
+      "aex": 2,
+      "bel20": 2,
+      "cac40": 2,
+      "dax40": 2,
+      "etf_context": 9,
+      "europe_additional_large_caps": 2,
+      "explicit_supplemental_watch": 12,
+      "local_price_history_covered": 294,
+      "market_context": 3,
+      "nasdaq100": 10,
+      "sp400": 6,
+      "sp500": 10
+    },
+    "missing": 4,
+    "refreshed": 0,
+    "selected_instruments": 12,
+    "skipped": 0,
+    "stale": 0,
+    "total_canonical_instruments": 314,
+    "unique_equities": 305,
+    "unsupported": 0,
+    "valid": 0
+  }
+}

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import shutil
 import sys
@@ -34,29 +35,57 @@ def build_universe_snapshot(
     price_history_root: str | Path = DEFAULT_PRICE_HISTORY_ROOT,
 ) -> dict[str, Any]:
     config = _load_config(config_path)
+    return build_universe_snapshot_from_config(
+        config,
+        config_path=config_path,
+        price_history_root=price_history_root,
+    )
+
+
+def build_universe_snapshot_from_config(
+    config: Mapping[str, Any],
+    *,
+    config_path: str | Path,
+    price_history_root: str | Path = DEFAULT_PRICE_HISTORY_ROOT,
+) -> dict[str, Any]:
     instruments: dict[str, dict[str, Any]] = {}
     duplicate_attempts = 0
+    canonical_by_source_symbol = {
+        str(override["source_symbol"]).upper(): str(override["canonical_symbol"]).upper()
+        for override in config.get("symbol_overrides") or ()
+        if override.get("source_symbol") and override.get("canonical_symbol")
+    }
+    source_by_canonical_symbol = {
+        str(override["canonical_symbol"]).upper(): str(override["source_symbol"]).upper()
+        for override in config.get("symbol_overrides") or ()
+        if override.get("source_symbol") and override.get("canonical_symbol")
+    }
     for layer in config["layers"]:
         layer_id = layer["layer_id"]
         membership = layer.get("membership", layer_id)
         if layer["source_type"] == "local_price_history_directory":
             for path in sorted(Path(price_history_root).glob("*.csv")):
-                symbol = path.stem.upper()
-                if _non_instrument_csv(symbol):
+                source_symbol = path.stem.upper()
+                if _non_instrument_csv(source_symbol):
                     continue
+                symbol = canonical_by_source_symbol.get(source_symbol, source_symbol)
                 entry = _base_entry(
                     symbol=symbol,
                     name=symbol,
-                    layer=layer,
+                    layer={**layer, "source_symbol": source_symbol},
                     membership=membership,
                 )
                 duplicate_attempts += _merge_entry(instruments, entry, membership)
         elif layer["source_type"] == "explicit_instruments":
             for raw in layer.get("instruments") or ():
+                symbol = str(raw["symbol"]).upper()
+                raw_layer = {**layer, **raw}
+                if symbol in source_by_canonical_symbol:
+                    raw_layer["source_symbol"] = source_by_canonical_symbol[symbol]
                 entry = _base_entry(
-                    symbol=str(raw["symbol"]).upper(),
-                    name=raw.get("name") or str(raw["symbol"]).upper(),
-                    layer={**layer, **raw},
+                    symbol=symbol,
+                    name=raw.get("name") or symbol,
+                    layer=raw_layer,
                     membership=membership,
                 )
                 duplicate_attempts += _merge_entry(instruments, entry, membership)
@@ -88,6 +117,9 @@ def build_universe_snapshot(
             "context_count": sum(1 for entry in entries if "market_context" in entry["universe_memberships"]),
             "duplicate_attempts_before_deduplication": duplicate_attempts,
             "duplicates_after_deduplication": 0,
+            "unsupported_symbol_mappings": sum(
+                1 for entry in entries if entry.get("source_mapping_status") != "mapped"
+            ),
         },
         "instruments": entries,
     }
@@ -157,6 +189,30 @@ def build_data_run(
             "run_id": run_id,
             "entries": [row for row in results if row["snapshotstatus"] == "unsupported_symbol_mapping"],
         },
+        "imported_snapshots": {
+            "schema_version": "market-engine-local-market-data-imported-snapshots-v1",
+            "run_id": run_id,
+            "entries": [row for row in results if row["snapshotstatus"] == "imported"],
+        },
+        "refreshed_snapshots": {
+            "schema_version": "market-engine-local-market-data-refreshed-snapshots-v1",
+            "run_id": run_id,
+            "entries": [row for row in results if row["snapshotstatus"] == "refreshed"],
+        },
+        "insufficient_history": {
+            "schema_version": "market-engine-local-market-data-insufficient-history-v1",
+            "run_id": run_id,
+            "entries": [
+                row
+                for row in results
+                if row["snapshotstatus"] in {"insufficient_history", "insufficient_forward_data", "stale_snapshot"}
+            ],
+        },
+        "invalid_snapshots": {
+            "schema_version": "market-engine-local-market-data-invalid-snapshots-v1",
+            "run_id": run_id,
+            "entries": [row for row in results if row["snapshotstatus"] == "validation_failed"],
+        },
         "unresolved_outcome_readiness": unresolved_readiness,
         "report": _render_report(run_id, universe, coverage, unresolved_readiness),
     }
@@ -204,6 +260,7 @@ def inspect_price_history(
             "validation_result": "failed",
             "blocker": validation["status"],
             "note": validation["note"],
+            "checksum": validation.get("checksum"),
         }
     status = "valid_current_snapshot"
     blocker = None
@@ -225,12 +282,14 @@ def inspect_price_history(
         "validation_result": "valid" if blocker is None else "limited",
         "blocker": blocker,
         "note": note,
+        "checksum": validation.get("checksum"),
     }
 
 
 def validate_price_history_csv(path: str | Path, *, min_history_rows: int = DEFAULT_MIN_HISTORY_ROWS) -> dict[str, Any]:
     csv_path = Path(path)
     try:
+        checksum = _sha256_file(csv_path)
         with csv_path.open(newline="", encoding="utf-8") as handle:
             reader = csv.DictReader(handle)
             headers = {_normalize_column(header): header for header in (reader.fieldnames or [])}
@@ -242,6 +301,16 @@ def validate_price_history_csv(path: str | Path, *, min_history_rows: int = DEFA
                 raw_date = row.get(headers["date"])
                 if not raw_date:
                     return {"status": "validation_failed", "note": "Missing date value.", "row_count": len(rows)}
+                for column in ("open", "high", "low", "close"):
+                    raw_value = row.get(headers[column])
+                    if raw_value in (None, ""):
+                        return {"status": "validation_failed", "note": f"Missing {column} value.", "row_count": len(rows)}
+                open_price = float(str(row[headers["open"]]).replace(",", ""))
+                high_price = float(str(row[headers["high"]]).replace(",", ""))
+                low_price = float(str(row[headers["low"]]).replace(",", ""))
+                float(str(row[headers["close"]]).replace(",", ""))
+                if high_price < low_price:
+                    return {"status": "validation_failed", "note": "OHLC values are inconsistent.", "row_count": len(rows)}
                 rows.append(date.fromisoformat(raw_date[:10]))
     except (OSError, ValueError, csv.Error) as exc:
         return {"status": "validation_failed", "note": f"Invalid price-history CSV: {exc}", "row_count": 0}
@@ -257,6 +326,7 @@ def validate_price_history_csv(path: str | Path, *, min_history_rows: int = DEFA
         "start_date": rows[0].isoformat(),
         "end_date": rows[-1].isoformat(),
         "row_count": len(rows),
+        "checksum": checksum,
     }
 
 
@@ -279,6 +349,10 @@ def write_data_run(run: Mapping[str, Any], *, artifact_root: str | Path, run_id:
     _write_json(output_dir / "instrument_results.json", run["instrument_results"])
     _write_json(output_dir / "missing_price_history.json", run["missing_price_history"])
     _write_json(output_dir / "unsupported_symbol_mappings.json", run["unsupported_symbol_mappings"])
+    _write_json(output_dir / "imported_snapshots.json", run["imported_snapshots"])
+    _write_json(output_dir / "refreshed_snapshots.json", run["refreshed_snapshots"])
+    _write_json(output_dir / "insufficient_history.json", run["insufficient_history"])
+    _write_json(output_dir / "invalid_snapshots.json", run["invalid_snapshots"])
     _write_json(output_dir / "unresolved_outcome_readiness.json", run["unresolved_outcome_readiness"])
     (output_dir / "report.md").write_text(run["report"], encoding="utf-8")
     return output_dir
@@ -358,7 +432,7 @@ def _load_universe_or_config(path: str | Path, *, price_history_root: str | Path
 
 def _base_entry(*, symbol: str, name: str, layer: Mapping[str, Any], membership: str) -> dict[str, Any]:
     source_symbol = str(layer.get("source_symbol") or symbol).upper()
-    source_mapping_status = "mapped"
+    source_mapping_status = str(layer.get("mapping_status") or layer.get("source_mapping_status") or "mapped")
     if layer.get("source_notes") and "required" in str(layer.get("source_notes")).lower():
         source_mapping_status = "unsupported"
     asset_type = str(layer.get("asset_type") or "equity").lower()
@@ -384,6 +458,8 @@ def _base_entry(*, symbol: str, name: str, layer: Mapping[str, Any], membership:
         "source_symbol": source_symbol,
         "source_notes": layer.get("source_notes"),
         "source_mapping_status": source_mapping_status,
+        "mapping_status": "resolved" if source_mapping_status == "mapped" else source_mapping_status,
+        "source_provenance": layer.get("source_provenance") or [],
     }
 
 
@@ -411,6 +487,8 @@ def _apply_symbol_overrides(instruments: dict[str, dict[str, Any]], overrides: S
         if key in instruments:
             instruments[key]["source_symbol"] = str(override["source_symbol"]).upper()
             instruments[key]["source_notes"] = override.get("reason")
+            instruments[key]["source_mapping_status"] = override.get("source_mapping_status") or "mapped"
+            instruments[key]["mapping_status"] = override.get("mapping_status") or "resolved"
 
 
 def _validate_universe(instruments: Mapping[str, Mapping[str, Any]]) -> None:
@@ -566,6 +644,14 @@ def _normalize_column(value: str) -> str:
 
 def _write_json(path: Path, data: Mapping[str, Any]) -> None:
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 if __name__ == "__main__":

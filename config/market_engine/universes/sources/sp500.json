@@ -1,0 +1,25 @@
+{
+  "schema_version": "market-engine-canonical-universe-source-v1",
+  "universe_id": "sp500",
+  "source_name": "Operator-controlled S&P 500 partial membership snapshot",
+  "snapshot_date": "2026-07-12",
+  "retrieval_date": "2026-07-13",
+  "provenance": "Local repository bootstrap from existing project universe and local price-history coverage; full official constituent file not present.",
+  "status": "partial",
+  "known_limitations": [
+    "Partial layer only; does not claim full S&P 500 membership.",
+    "Use a future official index-provider or exchange-published constituent snapshot for full coverage."
+  ],
+  "constituents": [
+    {"symbol": "AAPL", "name": "Apple Inc.", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Technology"},
+    {"symbol": "MSFT", "name": "Microsoft Corporation", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Technology"},
+    {"symbol": "NVDA", "name": "NVIDIA Corporation", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Technology", "industry": "Semiconductors"},
+    {"symbol": "AMZN", "name": "Amazon.com Inc.", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Consumer Cyclical"},
+    {"symbol": "META", "name": "Meta Platforms Inc.", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Communication Services"},
+    {"symbol": "AVGO", "name": "Broadcom Inc.", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Technology", "industry": "Semiconductors"},
+    {"symbol": "COST", "name": "Costco Wholesale Corporation", "exchange": "NASDAQ", "country": "US", "currency": "USD", "sector": "Consumer Defensive"},
+    {"symbol": "BRK.B", "name": "Berkshire Hathaway Inc. Class B", "exchange": "NYSE", "country": "US", "currency": "USD", "sector": "Financial Services"},
+    {"symbol": "JPM", "name": "JPMorgan Chase & Co.", "exchange": "NYSE", "country": "US", "currency": "USD", "sector": "Financial Services"},
+    {"symbol": "LLY", "name": "Eli Lilly and Company", "exchange": "NYSE", "country": "US", "currency": "USD", "sector": "Healthcare"}
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": "market-engine-canonical-universe-source-v1",
+  "universe_id": "market_context",
+  "source_name": "Controlled market context instrument set",
+  "snapshot_date": "2026-07-12",
+  "retrieval_date": "2026-07-13",
+  "provenance": "Local repository bootstrap from existing ME-DATA02 market context set.",
+  "status": "active",
+  "asset_type": "index",
+  "analysis_eligible": true,
+  "advice_eligible": false,
+  "context_only": true,
+  "known_limitations": ["Compact context set; no intraday, rates curve, or macro data acquisition added."],
+  "constituents": [
+    {"symbol": "SPY", "asset_type": "etf", "name": "US broad market proxy", "exchange": "NYSEARCA", "country": "US", "currency": "USD"},
+    {"symbol": "QQQ", "asset_type": "etf", "name": "US growth and technology proxy", "exchange": "NASDAQ", "country": "US", "currency": "USD"},
+    {"symbol": "GOLD", "asset_type": "equity", "name": "Gold equity/liquid proxy", "exchange": "NYSE", "country": "CA", "currency": "USD", "context_only": false, "advice_eligible": true}
+  ]
+}

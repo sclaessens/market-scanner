@@ -1,0 +1,19 @@
+{
+  "run_id": "me-boot03-full-coverage-report-only-20260713T123000Z",
+  "schema_version": "market-engine-local-market-data-missing-price-history-v1",
+  "tickers": [
+    "CLS",
+    "CRDO",
+    "HO",
+    "IREN",
+    "NVO",
+    "VRT",
+    "DIA",
+    "IWM",
+    "SMH",
+    "SOXX",
+    "XLE",
+    "XLF",
+    "XLK"
+  ]
+}
