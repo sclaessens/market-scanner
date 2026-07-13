@@ -1,0 +1,16 @@
+{
+  "context_count": 0,
+  "duplicate_attempts_before_deduplication": 706,
+  "duplicates_after_deduplication": 0,
+  "etf_count": 9,
+  "layer_counts": {
+    "etf_context": 9,
+    "explicit_supplemental_watch": 6,
+    "local_price_history_covered": 740,
+    "sp400": 400,
+    "sp500": 503
+  },
+  "total_instruments": 952,
+  "unique_equities": 943,
+  "unsupported_symbol_mappings": 0
+}

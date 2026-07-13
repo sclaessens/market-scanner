@@ -1,0 +1,57 @@
+{
+  "after": {
+    "blocker_counts": {
+      "insufficient_forward_data": 12
+    },
+    "insufficient_forward_data": 12,
+    "missing_price_history": 0,
+    "missing_price_history_tickers": [],
+    "other_blockers": 0,
+    "resolved": 0,
+    "selected_outcomes": 12,
+    "snapshot_references": [
+      "data/processed/AMD.csv",
+      "data/processed/ASML.csv",
+      "data/processed/AVGO.csv",
+      "data/processed/CLS.csv",
+      "data/processed/COST.csv",
+      "data/processed/CRDO.csv",
+      "data/processed/IREN.csv",
+      "data/processed/META.csv",
+      "data/processed/MSFT.csv",
+      "data/processed/NVDA.csv",
+      "data/processed/TSM.csv",
+      "data/processed/VRT.csv"
+    ],
+    "still_unresolved": 12
+  },
+  "before": {
+    "blocker_counts": {
+      "insufficient_forward_data": 8,
+      "missing_price_history": 4
+    },
+    "insufficient_forward_data": 8,
+    "missing_price_history": 4,
+    "missing_price_history_tickers": [
+      "CLS",
+      "CRDO",
+      "IREN",
+      "VRT"
+    ],
+    "other_blockers": 0,
+    "resolved": 0,
+    "selected_outcomes": 12,
+    "snapshot_references": [
+      "data/processed/AMD.csv",
+      "data/processed/ASML.csv",
+      "data/processed/AVGO.csv",
+      "data/processed/COST.csv",
+      "data/processed/META.csv",
+      "data/processed/MSFT.csv",
+      "data/processed/NVDA.csv",
+      "data/processed/TSM.csv"
+    ],
+    "still_unresolved": 12
+  },
+  "newly_resolved": 0
+}

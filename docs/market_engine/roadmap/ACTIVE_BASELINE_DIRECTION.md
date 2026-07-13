@@ -45,7 +45,8 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots (completed)
   -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes (implementation complete / coverage partial)
   -> ME-BOOT03 - Bootstrap authoritative universe and local price-history coverage (implementation complete / coverage partial)
-  -> ME-DATA04 - Operator-supplied forward price-history import for ME-EVAL blockers
+  -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
+  -> ME-DATA05 - Post-cutoff forward outcome refresh after future trading days become available
   -> ME-APP01 - App/report view for advice candidates
 ```
 

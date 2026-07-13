@@ -1,0 +1,8 @@
+{
+  "acquisition_failed": 0,
+  "cutoff_date": "2026-07-10",
+  "requested": 952,
+  "stale_snapshot": 2,
+  "valid_current_snapshot": 950,
+  "validation_failed": 0
+}

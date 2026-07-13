@@ -1,0 +1,30 @@
+{
+  "overlaps": [
+    {
+      "instrument_count": 2,
+      "left_layer": "etf_context",
+      "right_layer": "local_price_history_covered"
+    },
+    {
+      "instrument_count": 5,
+      "left_layer": "explicit_supplemental_watch",
+      "right_layer": "local_price_history_covered"
+    },
+    {
+      "instrument_count": 1,
+      "left_layer": "explicit_supplemental_watch",
+      "right_layer": "sp500"
+    },
+    {
+      "instrument_count": 270,
+      "left_layer": "local_price_history_covered",
+      "right_layer": "sp400"
+    },
+    {
+      "instrument_count": 428,
+      "left_layer": "local_price_history_covered",
+      "right_layer": "sp500"
+    }
+  ],
+  "schema_version": "market-engine-canonical-universe-overlap-report-v1"
+}

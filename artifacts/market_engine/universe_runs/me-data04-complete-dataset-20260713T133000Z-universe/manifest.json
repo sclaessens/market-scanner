@@ -1,0 +1,19 @@
+{
+  "artifact_type": "market-engine-canonical-universe-bootstrap-run",
+  "base_config_path": "config/market_engine/universes/canonical_universe.json",
+  "canonical_instrument_count": 952,
+  "generated_at": "2026-07-13T17:21:46Z",
+  "guardrails": {
+    "advice_generation_performed": false,
+    "broker_order_execution_performed": false,
+    "historical_membership_reconstruction_performed": false,
+    "live_network_access_performed": false,
+    "portfolio_watchlist_mutation_performed": false,
+    "provider_fallback_performed": false
+  },
+  "price_history_root": "data/processed",
+  "run_id": "me-data04-complete-dataset-20260713T133000Z-universe",
+  "schema_version": "market-engine-canonical-universe-bootstrap-run-v1",
+  "source_count": 4,
+  "source_root": "artifacts/market_engine/data_runs/me-data04-complete-dataset-20260713T133000Z/membership_sources"
+}

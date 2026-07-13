@@ -1,0 +1,275 @@
+{
+  "covered_critical_tickers": [
+    "AMD",
+    "ASML",
+    "AVGO",
+    "CLS",
+    "COST",
+    "CRDO",
+    "IREN",
+    "META",
+    "MSFT",
+    "NVDA",
+    "TSM",
+    "VRT"
+  ],
+  "critical_tickers_total": 12,
+  "not_ready_count": 0,
+  "outcomes": [
+    {
+      "artifactpath": "data/processed/AMD.csv",
+      "asset_type": "equity",
+      "blocker": null,
+      "checksum": "9fea3d2d577be379626c1b422dd79d1482f015a83de7b7b7d0ce6711d4c653bf",
+      "end_date": "2026-07-10",
+      "expected_refresh_readiness": "ready_for_me_eval02_refresh",
+      "instrument_id": "equity:amd",
+      "note": "Valid local price-history snapshot.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 380,
+      "snapshotstatus": "valid_current_snapshot",
+      "source_symbol": "AMD",
+      "start_date": "2025-01-02",
+      "symbol": "AMD",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "validation_result": "valid"
+    },
+    {
+      "artifactpath": "data/processed/ASML.csv",
+      "asset_type": "equity",
+      "blocker": null,
+      "checksum": "081516b4e99732a408b8e91218512edfbba354b2b31fb2b9b6dbf86bda9f6e79",
+      "end_date": "2026-07-10",
+      "expected_refresh_readiness": "ready_for_me_eval02_refresh",
+      "instrument_id": "equity:asml",
+      "note": "Valid local price-history snapshot.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 380,
+      "snapshotstatus": "valid_current_snapshot",
+      "source_symbol": "ASML",
+      "start_date": "2025-01-02",
+      "symbol": "ASML",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "valid"
+    },
+    {
+      "artifactpath": "data/processed/AVGO.csv",
+      "asset_type": "equity",
+      "blocker": null,
+      "checksum": "2765ad073526896de7680ceda5cd1ac38d388b370988be8086e79927bd5d5698",
+      "end_date": "2026-07-10",
+      "expected_refresh_readiness": "ready_for_me_eval02_refresh",
+      "instrument_id": "equity:avgo",
+      "note": "Valid local price-history snapshot.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 380,
+      "snapshotstatus": "valid_current_snapshot",
+      "source_symbol": "AVGO",
+      "start_date": "2025-01-02",
+      "symbol": "AVGO",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "validation_result": "valid"
+    },
+    {
+      "artifactpath": "data/processed/CLS.csv",
+      "asset_type": "equity",
+      "blocker": null,
+      "checksum": "9a5a44ea12a57c1d4791affe5c0ddec49e57f0b89a06c3ff20a6910e02da901a",
+      "end_date": "2026-07-10",
+      "expected_refresh_readiness": "ready_for_me_eval02_refresh",
+      "instrument_id": "equity:cls",
+      "note": "Valid local price-history snapshot.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 380,
+      "snapshotstatus": "valid_current_snapshot",
+      "source_symbol": "CLS",
+      "start_date": "2025-01-02",
+      "symbol": "CLS",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "valid"
+    },
+    {
+      "artifactpath": "data/processed/COST.csv",
+      "asset_type": "equity",
+      "blocker": null,
+      "checksum": "746811b877b4af7240a1a0d98fd830baff538374432f148a50bb122f6a05e82f",
+      "end_date": "2026-07-10",
+      "expected_refresh_readiness": "ready_for_me_eval02_refresh",
+      "instrument_id": "equity:cost",
+      "note": "Valid local price-history snapshot.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 380,
+      "snapshotstatus": "valid_current_snapshot",
+      "source_symbol": "COST",
+      "start_date": "2025-01-02",
+      "symbol": "COST",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "validation_result": "valid"
+    },
+    {
+      "artifactpath": "data/processed/CRDO.csv",
+      "asset_type": "equity",
+      "blocker": null,
+      "checksum": "5442cd3b8326f2a0678e596649bcb466a3cab09e65925fb89df7174ad860cfab",
+      "end_date": "2026-07-10",
+      "expected_refresh_readiness": "ready_for_me_eval02_refresh",
+      "instrument_id": "equity:crdo",
+      "note": "Valid local price-history snapshot.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 380,
+      "snapshotstatus": "valid_current_snapshot",
+      "source_symbol": "CRDO",
+      "start_date": "2025-01-02",
+      "symbol": "CRDO",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "valid"
+    },
+    {
+      "artifactpath": "data/processed/IREN.csv",
+      "asset_type": "equity",
+      "blocker": null,
+      "checksum": "2201d183d8ea1a28884db8fcd66590ba52f2f5cbc83e4c233947340413ef9b76",
+      "end_date": "2026-07-10",
+      "expected_refresh_readiness": "ready_for_me_eval02_refresh",
+      "instrument_id": "equity:iren",
+      "note": "Valid local price-history snapshot.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 380,
+      "snapshotstatus": "valid_current_snapshot",
+      "source_symbol": "IREN",
+      "start_date": "2025-01-02",
+      "symbol": "IREN",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "valid"
+    },
+    {
+      "artifactpath": "data/processed/META.csv",
+      "asset_type": "equity",
+      "blocker": null,
+      "checksum": "ec254620837bfa92237deb7d70040fbbcc7c2393690669f67f3326c65215b4b4",
+      "end_date": "2026-07-10",
+      "expected_refresh_readiness": "ready_for_me_eval02_refresh",
+      "instrument_id": "equity:meta",
+      "note": "Valid local price-history snapshot.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 380,
+      "snapshotstatus": "valid_current_snapshot",
+      "source_symbol": "META",
+      "start_date": "2025-01-02",
+      "symbol": "META",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "validation_result": "valid"
+    },
+    {
+      "artifactpath": "data/processed/MSFT.csv",
+      "asset_type": "equity",
+      "blocker": null,
+      "checksum": "5f6fa9c978e810e81e1e8e97d33ac764a3d9864a5f99be7822e098ddf603447b",
+      "end_date": "2026-07-10",
+      "expected_refresh_readiness": "ready_for_me_eval02_refresh",
+      "instrument_id": "equity:msft",
+      "note": "Valid local price-history snapshot.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 380,
+      "snapshotstatus": "valid_current_snapshot",
+      "source_symbol": "MSFT",
+      "start_date": "2025-01-02",
+      "symbol": "MSFT",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "validation_result": "valid"
+    },
+    {
+      "artifactpath": "data/processed/NVDA.csv",
+      "asset_type": "equity",
+      "blocker": null,
+      "checksum": "06c0f04cb7fe4777bececffe40fc0a74f7ae6539d1eca3139bd32a9f7a84c7d5",
+      "end_date": "2026-07-10",
+      "expected_refresh_readiness": "ready_for_me_eval02_refresh",
+      "instrument_id": "equity:nvda",
+      "note": "Valid local price-history snapshot.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 380,
+      "snapshotstatus": "valid_current_snapshot",
+      "source_symbol": "NVDA",
+      "start_date": "2025-01-02",
+      "symbol": "NVDA",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "validation_result": "valid"
+    },
+    {
+      "artifactpath": "data/processed/TSM.csv",
+      "asset_type": "equity",
+      "blocker": null,
+      "checksum": "b01908c0b2c403205de34693e17af1edd814b9bc202e9092d67289c6897e7b61",
+      "end_date": "2026-07-10",
+      "expected_refresh_readiness": "ready_for_me_eval02_refresh",
+      "instrument_id": "equity:tsm",
+      "note": "Valid local price-history snapshot.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 380,
+      "snapshotstatus": "valid_current_snapshot",
+      "source_symbol": "TSM",
+      "start_date": "2025-01-02",
+      "symbol": "TSM",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "valid"
+    },
+    {
+      "artifactpath": "data/processed/VRT.csv",
+      "asset_type": "equity",
+      "blocker": null,
+      "checksum": "7bf3f25753d70b0d0794fde584b3a77a76e5f8793dcfb512622c57871061d1c3",
+      "end_date": "2026-07-10",
+      "expected_refresh_readiness": "ready_for_me_eval02_refresh",
+      "instrument_id": "equity:vrt",
+      "note": "Valid local price-history snapshot.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 380,
+      "snapshotstatus": "valid_current_snapshot",
+      "source_symbol": "VRT",
+      "start_date": "2025-01-02",
+      "symbol": "VRT",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "validation_result": "valid"
+    }
+  ],
+  "ready_count": 12,
+  "schema_version": "market-engine-unresolved-outcome-readiness-v1"
+}

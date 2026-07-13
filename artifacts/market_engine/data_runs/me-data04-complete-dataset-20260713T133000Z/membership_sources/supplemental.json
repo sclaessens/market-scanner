@@ -1,0 +1,63 @@
+{
+  "asset_type": "equity",
+  "constituents": [
+    {
+      "country": "CA",
+      "currency": "USD",
+      "exchange": "NYSE",
+      "name": "Celestica Inc.",
+      "sector": "Technology",
+      "symbol": "CLS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "NASDAQ",
+      "name": "Credo Technology Group Holding Ltd",
+      "sector": "Technology",
+      "symbol": "CRDO"
+    },
+    {
+      "country": "AU",
+      "currency": "USD",
+      "exchange": "NASDAQ",
+      "name": "IREN Limited",
+      "sector": "Technology",
+      "symbol": "IREN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "NYSE",
+      "name": "Vertiv Holdings Co",
+      "sector": "Industrials",
+      "symbol": "VRT"
+    },
+    {
+      "country": "NL",
+      "currency": "USD",
+      "exchange": "NASDAQ",
+      "name": "ASML Holding N.V.",
+      "sector": "Technology",
+      "symbol": "ASML"
+    },
+    {
+      "country": "TW",
+      "currency": "USD",
+      "exchange": "NYSE",
+      "name": "Taiwan Semiconductor Manufacturing Company Limited ADR",
+      "sector": "Technology",
+      "symbol": "TSM"
+    }
+  ],
+  "known_limitations": [
+    "Project supplement, not an index membership source."
+  ],
+  "provenance": "local:ME-DATA04",
+  "retrieval_date": "2026-07-13",
+  "schema_version": "market-engine-canonical-universe-source-v1",
+  "snapshot_date": "2026-07-13",
+  "source_name": "ME-DATA04 explicit project and evaluation supplement",
+  "status": "active",
+  "universe_id": "explicit_supplemental_watch"
+}

@@ -1,0 +1,37 @@
+{
+  "membership_sources": [
+    {
+      "count": 503,
+      "path": "artifacts/market_engine/data_runs/me-data04-complete-dataset-20260713T133000Z/membership_sources/sp500.json",
+      "universe_id": "sp500",
+      "url": "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+    },
+    {
+      "count": 400,
+      "path": "artifacts/market_engine/data_runs/me-data04-complete-dataset-20260713T133000Z/membership_sources/sp400.json",
+      "universe_id": "sp400",
+      "url": "https://en.wikipedia.org/wiki/List_of_S%26P_400_companies"
+    },
+    {
+      "count": 6,
+      "path": "artifacts/market_engine/data_runs/me-data04-complete-dataset-20260713T133000Z/membership_sources/supplemental.json",
+      "universe_id": "explicit_supplemental_watch",
+      "url": "local:ME-DATA04"
+    },
+    {
+      "count": 9,
+      "path": "artifacts/market_engine/data_runs/me-data04-complete-dataset-20260713T133000Z/membership_sources/etfs.json",
+      "universe_id": "etf_context",
+      "url": "local:ME-DATA04"
+    }
+  ],
+  "price_history_source": {
+    "adjusted_prices": "auto_adjust=False; Adj Close retained when returned",
+    "granularity": "1d",
+    "library": "yfinance",
+    "provider": "Yahoo Finance",
+    "storage": "data/processed/<source_symbol>.csv"
+  },
+  "run_id": "me-data04-complete-dataset-20260713T133000Z",
+  "schema_version": "market-engine-data04-source-decision-v1"
+}

@@ -1,0 +1,30 @@
+{
+  "count": 2,
+  "entries": [
+    {
+      "artifactpath": "data/processed/BLD.csv",
+      "checksum": "0e898171f222696c42247db4bf8b279290f2c618e539dec2f8af0e7e545ba52d",
+      "end_date": "2026-07-02",
+      "note": "downloaded",
+      "row_count": 375,
+      "source_symbol": "BLD",
+      "start_date": "2025-01-02",
+      "status": "stale_snapshot",
+      "symbol": "BLD",
+      "yfinance_symbol": "BLD"
+    },
+    {
+      "artifactpath": "data/processed/JHG.csv",
+      "checksum": "70cecae4de2a04b2be2047cd30f306f51ece8623bb7b9320a0c377fb03127a07",
+      "end_date": "2026-07-02",
+      "note": "downloaded",
+      "row_count": 375,
+      "source_symbol": "JHG",
+      "start_date": "2025-01-02",
+      "status": "stale_snapshot",
+      "symbol": "JHG",
+      "yfinance_symbol": "JHG"
+    }
+  ],
+  "schema_version": "market-engine-data04-stale-history-summary-v1"
+}
