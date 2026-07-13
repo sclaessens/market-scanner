@@ -1,0 +1,150 @@
+{
+  "results": [
+    {
+      "artifactpath": "data/processed/ASML.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:asml",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ASML",
+      "start_date": "2025-04-30",
+      "symbol": "ASML",
+      "universe_memberships": [
+        "europe_large_cap_defined",
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CLS.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "equity:cls",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "CLS",
+      "start_date": null,
+      "symbol": "CLS",
+      "universe_memberships": [
+        "explicit_supplemental_watch"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/GOLD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:gold",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "GOLD",
+      "start_date": "2025-04-30",
+      "symbol": "GOLD",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "market_context"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HO.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "equity:ho",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "HO",
+      "start_date": null,
+      "symbol": "HO",
+      "universe_memberships": [
+        "europe_large_cap_defined"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/NVDA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:nvda",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NVDA",
+      "start_date": "2025-04-30",
+      "symbol": "NVDA",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/RHM.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:rhm",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "RHM",
+      "start_date": null,
+      "symbol": "RHM",
+      "universe_memberships": [
+        "europe_large_cap_defined"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/QQQ.csv",
+      "asset_type": "etf",
+      "blocker": "insufficient_history",
+      "end_date": "2026-03-23",
+      "instrument_id": "etf:qqq",
+      "note": "Local price history has fewer rows than the configured minimum.",
+      "row_count": 251,
+      "snapshotstatus": "insufficient_history",
+      "source_symbol": "QQQ",
+      "start_date": "2025-03-24",
+      "symbol": "QQQ",
+      "universe_memberships": [
+        "etf_context",
+        "local_price_history_covered",
+        "market_context"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SPY.csv",
+      "asset_type": "etf",
+      "blocker": "insufficient_history",
+      "end_date": "2026-03-23",
+      "instrument_id": "etf:spy",
+      "note": "Local price history has fewer rows than the configured minimum.",
+      "row_count": 251,
+      "snapshotstatus": "insufficient_history",
+      "source_symbol": "SPY",
+      "start_date": "2025-03-24",
+      "symbol": "SPY",
+      "universe_memberships": [
+        "etf_context",
+        "local_price_history_covered",
+        "market_context"
+      ],
+      "validation_result": "limited"
+    }
+  ],
+  "run_id": "me-data02-representative-sample-20260712T141000Z",
+  "schema_version": "market-engine-local-market-data-instrument-results-v1"
+}

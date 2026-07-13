@@ -1,0 +1,5256 @@
+{
+  "results": [
+    {
+      "artifactpath": "data/processed/AA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:aa",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AA",
+      "start_date": "2025-04-30",
+      "symbol": "AA",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AAPL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:aapl",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AAPL",
+      "start_date": "2025-04-30",
+      "symbol": "AAPL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ABBV.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:abbv",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ABBV",
+      "start_date": "2025-04-30",
+      "symbol": "ABBV",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ABNB.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:abnb",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ABNB",
+      "start_date": "2025-04-30",
+      "symbol": "ABNB",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ADBE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:adbe",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ADBE",
+      "start_date": "2025-04-30",
+      "symbol": "ADBE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ADI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:adi",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ADI",
+      "start_date": "2025-04-30",
+      "symbol": "ADI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ADP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:adp",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ADP",
+      "start_date": "2025-04-30",
+      "symbol": "ADP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ADSK.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:adsk",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ADSK",
+      "start_date": "2025-04-30",
+      "symbol": "ADSK",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ADYEN.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:adyen",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "ADYEN",
+      "start_date": null,
+      "symbol": "ADYEN",
+      "universe_memberships": [
+        "europe_large_cap_defined"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/AEP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:aep",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AEP",
+      "start_date": "2025-04-30",
+      "symbol": "AEP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AIG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:aig",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AIG",
+      "start_date": "2025-04-30",
+      "symbol": "AIG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AKAM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:akam",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AKAM",
+      "start_date": "2025-04-30",
+      "symbol": "AKAM",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ALB.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:alb",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ALB",
+      "start_date": "2025-04-30",
+      "symbol": "ALB",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ALL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:all",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ALL",
+      "start_date": "2025-04-30",
+      "symbol": "ALL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AMAT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:amat",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AMAT",
+      "start_date": "2025-04-30",
+      "symbol": "AMAT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AMD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:amd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AMD",
+      "start_date": "2025-04-30",
+      "symbol": "AMD",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AMGN.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:amgn",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AMGN",
+      "start_date": "2025-04-30",
+      "symbol": "AMGN",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AMT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:amt",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AMT",
+      "start_date": "2025-04-30",
+      "symbol": "AMT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AMZN.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:amzn",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AMZN",
+      "start_date": "2025-04-30",
+      "symbol": "AMZN",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ANET.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:anet",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ANET",
+      "start_date": "2025-04-30",
+      "symbol": "ANET",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/APD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:apd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "APD",
+      "start_date": "2025-04-30",
+      "symbol": "APD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/APH.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:aph",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "APH",
+      "start_date": "2025-04-30",
+      "symbol": "APH",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/APP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:app",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "APP",
+      "start_date": "2025-04-30",
+      "symbol": "APP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ASML.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:asml",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ASML",
+      "start_date": "2025-04-30",
+      "symbol": "ASML",
+      "universe_memberships": [
+        "europe_large_cap_defined",
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AVB.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:avb",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AVB",
+      "start_date": "2025-04-30",
+      "symbol": "AVB",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AVGO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:avgo",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AVGO",
+      "start_date": "2025-04-30",
+      "symbol": "AVGO",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AXP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:axp",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AXP",
+      "start_date": "2025-04-30",
+      "symbol": "AXP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AZO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:azo",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AZO",
+      "start_date": "2025-04-30",
+      "symbol": "AZO",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/BA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ba",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BA",
+      "start_date": "2025-04-30",
+      "symbol": "BA",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/BABA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:baba",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BABA",
+      "start_date": "2025-04-30",
+      "symbol": "BABA",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/BAC.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:bac",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BAC",
+      "start_date": "2025-04-30",
+      "symbol": "BAC",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/BHP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:bhp",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BHP",
+      "start_date": "2025-04-30",
+      "symbol": "BHP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/BIIB.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:biib",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BIIB",
+      "start_date": "2025-04-30",
+      "symbol": "BIIB",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/BKNG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:bkng",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BKNG",
+      "start_date": "2025-04-30",
+      "symbol": "BKNG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/BKR.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:bkr",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BKR",
+      "start_date": "2025-04-30",
+      "symbol": "BKR",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/BLK.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:blk",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BLK",
+      "start_date": "2025-04-30",
+      "symbol": "BLK",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/BMY.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:bmy",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BMY",
+      "start_date": "2025-04-30",
+      "symbol": "BMY",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/BRK-B.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:brk-b",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BRK-B",
+      "start_date": "2025-04-30",
+      "symbol": "BRK-B",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/BSX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:bsx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BSX",
+      "start_date": "2025-04-30",
+      "symbol": "BSX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/BX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:bx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BX",
+      "start_date": "2025-04-30",
+      "symbol": "BX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/C.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:c",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "C",
+      "start_date": "2025-04-30",
+      "symbol": "C",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CAT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cat",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CAT",
+      "start_date": "2025-04-30",
+      "symbol": "CAT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CB.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cb",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CB",
+      "start_date": "2025-04-30",
+      "symbol": "CB",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CCI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cci",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CCI",
+      "start_date": "2025-04-30",
+      "symbol": "CCI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CCJ.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ccj",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CCJ",
+      "start_date": "2025-04-30",
+      "symbol": "CCJ",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CCL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ccl",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CCL",
+      "start_date": "2025-04-30",
+      "symbol": "CCL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CDNS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cdns",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CDNS",
+      "start_date": "2025-04-30",
+      "symbol": "CDNS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CHKP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:chkp",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CHKP",
+      "start_date": "2025-04-30",
+      "symbol": "CHKP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CHRW.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:chrw",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CHRW",
+      "start_date": "2025-04-30",
+      "symbol": "CHRW",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ci",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CI",
+      "start_date": "2025-04-30",
+      "symbol": "CI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cl",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CL",
+      "start_date": "2025-04-30",
+      "symbol": "CL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CLS.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "equity:cls",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "CLS",
+      "start_date": null,
+      "symbol": "CLS",
+      "universe_memberships": [
+        "explicit_supplemental_watch"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/CMCSA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cmcsa",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CMCSA",
+      "start_date": "2025-04-30",
+      "symbol": "CMCSA",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CME.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cme",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CME",
+      "start_date": "2025-04-30",
+      "symbol": "CME",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CMI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cmi",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CMI",
+      "start_date": "2025-04-30",
+      "symbol": "CMI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/COF.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cof",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "COF",
+      "start_date": "2025-04-30",
+      "symbol": "COF",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/COP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cop",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "COP",
+      "start_date": "2025-04-30",
+      "symbol": "COP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/COST.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cost",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "COST",
+      "start_date": "2025-04-30",
+      "symbol": "COST",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CRDO.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "equity:crdo",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "CRDO",
+      "start_date": null,
+      "symbol": "CRDO",
+      "universe_memberships": [
+        "explicit_supplemental_watch"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/CRM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:crm",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CRM",
+      "start_date": "2025-04-30",
+      "symbol": "CRM",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CRWD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:crwd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CRWD",
+      "start_date": "2025-04-30",
+      "symbol": "CRWD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CSCO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:csco",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CSCO",
+      "start_date": "2025-04-30",
+      "symbol": "CSCO",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CSX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:csx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CSX",
+      "start_date": "2025-04-30",
+      "symbol": "CSX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CTAS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ctas",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CTAS",
+      "start_date": "2025-04-30",
+      "symbol": "CTAS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CVS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cvs",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CVS",
+      "start_date": "2025-04-30",
+      "symbol": "CVS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CVX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:cvx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "CVX",
+      "start_date": "2025-04-30",
+      "symbol": "CVX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/D.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:d",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "D",
+      "start_date": "2025-04-30",
+      "symbol": "D",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DASH.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:dash",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DASH",
+      "start_date": "2025-04-30",
+      "symbol": "DASH",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:dd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DD",
+      "start_date": "2025-04-30",
+      "symbol": "DD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DDOG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ddog",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DDOG",
+      "start_date": "2025-04-30",
+      "symbol": "DDOG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:de",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DE",
+      "start_date": "2025-04-30",
+      "symbol": "DE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DELL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:dell",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DELL",
+      "start_date": "2025-04-30",
+      "symbol": "DELL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DHI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:dhi",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DHI",
+      "start_date": "2025-04-30",
+      "symbol": "DHI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DIS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:dis",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DIS",
+      "start_date": "2025-04-30",
+      "symbol": "DIS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DLR.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:dlr",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DLR",
+      "start_date": "2025-04-30",
+      "symbol": "DLR",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DOCU.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:docu",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DOCU",
+      "start_date": "2025-04-30",
+      "symbol": "DOCU",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DOW.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:dow",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DOW",
+      "start_date": "2025-04-30",
+      "symbol": "DOW",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DPZ.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:dpz",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DPZ",
+      "start_date": "2025-04-30",
+      "symbol": "DPZ",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DUK.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:duk",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DUK",
+      "start_date": "2025-04-30",
+      "symbol": "DUK",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DUOL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:duol",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DUOL",
+      "start_date": "2025-04-30",
+      "symbol": "DUOL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DVN.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:dvn",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DVN",
+      "start_date": "2025-04-30",
+      "symbol": "DVN",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DXCM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:dxcm",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "DXCM",
+      "start_date": "2025-04-30",
+      "symbol": "DXCM",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/EA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ea",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "EA",
+      "start_date": "2025-04-30",
+      "symbol": "EA",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/EBAY.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ebay",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "EBAY",
+      "start_date": "2025-04-30",
+      "symbol": "EBAY",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ECL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ecl",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ECL",
+      "start_date": "2025-04-30",
+      "symbol": "ECL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/EL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:el",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "EL",
+      "start_date": "2025-04-30",
+      "symbol": "EL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ELV.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:elv",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ELV",
+      "start_date": "2025-04-30",
+      "symbol": "ELV",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/EMR.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:emr",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "EMR",
+      "start_date": "2025-04-30",
+      "symbol": "EMR",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ENB.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:enb",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ENB",
+      "start_date": "2025-04-30",
+      "symbol": "ENB",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ENPH.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:enph",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ENPH",
+      "start_date": "2025-04-30",
+      "symbol": "ENPH",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/EOG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:eog",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "EOG",
+      "start_date": "2025-04-30",
+      "symbol": "EOG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/EQIX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:eqix",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "EQIX",
+      "start_date": "2025-04-30",
+      "symbol": "EQIX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/EQR.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:eqr",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "EQR",
+      "start_date": "2025-04-30",
+      "symbol": "EQR",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ETN.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:etn",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ETN",
+      "start_date": "2025-04-30",
+      "symbol": "ETN",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ETSY.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:etsy",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ETSY",
+      "start_date": "2025-04-30",
+      "symbol": "ETSY",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/EW.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ew",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "EW",
+      "start_date": "2025-04-30",
+      "symbol": "EW",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/EXC.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:exc",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "EXC",
+      "start_date": "2025-04-30",
+      "symbol": "EXC",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/EXPD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:expd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "EXPD",
+      "start_date": "2025-04-30",
+      "symbol": "EXPD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/F.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:f",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "F",
+      "start_date": "2025-04-30",
+      "symbol": "F",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/FAST.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:fast",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "FAST",
+      "start_date": "2025-04-30",
+      "symbol": "FAST",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/FCX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:fcx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "FCX",
+      "start_date": "2025-04-30",
+      "symbol": "FCX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/FDX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:fdx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "FDX",
+      "start_date": "2025-04-30",
+      "symbol": "FDX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/FIS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:fis",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "FIS",
+      "start_date": "2025-04-30",
+      "symbol": "FIS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/FTNT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ftnt",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "FTNT",
+      "start_date": "2025-04-30",
+      "symbol": "FTNT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/GD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:gd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "GD",
+      "start_date": "2025-04-30",
+      "symbol": "GD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/GE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ge",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "GE",
+      "start_date": "2025-04-30",
+      "symbol": "GE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/GEHC.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:gehc",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "GEHC",
+      "start_date": "2025-04-30",
+      "symbol": "GEHC",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/GILD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:gild",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "GILD",
+      "start_date": "2025-04-30",
+      "symbol": "GILD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/GLW.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:glw",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "GLW",
+      "start_date": "2025-04-30",
+      "symbol": "GLW",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/GM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:gm",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "GM",
+      "start_date": "2025-04-30",
+      "symbol": "GM",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/GOLD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:gold",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "GOLD",
+      "start_date": "2025-04-30",
+      "symbol": "GOLD",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "market_context"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/GOOGL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:googl",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "GOOGL",
+      "start_date": "2025-04-30",
+      "symbol": "GOOGL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/GS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:gs",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "GS",
+      "start_date": "2025-04-30",
+      "symbol": "GS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/GWW.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:gww",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "GWW",
+      "start_date": "2025-04-30",
+      "symbol": "GWW",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HAL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:hal",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "HAL",
+      "start_date": "2025-04-30",
+      "symbol": "HAL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HCA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:hca",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "HCA",
+      "start_date": "2025-04-30",
+      "symbol": "HCA",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:hd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "HD",
+      "start_date": "2025-04-30",
+      "symbol": "HD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HEI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:hei",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "HEI",
+      "start_date": "2025-04-30",
+      "symbol": "HEI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HII.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:hii",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "HII",
+      "start_date": "2025-04-30",
+      "symbol": "HII",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HLT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:hlt",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "HLT",
+      "start_date": "2025-04-30",
+      "symbol": "HLT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HO.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "equity:ho",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "HO",
+      "start_date": null,
+      "symbol": "HO",
+      "universe_memberships": [
+        "europe_large_cap_defined"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/HON.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:hon",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "HON",
+      "start_date": "2025-04-30",
+      "symbol": "HON",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HPE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:hpe",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "HPE",
+      "start_date": "2025-04-30",
+      "symbol": "HPE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HPQ.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:hpq",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "HPQ",
+      "start_date": "2025-04-30",
+      "symbol": "HPQ",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HSY.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:hsy",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "HSY",
+      "start_date": "2025-04-30",
+      "symbol": "HSY",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ICE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ice",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ICE",
+      "start_date": "2025-04-30",
+      "symbol": "ICE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/IDXX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:idxx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "IDXX",
+      "start_date": "2025-04-30",
+      "symbol": "IDXX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/IEX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:iex",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "IEX",
+      "start_date": "2025-04-30",
+      "symbol": "IEX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ILMN.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ilmn",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ILMN",
+      "start_date": "2025-04-30",
+      "symbol": "ILMN",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/INTC.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:intc",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "INTC",
+      "start_date": "2025-04-30",
+      "symbol": "INTC",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/INTU.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:intu",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "INTU",
+      "start_date": "2025-04-30",
+      "symbol": "INTU",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/IP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ip",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "IP",
+      "start_date": "2025-04-30",
+      "symbol": "IP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/IQV.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:iqv",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "IQV",
+      "start_date": "2025-04-30",
+      "symbol": "IQV",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/IREN.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "equity:iren",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "IREN",
+      "start_date": null,
+      "symbol": "IREN",
+      "universe_memberships": [
+        "explicit_supplemental_watch"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/ISRG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:isrg",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ISRG",
+      "start_date": "2025-04-30",
+      "symbol": "ISRG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ITW.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:itw",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ITW",
+      "start_date": "2025-04-30",
+      "symbol": "ITW",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/JBL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:jbl",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "JBL",
+      "start_date": "2025-04-30",
+      "symbol": "JBL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/JD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:jd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "JD",
+      "start_date": "2025-04-30",
+      "symbol": "JD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/JNJ.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:jnj",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "JNJ",
+      "start_date": "2025-04-30",
+      "symbol": "JNJ",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/JPM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:jpm",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "JPM",
+      "start_date": "2025-04-30",
+      "symbol": "JPM",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/KDP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:kdp",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "KDP",
+      "start_date": "2025-04-30",
+      "symbol": "KDP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/KEYS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:keys",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "KEYS",
+      "start_date": "2025-04-30",
+      "symbol": "KEYS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/KHC.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:khc",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "KHC",
+      "start_date": "2025-04-30",
+      "symbol": "KHC",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/KKR.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:kkr",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "KKR",
+      "start_date": "2025-04-30",
+      "symbol": "KKR",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/KLAC.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:klac",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "KLAC",
+      "start_date": "2025-04-30",
+      "symbol": "KLAC",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/KMB.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:kmb",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "KMB",
+      "start_date": "2025-04-30",
+      "symbol": "KMB",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/KMI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:kmi",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "KMI",
+      "start_date": "2025-04-30",
+      "symbol": "KMI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/KO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ko",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "KO",
+      "start_date": "2025-04-30",
+      "symbol": "KO",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/LCID.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:lcid",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "LCID",
+      "start_date": "2025-04-30",
+      "symbol": "LCID",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/LEN.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:len",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "LEN",
+      "start_date": "2025-04-30",
+      "symbol": "LEN",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/LHX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:lhx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "LHX",
+      "start_date": "2025-04-30",
+      "symbol": "LHX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/LIN.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:lin",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "LIN",
+      "start_date": "2025-04-30",
+      "symbol": "LIN",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/LLY.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:lly",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "LLY",
+      "start_date": "2025-04-30",
+      "symbol": "LLY",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/LMT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:lmt",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "LMT",
+      "start_date": "2025-04-30",
+      "symbol": "LMT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/LNG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:lng",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "LNG",
+      "start_date": "2025-04-30",
+      "symbol": "LNG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/LOW.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:low",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "LOW",
+      "start_date": "2025-04-30",
+      "symbol": "LOW",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/LRCX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:lrcx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "LRCX",
+      "start_date": "2025-04-30",
+      "symbol": "LRCX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/LULU.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:lulu",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "LULU",
+      "start_date": "2025-04-30",
+      "symbol": "LULU",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/LVS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:lvs",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "LVS",
+      "start_date": "2025-04-30",
+      "symbol": "LVS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/LYFT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:lyft",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "LYFT",
+      "start_date": "2025-04-30",
+      "symbol": "LYFT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ma",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MA",
+      "start_date": "2025-04-30",
+      "symbol": "MA",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MAR.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mar",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MAR",
+      "start_date": "2025-04-30",
+      "symbol": "MAR",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MCD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mcd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MCD",
+      "start_date": "2025-04-30",
+      "symbol": "MCD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MCHP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mchp",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MCHP",
+      "start_date": "2025-04-30",
+      "symbol": "MCHP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MCO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mco",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MCO",
+      "start_date": "2025-04-30",
+      "symbol": "MCO",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MDB.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mdb",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MDB",
+      "start_date": "2025-04-30",
+      "symbol": "MDB",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MDLZ.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mdlz",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MDLZ",
+      "start_date": "2025-04-30",
+      "symbol": "MDLZ",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MDT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mdt",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MDT",
+      "start_date": "2025-04-30",
+      "symbol": "MDT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MELI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:meli",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MELI",
+      "start_date": "2025-04-30",
+      "symbol": "MELI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/META.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:meta",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "META",
+      "start_date": "2025-04-30",
+      "symbol": "META",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mo",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MO",
+      "start_date": "2025-04-30",
+      "symbol": "MO",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mp",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MP",
+      "start_date": "2025-04-30",
+      "symbol": "MP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MPC.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mpc",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MPC",
+      "start_date": "2025-04-30",
+      "symbol": "MPC",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MPWR.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mpwr",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MPWR",
+      "start_date": "2025-04-30",
+      "symbol": "MPWR",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MRK.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mrk",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MRK",
+      "start_date": "2025-04-30",
+      "symbol": "MRK",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MRVL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mrvl",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MRVL",
+      "start_date": "2025-04-30",
+      "symbol": "MRVL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ms",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MS",
+      "start_date": "2025-04-30",
+      "symbol": "MS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MSCI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:msci",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MSCI",
+      "start_date": "2025-04-30",
+      "symbol": "MSCI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MSFT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:msft",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MSFT",
+      "start_date": "2025-04-30",
+      "symbol": "MSFT",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MSI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:msi",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MSI",
+      "start_date": "2025-04-30",
+      "symbol": "MSI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MU.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:mu",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MU",
+      "start_date": "2025-04-30",
+      "symbol": "MU",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NDAQ.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ndaq",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NDAQ",
+      "start_date": "2025-04-30",
+      "symbol": "NDAQ",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NEE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:nee",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NEE",
+      "start_date": "2025-04-30",
+      "symbol": "NEE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NEM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:nem",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NEM",
+      "start_date": "2025-04-30",
+      "symbol": "NEM",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NET.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:net",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NET",
+      "start_date": "2025-04-30",
+      "symbol": "NET",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NFLX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:nflx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NFLX",
+      "start_date": "2025-04-30",
+      "symbol": "NFLX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NKE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:nke",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NKE",
+      "start_date": "2025-04-30",
+      "symbol": "NKE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NOC.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:noc",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NOC",
+      "start_date": "2025-04-30",
+      "symbol": "NOC",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NOW.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:now",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NOW",
+      "start_date": "2025-04-30",
+      "symbol": "NOW",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NSC.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:nsc",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NSC",
+      "start_date": "2025-04-30",
+      "symbol": "NSC",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NUE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:nue",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NUE",
+      "start_date": "2025-04-30",
+      "symbol": "NUE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NVDA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:nvda",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NVDA",
+      "start_date": "2025-04-30",
+      "symbol": "NVDA",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NVR.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:nvr",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NVR",
+      "start_date": "2025-04-30",
+      "symbol": "NVR",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NXE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:nxe",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NXE",
+      "start_date": "2025-04-30",
+      "symbol": "NXE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NXPI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:nxpi",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NXPI",
+      "start_date": "2025-04-30",
+      "symbol": "NXPI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/O.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:o",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "O",
+      "start_date": "2025-04-30",
+      "symbol": "O",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ODFL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:odfl",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ODFL",
+      "start_date": "2025-04-30",
+      "symbol": "ODFL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/OKE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:oke",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "OKE",
+      "start_date": "2025-04-30",
+      "symbol": "OKE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/OKTA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:okta",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "OKTA",
+      "start_date": "2025-04-30",
+      "symbol": "OKTA",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ON.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:on",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ON",
+      "start_date": "2025-04-30",
+      "symbol": "ON",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ORCL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:orcl",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ORCL",
+      "start_date": "2025-04-30",
+      "symbol": "ORCL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ORLY.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:orly",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ORLY",
+      "start_date": "2025-04-30",
+      "symbol": "ORLY",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/OXY.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:oxy",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "OXY",
+      "start_date": "2025-04-30",
+      "symbol": "OXY",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PANW.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:panw",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PANW",
+      "start_date": "2025-04-30",
+      "symbol": "PANW",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PAYX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:payx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PAYX",
+      "start_date": "2025-04-30",
+      "symbol": "PAYX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PCAR.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:pcar",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PCAR",
+      "start_date": "2025-04-30",
+      "symbol": "PCAR",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PCG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:pcg",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PCG",
+      "start_date": "2025-04-30",
+      "symbol": "PCG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PDD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:pdd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PDD",
+      "start_date": "2025-04-30",
+      "symbol": "PDD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PEP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:pep",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PEP",
+      "start_date": "2025-04-30",
+      "symbol": "PEP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PFE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:pfe",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PFE",
+      "start_date": "2025-04-30",
+      "symbol": "PFE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:pg",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PG",
+      "start_date": "2025-04-30",
+      "symbol": "PG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PGR.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:pgr",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PGR",
+      "start_date": "2025-04-30",
+      "symbol": "PGR",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PH.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ph",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PH",
+      "start_date": "2025-04-30",
+      "symbol": "PH",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PKG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:pkg",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PKG",
+      "start_date": "2025-04-30",
+      "symbol": "PKG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PLD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:pld",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PLD",
+      "start_date": "2025-04-30",
+      "symbol": "PLD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PLTR.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:pltr",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PLTR",
+      "start_date": "2025-04-30",
+      "symbol": "PLTR",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:pm",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PM",
+      "start_date": "2025-04-30",
+      "symbol": "PM",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PPG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ppg",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PPG",
+      "start_date": "2025-04-30",
+      "symbol": "PPG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PSA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:psa",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PSA",
+      "start_date": "2025-04-30",
+      "symbol": "PSA",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PSX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:psx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PSX",
+      "start_date": "2025-04-30",
+      "symbol": "PSX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/PYPL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:pypl",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "PYPL",
+      "start_date": "2025-04-30",
+      "symbol": "PYPL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/QCOM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:qcom",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "QCOM",
+      "start_date": "2025-04-30",
+      "symbol": "QCOM",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/RBLX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:rblx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "RBLX",
+      "start_date": "2025-04-30",
+      "symbol": "RBLX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/RCL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:rcl",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "RCL",
+      "start_date": "2025-04-30",
+      "symbol": "RCL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/REGN.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:regn",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "REGN",
+      "start_date": "2025-04-30",
+      "symbol": "REGN",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/RHM.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:rhm",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "RHM",
+      "start_date": null,
+      "symbol": "RHM",
+      "universe_memberships": [
+        "europe_large_cap_defined"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/RIO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:rio",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "RIO",
+      "start_date": "2025-04-30",
+      "symbol": "RIO",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/RIVN.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:rivn",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "RIVN",
+      "start_date": "2025-04-30",
+      "symbol": "RIVN",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ROKU.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:roku",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ROKU",
+      "start_date": "2025-04-30",
+      "symbol": "ROKU",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ROP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:rop",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ROP",
+      "start_date": "2025-04-30",
+      "symbol": "ROP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ROST.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:rost",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ROST",
+      "start_date": "2025-04-30",
+      "symbol": "ROST",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/RSG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:rsg",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "RSG",
+      "start_date": "2025-04-30",
+      "symbol": "RSG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/RTX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:rtx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "RTX",
+      "start_date": "2025-04-30",
+      "symbol": "RTX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/S.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:s",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "S",
+      "start_date": "2025-04-30",
+      "symbol": "S",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SBUX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:sbux",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SBUX",
+      "start_date": "2025-04-30",
+      "symbol": "SBUX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SCCO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:scco",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SCCO",
+      "start_date": "2025-04-30",
+      "symbol": "SCCO",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SCHW.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:schw",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SCHW",
+      "start_date": "2025-04-30",
+      "symbol": "SCHW",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:se",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SE",
+      "start_date": "2025-04-30",
+      "symbol": "SE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SHOP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:shop",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SHOP",
+      "start_date": "2025-04-30",
+      "symbol": "SHOP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SHW.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:shw",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SHW",
+      "start_date": "2025-04-30",
+      "symbol": "SHW",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SLB.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:slb",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SLB",
+      "start_date": "2025-04-30",
+      "symbol": "SLB",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SMCI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:smci",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SMCI",
+      "start_date": "2025-04-30",
+      "symbol": "SMCI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SNOW.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:snow",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SNOW",
+      "start_date": "2025-04-30",
+      "symbol": "SNOW",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SNPS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:snps",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SNPS",
+      "start_date": "2025-04-30",
+      "symbol": "SNPS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:so",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SO",
+      "start_date": "2025-04-30",
+      "symbol": "SO",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SOFI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:sofi",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SOFI",
+      "start_date": "2025-04-30",
+      "symbol": "SOFI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SPG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:spg",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SPG",
+      "start_date": "2025-04-30",
+      "symbol": "SPG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SPGI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:spgi",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SPGI",
+      "start_date": "2025-04-30",
+      "symbol": "SPGI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SPOT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:spot",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SPOT",
+      "start_date": "2025-04-30",
+      "symbol": "SPOT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SRE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:sre",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SRE",
+      "start_date": "2025-04-30",
+      "symbol": "SRE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/STLD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:stld",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "STLD",
+      "start_date": "2025-04-30",
+      "symbol": "STLD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/STX.csv",
+      "asset_type": "equity",
+      "blocker": "validation_failed",
+      "end_date": null,
+      "instrument_id": "equity:stx",
+      "note": "Missing required OHLC columns: date",
+      "row_count": 0,
+      "snapshotstatus": "validation_failed",
+      "source_symbol": "STX",
+      "start_date": null,
+      "symbol": "STX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "failed"
+    },
+    {
+      "artifactpath": "data/processed/SU.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:su",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SU",
+      "start_date": "2025-04-30",
+      "symbol": "SU",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SYK.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:syk",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "SYK",
+      "start_date": "2025-04-30",
+      "symbol": "SYK",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/T.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:t",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "T",
+      "start_date": "2025-04-30",
+      "symbol": "T",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TDG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:tdg",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TDG",
+      "start_date": "2025-04-30",
+      "symbol": "TDG",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TEAM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:team",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TEAM",
+      "start_date": "2025-04-30",
+      "symbol": "TEAM",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TECK.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:teck",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TECK",
+      "start_date": "2025-04-30",
+      "symbol": "TECK",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TER.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ter",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TER",
+      "start_date": "2025-04-30",
+      "symbol": "TER",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TGT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:tgt",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TGT",
+      "start_date": "2025-04-30",
+      "symbol": "TGT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TJX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:tjx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TJX",
+      "start_date": "2025-04-30",
+      "symbol": "TJX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TMUS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:tmus",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TMUS",
+      "start_date": "2025-04-30",
+      "symbol": "TMUS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TRV.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:trv",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TRV",
+      "start_date": "2025-04-30",
+      "symbol": "TRV",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TSCO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:tsco",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TSCO",
+      "start_date": "2025-04-30",
+      "symbol": "TSCO",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TSLA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:tsla",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TSLA",
+      "start_date": "2025-04-30",
+      "symbol": "TSLA",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TSM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:tsm",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TSM",
+      "start_date": "2025-04-30",
+      "symbol": "TSM",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:tt",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TT",
+      "start_date": "2025-04-30",
+      "symbol": "TT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TTWO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ttwo",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TTWO",
+      "start_date": "2025-04-30",
+      "symbol": "TTWO",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TWLO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:twlo",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TWLO",
+      "start_date": "2025-04-30",
+      "symbol": "TWLO",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TXN.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:txn",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TXN",
+      "start_date": "2025-04-30",
+      "symbol": "TXN",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TXT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:txt",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TXT",
+      "start_date": "2025-04-30",
+      "symbol": "TXT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/U.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:u",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "U",
+      "start_date": "2025-04-30",
+      "symbol": "U",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/UBER.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:uber",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "UBER",
+      "start_date": "2025-04-30",
+      "symbol": "UBER",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/UEC.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:uec",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "UEC",
+      "start_date": "2025-04-30",
+      "symbol": "UEC",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/UNH.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:unh",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "UNH",
+      "start_date": "2025-04-30",
+      "symbol": "UNH",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/UNP.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:unp",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "UNP",
+      "start_date": "2025-04-30",
+      "symbol": "UNP",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/UPS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:ups",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "UPS",
+      "start_date": "2025-04-30",
+      "symbol": "UPS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/V.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:v",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "V",
+      "start_date": "2025-04-30",
+      "symbol": "V",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/VALE.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:vale",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "VALE",
+      "start_date": "2025-04-30",
+      "symbol": "VALE",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/VEEV.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:veev",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "VEEV",
+      "start_date": "2025-04-30",
+      "symbol": "VEEV",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/VICI.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:vici",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "VICI",
+      "start_date": "2025-04-30",
+      "symbol": "VICI",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/VLO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:vlo",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "VLO",
+      "start_date": "2025-04-30",
+      "symbol": "VLO",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/VRT.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "equity:vrt",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "VRT",
+      "start_date": null,
+      "symbol": "VRT",
+      "universe_memberships": [
+        "explicit_supplemental_watch"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/VRTX.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:vrtx",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "VRTX",
+      "start_date": "2025-04-30",
+      "symbol": "VRTX",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/VZ.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:vz",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "VZ",
+      "start_date": "2025-04-30",
+      "symbol": "VZ",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/WBD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:wbd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "WBD",
+      "start_date": "2025-04-30",
+      "symbol": "WBD",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/WDAY.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:wday",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "WDAY",
+      "start_date": "2025-04-30",
+      "symbol": "WDAY",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/WDC.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:wdc",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "WDC",
+      "start_date": "2025-04-30",
+      "symbol": "WDC",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/WELL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:well",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "WELL",
+      "start_date": "2025-04-30",
+      "symbol": "WELL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/WFC.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:wfc",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "WFC",
+      "start_date": "2025-04-30",
+      "symbol": "WFC",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/WM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:wm",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "WM",
+      "start_date": "2025-04-30",
+      "symbol": "WM",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/WMB.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:wmb",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "WMB",
+      "start_date": "2025-04-30",
+      "symbol": "WMB",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/WMT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:wmt",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "WMT",
+      "start_date": "2025-04-30",
+      "symbol": "WMT",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/WYNN.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:wynn",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "WYNN",
+      "start_date": "2025-04-30",
+      "symbol": "WYNN",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/XEL.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:xel",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "XEL",
+      "start_date": "2025-04-30",
+      "symbol": "XEL",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/XOM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:xom",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "XOM",
+      "start_date": "2025-04-30",
+      "symbol": "XOM",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/YUM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:yum",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "YUM",
+      "start_date": "2025-04-30",
+      "symbol": "YUM",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ZBH.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:zbh",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ZBH",
+      "start_date": "2025-04-30",
+      "symbol": "ZBH",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ZS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "end_date": "2026-04-30",
+      "instrument_id": "equity:zs",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ZS",
+      "start_date": "2025-04-30",
+      "symbol": "ZS",
+      "universe_memberships": [
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/DIA.csv",
+      "asset_type": "etf",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "etf:dia",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "DIA",
+      "start_date": null,
+      "symbol": "DIA",
+      "universe_memberships": [
+        "etf_context"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/IWM.csv",
+      "asset_type": "etf",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "etf:iwm",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "IWM",
+      "start_date": null,
+      "symbol": "IWM",
+      "universe_memberships": [
+        "etf_context"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/QQQ.csv",
+      "asset_type": "etf",
+      "blocker": "insufficient_history",
+      "end_date": "2026-03-23",
+      "instrument_id": "etf:qqq",
+      "note": "Local price history has fewer rows than the configured minimum.",
+      "row_count": 251,
+      "snapshotstatus": "insufficient_history",
+      "source_symbol": "QQQ",
+      "start_date": "2025-03-24",
+      "symbol": "QQQ",
+      "universe_memberships": [
+        "etf_context",
+        "local_price_history_covered",
+        "market_context"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SMH.csv",
+      "asset_type": "etf",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "etf:smh",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "SMH",
+      "start_date": null,
+      "symbol": "SMH",
+      "universe_memberships": [
+        "etf_context"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/SOXX.csv",
+      "asset_type": "etf",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "etf:soxx",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "SOXX",
+      "start_date": null,
+      "symbol": "SOXX",
+      "universe_memberships": [
+        "etf_context"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/SPY.csv",
+      "asset_type": "etf",
+      "blocker": "insufficient_history",
+      "end_date": "2026-03-23",
+      "instrument_id": "etf:spy",
+      "note": "Local price history has fewer rows than the configured minimum.",
+      "row_count": 251,
+      "snapshotstatus": "insufficient_history",
+      "source_symbol": "SPY",
+      "start_date": "2025-03-24",
+      "symbol": "SPY",
+      "universe_memberships": [
+        "etf_context",
+        "local_price_history_covered",
+        "market_context"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/XLE.csv",
+      "asset_type": "etf",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "etf:xle",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "XLE",
+      "start_date": null,
+      "symbol": "XLE",
+      "universe_memberships": [
+        "etf_context"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/XLF.csv",
+      "asset_type": "etf",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "etf:xlf",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "XLF",
+      "start_date": null,
+      "symbol": "XLF",
+      "universe_memberships": [
+        "etf_context"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/XLK.csv",
+      "asset_type": "etf",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "instrument_id": "etf:xlk",
+      "note": "No local price-history CSV found.",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "XLK",
+      "start_date": null,
+      "symbol": "XLK",
+      "universe_memberships": [
+        "etf_context"
+      ],
+      "validation_result": "missing"
+    }
+  ],
+  "run_id": "me-data02-full-coverage-report-only-20260712T142000Z",
+  "schema_version": "market-engine-local-market-data-instrument-results-v1"
+}

@@ -1,0 +1,26 @@
+{
+  "artifact_type": "market-engine-advice-outcome-refresh-manifest",
+  "baseline_guardrail": {
+    "broker_order_execution_performed": false,
+    "live_source_acquisition_performed": false,
+    "openai_api_required": false,
+    "portfolio_watchlist_mutation_performed": false,
+    "provider_invocation_allowed": false,
+    "scheduler_implemented": false
+  },
+  "generated_at": "2026-07-12T14:30:00Z",
+  "input": {
+    "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+    "evaluation_artifact_path": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+    "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z",
+    "price_history_root": "data/processed",
+    "ticker_filter": []
+  },
+  "outputs": {
+    "missing_price_history_json": "missing_price_history.json",
+    "refresh_outcome_index_json": "refresh_outcome_index.json",
+    "refresh_report_md": "refresh_report.md"
+  },
+  "run_id": "me-data02-post-data-refresh-check-20260712T143000Z",
+  "schema_version": "market-engine-advice-outcome-refresh-manifest-v1"
+}

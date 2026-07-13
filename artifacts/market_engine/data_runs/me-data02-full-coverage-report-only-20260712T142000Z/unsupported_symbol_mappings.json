@@ -1,0 +1,40 @@
+{
+  "entries": [
+    {
+      "artifactpath": "data/processed/ADYEN.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:adyen",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "ADYEN",
+      "start_date": null,
+      "symbol": "ADYEN",
+      "universe_memberships": [
+        "europe_large_cap_defined"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/RHM.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:rhm",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "RHM",
+      "start_date": null,
+      "symbol": "RHM",
+      "universe_memberships": [
+        "europe_large_cap_defined"
+      ],
+      "validation_result": "missing"
+    }
+  ],
+  "run_id": "me-data02-full-coverage-report-only-20260712T142000Z",
+  "schema_version": "market-engine-local-market-data-unsupported-symbol-mappings-v1"
+}

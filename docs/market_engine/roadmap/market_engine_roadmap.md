@@ -108,7 +108,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
   -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots (completed)
-  -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes
+  -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes (implementation complete / coverage partial)
+  -> ME-DATA03 - Operator-supplied local price snapshot import for ME-EVAL blockers
   -> ME-APP01 - App/report view for advice candidates
 ```
 
@@ -167,10 +168,22 @@ outcomes, resolved 0, kept 8 as `insufficient_forward_data`, and reported
 refresh mechanism works, but current local data still cannot resolve the
 sample outcomes.
 
-ME-DATA02 is now the next baseline sprint because the remaining blocker is
-local price-snapshot availability: later snapshots for the 8 insufficient
-forward-data tickers and missing local CSVs for the 4 missing-price-history
-tickers.
+ME-DATA02 added the canonical local market-data universe config and local
+coverage/import command. The full report-only run
+`me-data02-full-coverage-report-only-20260712T142000Z` produced 308 canonical
+instruments: 299 unique equities, 9 ETFs, and 3 market-context instruments.
+Coverage remains partial: 0 valid current snapshots, 12 missing, 293
+insufficient, 1 invalid, and 2 unsupported mappings. ME-DATA02 did not claim
+full 1,000+ index coverage because reproducible local constituent sources were
+not present.
+
+The post-ME-DATA02 ME-EVAL02 refresh check remained unresolved with
+`insufficient_forward_data: 8` and `missing_price_history: 4` for `CLS`,
+`CRDO`, `IREN`, and `VRT`.
+
+ME-DATA03 is now the next baseline sprint because approved operator-supplied
+local CSV snapshots are needed before ME-EVAL02 can resolve the critical
+outcomes.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 

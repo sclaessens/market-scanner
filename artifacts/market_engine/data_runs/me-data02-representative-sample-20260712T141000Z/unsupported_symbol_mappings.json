@@ -1,0 +1,23 @@
+{
+  "entries": [
+    {
+      "artifactpath": "data/processed/RHM.csv",
+      "asset_type": "equity",
+      "blocker": "unsupported_symbol_mapping",
+      "end_date": null,
+      "instrument_id": "equity:rhm",
+      "note": "Source symbol mapping is not supported.",
+      "row_count": 0,
+      "snapshotstatus": "unsupported_symbol_mapping",
+      "source_symbol": "RHM",
+      "start_date": null,
+      "symbol": "RHM",
+      "universe_memberships": [
+        "europe_large_cap_defined"
+      ],
+      "validation_result": "missing"
+    }
+  ],
+  "run_id": "me-data02-representative-sample-20260712T141000Z",
+  "schema_version": "market-engine-local-market-data-unsupported-symbol-mappings-v1"
+}
