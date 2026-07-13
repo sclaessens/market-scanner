@@ -1,0 +1,39 @@
+{
+  "overrides": [
+    {
+      "canonical_symbol": "ADYEN",
+      "mapping_status": "unsupported",
+      "reason": "Primary-listing source mapping requires operator-supplied validation before price acquisition.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "ADYEN.AS"
+    },
+    {
+      "canonical_symbol": "ASML",
+      "reason": "Existing local CSV and project artifacts use ASML ADR/local-compatible symbol.",
+      "source_symbol": "ASML"
+    },
+    {
+      "canonical_symbol": "BF.B",
+      "reason": "ME-DATA04 yfinance acquisition symbol normalization for class-share or provider syntax.",
+      "source_symbol": "BF-B"
+    },
+    {
+      "canonical_symbol": "BRK.B",
+      "reason": "ME-DATA04 yfinance acquisition symbol normalization for class-share or provider syntax.",
+      "source_symbol": "BRK-B"
+    },
+    {
+      "canonical_symbol": "MOG.A",
+      "reason": "ME-DATA04 yfinance acquisition symbol normalization for class-share or provider syntax.",
+      "source_symbol": "MOG-A"
+    },
+    {
+      "canonical_symbol": "RHM",
+      "mapping_status": "unsupported",
+      "reason": "Primary-listing source mapping requires operator-supplied validation before price acquisition.",
+      "source_mapping_status": "unsupported",
+      "source_symbol": "RHM.DE"
+    }
+  ],
+  "schema_version": "market-engine-symbol-overrides-v1"
+}

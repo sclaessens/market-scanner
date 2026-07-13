@@ -2346,3 +2346,33 @@ Next:
 ```text
 ME-DATA04 - Operator-supplied forward price-history import for ME-EVAL blockers
 ```
+
+### ME-DATA04 - Complete canonical local market dataset
+
+Status: OPERATIONAL DATASET PARTIAL
+
+ME-DATA04 moved the local market dataset from bootstrap coverage to a materially
+usable operational dataset:
+
+```text
+canonical universe before: 314
+canonical universe after: 952
+valid local histories before: 0
+valid local histories after: 946
+valid local history coverage after: 99.37%
+missing histories after: 0
+invalid histories after: 0
+unsupported mappings after: 0
+ME-EVAL02 resolved before: 0
+ME-EVAL02 resolved after: 0
+```
+
+The roadmap status remains partial because the evaluation acceptance criterion
+requires `resolved > 0`, and future horizon data was not yet available beyond
+the `2026-07-10` cutoff.
+
+Next:
+
+```text
+ME-DATA05 - Post-cutoff forward outcome refresh after future trading days become available
+```

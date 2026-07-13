@@ -1,0 +1,60 @@
+{
+  "asset_type": "etf",
+  "constituents": [
+    {
+      "asset_type": "etf",
+      "name": "SPDR S&P 500 ETF Trust",
+      "symbol": "SPY"
+    },
+    {
+      "asset_type": "etf",
+      "name": "Invesco QQQ Trust",
+      "symbol": "QQQ"
+    },
+    {
+      "asset_type": "etf",
+      "name": "iShares Russell 2000 ETF",
+      "symbol": "IWM"
+    },
+    {
+      "asset_type": "etf",
+      "name": "SPDR Dow Jones Industrial Average ETF Trust",
+      "symbol": "DIA"
+    },
+    {
+      "asset_type": "etf",
+      "name": "Technology Select Sector SPDR Fund",
+      "symbol": "XLK"
+    },
+    {
+      "asset_type": "etf",
+      "name": "Financial Select Sector SPDR Fund",
+      "symbol": "XLF"
+    },
+    {
+      "asset_type": "etf",
+      "name": "Energy Select Sector SPDR Fund",
+      "symbol": "XLE"
+    },
+    {
+      "asset_type": "etf",
+      "name": "VanEck Semiconductor ETF",
+      "symbol": "SMH"
+    },
+    {
+      "asset_type": "etf",
+      "name": "iShares Semiconductor ETF",
+      "symbol": "SOXX"
+    }
+  ],
+  "known_limitations": [
+    "Compact ETF context set, not a full ETF universe."
+  ],
+  "provenance": "local:ME-DATA04",
+  "retrieval_date": "2026-07-13",
+  "schema_version": "market-engine-canonical-universe-source-v1",
+  "snapshot_date": "2026-07-13",
+  "source_name": "ME-DATA04 controlled ETF context",
+  "status": "active",
+  "universe_id": "etf_context"
+}

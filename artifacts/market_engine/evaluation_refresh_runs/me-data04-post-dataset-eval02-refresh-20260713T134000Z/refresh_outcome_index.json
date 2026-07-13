@@ -1,0 +1,441 @@
+{
+  "artifact_type": "market-engine-advice-outcome-refresh-run",
+  "generated_at": "2026-07-13T13:40:00Z",
+  "horizons": [
+    {
+      "name": "1w",
+      "trading_days": 5
+    },
+    {
+      "name": "1m",
+      "trading_days": 21
+    },
+    {
+      "name": "3m",
+      "trading_days": 63
+    }
+  ],
+  "input": {
+    "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+    "evaluation_artifact_path": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+    "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z",
+    "price_history_root": "data/processed",
+    "ticker_filter": []
+  },
+  "input_mode": "existing_evaluation_artifact",
+  "outcomes": [
+    {
+      "advice": "wait_for_price",
+      "advice_evaluation_identifier": {
+        "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+        "previous_evaluation_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+        "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z"
+      },
+      "explanation": "Local price history exists but still does not extend far enough beyond the advice date.",
+      "new_blocker": "insufficient_forward_data",
+      "new_status": "unresolved",
+      "outcome_metrics": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "previous_blocker": "insufficient_forward_data",
+      "previous_status": "unresolved",
+      "resolved": false,
+      "snapshot_last_available_date": "2026-07-10",
+      "snapshot_status": "available",
+      "ticker": "AMD",
+      "used_snapshot": "data/processed/AMD.csv"
+    },
+    {
+      "advice": "buy_candidate",
+      "advice_evaluation_identifier": {
+        "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+        "previous_evaluation_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+        "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z"
+      },
+      "explanation": "Local price history exists but still does not extend far enough beyond the advice date.",
+      "new_blocker": "insufficient_forward_data",
+      "new_status": "unresolved",
+      "outcome_metrics": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "previous_blocker": "insufficient_forward_data",
+      "previous_status": "unresolved",
+      "resolved": false,
+      "snapshot_last_available_date": "2026-07-10",
+      "snapshot_status": "available",
+      "ticker": "ASML",
+      "used_snapshot": "data/processed/ASML.csv"
+    },
+    {
+      "advice": "wait_for_price",
+      "advice_evaluation_identifier": {
+        "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+        "previous_evaluation_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+        "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z"
+      },
+      "explanation": "Local price history exists but still does not extend far enough beyond the advice date.",
+      "new_blocker": "insufficient_forward_data",
+      "new_status": "unresolved",
+      "outcome_metrics": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "previous_blocker": "insufficient_forward_data",
+      "previous_status": "unresolved",
+      "resolved": false,
+      "snapshot_last_available_date": "2026-07-10",
+      "snapshot_status": "available",
+      "ticker": "AVGO",
+      "used_snapshot": "data/processed/AVGO.csv"
+    },
+    {
+      "advice": "watchlist",
+      "advice_evaluation_identifier": {
+        "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+        "previous_evaluation_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+        "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z"
+      },
+      "explanation": "Local price history exists but still does not extend far enough beyond the advice date.",
+      "new_blocker": "insufficient_forward_data",
+      "new_status": "unresolved",
+      "outcome_metrics": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "previous_blocker": "missing_price_history",
+      "previous_status": "unresolved",
+      "resolved": false,
+      "snapshot_last_available_date": "2026-07-10",
+      "snapshot_status": "available",
+      "ticker": "CLS",
+      "used_snapshot": "data/processed/CLS.csv"
+    },
+    {
+      "advice": "buy_candidate",
+      "advice_evaluation_identifier": {
+        "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+        "previous_evaluation_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+        "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z"
+      },
+      "explanation": "Local price history exists but still does not extend far enough beyond the advice date.",
+      "new_blocker": "insufficient_forward_data",
+      "new_status": "unresolved",
+      "outcome_metrics": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "previous_blocker": "insufficient_forward_data",
+      "previous_status": "unresolved",
+      "resolved": false,
+      "snapshot_last_available_date": "2026-07-10",
+      "snapshot_status": "available",
+      "ticker": "COST",
+      "used_snapshot": "data/processed/COST.csv"
+    },
+    {
+      "advice": "watchlist",
+      "advice_evaluation_identifier": {
+        "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+        "previous_evaluation_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+        "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z"
+      },
+      "explanation": "Local price history exists but still does not extend far enough beyond the advice date.",
+      "new_blocker": "insufficient_forward_data",
+      "new_status": "unresolved",
+      "outcome_metrics": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "previous_blocker": "missing_price_history",
+      "previous_status": "unresolved",
+      "resolved": false,
+      "snapshot_last_available_date": "2026-07-10",
+      "snapshot_status": "available",
+      "ticker": "CRDO",
+      "used_snapshot": "data/processed/CRDO.csv"
+    },
+    {
+      "advice": "watchlist",
+      "advice_evaluation_identifier": {
+        "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+        "previous_evaluation_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+        "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z"
+      },
+      "explanation": "Local price history exists but still does not extend far enough beyond the advice date.",
+      "new_blocker": "insufficient_forward_data",
+      "new_status": "unresolved",
+      "outcome_metrics": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "previous_blocker": "missing_price_history",
+      "previous_status": "unresolved",
+      "resolved": false,
+      "snapshot_last_available_date": "2026-07-10",
+      "snapshot_status": "available",
+      "ticker": "IREN",
+      "used_snapshot": "data/processed/IREN.csv"
+    },
+    {
+      "advice": "avoid_for_now",
+      "advice_evaluation_identifier": {
+        "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+        "previous_evaluation_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+        "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z"
+      },
+      "explanation": "Local price history exists but still does not extend far enough beyond the advice date.",
+      "new_blocker": "insufficient_forward_data",
+      "new_status": "unresolved",
+      "outcome_metrics": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "previous_blocker": "insufficient_forward_data",
+      "previous_status": "unresolved",
+      "resolved": false,
+      "snapshot_last_available_date": "2026-07-10",
+      "snapshot_status": "available",
+      "ticker": "META",
+      "used_snapshot": "data/processed/META.csv"
+    },
+    {
+      "advice": "watchlist",
+      "advice_evaluation_identifier": {
+        "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+        "previous_evaluation_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+        "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z"
+      },
+      "explanation": "Local price history exists but still does not extend far enough beyond the advice date.",
+      "new_blocker": "insufficient_forward_data",
+      "new_status": "unresolved",
+      "outcome_metrics": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "previous_blocker": "insufficient_forward_data",
+      "previous_status": "unresolved",
+      "resolved": false,
+      "snapshot_last_available_date": "2026-07-10",
+      "snapshot_status": "available",
+      "ticker": "MSFT",
+      "used_snapshot": "data/processed/MSFT.csv"
+    },
+    {
+      "advice": "buy_candidate",
+      "advice_evaluation_identifier": {
+        "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+        "previous_evaluation_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+        "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z"
+      },
+      "explanation": "Local price history exists but still does not extend far enough beyond the advice date.",
+      "new_blocker": "insufficient_forward_data",
+      "new_status": "unresolved",
+      "outcome_metrics": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "previous_blocker": "insufficient_forward_data",
+      "previous_status": "unresolved",
+      "resolved": false,
+      "snapshot_last_available_date": "2026-07-10",
+      "snapshot_status": "available",
+      "ticker": "NVDA",
+      "used_snapshot": "data/processed/NVDA.csv"
+    },
+    {
+      "advice": "buy_candidate",
+      "advice_evaluation_identifier": {
+        "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+        "previous_evaluation_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+        "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z"
+      },
+      "explanation": "Local price history exists but still does not extend far enough beyond the advice date.",
+      "new_blocker": "insufficient_forward_data",
+      "new_status": "unresolved",
+      "outcome_metrics": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "previous_blocker": "insufficient_forward_data",
+      "previous_status": "unresolved",
+      "resolved": false,
+      "snapshot_last_available_date": "2026-07-10",
+      "snapshot_status": "available",
+      "ticker": "TSM",
+      "used_snapshot": "data/processed/TSM.csv"
+    },
+    {
+      "advice": "watchlist",
+      "advice_evaluation_identifier": {
+        "advice_index_path": "artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json",
+        "previous_evaluation_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+        "previous_evaluation_run_id": "me-eval01-advice-outcomes-20260712T120000Z"
+      },
+      "explanation": "Local price history exists but still does not extend far enough beyond the advice date.",
+      "new_blocker": "insufficient_forward_data",
+      "new_status": "unresolved",
+      "outcome_metrics": {
+        "1m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "1w": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        },
+        "3m": {
+          "reason": "insufficient_forward_data",
+          "status": "unresolved"
+        }
+      },
+      "previous_blocker": "missing_price_history",
+      "previous_status": "unresolved",
+      "resolved": false,
+      "snapshot_last_available_date": "2026-07-10",
+      "snapshot_status": "available",
+      "ticker": "VRT",
+      "used_snapshot": "data/processed/VRT.csv"
+    }
+  ],
+  "run_id": "me-data04-post-dataset-eval02-refresh-20260713T134000Z",
+  "run_type": "scheduled_future_outcome_refresh_local_snapshots",
+  "schema_version": "market-engine-advice-outcome-refresh-run-v1",
+  "summary": {
+    "blocker_counts": {
+      "insufficient_forward_data": 12
+    },
+    "insufficient_forward_data": 12,
+    "missing_price_history": 0,
+    "missing_price_history_tickers": [],
+    "other_blockers": 0,
+    "resolved": 0,
+    "selected_outcomes": 12,
+    "snapshot_references": [
+      "data/processed/AMD.csv",
+      "data/processed/ASML.csv",
+      "data/processed/AVGO.csv",
+      "data/processed/CLS.csv",
+      "data/processed/COST.csv",
+      "data/processed/CRDO.csv",
+      "data/processed/IREN.csv",
+      "data/processed/META.csv",
+      "data/processed/MSFT.csv",
+      "data/processed/NVDA.csv",
+      "data/processed/TSM.csv",
+      "data/processed/VRT.csv"
+    ],
+    "still_unresolved": 12
+  }
+}

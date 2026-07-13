@@ -1,0 +1,20 @@
+{
+  "artifact_root": "artifacts/market_engine/data_runs",
+  "artifact_type": "market-engine-local-market-data-run-manifest",
+  "baseline_guardrail": {
+    "advice_generation_performed": false,
+    "broker_order_execution_performed": false,
+    "live_source_acquisition_performed": false,
+    "portfolio_watchlist_mutation_performed": false,
+    "provider_invocation_allowed": false,
+    "scheduler_implemented": false
+  },
+  "input": {
+    "price_history_root": "data/processed",
+    "universe_path": "config/market_engine/universes/canonical_universe.json"
+  },
+  "run_id": "me-data04-complete-dataset-20260713T133000Z-coverage-after",
+  "schema_version": "market-engine-local-market-data-run-manifest-v1",
+  "snapshot_date": "2026-07-13",
+  "universe_version": "me-data04-complete-canonical-local-market-dataset-v1"
+}

@@ -1,0 +1,36 @@
+{
+  "missing": [
+    {
+      "advice": "watchlist",
+      "new_blocker": "missing_price_history",
+      "previous_blocker": "missing_price_history",
+      "ticker": "CLS"
+    },
+    {
+      "advice": "watchlist",
+      "new_blocker": "missing_price_history",
+      "previous_blocker": "missing_price_history",
+      "ticker": "CRDO"
+    },
+    {
+      "advice": "watchlist",
+      "new_blocker": "missing_price_history",
+      "previous_blocker": "missing_price_history",
+      "ticker": "IREN"
+    },
+    {
+      "advice": "watchlist",
+      "new_blocker": "missing_price_history",
+      "previous_blocker": "missing_price_history",
+      "ticker": "VRT"
+    }
+  ],
+  "run_id": "me-data04-baseline-eval02-refresh-20260713T131000Z",
+  "schema_version": "market-engine-advice-outcome-refresh-missing-price-history-v1",
+  "tickers": [
+    "CLS",
+    "CRDO",
+    "IREN",
+    "VRT"
+  ]
+}

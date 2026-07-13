@@ -1,0 +1,18 @@
+{
+  "checks": {
+    "canonical_universe_gt_900": true,
+    "current_history_materially_current": false,
+    "valid_history_gt_90pct": true
+  },
+  "metrics": {
+    "canonical_universe": 952,
+    "insufficient": 6,
+    "invalid": 0,
+    "missing": 0,
+    "unsupported": 0,
+    "valid_history_coverage_pct": 99.37,
+    "valid_local_history": 946
+  },
+  "schema_version": "market-engine-data04-acceptance-result-v1",
+  "status": "operational_dataset_partial"
+}

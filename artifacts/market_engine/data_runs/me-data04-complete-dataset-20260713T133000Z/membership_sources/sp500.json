@@ -1,0 +1,4543 @@
+{
+  "asset_type": "equity",
+  "constituents": [
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "3M",
+      "sector": "Industrials",
+      "source_symbol": "MMM",
+      "symbol": "MMM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "A. O. Smith",
+      "sector": "Industrials",
+      "source_symbol": "AOS",
+      "symbol": "AOS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Abbott Laboratories",
+      "sector": "Health Care",
+      "source_symbol": "ABT",
+      "symbol": "ABT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "AbbVie",
+      "sector": "Health Care",
+      "source_symbol": "ABBV",
+      "symbol": "ABBV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Accenture",
+      "sector": "Information Technology",
+      "source_symbol": "ACN",
+      "symbol": "ACN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Adobe Inc.",
+      "sector": "Information Technology",
+      "source_symbol": "ADBE",
+      "symbol": "ADBE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Advanced Micro Devices",
+      "sector": "Information Technology",
+      "source_symbol": "AMD",
+      "symbol": "AMD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "AES Corporation",
+      "sector": "Utilities",
+      "source_symbol": "AES",
+      "symbol": "AES"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Aflac",
+      "sector": "Financials",
+      "source_symbol": "AFL",
+      "symbol": "AFL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Agilent Technologies",
+      "sector": "Health Care",
+      "source_symbol": "A",
+      "symbol": "A"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Air Products",
+      "sector": "Materials",
+      "source_symbol": "APD",
+      "symbol": "APD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Airbnb",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "ABNB",
+      "symbol": "ABNB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Akamai Technologies",
+      "sector": "Information Technology",
+      "source_symbol": "AKAM",
+      "symbol": "AKAM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Albemarle Corporation",
+      "sector": "Materials",
+      "source_symbol": "ALB",
+      "symbol": "ALB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Alexandria Real Estate Equities",
+      "sector": "Real Estate",
+      "source_symbol": "ARE",
+      "symbol": "ARE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Align Technology",
+      "sector": "Health Care",
+      "source_symbol": "ALGN",
+      "symbol": "ALGN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Allegion",
+      "sector": "Industrials",
+      "source_symbol": "ALLE",
+      "symbol": "ALLE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Alliant Energy",
+      "sector": "Utilities",
+      "source_symbol": "LNT",
+      "symbol": "LNT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Allstate",
+      "sector": "Financials",
+      "source_symbol": "ALL",
+      "symbol": "ALL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Alphabet Inc. (Class A)",
+      "sector": "Communication Services",
+      "source_symbol": "GOOGL",
+      "symbol": "GOOGL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Alphabet Inc. (Class C)",
+      "sector": "Communication Services",
+      "source_symbol": "GOOG",
+      "symbol": "GOOG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Altria",
+      "sector": "Consumer Staples",
+      "source_symbol": "MO",
+      "symbol": "MO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Amazon",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "AMZN",
+      "symbol": "AMZN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Amcor",
+      "sector": "Materials",
+      "source_symbol": "AMCR",
+      "symbol": "AMCR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ameren",
+      "sector": "Utilities",
+      "source_symbol": "AEE",
+      "symbol": "AEE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "American Electric Power",
+      "sector": "Utilities",
+      "source_symbol": "AEP",
+      "symbol": "AEP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "American Express",
+      "sector": "Financials",
+      "source_symbol": "AXP",
+      "symbol": "AXP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "American International Group",
+      "sector": "Financials",
+      "source_symbol": "AIG",
+      "symbol": "AIG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "American Tower",
+      "sector": "Real Estate",
+      "source_symbol": "AMT",
+      "symbol": "AMT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "American Water Works",
+      "sector": "Utilities",
+      "source_symbol": "AWK",
+      "symbol": "AWK"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ameriprise Financial",
+      "sector": "Financials",
+      "source_symbol": "AMP",
+      "symbol": "AMP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ametek",
+      "sector": "Industrials",
+      "source_symbol": "AME",
+      "symbol": "AME"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Amgen",
+      "sector": "Health Care",
+      "source_symbol": "AMGN",
+      "symbol": "AMGN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Amphenol",
+      "sector": "Information Technology",
+      "source_symbol": "APH",
+      "symbol": "APH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Analog Devices",
+      "sector": "Information Technology",
+      "source_symbol": "ADI",
+      "symbol": "ADI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Aon plc",
+      "sector": "Financials",
+      "source_symbol": "AON",
+      "symbol": "AON"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "APA Corporation",
+      "sector": "Energy",
+      "source_symbol": "APA",
+      "symbol": "APA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Apollo Global Management",
+      "sector": "Financials",
+      "source_symbol": "APO",
+      "symbol": "APO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Apple Inc.",
+      "sector": "Information Technology",
+      "source_symbol": "AAPL",
+      "symbol": "AAPL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Applied Materials",
+      "sector": "Information Technology",
+      "source_symbol": "AMAT",
+      "symbol": "AMAT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "AppLovin",
+      "sector": "Information Technology",
+      "source_symbol": "APP",
+      "symbol": "APP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Aptiv",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "APTV",
+      "symbol": "APTV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Arch Capital Group",
+      "sector": "Financials",
+      "source_symbol": "ACGL",
+      "symbol": "ACGL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Archer Daniels Midland",
+      "sector": "Consumer Staples",
+      "source_symbol": "ADM",
+      "symbol": "ADM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ares Management",
+      "sector": "Financials",
+      "source_symbol": "ARES",
+      "symbol": "ARES"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Arista Networks",
+      "sector": "Information Technology",
+      "source_symbol": "ANET",
+      "symbol": "ANET"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Arthur J. Gallagher & Co.",
+      "sector": "Financials",
+      "source_symbol": "AJG",
+      "symbol": "AJG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Assurant",
+      "sector": "Financials",
+      "source_symbol": "AIZ",
+      "symbol": "AIZ"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "AT&T",
+      "sector": "Communication Services",
+      "source_symbol": "T",
+      "symbol": "T"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Atmos Energy",
+      "sector": "Utilities",
+      "source_symbol": "ATO",
+      "symbol": "ATO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Autodesk",
+      "sector": "Information Technology",
+      "source_symbol": "ADSK",
+      "symbol": "ADSK"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Automatic Data Processing",
+      "sector": "Industrials",
+      "source_symbol": "ADP",
+      "symbol": "ADP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "AutoZone",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "AZO",
+      "symbol": "AZO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "AvalonBay Communities",
+      "sector": "Real Estate",
+      "source_symbol": "AVB",
+      "symbol": "AVB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Avery Dennison",
+      "sector": "Materials",
+      "source_symbol": "AVY",
+      "symbol": "AVY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Axon Enterprise",
+      "sector": "Industrials",
+      "source_symbol": "AXON",
+      "symbol": "AXON"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Baker Hughes",
+      "sector": "Energy",
+      "source_symbol": "BKR",
+      "symbol": "BKR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ball Corporation",
+      "sector": "Materials",
+      "source_symbol": "BALL",
+      "symbol": "BALL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Bank of America",
+      "sector": "Financials",
+      "source_symbol": "BAC",
+      "symbol": "BAC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Baxter International",
+      "sector": "Health Care",
+      "source_symbol": "BAX",
+      "symbol": "BAX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Becton Dickinson",
+      "sector": "Health Care",
+      "source_symbol": "BDX",
+      "symbol": "BDX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Berkshire Hathaway",
+      "sector": "Financials",
+      "source_symbol": "BRK-B",
+      "symbol": "BRK.B"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Best Buy",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "BBY",
+      "symbol": "BBY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Bio-Techne",
+      "sector": "Health Care",
+      "source_symbol": "TECH",
+      "symbol": "TECH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Biogen",
+      "sector": "Health Care",
+      "source_symbol": "BIIB",
+      "symbol": "BIIB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "BlackRock",
+      "sector": "Financials",
+      "source_symbol": "BLK",
+      "symbol": "BLK"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Blackstone Inc.",
+      "sector": "Financials",
+      "source_symbol": "BX",
+      "symbol": "BX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Block, Inc.",
+      "sector": "Financials",
+      "source_symbol": "XYZ",
+      "symbol": "XYZ"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "BNY Mellon",
+      "sector": "Financials",
+      "source_symbol": "BNY",
+      "symbol": "BNY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Boeing",
+      "sector": "Industrials",
+      "source_symbol": "BA",
+      "symbol": "BA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Booking Holdings",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "BKNG",
+      "symbol": "BKNG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Boston Scientific",
+      "sector": "Health Care",
+      "source_symbol": "BSX",
+      "symbol": "BSX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Bristol Myers Squibb",
+      "sector": "Health Care",
+      "source_symbol": "BMY",
+      "symbol": "BMY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Broadcom",
+      "sector": "Information Technology",
+      "source_symbol": "AVGO",
+      "symbol": "AVGO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Broadridge Financial Solutions",
+      "sector": "Industrials",
+      "source_symbol": "BR",
+      "symbol": "BR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Brown & Brown",
+      "sector": "Financials",
+      "source_symbol": "BRO",
+      "symbol": "BRO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Brown\u2013Forman",
+      "sector": "Consumer Staples",
+      "source_symbol": "BF-B",
+      "symbol": "BF.B"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Builders FirstSource",
+      "sector": "Industrials",
+      "source_symbol": "BLDR",
+      "symbol": "BLDR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Bunge Global",
+      "sector": "Consumer Staples",
+      "source_symbol": "BG",
+      "symbol": "BG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "BXP, Inc.",
+      "sector": "Real Estate",
+      "source_symbol": "BXP",
+      "symbol": "BXP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "C.H. Robinson",
+      "sector": "Industrials",
+      "source_symbol": "CHRW",
+      "symbol": "CHRW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Cadence Design Systems",
+      "sector": "Information Technology",
+      "source_symbol": "CDNS",
+      "symbol": "CDNS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Camden Property Trust",
+      "sector": "Real Estate",
+      "source_symbol": "CPT",
+      "symbol": "CPT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Capital One",
+      "sector": "Financials",
+      "source_symbol": "COF",
+      "symbol": "COF"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Cardinal Health",
+      "sector": "Health Care",
+      "source_symbol": "CAH",
+      "symbol": "CAH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Carnival Corporation",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "CCL",
+      "symbol": "CCL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Carrier Global",
+      "sector": "Industrials",
+      "source_symbol": "CARR",
+      "symbol": "CARR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Carvana",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "CVNA",
+      "symbol": "CVNA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Casey's",
+      "sector": "Consumer Staples",
+      "source_symbol": "CASY",
+      "symbol": "CASY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Caterpillar Inc.",
+      "sector": "Industrials",
+      "source_symbol": "CAT",
+      "symbol": "CAT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Cboe Global Markets",
+      "sector": "Financials",
+      "source_symbol": "CBOE",
+      "symbol": "CBOE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "CBRE Group",
+      "sector": "Real Estate",
+      "source_symbol": "CBRE",
+      "symbol": "CBRE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "CDW Corporation",
+      "sector": "Information Technology",
+      "source_symbol": "CDW",
+      "symbol": "CDW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Cencora",
+      "sector": "Health Care",
+      "source_symbol": "COR",
+      "symbol": "COR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Centene Corporation",
+      "sector": "Health Care",
+      "source_symbol": "CNC",
+      "symbol": "CNC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "CenterPoint Energy",
+      "sector": "Utilities",
+      "source_symbol": "CNP",
+      "symbol": "CNP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "CF Industries",
+      "sector": "Materials",
+      "source_symbol": "CF",
+      "symbol": "CF"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Charles River Laboratories",
+      "sector": "Health Care",
+      "source_symbol": "CRL",
+      "symbol": "CRL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Charles Schwab Corporation",
+      "sector": "Financials",
+      "source_symbol": "SCHW",
+      "symbol": "SCHW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Charter Communications",
+      "sector": "Communication Services",
+      "source_symbol": "CHTR",
+      "symbol": "CHTR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Chevron Corporation",
+      "sector": "Energy",
+      "source_symbol": "CVX",
+      "symbol": "CVX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Chipotle Mexican Grill",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "CMG",
+      "symbol": "CMG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Chubb Limited",
+      "sector": "Financials",
+      "source_symbol": "CB",
+      "symbol": "CB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Church & Dwight",
+      "sector": "Consumer Staples",
+      "source_symbol": "CHD",
+      "symbol": "CHD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ciena",
+      "sector": "Information Technology",
+      "source_symbol": "CIEN",
+      "symbol": "CIEN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Cigna",
+      "sector": "Health Care",
+      "source_symbol": "CI",
+      "symbol": "CI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Cincinnati Financial",
+      "sector": "Financials",
+      "source_symbol": "CINF",
+      "symbol": "CINF"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Cintas",
+      "sector": "Industrials",
+      "source_symbol": "CTAS",
+      "symbol": "CTAS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Cisco",
+      "sector": "Information Technology",
+      "source_symbol": "CSCO",
+      "symbol": "CSCO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Citigroup",
+      "sector": "Financials",
+      "source_symbol": "C",
+      "symbol": "C"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Citizens Financial Group",
+      "sector": "Financials",
+      "source_symbol": "CFG",
+      "symbol": "CFG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Clorox",
+      "sector": "Consumer Staples",
+      "source_symbol": "CLX",
+      "symbol": "CLX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "CME Group",
+      "sector": "Financials",
+      "source_symbol": "CME",
+      "symbol": "CME"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "CMS Energy",
+      "sector": "Utilities",
+      "source_symbol": "CMS",
+      "symbol": "CMS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Coca-Cola Company (The)",
+      "sector": "Consumer Staples",
+      "source_symbol": "KO",
+      "symbol": "KO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Cognizant",
+      "sector": "Information Technology",
+      "source_symbol": "CTSH",
+      "symbol": "CTSH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Coherent Corp.",
+      "sector": "Information Technology",
+      "source_symbol": "COHR",
+      "symbol": "COHR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Coinbase",
+      "sector": "Financials",
+      "source_symbol": "COIN",
+      "symbol": "COIN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Colgate-Palmolive",
+      "sector": "Consumer Staples",
+      "source_symbol": "CL",
+      "symbol": "CL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Comcast",
+      "sector": "Communication Services",
+      "source_symbol": "CMCSA",
+      "symbol": "CMCSA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Comfort Systems USA",
+      "sector": "Industrials",
+      "source_symbol": "FIX",
+      "symbol": "FIX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "ConocoPhillips",
+      "sector": "Energy",
+      "source_symbol": "COP",
+      "symbol": "COP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Consolidated Edison",
+      "sector": "Utilities",
+      "source_symbol": "ED",
+      "symbol": "ED"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Constellation Brands",
+      "sector": "Consumer Staples",
+      "source_symbol": "STZ",
+      "symbol": "STZ"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Constellation Energy",
+      "sector": "Utilities",
+      "source_symbol": "CEG",
+      "symbol": "CEG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Cooper Companies (The)",
+      "sector": "Health Care",
+      "source_symbol": "COO",
+      "symbol": "COO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Copart",
+      "sector": "Industrials",
+      "source_symbol": "CPRT",
+      "symbol": "CPRT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Corning Inc.",
+      "sector": "Information Technology",
+      "source_symbol": "GLW",
+      "symbol": "GLW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Corpay",
+      "sector": "Financials",
+      "source_symbol": "CPAY",
+      "symbol": "CPAY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Corteva",
+      "sector": "Materials",
+      "source_symbol": "CTVA",
+      "symbol": "CTVA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "CoStar Group",
+      "sector": "Real Estate",
+      "source_symbol": "CSGP",
+      "symbol": "CSGP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Costco",
+      "sector": "Consumer Staples",
+      "source_symbol": "COST",
+      "symbol": "COST"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "CRH plc",
+      "sector": "Materials",
+      "source_symbol": "CRH",
+      "symbol": "CRH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "CrowdStrike",
+      "sector": "Information Technology",
+      "source_symbol": "CRWD",
+      "symbol": "CRWD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Crown Castle",
+      "sector": "Real Estate",
+      "source_symbol": "CCI",
+      "symbol": "CCI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "CSX Corporation",
+      "sector": "Industrials",
+      "source_symbol": "CSX",
+      "symbol": "CSX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Cummins",
+      "sector": "Industrials",
+      "source_symbol": "CMI",
+      "symbol": "CMI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "CVS Health",
+      "sector": "Health Care",
+      "source_symbol": "CVS",
+      "symbol": "CVS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Danaher Corporation",
+      "sector": "Health Care",
+      "source_symbol": "DHR",
+      "symbol": "DHR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Darden Restaurants",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "DRI",
+      "symbol": "DRI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Datadog",
+      "sector": "Information Technology",
+      "source_symbol": "DDOG",
+      "symbol": "DDOG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "DaVita",
+      "sector": "Health Care",
+      "source_symbol": "DVA",
+      "symbol": "DVA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Deckers Brands",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "DECK",
+      "symbol": "DECK"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Deere & Company",
+      "sector": "Industrials",
+      "source_symbol": "DE",
+      "symbol": "DE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Dell Technologies",
+      "sector": "Information Technology",
+      "source_symbol": "DELL",
+      "symbol": "DELL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Delta Air Lines",
+      "sector": "Industrials",
+      "source_symbol": "DAL",
+      "symbol": "DAL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Devon Energy",
+      "sector": "Energy",
+      "source_symbol": "DVN",
+      "symbol": "DVN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Dexcom",
+      "sector": "Health Care",
+      "source_symbol": "DXCM",
+      "symbol": "DXCM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Diamondback Energy",
+      "sector": "Energy",
+      "source_symbol": "FANG",
+      "symbol": "FANG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Digital Realty",
+      "sector": "Real Estate",
+      "source_symbol": "DLR",
+      "symbol": "DLR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Dollar General",
+      "sector": "Consumer Staples",
+      "source_symbol": "DG",
+      "symbol": "DG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Dollar Tree",
+      "sector": "Consumer Staples",
+      "source_symbol": "DLTR",
+      "symbol": "DLTR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Dominion Energy",
+      "sector": "Utilities",
+      "source_symbol": "D",
+      "symbol": "D"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Domino's",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "DPZ",
+      "symbol": "DPZ"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "DoorDash",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "DASH",
+      "symbol": "DASH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Dover Corporation",
+      "sector": "Industrials",
+      "source_symbol": "DOV",
+      "symbol": "DOV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Dow Inc.",
+      "sector": "Materials",
+      "source_symbol": "DOW",
+      "symbol": "DOW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "D. R. Horton",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "DHI",
+      "symbol": "DHI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "DTE Energy",
+      "sector": "Utilities",
+      "source_symbol": "DTE",
+      "symbol": "DTE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Duke Energy",
+      "sector": "Utilities",
+      "source_symbol": "DUK",
+      "symbol": "DUK"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "DuPont",
+      "sector": "Materials",
+      "source_symbol": "DD",
+      "symbol": "DD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Eaton Corporation",
+      "sector": "Industrials",
+      "source_symbol": "ETN",
+      "symbol": "ETN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "eBay Inc.",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "EBAY",
+      "symbol": "EBAY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "EchoStar",
+      "sector": "Communication Services",
+      "source_symbol": "ECHO",
+      "symbol": "ECHO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ecolab",
+      "sector": "Materials",
+      "source_symbol": "ECL",
+      "symbol": "ECL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Edison International",
+      "sector": "Utilities",
+      "source_symbol": "EIX",
+      "symbol": "EIX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Edwards Lifesciences",
+      "sector": "Health Care",
+      "source_symbol": "EW",
+      "symbol": "EW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Electronic Arts",
+      "sector": "Communication Services",
+      "source_symbol": "EA",
+      "symbol": "EA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Elevance Health",
+      "sector": "Health Care",
+      "source_symbol": "ELV",
+      "symbol": "ELV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Emcor",
+      "sector": "Industrials",
+      "source_symbol": "EME",
+      "symbol": "EME"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Emerson Electric",
+      "sector": "Industrials",
+      "source_symbol": "EMR",
+      "symbol": "EMR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Entergy",
+      "sector": "Utilities",
+      "source_symbol": "ETR",
+      "symbol": "ETR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "EOG Resources",
+      "sector": "Energy",
+      "source_symbol": "EOG",
+      "symbol": "EOG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "EQT Corporation",
+      "sector": "Energy",
+      "source_symbol": "EQT",
+      "symbol": "EQT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Equifax",
+      "sector": "Industrials",
+      "source_symbol": "EFX",
+      "symbol": "EFX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Equinix",
+      "sector": "Real Estate",
+      "source_symbol": "EQIX",
+      "symbol": "EQIX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Equity Residential",
+      "sector": "Real Estate",
+      "source_symbol": "EQR",
+      "symbol": "EQR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Erie Indemnity",
+      "sector": "Financials",
+      "source_symbol": "ERIE",
+      "symbol": "ERIE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Essex Property Trust",
+      "sector": "Real Estate",
+      "source_symbol": "ESS",
+      "symbol": "ESS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Est\u00e9e Lauder Companies (The)",
+      "sector": "Consumer Staples",
+      "source_symbol": "EL",
+      "symbol": "EL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Everest Group",
+      "sector": "Financials",
+      "source_symbol": "EG",
+      "symbol": "EG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Evergy",
+      "sector": "Utilities",
+      "source_symbol": "EVRG",
+      "symbol": "EVRG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Eversource Energy",
+      "sector": "Utilities",
+      "source_symbol": "ES",
+      "symbol": "ES"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Exelon",
+      "sector": "Utilities",
+      "source_symbol": "EXC",
+      "symbol": "EXC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Expand Energy",
+      "sector": "Energy",
+      "source_symbol": "EXE",
+      "symbol": "EXE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Expedia Group",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "EXPE",
+      "symbol": "EXPE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Expeditors International",
+      "sector": "Industrials",
+      "source_symbol": "EXPD",
+      "symbol": "EXPD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Extra Space Storage",
+      "sector": "Real Estate",
+      "source_symbol": "EXR",
+      "symbol": "EXR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "ExxonMobil",
+      "sector": "Energy",
+      "source_symbol": "XOM",
+      "symbol": "XOM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "F5, Inc.",
+      "sector": "Information Technology",
+      "source_symbol": "FFIV",
+      "symbol": "FFIV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "FactSet",
+      "sector": "Financials",
+      "source_symbol": "FDS",
+      "symbol": "FDS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Fair Isaac",
+      "sector": "Information Technology",
+      "source_symbol": "FICO",
+      "symbol": "FICO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Fastenal",
+      "sector": "Industrials",
+      "source_symbol": "FAST",
+      "symbol": "FAST"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Federal Realty Investment Trust",
+      "sector": "Real Estate",
+      "source_symbol": "FRT",
+      "symbol": "FRT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "FedEx",
+      "sector": "Industrials",
+      "source_symbol": "FDX",
+      "symbol": "FDX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "FedEx Freight",
+      "sector": "Industrials",
+      "source_symbol": "FDXF",
+      "symbol": "FDXF"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Fidelity National Information Services",
+      "sector": "Financials",
+      "source_symbol": "FIS",
+      "symbol": "FIS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Fifth Third Bancorp",
+      "sector": "Financials",
+      "source_symbol": "FITB",
+      "symbol": "FITB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "First Solar",
+      "sector": "Information Technology",
+      "source_symbol": "FSLR",
+      "symbol": "FSLR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "FirstEnergy",
+      "sector": "Utilities",
+      "source_symbol": "FE",
+      "symbol": "FE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Fiserv",
+      "sector": "Financials",
+      "source_symbol": "FISV",
+      "symbol": "FISV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Flex Ltd.",
+      "sector": "Information Technology",
+      "source_symbol": "FLEX",
+      "symbol": "FLEX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ford Motor Company",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "F",
+      "symbol": "F"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Fortinet",
+      "sector": "Information Technology",
+      "source_symbol": "FTNT",
+      "symbol": "FTNT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Fortive",
+      "sector": "Industrials",
+      "source_symbol": "FTV",
+      "symbol": "FTV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Fox Corporation (Class A)",
+      "sector": "Communication Services",
+      "source_symbol": "FOXA",
+      "symbol": "FOXA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Fox Corporation (Class B)",
+      "sector": "Communication Services",
+      "source_symbol": "FOX",
+      "symbol": "FOX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Franklin Resources",
+      "sector": "Financials",
+      "source_symbol": "BEN",
+      "symbol": "BEN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Freeport-McMoRan",
+      "sector": "Materials",
+      "source_symbol": "FCX",
+      "symbol": "FCX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Garmin",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "GRMN",
+      "symbol": "GRMN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Gartner",
+      "sector": "Information Technology",
+      "source_symbol": "IT",
+      "symbol": "IT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "GE Aerospace",
+      "sector": "Industrials",
+      "source_symbol": "GE",
+      "symbol": "GE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "GE HealthCare",
+      "sector": "Health Care",
+      "source_symbol": "GEHC",
+      "symbol": "GEHC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "GE Vernova",
+      "sector": "Industrials",
+      "source_symbol": "GEV",
+      "symbol": "GEV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Gen Digital",
+      "sector": "Information Technology",
+      "source_symbol": "GEN",
+      "symbol": "GEN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Generac",
+      "sector": "Industrials",
+      "source_symbol": "GNRC",
+      "symbol": "GNRC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "General Dynamics",
+      "sector": "Industrials",
+      "source_symbol": "GD",
+      "symbol": "GD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "General Mills",
+      "sector": "Consumer Staples",
+      "source_symbol": "GIS",
+      "symbol": "GIS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "General Motors",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "GM",
+      "symbol": "GM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Genuine Parts Company",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "GPC",
+      "symbol": "GPC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Gilead Sciences",
+      "sector": "Health Care",
+      "source_symbol": "GILD",
+      "symbol": "GILD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Global Payments",
+      "sector": "Financials",
+      "source_symbol": "GPN",
+      "symbol": "GPN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Globe Life",
+      "sector": "Financials",
+      "source_symbol": "GL",
+      "symbol": "GL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "GoDaddy",
+      "sector": "Information Technology",
+      "source_symbol": "GDDY",
+      "symbol": "GDDY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Goldman Sachs",
+      "sector": "Financials",
+      "source_symbol": "GS",
+      "symbol": "GS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Halliburton",
+      "sector": "Energy",
+      "source_symbol": "HAL",
+      "symbol": "HAL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Hartford (The)",
+      "sector": "Financials",
+      "source_symbol": "HIG",
+      "symbol": "HIG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Hasbro",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "HAS",
+      "symbol": "HAS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "HCA Healthcare",
+      "sector": "Health Care",
+      "source_symbol": "HCA",
+      "symbol": "HCA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Healthpeak Properties",
+      "sector": "Real Estate",
+      "source_symbol": "DOC",
+      "symbol": "DOC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Henry Schein",
+      "sector": "Health Care",
+      "source_symbol": "HSIC",
+      "symbol": "HSIC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Hershey Company (The)",
+      "sector": "Consumer Staples",
+      "source_symbol": "HSY",
+      "symbol": "HSY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Hewlett Packard Enterprise",
+      "sector": "Information Technology",
+      "source_symbol": "HPE",
+      "symbol": "HPE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Hilton Worldwide",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "HLT",
+      "symbol": "HLT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Home Depot (The)",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "HD",
+      "symbol": "HD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Honeywell Aerospace",
+      "sector": "Industrials",
+      "source_symbol": "HONA",
+      "symbol": "HONA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Honeywell Technologies",
+      "sector": "Industrials",
+      "source_symbol": "HON",
+      "symbol": "HON"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Hormel Foods",
+      "sector": "Consumer Staples",
+      "source_symbol": "HRL",
+      "symbol": "HRL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Host Hotels & Resorts",
+      "sector": "Real Estate",
+      "source_symbol": "HST",
+      "symbol": "HST"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Howmet Aerospace",
+      "sector": "Industrials",
+      "source_symbol": "HWM",
+      "symbol": "HWM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "HP Inc.",
+      "sector": "Information Technology",
+      "source_symbol": "HPQ",
+      "symbol": "HPQ"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Hubbell Incorporated",
+      "sector": "Industrials",
+      "source_symbol": "HUBB",
+      "symbol": "HUBB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Humana",
+      "sector": "Health Care",
+      "source_symbol": "HUM",
+      "symbol": "HUM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Huntington Bancshares",
+      "sector": "Financials",
+      "source_symbol": "HBAN",
+      "symbol": "HBAN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Huntington Ingalls Industries",
+      "sector": "Industrials",
+      "source_symbol": "HII",
+      "symbol": "HII"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "IBM",
+      "sector": "Information Technology",
+      "source_symbol": "IBM",
+      "symbol": "IBM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "IDEX Corporation",
+      "sector": "Industrials",
+      "source_symbol": "IEX",
+      "symbol": "IEX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Idexx Laboratories",
+      "sector": "Health Care",
+      "source_symbol": "IDXX",
+      "symbol": "IDXX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Illinois Tool Works",
+      "sector": "Industrials",
+      "source_symbol": "ITW",
+      "symbol": "ITW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Incyte",
+      "sector": "Health Care",
+      "source_symbol": "INCY",
+      "symbol": "INCY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ingersoll Rand",
+      "sector": "Industrials",
+      "source_symbol": "IR",
+      "symbol": "IR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Insulet Corporation",
+      "sector": "Health Care",
+      "source_symbol": "PODD",
+      "symbol": "PODD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Intel",
+      "sector": "Information Technology",
+      "source_symbol": "INTC",
+      "symbol": "INTC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Interactive Brokers",
+      "sector": "Financials",
+      "source_symbol": "IBKR",
+      "symbol": "IBKR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Intercontinental Exchange",
+      "sector": "Financials",
+      "source_symbol": "ICE",
+      "symbol": "ICE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "International Flavors & Fragrances",
+      "sector": "Materials",
+      "source_symbol": "IFF",
+      "symbol": "IFF"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "International Paper",
+      "sector": "Materials",
+      "source_symbol": "IP",
+      "symbol": "IP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Intuit",
+      "sector": "Information Technology",
+      "source_symbol": "INTU",
+      "symbol": "INTU"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Intuitive Surgical",
+      "sector": "Health Care",
+      "source_symbol": "ISRG",
+      "symbol": "ISRG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Invesco",
+      "sector": "Financials",
+      "source_symbol": "IVZ",
+      "symbol": "IVZ"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Invitation Homes",
+      "sector": "Real Estate",
+      "source_symbol": "INVH",
+      "symbol": "INVH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "IQVIA",
+      "sector": "Health Care",
+      "source_symbol": "IQV",
+      "symbol": "IQV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Iron Mountain",
+      "sector": "Real Estate",
+      "source_symbol": "IRM",
+      "symbol": "IRM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "J.B. Hunt",
+      "sector": "Industrials",
+      "source_symbol": "JBHT",
+      "symbol": "JBHT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Jabil",
+      "sector": "Information Technology",
+      "source_symbol": "JBL",
+      "symbol": "JBL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Jack Henry & Associates",
+      "sector": "Financials",
+      "source_symbol": "JKHY",
+      "symbol": "JKHY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Jacobs Solutions",
+      "sector": "Industrials",
+      "source_symbol": "J",
+      "symbol": "J"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Johnson & Johnson",
+      "sector": "Health Care",
+      "source_symbol": "JNJ",
+      "symbol": "JNJ"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Johnson Controls",
+      "sector": "Industrials",
+      "source_symbol": "JCI",
+      "symbol": "JCI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "JPMorgan Chase",
+      "sector": "Financials",
+      "source_symbol": "JPM",
+      "symbol": "JPM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Kenvue",
+      "sector": "Consumer Staples",
+      "source_symbol": "KVUE",
+      "symbol": "KVUE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Keurig Dr Pepper",
+      "sector": "Consumer Staples",
+      "source_symbol": "KDP",
+      "symbol": "KDP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "KeyCorp",
+      "sector": "Financials",
+      "source_symbol": "KEY",
+      "symbol": "KEY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Keysight Technologies",
+      "sector": "Information Technology",
+      "source_symbol": "KEYS",
+      "symbol": "KEYS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Kimberly-Clark",
+      "sector": "Consumer Staples",
+      "source_symbol": "KMB",
+      "symbol": "KMB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Kimco Realty",
+      "sector": "Real Estate",
+      "source_symbol": "KIM",
+      "symbol": "KIM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Kinder Morgan",
+      "sector": "Energy",
+      "source_symbol": "KMI",
+      "symbol": "KMI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "KKR & Co.",
+      "sector": "Financials",
+      "source_symbol": "KKR",
+      "symbol": "KKR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "KLA Corporation",
+      "sector": "Information Technology",
+      "source_symbol": "KLAC",
+      "symbol": "KLAC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Kraft Heinz",
+      "sector": "Consumer Staples",
+      "source_symbol": "KHC",
+      "symbol": "KHC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Kroger",
+      "sector": "Consumer Staples",
+      "source_symbol": "KR",
+      "symbol": "KR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "L3Harris",
+      "sector": "Industrials",
+      "source_symbol": "LHX",
+      "symbol": "LHX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Labcorp",
+      "sector": "Health Care",
+      "source_symbol": "LH",
+      "symbol": "LH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Lam Research",
+      "sector": "Information Technology",
+      "source_symbol": "LRCX",
+      "symbol": "LRCX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Las Vegas Sands",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "LVS",
+      "symbol": "LVS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Leidos",
+      "sector": "Industrials",
+      "source_symbol": "LDOS",
+      "symbol": "LDOS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Lennar",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "LEN",
+      "symbol": "LEN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Lennox International",
+      "sector": "Industrials",
+      "source_symbol": "LII",
+      "symbol": "LII"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Lilly (Eli)",
+      "sector": "Health Care",
+      "source_symbol": "LLY",
+      "symbol": "LLY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Linde plc",
+      "sector": "Materials",
+      "source_symbol": "LIN",
+      "symbol": "LIN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Live Nation Entertainment",
+      "sector": "Communication Services",
+      "source_symbol": "LYV",
+      "symbol": "LYV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Lockheed Martin",
+      "sector": "Industrials",
+      "source_symbol": "LMT",
+      "symbol": "LMT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Loews Corporation",
+      "sector": "Financials",
+      "source_symbol": "L",
+      "symbol": "L"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Lowe's",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "LOW",
+      "symbol": "LOW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Lululemon Athletica",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "LULU",
+      "symbol": "LULU"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Lumentum",
+      "sector": "Information Technology",
+      "source_symbol": "LITE",
+      "symbol": "LITE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "LyondellBasell",
+      "sector": "Materials",
+      "source_symbol": "LYB",
+      "symbol": "LYB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "M&T Bank",
+      "sector": "Financials",
+      "source_symbol": "MTB",
+      "symbol": "MTB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Marathon Petroleum",
+      "sector": "Energy",
+      "source_symbol": "MPC",
+      "symbol": "MPC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Marriott International",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "MAR",
+      "symbol": "MAR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Marsh McLennan",
+      "sector": "Financials",
+      "source_symbol": "MRSH",
+      "symbol": "MRSH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Martin Marietta Materials",
+      "sector": "Materials",
+      "source_symbol": "MLM",
+      "symbol": "MLM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Marvell Technology",
+      "sector": "Information Technology",
+      "source_symbol": "MRVL",
+      "symbol": "MRVL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Masco",
+      "sector": "Industrials",
+      "source_symbol": "MAS",
+      "symbol": "MAS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Mastercard",
+      "sector": "Financials",
+      "source_symbol": "MA",
+      "symbol": "MA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "McCormick & Company",
+      "sector": "Consumer Staples",
+      "source_symbol": "MKC",
+      "symbol": "MKC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "McDonald's",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "MCD",
+      "symbol": "MCD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "McKesson Corporation",
+      "sector": "Health Care",
+      "source_symbol": "MCK",
+      "symbol": "MCK"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Medtronic",
+      "sector": "Health Care",
+      "source_symbol": "MDT",
+      "symbol": "MDT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Merck & Co.",
+      "sector": "Health Care",
+      "source_symbol": "MRK",
+      "symbol": "MRK"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Meta Platforms",
+      "sector": "Communication Services",
+      "source_symbol": "META",
+      "symbol": "META"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "MetLife",
+      "sector": "Financials",
+      "source_symbol": "MET",
+      "symbol": "MET"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Mettler Toledo",
+      "sector": "Health Care",
+      "source_symbol": "MTD",
+      "symbol": "MTD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "MGM Resorts",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "MGM",
+      "symbol": "MGM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Microchip Technology",
+      "sector": "Information Technology",
+      "source_symbol": "MCHP",
+      "symbol": "MCHP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Micron Technology",
+      "sector": "Information Technology",
+      "source_symbol": "MU",
+      "symbol": "MU"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Microsoft",
+      "sector": "Information Technology",
+      "source_symbol": "MSFT",
+      "symbol": "MSFT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Mid-America Apartment Communities",
+      "sector": "Real Estate",
+      "source_symbol": "MAA",
+      "symbol": "MAA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Moderna",
+      "sector": "Health Care",
+      "source_symbol": "MRNA",
+      "symbol": "MRNA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Molson Coors Beverage Company",
+      "sector": "Consumer Staples",
+      "source_symbol": "TAP",
+      "symbol": "TAP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Mondelez International",
+      "sector": "Consumer Staples",
+      "source_symbol": "MDLZ",
+      "symbol": "MDLZ"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Monolithic Power Systems",
+      "sector": "Information Technology",
+      "source_symbol": "MPWR",
+      "symbol": "MPWR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Monster Beverage",
+      "sector": "Consumer Staples",
+      "source_symbol": "MNST",
+      "symbol": "MNST"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Moody's Corporation",
+      "sector": "Financials",
+      "source_symbol": "MCO",
+      "symbol": "MCO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Morgan Stanley",
+      "sector": "Financials",
+      "source_symbol": "MS",
+      "symbol": "MS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Mosaic Company (The)",
+      "sector": "Materials",
+      "source_symbol": "MOS",
+      "symbol": "MOS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Motorola Solutions",
+      "sector": "Information Technology",
+      "source_symbol": "MSI",
+      "symbol": "MSI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "MSCI Inc.",
+      "sector": "Financials",
+      "source_symbol": "MSCI",
+      "symbol": "MSCI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Nasdaq, Inc.",
+      "sector": "Financials",
+      "source_symbol": "NDAQ",
+      "symbol": "NDAQ"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "NetApp",
+      "sector": "Information Technology",
+      "source_symbol": "NTAP",
+      "symbol": "NTAP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Netflix",
+      "sector": "Communication Services",
+      "source_symbol": "NFLX",
+      "symbol": "NFLX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Newmont",
+      "sector": "Materials",
+      "source_symbol": "NEM",
+      "symbol": "NEM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "News Corp (Class A)",
+      "sector": "Communication Services",
+      "source_symbol": "NWSA",
+      "symbol": "NWSA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "News Corp (Class B)",
+      "sector": "Communication Services",
+      "source_symbol": "NWS",
+      "symbol": "NWS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "NextEra Energy",
+      "sector": "Utilities",
+      "source_symbol": "NEE",
+      "symbol": "NEE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Nike, Inc.",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "NKE",
+      "symbol": "NKE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "NiSource",
+      "sector": "Utilities",
+      "source_symbol": "NI",
+      "symbol": "NI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Nordson Corporation",
+      "sector": "Industrials",
+      "source_symbol": "NDSN",
+      "symbol": "NDSN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Norfolk Southern",
+      "sector": "Industrials",
+      "source_symbol": "NSC",
+      "symbol": "NSC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Northern Trust",
+      "sector": "Financials",
+      "source_symbol": "NTRS",
+      "symbol": "NTRS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Northrop Grumman",
+      "sector": "Industrials",
+      "source_symbol": "NOC",
+      "symbol": "NOC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Norwegian Cruise Line Holdings",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "NCLH",
+      "symbol": "NCLH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "NRG Energy",
+      "sector": "Utilities",
+      "source_symbol": "NRG",
+      "symbol": "NRG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Nucor",
+      "sector": "Materials",
+      "source_symbol": "NUE",
+      "symbol": "NUE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Nvidia",
+      "sector": "Information Technology",
+      "source_symbol": "NVDA",
+      "symbol": "NVDA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "NVR, Inc.",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "NVR",
+      "symbol": "NVR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "NXP Semiconductors",
+      "sector": "Information Technology",
+      "source_symbol": "NXPI",
+      "symbol": "NXPI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "O\u2019Reilly Automotive",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "ORLY",
+      "symbol": "ORLY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Occidental Petroleum",
+      "sector": "Energy",
+      "source_symbol": "OXY",
+      "symbol": "OXY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Old Dominion",
+      "sector": "Industrials",
+      "source_symbol": "ODFL",
+      "symbol": "ODFL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Omnicom Group",
+      "sector": "Communication Services",
+      "source_symbol": "OMC",
+      "symbol": "OMC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "ON Semiconductor",
+      "sector": "Information Technology",
+      "source_symbol": "ON",
+      "symbol": "ON"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Oneok",
+      "sector": "Energy",
+      "source_symbol": "OKE",
+      "symbol": "OKE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Oracle Corporation",
+      "sector": "Information Technology",
+      "source_symbol": "ORCL",
+      "symbol": "ORCL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Otis Worldwide",
+      "sector": "Industrials",
+      "source_symbol": "OTIS",
+      "symbol": "OTIS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Paccar",
+      "sector": "Industrials",
+      "source_symbol": "PCAR",
+      "symbol": "PCAR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Packaging Corporation of America",
+      "sector": "Materials",
+      "source_symbol": "PKG",
+      "symbol": "PKG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Palantir Technologies",
+      "sector": "Information Technology",
+      "source_symbol": "PLTR",
+      "symbol": "PLTR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Palo Alto Networks",
+      "sector": "Information Technology",
+      "source_symbol": "PANW",
+      "symbol": "PANW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Paramount Skydance Corporation",
+      "sector": "Communication Services",
+      "source_symbol": "PSKY",
+      "symbol": "PSKY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Parker Hannifin",
+      "sector": "Industrials",
+      "source_symbol": "PH",
+      "symbol": "PH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Paychex",
+      "sector": "Industrials",
+      "source_symbol": "PAYX",
+      "symbol": "PAYX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "PayPal",
+      "sector": "Financials",
+      "source_symbol": "PYPL",
+      "symbol": "PYPL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Pentair",
+      "sector": "Industrials",
+      "source_symbol": "PNR",
+      "symbol": "PNR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "PepsiCo",
+      "sector": "Consumer Staples",
+      "source_symbol": "PEP",
+      "symbol": "PEP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Pfizer",
+      "sector": "Health Care",
+      "source_symbol": "PFE",
+      "symbol": "PFE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "PG&E Corporation",
+      "sector": "Utilities",
+      "source_symbol": "PCG",
+      "symbol": "PCG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Philip Morris International",
+      "sector": "Consumer Staples",
+      "source_symbol": "PM",
+      "symbol": "PM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Phillips 66",
+      "sector": "Energy",
+      "source_symbol": "PSX",
+      "symbol": "PSX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Pinnacle West Capital",
+      "sector": "Utilities",
+      "source_symbol": "PNW",
+      "symbol": "PNW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "PNC Financial Services",
+      "sector": "Financials",
+      "source_symbol": "PNC",
+      "symbol": "PNC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "PPG Industries",
+      "sector": "Materials",
+      "source_symbol": "PPG",
+      "symbol": "PPG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "PPL Corporation",
+      "sector": "Utilities",
+      "source_symbol": "PPL",
+      "symbol": "PPL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Principal Financial Group",
+      "sector": "Financials",
+      "source_symbol": "PFG",
+      "symbol": "PFG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Procter & Gamble",
+      "sector": "Consumer Staples",
+      "source_symbol": "PG",
+      "symbol": "PG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Progressive Corporation",
+      "sector": "Financials",
+      "source_symbol": "PGR",
+      "symbol": "PGR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Prologis",
+      "sector": "Real Estate",
+      "source_symbol": "PLD",
+      "symbol": "PLD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Prudential Financial",
+      "sector": "Financials",
+      "source_symbol": "PRU",
+      "symbol": "PRU"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Public Service Enterprise Group",
+      "sector": "Utilities",
+      "source_symbol": "PEG",
+      "symbol": "PEG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "PTC Inc.",
+      "sector": "Information Technology",
+      "source_symbol": "PTC",
+      "symbol": "PTC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Public Storage",
+      "sector": "Real Estate",
+      "source_symbol": "PSA",
+      "symbol": "PSA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "PulteGroup",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "PHM",
+      "symbol": "PHM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Quanta Services",
+      "sector": "Industrials",
+      "source_symbol": "PWR",
+      "symbol": "PWR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Qualcomm",
+      "sector": "Information Technology",
+      "source_symbol": "QCOM",
+      "symbol": "QCOM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Quest Diagnostics",
+      "sector": "Health Care",
+      "source_symbol": "DGX",
+      "symbol": "DGX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Qnity Electronics",
+      "sector": "Information Technology",
+      "source_symbol": "Q",
+      "symbol": "Q"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ralph Lauren Corporation",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "RL",
+      "symbol": "RL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Raymond James Financial",
+      "sector": "Financials",
+      "source_symbol": "RJF",
+      "symbol": "RJF"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "RTX Corporation",
+      "sector": "Industrials",
+      "source_symbol": "RTX",
+      "symbol": "RTX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Realty Income",
+      "sector": "Real Estate",
+      "source_symbol": "O",
+      "symbol": "O"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Regency Centers",
+      "sector": "Real Estate",
+      "source_symbol": "REG",
+      "symbol": "REG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Regeneron Pharmaceuticals",
+      "sector": "Health Care",
+      "source_symbol": "REGN",
+      "symbol": "REGN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Regions Financial Corporation",
+      "sector": "Financials",
+      "source_symbol": "RF",
+      "symbol": "RF"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Republic Services",
+      "sector": "Industrials",
+      "source_symbol": "RSG",
+      "symbol": "RSG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "ResMed",
+      "sector": "Health Care",
+      "source_symbol": "RMD",
+      "symbol": "RMD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Revvity",
+      "sector": "Health Care",
+      "source_symbol": "RVTY",
+      "symbol": "RVTY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Robinhood Markets",
+      "sector": "Financials",
+      "source_symbol": "HOOD",
+      "symbol": "HOOD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Rockwell Automation",
+      "sector": "Industrials",
+      "source_symbol": "ROK",
+      "symbol": "ROK"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Rollins, Inc.",
+      "sector": "Industrials",
+      "source_symbol": "ROL",
+      "symbol": "ROL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Roper Technologies",
+      "sector": "Information Technology",
+      "source_symbol": "ROP",
+      "symbol": "ROP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ross Stores",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "ROST",
+      "symbol": "ROST"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Royal Caribbean Group",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "RCL",
+      "symbol": "RCL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "S&P Global",
+      "sector": "Financials",
+      "source_symbol": "SPGI",
+      "symbol": "SPGI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Salesforce",
+      "sector": "Information Technology",
+      "source_symbol": "CRM",
+      "symbol": "CRM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Sandisk",
+      "sector": "Information Technology",
+      "source_symbol": "SNDK",
+      "symbol": "SNDK"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "SBA Communications",
+      "sector": "Real Estate",
+      "source_symbol": "SBAC",
+      "symbol": "SBAC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Schlumberger",
+      "sector": "Energy",
+      "source_symbol": "SLB",
+      "symbol": "SLB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Seagate Technology",
+      "sector": "Information Technology",
+      "source_symbol": "STX",
+      "symbol": "STX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Sempra",
+      "sector": "Utilities",
+      "source_symbol": "SRE",
+      "symbol": "SRE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "ServiceNow",
+      "sector": "Information Technology",
+      "source_symbol": "NOW",
+      "symbol": "NOW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Sherwin-Williams",
+      "sector": "Materials",
+      "source_symbol": "SHW",
+      "symbol": "SHW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Simon Property Group",
+      "sector": "Real Estate",
+      "source_symbol": "SPG",
+      "symbol": "SPG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Skyworks Solutions",
+      "sector": "Information Technology",
+      "source_symbol": "SWKS",
+      "symbol": "SWKS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "J.M. Smucker Company (The)",
+      "sector": "Consumer Staples",
+      "source_symbol": "SJM",
+      "symbol": "SJM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Smurfit Westrock",
+      "sector": "Materials",
+      "source_symbol": "SW",
+      "symbol": "SW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Snap-on",
+      "sector": "Industrials",
+      "source_symbol": "SNA",
+      "symbol": "SNA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Solventum",
+      "sector": "Health Care",
+      "source_symbol": "SOLV",
+      "symbol": "SOLV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Southern Company",
+      "sector": "Utilities",
+      "source_symbol": "SO",
+      "symbol": "SO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Southwest Airlines",
+      "sector": "Industrials",
+      "source_symbol": "LUV",
+      "symbol": "LUV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Stanley Black & Decker",
+      "sector": "Industrials",
+      "source_symbol": "SWK",
+      "symbol": "SWK"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Starbucks",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "SBUX",
+      "symbol": "SBUX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "State Street Corporation",
+      "sector": "Financials",
+      "source_symbol": "STT",
+      "symbol": "STT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Steel Dynamics",
+      "sector": "Materials",
+      "source_symbol": "STLD",
+      "symbol": "STLD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Steris",
+      "sector": "Health Care",
+      "source_symbol": "STE",
+      "symbol": "STE"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Stryker Corporation",
+      "sector": "Health Care",
+      "source_symbol": "SYK",
+      "symbol": "SYK"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Supermicro",
+      "sector": "Information Technology",
+      "source_symbol": "SMCI",
+      "symbol": "SMCI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Synchrony Financial",
+      "sector": "Financials",
+      "source_symbol": "SYF",
+      "symbol": "SYF"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Synopsys",
+      "sector": "Information Technology",
+      "source_symbol": "SNPS",
+      "symbol": "SNPS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Sysco",
+      "sector": "Consumer Staples",
+      "source_symbol": "SYY",
+      "symbol": "SYY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "T-Mobile US",
+      "sector": "Communication Services",
+      "source_symbol": "TMUS",
+      "symbol": "TMUS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "T. Rowe Price",
+      "sector": "Financials",
+      "source_symbol": "TROW",
+      "symbol": "TROW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Take-Two Interactive",
+      "sector": "Communication Services",
+      "source_symbol": "TTWO",
+      "symbol": "TTWO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Tapestry, Inc.",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "TPR",
+      "symbol": "TPR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Targa Resources",
+      "sector": "Energy",
+      "source_symbol": "TRGP",
+      "symbol": "TRGP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Target Corporation",
+      "sector": "Consumer Staples",
+      "source_symbol": "TGT",
+      "symbol": "TGT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "TE Connectivity",
+      "sector": "Information Technology",
+      "source_symbol": "TEL",
+      "symbol": "TEL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Teledyne Technologies",
+      "sector": "Information Technology",
+      "source_symbol": "TDY",
+      "symbol": "TDY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Teradyne",
+      "sector": "Information Technology",
+      "source_symbol": "TER",
+      "symbol": "TER"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Tesla, Inc.",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "TSLA",
+      "symbol": "TSLA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Texas Instruments",
+      "sector": "Information Technology",
+      "source_symbol": "TXN",
+      "symbol": "TXN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Texas Pacific Land Corporation",
+      "sector": "Energy",
+      "source_symbol": "TPL",
+      "symbol": "TPL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Textron",
+      "sector": "Industrials",
+      "source_symbol": "TXT",
+      "symbol": "TXT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Thermo Fisher Scientific",
+      "sector": "Health Care",
+      "source_symbol": "TMO",
+      "symbol": "TMO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "TJX Companies",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "TJX",
+      "symbol": "TJX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "TKO Group Holdings",
+      "sector": "Communication Services",
+      "source_symbol": "TKO",
+      "symbol": "TKO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Trade Desk (The)",
+      "sector": "Communication Services",
+      "source_symbol": "TTD",
+      "symbol": "TTD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Tractor Supply",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "TSCO",
+      "symbol": "TSCO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Trane Technologies",
+      "sector": "Industrials",
+      "source_symbol": "TT",
+      "symbol": "TT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "TransDigm Group",
+      "sector": "Industrials",
+      "source_symbol": "TDG",
+      "symbol": "TDG"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Travelers Companies (The)",
+      "sector": "Financials",
+      "source_symbol": "TRV",
+      "symbol": "TRV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Trimble Inc.",
+      "sector": "Information Technology",
+      "source_symbol": "TRMB",
+      "symbol": "TRMB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Truist Financial",
+      "sector": "Financials",
+      "source_symbol": "TFC",
+      "symbol": "TFC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Tyler Technologies",
+      "sector": "Information Technology",
+      "source_symbol": "TYL",
+      "symbol": "TYL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Tyson Foods",
+      "sector": "Consumer Staples",
+      "source_symbol": "TSN",
+      "symbol": "TSN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "U.S. Bancorp",
+      "sector": "Financials",
+      "source_symbol": "USB",
+      "symbol": "USB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Uber",
+      "sector": "Industrials",
+      "source_symbol": "UBER",
+      "symbol": "UBER"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "UDR, Inc.",
+      "sector": "Real Estate",
+      "source_symbol": "UDR",
+      "symbol": "UDR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ulta Beauty",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "ULTA",
+      "symbol": "ULTA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Union Pacific Corporation",
+      "sector": "Industrials",
+      "source_symbol": "UNP",
+      "symbol": "UNP"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "United Airlines Holdings",
+      "sector": "Industrials",
+      "source_symbol": "UAL",
+      "symbol": "UAL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "United Parcel Service",
+      "sector": "Industrials",
+      "source_symbol": "UPS",
+      "symbol": "UPS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "United Rentals",
+      "sector": "Industrials",
+      "source_symbol": "URI",
+      "symbol": "URI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "UnitedHealth Group",
+      "sector": "Health Care",
+      "source_symbol": "UNH",
+      "symbol": "UNH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Universal Health Services",
+      "sector": "Health Care",
+      "source_symbol": "UHS",
+      "symbol": "UHS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Valero Energy",
+      "sector": "Energy",
+      "source_symbol": "VLO",
+      "symbol": "VLO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Veeva Systems",
+      "sector": "Health Care",
+      "source_symbol": "VEEV",
+      "symbol": "VEEV"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Ventas",
+      "sector": "Real Estate",
+      "source_symbol": "VTR",
+      "symbol": "VTR"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Veralto",
+      "sector": "Industrials",
+      "source_symbol": "VLTO",
+      "symbol": "VLTO"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Verisign",
+      "sector": "Information Technology",
+      "source_symbol": "VRSN",
+      "symbol": "VRSN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Verisk Analytics",
+      "sector": "Industrials",
+      "source_symbol": "VRSK",
+      "symbol": "VRSK"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Verizon",
+      "sector": "Communication Services",
+      "source_symbol": "VZ",
+      "symbol": "VZ"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Vertex Pharmaceuticals",
+      "sector": "Health Care",
+      "source_symbol": "VRTX",
+      "symbol": "VRTX"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Vertiv",
+      "sector": "Industrials",
+      "source_symbol": "VRT",
+      "symbol": "VRT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Viatris",
+      "sector": "Health Care",
+      "source_symbol": "VTRS",
+      "symbol": "VTRS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Vici Properties",
+      "sector": "Real Estate",
+      "source_symbol": "VICI",
+      "symbol": "VICI"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Visa Inc.",
+      "sector": "Financials",
+      "source_symbol": "V",
+      "symbol": "V"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Vistra Corp.",
+      "sector": "Utilities",
+      "source_symbol": "VST",
+      "symbol": "VST"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Vulcan Materials Company",
+      "sector": "Materials",
+      "source_symbol": "VMC",
+      "symbol": "VMC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "W. R. Berkley Corporation",
+      "sector": "Financials",
+      "source_symbol": "WRB",
+      "symbol": "WRB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "W. W. Grainger",
+      "sector": "Industrials",
+      "source_symbol": "GWW",
+      "symbol": "GWW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Wabtec",
+      "sector": "Industrials",
+      "source_symbol": "WAB",
+      "symbol": "WAB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Walmart",
+      "sector": "Consumer Staples",
+      "source_symbol": "WMT",
+      "symbol": "WMT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Walt Disney Company (The)",
+      "sector": "Communication Services",
+      "source_symbol": "DIS",
+      "symbol": "DIS"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Warner Bros. Discovery",
+      "sector": "Communication Services",
+      "source_symbol": "WBD",
+      "symbol": "WBD"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Waste Management",
+      "sector": "Industrials",
+      "source_symbol": "WM",
+      "symbol": "WM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Waters Corporation",
+      "sector": "Health Care",
+      "source_symbol": "WAT",
+      "symbol": "WAT"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "WEC Energy Group",
+      "sector": "Utilities",
+      "source_symbol": "WEC",
+      "symbol": "WEC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Wells Fargo",
+      "sector": "Financials",
+      "source_symbol": "WFC",
+      "symbol": "WFC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Welltower",
+      "sector": "Real Estate",
+      "source_symbol": "WELL",
+      "symbol": "WELL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "West Pharmaceutical Services",
+      "sector": "Health Care",
+      "source_symbol": "WST",
+      "symbol": "WST"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Western Digital",
+      "sector": "Information Technology",
+      "source_symbol": "WDC",
+      "symbol": "WDC"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Weyerhaeuser",
+      "sector": "Real Estate",
+      "source_symbol": "WY",
+      "symbol": "WY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Williams-Sonoma, Inc.",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "WSM",
+      "symbol": "WSM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Williams Companies",
+      "sector": "Energy",
+      "source_symbol": "WMB",
+      "symbol": "WMB"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Willis Towers Watson",
+      "sector": "Financials",
+      "source_symbol": "WTW",
+      "symbol": "WTW"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Workday, Inc.",
+      "sector": "Information Technology",
+      "source_symbol": "WDAY",
+      "symbol": "WDAY"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Wynn Resorts",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "WYNN",
+      "symbol": "WYNN"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Xcel Energy",
+      "sector": "Utilities",
+      "source_symbol": "XEL",
+      "symbol": "XEL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Xylem Inc.",
+      "sector": "Industrials",
+      "source_symbol": "XYL",
+      "symbol": "XYL"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Yum! Brands",
+      "sector": "Consumer Discretionary",
+      "source_symbol": "YUM",
+      "symbol": "YUM"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Zebra Technologies",
+      "sector": "Information Technology",
+      "source_symbol": "ZBRA",
+      "symbol": "ZBRA"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Zimmer Biomet",
+      "sector": "Health Care",
+      "source_symbol": "ZBH",
+      "symbol": "ZBH"
+    },
+    {
+      "country": "US",
+      "currency": "USD",
+      "exchange": "US",
+      "name": "Zoetis",
+      "sector": "Health Care",
+      "source_symbol": "ZTS",
+      "symbol": "ZTS"
+    }
+  ],
+  "known_limitations": [
+    "Wikipedia is a public reproducible table, not the official S&P Dow Jones licensed feed.",
+    "Use an official constituent file for production-grade index licensing."
+  ],
+  "provenance": "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies",
+  "retrieval_date": "2026-07-13",
+  "schema_version": "market-engine-canonical-universe-source-v1",
+  "snapshot_date": "2026-07-13",
+  "source_name": "Wikipedia S&P 500 constituent table",
+  "status": "active",
+  "universe_id": "sp500"
+}

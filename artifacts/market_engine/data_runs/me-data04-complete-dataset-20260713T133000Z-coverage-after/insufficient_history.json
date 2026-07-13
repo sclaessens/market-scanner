@@ -1,0 +1,120 @@
+{
+  "entries": [
+    {
+      "artifactpath": "data/processed/BLD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "0e898171f222696c42247db4bf8b279290f2c618e539dec2f8af0e7e545ba52d",
+      "end_date": "2026-07-02",
+      "instrument_id": "equity:bld",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 375,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "BLD",
+      "start_date": "2025-01-02",
+      "symbol": "BLD",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "sp400"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/FDXF.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_history",
+      "checksum": "216498cd0191c4858d3d5a6fc414a553aca7e3f0472677b9614e77bd50e7b884",
+      "end_date": "2026-07-10",
+      "instrument_id": "equity:fdxf",
+      "note": "Local price history has fewer rows than the configured minimum.",
+      "row_count": 31,
+      "snapshotstatus": "insufficient_history",
+      "source_symbol": "FDXF",
+      "start_date": "2026-05-27",
+      "symbol": "FDXF",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/HONA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_history",
+      "checksum": "9f4b733b21e210c79b8bcea9cdde36b313026edae3232b7c939467d1b5212117",
+      "end_date": "2026-07-10",
+      "instrument_id": "equity:hona",
+      "note": "Local price history has fewer rows than the configured minimum.",
+      "row_count": 18,
+      "snapshotstatus": "insufficient_history",
+      "source_symbol": "HONA",
+      "start_date": "2026-06-15",
+      "symbol": "HONA",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/JHG.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "70cecae4de2a04b2be2047cd30f306f51ece8623bb7b9320a0c377fb03127a07",
+      "end_date": "2026-07-02",
+      "instrument_id": "equity:jhg",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "row_count": 375,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "JHG",
+      "start_date": "2025-01-02",
+      "symbol": "JHG",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "sp400"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/Q.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_history",
+      "checksum": "77251e083893b54b75bfed4471f1c1f20d414ccb0a7757a80cb4518378d1b0fa",
+      "end_date": "2026-07-10",
+      "instrument_id": "equity:q",
+      "note": "Local price history has fewer rows than the configured minimum.",
+      "row_count": 176,
+      "snapshotstatus": "insufficient_history",
+      "source_symbol": "Q",
+      "start_date": "2025-10-27",
+      "symbol": "Q",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "sp500"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/SOLS.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_history",
+      "checksum": "447964fb77420075c0ddb972a99748d0f55ff76843fef95fbc3391be8a56fcff",
+      "end_date": "2026-07-10",
+      "instrument_id": "equity:sols",
+      "note": "Local price history has fewer rows than the configured minimum.",
+      "row_count": 181,
+      "snapshotstatus": "insufficient_history",
+      "source_symbol": "SOLS",
+      "start_date": "2025-10-20",
+      "symbol": "SOLS",
+      "universe_memberships": [
+        "local_price_history_covered",
+        "sp400"
+      ],
+      "validation_result": "limited"
+    }
+  ],
+  "run_id": "me-data04-complete-dataset-20260713T133000Z-coverage-after",
+  "schema_version": "market-engine-local-market-data-insufficient-history-v1"
+}

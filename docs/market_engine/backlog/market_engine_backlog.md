@@ -4431,3 +4431,33 @@ Next:
 ```text
 ME-DATA04 - Operator-supplied forward price-history import for ME-EVAL blockers
 ```
+
+### ME-DATA04 - Build complete canonical local market dataset
+
+Status: OPERATIONAL DATASET PARTIAL
+
+ME-DATA04 built a real local market dataset from reproducible membership and
+price-history sources:
+
+* membership: Wikipedia S&P 500 and S&P MidCap 400 tables plus explicit
+  project/ETF supplements;
+* price history: Yahoo Finance daily OHLCV through the existing `yfinance`
+  dependency;
+* cutoff date: `2026-07-10`;
+* canonical universe: 952 instruments;
+* valid local histories: 946;
+* valid coverage: 99.37%;
+* missing histories: 0;
+* invalid histories: 0;
+* unsupported mappings: 0.
+
+The sprint remains partial because ME-EVAL02 still reports `resolved: 0`.
+The four missing-price-history blockers (`CLS`, `CRDO`, `IREN`, `VRT`) now have
+valid local histories, but all 12 evaluation candidates still require future
+forward-horizon data.
+
+Next:
+
+```text
+ME-DATA05 - Post-cutoff forward outcome refresh after future trading days become available
+```

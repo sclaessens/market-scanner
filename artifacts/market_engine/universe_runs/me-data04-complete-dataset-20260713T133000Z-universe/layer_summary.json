@@ -1,0 +1,55 @@
+{
+  "layers": [
+    {
+      "deduplicated_constituents": 9,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Compact ETF context set, not a full ETF universe."
+      ],
+      "layer_id": "etf_context",
+      "raw_constituents": 9,
+      "source_name": "ME-DATA04 controlled ETF context",
+      "status": "active",
+      "unique_instruments": 9
+    },
+    {
+      "deduplicated_constituents": 400,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Wikipedia is a public reproducible table, not the official S&P Dow Jones licensed feed.",
+        "Use an official constituent file for production-grade index licensing."
+      ],
+      "layer_id": "sp400",
+      "raw_constituents": 400,
+      "source_name": "Wikipedia S&P MidCap 400 constituent table",
+      "status": "active",
+      "unique_instruments": 400
+    },
+    {
+      "deduplicated_constituents": 503,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Wikipedia is a public reproducible table, not the official S&P Dow Jones licensed feed.",
+        "Use an official constituent file for production-grade index licensing."
+      ],
+      "layer_id": "sp500",
+      "raw_constituents": 503,
+      "source_name": "Wikipedia S&P 500 constituent table",
+      "status": "active",
+      "unique_instruments": 503
+    },
+    {
+      "deduplicated_constituents": 6,
+      "duplicate_raw_entries": 0,
+      "known_limitations": [
+        "Project supplement, not an index membership source."
+      ],
+      "layer_id": "explicit_supplemental_watch",
+      "raw_constituents": 6,
+      "source_name": "ME-DATA04 explicit project and evaluation supplement",
+      "status": "active",
+      "unique_instruments": 6
+    }
+  ],
+  "schema_version": "market-engine-canonical-universe-layer-summary-v1"
+}

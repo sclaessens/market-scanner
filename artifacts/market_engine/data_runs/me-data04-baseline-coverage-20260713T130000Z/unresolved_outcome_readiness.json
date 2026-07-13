@@ -1,0 +1,282 @@
+{
+  "covered_critical_tickers": [
+    "AMD",
+    "ASML",
+    "AVGO",
+    "CLS",
+    "COST",
+    "CRDO",
+    "IREN",
+    "META",
+    "MSFT",
+    "NVDA",
+    "TSM",
+    "VRT"
+  ],
+  "critical_tickers_total": 12,
+  "not_ready_count": 12,
+  "outcomes": [
+    {
+      "artifactpath": "data/processed/AMD.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "6f5f9b3428c5853d734fd3b72e6fc1c2e3607f5660cf526e1ac26686a745456f",
+      "end_date": "2026-04-30",
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:amd",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AMD",
+      "start_date": "2025-04-30",
+      "symbol": "AMD",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/ASML.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "b46dc36a1e1a883fea3aa69ef90ddd740fd9039eeff44a3afc2d7cfb66020c33",
+      "end_date": "2026-04-30",
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:asml",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "ASML",
+      "start_date": "2025-04-30",
+      "symbol": "ASML",
+      "universe_memberships": [
+        "aex",
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/AVGO.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "cc75c5aa5063e122d09b37aafdb68a0d804b47b324b01e60f71c1973c7db7ec8",
+      "end_date": "2026-04-30",
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:avgo",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "AVGO",
+      "start_date": "2025-04-30",
+      "symbol": "AVGO",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CLS.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:cls",
+      "note": "No local price-history CSV found.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "CLS",
+      "start_date": null,
+      "symbol": "CLS",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "sp400"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/COST.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "d9af9f3b6f800e12be00aef24c2a66edff47a0f051e0588d0fe0d0021080a626",
+      "end_date": "2026-04-30",
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:cost",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "COST",
+      "start_date": "2025-04-30",
+      "symbol": "COST",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/CRDO.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:crdo",
+      "note": "No local price-history CSV found.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "CRDO",
+      "start_date": null,
+      "symbol": "CRDO",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "sp400"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/IREN.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:iren",
+      "note": "No local price-history CSV found.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "IREN",
+      "start_date": null,
+      "symbol": "IREN",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "sp400"
+      ],
+      "validation_result": "missing"
+    },
+    {
+      "artifactpath": "data/processed/META.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "42e07c5d11959633514b95012a1a57a843ed0a73eeb6dc6422951988c50fe9aa",
+      "end_date": "2026-04-30",
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:meta",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "META",
+      "start_date": "2025-04-30",
+      "symbol": "META",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/MSFT.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "290758890f2558cd2cb075eac2ececd7620d6f188120e94c555a089d1729129a",
+      "end_date": "2026-04-30",
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:msft",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "MSFT",
+      "start_date": "2025-04-30",
+      "symbol": "MSFT",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/NVDA.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "0bc424bec82a6be78d32235990be35aeb6b027572e101205e4ba34210bc6ecba",
+      "end_date": "2026-04-30",
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:nvda",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "NVDA",
+      "start_date": "2025-04-30",
+      "symbol": "NVDA",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered",
+        "nasdaq100",
+        "sp500"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/TSM.csv",
+      "asset_type": "equity",
+      "blocker": "insufficient_forward_data",
+      "checksum": "5a5733b587a1a78857524b28199cb314921ad74270e5be9d5f829a857fde03b0",
+      "end_date": "2026-04-30",
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:tsm",
+      "note": "Local price history does not reach the configured forward evaluation date.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 252,
+      "snapshotstatus": "insufficient_forward_data",
+      "source_symbol": "TSM",
+      "start_date": "2025-04-30",
+      "symbol": "TSM",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "local_price_history_covered"
+      ],
+      "validation_result": "limited"
+    },
+    {
+      "artifactpath": "data/processed/VRT.csv",
+      "asset_type": "equity",
+      "blocker": "missing_price_history",
+      "end_date": null,
+      "expected_refresh_readiness": "not_ready",
+      "instrument_id": "equity:vrt",
+      "note": "No local price-history CSV found.",
+      "previous_blocker_context": "ME-EVAL02 unresolved outcome",
+      "row_count": 0,
+      "snapshotstatus": "missing_price_history",
+      "source_symbol": "VRT",
+      "start_date": null,
+      "symbol": "VRT",
+      "universe_memberships": [
+        "explicit_supplemental_watch",
+        "sp400"
+      ],
+      "validation_result": "missing"
+    }
+  ],
+  "ready_count": 0,
+  "schema_version": "market-engine-unresolved-outcome-readiness-v1"
+}
