@@ -1,0 +1,12 @@
+{
+  "checks": {
+    "atomic_failures_preserve_existing_files": true,
+    "coverage_executed": true,
+    "evaluation_executed": true,
+    "histories_checked": true,
+    "no_duplicate_dates": true,
+    "no_unexplained_coverage_regression": true
+  },
+  "schema_version": "market-engine-data05-acceptance-result-v1",
+  "status": "incremental_refresh_operational"
+}

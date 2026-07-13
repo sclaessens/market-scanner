@@ -46,8 +46,8 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes (implementation complete / coverage partial)
   -> ME-BOOT03 - Bootstrap authoritative universe and local price-history coverage (implementation complete / coverage partial)
   -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
-  -> ME-DATA05 - Post-cutoff forward outcome refresh after future trading days become available
-  -> ME-APP01 - App/report view for advice candidates
+  -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
+  -> ME-ANALYSIS01 - Broad canonical-universe analysis execution and reporting
 ```
 
 ## Superseded baseline pointers
@@ -296,17 +296,18 @@ missing_price_history_tickers: CLS, CRDO, IREN, VRT
 ## Next baseline sprint
 
 ```text
-ME-DATA03 - Operator-supplied local price snapshot import for ME-EVAL blockers
+ME-ANALYSIS01 - Broad canonical-universe analysis execution and reporting
 ```
 
 Not:
 
 ```text
 ME-GH03 - Deterministic ranking and review queue
+ME-DATA06 - Another data-only infrastructure sprint without an operational blocker
 ```
 
-Remaining data gaps are explicit follow-up candidates, not blockers to
-ME-DATA03:
+Remaining data gaps are explicit follow-up candidates, not blockers to broad
+analysis over the current canonical dataset:
 
 ```text
 portfolio_context: 12
@@ -315,6 +316,87 @@ local_price_history: 4
 status/advice coverage beyond 12 of 500 target tickers
 forward local price snapshots after the advice date
 ```
+
+## Current completed ME-DATA04 result
+
+ME-DATA04 built the complete canonical local market dataset under:
+
+```text
+data/processed
+```
+
+The completed run established:
+
+```text
+total_canonical_instruments: 952
+valid_histories: 946
+insufficient_histories: 6
+missing_histories: 0
+invalid_histories: 0
+unsupported_mappings: 0
+completion_status: completed_with_blockers
+```
+
+ME-DATA04 proved the canonical universe, local price-history storage,
+validation, coverage reporting, and ME-EVAL02 local-history consumption.
+
+## Current completed ME-DATA05 result
+
+ME-DATA05 added the incremental refresh command:
+
+```text
+src/market_engine/data/incremental_market_data_refresh.py
+```
+
+The sample operational run used:
+
+```text
+run_id: me-data05-incremental-refresh-20260713T140000Z
+cutoff_date: 2026-07-10
+overlap_calendar_days: 7
+provider: Yahoo Finance via yfinance
+price_history_root: data/processed
+```
+
+and produced:
+
+```text
+histories_checked: 952
+already_current: 946
+incrementally_updated: 0
+new_snapshot_created: 0
+full_rebuild_completed: 0
+stale_after_update: 2
+insufficient_history: 4
+download_failed: 0
+merge_failed: 0
+validation_failed: 0
+rows_downloaded: 12
+rows_added: 0
+files_rewritten: 0
+files_unchanged: 952
+```
+
+The second same-cutoff idempotency run
+`me-data05-idempotency-refresh-20260713T141000Z` reproduced those metrics with
+`files_rewritten: 0`. Coverage stayed at 946 valid histories and 6
+insufficient histories. ME-EVAL02 executed before and after refresh and
+remained:
+
+```text
+selected_outcomes: 12
+resolved: 0
+still_unresolved: 12
+newly_resolved: 0
+blocker_counts:
+  insufficient_forward_data: 12
+```
+
+ME-DATA05 therefore answers the operational question: the local market dataset
+can now be refreshed safely and efficiently without full re-downloads for
+already current histories, and coverage plus evaluation are refreshed
+automatically. The absence of newly resolved outcomes is a real-data timing
+constraint, not a refresh failure.
 
 ## Completed ME-ADV01 result
 

@@ -109,8 +109,10 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
   -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots (completed)
   -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes (implementation complete / coverage partial)
-  -> ME-DATA03 - Operator-supplied local price snapshot import for ME-EVAL blockers
-  -> ME-APP01 - App/report view for advice candidates
+  -> ME-BOOT03 - Bootstrap authoritative universe and local price-history coverage (implementation complete / coverage partial)
+  -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
+  -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
+  -> ME-ANALYSIS01 - Broad canonical-universe analysis execution and reporting
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -181,9 +183,24 @@ The post-ME-DATA02 ME-EVAL02 refresh check remained unresolved with
 `insufficient_forward_data: 8` and `missing_price_history: 4` for `CLS`,
 `CRDO`, `IREN`, and `VRT`.
 
-ME-DATA03 is now the next baseline sprint because approved operator-supplied
-local CSV snapshots are needed before ME-EVAL02 can resolve the critical
-outcomes.
+ME-DATA04 built the complete canonical local market dataset for 952
+instruments and established an operational dataset partial: 946 valid
+histories, 6 explicit blockers, no missing histories, no invalid histories,
+and no unsupported mappings.
+
+ME-DATA05 added the operational incremental refresh command. The two
+same-cutoff runs `me-data05-incremental-refresh-20260713T140000Z` and
+`me-data05-idempotency-refresh-20260713T141000Z` both checked 952 histories,
+kept 946 already current, reported 2 stale-after-update provider cases, kept
+4 insufficient-history blockers, rewrote 0 files, added 0 rows, refreshed
+coverage automatically, and ran ME-EVAL02 automatically. ME-EVAL02 remained
+0 resolved and 12 unresolved because sufficient real post-advice forward data
+does not yet exist.
+
+ME-ANALYSIS01 is now the recommended baseline sprint because the local dataset
+can be refreshed safely and efficiently. The next large step should use the
+952-instrument dataset for broad Market Engine analysis and reporting instead
+of adding another data-only infrastructure layer.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 
