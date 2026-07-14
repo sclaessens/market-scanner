@@ -1,0 +1,32 @@
+{
+  "artifact_type": "market-engine-data05-incremental-market-data-refresh",
+  "canonical_universe_path": "config/market_engine/universes/canonical_universe.json",
+  "coverage_after_artifact": "artifacts/market_engine/data_runs/me-data05-idempotency-refresh-20260713T141000Z/coverage_after.json",
+  "coverage_before_artifact": "artifacts/market_engine/data_runs/me-data05-idempotency-refresh-20260713T141000Z/coverage_before.json",
+  "cutoff_date": "2026-07-10",
+  "cutoff_reason": "explicit operator override",
+  "end_status": "incremental_refresh_operational",
+  "evaluation_after_artifact": "artifacts/market_engine/evaluation_refresh_runs/me-data05-idempotency-refresh-20260713T141000Z-evaluation-after",
+  "evaluation_before_artifact": "artifacts/market_engine/evaluation_refresh_runs/me-data05-idempotency-refresh-20260713T141000Z-evaluation-before",
+  "evaluation_input_artifact": "artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json",
+  "generated_at": "2026-07-13T14:10:00Z",
+  "guardrails": {
+    "advice_generation_performed": false,
+    "broker_order_execution_performed": false,
+    "portfolio_watchlist_mutation_performed": false,
+    "synthetic_forward_data_used": false,
+    "telegram_delivery_performed": false
+  },
+  "overlap_policy": {
+    "overlap_calendar_days": 7
+  },
+  "price_history_root": "data/processed",
+  "price_refresh_performed": true,
+  "provider": "Yahoo Finance via yfinance",
+  "run_id": "me-data05-idempotency-refresh-20260713T141000Z",
+  "schema_version": "market-engine-data05-incremental-refresh-run-v1",
+  "universe_refresh_performed": false,
+  "universe_refresh_requested": false,
+  "universe_refresh_status": "not_requested",
+  "universe_version": "me-data04-complete-canonical-local-market-dataset-v1"
+}

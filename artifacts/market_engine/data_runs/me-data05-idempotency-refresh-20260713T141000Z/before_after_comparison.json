@@ -1,0 +1,106 @@
+{
+  "coverage_after": {
+    "completion_status": "completed_with_blockers",
+    "context_count": 0,
+    "etf_count": 9,
+    "failed": 0,
+    "imported": 0,
+    "insufficient": 6,
+    "invalid": 0,
+    "layer_counts": {
+      "etf_context": 9,
+      "explicit_supplemental_watch": 6,
+      "local_price_history_covered": 952,
+      "sp400": 400,
+      "sp500": 503
+    },
+    "missing": 0,
+    "refreshed": 0,
+    "selected_instruments": 952,
+    "skipped": 0,
+    "stale": 0,
+    "total_canonical_instruments": 952,
+    "unique_equities": 943,
+    "unsupported": 0,
+    "valid": 946
+  },
+  "coverage_before": {
+    "completion_status": "completed_with_blockers",
+    "context_count": 0,
+    "etf_count": 9,
+    "failed": 0,
+    "imported": 0,
+    "insufficient": 6,
+    "invalid": 0,
+    "layer_counts": {
+      "etf_context": 9,
+      "explicit_supplemental_watch": 6,
+      "local_price_history_covered": 952,
+      "sp400": 400,
+      "sp500": 503
+    },
+    "missing": 0,
+    "refreshed": 0,
+    "selected_instruments": 952,
+    "skipped": 0,
+    "stale": 0,
+    "total_canonical_instruments": 952,
+    "unique_equities": 943,
+    "unsupported": 0,
+    "valid": 946
+  },
+  "evaluation_after": {
+    "blocker_counts": {
+      "insufficient_forward_data": 12
+    },
+    "insufficient_forward_data": 12,
+    "missing_price_history": 0,
+    "missing_price_history_tickers": [],
+    "other_blockers": 0,
+    "resolved": 0,
+    "selected_outcomes": 12,
+    "snapshot_references": [
+      "data/processed/AMD.csv",
+      "data/processed/ASML.csv",
+      "data/processed/AVGO.csv",
+      "data/processed/CLS.csv",
+      "data/processed/COST.csv",
+      "data/processed/CRDO.csv",
+      "data/processed/IREN.csv",
+      "data/processed/META.csv",
+      "data/processed/MSFT.csv",
+      "data/processed/NVDA.csv",
+      "data/processed/TSM.csv",
+      "data/processed/VRT.csv"
+    ],
+    "still_unresolved": 12
+  },
+  "evaluation_before": {
+    "blocker_counts": {
+      "insufficient_forward_data": 12
+    },
+    "insufficient_forward_data": 12,
+    "missing_price_history": 0,
+    "missing_price_history_tickers": [],
+    "other_blockers": 0,
+    "resolved": 0,
+    "selected_outcomes": 12,
+    "snapshot_references": [
+      "data/processed/AMD.csv",
+      "data/processed/ASML.csv",
+      "data/processed/AVGO.csv",
+      "data/processed/CLS.csv",
+      "data/processed/COST.csv",
+      "data/processed/CRDO.csv",
+      "data/processed/IREN.csv",
+      "data/processed/META.csv",
+      "data/processed/MSFT.csv",
+      "data/processed/NVDA.csv",
+      "data/processed/TSM.csv",
+      "data/processed/VRT.csv"
+    ],
+    "still_unresolved": 12
+  },
+  "newly_resolved": 0,
+  "schema_version": "market-engine-data05-before-after-comparison-v1"
+}

@@ -50,8 +50,10 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
   -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots (completed)
   -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes (implementation complete / coverage partial)
-  -> ME-DATA03 - Operator-supplied local price snapshot import for ME-EVAL blockers
-  -> ME-APP01 - App/report view for advice candidates
+  -> ME-BOOT03 - Bootstrap authoritative universe and local price-history coverage (implementation complete / coverage partial)
+  -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
+  -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
+  -> ME-ANALYSIS01 - Broad canonical-universe analysis execution and reporting
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -103,6 +105,28 @@ The ME-EVAL02 real-world run
 `me-eval02-refresh-local-snapshots-20260712T130000Z` selected 12 unresolved
 outcomes, resolved 0, kept 8 as `insufficient_forward_data`, and reported
 4 as `missing_price_history`: `CLS`, `CRDO`, `IREN`, and `VRT`.
+
+ME-DATA04 then built the complete canonical local market dataset for 952
+instruments. The completed dataset established 946 valid current histories,
+6 explicit insufficient-history or insufficient-forward-data blockers, no
+missing histories, no invalid histories, and no unsupported mappings.
+
+ME-DATA05 converted the ME-DATA04 dataset flow into an operational
+incremental refresh. The command reads existing local histories, requests only
+stale recent windows with overlap, writes only changed files, refreshes
+coverage automatically, and runs ME-EVAL02 automatically. The two same-cutoff
+runs `me-data05-incremental-refresh-20260713T140000Z` and
+`me-data05-idempotency-refresh-20260713T141000Z` both checked 952 histories,
+reported 946 `already_current`, 2 `stale_after_update`, 4
+`insufficient_history`, 0 files rewritten, 0 rows added, and 12 ME-EVAL02
+outcomes still unresolved due to `insufficient_forward_data`.
+
+PR review follow-up kept ME-DATA05 price-refresh focused: `--refresh-universe`
+now fails closed because no supported in-place canonical membership refresh
+implementation exists for this flow. Persisted artifacts are compacted:
+`per_ticker_status.json` is the only full per-ticker detail list,
+`refresh_summary.json` is aggregate-only, and the duplicate
+`already_current.json` artifact was removed.
 
 ### ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
 
@@ -166,7 +190,7 @@ Owner roles: Product Owner / Data Steward / Development Lead / QA Lead / Governa
 
 Job family: ME-DATA / Local data coverage
 
-Status: NEXT BASELINE SPRINT AFTER ME-DATA02
+Status: SUPERSEDED BY ME-DATA04 / RETAINED FOR BACKLOG HISTORY
 
 Goal: provide approved local CSV snapshots for the 12 critical ME-EVAL
 unresolved outcome tickers, including missing snapshots for `CLS`, `CRDO`,
@@ -178,6 +202,45 @@ download, new provider architecture, broker/order execution, portfolio or
 watchlist mutation, advice generation, outcome-rule changes, Telegram,
 scheduler, queue, daemon, machine learning, or recommendation threshold
 changes.
+
+ME-DATA04 and ME-DATA05 superseded this as the active baseline path by creating
+the complete canonical local dataset and the repeatable incremental refresh
+flow. The item remains documented because it was a valid intermediate baseline
+candidate before the broader dataset path landed.
+
+### ME-DATA05 - Incremental market data refresh and forward evaluation
+
+Owner roles: Product Owner / Data Steward / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-DATA / Local data coverage
+
+Status: COMPLETED / incremental_refresh_operational
+
+Goal: provide a safe, repeatable operator command for refreshing the complete
+local market dataset without full re-downloads of already valid histories,
+then automatically refresh coverage and ME-EVAL02 outcomes.
+
+Scope: local price-history refresh, validation, coverage reporting, and
+ME-EVAL02 refresh only. No broker/order execution, portfolio or watchlist
+mutation, advice generation, synthetic forward data, Telegram, scheduler,
+Decision Engine authority change, or recommendation threshold change.
+
+### ME-ANALYSIS01 - Broad canonical-universe analysis execution and reporting
+
+Owner roles: Product Owner / Operator / Data Steward / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-ANALYSIS / Broad analysis execution
+
+Status: RECOMMENDED NEXT BASELINE SPRINT AFTER ME-DATA05
+
+Goal: use the now-operational 952-instrument local market dataset for broad
+Market Engine analysis and reporting instead of adding another data-only
+infrastructure layer.
+
+Scope: broad local analysis execution and reporting over existing canonical
+dataset artifacts. No allocation authority, broker/order execution,
+portfolio/watchlist mutation, Telegram delivery, synthetic data, or Decision
+Engine changes.
 
 ## Current ChatGPT Advisory Artifact Chain
 

@@ -1,0 +1,23 @@
+{
+  "schema_version": "market-engine-data05-price-refresh-summary-v1",
+  "summary": {
+    "already_current": 946,
+    "download_failed": 0,
+    "empty_provider_response": 0,
+    "files_rewritten": 0,
+    "files_unchanged": 952,
+    "full_rebuild_completed": 0,
+    "full_rebuild_required": 0,
+    "histories_checked": 952,
+    "incrementally_updated": 0,
+    "insufficient_history": 4,
+    "merge_failed": 0,
+    "new_snapshot_created": 0,
+    "rows_added": 0,
+    "rows_downloaded": 12,
+    "rows_replaced_within_overlap": 0,
+    "stale_after_update": 2,
+    "unsupported_mapping": 0,
+    "validation_failed": 0
+  }
+}
