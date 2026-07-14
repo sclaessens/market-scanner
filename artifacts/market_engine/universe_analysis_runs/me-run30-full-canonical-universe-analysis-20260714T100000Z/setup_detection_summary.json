@@ -1,0 +1,22 @@
+{
+  "risk_state_counts": {
+    "elevated": 256,
+    "high": 52,
+    "normal": 638,
+    "unknown": 6
+  },
+  "schema_version": "market-engine-run30-setup-detection-summary-v1",
+  "setup_state_counts": {
+    "breakout_candidate": 196,
+    "extended_wait": 43,
+    "no_clear_setup": 450,
+    "pullback_watch": 129,
+    "weak_setup": 134
+  },
+  "trend_state_counts": {
+    "downtrend": 134,
+    "sideways": 444,
+    "unknown": 6,
+    "uptrend": 368
+  }
+}

@@ -112,7 +112,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-BOOT03 - Bootstrap authoritative universe and local price-history coverage (implementation complete / coverage partial)
   -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
   -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
-  -> ME-ANALYSIS01 - Broad canonical-universe analysis execution and reporting
+  -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
+  -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -203,10 +204,19 @@ canonical membership refresh implementation in the ME-DATA05 path. Artifact
 storage is compacted so `per_ticker_status.json` is the only complete
 per-ticker list and `refresh_summary.json` contains aggregate metrics only.
 
-ME-ANALYSIS01 is now the recommended baseline sprint because the local dataset
-can be refreshed safely and efficiently. The next large step should use the
-952-instrument dataset for broad Market Engine analysis and reporting instead
-of adding another data-only infrastructure layer.
+ME-RUN30 executed the first full canonical-universe analysis and candidate
+ranking. It attempted all 952 instruments, analysed 946 eligible instruments,
+kept 6 insufficient-history instruments explicit, produced setup/advice/blocker
+distributions, ranked 527 review candidates, and generated a top-candidate
+review package. The ranking is deterministic and traceable to local
+price-history-derived setup observations, while missing fundamental,
+portfolio, and market context are penalised as missing evidence.
+
+ME-RUN31 is now the recommended baseline sprint because ME-RUN30 proved the
+broad analysis path but also showed that price-history-led ranking still
+carries systematic missing-evidence penalties. The next step should integrate
+broader local non-price evidence into the candidate ranking without creating
+allocation authority.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 

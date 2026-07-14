@@ -47,7 +47,8 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-BOOT03 - Bootstrap authoritative universe and local price-history coverage (implementation complete / coverage partial)
   -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
   -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
-  -> ME-ANALYSIS01 - Broad canonical-universe analysis execution and reporting
+  -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
+  -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking
 ```
 
 ## Superseded baseline pointers
@@ -296,7 +297,7 @@ missing_price_history_tickers: CLS, CRDO, IREN, VRT
 ## Next baseline sprint
 
 ```text
-ME-ANALYSIS01 - Broad canonical-universe analysis execution and reporting
+ME-RUN31 - Add broader non-price evidence to canonical-universe ranking
 ```
 
 Not:
@@ -412,6 +413,45 @@ persisted artifact structure is also compact: `per_ticker_status.json` is the
 only complete per-ticker record list, `refresh_summary.json` contains aggregate
 metrics only, and duplicate `already_current.json` artifacts are no longer
 written.
+
+## Current completed ME-RUN30 result
+
+ME-RUN30 added the broad canonical-universe analysis command:
+
+```text
+src/market_engine/run/full_canonical_universe_analysis.py
+```
+
+The primary run used:
+
+```text
+run_id: me-run30-full-canonical-universe-analysis-20260714T100000Z
+cutoff_date: 2026-07-10
+price_history_root: data/processed
+```
+
+and produced:
+
+```text
+total_canonical_instruments: 952
+attempted_instruments: 952
+eligible_analyzed: 946
+insufficient_history: 6
+failed: 0
+ranked_candidates: 527
+buy_candidate: 105
+wait_for_price: 257
+watchlist: 407
+avoid_for_now: 177
+unable_to_analyse: 6
+```
+
+The idempotency run
+`me-run30-full-canonical-universe-analysis-idempotency-20260714T101000Z`
+matched final statuses, advice labels, candidate scores, and candidate ranking
+order. Ranking is traceable to local price-history setup observations and
+includes a missing-evidence penalty for absent fundamental, portfolio, and
+market context.
 
 ## Completed ME-ADV01 result
 

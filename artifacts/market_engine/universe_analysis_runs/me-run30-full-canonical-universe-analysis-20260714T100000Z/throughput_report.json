@@ -1,0 +1,4769 @@
+{
+  "attempted_instruments": 952,
+  "average_runtime_seconds_per_ticker": 0.00265806,
+  "per_ticker_runtime": [
+    {
+      "instrument_id": "equity:a",
+      "runtime_seconds": 0.00448688,
+      "symbol": "A"
+    },
+    {
+      "instrument_id": "equity:aa",
+      "runtime_seconds": 0.00308088,
+      "symbol": "AA"
+    },
+    {
+      "instrument_id": "equity:aal",
+      "runtime_seconds": 0.00297933,
+      "symbol": "AAL"
+    },
+    {
+      "instrument_id": "equity:aaon",
+      "runtime_seconds": 0.00277325,
+      "symbol": "AAON"
+    },
+    {
+      "instrument_id": "equity:aapl",
+      "runtime_seconds": 0.00634008,
+      "symbol": "AAPL"
+    },
+    {
+      "instrument_id": "equity:abbv",
+      "runtime_seconds": 0.00291504,
+      "symbol": "ABBV"
+    },
+    {
+      "instrument_id": "equity:abnb",
+      "runtime_seconds": 0.00275379,
+      "symbol": "ABNB"
+    },
+    {
+      "instrument_id": "equity:abt",
+      "runtime_seconds": 0.00301029,
+      "symbol": "ABT"
+    },
+    {
+      "instrument_id": "equity:acgl",
+      "runtime_seconds": 0.00297188,
+      "symbol": "ACGL"
+    },
+    {
+      "instrument_id": "equity:aci",
+      "runtime_seconds": 0.00273467,
+      "symbol": "ACI"
+    },
+    {
+      "instrument_id": "equity:acm",
+      "runtime_seconds": 0.00281183,
+      "symbol": "ACM"
+    },
+    {
+      "instrument_id": "equity:acn",
+      "runtime_seconds": 0.00286908,
+      "symbol": "ACN"
+    },
+    {
+      "instrument_id": "equity:adbe",
+      "runtime_seconds": 0.00277458,
+      "symbol": "ADBE"
+    },
+    {
+      "instrument_id": "equity:adc",
+      "runtime_seconds": 0.00271054,
+      "symbol": "ADC"
+    },
+    {
+      "instrument_id": "equity:adi",
+      "runtime_seconds": 0.00277892,
+      "symbol": "ADI"
+    },
+    {
+      "instrument_id": "equity:adm",
+      "runtime_seconds": 0.00274325,
+      "symbol": "ADM"
+    },
+    {
+      "instrument_id": "equity:adp",
+      "runtime_seconds": 0.00283583,
+      "symbol": "ADP"
+    },
+    {
+      "instrument_id": "equity:adsk",
+      "runtime_seconds": 0.00274233,
+      "symbol": "ADSK"
+    },
+    {
+      "instrument_id": "equity:aee",
+      "runtime_seconds": 0.0026395,
+      "symbol": "AEE"
+    },
+    {
+      "instrument_id": "equity:aeis",
+      "runtime_seconds": 0.00274471,
+      "symbol": "AEIS"
+    },
+    {
+      "instrument_id": "equity:aep",
+      "runtime_seconds": 0.00286017,
+      "symbol": "AEP"
+    },
+    {
+      "instrument_id": "equity:aes",
+      "runtime_seconds": 0.0027105,
+      "symbol": "AES"
+    },
+    {
+      "instrument_id": "equity:afg",
+      "runtime_seconds": 0.00271246,
+      "symbol": "AFG"
+    },
+    {
+      "instrument_id": "equity:afl",
+      "runtime_seconds": 0.00276937,
+      "symbol": "AFL"
+    },
+    {
+      "instrument_id": "equity:agco",
+      "runtime_seconds": 0.002831,
+      "symbol": "AGCO"
+    },
+    {
+      "instrument_id": "equity:ahr",
+      "runtime_seconds": 0.00274108,
+      "symbol": "AHR"
+    },
+    {
+      "instrument_id": "equity:aig",
+      "runtime_seconds": 0.00288146,
+      "symbol": "AIG"
+    },
+    {
+      "instrument_id": "equity:ait",
+      "runtime_seconds": 0.00298313,
+      "symbol": "AIT"
+    },
+    {
+      "instrument_id": "equity:aiz",
+      "runtime_seconds": 0.00274408,
+      "symbol": "AIZ"
+    },
+    {
+      "instrument_id": "equity:ajg",
+      "runtime_seconds": 0.00286046,
+      "symbol": "AJG"
+    },
+    {
+      "instrument_id": "equity:akam",
+      "runtime_seconds": 0.00261783,
+      "symbol": "AKAM"
+    },
+    {
+      "instrument_id": "equity:alb",
+      "runtime_seconds": 0.00270233,
+      "symbol": "ALB"
+    },
+    {
+      "instrument_id": "equity:algm",
+      "runtime_seconds": 0.00267363,
+      "symbol": "ALGM"
+    },
+    {
+      "instrument_id": "equity:algn",
+      "runtime_seconds": 0.00257137,
+      "symbol": "ALGN"
+    },
+    {
+      "instrument_id": "equity:alk",
+      "runtime_seconds": 0.00264558,
+      "symbol": "ALK"
+    },
+    {
+      "instrument_id": "equity:all",
+      "runtime_seconds": 0.00278912,
+      "symbol": "ALL"
+    },
+    {
+      "instrument_id": "equity:alle",
+      "runtime_seconds": 0.0026505,
+      "symbol": "ALLE"
+    },
+    {
+      "instrument_id": "equity:ally",
+      "runtime_seconds": 0.00281613,
+      "symbol": "ALLY"
+    },
+    {
+      "instrument_id": "equity:alsn",
+      "runtime_seconds": 0.00274883,
+      "symbol": "ALSN"
+    },
+    {
+      "instrument_id": "equity:alv",
+      "runtime_seconds": 0.00265367,
+      "symbol": "ALV"
+    },
+    {
+      "instrument_id": "equity:am",
+      "runtime_seconds": 0.00275287,
+      "symbol": "AM"
+    },
+    {
+      "instrument_id": "equity:amat",
+      "runtime_seconds": 0.00274425,
+      "symbol": "AMAT"
+    },
+    {
+      "instrument_id": "equity:amcr",
+      "runtime_seconds": 0.00264108,
+      "symbol": "AMCR"
+    },
+    {
+      "instrument_id": "equity:amd",
+      "runtime_seconds": 0.00274412,
+      "symbol": "AMD"
+    },
+    {
+      "instrument_id": "equity:ame",
+      "runtime_seconds": 0.00270083,
+      "symbol": "AME"
+    },
+    {
+      "instrument_id": "equity:amg",
+      "runtime_seconds": 0.00279283,
+      "symbol": "AMG"
+    },
+    {
+      "instrument_id": "equity:amgn",
+      "runtime_seconds": 0.00274479,
+      "symbol": "AMGN"
+    },
+    {
+      "instrument_id": "equity:amh",
+      "runtime_seconds": 0.002753,
+      "symbol": "AMH"
+    },
+    {
+      "instrument_id": "equity:amkr",
+      "runtime_seconds": 0.00265904,
+      "symbol": "AMKR"
+    },
+    {
+      "instrument_id": "equity:amp",
+      "runtime_seconds": 0.00271608,
+      "symbol": "AMP"
+    },
+    {
+      "instrument_id": "equity:amt",
+      "runtime_seconds": 0.00267571,
+      "symbol": "AMT"
+    },
+    {
+      "instrument_id": "equity:amzn",
+      "runtime_seconds": 0.00278654,
+      "symbol": "AMZN"
+    },
+    {
+      "instrument_id": "equity:an",
+      "runtime_seconds": 0.0028205,
+      "symbol": "AN"
+    },
+    {
+      "instrument_id": "equity:anet",
+      "runtime_seconds": 0.00260563,
+      "symbol": "ANET"
+    },
+    {
+      "instrument_id": "equity:anf",
+      "runtime_seconds": 0.00257829,
+      "symbol": "ANF"
+    },
+    {
+      "instrument_id": "equity:aon",
+      "runtime_seconds": 0.00265396,
+      "symbol": "AON"
+    },
+    {
+      "instrument_id": "equity:aos",
+      "runtime_seconds": 0.00268608,
+      "symbol": "AOS"
+    },
+    {
+      "instrument_id": "equity:apa",
+      "runtime_seconds": 0.00288292,
+      "symbol": "APA"
+    },
+    {
+      "instrument_id": "equity:apd",
+      "runtime_seconds": 0.00287142,
+      "symbol": "APD"
+    },
+    {
+      "instrument_id": "equity:apg",
+      "runtime_seconds": 0.00272458,
+      "symbol": "APG"
+    },
+    {
+      "instrument_id": "equity:aph",
+      "runtime_seconds": 0.00275725,
+      "symbol": "APH"
+    },
+    {
+      "instrument_id": "equity:apo",
+      "runtime_seconds": 0.00303975,
+      "symbol": "APO"
+    },
+    {
+      "instrument_id": "equity:app",
+      "runtime_seconds": 0.00257742,
+      "symbol": "APP"
+    },
+    {
+      "instrument_id": "equity:appf",
+      "runtime_seconds": 0.00256475,
+      "symbol": "APPF"
+    },
+    {
+      "instrument_id": "equity:aptv",
+      "runtime_seconds": 0.00262175,
+      "symbol": "APTV"
+    },
+    {
+      "instrument_id": "equity:ar",
+      "runtime_seconds": 0.00266008,
+      "symbol": "AR"
+    },
+    {
+      "instrument_id": "equity:are",
+      "runtime_seconds": 0.00276667,
+      "symbol": "ARE"
+    },
+    {
+      "instrument_id": "equity:ares",
+      "runtime_seconds": 0.00269912,
+      "symbol": "ARES"
+    },
+    {
+      "instrument_id": "equity:armk",
+      "runtime_seconds": 0.00265158,
+      "symbol": "ARMK"
+    },
+    {
+      "instrument_id": "equity:arw",
+      "runtime_seconds": 0.00279517,
+      "symbol": "ARW"
+    },
+    {
+      "instrument_id": "equity:arwr",
+      "runtime_seconds": 0.00268283,
+      "symbol": "ARWR"
+    },
+    {
+      "instrument_id": "equity:asb",
+      "runtime_seconds": 0.00272963,
+      "symbol": "ASB"
+    },
+    {
+      "instrument_id": "equity:ash",
+      "runtime_seconds": 0.00279483,
+      "symbol": "ASH"
+    },
+    {
+      "instrument_id": "equity:asml",
+      "runtime_seconds": 0.00264083,
+      "symbol": "ASML"
+    },
+    {
+      "instrument_id": "equity:ati",
+      "runtime_seconds": 0.00261921,
+      "symbol": "ATI"
+    },
+    {
+      "instrument_id": "equity:ato",
+      "runtime_seconds": 0.00266858,
+      "symbol": "ATO"
+    },
+    {
+      "instrument_id": "equity:atr",
+      "runtime_seconds": 0.00257775,
+      "symbol": "ATR"
+    },
+    {
+      "instrument_id": "equity:avav",
+      "runtime_seconds": 0.002804,
+      "symbol": "AVAV"
+    },
+    {
+      "instrument_id": "equity:avb",
+      "runtime_seconds": 0.00270488,
+      "symbol": "AVB"
+    },
+    {
+      "instrument_id": "equity:avgo",
+      "runtime_seconds": 0.00257612,
+      "symbol": "AVGO"
+    },
+    {
+      "instrument_id": "equity:avnt",
+      "runtime_seconds": 0.00268908,
+      "symbol": "AVNT"
+    },
+    {
+      "instrument_id": "equity:avt",
+      "runtime_seconds": 0.00270079,
+      "symbol": "AVT"
+    },
+    {
+      "instrument_id": "equity:avtr",
+      "runtime_seconds": 0.00259017,
+      "symbol": "AVTR"
+    },
+    {
+      "instrument_id": "equity:avy",
+      "runtime_seconds": 0.00281387,
+      "symbol": "AVY"
+    },
+    {
+      "instrument_id": "equity:awk",
+      "runtime_seconds": 0.0027235,
+      "symbol": "AWK"
+    },
+    {
+      "instrument_id": "equity:axon",
+      "runtime_seconds": 0.00252838,
+      "symbol": "AXON"
+    },
+    {
+      "instrument_id": "equity:axp",
+      "runtime_seconds": 0.00264779,
+      "symbol": "AXP"
+    },
+    {
+      "instrument_id": "equity:axta",
+      "runtime_seconds": 0.00271138,
+      "symbol": "AXTA"
+    },
+    {
+      "instrument_id": "equity:ayi",
+      "runtime_seconds": 0.00262729,
+      "symbol": "AYI"
+    },
+    {
+      "instrument_id": "equity:azo",
+      "runtime_seconds": 0.00264537,
+      "symbol": "AZO"
+    },
+    {
+      "instrument_id": "equity:ba",
+      "runtime_seconds": 0.00257508,
+      "symbol": "BA"
+    },
+    {
+      "instrument_id": "equity:baba",
+      "runtime_seconds": 0.00273671,
+      "symbol": "BABA"
+    },
+    {
+      "instrument_id": "equity:bac",
+      "runtime_seconds": 0.00267146,
+      "symbol": "BAC"
+    },
+    {
+      "instrument_id": "equity:bah",
+      "runtime_seconds": 0.00260788,
+      "symbol": "BAH"
+    },
+    {
+      "instrument_id": "equity:ball",
+      "runtime_seconds": 0.00267887,
+      "symbol": "BALL"
+    },
+    {
+      "instrument_id": "equity:bax",
+      "runtime_seconds": 0.00276183,
+      "symbol": "BAX"
+    },
+    {
+      "instrument_id": "equity:bbwi",
+      "runtime_seconds": 0.00261729,
+      "symbol": "BBWI"
+    },
+    {
+      "instrument_id": "equity:bby",
+      "runtime_seconds": 0.00268542,
+      "symbol": "BBY"
+    },
+    {
+      "instrument_id": "equity:bc",
+      "runtime_seconds": 0.00258167,
+      "symbol": "BC"
+    },
+    {
+      "instrument_id": "equity:bco",
+      "runtime_seconds": 0.00263679,
+      "symbol": "BCO"
+    },
+    {
+      "instrument_id": "equity:bdc",
+      "runtime_seconds": 0.00272858,
+      "symbol": "BDC"
+    },
+    {
+      "instrument_id": "equity:bdx",
+      "runtime_seconds": 0.00285458,
+      "symbol": "BDX"
+    },
+    {
+      "instrument_id": "equity:ben",
+      "runtime_seconds": 0.00265396,
+      "symbol": "BEN"
+    },
+    {
+      "instrument_id": "equity:bf.b",
+      "runtime_seconds": 0.00274104,
+      "symbol": "BF.B"
+    },
+    {
+      "instrument_id": "equity:bg",
+      "runtime_seconds": 0.00254475,
+      "symbol": "BG"
+    },
+    {
+      "instrument_id": "equity:bhf",
+      "runtime_seconds": 0.00264696,
+      "symbol": "BHF"
+    },
+    {
+      "instrument_id": "equity:bhp",
+      "runtime_seconds": 0.00283862,
+      "symbol": "BHP"
+    },
+    {
+      "instrument_id": "equity:biib",
+      "runtime_seconds": 0.00269742,
+      "symbol": "BIIB"
+    },
+    {
+      "instrument_id": "equity:bill",
+      "runtime_seconds": 0.00266563,
+      "symbol": "BILL"
+    },
+    {
+      "instrument_id": "equity:bio",
+      "runtime_seconds": 0.00274992,
+      "symbol": "BIO"
+    },
+    {
+      "instrument_id": "equity:bj",
+      "runtime_seconds": 0.00275871,
+      "symbol": "BJ"
+    },
+    {
+      "instrument_id": "equity:bkh",
+      "runtime_seconds": 0.00281687,
+      "symbol": "BKH"
+    },
+    {
+      "instrument_id": "equity:bkng",
+      "runtime_seconds": 0.00291258,
+      "symbol": "BKNG"
+    },
+    {
+      "instrument_id": "equity:bkr",
+      "runtime_seconds": 0.00254704,
+      "symbol": "BKR"
+    },
+    {
+      "instrument_id": "equity:bld",
+      "runtime_seconds": 0.00092562,
+      "symbol": "BLD"
+    },
+    {
+      "instrument_id": "equity:bldr",
+      "runtime_seconds": 0.00264017,
+      "symbol": "BLDR"
+    },
+    {
+      "instrument_id": "equity:blk",
+      "runtime_seconds": 0.00275,
+      "symbol": "BLK"
+    },
+    {
+      "instrument_id": "equity:bmrn",
+      "runtime_seconds": 0.00269446,
+      "symbol": "BMRN"
+    },
+    {
+      "instrument_id": "equity:bmy",
+      "runtime_seconds": 0.00269246,
+      "symbol": "BMY"
+    },
+    {
+      "instrument_id": "equity:bny",
+      "runtime_seconds": 0.00267213,
+      "symbol": "BNY"
+    },
+    {
+      "instrument_id": "equity:br",
+      "runtime_seconds": 0.00260454,
+      "symbol": "BR"
+    },
+    {
+      "instrument_id": "equity:brk.b",
+      "runtime_seconds": 0.00268725,
+      "symbol": "BRK.B"
+    },
+    {
+      "instrument_id": "equity:brkr",
+      "runtime_seconds": 0.00269396,
+      "symbol": "BRKR"
+    },
+    {
+      "instrument_id": "equity:bro",
+      "runtime_seconds": 0.00265188,
+      "symbol": "BRO"
+    },
+    {
+      "instrument_id": "equity:bros",
+      "runtime_seconds": 0.00261863,
+      "symbol": "BROS"
+    },
+    {
+      "instrument_id": "equity:brx",
+      "runtime_seconds": 0.00258563,
+      "symbol": "BRX"
+    },
+    {
+      "instrument_id": "equity:bsx",
+      "runtime_seconds": 0.00258304,
+      "symbol": "BSX"
+    },
+    {
+      "instrument_id": "equity:bsy",
+      "runtime_seconds": 0.00259338,
+      "symbol": "BSY"
+    },
+    {
+      "instrument_id": "equity:burl",
+      "runtime_seconds": 0.00257787,
+      "symbol": "BURL"
+    },
+    {
+      "instrument_id": "equity:bwa",
+      "runtime_seconds": 0.00269063,
+      "symbol": "BWA"
+    },
+    {
+      "instrument_id": "equity:bwxt",
+      "runtime_seconds": 0.00263508,
+      "symbol": "BWXT"
+    },
+    {
+      "instrument_id": "equity:bx",
+      "runtime_seconds": 0.00292971,
+      "symbol": "BX"
+    },
+    {
+      "instrument_id": "equity:bxp",
+      "runtime_seconds": 0.00267942,
+      "symbol": "BXP"
+    },
+    {
+      "instrument_id": "equity:byd",
+      "runtime_seconds": 0.00284537,
+      "symbol": "BYD"
+    },
+    {
+      "instrument_id": "equity:c",
+      "runtime_seconds": 0.00271129,
+      "symbol": "C"
+    },
+    {
+      "instrument_id": "equity:caci",
+      "runtime_seconds": 0.00254433,
+      "symbol": "CACI"
+    },
+    {
+      "instrument_id": "equity:cah",
+      "runtime_seconds": 0.00271312,
+      "symbol": "CAH"
+    },
+    {
+      "instrument_id": "equity:car",
+      "runtime_seconds": 0.00274583,
+      "symbol": "CAR"
+    },
+    {
+      "instrument_id": "equity:carr",
+      "runtime_seconds": 0.00276171,
+      "symbol": "CARR"
+    },
+    {
+      "instrument_id": "equity:cart",
+      "runtime_seconds": 0.00274567,
+      "symbol": "CART"
+    },
+    {
+      "instrument_id": "equity:casy",
+      "runtime_seconds": 0.002663,
+      "symbol": "CASY"
+    },
+    {
+      "instrument_id": "equity:cat",
+      "runtime_seconds": 0.00269633,
+      "symbol": "CAT"
+    },
+    {
+      "instrument_id": "equity:cava",
+      "runtime_seconds": 0.00273054,
+      "symbol": "CAVA"
+    },
+    {
+      "instrument_id": "equity:cb",
+      "runtime_seconds": 0.00263367,
+      "symbol": "CB"
+    },
+    {
+      "instrument_id": "equity:cboe",
+      "runtime_seconds": 0.00271979,
+      "symbol": "CBOE"
+    },
+    {
+      "instrument_id": "equity:cbre",
+      "runtime_seconds": 0.00284858,
+      "symbol": "CBRE"
+    },
+    {
+      "instrument_id": "equity:cbsh",
+      "runtime_seconds": 0.00269021,
+      "symbol": "CBSH"
+    },
+    {
+      "instrument_id": "equity:cbt",
+      "runtime_seconds": 0.00270804,
+      "symbol": "CBT"
+    },
+    {
+      "instrument_id": "equity:cci",
+      "runtime_seconds": 0.00268833,
+      "symbol": "CCI"
+    },
+    {
+      "instrument_id": "equity:ccj",
+      "runtime_seconds": 0.00264433,
+      "symbol": "CCJ"
+    },
+    {
+      "instrument_id": "equity:cck",
+      "runtime_seconds": 0.00270012,
+      "symbol": "CCK"
+    },
+    {
+      "instrument_id": "equity:ccl",
+      "runtime_seconds": 0.00278333,
+      "symbol": "CCL"
+    },
+    {
+      "instrument_id": "equity:cde",
+      "runtime_seconds": 0.00268304,
+      "symbol": "CDE"
+    },
+    {
+      "instrument_id": "equity:cdns",
+      "runtime_seconds": 0.00272408,
+      "symbol": "CDNS"
+    },
+    {
+      "instrument_id": "equity:cdp",
+      "runtime_seconds": 0.00266883,
+      "symbol": "CDP"
+    },
+    {
+      "instrument_id": "equity:cdw",
+      "runtime_seconds": 0.0027515,
+      "symbol": "CDW"
+    },
+    {
+      "instrument_id": "equity:ceg",
+      "runtime_seconds": 0.00274533,
+      "symbol": "CEG"
+    },
+    {
+      "instrument_id": "equity:celh",
+      "runtime_seconds": 0.00265358,
+      "symbol": "CELH"
+    },
+    {
+      "instrument_id": "equity:cf",
+      "runtime_seconds": 0.00265846,
+      "symbol": "CF"
+    },
+    {
+      "instrument_id": "equity:cfg",
+      "runtime_seconds": 0.00272417,
+      "symbol": "CFG"
+    },
+    {
+      "instrument_id": "equity:cfr",
+      "runtime_seconds": 0.0025985,
+      "symbol": "CFR"
+    },
+    {
+      "instrument_id": "equity:cg",
+      "runtime_seconds": 0.00266775,
+      "symbol": "CG"
+    },
+    {
+      "instrument_id": "equity:cgnx",
+      "runtime_seconds": 0.00266904,
+      "symbol": "CGNX"
+    },
+    {
+      "instrument_id": "equity:chd",
+      "runtime_seconds": 0.00257204,
+      "symbol": "CHD"
+    },
+    {
+      "instrument_id": "equity:chdn",
+      "runtime_seconds": 0.0027405,
+      "symbol": "CHDN"
+    },
+    {
+      "instrument_id": "equity:che",
+      "runtime_seconds": 0.00266721,
+      "symbol": "CHE"
+    },
+    {
+      "instrument_id": "equity:chh",
+      "runtime_seconds": 0.00263575,
+      "symbol": "CHH"
+    },
+    {
+      "instrument_id": "equity:chkp",
+      "runtime_seconds": 0.00274221,
+      "symbol": "CHKP"
+    },
+    {
+      "instrument_id": "equity:chrd",
+      "runtime_seconds": 0.00267471,
+      "symbol": "CHRD"
+    },
+    {
+      "instrument_id": "equity:chrw",
+      "runtime_seconds": 0.00269512,
+      "symbol": "CHRW"
+    },
+    {
+      "instrument_id": "equity:chtr",
+      "runtime_seconds": 0.00268171,
+      "symbol": "CHTR"
+    },
+    {
+      "instrument_id": "equity:chwy",
+      "runtime_seconds": 0.00264567,
+      "symbol": "CHWY"
+    },
+    {
+      "instrument_id": "equity:ci",
+      "runtime_seconds": 0.00262858,
+      "symbol": "CI"
+    },
+    {
+      "instrument_id": "equity:cien",
+      "runtime_seconds": 0.00274496,
+      "symbol": "CIEN"
+    },
+    {
+      "instrument_id": "equity:cinf",
+      "runtime_seconds": 0.0026265,
+      "symbol": "CINF"
+    },
+    {
+      "instrument_id": "equity:cl",
+      "runtime_seconds": 0.0027695,
+      "symbol": "CL"
+    },
+    {
+      "instrument_id": "equity:clf",
+      "runtime_seconds": 0.00270017,
+      "symbol": "CLF"
+    },
+    {
+      "instrument_id": "equity:clh",
+      "runtime_seconds": 0.00264458,
+      "symbol": "CLH"
+    },
+    {
+      "instrument_id": "equity:cls",
+      "runtime_seconds": 0.00268208,
+      "symbol": "CLS"
+    },
+    {
+      "instrument_id": "equity:clx",
+      "runtime_seconds": 0.00261479,
+      "symbol": "CLX"
+    },
+    {
+      "instrument_id": "equity:cmc",
+      "runtime_seconds": 0.00270271,
+      "symbol": "CMC"
+    },
+    {
+      "instrument_id": "equity:cmcsa",
+      "runtime_seconds": 0.00276108,
+      "symbol": "CMCSA"
+    },
+    {
+      "instrument_id": "equity:cme",
+      "runtime_seconds": 0.00266529,
+      "symbol": "CME"
+    },
+    {
+      "instrument_id": "equity:cmg",
+      "runtime_seconds": 0.00269013,
+      "symbol": "CMG"
+    },
+    {
+      "instrument_id": "equity:cmi",
+      "runtime_seconds": 0.00268737,
+      "symbol": "CMI"
+    },
+    {
+      "instrument_id": "equity:cms",
+      "runtime_seconds": 0.002632,
+      "symbol": "CMS"
+    },
+    {
+      "instrument_id": "equity:cnc",
+      "runtime_seconds": 0.00273121,
+      "symbol": "CNC"
+    },
+    {
+      "instrument_id": "equity:cnh",
+      "runtime_seconds": 0.00277067,
+      "symbol": "CNH"
+    },
+    {
+      "instrument_id": "equity:cnm",
+      "runtime_seconds": 0.00251837,
+      "symbol": "CNM"
+    },
+    {
+      "instrument_id": "equity:cno",
+      "runtime_seconds": 0.00274438,
+      "symbol": "CNO"
+    },
+    {
+      "instrument_id": "equity:cnp",
+      "runtime_seconds": 0.00278429,
+      "symbol": "CNP"
+    },
+    {
+      "instrument_id": "equity:cnx",
+      "runtime_seconds": 0.00257854,
+      "symbol": "CNX"
+    },
+    {
+      "instrument_id": "equity:cof",
+      "runtime_seconds": 0.00277192,
+      "symbol": "COF"
+    },
+    {
+      "instrument_id": "equity:cohr",
+      "runtime_seconds": 0.00271025,
+      "symbol": "COHR"
+    },
+    {
+      "instrument_id": "equity:coin",
+      "runtime_seconds": 0.00255004,
+      "symbol": "COIN"
+    },
+    {
+      "instrument_id": "equity:coke",
+      "runtime_seconds": 0.00276529,
+      "symbol": "COKE"
+    },
+    {
+      "instrument_id": "equity:colb",
+      "runtime_seconds": 0.00258063,
+      "symbol": "COLB"
+    },
+    {
+      "instrument_id": "equity:colm",
+      "runtime_seconds": 0.00253508,
+      "symbol": "COLM"
+    },
+    {
+      "instrument_id": "equity:coo",
+      "runtime_seconds": 0.00260721,
+      "symbol": "COO"
+    },
+    {
+      "instrument_id": "equity:cop",
+      "runtime_seconds": 0.00259167,
+      "symbol": "COP"
+    },
+    {
+      "instrument_id": "equity:cor",
+      "runtime_seconds": 0.00254875,
+      "symbol": "COR"
+    },
+    {
+      "instrument_id": "equity:cost",
+      "runtime_seconds": 0.00265025,
+      "symbol": "COST"
+    },
+    {
+      "instrument_id": "equity:cpay",
+      "runtime_seconds": 0.00258788,
+      "symbol": "CPAY"
+    },
+    {
+      "instrument_id": "equity:cpri",
+      "runtime_seconds": 0.00257771,
+      "symbol": "CPRI"
+    },
+    {
+      "instrument_id": "equity:cprt",
+      "runtime_seconds": 0.00266229,
+      "symbol": "CPRT"
+    },
+    {
+      "instrument_id": "equity:cpt",
+      "runtime_seconds": 0.00263667,
+      "symbol": "CPT"
+    },
+    {
+      "instrument_id": "equity:cr",
+      "runtime_seconds": 0.00253642,
+      "symbol": "CR"
+    },
+    {
+      "instrument_id": "equity:crbg",
+      "runtime_seconds": 0.00258713,
+      "symbol": "CRBG"
+    },
+    {
+      "instrument_id": "equity:crdo",
+      "runtime_seconds": 0.00258042,
+      "symbol": "CRDO"
+    },
+    {
+      "instrument_id": "equity:crh",
+      "runtime_seconds": 0.00253012,
+      "symbol": "CRH"
+    },
+    {
+      "instrument_id": "equity:crl",
+      "runtime_seconds": 0.00258679,
+      "symbol": "CRL"
+    },
+    {
+      "instrument_id": "equity:crm",
+      "runtime_seconds": 0.00265237,
+      "symbol": "CRM"
+    },
+    {
+      "instrument_id": "equity:crox",
+      "runtime_seconds": 0.00257183,
+      "symbol": "CROX"
+    },
+    {
+      "instrument_id": "equity:crs",
+      "runtime_seconds": 0.00260512,
+      "symbol": "CRS"
+    },
+    {
+      "instrument_id": "equity:crus",
+      "runtime_seconds": 0.00253346,
+      "symbol": "CRUS"
+    },
+    {
+      "instrument_id": "equity:crwd",
+      "runtime_seconds": 0.00263546,
+      "symbol": "CRWD"
+    },
+    {
+      "instrument_id": "equity:csco",
+      "runtime_seconds": 0.00269121,
+      "symbol": "CSCO"
+    },
+    {
+      "instrument_id": "equity:csgp",
+      "runtime_seconds": 0.00268296,
+      "symbol": "CSGP"
+    },
+    {
+      "instrument_id": "equity:csl",
+      "runtime_seconds": 0.00262858,
+      "symbol": "CSL"
+    },
+    {
+      "instrument_id": "equity:csx",
+      "runtime_seconds": 0.00269371,
+      "symbol": "CSX"
+    },
+    {
+      "instrument_id": "equity:ctas",
+      "runtime_seconds": 0.00267946,
+      "symbol": "CTAS"
+    },
+    {
+      "instrument_id": "equity:ctre",
+      "runtime_seconds": 0.00267883,
+      "symbol": "CTRE"
+    },
+    {
+      "instrument_id": "equity:ctsh",
+      "runtime_seconds": 0.00260346,
+      "symbol": "CTSH"
+    },
+    {
+      "instrument_id": "equity:ctva",
+      "runtime_seconds": 0.00275092,
+      "symbol": "CTVA"
+    },
+    {
+      "instrument_id": "equity:cube",
+      "runtime_seconds": 0.00265404,
+      "symbol": "CUBE"
+    },
+    {
+      "instrument_id": "equity:cuz",
+      "runtime_seconds": 0.00266404,
+      "symbol": "CUZ"
+    },
+    {
+      "instrument_id": "equity:cvlt",
+      "runtime_seconds": 0.00256921,
+      "symbol": "CVLT"
+    },
+    {
+      "instrument_id": "equity:cvna",
+      "runtime_seconds": 0.00277271,
+      "symbol": "CVNA"
+    },
+    {
+      "instrument_id": "equity:cvs",
+      "runtime_seconds": 0.00271492,
+      "symbol": "CVS"
+    },
+    {
+      "instrument_id": "equity:cvx",
+      "runtime_seconds": 0.00262154,
+      "symbol": "CVX"
+    },
+    {
+      "instrument_id": "equity:cw",
+      "runtime_seconds": 0.00276104,
+      "symbol": "CW"
+    },
+    {
+      "instrument_id": "equity:cxt",
+      "runtime_seconds": 0.00268054,
+      "symbol": "CXT"
+    },
+    {
+      "instrument_id": "equity:cytk",
+      "runtime_seconds": 0.00260592,
+      "symbol": "CYTK"
+    },
+    {
+      "instrument_id": "equity:d",
+      "runtime_seconds": 0.00268512,
+      "symbol": "D"
+    },
+    {
+      "instrument_id": "equity:dal",
+      "runtime_seconds": 0.00265963,
+      "symbol": "DAL"
+    },
+    {
+      "instrument_id": "equity:dar",
+      "runtime_seconds": 0.0026275,
+      "symbol": "DAR"
+    },
+    {
+      "instrument_id": "equity:dash",
+      "runtime_seconds": 0.00285113,
+      "symbol": "DASH"
+    },
+    {
+      "instrument_id": "equity:dbx",
+      "runtime_seconds": 0.00270483,
+      "symbol": "DBX"
+    },
+    {
+      "instrument_id": "equity:dci",
+      "runtime_seconds": 0.00260304,
+      "symbol": "DCI"
+    },
+    {
+      "instrument_id": "equity:dd",
+      "runtime_seconds": 0.00283346,
+      "symbol": "DD"
+    },
+    {
+      "instrument_id": "equity:ddog",
+      "runtime_seconds": 0.0026805,
+      "symbol": "DDOG"
+    },
+    {
+      "instrument_id": "equity:de",
+      "runtime_seconds": 0.00258529,
+      "symbol": "DE"
+    },
+    {
+      "instrument_id": "equity:deck",
+      "runtime_seconds": 0.00291196,
+      "symbol": "DECK"
+    },
+    {
+      "instrument_id": "equity:dell",
+      "runtime_seconds": 0.00270083,
+      "symbol": "DELL"
+    },
+    {
+      "instrument_id": "equity:dg",
+      "runtime_seconds": 0.00287287,
+      "symbol": "DG"
+    },
+    {
+      "instrument_id": "equity:dgx",
+      "runtime_seconds": 0.00273846,
+      "symbol": "DGX"
+    },
+    {
+      "instrument_id": "equity:dhi",
+      "runtime_seconds": 0.00266087,
+      "symbol": "DHI"
+    },
+    {
+      "instrument_id": "equity:dhr",
+      "runtime_seconds": 0.00257758,
+      "symbol": "DHR"
+    },
+    {
+      "instrument_id": "equity:dino",
+      "runtime_seconds": 0.00263246,
+      "symbol": "DINO"
+    },
+    {
+      "instrument_id": "equity:dis",
+      "runtime_seconds": 0.00265412,
+      "symbol": "DIS"
+    },
+    {
+      "instrument_id": "equity:dks",
+      "runtime_seconds": 0.00250458,
+      "symbol": "DKS"
+    },
+    {
+      "instrument_id": "equity:dlb",
+      "runtime_seconds": 0.00271283,
+      "symbol": "DLB"
+    },
+    {
+      "instrument_id": "equity:dlr",
+      "runtime_seconds": 0.00264658,
+      "symbol": "DLR"
+    },
+    {
+      "instrument_id": "equity:dltr",
+      "runtime_seconds": 0.0025025,
+      "symbol": "DLTR"
+    },
+    {
+      "instrument_id": "equity:doc",
+      "runtime_seconds": 0.00263083,
+      "symbol": "DOC"
+    },
+    {
+      "instrument_id": "equity:docn",
+      "runtime_seconds": 0.00263912,
+      "symbol": "DOCN"
+    },
+    {
+      "instrument_id": "equity:docs",
+      "runtime_seconds": 0.00247492,
+      "symbol": "DOCS"
+    },
+    {
+      "instrument_id": "equity:docu",
+      "runtime_seconds": 0.00259971,
+      "symbol": "DOCU"
+    },
+    {
+      "instrument_id": "equity:dov",
+      "runtime_seconds": 0.00273192,
+      "symbol": "DOV"
+    },
+    {
+      "instrument_id": "equity:dow",
+      "runtime_seconds": 0.00255687,
+      "symbol": "DOW"
+    },
+    {
+      "instrument_id": "equity:dpz",
+      "runtime_seconds": 0.00253513,
+      "symbol": "DPZ"
+    },
+    {
+      "instrument_id": "equity:dri",
+      "runtime_seconds": 0.00263854,
+      "symbol": "DRI"
+    },
+    {
+      "instrument_id": "equity:dt",
+      "runtime_seconds": 0.00253817,
+      "symbol": "DT"
+    },
+    {
+      "instrument_id": "equity:dte",
+      "runtime_seconds": 0.00256433,
+      "symbol": "DTE"
+    },
+    {
+      "instrument_id": "equity:dtm",
+      "runtime_seconds": 0.00257992,
+      "symbol": "DTM"
+    },
+    {
+      "instrument_id": "equity:duk",
+      "runtime_seconds": 0.00257821,
+      "symbol": "DUK"
+    },
+    {
+      "instrument_id": "equity:duol",
+      "runtime_seconds": 0.00254071,
+      "symbol": "DUOL"
+    },
+    {
+      "instrument_id": "equity:dva",
+      "runtime_seconds": 0.00264129,
+      "symbol": "DVA"
+    },
+    {
+      "instrument_id": "equity:dvn",
+      "runtime_seconds": 0.00262633,
+      "symbol": "DVN"
+    },
+    {
+      "instrument_id": "equity:dxcm",
+      "runtime_seconds": 0.00249187,
+      "symbol": "DXCM"
+    },
+    {
+      "instrument_id": "equity:dy",
+      "runtime_seconds": 0.00253279,
+      "symbol": "DY"
+    },
+    {
+      "instrument_id": "equity:ea",
+      "runtime_seconds": 0.00263567,
+      "symbol": "EA"
+    },
+    {
+      "instrument_id": "equity:ebay",
+      "runtime_seconds": 0.00250108,
+      "symbol": "EBAY"
+    },
+    {
+      "instrument_id": "equity:echo",
+      "runtime_seconds": 0.00253117,
+      "symbol": "ECHO"
+    },
+    {
+      "instrument_id": "equity:ecl",
+      "runtime_seconds": 0.00262883,
+      "symbol": "ECL"
+    },
+    {
+      "instrument_id": "equity:ed",
+      "runtime_seconds": 0.00256571,
+      "symbol": "ED"
+    },
+    {
+      "instrument_id": "equity:eeft",
+      "runtime_seconds": 0.00250117,
+      "symbol": "EEFT"
+    },
+    {
+      "instrument_id": "equity:efx",
+      "runtime_seconds": 0.00261946,
+      "symbol": "EFX"
+    },
+    {
+      "instrument_id": "equity:eg",
+      "runtime_seconds": 0.00256258,
+      "symbol": "EG"
+    },
+    {
+      "instrument_id": "equity:egp",
+      "runtime_seconds": 0.00256175,
+      "symbol": "EGP"
+    },
+    {
+      "instrument_id": "equity:ehc",
+      "runtime_seconds": 0.00260879,
+      "symbol": "EHC"
+    },
+    {
+      "instrument_id": "equity:eix",
+      "runtime_seconds": 0.00276017,
+      "symbol": "EIX"
+    },
+    {
+      "instrument_id": "equity:el",
+      "runtime_seconds": 0.00251446,
+      "symbol": "EL"
+    },
+    {
+      "instrument_id": "equity:elan",
+      "runtime_seconds": 0.00264425,
+      "symbol": "ELAN"
+    },
+    {
+      "instrument_id": "equity:elf",
+      "runtime_seconds": 0.00264917,
+      "symbol": "ELF"
+    },
+    {
+      "instrument_id": "equity:els",
+      "runtime_seconds": 0.00248229,
+      "symbol": "ELS"
+    },
+    {
+      "instrument_id": "equity:elv",
+      "runtime_seconds": 0.00255842,
+      "symbol": "ELV"
+    },
+    {
+      "instrument_id": "equity:eme",
+      "runtime_seconds": 0.00256558,
+      "symbol": "EME"
+    },
+    {
+      "instrument_id": "equity:emr",
+      "runtime_seconds": 0.00282138,
+      "symbol": "EMR"
+    },
+    {
+      "instrument_id": "equity:enb",
+      "runtime_seconds": 0.00267017,
+      "symbol": "ENB"
+    },
+    {
+      "instrument_id": "equity:enph",
+      "runtime_seconds": 0.00283208,
+      "symbol": "ENPH"
+    },
+    {
+      "instrument_id": "equity:ens",
+      "runtime_seconds": 0.00272037,
+      "symbol": "ENS"
+    },
+    {
+      "instrument_id": "equity:ensg",
+      "runtime_seconds": 0.0028745,
+      "symbol": "ENSG"
+    },
+    {
+      "instrument_id": "equity:entg",
+      "runtime_seconds": 0.00272154,
+      "symbol": "ENTG"
+    },
+    {
+      "instrument_id": "equity:eog",
+      "runtime_seconds": 0.00283662,
+      "symbol": "EOG"
+    },
+    {
+      "instrument_id": "equity:epr",
+      "runtime_seconds": 0.00264629,
+      "symbol": "EPR"
+    },
+    {
+      "instrument_id": "equity:eqh",
+      "runtime_seconds": 0.00281304,
+      "symbol": "EQH"
+    },
+    {
+      "instrument_id": "equity:eqix",
+      "runtime_seconds": 0.00271329,
+      "symbol": "EQIX"
+    },
+    {
+      "instrument_id": "equity:eqr",
+      "runtime_seconds": 0.00267025,
+      "symbol": "EQR"
+    },
+    {
+      "instrument_id": "equity:eqt",
+      "runtime_seconds": 0.00276175,
+      "symbol": "EQT"
+    },
+    {
+      "instrument_id": "equity:erie",
+      "runtime_seconds": 0.00256987,
+      "symbol": "ERIE"
+    },
+    {
+      "instrument_id": "equity:es",
+      "runtime_seconds": 0.00252863,
+      "symbol": "ES"
+    },
+    {
+      "instrument_id": "equity:esab",
+      "runtime_seconds": 0.00269208,
+      "symbol": "ESAB"
+    },
+    {
+      "instrument_id": "equity:esnt",
+      "runtime_seconds": 0.00258729,
+      "symbol": "ESNT"
+    },
+    {
+      "instrument_id": "equity:ess",
+      "runtime_seconds": 0.00253079,
+      "symbol": "ESS"
+    },
+    {
+      "instrument_id": "equity:etn",
+      "runtime_seconds": 0.00264392,
+      "symbol": "ETN"
+    },
+    {
+      "instrument_id": "equity:etr",
+      "runtime_seconds": 0.00251063,
+      "symbol": "ETR"
+    },
+    {
+      "instrument_id": "equity:etsy",
+      "runtime_seconds": 0.002502,
+      "symbol": "ETSY"
+    },
+    {
+      "instrument_id": "equity:evr",
+      "runtime_seconds": 0.00276517,
+      "symbol": "EVR"
+    },
+    {
+      "instrument_id": "equity:evrg",
+      "runtime_seconds": 0.00266638,
+      "symbol": "EVRG"
+    },
+    {
+      "instrument_id": "equity:ew",
+      "runtime_seconds": 0.002578,
+      "symbol": "EW"
+    },
+    {
+      "instrument_id": "equity:ewbc",
+      "runtime_seconds": 0.00261271,
+      "symbol": "EWBC"
+    },
+    {
+      "instrument_id": "equity:exc",
+      "runtime_seconds": 0.00263379,
+      "symbol": "EXC"
+    },
+    {
+      "instrument_id": "equity:exe",
+      "runtime_seconds": 0.0027245,
+      "symbol": "EXE"
+    },
+    {
+      "instrument_id": "equity:exel",
+      "runtime_seconds": 0.00265012,
+      "symbol": "EXEL"
+    },
+    {
+      "instrument_id": "equity:exls",
+      "runtime_seconds": 0.00272217,
+      "symbol": "EXLS"
+    },
+    {
+      "instrument_id": "equity:exp",
+      "runtime_seconds": 0.00269663,
+      "symbol": "EXP"
+    },
+    {
+      "instrument_id": "equity:expd",
+      "runtime_seconds": 0.00260796,
+      "symbol": "EXPD"
+    },
+    {
+      "instrument_id": "equity:expe",
+      "runtime_seconds": 0.00272658,
+      "symbol": "EXPE"
+    },
+    {
+      "instrument_id": "equity:expo",
+      "runtime_seconds": 0.00267183,
+      "symbol": "EXPO"
+    },
+    {
+      "instrument_id": "equity:exr",
+      "runtime_seconds": 0.00263758,
+      "symbol": "EXR"
+    },
+    {
+      "instrument_id": "equity:f",
+      "runtime_seconds": 0.00274163,
+      "symbol": "F"
+    },
+    {
+      "instrument_id": "equity:faf",
+      "runtime_seconds": 0.00260404,
+      "symbol": "FAF"
+    },
+    {
+      "instrument_id": "equity:fang",
+      "runtime_seconds": 0.00277529,
+      "symbol": "FANG"
+    },
+    {
+      "instrument_id": "equity:fast",
+      "runtime_seconds": 0.00272625,
+      "symbol": "FAST"
+    },
+    {
+      "instrument_id": "equity:fbin",
+      "runtime_seconds": 0.00264592,
+      "symbol": "FBIN"
+    },
+    {
+      "instrument_id": "equity:fcfs",
+      "runtime_seconds": 0.00261558,
+      "symbol": "FCFS"
+    },
+    {
+      "instrument_id": "equity:fcn",
+      "runtime_seconds": 0.00265338,
+      "symbol": "FCN"
+    },
+    {
+      "instrument_id": "equity:fcx",
+      "runtime_seconds": 0.00259967,
+      "symbol": "FCX"
+    },
+    {
+      "instrument_id": "equity:fds",
+      "runtime_seconds": 0.002753,
+      "symbol": "FDS"
+    },
+    {
+      "instrument_id": "equity:fdx",
+      "runtime_seconds": 0.00271179,
+      "symbol": "FDX"
+    },
+    {
+      "instrument_id": "equity:fdxf",
+      "runtime_seconds": 0.0002955,
+      "symbol": "FDXF"
+    },
+    {
+      "instrument_id": "equity:fe",
+      "runtime_seconds": 0.00255817,
+      "symbol": "FE"
+    },
+    {
+      "instrument_id": "equity:ffin",
+      "runtime_seconds": 0.00277913,
+      "symbol": "FFIN"
+    },
+    {
+      "instrument_id": "equity:ffiv",
+      "runtime_seconds": 0.00265229,
+      "symbol": "FFIV"
+    },
+    {
+      "instrument_id": "equity:fhi",
+      "runtime_seconds": 0.00261025,
+      "symbol": "FHI"
+    },
+    {
+      "instrument_id": "equity:fhn",
+      "runtime_seconds": 0.00265029,
+      "symbol": "FHN"
+    },
+    {
+      "instrument_id": "equity:fico",
+      "runtime_seconds": 0.00264654,
+      "symbol": "FICO"
+    },
+    {
+      "instrument_id": "equity:fis",
+      "runtime_seconds": 0.00257733,
+      "symbol": "FIS"
+    },
+    {
+      "instrument_id": "equity:fisv",
+      "runtime_seconds": 0.00276521,
+      "symbol": "FISV"
+    },
+    {
+      "instrument_id": "equity:fitb",
+      "runtime_seconds": 0.00259354,
+      "symbol": "FITB"
+    },
+    {
+      "instrument_id": "equity:five",
+      "runtime_seconds": 0.00276617,
+      "symbol": "FIVE"
+    },
+    {
+      "instrument_id": "equity:fix",
+      "runtime_seconds": 0.00267587,
+      "symbol": "FIX"
+    },
+    {
+      "instrument_id": "equity:flex",
+      "runtime_seconds": 0.00255862,
+      "symbol": "FLEX"
+    },
+    {
+      "instrument_id": "equity:flg",
+      "runtime_seconds": 0.00273379,
+      "symbol": "FLG"
+    },
+    {
+      "instrument_id": "equity:flr",
+      "runtime_seconds": 0.00269808,
+      "symbol": "FLR"
+    },
+    {
+      "instrument_id": "equity:fls",
+      "runtime_seconds": 0.00254838,
+      "symbol": "FLS"
+    },
+    {
+      "instrument_id": "equity:fn",
+      "runtime_seconds": 0.002833,
+      "symbol": "FN"
+    },
+    {
+      "instrument_id": "equity:fnb",
+      "runtime_seconds": 0.00269683,
+      "symbol": "FNB"
+    },
+    {
+      "instrument_id": "equity:fnd",
+      "runtime_seconds": 0.00258046,
+      "symbol": "FND"
+    },
+    {
+      "instrument_id": "equity:fnf",
+      "runtime_seconds": 0.00269167,
+      "symbol": "FNF"
+    },
+    {
+      "instrument_id": "equity:four",
+      "runtime_seconds": 0.00265017,
+      "symbol": "FOUR"
+    },
+    {
+      "instrument_id": "equity:fox",
+      "runtime_seconds": 0.00263446,
+      "symbol": "FOX"
+    },
+    {
+      "instrument_id": "equity:foxa",
+      "runtime_seconds": 0.00268588,
+      "symbol": "FOXA"
+    },
+    {
+      "instrument_id": "equity:fr",
+      "runtime_seconds": 0.00262654,
+      "symbol": "FR"
+    },
+    {
+      "instrument_id": "equity:frt",
+      "runtime_seconds": 0.00260875,
+      "symbol": "FRT"
+    },
+    {
+      "instrument_id": "equity:fslr",
+      "runtime_seconds": 0.002605,
+      "symbol": "FSLR"
+    },
+    {
+      "instrument_id": "equity:fti",
+      "runtime_seconds": 0.00261492,
+      "symbol": "FTI"
+    },
+    {
+      "instrument_id": "equity:ftnt",
+      "runtime_seconds": 0.00267667,
+      "symbol": "FTNT"
+    },
+    {
+      "instrument_id": "equity:ftv",
+      "runtime_seconds": 0.00269963,
+      "symbol": "FTV"
+    },
+    {
+      "instrument_id": "equity:g",
+      "runtime_seconds": 0.00272129,
+      "symbol": "G"
+    },
+    {
+      "instrument_id": "equity:gap",
+      "runtime_seconds": 0.00273038,
+      "symbol": "GAP"
+    },
+    {
+      "instrument_id": "equity:gatx",
+      "runtime_seconds": 0.00269146,
+      "symbol": "GATX"
+    },
+    {
+      "instrument_id": "equity:gbci",
+      "runtime_seconds": 0.00267733,
+      "symbol": "GBCI"
+    },
+    {
+      "instrument_id": "equity:gd",
+      "runtime_seconds": 0.00265496,
+      "symbol": "GD"
+    },
+    {
+      "instrument_id": "equity:gddy",
+      "runtime_seconds": 0.00277129,
+      "symbol": "GDDY"
+    },
+    {
+      "instrument_id": "equity:ge",
+      "runtime_seconds": 0.00264304,
+      "symbol": "GE"
+    },
+    {
+      "instrument_id": "equity:gef",
+      "runtime_seconds": 0.00265246,
+      "symbol": "GEF"
+    },
+    {
+      "instrument_id": "equity:gehc",
+      "runtime_seconds": 0.00255892,
+      "symbol": "GEHC"
+    },
+    {
+      "instrument_id": "equity:gen",
+      "runtime_seconds": 0.00264825,
+      "symbol": "GEN"
+    },
+    {
+      "instrument_id": "equity:gev",
+      "runtime_seconds": 0.00262167,
+      "symbol": "GEV"
+    },
+    {
+      "instrument_id": "equity:ggg",
+      "runtime_seconds": 0.00255571,
+      "symbol": "GGG"
+    },
+    {
+      "instrument_id": "equity:ghc",
+      "runtime_seconds": 0.002654,
+      "symbol": "GHC"
+    },
+    {
+      "instrument_id": "equity:gild",
+      "runtime_seconds": 0.00274933,
+      "symbol": "GILD"
+    },
+    {
+      "instrument_id": "equity:gis",
+      "runtime_seconds": 0.002672,
+      "symbol": "GIS"
+    },
+    {
+      "instrument_id": "equity:gl",
+      "runtime_seconds": 0.00271058,
+      "symbol": "GL"
+    },
+    {
+      "instrument_id": "equity:glpi",
+      "runtime_seconds": 0.00268629,
+      "symbol": "GLPI"
+    },
+    {
+      "instrument_id": "equity:glw",
+      "runtime_seconds": 0.00260962,
+      "symbol": "GLW"
+    },
+    {
+      "instrument_id": "equity:gm",
+      "runtime_seconds": 0.00258313,
+      "symbol": "GM"
+    },
+    {
+      "instrument_id": "equity:gme",
+      "runtime_seconds": 0.00262646,
+      "symbol": "GME"
+    },
+    {
+      "instrument_id": "equity:gmed",
+      "runtime_seconds": 0.00263367,
+      "symbol": "GMED"
+    },
+    {
+      "instrument_id": "equity:gnrc",
+      "runtime_seconds": 0.00268808,
+      "symbol": "GNRC"
+    },
+    {
+      "instrument_id": "equity:gntx",
+      "runtime_seconds": 0.00271246,
+      "symbol": "GNTX"
+    },
+    {
+      "instrument_id": "equity:gold",
+      "runtime_seconds": 0.00268158,
+      "symbol": "GOLD"
+    },
+    {
+      "instrument_id": "equity:goog",
+      "runtime_seconds": 0.00261054,
+      "symbol": "GOOG"
+    },
+    {
+      "instrument_id": "equity:googl",
+      "runtime_seconds": 0.00278308,
+      "symbol": "GOOGL"
+    },
+    {
+      "instrument_id": "equity:gpc",
+      "runtime_seconds": 0.00273333,
+      "symbol": "GPC"
+    },
+    {
+      "instrument_id": "equity:gpk",
+      "runtime_seconds": 0.00265525,
+      "symbol": "GPK"
+    },
+    {
+      "instrument_id": "equity:gpn",
+      "runtime_seconds": 0.00265408,
+      "symbol": "GPN"
+    },
+    {
+      "instrument_id": "equity:grmn",
+      "runtime_seconds": 0.00274412,
+      "symbol": "GRMN"
+    },
+    {
+      "instrument_id": "equity:gs",
+      "runtime_seconds": 0.00259583,
+      "symbol": "GS"
+    },
+    {
+      "instrument_id": "equity:gtls",
+      "runtime_seconds": 0.00265996,
+      "symbol": "GTLS"
+    },
+    {
+      "instrument_id": "equity:gwre",
+      "runtime_seconds": 0.00267796,
+      "symbol": "GWRE"
+    },
+    {
+      "instrument_id": "equity:gww",
+      "runtime_seconds": 0.00252229,
+      "symbol": "GWW"
+    },
+    {
+      "instrument_id": "equity:gxo",
+      "runtime_seconds": 0.00270392,
+      "symbol": "GXO"
+    },
+    {
+      "instrument_id": "equity:h",
+      "runtime_seconds": 0.00271162,
+      "symbol": "H"
+    },
+    {
+      "instrument_id": "equity:hae",
+      "runtime_seconds": 0.00252267,
+      "symbol": "HAE"
+    },
+    {
+      "instrument_id": "equity:hal",
+      "runtime_seconds": 0.00276637,
+      "symbol": "HAL"
+    },
+    {
+      "instrument_id": "equity:halo",
+      "runtime_seconds": 0.00282196,
+      "symbol": "HALO"
+    },
+    {
+      "instrument_id": "equity:has",
+      "runtime_seconds": 0.00258758,
+      "symbol": "HAS"
+    },
+    {
+      "instrument_id": "equity:hban",
+      "runtime_seconds": 0.00270458,
+      "symbol": "HBAN"
+    },
+    {
+      "instrument_id": "equity:hca",
+      "runtime_seconds": 0.0027035,
+      "symbol": "HCA"
+    },
+    {
+      "instrument_id": "equity:hd",
+      "runtime_seconds": 0.002607,
+      "symbol": "HD"
+    },
+    {
+      "instrument_id": "equity:hei",
+      "runtime_seconds": 0.00262708,
+      "symbol": "HEI"
+    },
+    {
+      "instrument_id": "equity:hgv",
+      "runtime_seconds": 0.00260125,
+      "symbol": "HGV"
+    },
+    {
+      "instrument_id": "equity:hig",
+      "runtime_seconds": 0.00267388,
+      "symbol": "HIG"
+    },
+    {
+      "instrument_id": "equity:hii",
+      "runtime_seconds": 0.00264313,
+      "symbol": "HII"
+    },
+    {
+      "instrument_id": "equity:hims",
+      "runtime_seconds": 0.00265825,
+      "symbol": "HIMS"
+    },
+    {
+      "instrument_id": "equity:hl",
+      "runtime_seconds": 0.00279692,
+      "symbol": "HL"
+    },
+    {
+      "instrument_id": "equity:hli",
+      "runtime_seconds": 0.00258392,
+      "symbol": "HLI"
+    },
+    {
+      "instrument_id": "equity:hlne",
+      "runtime_seconds": 0.00265108,
+      "symbol": "HLNE"
+    },
+    {
+      "instrument_id": "equity:hlt",
+      "runtime_seconds": 0.00287017,
+      "symbol": "HLT"
+    },
+    {
+      "instrument_id": "equity:hog",
+      "runtime_seconds": 0.00263075,
+      "symbol": "HOG"
+    },
+    {
+      "instrument_id": "equity:homb",
+      "runtime_seconds": 0.00266804,
+      "symbol": "HOMB"
+    },
+    {
+      "instrument_id": "equity:hon",
+      "runtime_seconds": 0.00276742,
+      "symbol": "HON"
+    },
+    {
+      "instrument_id": "equity:hona",
+      "runtime_seconds": 0.00023596,
+      "symbol": "HONA"
+    },
+    {
+      "instrument_id": "equity:hood",
+      "runtime_seconds": 0.00253325,
+      "symbol": "HOOD"
+    },
+    {
+      "instrument_id": "equity:hpe",
+      "runtime_seconds": 0.0026865,
+      "symbol": "HPE"
+    },
+    {
+      "instrument_id": "equity:hpq",
+      "runtime_seconds": 0.00263017,
+      "symbol": "HPQ"
+    },
+    {
+      "instrument_id": "equity:hqy",
+      "runtime_seconds": 0.00264596,
+      "symbol": "HQY"
+    },
+    {
+      "instrument_id": "equity:hr",
+      "runtime_seconds": 0.00264404,
+      "symbol": "HR"
+    },
+    {
+      "instrument_id": "equity:hrb",
+      "runtime_seconds": 0.00256396,
+      "symbol": "HRB"
+    },
+    {
+      "instrument_id": "equity:hrl",
+      "runtime_seconds": 0.00255308,
+      "symbol": "HRL"
+    },
+    {
+      "instrument_id": "equity:hsic",
+      "runtime_seconds": 0.00259642,
+      "symbol": "HSIC"
+    },
+    {
+      "instrument_id": "equity:hst",
+      "runtime_seconds": 0.00264821,
+      "symbol": "HST"
+    },
+    {
+      "instrument_id": "equity:hsy",
+      "runtime_seconds": 0.00264863,
+      "symbol": "HSY"
+    },
+    {
+      "instrument_id": "equity:hubb",
+      "runtime_seconds": 0.00267421,
+      "symbol": "HUBB"
+    },
+    {
+      "instrument_id": "equity:hum",
+      "runtime_seconds": 0.00282592,
+      "symbol": "HUM"
+    },
+    {
+      "instrument_id": "equity:hwc",
+      "runtime_seconds": 0.00272279,
+      "symbol": "HWC"
+    },
+    {
+      "instrument_id": "equity:hwm",
+      "runtime_seconds": 0.00261358,
+      "symbol": "HWM"
+    },
+    {
+      "instrument_id": "equity:hxl",
+      "runtime_seconds": 0.00271512,
+      "symbol": "HXL"
+    },
+    {
+      "instrument_id": "equity:ibkr",
+      "runtime_seconds": 0.00257458,
+      "symbol": "IBKR"
+    },
+    {
+      "instrument_id": "equity:ibm",
+      "runtime_seconds": 0.00281808,
+      "symbol": "IBM"
+    },
+    {
+      "instrument_id": "equity:iboc",
+      "runtime_seconds": 0.00268546,
+      "symbol": "IBOC"
+    },
+    {
+      "instrument_id": "equity:ice",
+      "runtime_seconds": 0.00279325,
+      "symbol": "ICE"
+    },
+    {
+      "instrument_id": "equity:ida",
+      "runtime_seconds": 0.00275754,
+      "symbol": "IDA"
+    },
+    {
+      "instrument_id": "equity:idcc",
+      "runtime_seconds": 0.00260933,
+      "symbol": "IDCC"
+    },
+    {
+      "instrument_id": "equity:idxx",
+      "runtime_seconds": 0.00259617,
+      "symbol": "IDXX"
+    },
+    {
+      "instrument_id": "equity:iex",
+      "runtime_seconds": 0.00283825,
+      "symbol": "IEX"
+    },
+    {
+      "instrument_id": "equity:iff",
+      "runtime_seconds": 0.00259033,
+      "symbol": "IFF"
+    },
+    {
+      "instrument_id": "equity:ilmn",
+      "runtime_seconds": 0.002687,
+      "symbol": "ILMN"
+    },
+    {
+      "instrument_id": "equity:incy",
+      "runtime_seconds": 0.00264617,
+      "symbol": "INCY"
+    },
+    {
+      "instrument_id": "equity:ingr",
+      "runtime_seconds": 0.00262529,
+      "symbol": "INGR"
+    },
+    {
+      "instrument_id": "equity:intc",
+      "runtime_seconds": 0.00274137,
+      "symbol": "INTC"
+    },
+    {
+      "instrument_id": "equity:intu",
+      "runtime_seconds": 0.00258175,
+      "symbol": "INTU"
+    },
+    {
+      "instrument_id": "equity:invh",
+      "runtime_seconds": 0.00260633,
+      "symbol": "INVH"
+    },
+    {
+      "instrument_id": "equity:ip",
+      "runtime_seconds": 0.00285687,
+      "symbol": "IP"
+    },
+    {
+      "instrument_id": "equity:ipgp",
+      "runtime_seconds": 0.00268217,
+      "symbol": "IPGP"
+    },
+    {
+      "instrument_id": "equity:iqv",
+      "runtime_seconds": 0.00272525,
+      "symbol": "IQV"
+    },
+    {
+      "instrument_id": "equity:ir",
+      "runtime_seconds": 0.00272133,
+      "symbol": "IR"
+    },
+    {
+      "instrument_id": "equity:iren",
+      "runtime_seconds": 0.00262833,
+      "symbol": "IREN"
+    },
+    {
+      "instrument_id": "equity:irm",
+      "runtime_seconds": 0.00268071,
+      "symbol": "IRM"
+    },
+    {
+      "instrument_id": "equity:irt",
+      "runtime_seconds": 0.00273487,
+      "symbol": "IRT"
+    },
+    {
+      "instrument_id": "equity:isrg",
+      "runtime_seconds": 0.00259696,
+      "symbol": "ISRG"
+    },
+    {
+      "instrument_id": "equity:it",
+      "runtime_seconds": 0.00265742,
+      "symbol": "IT"
+    },
+    {
+      "instrument_id": "equity:itt",
+      "runtime_seconds": 0.00272933,
+      "symbol": "ITT"
+    },
+    {
+      "instrument_id": "equity:itw",
+      "runtime_seconds": 0.00257254,
+      "symbol": "ITW"
+    },
+    {
+      "instrument_id": "equity:ivz",
+      "runtime_seconds": 0.00277275,
+      "symbol": "IVZ"
+    },
+    {
+      "instrument_id": "equity:j",
+      "runtime_seconds": 0.00273717,
+      "symbol": "J"
+    },
+    {
+      "instrument_id": "equity:jazz",
+      "runtime_seconds": 0.00257733,
+      "symbol": "JAZZ"
+    },
+    {
+      "instrument_id": "equity:jbht",
+      "runtime_seconds": 0.00270596,
+      "symbol": "JBHT"
+    },
+    {
+      "instrument_id": "equity:jbl",
+      "runtime_seconds": 0.00324588,
+      "symbol": "JBL"
+    },
+    {
+      "instrument_id": "equity:jci",
+      "runtime_seconds": 0.00263508,
+      "symbol": "JCI"
+    },
+    {
+      "instrument_id": "equity:jd",
+      "runtime_seconds": 0.00276879,
+      "symbol": "JD"
+    },
+    {
+      "instrument_id": "equity:jef",
+      "runtime_seconds": 0.00269825,
+      "symbol": "JEF"
+    },
+    {
+      "instrument_id": "equity:jhg",
+      "runtime_seconds": 0.000908,
+      "symbol": "JHG"
+    },
+    {
+      "instrument_id": "equity:jkhy",
+      "runtime_seconds": 0.00272633,
+      "symbol": "JKHY"
+    },
+    {
+      "instrument_id": "equity:jll",
+      "runtime_seconds": 0.00266558,
+      "symbol": "JLL"
+    },
+    {
+      "instrument_id": "equity:jnj",
+      "runtime_seconds": 0.00271725,
+      "symbol": "JNJ"
+    },
+    {
+      "instrument_id": "equity:jpm",
+      "runtime_seconds": 0.00254571,
+      "symbol": "JPM"
+    },
+    {
+      "instrument_id": "equity:kbh",
+      "runtime_seconds": 0.00283446,
+      "symbol": "KBH"
+    },
+    {
+      "instrument_id": "equity:kbr",
+      "runtime_seconds": 0.00275038,
+      "symbol": "KBR"
+    },
+    {
+      "instrument_id": "equity:kd",
+      "runtime_seconds": 0.00260954,
+      "symbol": "KD"
+    },
+    {
+      "instrument_id": "equity:kdp",
+      "runtime_seconds": 0.00281371,
+      "symbol": "KDP"
+    },
+    {
+      "instrument_id": "equity:kex",
+      "runtime_seconds": 0.00276887,
+      "symbol": "KEX"
+    },
+    {
+      "instrument_id": "equity:key",
+      "runtime_seconds": 0.00261137,
+      "symbol": "KEY"
+    },
+    {
+      "instrument_id": "equity:keys",
+      "runtime_seconds": 0.00275842,
+      "symbol": "KEYS"
+    },
+    {
+      "instrument_id": "equity:khc",
+      "runtime_seconds": 0.00283429,
+      "symbol": "KHC"
+    },
+    {
+      "instrument_id": "equity:kim",
+      "runtime_seconds": 0.00264625,
+      "symbol": "KIM"
+    },
+    {
+      "instrument_id": "equity:kkr",
+      "runtime_seconds": 0.00273529,
+      "symbol": "KKR"
+    },
+    {
+      "instrument_id": "equity:klac",
+      "runtime_seconds": 0.00276154,
+      "symbol": "KLAC"
+    },
+    {
+      "instrument_id": "equity:kmb",
+      "runtime_seconds": 0.00262937,
+      "symbol": "KMB"
+    },
+    {
+      "instrument_id": "equity:kmi",
+      "runtime_seconds": 0.002745,
+      "symbol": "KMI"
+    },
+    {
+      "instrument_id": "equity:knf",
+      "runtime_seconds": 0.00273183,
+      "symbol": "KNF"
+    },
+    {
+      "instrument_id": "equity:knsl",
+      "runtime_seconds": 0.00263983,
+      "symbol": "KNSL"
+    },
+    {
+      "instrument_id": "equity:knx",
+      "runtime_seconds": 0.00270808,
+      "symbol": "KNX"
+    },
+    {
+      "instrument_id": "equity:ko",
+      "runtime_seconds": 0.00258104,
+      "symbol": "KO"
+    },
+    {
+      "instrument_id": "equity:kr",
+      "runtime_seconds": 0.00265746,
+      "symbol": "KR"
+    },
+    {
+      "instrument_id": "equity:krc",
+      "runtime_seconds": 0.00271533,
+      "symbol": "KRC"
+    },
+    {
+      "instrument_id": "equity:krg",
+      "runtime_seconds": 0.00259688,
+      "symbol": "KRG"
+    },
+    {
+      "instrument_id": "equity:ktos",
+      "runtime_seconds": 0.00268317,
+      "symbol": "KTOS"
+    },
+    {
+      "instrument_id": "equity:kvue",
+      "runtime_seconds": 0.00267171,
+      "symbol": "KVUE"
+    },
+    {
+      "instrument_id": "equity:l",
+      "runtime_seconds": 0.00263204,
+      "symbol": "L"
+    },
+    {
+      "instrument_id": "equity:lad",
+      "runtime_seconds": 0.00258371,
+      "symbol": "LAD"
+    },
+    {
+      "instrument_id": "equity:lamr",
+      "runtime_seconds": 0.00263158,
+      "symbol": "LAMR"
+    },
+    {
+      "instrument_id": "equity:lcid",
+      "runtime_seconds": 0.00270287,
+      "symbol": "LCID"
+    },
+    {
+      "instrument_id": "equity:ldos",
+      "runtime_seconds": 0.00264067,
+      "symbol": "LDOS"
+    },
+    {
+      "instrument_id": "equity:lea",
+      "runtime_seconds": 0.00262462,
+      "symbol": "LEA"
+    },
+    {
+      "instrument_id": "equity:leco",
+      "runtime_seconds": 0.00265679,
+      "symbol": "LECO"
+    },
+    {
+      "instrument_id": "equity:len",
+      "runtime_seconds": 0.00255654,
+      "symbol": "LEN"
+    },
+    {
+      "instrument_id": "equity:lfus",
+      "runtime_seconds": 0.00256587,
+      "symbol": "LFUS"
+    },
+    {
+      "instrument_id": "equity:lh",
+      "runtime_seconds": 0.00257717,
+      "symbol": "LH"
+    },
+    {
+      "instrument_id": "equity:lhx",
+      "runtime_seconds": 0.00254204,
+      "symbol": "LHX"
+    },
+    {
+      "instrument_id": "equity:lii",
+      "runtime_seconds": 0.00247629,
+      "symbol": "LII"
+    },
+    {
+      "instrument_id": "equity:lin",
+      "runtime_seconds": 0.00254492,
+      "symbol": "LIN"
+    },
+    {
+      "instrument_id": "equity:lite",
+      "runtime_seconds": 0.00258825,
+      "symbol": "LITE"
+    },
+    {
+      "instrument_id": "equity:livn",
+      "runtime_seconds": 0.00278379,
+      "symbol": "LIVN"
+    },
+    {
+      "instrument_id": "equity:lly",
+      "runtime_seconds": 0.00267992,
+      "symbol": "LLY"
+    },
+    {
+      "instrument_id": "equity:lmt",
+      "runtime_seconds": 0.00271046,
+      "symbol": "LMT"
+    },
+    {
+      "instrument_id": "equity:lng",
+      "runtime_seconds": 0.0026755,
+      "symbol": "LNG"
+    },
+    {
+      "instrument_id": "equity:lnt",
+      "runtime_seconds": 0.00281304,
+      "symbol": "LNT"
+    },
+    {
+      "instrument_id": "equity:lnth",
+      "runtime_seconds": 0.00269133,
+      "symbol": "LNTH"
+    },
+    {
+      "instrument_id": "equity:lope",
+      "runtime_seconds": 0.00281529,
+      "symbol": "LOPE"
+    },
+    {
+      "instrument_id": "equity:low",
+      "runtime_seconds": 0.00278929,
+      "symbol": "LOW"
+    },
+    {
+      "instrument_id": "equity:lpx",
+      "runtime_seconds": 0.00272137,
+      "symbol": "LPX"
+    },
+    {
+      "instrument_id": "equity:lrcx",
+      "runtime_seconds": 0.00272367,
+      "symbol": "LRCX"
+    },
+    {
+      "instrument_id": "equity:lscc",
+      "runtime_seconds": 0.00269662,
+      "symbol": "LSCC"
+    },
+    {
+      "instrument_id": "equity:lstr",
+      "runtime_seconds": 0.00267413,
+      "symbol": "LSTR"
+    },
+    {
+      "instrument_id": "equity:lulu",
+      "runtime_seconds": 0.00274892,
+      "symbol": "LULU"
+    },
+    {
+      "instrument_id": "equity:luv",
+      "runtime_seconds": 0.00272554,
+      "symbol": "LUV"
+    },
+    {
+      "instrument_id": "equity:lvs",
+      "runtime_seconds": 0.00258508,
+      "symbol": "LVS"
+    },
+    {
+      "instrument_id": "equity:lyb",
+      "runtime_seconds": 0.00273313,
+      "symbol": "LYB"
+    },
+    {
+      "instrument_id": "equity:lyft",
+      "runtime_seconds": 0.00280958,
+      "symbol": "LYFT"
+    },
+    {
+      "instrument_id": "equity:lyv",
+      "runtime_seconds": 0.00261263,
+      "symbol": "LYV"
+    },
+    {
+      "instrument_id": "equity:m",
+      "runtime_seconds": 0.00270746,
+      "symbol": "M"
+    },
+    {
+      "instrument_id": "equity:ma",
+      "runtime_seconds": 0.00258225,
+      "symbol": "MA"
+    },
+    {
+      "instrument_id": "equity:maa",
+      "runtime_seconds": 0.00263733,
+      "symbol": "MAA"
+    },
+    {
+      "instrument_id": "equity:manh",
+      "runtime_seconds": 0.00267892,
+      "symbol": "MANH"
+    },
+    {
+      "instrument_id": "equity:mar",
+      "runtime_seconds": 0.00271496,
+      "symbol": "MAR"
+    },
+    {
+      "instrument_id": "equity:mas",
+      "runtime_seconds": 0.00265571,
+      "symbol": "MAS"
+    },
+    {
+      "instrument_id": "equity:mat",
+      "runtime_seconds": 0.00271846,
+      "symbol": "MAT"
+    },
+    {
+      "instrument_id": "equity:mcd",
+      "runtime_seconds": 0.002509,
+      "symbol": "MCD"
+    },
+    {
+      "instrument_id": "equity:mchp",
+      "runtime_seconds": 0.00268538,
+      "symbol": "MCHP"
+    },
+    {
+      "instrument_id": "equity:mck",
+      "runtime_seconds": 0.00264871,
+      "symbol": "MCK"
+    },
+    {
+      "instrument_id": "equity:mco",
+      "runtime_seconds": 0.00253904,
+      "symbol": "MCO"
+    },
+    {
+      "instrument_id": "equity:mdb",
+      "runtime_seconds": 0.00266438,
+      "symbol": "MDB"
+    },
+    {
+      "instrument_id": "equity:mdlz",
+      "runtime_seconds": 0.00260783,
+      "symbol": "MDLZ"
+    },
+    {
+      "instrument_id": "equity:mdt",
+      "runtime_seconds": 0.00260179,
+      "symbol": "MDT"
+    },
+    {
+      "instrument_id": "equity:medp",
+      "runtime_seconds": 0.00280642,
+      "symbol": "MEDP"
+    },
+    {
+      "instrument_id": "equity:meli",
+      "runtime_seconds": 0.00259754,
+      "symbol": "MELI"
+    },
+    {
+      "instrument_id": "equity:met",
+      "runtime_seconds": 0.002744,
+      "symbol": "MET"
+    },
+    {
+      "instrument_id": "equity:meta",
+      "runtime_seconds": 0.00267483,
+      "symbol": "META"
+    },
+    {
+      "instrument_id": "equity:mgm",
+      "runtime_seconds": 0.00259362,
+      "symbol": "MGM"
+    },
+    {
+      "instrument_id": "equity:midd",
+      "runtime_seconds": 0.00271787,
+      "symbol": "MIDD"
+    },
+    {
+      "instrument_id": "equity:mkc",
+      "runtime_seconds": 0.00278267,
+      "symbol": "MKC"
+    },
+    {
+      "instrument_id": "equity:mksi",
+      "runtime_seconds": 0.00260187,
+      "symbol": "MKSI"
+    },
+    {
+      "instrument_id": "equity:mli",
+      "runtime_seconds": 0.00276667,
+      "symbol": "MLI"
+    },
+    {
+      "instrument_id": "equity:mlm",
+      "runtime_seconds": 0.00260179,
+      "symbol": "MLM"
+    },
+    {
+      "instrument_id": "equity:mmm",
+      "runtime_seconds": 0.00259262,
+      "symbol": "MMM"
+    },
+    {
+      "instrument_id": "equity:mms",
+      "runtime_seconds": 0.00272167,
+      "symbol": "MMS"
+    },
+    {
+      "instrument_id": "equity:mnst",
+      "runtime_seconds": 0.00265704,
+      "symbol": "MNST"
+    },
+    {
+      "instrument_id": "equity:mo",
+      "runtime_seconds": 0.00267558,
+      "symbol": "MO"
+    },
+    {
+      "instrument_id": "equity:mog.a",
+      "runtime_seconds": 0.00269212,
+      "symbol": "MOG.A"
+    },
+    {
+      "instrument_id": "equity:morn",
+      "runtime_seconds": 0.00254288,
+      "symbol": "MORN"
+    },
+    {
+      "instrument_id": "equity:mos",
+      "runtime_seconds": 0.00283458,
+      "symbol": "MOS"
+    },
+    {
+      "instrument_id": "equity:mp",
+      "runtime_seconds": 0.00255771,
+      "symbol": "MP"
+    },
+    {
+      "instrument_id": "equity:mpc",
+      "runtime_seconds": 0.00255979,
+      "symbol": "MPC"
+    },
+    {
+      "instrument_id": "equity:mpwr",
+      "runtime_seconds": 0.00268971,
+      "symbol": "MPWR"
+    },
+    {
+      "instrument_id": "equity:mrk",
+      "runtime_seconds": 0.00254675,
+      "symbol": "MRK"
+    },
+    {
+      "instrument_id": "equity:mrna",
+      "runtime_seconds": 0.0025415,
+      "symbol": "MRNA"
+    },
+    {
+      "instrument_id": "equity:mrsh",
+      "runtime_seconds": 0.00264821,
+      "symbol": "MRSH"
+    },
+    {
+      "instrument_id": "equity:mrvl",
+      "runtime_seconds": 0.00256508,
+      "symbol": "MRVL"
+    },
+    {
+      "instrument_id": "equity:ms",
+      "runtime_seconds": 0.00256483,
+      "symbol": "MS"
+    },
+    {
+      "instrument_id": "equity:msa",
+      "runtime_seconds": 0.00265863,
+      "symbol": "MSA"
+    },
+    {
+      "instrument_id": "equity:msci",
+      "runtime_seconds": 0.00250212,
+      "symbol": "MSCI"
+    },
+    {
+      "instrument_id": "equity:msft",
+      "runtime_seconds": 0.00248162,
+      "symbol": "MSFT"
+    },
+    {
+      "instrument_id": "equity:msi",
+      "runtime_seconds": 0.00258779,
+      "symbol": "MSI"
+    },
+    {
+      "instrument_id": "equity:msm",
+      "runtime_seconds": 0.00256696,
+      "symbol": "MSM"
+    },
+    {
+      "instrument_id": "equity:mtb",
+      "runtime_seconds": 0.0025335,
+      "symbol": "MTB"
+    },
+    {
+      "instrument_id": "equity:mtd",
+      "runtime_seconds": 0.00255179,
+      "symbol": "MTD"
+    },
+    {
+      "instrument_id": "equity:mtdr",
+      "runtime_seconds": 0.00265017,
+      "symbol": "MTDR"
+    },
+    {
+      "instrument_id": "equity:mtg",
+      "runtime_seconds": 0.00253337,
+      "symbol": "MTG"
+    },
+    {
+      "instrument_id": "equity:mtn",
+      "runtime_seconds": 0.00256633,
+      "symbol": "MTN"
+    },
+    {
+      "instrument_id": "equity:mtsi",
+      "runtime_seconds": 0.00257517,
+      "symbol": "MTSI"
+    },
+    {
+      "instrument_id": "equity:mtz",
+      "runtime_seconds": 0.00254096,
+      "symbol": "MTZ"
+    },
+    {
+      "instrument_id": "equity:mu",
+      "runtime_seconds": 0.00255587,
+      "symbol": "MU"
+    },
+    {
+      "instrument_id": "equity:mur",
+      "runtime_seconds": 0.00260804,
+      "symbol": "MUR"
+    },
+    {
+      "instrument_id": "equity:musa",
+      "runtime_seconds": 0.00254442,
+      "symbol": "MUSA"
+    },
+    {
+      "instrument_id": "equity:mzti",
+      "runtime_seconds": 0.00253046,
+      "symbol": "MZTI"
+    },
+    {
+      "instrument_id": "equity:nbix",
+      "runtime_seconds": 0.00258813,
+      "symbol": "NBIX"
+    },
+    {
+      "instrument_id": "equity:nclh",
+      "runtime_seconds": 0.00262296,
+      "symbol": "NCLH"
+    },
+    {
+      "instrument_id": "equity:ndaq",
+      "runtime_seconds": 0.00246942,
+      "symbol": "NDAQ"
+    },
+    {
+      "instrument_id": "equity:ndsn",
+      "runtime_seconds": 0.00256608,
+      "symbol": "NDSN"
+    },
+    {
+      "instrument_id": "equity:nee",
+      "runtime_seconds": 0.00263196,
+      "symbol": "NEE"
+    },
+    {
+      "instrument_id": "equity:nem",
+      "runtime_seconds": 0.00248333,
+      "symbol": "NEM"
+    },
+    {
+      "instrument_id": "equity:net",
+      "runtime_seconds": 0.00256333,
+      "symbol": "NET"
+    },
+    {
+      "instrument_id": "equity:neu",
+      "runtime_seconds": 0.00256638,
+      "symbol": "NEU"
+    },
+    {
+      "instrument_id": "equity:nfg",
+      "runtime_seconds": 0.00253379,
+      "symbol": "NFG"
+    },
+    {
+      "instrument_id": "equity:nflx",
+      "runtime_seconds": 0.00255992,
+      "symbol": "NFLX"
+    },
+    {
+      "instrument_id": "equity:ni",
+      "runtime_seconds": 0.00254379,
+      "symbol": "NI"
+    },
+    {
+      "instrument_id": "equity:njr",
+      "runtime_seconds": 0.00254367,
+      "symbol": "NJR"
+    },
+    {
+      "instrument_id": "equity:nke",
+      "runtime_seconds": 0.00251279,
+      "symbol": "NKE"
+    },
+    {
+      "instrument_id": "equity:nly",
+      "runtime_seconds": 0.00255875,
+      "symbol": "NLY"
+    },
+    {
+      "instrument_id": "equity:nnn",
+      "runtime_seconds": 0.00262312,
+      "symbol": "NNN"
+    },
+    {
+      "instrument_id": "equity:noc",
+      "runtime_seconds": 0.00247038,
+      "symbol": "NOC"
+    },
+    {
+      "instrument_id": "equity:nov",
+      "runtime_seconds": 0.00253758,
+      "symbol": "NOV"
+    },
+    {
+      "instrument_id": "equity:novt",
+      "runtime_seconds": 0.00263896,
+      "symbol": "NOVT"
+    },
+    {
+      "instrument_id": "equity:now",
+      "runtime_seconds": 0.00255187,
+      "symbol": "NOW"
+    },
+    {
+      "instrument_id": "equity:nrg",
+      "runtime_seconds": 0.00254371,
+      "symbol": "NRG"
+    },
+    {
+      "instrument_id": "equity:nsa",
+      "runtime_seconds": 0.00259138,
+      "symbol": "NSA"
+    },
+    {
+      "instrument_id": "equity:nsc",
+      "runtime_seconds": 0.00255425,
+      "symbol": "NSC"
+    },
+    {
+      "instrument_id": "equity:ntap",
+      "runtime_seconds": 0.00255163,
+      "symbol": "NTAP"
+    },
+    {
+      "instrument_id": "equity:ntnx",
+      "runtime_seconds": 0.00259017,
+      "symbol": "NTNX"
+    },
+    {
+      "instrument_id": "equity:ntrs",
+      "runtime_seconds": 0.00256138,
+      "symbol": "NTRS"
+    },
+    {
+      "instrument_id": "equity:nue",
+      "runtime_seconds": 0.00250304,
+      "symbol": "NUE"
+    },
+    {
+      "instrument_id": "equity:nvda",
+      "runtime_seconds": 0.00261567,
+      "symbol": "NVDA"
+    },
+    {
+      "instrument_id": "equity:nvr",
+      "runtime_seconds": 0.00247783,
+      "symbol": "NVR"
+    },
+    {
+      "instrument_id": "equity:nvst",
+      "runtime_seconds": 0.0025055,
+      "symbol": "NVST"
+    },
+    {
+      "instrument_id": "equity:nvt",
+      "runtime_seconds": 0.00255575,
+      "symbol": "NVT"
+    },
+    {
+      "instrument_id": "equity:nwe",
+      "runtime_seconds": 0.00260683,
+      "symbol": "NWE"
+    },
+    {
+      "instrument_id": "equity:nws",
+      "runtime_seconds": 0.00249408,
+      "symbol": "NWS"
+    },
+    {
+      "instrument_id": "equity:nwsa",
+      "runtime_seconds": 0.00256258,
+      "symbol": "NWSA"
+    },
+    {
+      "instrument_id": "equity:nxe",
+      "runtime_seconds": 0.00257012,
+      "symbol": "NXE"
+    },
+    {
+      "instrument_id": "equity:nxpi",
+      "runtime_seconds": 0.00257325,
+      "symbol": "NXPI"
+    },
+    {
+      "instrument_id": "equity:nxst",
+      "runtime_seconds": 0.00257204,
+      "symbol": "NXST"
+    },
+    {
+      "instrument_id": "equity:nxt",
+      "runtime_seconds": 0.00260375,
+      "symbol": "NXT"
+    },
+    {
+      "instrument_id": "equity:nyt",
+      "runtime_seconds": 0.00259967,
+      "symbol": "NYT"
+    },
+    {
+      "instrument_id": "equity:o",
+      "runtime_seconds": 0.00256417,
+      "symbol": "O"
+    },
+    {
+      "instrument_id": "equity:oc",
+      "runtime_seconds": 0.00271142,
+      "symbol": "OC"
+    },
+    {
+      "instrument_id": "equity:odfl",
+      "runtime_seconds": 0.00268429,
+      "symbol": "ODFL"
+    },
+    {
+      "instrument_id": "equity:oge",
+      "runtime_seconds": 0.00252567,
+      "symbol": "OGE"
+    },
+    {
+      "instrument_id": "equity:ogs",
+      "runtime_seconds": 0.00247704,
+      "symbol": "OGS"
+    },
+    {
+      "instrument_id": "equity:ohi",
+      "runtime_seconds": 0.00270346,
+      "symbol": "OHI"
+    },
+    {
+      "instrument_id": "equity:oke",
+      "runtime_seconds": 0.00251358,
+      "symbol": "OKE"
+    },
+    {
+      "instrument_id": "equity:okta",
+      "runtime_seconds": 0.00250937,
+      "symbol": "OKTA"
+    },
+    {
+      "instrument_id": "equity:oled",
+      "runtime_seconds": 0.00262433,
+      "symbol": "OLED"
+    },
+    {
+      "instrument_id": "equity:olli",
+      "runtime_seconds": 0.00259221,
+      "symbol": "OLLI"
+    },
+    {
+      "instrument_id": "equity:oln",
+      "runtime_seconds": 0.0025495,
+      "symbol": "OLN"
+    },
+    {
+      "instrument_id": "equity:omc",
+      "runtime_seconds": 0.00255096,
+      "symbol": "OMC"
+    },
+    {
+      "instrument_id": "equity:on",
+      "runtime_seconds": 0.00260767,
+      "symbol": "ON"
+    },
+    {
+      "instrument_id": "equity:onb",
+      "runtime_seconds": 0.00249375,
+      "symbol": "ONB"
+    },
+    {
+      "instrument_id": "equity:onto",
+      "runtime_seconds": 0.00259733,
+      "symbol": "ONTO"
+    },
+    {
+      "instrument_id": "equity:opch",
+      "runtime_seconds": 0.00262662,
+      "symbol": "OPCH"
+    },
+    {
+      "instrument_id": "equity:ora",
+      "runtime_seconds": 0.00248633,
+      "symbol": "ORA"
+    },
+    {
+      "instrument_id": "equity:orcl",
+      "runtime_seconds": 0.0025385,
+      "symbol": "ORCL"
+    },
+    {
+      "instrument_id": "equity:ori",
+      "runtime_seconds": 0.00261671,
+      "symbol": "ORI"
+    },
+    {
+      "instrument_id": "equity:orly",
+      "runtime_seconds": 0.00251338,
+      "symbol": "ORLY"
+    },
+    {
+      "instrument_id": "equity:osk",
+      "runtime_seconds": 0.00255867,
+      "symbol": "OSK"
+    },
+    {
+      "instrument_id": "equity:otis",
+      "runtime_seconds": 0.00255788,
+      "symbol": "OTIS"
+    },
+    {
+      "instrument_id": "equity:ovv",
+      "runtime_seconds": 0.00254317,
+      "symbol": "OVV"
+    },
+    {
+      "instrument_id": "equity:oxy",
+      "runtime_seconds": 0.00253225,
+      "symbol": "OXY"
+    },
+    {
+      "instrument_id": "equity:ozk",
+      "runtime_seconds": 0.00255729,
+      "symbol": "OZK"
+    },
+    {
+      "instrument_id": "equity:p",
+      "runtime_seconds": 0.00252329,
+      "symbol": "P"
+    },
+    {
+      "instrument_id": "equity:pag",
+      "runtime_seconds": 0.00252475,
+      "symbol": "PAG"
+    },
+    {
+      "instrument_id": "equity:panw",
+      "runtime_seconds": 0.00257017,
+      "symbol": "PANW"
+    },
+    {
+      "instrument_id": "equity:path",
+      "runtime_seconds": 0.00263508,
+      "symbol": "PATH"
+    },
+    {
+      "instrument_id": "equity:payx",
+      "runtime_seconds": 0.00252296,
+      "symbol": "PAYX"
+    },
+    {
+      "instrument_id": "equity:pb",
+      "runtime_seconds": 0.00247754,
+      "symbol": "PB"
+    },
+    {
+      "instrument_id": "equity:pbf",
+      "runtime_seconds": 0.00265525,
+      "symbol": "PBF"
+    },
+    {
+      "instrument_id": "equity:pcar",
+      "runtime_seconds": 0.00252404,
+      "symbol": "PCAR"
+    },
+    {
+      "instrument_id": "equity:pcg",
+      "runtime_seconds": 0.00254704,
+      "symbol": "PCG"
+    },
+    {
+      "instrument_id": "equity:pcty",
+      "runtime_seconds": 0.002635,
+      "symbol": "PCTY"
+    },
+    {
+      "instrument_id": "equity:pdd",
+      "runtime_seconds": 0.00257246,
+      "symbol": "PDD"
+    },
+    {
+      "instrument_id": "equity:peg",
+      "runtime_seconds": 0.00249071,
+      "symbol": "PEG"
+    },
+    {
+      "instrument_id": "equity:pega",
+      "runtime_seconds": 0.00265558,
+      "symbol": "PEGA"
+    },
+    {
+      "instrument_id": "equity:pen",
+      "runtime_seconds": 0.00257579,
+      "symbol": "PEN"
+    },
+    {
+      "instrument_id": "equity:pep",
+      "runtime_seconds": 0.00251471,
+      "symbol": "PEP"
+    },
+    {
+      "instrument_id": "equity:pfe",
+      "runtime_seconds": 0.00260454,
+      "symbol": "PFE"
+    },
+    {
+      "instrument_id": "equity:pfg",
+      "runtime_seconds": 0.00256775,
+      "symbol": "PFG"
+    },
+    {
+      "instrument_id": "equity:pfgc",
+      "runtime_seconds": 0.00252625,
+      "symbol": "PFGC"
+    },
+    {
+      "instrument_id": "equity:pg",
+      "runtime_seconds": 0.00256717,
+      "symbol": "PG"
+    },
+    {
+      "instrument_id": "equity:pgr",
+      "runtime_seconds": 0.00272275,
+      "symbol": "PGR"
+    },
+    {
+      "instrument_id": "equity:ph",
+      "runtime_seconds": 0.00249175,
+      "symbol": "PH"
+    },
+    {
+      "instrument_id": "equity:phm",
+      "runtime_seconds": 0.00259246,
+      "symbol": "PHM"
+    },
+    {
+      "instrument_id": "equity:pii",
+      "runtime_seconds": 0.00256604,
+      "symbol": "PII"
+    },
+    {
+      "instrument_id": "equity:pins",
+      "runtime_seconds": 0.00257558,
+      "symbol": "PINS"
+    },
+    {
+      "instrument_id": "equity:pk",
+      "runtime_seconds": 0.00255179,
+      "symbol": "PK"
+    },
+    {
+      "instrument_id": "equity:pkg",
+      "runtime_seconds": 0.00257954,
+      "symbol": "PKG"
+    },
+    {
+      "instrument_id": "equity:pld",
+      "runtime_seconds": 0.00263817,
+      "symbol": "PLD"
+    },
+    {
+      "instrument_id": "equity:plnt",
+      "runtime_seconds": 0.00254046,
+      "symbol": "PLNT"
+    },
+    {
+      "instrument_id": "equity:pltr",
+      "runtime_seconds": 0.00262021,
+      "symbol": "PLTR"
+    },
+    {
+      "instrument_id": "equity:pm",
+      "runtime_seconds": 0.00263246,
+      "symbol": "PM"
+    },
+    {
+      "instrument_id": "equity:pnc",
+      "runtime_seconds": 0.00256342,
+      "symbol": "PNC"
+    },
+    {
+      "instrument_id": "equity:pnfp",
+      "runtime_seconds": 0.00261154,
+      "symbol": "PNFP"
+    },
+    {
+      "instrument_id": "equity:pnr",
+      "runtime_seconds": 0.00259863,
+      "symbol": "PNR"
+    },
+    {
+      "instrument_id": "equity:pnw",
+      "runtime_seconds": 0.00249858,
+      "symbol": "PNW"
+    },
+    {
+      "instrument_id": "equity:podd",
+      "runtime_seconds": 0.00253604,
+      "symbol": "PODD"
+    },
+    {
+      "instrument_id": "equity:por",
+      "runtime_seconds": 0.002565,
+      "symbol": "POR"
+    },
+    {
+      "instrument_id": "equity:post",
+      "runtime_seconds": 0.00253996,
+      "symbol": "POST"
+    },
+    {
+      "instrument_id": "equity:ppc",
+      "runtime_seconds": 0.00252646,
+      "symbol": "PPC"
+    },
+    {
+      "instrument_id": "equity:ppg",
+      "runtime_seconds": 0.00275546,
+      "symbol": "PPG"
+    },
+    {
+      "instrument_id": "equity:ppl",
+      "runtime_seconds": 0.00261454,
+      "symbol": "PPL"
+    },
+    {
+      "instrument_id": "equity:pr",
+      "runtime_seconds": 0.00255258,
+      "symbol": "PR"
+    },
+    {
+      "instrument_id": "equity:pri",
+      "runtime_seconds": 0.00255429,
+      "symbol": "PRI"
+    },
+    {
+      "instrument_id": "equity:pru",
+      "runtime_seconds": 0.00261458,
+      "symbol": "PRU"
+    },
+    {
+      "instrument_id": "equity:psa",
+      "runtime_seconds": 0.0024985,
+      "symbol": "PSA"
+    },
+    {
+      "instrument_id": "equity:psky",
+      "runtime_seconds": 0.00263629,
+      "symbol": "PSKY"
+    },
+    {
+      "instrument_id": "equity:psn",
+      "runtime_seconds": 0.00252679,
+      "symbol": "PSN"
+    },
+    {
+      "instrument_id": "equity:psx",
+      "runtime_seconds": 0.002527,
+      "symbol": "PSX"
+    },
+    {
+      "instrument_id": "equity:ptc",
+      "runtime_seconds": 0.00254375,
+      "symbol": "PTC"
+    },
+    {
+      "instrument_id": "equity:pvh",
+      "runtime_seconds": 0.00255775,
+      "symbol": "PVH"
+    },
+    {
+      "instrument_id": "equity:pwr",
+      "runtime_seconds": 0.00248108,
+      "symbol": "PWR"
+    },
+    {
+      "instrument_id": "equity:pypl",
+      "runtime_seconds": 0.00253933,
+      "symbol": "PYPL"
+    },
+    {
+      "instrument_id": "equity:q",
+      "runtime_seconds": 0.00053329,
+      "symbol": "Q"
+    },
+    {
+      "instrument_id": "equity:qcom",
+      "runtime_seconds": 0.002569,
+      "symbol": "QCOM"
+    },
+    {
+      "instrument_id": "equity:qlys",
+      "runtime_seconds": 0.00259033,
+      "symbol": "QLYS"
+    },
+    {
+      "instrument_id": "equity:r",
+      "runtime_seconds": 0.00262717,
+      "symbol": "R"
+    },
+    {
+      "instrument_id": "equity:rba",
+      "runtime_seconds": 0.00260933,
+      "symbol": "RBA"
+    },
+    {
+      "instrument_id": "equity:rbc",
+      "runtime_seconds": 0.00268362,
+      "symbol": "RBC"
+    },
+    {
+      "instrument_id": "equity:rblx",
+      "runtime_seconds": 0.00267442,
+      "symbol": "RBLX"
+    },
+    {
+      "instrument_id": "equity:rcl",
+      "runtime_seconds": 0.00277079,
+      "symbol": "RCL"
+    },
+    {
+      "instrument_id": "equity:reg",
+      "runtime_seconds": 0.00254471,
+      "symbol": "REG"
+    },
+    {
+      "instrument_id": "equity:regn",
+      "runtime_seconds": 0.00266879,
+      "symbol": "REGN"
+    },
+    {
+      "instrument_id": "equity:rexr",
+      "runtime_seconds": 0.00264829,
+      "symbol": "REXR"
+    },
+    {
+      "instrument_id": "equity:rf",
+      "runtime_seconds": 0.00263938,
+      "symbol": "RF"
+    },
+    {
+      "instrument_id": "equity:rga",
+      "runtime_seconds": 0.00273887,
+      "symbol": "RGA"
+    },
+    {
+      "instrument_id": "equity:rgen",
+      "runtime_seconds": 0.00279533,
+      "symbol": "RGEN"
+    },
+    {
+      "instrument_id": "equity:rgld",
+      "runtime_seconds": 0.00270958,
+      "symbol": "RGLD"
+    },
+    {
+      "instrument_id": "equity:rh",
+      "runtime_seconds": 0.00271096,
+      "symbol": "RH"
+    },
+    {
+      "instrument_id": "equity:rio",
+      "runtime_seconds": 0.00265217,
+      "symbol": "RIO"
+    },
+    {
+      "instrument_id": "equity:rivn",
+      "runtime_seconds": 0.00269912,
+      "symbol": "RIVN"
+    },
+    {
+      "instrument_id": "equity:rjf",
+      "runtime_seconds": 0.00271987,
+      "symbol": "RJF"
+    },
+    {
+      "instrument_id": "equity:rl",
+      "runtime_seconds": 0.00272117,
+      "symbol": "RL"
+    },
+    {
+      "instrument_id": "equity:rli",
+      "runtime_seconds": 0.00264221,
+      "symbol": "RLI"
+    },
+    {
+      "instrument_id": "equity:rmbs",
+      "runtime_seconds": 0.00266954,
+      "symbol": "RMBS"
+    },
+    {
+      "instrument_id": "equity:rmd",
+      "runtime_seconds": 0.00261142,
+      "symbol": "RMD"
+    },
+    {
+      "instrument_id": "equity:rnr",
+      "runtime_seconds": 0.00265071,
+      "symbol": "RNR"
+    },
+    {
+      "instrument_id": "equity:roiv",
+      "runtime_seconds": 0.002703,
+      "symbol": "ROIV"
+    },
+    {
+      "instrument_id": "equity:rok",
+      "runtime_seconds": 0.00251313,
+      "symbol": "ROK"
+    },
+    {
+      "instrument_id": "equity:roku",
+      "runtime_seconds": 0.00276625,
+      "symbol": "ROKU"
+    },
+    {
+      "instrument_id": "equity:rol",
+      "runtime_seconds": 0.00272533,
+      "symbol": "ROL"
+    },
+    {
+      "instrument_id": "equity:rop",
+      "runtime_seconds": 0.00258846,
+      "symbol": "ROP"
+    },
+    {
+      "instrument_id": "equity:rost",
+      "runtime_seconds": 0.00272287,
+      "symbol": "ROST"
+    },
+    {
+      "instrument_id": "equity:rpm",
+      "runtime_seconds": 0.00286979,
+      "symbol": "RPM"
+    },
+    {
+      "instrument_id": "equity:rrc",
+      "runtime_seconds": 0.00264208,
+      "symbol": "RRC"
+    },
+    {
+      "instrument_id": "equity:rrx",
+      "runtime_seconds": 0.00279962,
+      "symbol": "RRX"
+    },
+    {
+      "instrument_id": "equity:rs",
+      "runtime_seconds": 0.00267362,
+      "symbol": "RS"
+    },
+    {
+      "instrument_id": "equity:rsg",
+      "runtime_seconds": 0.00266725,
+      "symbol": "RSG"
+    },
+    {
+      "instrument_id": "equity:rtx",
+      "runtime_seconds": 0.002614,
+      "symbol": "RTX"
+    },
+    {
+      "instrument_id": "equity:rvty",
+      "runtime_seconds": 0.00272958,
+      "symbol": "RVTY"
+    },
+    {
+      "instrument_id": "equity:ryan",
+      "runtime_seconds": 0.00265517,
+      "symbol": "RYAN"
+    },
+    {
+      "instrument_id": "equity:ryn",
+      "runtime_seconds": 0.00265913,
+      "symbol": "RYN"
+    },
+    {
+      "instrument_id": "equity:s",
+      "runtime_seconds": 0.00267313,
+      "symbol": "S"
+    },
+    {
+      "instrument_id": "equity:saia",
+      "runtime_seconds": 0.00266658,
+      "symbol": "SAIA"
+    },
+    {
+      "instrument_id": "equity:saic",
+      "runtime_seconds": 0.00271,
+      "symbol": "SAIC"
+    },
+    {
+      "instrument_id": "equity:sam",
+      "runtime_seconds": 0.00264358,
+      "symbol": "SAM"
+    },
+    {
+      "instrument_id": "equity:sanm",
+      "runtime_seconds": 0.00267604,
+      "symbol": "SANM"
+    },
+    {
+      "instrument_id": "equity:saro",
+      "runtime_seconds": 0.002663,
+      "symbol": "SARO"
+    },
+    {
+      "instrument_id": "equity:sbac",
+      "runtime_seconds": 0.00261958,
+      "symbol": "SBAC"
+    },
+    {
+      "instrument_id": "equity:sbra",
+      "runtime_seconds": 0.00272921,
+      "symbol": "SBRA"
+    },
+    {
+      "instrument_id": "equity:sbux",
+      "runtime_seconds": 0.00262438,
+      "symbol": "SBUX"
+    },
+    {
+      "instrument_id": "equity:scco",
+      "runtime_seconds": 0.00263492,
+      "symbol": "SCCO"
+    },
+    {
+      "instrument_id": "equity:schw",
+      "runtime_seconds": 0.00265675,
+      "symbol": "SCHW"
+    },
+    {
+      "instrument_id": "equity:sci",
+      "runtime_seconds": 0.00257013,
+      "symbol": "SCI"
+    },
+    {
+      "instrument_id": "equity:se",
+      "runtime_seconds": 0.00275621,
+      "symbol": "SE"
+    },
+    {
+      "instrument_id": "equity:seic",
+      "runtime_seconds": 0.00271467,
+      "symbol": "SEIC"
+    },
+    {
+      "instrument_id": "equity:sf",
+      "runtime_seconds": 0.00252542,
+      "symbol": "SF"
+    },
+    {
+      "instrument_id": "equity:sfm",
+      "runtime_seconds": 0.00267329,
+      "symbol": "SFM"
+    },
+    {
+      "instrument_id": "equity:sgi",
+      "runtime_seconds": 0.00272254,
+      "symbol": "SGI"
+    },
+    {
+      "instrument_id": "equity:shc",
+      "runtime_seconds": 0.00256058,
+      "symbol": "SHC"
+    },
+    {
+      "instrument_id": "equity:shop",
+      "runtime_seconds": 0.00284325,
+      "symbol": "SHOP"
+    },
+    {
+      "instrument_id": "equity:shw",
+      "runtime_seconds": 0.00268725,
+      "symbol": "SHW"
+    },
+    {
+      "instrument_id": "equity:sigi",
+      "runtime_seconds": 0.00260067,
+      "symbol": "SIGI"
+    },
+    {
+      "instrument_id": "equity:siri",
+      "runtime_seconds": 0.00266529,
+      "symbol": "SIRI"
+    },
+    {
+      "instrument_id": "equity:sitm",
+      "runtime_seconds": 0.00262496,
+      "symbol": "SITM"
+    },
+    {
+      "instrument_id": "equity:sjm",
+      "runtime_seconds": 0.00278342,
+      "symbol": "SJM"
+    },
+    {
+      "instrument_id": "equity:slab",
+      "runtime_seconds": 0.00263692,
+      "symbol": "SLAB"
+    },
+    {
+      "instrument_id": "equity:slb",
+      "runtime_seconds": 0.00267437,
+      "symbol": "SLB"
+    },
+    {
+      "instrument_id": "equity:slgn",
+      "runtime_seconds": 0.00273483,
+      "symbol": "SLGN"
+    },
+    {
+      "instrument_id": "equity:slm",
+      "runtime_seconds": 0.00261113,
+      "symbol": "SLM"
+    },
+    {
+      "instrument_id": "equity:smci",
+      "runtime_seconds": 0.00268329,
+      "symbol": "SMCI"
+    },
+    {
+      "instrument_id": "equity:smg",
+      "runtime_seconds": 0.00267837,
+      "symbol": "SMG"
+    },
+    {
+      "instrument_id": "equity:smtc",
+      "runtime_seconds": 0.00268896,
+      "symbol": "SMTC"
+    },
+    {
+      "instrument_id": "equity:sn",
+      "runtime_seconds": 0.00274142,
+      "symbol": "SN"
+    },
+    {
+      "instrument_id": "equity:sna",
+      "runtime_seconds": 0.00280508,
+      "symbol": "SNA"
+    },
+    {
+      "instrument_id": "equity:sndk",
+      "runtime_seconds": 0.00263025,
+      "symbol": "SNDK"
+    },
+    {
+      "instrument_id": "equity:snow",
+      "runtime_seconds": 0.00271725,
+      "symbol": "SNOW"
+    },
+    {
+      "instrument_id": "equity:snps",
+      "runtime_seconds": 0.00281642,
+      "symbol": "SNPS"
+    },
+    {
+      "instrument_id": "equity:snx",
+      "runtime_seconds": 0.00275213,
+      "symbol": "SNX"
+    },
+    {
+      "instrument_id": "equity:so",
+      "runtime_seconds": 0.00266433,
+      "symbol": "SO"
+    },
+    {
+      "instrument_id": "equity:sofi",
+      "runtime_seconds": 0.002726,
+      "symbol": "SOFI"
+    },
+    {
+      "instrument_id": "equity:sols",
+      "runtime_seconds": 0.00050854,
+      "symbol": "SOLS"
+    },
+    {
+      "instrument_id": "equity:solv",
+      "runtime_seconds": 0.00263888,
+      "symbol": "SOLV"
+    },
+    {
+      "instrument_id": "equity:son",
+      "runtime_seconds": 0.00264175,
+      "symbol": "SON"
+    },
+    {
+      "instrument_id": "equity:spg",
+      "runtime_seconds": 0.00271546,
+      "symbol": "SPG"
+    },
+    {
+      "instrument_id": "equity:spgi",
+      "runtime_seconds": 0.00277833,
+      "symbol": "SPGI"
+    },
+    {
+      "instrument_id": "equity:spot",
+      "runtime_seconds": 0.00255487,
+      "symbol": "SPOT"
+    },
+    {
+      "instrument_id": "equity:spxc",
+      "runtime_seconds": 0.00280796,
+      "symbol": "SPXC"
+    },
+    {
+      "instrument_id": "equity:sr",
+      "runtime_seconds": 0.00251304,
+      "symbol": "SR"
+    },
+    {
+      "instrument_id": "equity:sre",
+      "runtime_seconds": 0.00265488,
+      "symbol": "SRE"
+    },
+    {
+      "instrument_id": "equity:ssb",
+      "runtime_seconds": 0.00273692,
+      "symbol": "SSB"
+    },
+    {
+      "instrument_id": "equity:ssd",
+      "runtime_seconds": 0.00262442,
+      "symbol": "SSD"
+    },
+    {
+      "instrument_id": "equity:st",
+      "runtime_seconds": 0.00265558,
+      "symbol": "ST"
+    },
+    {
+      "instrument_id": "equity:stag",
+      "runtime_seconds": 0.00283838,
+      "symbol": "STAG"
+    },
+    {
+      "instrument_id": "equity:ste",
+      "runtime_seconds": 0.00257367,
+      "symbol": "STE"
+    },
+    {
+      "instrument_id": "equity:stld",
+      "runtime_seconds": 0.00268508,
+      "symbol": "STLD"
+    },
+    {
+      "instrument_id": "equity:strl",
+      "runtime_seconds": 0.0027725,
+      "symbol": "STRL"
+    },
+    {
+      "instrument_id": "equity:stt",
+      "runtime_seconds": 0.00257983,
+      "symbol": "STT"
+    },
+    {
+      "instrument_id": "equity:stwd",
+      "runtime_seconds": 0.0027585,
+      "symbol": "STWD"
+    },
+    {
+      "instrument_id": "equity:stx",
+      "runtime_seconds": 0.00269,
+      "symbol": "STX"
+    },
+    {
+      "instrument_id": "equity:stz",
+      "runtime_seconds": 0.00262604,
+      "symbol": "STZ"
+    },
+    {
+      "instrument_id": "equity:su",
+      "runtime_seconds": 0.00271071,
+      "symbol": "SU"
+    },
+    {
+      "instrument_id": "equity:sw",
+      "runtime_seconds": 0.00274225,
+      "symbol": "SW"
+    },
+    {
+      "instrument_id": "equity:swk",
+      "runtime_seconds": 0.00266621,
+      "symbol": "SWK"
+    },
+    {
+      "instrument_id": "equity:swks",
+      "runtime_seconds": 0.00267792,
+      "symbol": "SWKS"
+    },
+    {
+      "instrument_id": "equity:swx",
+      "runtime_seconds": 0.00268167,
+      "symbol": "SWX"
+    },
+    {
+      "instrument_id": "equity:syf",
+      "runtime_seconds": 0.00259404,
+      "symbol": "SYF"
+    },
+    {
+      "instrument_id": "equity:syk",
+      "runtime_seconds": 0.00260421,
+      "symbol": "SYK"
+    },
+    {
+      "instrument_id": "equity:syna",
+      "runtime_seconds": 0.00262579,
+      "symbol": "SYNA"
+    },
+    {
+      "instrument_id": "equity:syy",
+      "runtime_seconds": 0.00273513,
+      "symbol": "SYY"
+    },
+    {
+      "instrument_id": "equity:t",
+      "runtime_seconds": 0.00267754,
+      "symbol": "T"
+    },
+    {
+      "instrument_id": "equity:tap",
+      "runtime_seconds": 0.00259671,
+      "symbol": "TAP"
+    },
+    {
+      "instrument_id": "equity:tcbi",
+      "runtime_seconds": 0.0025435,
+      "symbol": "TCBI"
+    },
+    {
+      "instrument_id": "equity:tdg",
+      "runtime_seconds": 0.00266754,
+      "symbol": "TDG"
+    },
+    {
+      "instrument_id": "equity:tdy",
+      "runtime_seconds": 0.002572,
+      "symbol": "TDY"
+    },
+    {
+      "instrument_id": "equity:team",
+      "runtime_seconds": 0.00249871,
+      "symbol": "TEAM"
+    },
+    {
+      "instrument_id": "equity:tech",
+      "runtime_seconds": 0.0025805,
+      "symbol": "TECH"
+    },
+    {
+      "instrument_id": "equity:teck",
+      "runtime_seconds": 0.00260054,
+      "symbol": "TECK"
+    },
+    {
+      "instrument_id": "equity:tel",
+      "runtime_seconds": 0.00257625,
+      "symbol": "TEL"
+    },
+    {
+      "instrument_id": "equity:ter",
+      "runtime_seconds": 0.00257592,
+      "symbol": "TER"
+    },
+    {
+      "instrument_id": "equity:tex",
+      "runtime_seconds": 0.00263925,
+      "symbol": "TEX"
+    },
+    {
+      "instrument_id": "equity:tfc",
+      "runtime_seconds": 0.00261025,
+      "symbol": "TFC"
+    },
+    {
+      "instrument_id": "equity:tgt",
+      "runtime_seconds": 0.00255454,
+      "symbol": "TGT"
+    },
+    {
+      "instrument_id": "equity:thc",
+      "runtime_seconds": 0.00266225,
+      "symbol": "THC"
+    },
+    {
+      "instrument_id": "equity:thg",
+      "runtime_seconds": 0.00263179,
+      "symbol": "THG"
+    },
+    {
+      "instrument_id": "equity:tho",
+      "runtime_seconds": 0.00273854,
+      "symbol": "THO"
+    },
+    {
+      "instrument_id": "equity:tjx",
+      "runtime_seconds": 0.00277058,
+      "symbol": "TJX"
+    },
+    {
+      "instrument_id": "equity:tko",
+      "runtime_seconds": 0.00278396,
+      "symbol": "TKO"
+    },
+    {
+      "instrument_id": "equity:tkr",
+      "runtime_seconds": 0.00266529,
+      "symbol": "TKR"
+    },
+    {
+      "instrument_id": "equity:tln",
+      "runtime_seconds": 0.00268196,
+      "symbol": "TLN"
+    },
+    {
+      "instrument_id": "equity:tmhc",
+      "runtime_seconds": 0.00260558,
+      "symbol": "TMHC"
+    },
+    {
+      "instrument_id": "equity:tmo",
+      "runtime_seconds": 0.00267883,
+      "symbol": "TMO"
+    },
+    {
+      "instrument_id": "equity:tmus",
+      "runtime_seconds": 0.002727,
+      "symbol": "TMUS"
+    },
+    {
+      "instrument_id": "equity:tnl",
+      "runtime_seconds": 0.00260538,
+      "symbol": "TNL"
+    },
+    {
+      "instrument_id": "equity:tol",
+      "runtime_seconds": 0.0027235,
+      "symbol": "TOL"
+    },
+    {
+      "instrument_id": "equity:tpl",
+      "runtime_seconds": 0.00270654,
+      "symbol": "TPL"
+    },
+    {
+      "instrument_id": "equity:tpr",
+      "runtime_seconds": 0.00269396,
+      "symbol": "TPR"
+    },
+    {
+      "instrument_id": "equity:trex",
+      "runtime_seconds": 0.00270554,
+      "symbol": "TREX"
+    },
+    {
+      "instrument_id": "equity:trgp",
+      "runtime_seconds": 0.00273042,
+      "symbol": "TRGP"
+    },
+    {
+      "instrument_id": "equity:trmb",
+      "runtime_seconds": 0.00262333,
+      "symbol": "TRMB"
+    },
+    {
+      "instrument_id": "equity:trow",
+      "runtime_seconds": 0.00268304,
+      "symbol": "TROW"
+    },
+    {
+      "instrument_id": "equity:tru",
+      "runtime_seconds": 0.00266179,
+      "symbol": "TRU"
+    },
+    {
+      "instrument_id": "equity:trv",
+      "runtime_seconds": 0.00267375,
+      "symbol": "TRV"
+    },
+    {
+      "instrument_id": "equity:tsco",
+      "runtime_seconds": 0.002752,
+      "symbol": "TSCO"
+    },
+    {
+      "instrument_id": "equity:tsla",
+      "runtime_seconds": 0.00259371,
+      "symbol": "TSLA"
+    },
+    {
+      "instrument_id": "equity:tsm",
+      "runtime_seconds": 0.00275154,
+      "symbol": "TSM"
+    },
+    {
+      "instrument_id": "equity:tsn",
+      "runtime_seconds": 0.00274925,
+      "symbol": "TSN"
+    },
+    {
+      "instrument_id": "equity:tt",
+      "runtime_seconds": 0.00253221,
+      "symbol": "TT"
+    },
+    {
+      "instrument_id": "equity:ttc",
+      "runtime_seconds": 0.00276142,
+      "symbol": "TTC"
+    },
+    {
+      "instrument_id": "equity:ttd",
+      "runtime_seconds": 0.00272713,
+      "symbol": "TTD"
+    },
+    {
+      "instrument_id": "equity:ttek",
+      "runtime_seconds": 0.00260413,
+      "symbol": "TTEK"
+    },
+    {
+      "instrument_id": "equity:ttmi",
+      "runtime_seconds": 0.00271263,
+      "symbol": "TTMI"
+    },
+    {
+      "instrument_id": "equity:ttwo",
+      "runtime_seconds": 0.00325654,
+      "symbol": "TTWO"
+    },
+    {
+      "instrument_id": "equity:twlo",
+      "runtime_seconds": 0.00259713,
+      "symbol": "TWLO"
+    },
+    {
+      "instrument_id": "equity:txn",
+      "runtime_seconds": 0.00276404,
+      "symbol": "TXN"
+    },
+    {
+      "instrument_id": "equity:txnm",
+      "runtime_seconds": 0.00277629,
+      "symbol": "TXNM"
+    },
+    {
+      "instrument_id": "equity:txrh",
+      "runtime_seconds": 0.00270904,
+      "symbol": "TXRH"
+    },
+    {
+      "instrument_id": "equity:txt",
+      "runtime_seconds": 0.00269158,
+      "symbol": "TXT"
+    },
+    {
+      "instrument_id": "equity:tyl",
+      "runtime_seconds": 0.00268458,
+      "symbol": "TYL"
+    },
+    {
+      "instrument_id": "equity:u",
+      "runtime_seconds": 0.00263463,
+      "symbol": "U"
+    },
+    {
+      "instrument_id": "equity:ual",
+      "runtime_seconds": 0.00277721,
+      "symbol": "UAL"
+    },
+    {
+      "instrument_id": "equity:uber",
+      "runtime_seconds": 0.00267421,
+      "symbol": "UBER"
+    },
+    {
+      "instrument_id": "equity:ubsi",
+      "runtime_seconds": 0.00266154,
+      "symbol": "UBSI"
+    },
+    {
+      "instrument_id": "equity:udr",
+      "runtime_seconds": 0.00272775,
+      "symbol": "UDR"
+    },
+    {
+      "instrument_id": "equity:uec",
+      "runtime_seconds": 0.00264946,
+      "symbol": "UEC"
+    },
+    {
+      "instrument_id": "equity:ufpi",
+      "runtime_seconds": 0.00268967,
+      "symbol": "UFPI"
+    },
+    {
+      "instrument_id": "equity:ugi",
+      "runtime_seconds": 0.00272688,
+      "symbol": "UGI"
+    },
+    {
+      "instrument_id": "equity:uhs",
+      "runtime_seconds": 0.00262946,
+      "symbol": "UHS"
+    },
+    {
+      "instrument_id": "equity:uls",
+      "runtime_seconds": 0.00268254,
+      "symbol": "ULS"
+    },
+    {
+      "instrument_id": "equity:ulta",
+      "runtime_seconds": 0.00268158,
+      "symbol": "ULTA"
+    },
+    {
+      "instrument_id": "equity:umbf",
+      "runtime_seconds": 0.00266342,
+      "symbol": "UMBF"
+    },
+    {
+      "instrument_id": "equity:unh",
+      "runtime_seconds": 0.00270496,
+      "symbol": "UNH"
+    },
+    {
+      "instrument_id": "equity:unm",
+      "runtime_seconds": 0.00272242,
+      "symbol": "UNM"
+    },
+    {
+      "instrument_id": "equity:unp",
+      "runtime_seconds": 0.00259487,
+      "symbol": "UNP"
+    },
+    {
+      "instrument_id": "equity:ups",
+      "runtime_seconds": 0.00271596,
+      "symbol": "UPS"
+    },
+    {
+      "instrument_id": "equity:uri",
+      "runtime_seconds": 0.00270292,
+      "symbol": "URI"
+    },
+    {
+      "instrument_id": "equity:usb",
+      "runtime_seconds": 0.00263087,
+      "symbol": "USB"
+    },
+    {
+      "instrument_id": "equity:usfd",
+      "runtime_seconds": 0.00252888,
+      "symbol": "USFD"
+    },
+    {
+      "instrument_id": "equity:uthr",
+      "runtime_seconds": 0.00252546,
+      "symbol": "UTHR"
+    },
+    {
+      "instrument_id": "equity:v",
+      "runtime_seconds": 0.00263275,
+      "symbol": "V"
+    },
+    {
+      "instrument_id": "equity:val",
+      "runtime_seconds": 0.00254129,
+      "symbol": "VAL"
+    },
+    {
+      "instrument_id": "equity:vale",
+      "runtime_seconds": 0.00255738,
+      "symbol": "VALE"
+    },
+    {
+      "instrument_id": "equity:vc",
+      "runtime_seconds": 0.00260858,
+      "symbol": "VC"
+    },
+    {
+      "instrument_id": "equity:veev",
+      "runtime_seconds": 0.00254975,
+      "symbol": "VEEV"
+    },
+    {
+      "instrument_id": "equity:vfc",
+      "runtime_seconds": 0.00258204,
+      "symbol": "VFC"
+    },
+    {
+      "instrument_id": "equity:viav",
+      "runtime_seconds": 0.00268017,
+      "symbol": "VIAV"
+    },
+    {
+      "instrument_id": "equity:vici",
+      "runtime_seconds": 0.00269646,
+      "symbol": "VICI"
+    },
+    {
+      "instrument_id": "equity:vicr",
+      "runtime_seconds": 0.00255683,
+      "symbol": "VICR"
+    },
+    {
+      "instrument_id": "equity:vlo",
+      "runtime_seconds": 0.00268792,
+      "symbol": "VLO"
+    },
+    {
+      "instrument_id": "equity:vlto",
+      "runtime_seconds": 0.00261558,
+      "symbol": "VLTO"
+    },
+    {
+      "instrument_id": "equity:vly",
+      "runtime_seconds": 0.00254929,
+      "symbol": "VLY"
+    },
+    {
+      "instrument_id": "equity:vmc",
+      "runtime_seconds": 0.00260542,
+      "symbol": "VMC"
+    },
+    {
+      "instrument_id": "equity:vmi",
+      "runtime_seconds": 0.00263113,
+      "symbol": "VMI"
+    },
+    {
+      "instrument_id": "equity:vno",
+      "runtime_seconds": 0.00254704,
+      "symbol": "VNO"
+    },
+    {
+      "instrument_id": "equity:vnom",
+      "runtime_seconds": 0.00264133,
+      "symbol": "VNOM"
+    },
+    {
+      "instrument_id": "equity:vnt",
+      "runtime_seconds": 0.00260146,
+      "symbol": "VNT"
+    },
+    {
+      "instrument_id": "equity:voya",
+      "runtime_seconds": 0.00250504,
+      "symbol": "VOYA"
+    },
+    {
+      "instrument_id": "equity:vrsk",
+      "runtime_seconds": 0.00255796,
+      "symbol": "VRSK"
+    },
+    {
+      "instrument_id": "equity:vrsn",
+      "runtime_seconds": 0.002683,
+      "symbol": "VRSN"
+    },
+    {
+      "instrument_id": "equity:vrt",
+      "runtime_seconds": 0.00261904,
+      "symbol": "VRT"
+    },
+    {
+      "instrument_id": "equity:vrtx",
+      "runtime_seconds": 0.00258642,
+      "symbol": "VRTX"
+    },
+    {
+      "instrument_id": "equity:vst",
+      "runtime_seconds": 0.00261271,
+      "symbol": "VST"
+    },
+    {
+      "instrument_id": "equity:vtr",
+      "runtime_seconds": 0.00250108,
+      "symbol": "VTR"
+    },
+    {
+      "instrument_id": "equity:vtrs",
+      "runtime_seconds": 0.00256642,
+      "symbol": "VTRS"
+    },
+    {
+      "instrument_id": "equity:vvv",
+      "runtime_seconds": 0.00261729,
+      "symbol": "VVV"
+    },
+    {
+      "instrument_id": "equity:vz",
+      "runtime_seconds": 0.00260275,
+      "symbol": "VZ"
+    },
+    {
+      "instrument_id": "equity:wab",
+      "runtime_seconds": 0.00252833,
+      "symbol": "WAB"
+    },
+    {
+      "instrument_id": "equity:wal",
+      "runtime_seconds": 0.00260746,
+      "symbol": "WAL"
+    },
+    {
+      "instrument_id": "equity:wat",
+      "runtime_seconds": 0.00259383,
+      "symbol": "WAT"
+    },
+    {
+      "instrument_id": "equity:wbd",
+      "runtime_seconds": 0.002531,
+      "symbol": "WBD"
+    },
+    {
+      "instrument_id": "equity:wbs",
+      "runtime_seconds": 0.00255554,
+      "symbol": "WBS"
+    },
+    {
+      "instrument_id": "equity:wcc",
+      "runtime_seconds": 0.00266121,
+      "symbol": "WCC"
+    },
+    {
+      "instrument_id": "equity:wday",
+      "runtime_seconds": 0.00252383,
+      "symbol": "WDAY"
+    },
+    {
+      "instrument_id": "equity:wdc",
+      "runtime_seconds": 0.00255096,
+      "symbol": "WDC"
+    },
+    {
+      "instrument_id": "equity:wec",
+      "runtime_seconds": 0.00261804,
+      "symbol": "WEC"
+    },
+    {
+      "instrument_id": "equity:well",
+      "runtime_seconds": 0.00255546,
+      "symbol": "WELL"
+    },
+    {
+      "instrument_id": "equity:wex",
+      "runtime_seconds": 0.00254383,
+      "symbol": "WEX"
+    },
+    {
+      "instrument_id": "equity:wfc",
+      "runtime_seconds": 0.00259129,
+      "symbol": "WFC"
+    },
+    {
+      "instrument_id": "equity:wfrd",
+      "runtime_seconds": 0.00259192,
+      "symbol": "WFRD"
+    },
+    {
+      "instrument_id": "equity:wh",
+      "runtime_seconds": 0.00249496,
+      "symbol": "WH"
+    },
+    {
+      "instrument_id": "equity:whr",
+      "runtime_seconds": 0.00256542,
+      "symbol": "WHR"
+    },
+    {
+      "instrument_id": "equity:wing",
+      "runtime_seconds": 0.00259367,
+      "symbol": "WING"
+    },
+    {
+      "instrument_id": "equity:wlk",
+      "runtime_seconds": 0.00253071,
+      "symbol": "WLK"
+    },
+    {
+      "instrument_id": "equity:wm",
+      "runtime_seconds": 0.00253708,
+      "symbol": "WM"
+    },
+    {
+      "instrument_id": "equity:wmb",
+      "runtime_seconds": 0.00267021,
+      "symbol": "WMB"
+    },
+    {
+      "instrument_id": "equity:wmg",
+      "runtime_seconds": 0.002637,
+      "symbol": "WMG"
+    },
+    {
+      "instrument_id": "equity:wms",
+      "runtime_seconds": 0.00257433,
+      "symbol": "WMS"
+    },
+    {
+      "instrument_id": "equity:wmt",
+      "runtime_seconds": 0.00263946,
+      "symbol": "WMT"
+    },
+    {
+      "instrument_id": "equity:wpc",
+      "runtime_seconds": 0.00251075,
+      "symbol": "WPC"
+    },
+    {
+      "instrument_id": "equity:wrb",
+      "runtime_seconds": 0.00249233,
+      "symbol": "WRB"
+    },
+    {
+      "instrument_id": "equity:wsm",
+      "runtime_seconds": 0.00261283,
+      "symbol": "WSM"
+    },
+    {
+      "instrument_id": "equity:wso",
+      "runtime_seconds": 0.00251554,
+      "symbol": "WSO"
+    },
+    {
+      "instrument_id": "equity:wst",
+      "runtime_seconds": 0.00251721,
+      "symbol": "WST"
+    },
+    {
+      "instrument_id": "equity:wtfc",
+      "runtime_seconds": 0.00262025,
+      "symbol": "WTFC"
+    },
+    {
+      "instrument_id": "equity:wtrg",
+      "runtime_seconds": 0.00258429,
+      "symbol": "WTRG"
+    },
+    {
+      "instrument_id": "equity:wts",
+      "runtime_seconds": 0.00250771,
+      "symbol": "WTS"
+    },
+    {
+      "instrument_id": "equity:wtw",
+      "runtime_seconds": 0.00248788,
+      "symbol": "WTW"
+    },
+    {
+      "instrument_id": "equity:wwd",
+      "runtime_seconds": 0.00266663,
+      "symbol": "WWD"
+    },
+    {
+      "instrument_id": "equity:wy",
+      "runtime_seconds": 0.00253708,
+      "symbol": "WY"
+    },
+    {
+      "instrument_id": "equity:wynn",
+      "runtime_seconds": 0.00254512,
+      "symbol": "WYNN"
+    },
+    {
+      "instrument_id": "equity:xel",
+      "runtime_seconds": 0.00253633,
+      "symbol": "XEL"
+    },
+    {
+      "instrument_id": "equity:xom",
+      "runtime_seconds": 0.00255562,
+      "symbol": "XOM"
+    },
+    {
+      "instrument_id": "equity:xpo",
+      "runtime_seconds": 0.00255742,
+      "symbol": "XPO"
+    },
+    {
+      "instrument_id": "equity:xray",
+      "runtime_seconds": 0.00258267,
+      "symbol": "XRAY"
+    },
+    {
+      "instrument_id": "equity:xyl",
+      "runtime_seconds": 0.00255967,
+      "symbol": "XYL"
+    },
+    {
+      "instrument_id": "equity:xyz",
+      "runtime_seconds": 0.00250883,
+      "symbol": "XYZ"
+    },
+    {
+      "instrument_id": "equity:yeti",
+      "runtime_seconds": 0.00264267,
+      "symbol": "YETI"
+    },
+    {
+      "instrument_id": "equity:yum",
+      "runtime_seconds": 0.00259596,
+      "symbol": "YUM"
+    },
+    {
+      "instrument_id": "equity:zbh",
+      "runtime_seconds": 0.00249833,
+      "symbol": "ZBH"
+    },
+    {
+      "instrument_id": "equity:zbra",
+      "runtime_seconds": 0.00254113,
+      "symbol": "ZBRA"
+    },
+    {
+      "instrument_id": "equity:zion",
+      "runtime_seconds": 0.00258263,
+      "symbol": "ZION"
+    },
+    {
+      "instrument_id": "equity:zs",
+      "runtime_seconds": 0.00250433,
+      "symbol": "ZS"
+    },
+    {
+      "instrument_id": "equity:zts",
+      "runtime_seconds": 0.00256854,
+      "symbol": "ZTS"
+    },
+    {
+      "instrument_id": "etf:dia",
+      "runtime_seconds": 0.00258642,
+      "symbol": "DIA"
+    },
+    {
+      "instrument_id": "etf:iwm",
+      "runtime_seconds": 0.00251942,
+      "symbol": "IWM"
+    },
+    {
+      "instrument_id": "etf:qqq",
+      "runtime_seconds": 0.00251192,
+      "symbol": "QQQ"
+    },
+    {
+      "instrument_id": "etf:smh",
+      "runtime_seconds": 0.00266158,
+      "symbol": "SMH"
+    },
+    {
+      "instrument_id": "etf:soxx",
+      "runtime_seconds": 0.0026175,
+      "symbol": "SOXX"
+    },
+    {
+      "instrument_id": "etf:spy",
+      "runtime_seconds": 0.00248204,
+      "symbol": "SPY"
+    },
+    {
+      "instrument_id": "etf:xle",
+      "runtime_seconds": 0.00260375,
+      "symbol": "XLE"
+    },
+    {
+      "instrument_id": "etf:xlf",
+      "runtime_seconds": 0.00258075,
+      "symbol": "XLF"
+    },
+    {
+      "instrument_id": "etf:xlk",
+      "runtime_seconds": 0.00253763,
+      "symbol": "XLK"
+    }
+  ],
+  "schema_version": "market-engine-run30-throughput-report-v1",
+  "tickers_per_second": 376.214541,
+  "total_runtime_seconds": 2.530471
+}
