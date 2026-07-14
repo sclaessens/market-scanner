@@ -422,12 +422,13 @@ ME-RUN30 added the broad canonical-universe analysis command:
 src/market_engine/run/full_canonical_universe_analysis.py
 ```
 
-The primary run used:
+The corrected replacement run used:
 
 ```text
-run_id: me-run30-full-canonical-universe-analysis-20260714T100000Z
+run_id: me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z
 cutoff_date: 2026-07-10
 price_history_root: data/processed
+ranking_scope: technical_setup_screening
 ```
 
 and produced:
@@ -436,22 +437,26 @@ and produced:
 total_canonical_instruments: 952
 attempted_instruments: 952
 eligible_analyzed: 946
-insufficient_history: 6
+blocked_insufficient_history: 4
+blocked_stale_history: 2
 failed: 0
-ranked_candidates: 527
-buy_candidate: 105
-wait_for_price: 257
-watchlist: 407
-avoid_for_now: 177
+ranked_candidates: 330
+technical_setup_candidate: 105
+technical_wait_for_entry: 257
+technical_watch: 407
+technical_risk_exclusion: 177
 unable_to_analyse: 6
 ```
 
-The idempotency run
-`me-run30-full-canonical-universe-analysis-idempotency-20260714T101000Z`
-matched final statuses, advice labels, candidate scores, and candidate ranking
-order. Ranking is traceable to local price-history setup observations and
-includes a missing-evidence penalty for absent fundamental, portfolio, and
-market context.
+The PR review fix replaced the original canonical-looking advice labels with
+explicit technical screening labels because full canonical advice requires
+dry-run artifacts and complete fundamental context that are not yet available
+across the broad universe. The determinism rerun matched final statuses,
+technical labels, candidate scores, blockers, and candidate ranking order.
+Ranking is traceable to canonical setup/price/market context payloads derived
+from local price histories and includes a missing-evidence penalty for absent
+fundamental, portfolio, and market context. All ranked candidates remain
+`full_advice_ready: false`.
 
 ## Completed ME-ADV01 result
 

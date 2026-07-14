@@ -129,14 +129,16 @@ implementation exists for this flow. Persisted artifacts are compacted:
 `refresh_summary.json` is aggregate-only, and the duplicate
 `already_current.json` artifact was removed.
 
-ME-RUN30 then executed the first full canonical-universe analysis and
-candidate ranking over the 952-instrument dataset. It attempted all 952
-instruments, analysed 946 eligible local price histories, retained 6
-insufficient-history instruments as explicit `unable_to_analyse` cases,
-reported setup/advice/blocker distributions, produced 527 ranked review
-candidates, and generated a top-candidate review package. The ranking is
-price-history-led and penalises missing fundamental, portfolio, and market
-context instead of treating missing evidence as positive.
+ME-RUN30 then executed the first full canonical-universe technical setup
+screening and candidate ranking over the 952-instrument dataset. It attempted
+all 952 instruments, analysed 946 eligible local price histories, split 4
+insufficient-history blockers from 2 stale-history blockers, reported
+setup/screening/blocker distributions, produced 330 ranked technical review
+candidates, and generated a top-candidate review package. The PR review fix
+removed canonical-looking advice labels from ME-RUN30 output and made the
+ranking scope explicit as `technical_setup_screening`. Missing fundamental,
+portfolio, and market context remain visible and penalised; all ranked
+candidates are `full_advice_ready: false`.
 
 ### ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
 
@@ -244,12 +246,13 @@ Job family: ME-RUN / Broad analysis execution
 Status: COMPLETED / completed_with_blockers
 
 Goal: use the now-operational 952-instrument local market dataset for broad
-Market Engine analysis and deterministic candidate ranking.
+Market Engine technical setup screening and deterministic candidate ranking.
 
-Scope: broad local analysis execution and reporting over existing canonical
-dataset artifacts. No allocation authority, broker/order execution,
-portfolio/watchlist mutation, Telegram delivery, synthetic data, or Decision
-Engine changes.
+Scope: broad local technical screening execution and reporting over existing
+canonical dataset artifacts. Reuse canonical setup/price/market context
+contracts where available. No full deterministic advice labels, allocation
+authority, broker/order execution, portfolio/watchlist mutation, Telegram
+delivery, synthetic data, or Decision Engine changes.
 
 ### ME-RUN31 - Add broader non-price evidence to canonical-universe ranking
 
@@ -259,13 +262,15 @@ Job family: ME-RUN / Broad analysis execution
 
 Status: RECOMMENDED NEXT BASELINE SPRINT AFTER ME-RUN30
 
-Goal: connect available non-price evidence families into the broad
-canonical-universe ranking so candidate scoring can reduce its current
-fundamental, portfolio, and market-context missing-evidence penalties.
+Goal: connect available non-price evidence families into broad
+canonical-universe full-advice readiness so the existing deterministic advice
+engine can be used without broad technical-screening candidates masquerading
+as full advice.
 
-Scope: local deterministic evidence integration only. No allocation authority,
-broker/order execution, portfolio/watchlist mutation, Telegram delivery,
-synthetic data, or Decision Engine changes.
+Scope: local deterministic evidence integration and adapter work only. No
+allocation authority, broker/order execution, portfolio/watchlist mutation,
+Telegram delivery, synthetic data, live provider calls, or Decision Engine
+changes.
 
 ## Current ChatGPT Advisory Artifact Chain
 

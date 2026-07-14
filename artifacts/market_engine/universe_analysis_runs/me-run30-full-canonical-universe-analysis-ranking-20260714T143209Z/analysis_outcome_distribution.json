@@ -1,11 +1,4 @@
 {
-  "advice_label_counts": {
-    "avoid_for_now": 177,
-    "buy_candidate": 105,
-    "unable_to_analyse": 6,
-    "wait_for_price": 257,
-    "watchlist": 407
-  },
   "analysis_outcome_counts": {
     "blocked": 6,
     "constructive_but_not_entry_ready": 257,
@@ -17,6 +10,13 @@
     "high": 0,
     "low": 413,
     "medium": 539
+  },
+  "output_label_counts": {
+    "technical_risk_exclusion": 177,
+    "technical_setup_candidate": 105,
+    "technical_wait_for_entry": 257,
+    "technical_watch": 407,
+    "unable_to_analyse": 6
   },
   "schema_version": "market-engine-run30-analysis-outcome-distribution-v1"
 }

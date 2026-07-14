@@ -1330,10 +1330,10 @@
       "blockers": [
         "insufficient_forward_data"
       ],
-      "final_processing_status": "insufficient_history",
+      "final_processing_status": "blocked_stale_history",
       "instrument_id": "equity:bld",
       "missing_evidence": [
-        "sufficient_local_price_history"
+        "current_local_price_history"
       ],
       "symbol": "BLD"
     },
@@ -3850,7 +3850,7 @@
       "blockers": [
         "insufficient_history"
       ],
-      "final_processing_status": "insufficient_history",
+      "final_processing_status": "blocked_insufficient_history",
       "instrument_id": "equity:fdxf",
       "missing_evidence": [
         "sufficient_local_price_history"
@@ -4771,7 +4771,7 @@
       "blockers": [
         "insufficient_history"
       ],
-      "final_processing_status": "insufficient_history",
+      "final_processing_status": "blocked_insufficient_history",
       "instrument_id": "equity:hona",
       "missing_evidence": [
         "sufficient_local_price_history"
@@ -5341,10 +5341,10 @@
       "blockers": [
         "insufficient_forward_data"
       ],
-      "final_processing_status": "insufficient_history",
+      "final_processing_status": "blocked_stale_history",
       "instrument_id": "equity:jhg",
       "missing_evidence": [
-        "sufficient_local_price_history"
+        "current_local_price_history"
       ],
       "symbol": "JHG"
     },
@@ -7965,7 +7965,7 @@
       "blockers": [
         "insufficient_history"
       ],
-      "final_processing_status": "insufficient_history",
+      "final_processing_status": "blocked_insufficient_history",
       "instrument_id": "equity:q",
       "missing_evidence": [
         "sufficient_local_price_history"
@@ -8938,7 +8938,7 @@
       "blockers": [
         "insufficient_history"
       ],
-      "final_processing_status": "insufficient_history",
+      "final_processing_status": "blocked_insufficient_history",
       "instrument_id": "equity:sols",
       "missing_evidence": [
         "sufficient_local_price_history"
@@ -11008,10 +11008,11 @@
     "weak_or_high_risk_setup": 177
   },
   "missing_evidence_counts": {
+    "current_local_price_history": 2,
     "fundamental_context": 946,
     "market_context": 946,
     "portfolio_context": 946,
-    "sufficient_local_price_history": 6
+    "sufficient_local_price_history": 4
   },
   "schema_version": "market-engine-run30-blocker-report-v1"
 }

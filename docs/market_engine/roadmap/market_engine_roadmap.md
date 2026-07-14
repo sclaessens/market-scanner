@@ -204,19 +204,24 @@ canonical membership refresh implementation in the ME-DATA05 path. Artifact
 storage is compacted so `per_ticker_status.json` is the only complete
 per-ticker list and `refresh_summary.json` contains aggregate metrics only.
 
-ME-RUN30 executed the first full canonical-universe analysis and candidate
-ranking. It attempted all 952 instruments, analysed 946 eligible instruments,
-kept 6 insufficient-history instruments explicit, produced setup/advice/blocker
-distributions, ranked 527 review candidates, and generated a top-candidate
-review package. The ranking is deterministic and traceable to local
-price-history-derived setup observations, while missing fundamental,
-portfolio, and market context are penalised as missing evidence.
+ME-RUN30 executed the first full canonical-universe technical setup screening
+and candidate ranking. It attempted all 952 instruments, analysed 946 eligible
+instruments, split 4 insufficient-history blockers from 2 stale-history
+blockers, produced setup/screening/blocker distributions, ranked 330 technical
+review candidates, and generated a top-candidate review package. The review
+fix replaced canonical-looking advice labels with explicit technical screening
+labels because broad full-advice dry-run artifacts and complete fundamental
+context are not yet available. The ranking is deterministic and traceable to
+canonical setup/price/market context payloads derived from local price-history
+observations, while missing fundamental, portfolio, and market context are
+penalised as missing evidence. All ranked candidates remain
+`full_advice_ready: false`.
 
 ME-RUN31 is now the recommended baseline sprint because ME-RUN30 proved the
-broad analysis path but also showed that price-history-led ranking still
-carries systematic missing-evidence penalties. The next step should integrate
-broader local non-price evidence into the candidate ranking without creating
-allocation authority.
+broad technical screening path but also showed that the ranking still carries
+systematic full-advice missing-evidence penalties. The next step should connect
+available local non-price evidence into the existing deterministic advice
+contracts without creating allocation authority.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 

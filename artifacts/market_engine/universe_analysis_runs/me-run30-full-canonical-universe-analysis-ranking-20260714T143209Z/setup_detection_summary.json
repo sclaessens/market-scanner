@@ -11,6 +11,7 @@
     "extended_wait": 43,
     "no_clear_setup": 450,
     "pullback_watch": 129,
+    "unknown": 0,
     "weak_setup": 134
   },
   "trend_state_counts": {
