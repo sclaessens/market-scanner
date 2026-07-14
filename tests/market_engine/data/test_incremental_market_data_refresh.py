@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+import pytest
 
 from market_engine.data import incremental_market_data_refresh as refresh_module
 from market_engine.data.incremental_market_data_refresh import (
@@ -326,6 +327,103 @@ def test_run_invokes_evaluation_before_and_after_refresh(tmp_path: Path, monkeyp
     assert artifacts["before_after_comparison"]["newly_resolved"] == 0
 
 
+def test_refresh_universe_request_fails_closed_before_provider_or_manifest(tmp_path: Path) -> None:
+    def provider(_symbol: str, _start: str, _end: str) -> pd.DataFrame:
+        raise AssertionError("provider should not be called")
+
+    with pytest.raises(ValueError, match="universe refresh requested"):
+        run_incremental_refresh(
+            run_id="me-data05-test-universe-refresh-20260713T140000Z",
+            universe_path=tmp_path / "universe.json",
+            price_history_root=tmp_path / "prices",
+            artifact_root=tmp_path / "artifacts",
+            evaluation_artifact=tmp_path / "evaluation.json",
+            evaluation_output_root=tmp_path / "eval",
+            cutoff_date="2026-07-10",
+            refresh_universe=True,
+            provider=provider,
+        )
+
+    assert not (tmp_path / "artifacts" / "me-data05-test-universe-refresh-20260713T140000Z").exists()
+
+
+def test_compact_artifact_payloads_store_full_ticker_list_once(tmp_path: Path) -> None:
+    rows = [
+        {"instrument_id": "equity:aaa", "symbol": "AAA", "status": "already_current"},
+        {"instrument_id": "equity:bbb", "symbol": "BBB", "status": "incrementally_updated"},
+        {"instrument_id": "equity:ccc", "symbol": "CCC", "status": "new_snapshot_created"},
+        {"instrument_id": "equity:ddd", "symbol": "DDD", "status": "full_rebuild_completed"},
+        {"instrument_id": "equity:eee", "symbol": "EEE", "status": "stale_after_update"},
+    ]
+    artifacts = refresh_module._artifact_payloads(
+        manifest=_manifest(tmp_path),
+        refresh={
+            "schema_version": "market-engine-data05-price-refresh-summary-v1",
+            "summary": {
+                "histories_checked": 5,
+                "already_current": 1,
+                "incrementally_updated": 1,
+                "new_snapshot_created": 1,
+                "full_rebuild_required": 0,
+                "full_rebuild_completed": 1,
+                "download_failed": 0,
+                "empty_provider_response": 0,
+                "merge_failed": 0,
+                "validation_failed": 0,
+                "stale_after_update": 1,
+                "insufficient_history": 0,
+                "unsupported_mapping": 0,
+                "rows_downloaded": 10,
+                "rows_added": 2,
+                "rows_replaced_within_overlap": 1,
+                "files_rewritten": 3,
+                "files_unchanged": 2,
+            },
+            "per_ticker_status": rows,
+        },
+        coverage_before=_coverage(valid=4, insufficient=1),
+        coverage_after=_coverage(valid=4, insufficient=1),
+        evaluation_before=_evaluation(resolved=0),
+        evaluation_after=_evaluation(resolved=0),
+        acceptance={"schema_version": "test-acceptance-v1", "status": "incremental_refresh_operational", "checks": {}},
+    )
+
+    assert set(artifacts["refresh_summary"]) == {"schema_version", "summary"}
+    assert "per_ticker_status" not in artifacts["refresh_summary"]
+    assert "entries" not in artifacts["refresh_summary"]
+    assert len(artifacts["per_ticker_status"]["entries"]) == 5
+    assert "already_current" not in artifacts
+    assert {row["status"] for row in artifacts["incremental_updates"]["entries"]} == {
+        "incrementally_updated",
+        "new_snapshot_created",
+        "full_rebuild_completed",
+    }
+    assert [row["status"] for row in artifacts["failed_updates"]["entries"]] == ["stale_after_update"]
+    assert artifacts["acceptance_result"]["status"] == "incremental_refresh_operational"
+    assert "Histories checked" in artifacts["report"]
+
+    output_dir = tmp_path / "run"
+    refresh_module._write_refresh_artifacts(output_dir, artifacts)
+    written = sorted(path.name for path in output_dir.iterdir())
+    assert written == [
+        "acceptance_result.json",
+        "before_after_comparison.json",
+        "coverage_after.json",
+        "coverage_before.json",
+        "evaluation_after.json",
+        "evaluation_before.json",
+        "failed_updates.json",
+        "full_rebuilds.json",
+        "incremental_updates.json",
+        "manifest.json",
+        "new_snapshots.json",
+        "per_ticker_status.json",
+        "refresh_summary.json",
+        "report.md",
+        "validation_summary.json",
+    ]
+
+
 def _instrument(symbol: str) -> dict[str, Any]:
     return {
         "instrument_id": f"equity:{symbol}",
@@ -363,3 +461,44 @@ def _frame(rows: list[tuple[str, float]], *, high: float | None = None, low: flo
 def _write_price_csv(path: Path, rows: list[tuple[str, float]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     _frame(rows).to_csv(path, index=False)
+
+
+def _manifest(tmp_path: Path) -> dict[str, Any]:
+    return {
+        "run_id": "me-data05-test-20260713T140000Z",
+        "cutoff_date": "2026-07-10",
+        "overlap_policy": {"overlap_calendar_days": 7},
+        "universe_refresh_requested": False,
+        "universe_refresh_performed": False,
+        "universe_refresh_status": "not_requested",
+        "coverage_before_artifact": (tmp_path / "run" / "coverage_before.json").as_posix(),
+        "coverage_after_artifact": (tmp_path / "run" / "coverage_after.json").as_posix(),
+    }
+
+
+def _coverage(*, valid: int, insufficient: int) -> dict[str, Any]:
+    return {
+        "coverage_summary": {
+            "summary": {
+                "total_canonical_instruments": valid + insufficient,
+                "valid": valid,
+                "insufficient": insufficient,
+                "missing": 0,
+                "invalid": 0,
+                "unsupported": 0,
+            }
+        }
+    }
+
+
+def _evaluation(*, resolved: int) -> dict[str, Any]:
+    return {
+        "refresh_index": {
+            "summary": {
+                "selected_outcomes": 1,
+                "resolved": resolved,
+                "still_unresolved": 1 - resolved,
+                "blocker_counts": {"insufficient_forward_data": 1 - resolved},
+            }
+        }
+    }

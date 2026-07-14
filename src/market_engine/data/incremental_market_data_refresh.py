@@ -34,6 +34,9 @@ from market_engine.evaluation.advice_outcome_refresh import run_advice_outcome_r
 DEFAULT_OVERLAP_CALENDAR_DAYS = 7
 DEFAULT_HISTORICAL_START_DATE = "2025-01-01"
 REFRESH_SCHEMA_VERSION = "market-engine-data05-incremental-refresh-run-v1"
+UNSUPPORTED_UNIVERSE_REFRESH_MESSAGE = (
+    "universe refresh requested but no supported universe refresh implementation is available"
+)
 
 Provider = Callable[[str, str, str], pd.DataFrame]
 
@@ -55,6 +58,8 @@ def run_incremental_refresh(
     limit: int | None = None,
     provider: Provider | None = None,
 ) -> tuple[dict[str, Any], Path]:
+    if refresh_universe:
+        raise ValueError(UNSUPPORTED_UNIVERSE_REFRESH_MESSAGE)
     cutoff = cutoff_date or determine_safe_cutoff_date()
     run_dir = Path(artifact_root) / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -134,7 +139,9 @@ def run_incremental_refresh(
         "generated_at": _generated_at_from_run_id(run_id),
         "canonical_universe_path": Path(universe_path).as_posix(),
         "universe_version": universe["universe_version"],
-        "universe_refresh_performed": refresh_universe,
+        "universe_refresh_requested": refresh_universe,
+        "universe_refresh_performed": False,
+        "universe_refresh_status": "not_requested",
         "price_refresh_performed": refresh_prices,
         "provider": "Yahoo Finance via yfinance",
         "cutoff_date": cutoff,
@@ -521,10 +528,19 @@ def _artifact_payloads(
     }
     return {
         "manifest": manifest,
-        "refresh_summary": refresh,
+        "refresh_summary": {
+            "schema_version": refresh["schema_version"],
+            "summary": refresh["summary"],
+        },
         "per_ticker_status": {"schema_version": "market-engine-data05-per-ticker-status-v1", "entries": rows},
-        "incremental_updates": _filter_rows(rows, "incrementally_updated"),
-        "already_current": _filter_rows(rows, "already_current"),
+        "incremental_updates": {
+            "schema_version": "market-engine-data05-incremental-updates-v1",
+            "entries": [
+                row
+                for row in rows
+                if row["status"] in {"incrementally_updated", "new_snapshot_created", "full_rebuild_completed"}
+            ],
+        },
         "new_snapshots": _filter_rows(rows, "new_snapshot_created"),
         "full_rebuilds": {"schema_version": "market-engine-data05-full-rebuilds-v1", "entries": [row for row in rows if row["status"].startswith("full_rebuild")]},
         "failed_updates": {"schema_version": "market-engine-data05-failed-updates-v1", "entries": [row for row in rows if row["status"] in {"download_failed", "empty_provider_response", "merge_failed", "validation_failed", "stale_after_update", "insufficient_history", "unsupported_mapping"}]},
@@ -578,7 +594,6 @@ def _write_refresh_artifacts(run_dir: Path, artifacts: Mapping[str, Any]) -> Non
         "refresh_summary",
         "per_ticker_status",
         "incremental_updates",
-        "already_current",
         "new_snapshots",
         "full_rebuilds",
         "failed_updates",
@@ -672,7 +687,7 @@ def _render_report(
 
 
 def _empty_refresh(instruments: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    return {"summary": {"histories_checked": len(instruments), "already_current": 0, "incrementally_updated": 0, "new_snapshot_created": 0, "full_rebuild_required": 0, "full_rebuild_completed": 0, "download_failed": 0, "empty_provider_response": 0, "merge_failed": 0, "validation_failed": 0, "stale_after_update": 0, "insufficient_history": 0, "unsupported_mapping": 0, "rows_downloaded": 0, "rows_added": 0, "rows_replaced_within_overlap": 0, "files_rewritten": 0, "files_unchanged": len(instruments)}, "per_ticker_status": []}
+    return {"schema_version": "market-engine-data05-price-refresh-summary-v1", "summary": {"histories_checked": len(instruments), "already_current": 0, "incrementally_updated": 0, "new_snapshot_created": 0, "full_rebuild_required": 0, "full_rebuild_completed": 0, "download_failed": 0, "empty_provider_response": 0, "merge_failed": 0, "validation_failed": 0, "stale_after_update": 0, "insufficient_history": 0, "unsupported_mapping": 0, "rows_downloaded": 0, "rows_added": 0, "rows_replaced_within_overlap": 0, "files_rewritten": 0, "files_unchanged": len(instruments)}, "per_ticker_status": []}
 
 
 def _exclusive_end(cutoff_date: str) -> str:

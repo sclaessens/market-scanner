@@ -197,6 +197,12 @@ coverage automatically, and ran ME-EVAL02 automatically. ME-EVAL02 remained
 0 resolved and 12 unresolved because sufficient real post-advice forward data
 does not yet exist.
 
+The PR review follow-up made the operation boundaries explicit:
+`--refresh-universe` fails closed because there is no supported in-place
+canonical membership refresh implementation in the ME-DATA05 path. Artifact
+storage is compacted so `per_ticker_status.json` is the only complete
+per-ticker list and `refresh_summary.json` contains aggregate metrics only.
+
 ME-ANALYSIS01 is now the recommended baseline sprint because the local dataset
 can be refreshed safely and efficiently. The next large step should use the
 952-instrument dataset for broad Market Engine analysis and reporting instead

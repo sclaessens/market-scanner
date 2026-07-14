@@ -121,6 +121,13 @@ reported 946 `already_current`, 2 `stale_after_update`, 4
 `insufficient_history`, 0 files rewritten, 0 rows added, and 12 ME-EVAL02
 outcomes still unresolved due to `insufficient_forward_data`.
 
+PR review follow-up kept ME-DATA05 price-refresh focused: `--refresh-universe`
+now fails closed because no supported in-place canonical membership refresh
+implementation exists for this flow. Persisted artifacts are compacted:
+`per_ticker_status.json` is the only full per-ticker detail list,
+`refresh_summary.json` is aggregate-only, and the duplicate
+`already_current.json` artifact was removed.
+
 ### ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
 
 Owner roles: Product Owner / Data Steward / Development Lead / QA Lead / Governance Auditor

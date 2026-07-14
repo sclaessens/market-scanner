@@ -8,6 +8,8 @@ ME-DATA05 adds a safe incremental price-history refresh command for the canonica
 
 Two same-cutoff operational runs were executed against the local 952-instrument canonical dataset. Both runs completed with no file rewrites, no failed downloads, no merge failures, no validation failures, no duplicate-date regressions, and automatic coverage and ME-EVAL02 artifacts. The provider returned overlap-only data for `BLD` and `JHG`, so those tickers remain `stale_after_update`. Four newer listings remain `insufficient_history`. No synthetic forward data was used and ME-EVAL02 correctly left all 12 selected outcomes unresolved.
 
+PR review follow-up fixed two auditability issues: `--refresh-universe` is now fail-closed because there is no supported in-place canonical membership refresh implementation for this flow, and persisted run artifacts are compacted so the full ticker record list appears only in `per_ticker_status.json`.
+
 ## Baseline
 
 Baseline source: ME-DATA04 completed canonical local market dataset.
@@ -43,6 +45,31 @@ src/market_engine/data/incremental_market_data_refresh.py
 The refresh command derives the local CSV path from the canonical instrument `source_symbol`, validates the current file, reads the local end date, and chooses one of the explicit per-ticker statuses. Existing valid histories that already reach the cutoff are not downloaded or rewritten. Existing stale histories request `local_end_date - overlap_calendar_days` through `cutoff_date + 1 day`, allowing recent provider corrections without a full historical download.
 
 Missing histories and corrupt or incompatible histories use the full historical start date as an explicit initialization or rebuild path. Current but short histories are reported as `insufficient_history` without noisy repeated downloads.
+
+## Universe Refresh Policy
+
+ME-DATA05 does not implement canonical universe membership refresh. Existing
+repository code can build or bootstrap universe snapshots and configs, but
+there is no safe in-place membership refresh function that ME-DATA05 can call
+without expanding scope into a second universe-builder or a new acquisition
+flow.
+
+Therefore `--refresh-universe` is intentionally fail-closed:
+
+```text
+universe refresh requested but no supported universe refresh implementation is available
+```
+
+Normal runs report:
+
+```text
+universe_refresh_requested: false
+universe_refresh_performed: false
+universe_refresh_status: not_requested
+```
+
+The manifest never reports `universe_refresh_performed: true` unless a future
+supported implementation actually executes successfully.
 
 ## Cutoff Policy
 
@@ -117,6 +144,26 @@ Run 1 blockers:
 | `HONA` | `insufficient_history` | Current to cutoff but below minimum history rows. |
 | `Q` | `insufficient_history` | Current to cutoff but below minimum history rows. |
 | `SOLS` | `insufficient_history` | Current to cutoff but below minimum history rows. |
+
+## Compact Artifact Structure
+
+The canonical complete per-ticker detail artifact is:
+
+```text
+per_ticker_status.json
+```
+
+`refresh_summary.json` contains only aggregate summary keys and no
+`per_ticker_status` or `entries` payload. `already_current.json` was removed
+because it duplicated most of the full ticker list. `incremental_updates.json`
+contains only changed update records: `incrementally_updated`,
+`new_snapshot_created`, and `full_rebuild_completed`. `failed_updates.json`
+contains only failure or blocker statuses.
+
+PR diff size changed from the original review baseline of approximately
+131,753 added lines to 48,365 added lines after artifact compaction. The
+remaining large artifacts are the two canonical `per_ticker_status.json` files,
+one per operational run.
 
 ## Idempotency Run
 
@@ -263,6 +310,26 @@ referenced by the ME-DATA05 manifests, but they are intentionally not committed
 because the primary ME-DATA05 run directories already contain the compact
 `coverage_before.json` and `coverage_after.json` artifacts required for audit.
 
+Persisted ME-DATA05 data-run artifacts are now:
+
+```text
+acceptance_result.json
+before_after_comparison.json
+coverage_after.json
+coverage_before.json
+evaluation_after.json
+evaluation_before.json
+failed_updates.json
+full_rebuilds.json
+incremental_updates.json
+manifest.json
+new_snapshots.json
+per_ticker_status.json
+refresh_summary.json
+report.md
+validation_summary.json
+```
+
 ## Acceptance Criteria
 
 | Criterion | Result | Evidence |
@@ -272,6 +339,8 @@ because the primary ME-DATA05 run directories already contain the compact
 | Overlap merge and provider correction covered | pass | unit tests |
 | Atomic write and failure preservation covered | pass | unit tests |
 | Per-ticker statuses emitted | pass | `per_ticker_status.json` |
+| Summary artifacts are aggregate-only | pass | `refresh_summary.json` has no entries list |
+| Universe refresh reporting is honest | pass | unsupported request fails before manifest |
 | Coverage runs automatically | pass | coverage artifacts before and after |
 | ME-EVAL02 runs automatically | pass | evaluation refresh artifacts before and after |
 | Idempotent same-cutoff run | pass | run 2 `files_rewritten: 0` |

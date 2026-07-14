@@ -398,6 +398,21 @@ already current histories, and coverage plus evaluation are refreshed
 automatically. The absence of newly resolved outcomes is a real-data timing
 constraint, not a refresh failure.
 
+PR review follow-up clarified two operational boundaries:
+
+```text
+refresh_universe_requested: supported as an explicit request flag
+refresh_universe_performed: always false unless a supported implementation actually runs
+refresh_universe_status: not_requested for normal runs
+```
+
+If `--refresh-universe` is requested today, ME-DATA05 fails closed with a clear
+error instead of silently pretending that canonical membership changed. The
+persisted artifact structure is also compact: `per_ticker_status.json` is the
+only complete per-ticker record list, `refresh_summary.json` contains aggregate
+metrics only, and duplicate `already_current.json` artifacts are no longer
+written.
+
 ## Completed ME-ADV01 result
 
 ME-ADV01 produces deterministic advice output with labels:

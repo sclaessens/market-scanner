@@ -26,5 +26,7 @@
   "run_id": "me-data05-incremental-refresh-20260713T140000Z",
   "schema_version": "market-engine-data05-incremental-refresh-run-v1",
   "universe_refresh_performed": false,
+  "universe_refresh_requested": false,
+  "universe_refresh_status": "not_requested",
   "universe_version": "me-data04-complete-canonical-local-market-dataset-v1"
 }
