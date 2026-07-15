@@ -560,6 +560,17 @@ def test_artifact_tree_digest_is_deterministic_and_changes_on_mutation(tmp_path:
     assert run31._artifact_tree_digest(root) != first
 
 
+def test_git_commit_reads_packed_branch_ref(tmp_path: Path, monkeypatch: Any) -> None:
+    commit = "1234567890abcdef1234567890abcdef12345678"
+    git_dir = tmp_path / ".git"
+    git_dir.mkdir()
+    (git_dir / "HEAD").write_text("ref: refs/heads/me-run31\n", encoding="utf-8")
+    (git_dir / "packed-refs").write_text(f"# pack-refs with: peeled fully-peeled sorted\n{commit} refs/heads/me-run31\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    assert run31._git_commit() == commit
+
+
 def test_advice_completion_semantics_are_distinct(tmp_path: Path, monkeypatch: Any) -> None:
     _patch_universe(monkeypatch, symbols=("AAA", "BBB"))
     artifacts, _ = run31.run_broad_non_price_evidence_advice_readiness(

@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import shutil
+import subprocess
 import sys
 import time
 from collections import Counter
@@ -1727,9 +1728,42 @@ def _git_commit() -> str | None:
         return None
     text = head.read_text(encoding="utf-8").strip()
     if text.startswith("ref: "):
-        ref = Path(".git") / text.removeprefix("ref: ")
-        return ref.read_text(encoding="utf-8").strip() if ref.exists() else None
+        ref_name = text.removeprefix("ref: ")
+        ref = Path(".git") / ref_name
+        if ref.exists():
+            return ref.read_text(encoding="utf-8").strip()
+        packed_commit = _packed_ref_commit(ref_name)
+        if packed_commit:
+            return packed_commit
+        return _git_rev_parse_head()
     return text
+
+
+def _packed_ref_commit(ref_name: str) -> str | None:
+    packed_refs = Path(".git/packed-refs")
+    if not packed_refs.exists():
+        return None
+    for line in packed_refs.read_text(encoding="utf-8").splitlines():
+        if not line or line.startswith("#") or line.startswith("^"):
+            continue
+        commit, _, ref = line.partition(" ")
+        if ref == ref_name:
+            return commit
+    return None
+
+
+def _git_rev_parse_head() -> str | None:
+    try:
+        completed = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+    commit = completed.stdout.strip()
+    return commit or None
 
 
 def main(argv: Sequence[str] | None = None) -> int:
