@@ -54,7 +54,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
   -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
   -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
-  -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking
+  -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
+  -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -139,6 +140,17 @@ removed canonical-looking advice labels from ME-RUN30 output and made the
 ranking scope explicit as `technical_setup_screening`. Missing fundamental,
 portfolio, and market context remain visible and penalised; all ranked
 candidates are `full_advice_ready: false`.
+
+ME-RUN31 then attached available local non-price evidence to the ME-RUN30
+technical screening result and handed the generated ticker status index to the
+existing deterministic advice engine. The full run
+`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T095117Z`
+attempted all 952 canonical instruments, completed canonical advice generation
+for all 952, found 4 canonical advice-input-ready instruments, produced 4
+`wait_for_price` partial advice outputs, kept 948 instruments
+`unable_to_advise`, and produced 0 full-advice-ready ranking candidates. The
+dominant blocker is fundamental evidence coverage: 931 missing and 17 partial
+fundamental contexts.
 
 ### ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
 
@@ -260,7 +272,7 @@ Owner roles: Product Owner / Operator / Data Steward / Development Lead / QA Lea
 
 Job family: ME-RUN / Broad analysis execution
 
-Status: RECOMMENDED NEXT BASELINE SPRINT AFTER ME-RUN30
+Status: COMPLETED / completed_with_blockers
 
 Goal: connect available non-price evidence families into broad
 canonical-universe full-advice readiness so the existing deterministic advice
@@ -270,6 +282,32 @@ as full advice.
 Scope: local deterministic evidence integration and adapter work only. No
 allocation authority, broker/order execution, portfolio/watchlist mutation,
 Telegram delivery, synthetic data, live provider calls, or Decision Engine
+changes.
+
+Result: the implementation added
+`src/market_engine/run/broad_non_price_evidence_advice_readiness.py`, broad
+evidence coverage tests, and the full advice-readiness run under
+`artifacts/market_engine/full_advice_readiness_runs/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T095117Z/`.
+The sprint confirms the adapter and canonical advice handoff are operational,
+but full-advice ranking remains empty because local fundamental evidence is
+mostly missing.
+
+### ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources
+
+Owner roles: Product Owner / Operator / Data Steward / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-DATA / Local evidence coverage
+
+Status: RECOMMENDED NEXT BASELINE SPRINT AFTER ME-RUN31
+
+Goal: increase canonical-universe fundamental context coverage from approved
+local evidence sources so more ME-RUN31 candidates can reach deterministic
+canonical advice readiness.
+
+Scope: local evidence inventory, import, normalization, validation, and
+coverage reporting only. No provider side effects unless explicitly approved,
+no allocation authority, no advice rule changes, no broker/order execution, no
+portfolio or watchlist mutation, no Telegram delivery, and no Decision Engine
 changes.
 
 ## Current ChatGPT Advisory Artifact Chain

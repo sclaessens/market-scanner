@@ -48,7 +48,8 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
   -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
   -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
-  -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking
+  -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
+  -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources
 ```
 
 ## Superseded baseline pointers
@@ -297,7 +298,7 @@ missing_price_history_tickers: CLS, CRDO, IREN, VRT
 ## Next baseline sprint
 
 ```text
-ME-RUN31 - Add broader non-price evidence to canonical-universe ranking
+ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources
 ```
 
 Not:
@@ -305,17 +306,16 @@ Not:
 ```text
 ME-GH03 - Deterministic ranking and review queue
 ME-DATA06 - Another data-only infrastructure sprint without an operational blocker
+ME-RUN32 - Another broad ranking layer before evidence coverage improves
 ```
 
-Remaining data gaps are explicit follow-up candidates, not blockers to broad
-analysis over the current canonical dataset:
+Remaining data gaps are now the operational blocker to full-advice readiness:
 
 ```text
-portfolio_context: 12
-market_context: 8
-local_price_history: 4
-status/advice coverage beyond 12 of 500 target tickers
-forward local price snapshots after the advice date
+missing_fundamental_context: 931
+partial_fundamental_context: 17
+canonical_advice_input_ready: 4 of 952
+full_advice_ready: 0 of 952
 ```
 
 ## Current completed ME-DATA04 result
@@ -457,6 +457,47 @@ Ranking is traceable to canonical setup/price/market context payloads derived
 from local price histories and includes a missing-evidence penalty for absent
 fundamental, portfolio, and market context. All ranked candidates remain
 `full_advice_ready: false`.
+
+## Current completed ME-RUN31 result
+
+ME-RUN31 added the broad non-price evidence advice-readiness command:
+
+```text
+src/market_engine/run/broad_non_price_evidence_advice_readiness.py
+```
+
+The full run used:
+
+```text
+run_id: me-run31-broad-non-price-evidence-full-advice-readiness-20260715T095117Z
+technical_screening_artifact: artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/
+price_history_root: data/processed
+fundamental_evidence_path: data/processed/fundamental_quality.csv
+market_context_path: data/processed/market_regime.csv
+```
+
+and produced:
+
+```text
+attempted_instruments: 952
+technical_analysed: 946
+technical_ranking_eligible: 330
+canonical_advice_input_ready: 4
+advice_attempted: 952
+advice_completed: 952
+failed: 0
+wait_for_price: 4
+unable_to_advise: 948
+full_advice_ready: 0
+full_advice_ranking_eligible: 0
+missing_fundamental_context: 931
+partial_fundamental_context: 17
+```
+
+ME-RUN31 proves the broad evidence adapter and deterministic advice handoff
+work. It also proves that another ranking layer is not the next bottleneck:
+full-advice readiness is blocked primarily by missing local fundamental
+evidence coverage.
 
 ## Completed ME-ADV01 result
 
