@@ -53,7 +53,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-BOOT03 - Bootstrap authoritative universe and local price-history coverage (implementation complete / coverage partial)
   -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
   -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
-  -> ME-ANALYSIS01 - Broad canonical-universe analysis execution and reporting
+  -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
+  -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -127,6 +128,17 @@ implementation exists for this flow. Persisted artifacts are compacted:
 `per_ticker_status.json` is the only full per-ticker detail list,
 `refresh_summary.json` is aggregate-only, and the duplicate
 `already_current.json` artifact was removed.
+
+ME-RUN30 then executed the first full canonical-universe technical setup
+screening and candidate ranking over the 952-instrument dataset. It attempted
+all 952 instruments, analysed 946 eligible local price histories, split 4
+insufficient-history blockers from 2 stale-history blockers, reported
+setup/screening/blocker distributions, produced 330 ranked technical review
+candidates, and generated a top-candidate review package. The PR review fix
+removed canonical-looking advice labels from ME-RUN30 output and made the
+ranking scope explicit as `technical_setup_screening`. Missing fundamental,
+portfolio, and market context remain visible and penalised; all ranked
+candidates are `full_advice_ready: false`.
 
 ### ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
 
@@ -225,22 +237,40 @@ ME-EVAL02 refresh only. No broker/order execution, portfolio or watchlist
 mutation, advice generation, synthetic forward data, Telegram, scheduler,
 Decision Engine authority change, or recommendation threshold change.
 
-### ME-ANALYSIS01 - Broad canonical-universe analysis execution and reporting
+### ME-RUN30 - Full canonical-universe analysis and candidate ranking
 
 Owner roles: Product Owner / Operator / Data Steward / Development Lead / QA Lead / Governance Auditor
 
-Job family: ME-ANALYSIS / Broad analysis execution
+Job family: ME-RUN / Broad analysis execution
 
-Status: RECOMMENDED NEXT BASELINE SPRINT AFTER ME-DATA05
+Status: COMPLETED / completed_with_blockers
 
 Goal: use the now-operational 952-instrument local market dataset for broad
-Market Engine analysis and reporting instead of adding another data-only
-infrastructure layer.
+Market Engine technical setup screening and deterministic candidate ranking.
 
-Scope: broad local analysis execution and reporting over existing canonical
-dataset artifacts. No allocation authority, broker/order execution,
-portfolio/watchlist mutation, Telegram delivery, synthetic data, or Decision
-Engine changes.
+Scope: broad local technical screening execution and reporting over existing
+canonical dataset artifacts. Reuse canonical setup/price/market context
+contracts where available. No full deterministic advice labels, allocation
+authority, broker/order execution, portfolio/watchlist mutation, Telegram
+delivery, synthetic data, or Decision Engine changes.
+
+### ME-RUN31 - Add broader non-price evidence to canonical-universe ranking
+
+Owner roles: Product Owner / Operator / Data Steward / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-RUN / Broad analysis execution
+
+Status: RECOMMENDED NEXT BASELINE SPRINT AFTER ME-RUN30
+
+Goal: connect available non-price evidence families into broad
+canonical-universe full-advice readiness so the existing deterministic advice
+engine can be used without broad technical-screening candidates masquerading
+as full advice.
+
+Scope: local deterministic evidence integration and adapter work only. No
+allocation authority, broker/order execution, portfolio/watchlist mutation,
+Telegram delivery, synthetic data, live provider calls, or Decision Engine
+changes.
 
 ## Current ChatGPT Advisory Artifact Chain
 

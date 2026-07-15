@@ -47,7 +47,8 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-BOOT03 - Bootstrap authoritative universe and local price-history coverage (implementation complete / coverage partial)
   -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
   -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
-  -> ME-ANALYSIS01 - Broad canonical-universe analysis execution and reporting
+  -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
+  -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking
 ```
 
 ## Superseded baseline pointers
@@ -296,7 +297,7 @@ missing_price_history_tickers: CLS, CRDO, IREN, VRT
 ## Next baseline sprint
 
 ```text
-ME-ANALYSIS01 - Broad canonical-universe analysis execution and reporting
+ME-RUN31 - Add broader non-price evidence to canonical-universe ranking
 ```
 
 Not:
@@ -412,6 +413,50 @@ persisted artifact structure is also compact: `per_ticker_status.json` is the
 only complete per-ticker record list, `refresh_summary.json` contains aggregate
 metrics only, and duplicate `already_current.json` artifacts are no longer
 written.
+
+## Current completed ME-RUN30 result
+
+ME-RUN30 added the broad canonical-universe analysis command:
+
+```text
+src/market_engine/run/full_canonical_universe_analysis.py
+```
+
+The corrected replacement run used:
+
+```text
+run_id: me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z
+cutoff_date: 2026-07-10
+price_history_root: data/processed
+ranking_scope: technical_setup_screening
+```
+
+and produced:
+
+```text
+total_canonical_instruments: 952
+attempted_instruments: 952
+eligible_analyzed: 946
+blocked_insufficient_history: 4
+blocked_stale_history: 2
+failed: 0
+ranked_candidates: 330
+technical_setup_candidate: 105
+technical_wait_for_entry: 257
+technical_watch: 407
+technical_risk_exclusion: 177
+unable_to_analyse: 6
+```
+
+The PR review fix replaced the original canonical-looking advice labels with
+explicit technical screening labels because full canonical advice requires
+dry-run artifacts and complete fundamental context that are not yet available
+across the broad universe. The determinism rerun matched final statuses,
+technical labels, candidate scores, blockers, and candidate ranking order.
+Ranking is traceable to canonical setup/price/market context payloads derived
+from local price histories and includes a missing-evidence penalty for absent
+fundamental, portfolio, and market context. All ranked candidates remain
+`full_advice_ready: false`.
 
 ## Completed ME-ADV01 result
 

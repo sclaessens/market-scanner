@@ -1,0 +1,36 @@
+{
+  "artifact_type": "market-engine-run30-full-canonical-universe-analysis",
+  "generated_at": "2026-07-14T14:32:09Z",
+  "guardrails": {
+    "broker_order_execution_performed": false,
+    "deterministic_advice_labels_produced": false,
+    "portfolio_watchlist_mutation_performed": false,
+    "provider_invocation_performed": false,
+    "provider_or_model_advice_generation_performed": false,
+    "synthetic_forward_data_used": false,
+    "technical_screening_labels_produced": true,
+    "telegram_delivery_performed": false
+  },
+  "input": {
+    "canonical_universe_path": "config/market_engine/universes/canonical_universe.json",
+    "cutoff_date": "2026-07-10",
+    "price_history_root": "data/processed",
+    "universe_version": "me-data04-complete-canonical-local-market-dataset-v1"
+  },
+  "outputs": {
+    "analysis_outcome_distribution": "analysis_outcome_distribution.json",
+    "blocker_report": "blocker_report.json",
+    "candidate_ranking": "candidate_ranking.json",
+    "candidate_ranking_markdown": "candidate_ranking.md",
+    "manifest": "manifest.json",
+    "setup_detection_summary": "setup_detection_summary.json",
+    "throughput_report": "throughput_report.json",
+    "top_candidates": "top_candidates.md",
+    "unable_to_analyse": "unable_to_analyse.md",
+    "universe_analysis_index": "universe_analysis_index.json",
+    "universe_analysis_summary": "universe_analysis_summary.md"
+  },
+  "run_id": "me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z",
+  "schema_version": "market-engine-run30-full-canonical-universe-analysis-v1",
+  "status": "completed_with_blockers"
+}

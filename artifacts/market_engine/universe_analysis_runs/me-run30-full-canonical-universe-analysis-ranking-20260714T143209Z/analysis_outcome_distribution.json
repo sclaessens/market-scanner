@@ -1,0 +1,22 @@
+{
+  "analysis_outcome_counts": {
+    "blocked": 6,
+    "constructive_but_not_entry_ready": 257,
+    "constructive_price_setup": 105,
+    "inconclusive_setup": 407,
+    "risk_or_trend_blocked": 177
+  },
+  "confidence_counts": {
+    "high": 0,
+    "low": 413,
+    "medium": 539
+  },
+  "output_label_counts": {
+    "technical_risk_exclusion": 177,
+    "technical_setup_candidate": 105,
+    "technical_wait_for_entry": 257,
+    "technical_watch": 407,
+    "unable_to_analyse": 6
+  },
+  "schema_version": "market-engine-run30-analysis-outcome-distribution-v1"
+}
