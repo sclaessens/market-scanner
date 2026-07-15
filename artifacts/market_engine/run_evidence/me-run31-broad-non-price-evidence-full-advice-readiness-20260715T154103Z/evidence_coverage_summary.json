@@ -6,7 +6,7 @@
     "reference_date": "2026-07-10",
     "resolution_source": "explicit_cli"
   },
-  "run_id": "me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z",
+  "run_id": "me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z",
   "schema_version": "market-engine-run31-evidence-coverage-summary-v1",
   "summary": {
     "advice_attempted": 952,

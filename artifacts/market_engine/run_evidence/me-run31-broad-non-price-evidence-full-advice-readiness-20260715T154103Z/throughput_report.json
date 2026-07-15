@@ -1,0 +1,87 @@
+{
+  "advice_engine_completed": 952,
+  "attempted": 952,
+  "blocked": 0,
+  "canonical_advice_attempted": 952,
+  "canonical_advice_completed": 952,
+  "canonical_advice_input_ready": 4,
+  "end_time": "2026-07-15T15:41:12Z",
+  "failed": 0,
+  "full_advice_ready": 0,
+  "fundamental_context_resolved": 21,
+  "market_context_resolved": 952,
+  "max_ticker_runtime_seconds": 0.00149217,
+  "mean_ticker_runtime_seconds": 7.499e-05,
+  "median_ticker_runtime_seconds": 7e-05,
+  "min_ticker_runtime_seconds": 6.354e-05,
+  "non_unable_advice_outputs": 4,
+  "p95_ticker_runtime_seconds": 9.346e-05,
+  "partial_advice": 4,
+  "phase_runtime_seconds": {
+    "artifact_writing": 0.07050012506078929,
+    "canonical_advice_execution": 0.153592,
+    "fundamental_evidence_resolution": 0.002589,
+    "market_context_resolution": 0.000365,
+    "portfolio_context_resolution": 0.000164,
+    "technical_input_loading": 0.021305
+  },
+  "portfolio_context_resolved": 1,
+  "schema_version": "market-engine-run31-throughput-report-v1",
+  "slowest_tickers": [
+    {
+      "instrument_id": "equity:cop",
+      "runtime_seconds": 0.00149217,
+      "symbol": "COP"
+    },
+    {
+      "instrument_id": "equity:rrx",
+      "runtime_seconds": 0.00070317,
+      "symbol": "RRX"
+    },
+    {
+      "instrument_id": "equity:klac",
+      "runtime_seconds": 0.00022958,
+      "symbol": "KLAC"
+    },
+    {
+      "instrument_id": "equity:amgn",
+      "runtime_seconds": 0.00016729,
+      "symbol": "AMGN"
+    },
+    {
+      "instrument_id": "equity:nke",
+      "runtime_seconds": 0.00015479,
+      "symbol": "NKE"
+    },
+    {
+      "instrument_id": "equity:amg",
+      "runtime_seconds": 0.00015092,
+      "symbol": "AMG"
+    },
+    {
+      "instrument_id": "equity:wbs",
+      "runtime_seconds": 0.00015079,
+      "symbol": "WBS"
+    },
+    {
+      "instrument_id": "equity:su",
+      "runtime_seconds": 0.0001505,
+      "symbol": "SU"
+    },
+    {
+      "instrument_id": "equity:cf",
+      "runtime_seconds": 0.00012938,
+      "symbol": "CF"
+    },
+    {
+      "instrument_id": "equity:wst",
+      "runtime_seconds": 0.00012883,
+      "symbol": "WST"
+    }
+  ],
+  "start_time": "2026-07-15T15:41:11Z",
+  "technical_context_loaded": 946,
+  "tickers_per_second": 3748.772529,
+  "total_runtime_seconds": 0.25395,
+  "unable_to_advise": 948
+}

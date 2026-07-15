@@ -1,6 +1,6 @@
 # ME-RUN31 Broad Non-Price Evidence Full Advice Readiness Audit
 
-Status: IMPLEMENTED, REVIEW-HARDENED, AND VALIDATED
+Status: IMPLEMENTED, REVIEW-HARDENED, REPRODUCIBILITY-HARDENED, AND VALIDATED
 
 Draft PR: `#461`
 
@@ -76,21 +76,100 @@ Applicable portfolio context now requires a valid snapshot date. Missing,
 invalid, future, or stale dates fail closed for applicable positions.
 Not-applicable portfolio context remains non-blocking.
 
-## New Run
+## Final Reproducibility Rerun
+
+The committed compact evidence from
+`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z`
+was superseded because its evidence metadata referenced the pre-hardening
+runtime commit `5dbb0bf673f7ad863731f91146146a0e6bc870e1`.
+
+A commit-capture defect was found before the final rerun: the helper read loose
+Git refs but missed valid packed branch refs. That bug was fixed and covered by
+a regression test before the final evidence rerun.
+
+Runtime code commit:
+
+```text
+419af30557c168816e100aaa943545be2a2c2f02
+```
+
+This includes the review-hardening commit
+`d2ee508f64141a4b9db1763f5a1cd3504d46fe8b` plus the narrow packed-ref
+commit-capture fix.
+
+The final rerun was started from a clean tracked worktree. Only the local full
+artifact root and the guarded ME-CI11D directory were untracked at run start.
 
 Run artifact:
 
 ```text
-artifacts/market_engine/full_advice_readiness_runs/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z/
+artifacts/market_engine/full_advice_readiness_runs/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z/
 ```
 
 Compact evidence package:
 
 ```text
-artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z/
+artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z/
 ```
 
-The previous run `me-run31-broad-non-price-evidence-full-advice-readiness-20260715T095117Z` is superseded by this review-hardened run.
+Both compact evidence files record the same runtime code commit:
+
+```text
+run_evidence_index.git_commit: 419af30557c168816e100aaa943545be2a2c2f02
+manifest.git_commit: 419af30557c168816e100aaa943545be2a2c2f02
+```
+
+Freshness and technical input:
+
+```text
+freshness_reference_date: 2026-07-10
+technical_screening_run_id: me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z
+```
+
+Full artifact metrics:
+
+```text
+file_count: 971
+total_size_bytes: 25901313
+full_tree_digest: 8c0c6c05a8ab560f9571c9614ca77b8fb6cb9772a62f873d33eedd6f9a7d8117
+```
+
+Final rerun metrics:
+
+```text
+attempted_instruments: 952
+technical_analysed: 946
+technical_ranking_eligible: 330
+canonical_advice_input_ready: 4
+advice_engine_completed: 952
+non_unable_advice_outputs: 4
+unable_to_advise: 948
+full_advice_ready: 0
+failed: 0
+```
+
+The previous local full run
+`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z`
+is superseded by this reproducibility rerun.
+
+## New Run
+
+Run artifact:
+
+```text
+artifacts/market_engine/full_advice_readiness_runs/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z/
+```
+
+Compact evidence package:
+
+```text
+artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z/
+```
+
+The previous runs
+`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T095117Z`
+and `me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z`
+are superseded by this review-hardened and reproducibility-hardened run.
 
 ## Compact Evidence
 
@@ -115,8 +194,8 @@ Full artifact metrics:
 
 ```text
 file_count: 971
-total_size_bytes: 25901389
-full_tree_digest: 36aa76ec3a7c1e902f3a9582cb1a41160a373dea86a4493e8513a8a007be70d4
+total_size_bytes: 25901313
+full_tree_digest: 8c0c6c05a8ab560f9571c9614ca77b8fb6cb9772a62f873d33eedd6f9a7d8117
 compact_size: 284K
 ```
 
