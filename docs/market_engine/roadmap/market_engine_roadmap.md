@@ -113,7 +113,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
   -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
   -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
-  -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking
+  -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
+  -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -217,11 +218,24 @@ observations, while missing fundamental, portfolio, and market context are
 penalised as missing evidence. All ranked candidates remain
 `full_advice_ready: false`.
 
-ME-RUN31 is now the recommended baseline sprint because ME-RUN30 proved the
-broad technical screening path but also showed that the ranking still carries
-systematic full-advice missing-evidence penalties. The next step should connect
-available local non-price evidence into the existing deterministic advice
-contracts without creating allocation authority.
+ME-RUN31 connected available local non-price evidence to the ME-RUN30 broad
+technical screening result and reused the existing deterministic advice engine
+for canonical advice output. The full run
+`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z`
+attempted all 952 canonical instruments, completed the advice engine for all
+952, found 4 canonical advice-input-ready instruments, produced 4
+`wait_for_price` partial advice outputs, kept 948 instruments
+`unable_to_advise`, and produced 0 full-advice-ready ranking candidates. The
+review fix removed hardcoded freshness, made the ME-RUN30 technical input
+explicit, added deterministic fundamental and market row selection, and wrote
+a compact committed evidence package under
+`artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z/`.
+The dominant blocker is non-price evidence coverage: 931 missing and 17
+partial fundamental contexts.
+
+ME-DATA06 is now the recommended baseline sprint because ME-RUN31 proved the
+adapter and advice handoff, while showing that full-advice readiness is mostly
+blocked by missing local fundamental evidence rather than ranking mechanics.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 
