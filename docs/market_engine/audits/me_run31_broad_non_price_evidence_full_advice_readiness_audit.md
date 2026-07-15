@@ -1,63 +1,124 @@
 # ME-RUN31 Broad Non-Price Evidence Full Advice Readiness Audit
 
-Status: IMPLEMENTED AND VALIDATED
+Status: IMPLEMENTED, REVIEW-HARDENED, AND VALIDATED
+
+Draft PR: `#461`
+
+## Review Findings Addressed
+
+The PR review found that the initial ME-RUN31 implementation had these material gaps:
+
+- freshness used a hardcoded historical date;
+- technical input defaulted to one historical ME-RUN30 artifact;
+- fundamental CSV duplicate rows were silently overwritten;
+- market context selection depended on the final CSV row;
+- missing source dates could be treated as not stale;
+- advice completion could be confused with advice readiness;
+- the full run artifact was too large to commit and had no compact committed evidence package.
+
+## Runtime Fixes
+
+ME-RUN31 now requires an explicit technical screening artifact path. The CLI requires:
+
+```text
+--technical-screening-artifact <path>
+```
+
+Freshness is runtime-driven. The reference date resolves from:
+
+```text
+1. explicit --freshness-reference-date
+2. technical input manifest cutoff/as-of date
+3. fail-closed structural error
+```
+
+The new full run used the explicit reference date:
+
+```text
+freshness_reference_date: 2026-07-10
+resolution_source: explicit_cli
+fundamental_stale_after_days: 120
+market_stale_after_days: 120
+portfolio_stale_after_days: 45
+```
+
+Technical input validation now checks path existence, schema, manifest
+existence, manifest/index run-id consistency, selected instrument coverage,
+unknown instrument IDs, and universe compatibility. The ME-RUN30 artifact does
+not persist a universe version, so compatibility for this review run is
+documented as `inferred_from_exact_instrument_ids`; explicit universe-version
+mismatches still fail closed.
+
+## Selection Policies
+
+Fundamental evidence uses:
+
+```text
+selection_policy: latest_valid_source_date
+date priority: source_last_updated, source_timestamp, date, generated_at
+```
+
+Identical duplicate rows are deduplicated. Same-date conflicting rows become
+invalid with `duplicate_fundamental_rows_conflict`. Missing, invalid, or future
+fundamental source dates fail closed.
+
+Market context uses:
+
+```text
+selection_policy: latest_valid_market_context_date
+```
+
+Rows are date-validated, order-independent, and duplicate same-date conflicts
+become invalid with `duplicate_market_context_date_conflict`. Missing, invalid,
+or future market dates fail closed.
+
+Applicable portfolio context now requires a valid snapshot date. Missing,
+invalid, future, or stale dates fail closed for applicable positions.
+Not-applicable portfolio context remains non-blocking.
+
+## New Run
 
 Run artifact:
 
 ```text
-artifacts/market_engine/full_advice_readiness_runs/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T095117Z/
+artifacts/market_engine/full_advice_readiness_runs/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z/
 ```
 
-## Scope
-
-ME-RUN31 connects available local non-price evidence to the broad canonical-universe analysis result from ME-RUN30 and hands the resulting per-ticker input index to the existing deterministic advice engine.
-
-The sprint preserves separation between technical setup screening and canonical deterministic advice. It does not copy canonical advice rules into the broad run module, does not create allocation authority, and does not perform broker, order, portfolio, watchlist, Telegram, provider, scheduler, or production side effects.
-
-## Inputs
-
-Technical screening source:
+Compact evidence package:
 
 ```text
-artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/
+artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z/
 ```
 
-Local evidence inputs:
+The previous run `me-run31-broad-non-price-evidence-full-advice-readiness-20260715T095117Z` is superseded by this review-hardened run.
 
-```text
-config/market_engine/universes/canonical_universe.json
-data/processed
-data/processed/fundamental_quality.csv
-data/processed/market_regime.csv
-data/market_engine/portfolio_contexts/local_portfolio_context.json
-```
+## Compact Evidence
 
-## Produced Artifacts
-
-The run writes:
+The compact package is committed instead of the full per-ticker artifact tree.
+It contains:
 
 ```text
 manifest.json
-evidence_coverage_index.json
+run_evidence_index.json
 evidence_coverage_summary.json
-evidence_coverage_summary.md
-canonical_advice_input_index.json
-canonical_advice_output_index.json
 advice_readiness_report.json
-advice_readiness_report.md
 technical_to_advice_transition.json
-technical_ranking.json
-full_advice_ranking.json
-full_advice_ranking.md
-top_full_advice_candidates.md
-unable_to_advise.json
-unable_to_advise.md
 blocker_report.json
-source_lineage.json
 throughput_report.json
+full_advice_ranking.json
+top_level_checksums.json
 ```
 
-The implementation also writes `canonical_advice_inputs/` as the traceable dry-run payload source consumed by the deterministic advice engine.
+No per-ticker `dry_run.json` files are included in the compact package.
+
+Full artifact metrics:
+
+```text
+file_count: 971
+total_size_bytes: 25901389
+full_tree_digest: 36aa76ec3a7c1e902f3a9582cb1a41160a373dea86a4493e8513a8a007be70d4
+compact_size: 284K
+```
 
 ## Coverage Result
 
@@ -66,12 +127,8 @@ canonical_instruments: 952
 attempted_instruments: 952
 technical_analysed: 946
 technical_ranking_eligible: 330
-canonical_advice_input_ready: 4
-advice_attempted: 952
-advice_completed: 952
+blocked: 0
 failed: 0
-full_advice_ready: 0
-full_advice_ranking_eligible: 0
 ```
 
 Fundamental evidence:
@@ -82,18 +139,14 @@ partial: 17
 missing: 931
 stale: 0
 invalid: 0
-blocked: 0
 ```
 
 Market context:
 
 ```text
 available: 952
-partial: 0
-missing: 0
 stale: 0
 invalid: 0
-blocked: 0
 ```
 
 Portfolio context:
@@ -101,59 +154,43 @@ Portfolio context:
 ```text
 available: 1
 not_applicable: 951
-missing: 0
 stale: 0
 invalid: 0
-blocked: 0
 ```
 
-## Advice Result
+## Advice Semantics
+
+ME-RUN31 now reports advice engine completion separately from advice readiness:
+
+```text
+advice_generation_attempted: 952
+advice_engine_completed: 952
+canonical_advice_input_ready: 4
+non_unable_advice_outputs: 4
+unable_to_advise: 948
+full_advice_ready: 0
+```
 
 Canonical deterministic advice output:
 
 ```text
-buy_candidate: 0
 wait_for_price: 4
+unable_to_advise: 948
+buy_candidate: 0
 watchlist: 0
 avoid_for_now: 0
 hold_existing: 0
 take_loss_review: 0
-unable_to_advise: 948
-partial_advice: 4
 ```
 
-The four available-fundamental cases are `GM`, `PLD`, `TT`, and `WELL`. They reached canonical deterministic advice but remained partial:
+The four canonical advice-input-ready tickers remain partial, not full-advice-ready:
 
 ```text
-GM: wait_for_price, partial, blocker no_clear_setup
-PLD: wait_for_price, partial, blocker no_clear_setup
-TT: wait_for_price, partial, blocker price_or_risk_not_preferred
-WELL: wait_for_price, partial, blocker price_or_risk_not_preferred
+GM: wait_for_price, partial, no_clear_setup
+PLD: wait_for_price, partial, no_clear_setup
+TT: wait_for_price, partial, price_or_risk_not_preferred
+WELL: wait_for_price, partial, price_or_risk_not_preferred
 ```
-
-No instrument reached full-advice-ready status because the canonical advice engine did not return a ready actionable review output for any broad-universe ticker.
-
-## Ranking Result
-
-Technical ranking remains separate from full advice ranking.
-
-Top technical candidates after non-price evidence attachment:
-
-```text
-1 ASB 75 unable_to_advise missing_fundamental_context
-2 ASH 75 unable_to_advise missing_fundamental_context
-3 ATR 75 unable_to_advise missing_fundamental_context
-4 AXP 75 unable_to_advise missing_fundamental_context
-5 BIO 75 unable_to_advise missing_fundamental_context
-```
-
-Full advice ranking:
-
-```text
-eligible_candidates: 0
-```
-
-This is the correct fail-closed result: missing or partial non-price evidence does not count as positive evidence.
 
 ## Blockers
 
@@ -171,34 +208,24 @@ insufficient_history: 4
 insufficient_forward_data: 2
 ```
 
-There were no market-context blockers, no runtime failures, and no non-US instruments in the current canonical universe snapshot.
+The 17 partial fundamental rows are selected deterministically. Examples
+include `AAPL`, `ALL`, `AMD`, `BKR`, and `BMY`. Missing fundamental examples
+include `A`, `AA`, `AAL`, `AAON`, and `ABBV`.
 
-The only applicable local portfolio context was `COST`, which remained `unable_to_advise` because fundamental context was missing and the technical setup was weak or high risk.
+The only applicable local portfolio context remains `COST`, which is blocked
+by missing fundamental context and weak or high-risk setup evidence.
 
-ETF examples were processed and remained blocked by missing fundamental context, including `DIA`, `IWM`, `QQQ`, `SMH`, and `SOXX`.
+## Full Artifact Compaction Decision
 
-## Throughput
-
-```text
-attempted: 952
-total_runtime_seconds: 0.337035
-tickers_per_second: 2824.634208
-mean_ticker_runtime_seconds: 0.00007028
-median_ticker_runtime_seconds: 0.00006604
-p95_ticker_runtime_seconds: 0.00008317
-```
-
-## Determinism Check
-
-A fixed subset run over `ASB`, `COST`, `GM`, `NVDA`, `PLD`, `TT`, and `WELL`
-was executed twice. Stable fields matched across both runs: instrument id,
-symbol, technical screening label, technical candidate score, canonical advice
-label, advice readiness, full-advice-ready flag, missing evidence, blockers,
-and ordering.
+The full artifact still persists per-ticker dry-run files because the existing
+deterministic advice engine consumes filesystem artifact paths. Removing or
+bundling those files would require a broader advice-engine contract change.
+ME-RUN31 therefore keeps full local auditability and commits only the compact
+evidence package.
 
 ## Governance
 
-The run manifest records:
+The manifest records:
 
 ```text
 openai_api_invocation_performed: false
@@ -222,4 +249,7 @@ Recommended next sprint:
 ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources
 ```
 
-Reason: ME-RUN31 proves the broad advice-readiness adapter and canonical advice handoff work, but full-advice readiness is blocked primarily by `missing_fundamental_context: 931` and `partial_fundamental_context: 17`. The next highest-value sprint should expand local fundamental evidence coverage without changing advice semantics or allocation authority.
+Reason: ME-RUN31 now proves the hardened adapter, freshness policy, technical
+input validation, evidence selection policies, canonical advice handoff, and
+compact committed evidence path. Full-advice readiness remains blocked by
+fundamental evidence coverage: 931 missing and 17 partial fundamental contexts.

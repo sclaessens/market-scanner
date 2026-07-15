@@ -221,13 +221,17 @@ penalised as missing evidence. All ranked candidates remain
 ME-RUN31 connected available local non-price evidence to the ME-RUN30 broad
 technical screening result and reused the existing deterministic advice engine
 for canonical advice output. The full run
-`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T095117Z`
-attempted all 952 canonical instruments, completed canonical advice generation
-for all 952, found 4 canonical advice-input-ready instruments, produced 4
+`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z`
+attempted all 952 canonical instruments, completed the advice engine for all
+952, found 4 canonical advice-input-ready instruments, produced 4
 `wait_for_price` partial advice outputs, kept 948 instruments
 `unable_to_advise`, and produced 0 full-advice-ready ranking candidates. The
-dominant blocker is non-price evidence coverage: 931 missing and 17 partial
-fundamental contexts.
+review fix removed hardcoded freshness, made the ME-RUN30 technical input
+explicit, added deterministic fundamental and market row selection, and wrote
+a compact committed evidence package under
+`artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z/`.
+The dominant blocker is non-price evidence coverage: 931 missing and 17
+partial fundamental contexts.
 
 ME-DATA06 is now the recommended baseline sprint because ME-RUN31 proved the
 adapter and advice handoff, while showing that full-advice readiness is mostly

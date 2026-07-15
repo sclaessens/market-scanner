@@ -469,11 +469,13 @@ src/market_engine/run/broad_non_price_evidence_advice_readiness.py
 The full run used:
 
 ```text
-run_id: me-run31-broad-non-price-evidence-full-advice-readiness-20260715T095117Z
+run_id: me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z
 technical_screening_artifact: artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/
+freshness_reference_date: 2026-07-10
 price_history_root: data/processed
 fundamental_evidence_path: data/processed/fundamental_quality.csv
 market_context_path: data/processed/market_regime.csv
+compact_evidence_package: artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z/
 ```
 
 and produced:
@@ -483,8 +485,9 @@ attempted_instruments: 952
 technical_analysed: 946
 technical_ranking_eligible: 330
 canonical_advice_input_ready: 4
-advice_attempted: 952
-advice_completed: 952
+advice_generation_attempted: 952
+advice_engine_completed: 952
+non_unable_advice_outputs: 4
 failed: 0
 wait_for_price: 4
 unable_to_advise: 948
@@ -492,12 +495,17 @@ full_advice_ready: 0
 full_advice_ranking_eligible: 0
 missing_fundamental_context: 931
 partial_fundamental_context: 17
+full_artifact_file_count: 971
+full_artifact_total_size_bytes: 25901389
+full_artifact_tree_digest: 36aa76ec3a7c1e902f3a9582cb1a41160a373dea86a4493e8513a8a007be70d4
 ```
 
 ME-RUN31 proves the broad evidence adapter and deterministic advice handoff
-work. It also proves that another ranking layer is not the next bottleneck:
-full-advice readiness is blocked primarily by missing local fundamental
-evidence coverage.
+work. The PR review fix removed hardcoded freshness, made technical input
+explicit, validates source dates and duplicate rows fail-closed, and commits a
+compact evidence package instead of the full per-ticker artifact tree. Another
+ranking layer is not the next bottleneck: full-advice readiness is blocked
+primarily by missing local fundamental evidence coverage.
 
 ## Completed ME-ADV01 result
 

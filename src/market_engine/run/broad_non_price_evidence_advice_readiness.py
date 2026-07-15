@@ -25,13 +25,9 @@ from market_engine.run.local_portfolio_context_fixture import (
 
 SCHEMA_VERSION = "market-engine-run31-broad-non-price-evidence-advice-readiness-v1"
 DEFAULT_OUTPUT_ROOT = Path("artifacts/market_engine/full_advice_readiness_runs")
-DEFAULT_TECHNICAL_SCREENING_ARTIFACT = Path(
-    "artifacts/market_engine/universe_analysis_runs/"
-    "me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z"
-)
+DEFAULT_COMPACT_EVIDENCE_ROOT = Path("artifacts/market_engine/run_evidence")
 DEFAULT_FUNDAMENTAL_EVIDENCE_PATH = Path("data/processed/fundamental_quality.csv")
 DEFAULT_MARKET_CONTEXT_PATH = Path("data/processed/market_regime.csv")
-FRESHNESS_REFERENCE_DATE = "2026-07-10"
 FUNDAMENTAL_STALE_AFTER_DAYS = 120
 MARKET_STALE_AFTER_DAYS = 120
 PORTFOLIO_STALE_AFTER_DAYS = 45
@@ -47,13 +43,15 @@ class BroadAdviceReadinessError(ValueError):
 def run_broad_non_price_evidence_advice_readiness(
     *,
     run_id: str,
+    technical_screening_artifact: str | Path,
     canonical_universe: str | Path = DEFAULT_CANONICAL_CONFIG,
     price_history_root: str | Path = DEFAULT_PRICE_HISTORY_ROOT,
-    technical_screening_artifact: str | Path = DEFAULT_TECHNICAL_SCREENING_ARTIFACT,
     output_root: str | Path = DEFAULT_OUTPUT_ROOT,
+    compact_evidence_root: str | Path = DEFAULT_COMPACT_EVIDENCE_ROOT,
     fundamental_evidence_path: str | Path = DEFAULT_FUNDAMENTAL_EVIDENCE_PATH,
     market_context_path: str | Path = DEFAULT_MARKET_CONTEXT_PATH,
     portfolio_context_path: str | Path | None = DEFAULT_PORTFOLIO_CONTEXT_PATH,
+    freshness_reference_date: str | None = None,
     tickers: Sequence[str] | None = None,
     ticker_limit: int | None = None,
     top_limit: int = 25,
@@ -66,15 +64,21 @@ def run_broad_non_price_evidence_advice_readiness(
     phase = time.perf_counter()
     universe = build_universe_snapshot(canonical_universe, price_history_root=price_history_root)
     instruments = _select_instruments(universe["instruments"], tickers=tickers, ticker_limit=ticker_limit)
-    technical = _load_technical_screening(technical_screening_artifact)
+    technical = _load_technical_screening(
+        technical_screening_artifact,
+        universe=universe,
+        selected_instruments=instruments,
+        freshness_reference_date=freshness_reference_date,
+    )
+    freshness = _resolve_freshness_reference_date(freshness_reference_date, technical)
     phase_timings["technical_input_loading"] = _phase_elapsed(phase)
 
     phase = time.perf_counter()
-    fundamentals = _load_fundamental_rows(fundamental_evidence_path)
+    fundamentals = _load_fundamental_rows(fundamental_evidence_path, reference_date=freshness["reference"])
     phase_timings["fundamental_evidence_resolution"] = _phase_elapsed(phase)
 
     phase = time.perf_counter()
-    market = _load_market_context(market_context_path)
+    market = _load_market_context(market_context_path, reference_date=freshness["reference"])
     phase_timings["market_context_resolution"] = _phase_elapsed(phase)
 
     phase = time.perf_counter()
@@ -95,6 +99,7 @@ def run_broad_non_price_evidence_advice_readiness(
                 market_context=market,
                 portfolio_context=portfolio,
                 generated_at=started_at,
+                reference_date=freshness["reference"],
                 run_id=run_id,
             )
         except Exception as exc:
@@ -137,6 +142,8 @@ def run_broad_non_price_evidence_advice_readiness(
         canonical_universe=canonical_universe,
         price_history_root=price_history_root,
         technical_screening_artifact=technical["artifact_dir"],
+        technical_input=technical,
+        freshness_policy=freshness,
         fundamental_evidence_path=fundamental_evidence_path,
         market_context_path=market_context_path,
         portfolio_context_path=portfolio_context_path,
@@ -155,6 +162,17 @@ def run_broad_non_price_evidence_advice_readiness(
     _write_json(output_dir / "throughput_report.json", artifacts["throughput_report"])
     final_output_dir = _validate_required_outputs(output_dir)
     _rewrite_final_artifact_paths(final_output_dir=final_output_dir, temp_output_dir=output_dir)
+    compact_dir = _write_compact_evidence_package(
+        run_id=run_id,
+        generated_at=started_at,
+        full_output_dir=final_output_dir,
+        compact_evidence_root=compact_evidence_root,
+        artifacts=artifacts,
+        freshness_policy=freshness,
+        technical_input=technical,
+        allow_overwrite=allow_overwrite,
+    )
+    artifacts = _refresh_final_manifest_and_compact_index(final_output_dir=final_output_dir, compact_dir=compact_dir, artifacts=artifacts)
     return artifacts, final_output_dir
 
 
@@ -180,12 +198,32 @@ def _select_instruments(
     return selected[:ticker_limit] if ticker_limit else selected
 
 
-def _load_technical_screening(path: str | Path) -> dict[str, Any]:
+def _load_technical_screening(
+    path: str | Path,
+    *,
+    universe: Mapping[str, Any],
+    selected_instruments: Sequence[Mapping[str, Any]],
+    freshness_reference_date: str | None,
+) -> dict[str, Any]:
     artifact_dir = Path(path)
     index_path = artifact_dir / "universe_analysis_index.json" if artifact_dir.is_dir() else artifact_dir
+    if not index_path.exists():
+        raise BroadAdviceReadinessError(f"technical input missing: {index_path}")
     payload = _read_json(index_path)
     if payload.get("schema_version") != "market-engine-run30-universe-analysis-index-v1":
         raise BroadAdviceReadinessError("technical screening artifact must be a ME-RUN30 universe_analysis_index.json")
+    manifest_path = index_path.parent / "manifest.json"
+    if not manifest_path.exists():
+        raise BroadAdviceReadinessError("technical input manifest missing")
+    manifest = _read_json(manifest_path)
+    manifest_run_id = str(manifest.get("run_id") or "")
+    index_run_id = str(payload.get("run_id") or "")
+    if not manifest_run_id:
+        raise BroadAdviceReadinessError("technical input manifest missing run_id")
+    if not index_run_id:
+        raise BroadAdviceReadinessError("technical input index missing run_id")
+    if manifest_run_id != index_run_id:
+        raise BroadAdviceReadinessError("technical input manifest/index run_id mismatch")
     rows = payload.get("instruments")
     if not isinstance(rows, list):
         raise BroadAdviceReadinessError("technical screening artifact missing instruments")
@@ -197,15 +235,65 @@ def _load_technical_screening(path: str | Path) -> dict[str, Any]:
         if key in by_instrument:
             raise BroadAdviceReadinessError(f"duplicate technical screening instrument_id: {key}")
         by_instrument[key] = row
+    current_universe_version = universe.get("universe_version")
+    technical_universe_version = payload.get("universe_version") or manifest.get("canonical_universe_version")
+    current_ids = {str(row["instrument_id"]) for row in universe.get("instruments") or []}
+    technical_ids = set(by_instrument)
+    universe_compatibility = "explicit_version_match"
+    if technical_universe_version is None:
+        universe_compatibility = "inferred_from_exact_instrument_ids"
+    elif technical_universe_version != current_universe_version:
+        raise BroadAdviceReadinessError("technical input universe version mismatch")
+    selected_ids = {str(row["instrument_id"]) for row in selected_instruments}
+    missing_ids = sorted(selected_ids - technical_ids)
+    extra_ids = sorted(technical_ids - current_ids)
+    if missing_ids:
+        raise BroadAdviceReadinessError("technical input incomplete: missing instrument_id " + ", ".join(missing_ids[:10]))
+    if extra_ids:
+        raise BroadAdviceReadinessError("technical input contains unknown instrument_id " + ", ".join(extra_ids[:10]))
+    manifest_cutoff = manifest.get("cutoff_date") or manifest.get("as_of_date") or manifest.get("reference_date")
+    if manifest_cutoff is not None:
+        _parse_iso_date(str(manifest_cutoff), blocker="invalid_technical_input_cutoff_date")
+    elif freshness_reference_date is None:
+        raise BroadAdviceReadinessError("freshness reference date missing and technical input manifest has no cutoff/as-of date")
     return {
+        "status": "valid",
         "artifact_dir": artifact_dir if artifact_dir.is_dir() else index_path.parent,
         "index_path": index_path,
+        "manifest_path": manifest_path,
+        "manifest": manifest,
         "payload": payload,
+        "run_id": index_run_id,
+        "technical_input_universe_version": technical_universe_version,
+        "current_canonical_universe_version": current_universe_version,
+        "universe_compatibility": universe_compatibility,
+        "technical_input_status": "valid",
+        "manifest_cutoff_date": manifest_cutoff,
         "by_instrument": by_instrument,
     }
 
 
-def _load_fundamental_rows(path: str | Path) -> dict[str, Mapping[str, str]]:
+def _resolve_freshness_reference_date(explicit: str | None, technical: Mapping[str, Any]) -> dict[str, Any]:
+    if explicit:
+        reference = _parse_iso_date(explicit, blocker="invalid_freshness_reference_date")
+        source = "explicit_cli"
+    else:
+        manifest_cutoff = technical.get("manifest_cutoff_date")
+        if not manifest_cutoff:
+            raise BroadAdviceReadinessError("freshness reference date missing and technical input manifest has no cutoff/as-of date")
+        reference = _parse_iso_date(str(manifest_cutoff), blocker="invalid_technical_input_cutoff_date")
+        source = "technical_input_manifest"
+    return {
+        "reference_date": reference.isoformat(),
+        "reference": reference,
+        "resolution_source": source,
+        "fundamental_stale_after_days": FUNDAMENTAL_STALE_AFTER_DAYS,
+        "market_stale_after_days": MARKET_STALE_AFTER_DAYS,
+        "portfolio_stale_after_days": PORTFOLIO_STALE_AFTER_DAYS,
+    }
+
+
+def _load_fundamental_rows(path: str | Path, *, reference_date: date) -> dict[str, Mapping[str, Any]]:
     csv_path = Path(path)
     if not csv_path.exists():
         return {}
@@ -215,16 +303,64 @@ def _load_fundamental_rows(path: str | Path) -> dict[str, Mapping[str, str]]:
         missing = sorted(required - set(reader.fieldnames or ()))
         if missing:
             raise BroadAdviceReadinessError("fundamental evidence CSV missing columns: " + ", ".join(missing))
-        rows: dict[str, Mapping[str, str]] = {}
+        grouped: dict[str, list[dict[str, str]]] = {}
         for row in reader:
             ticker = str(row.get("ticker") or "").upper()
             if not ticker:
                 continue
-            rows[ticker] = dict(row)
-    return rows
+            grouped.setdefault(ticker, []).append(dict(row))
+    return {ticker: _select_fundamental_row(ticker, rows, reference_date=reference_date) for ticker, rows in grouped.items()}
 
 
-def _load_market_context(path: str | Path) -> dict[str, Any]:
+def _select_fundamental_row(ticker: str, rows: Sequence[Mapping[str, str]], *, reference_date: date) -> dict[str, Any]:
+    candidates: list[tuple[date, dict[str, str]]] = []
+    invalid: list[str] = []
+    for row in rows:
+        raw_date = _first_present(row, ("source_last_updated", "source_timestamp", "date", "generated_at"))
+        if raw_date is None:
+            invalid.append("missing_fundamental_source_date")
+            continue
+        try:
+            source_date = _parse_source_date(raw_date, reference_date=reference_date, missing_blocker="missing_fundamental_source_date", invalid_blocker="invalid_fundamental_source_date")
+        except BroadAdviceReadinessError:
+            invalid.append("invalid_fundamental_source_date")
+            continue
+        candidates.append((source_date, dict(row)))
+    metadata = {
+        "selection_policy": "latest_valid_source_date",
+        "candidate_row_count": len(rows),
+        "duplicate_identical_rows": 0,
+        "conflicting_rows": 0,
+        "invalid_candidate_rows": len(invalid),
+        "selected_source_date": None,
+    }
+    if not candidates:
+        return {
+            "ticker": ticker,
+            "_selection_metadata": metadata,
+            "_selection_status": "invalid",
+            "_selection_blockers": sorted(set(invalid or ["missing_fundamental_source_date"])),
+        }
+    newest = max(source_date for source_date, _ in candidates)
+    newest_rows = [row for source_date, row in candidates if source_date == newest]
+    unique = {_canonical_row(row) for row in newest_rows}
+    metadata["selected_source_date"] = newest.isoformat()
+    metadata["duplicate_identical_rows"] = max(0, len(newest_rows) - len(unique))
+    if len(unique) > 1:
+        metadata["conflicting_rows"] = len(unique)
+        selected = dict(newest_rows[0])
+        selected["_selection_metadata"] = metadata
+        selected["_selection_status"] = "invalid"
+        selected["_selection_blockers"] = ["duplicate_fundamental_rows_conflict"]
+        return selected
+    selected = dict(newest_rows[0])
+    selected["_selection_metadata"] = metadata
+    selected["_selection_status"] = "selected"
+    selected["_selection_blockers"] = []
+    return selected
+
+
+def _load_market_context(path: str | Path, *, reference_date: date) -> dict[str, Any]:
     csv_path = Path(path)
     if not csv_path.exists():
         return _evidence("missing", "market_context", blockers=["missing_market_context"], source_path=csv_path)
@@ -232,24 +368,73 @@ def _load_market_context(path: str | Path) -> dict[str, Any]:
         rows = list(csv.DictReader(handle))
     if not rows:
         return _evidence("missing", "market_context", blockers=["missing_market_context"], source_path=csv_path)
-    row = rows[-1]
     required = {"date", "regime"}
-    if required - set(row):
+    if required - set(rows[0]):
         return _evidence("invalid", "market_context", blockers=["invalid_market_context"], source_path=csv_path)
+    selected = _select_market_context_row(rows, reference_date=reference_date)
+    if selected["status"] == "invalid":
+        return _evidence(
+            "invalid",
+            "market_context",
+            source_path=csv_path,
+            values={"selection_metadata": selected["selection_metadata"]},
+            blockers=selected["blockers"],
+        )
+    row = selected["row"]
     status = "available"
     blockers: list[str] = []
-    stale = _stale(row.get("date"), max_age_days=MARKET_STALE_AFTER_DAYS)
-    if stale:
+    source_date = selected["source_date"]
+    if _is_stale(source_date, reference_date=reference_date, max_age_days=MARKET_STALE_AFTER_DAYS):
         status = "stale"
         blockers.append("stale_market_context")
     return _evidence(
         status,
         "market_context",
         source_path=csv_path,
-        source_date=row.get("date"),
-        values={"regime": row.get("regime"), "spy_close": row.get("spy_close"), "qqq_close": row.get("qqq_close")},
+        source_date=source_date.isoformat(),
+        values={
+            "regime": row.get("regime"),
+            "spy_close": row.get("spy_close"),
+            "qqq_close": row.get("qqq_close"),
+            "selection_metadata": selected["selection_metadata"],
+        },
         blockers=blockers,
     )
+
+
+def _select_market_context_row(rows: Sequence[Mapping[str, str]], *, reference_date: date) -> dict[str, Any]:
+    parsed: list[tuple[date, dict[str, str]]] = []
+    blockers: list[str] = []
+    for row in rows:
+        raw_date = row.get("date")
+        if not str(row.get("regime") or "").strip():
+            blockers.append("invalid_market_context")
+        try:
+            parsed_date = _parse_source_date(raw_date, reference_date=reference_date, missing_blocker="missing_market_context_date", invalid_blocker="invalid_market_context_date")
+        except BroadAdviceReadinessError as exc:
+            blockers.append(str(exc))
+            continue
+        parsed.append((parsed_date, dict(row)))
+    metadata = {
+        "selection_policy": "latest_valid_market_context_date",
+        "row_count": len(rows),
+        "selected_date": None,
+        "duplicate_dates": 0,
+        "conflicting_dates": 0,
+        "invalid_rows": len(blockers),
+    }
+    if blockers or not parsed:
+        return {"status": "invalid", "blockers": sorted(set(blockers or ["missing_market_context_date"])), "selection_metadata": metadata}
+    counts = Counter(source_date for source_date, _ in parsed)
+    metadata["duplicate_dates"] = sum(1 for count in counts.values() if count > 1)
+    newest = max(counts)
+    newest_rows = [row for source_date, row in parsed if source_date == newest]
+    unique = {_canonical_row(row) for row in newest_rows}
+    metadata["selected_date"] = newest.isoformat()
+    if len(unique) > 1:
+        metadata["conflicting_dates"] = len(unique)
+        return {"status": "invalid", "blockers": ["duplicate_market_context_date_conflict"], "selection_metadata": metadata}
+    return {"status": "selected", "row": newest_rows[0], "source_date": newest, "selection_metadata": metadata, "blockers": []}
 
 
 def _load_portfolio_context(path: str | Path | None) -> dict[str, Any]:
@@ -295,19 +480,20 @@ def _instrument_entry(
     instrument: Mapping[str, Any],
     *,
     technical_by_instrument: Mapping[str, Mapping[str, Any]],
-    fundamental_rows: Mapping[str, Mapping[str, str]],
+    fundamental_rows: Mapping[str, Mapping[str, Any]],
     fundamental_evidence_path: str | Path,
     market_context: Mapping[str, Any],
     portfolio_context: Mapping[str, Any],
     generated_at: str,
+    reference_date: date,
     run_id: str,
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     started = time.perf_counter()
     symbol = str(instrument["symbol"]).upper()
     technical = _technical_context(instrument, technical_by_instrument)
-    fundamental = _fundamental_context(symbol, fundamental_rows, source_path=fundamental_evidence_path)
+    fundamental = _fundamental_context(symbol, fundamental_rows, source_path=fundamental_evidence_path, reference_date=reference_date)
     market = _market_context_for_instrument(instrument, market_context)
-    portfolio = _portfolio_context_for_instrument(symbol, portfolio_context, generated_at=generated_at, run_id=run_id)
+    portfolio = _portfolio_context_for_instrument(symbol, portfolio_context, generated_at=generated_at, reference_date=reference_date, run_id=run_id)
     setup_context = _setup_context_from_technical(symbol, technical, market)
     evidence = _evidence_readiness(technical, fundamental, market, portfolio, setup_context)
     dry_run = _dry_run_payload_for_entry(
@@ -377,6 +563,7 @@ def _technical_context(
             values={"final_processing_status": row.get("final_processing_status"), "label": row.get("output_label")},
         )
     return {
+        "family": "technical_context",
         "status": "available",
         "label": row.get("output_label"),
         "candidate_score": row.get("candidate_score"),
@@ -393,10 +580,25 @@ def _technical_context(
     }
 
 
-def _fundamental_context(symbol: str, rows: Mapping[str, Mapping[str, str]], *, source_path: str | Path = DEFAULT_FUNDAMENTAL_EVIDENCE_PATH) -> dict[str, Any]:
+def _fundamental_context(
+    symbol: str,
+    rows: Mapping[str, Mapping[str, Any]],
+    *,
+    source_path: str | Path = DEFAULT_FUNDAMENTAL_EVIDENCE_PATH,
+    reference_date: date,
+) -> dict[str, Any]:
     row = rows.get(symbol)
     if row is None:
         return _evidence("missing", "fundamental_context", blockers=["missing_fundamental_context"], source_path=source_path)
+    selection_metadata = dict(row.get("_selection_metadata") or {})
+    if row.get("_selection_status") == "invalid":
+        return _evidence(
+            "invalid",
+            "fundamental_context",
+            blockers=list(row.get("_selection_blockers") or ["invalid_fundamental_context"]),
+            source_path=source_path,
+            values={"selection_metadata": selection_metadata},
+        )
     state = str(row.get("quality_state") or "").upper()
     if state == "SUFFICIENT_DATA":
         status = "available"
@@ -413,8 +615,18 @@ def _fundamental_context(symbol: str, rows: Mapping[str, Mapping[str, str]], *, 
         blockers.append("missing_fundamental_context")
     if status == "invalid":
         blockers.append("invalid_fundamental_context")
-    source_date = row.get("source_last_updated") or row.get("source_timestamp") or row.get("date")
-    if status in {"available", "partial"} and _stale(source_date, max_age_days=FUNDAMENTAL_STALE_AFTER_DAYS):
+    source_date_raw = _first_present(row, ("source_last_updated", "source_timestamp", "date", "generated_at"))
+    try:
+        parsed_source_date = _parse_source_date(source_date_raw, reference_date=reference_date, missing_blocker="missing_fundamental_source_date", invalid_blocker="invalid_fundamental_source_date")
+    except BroadAdviceReadinessError as exc:
+        return _evidence(
+            "invalid",
+            "fundamental_context",
+            blockers=[str(exc)],
+            source_path=source_path,
+            values={"selection_metadata": selection_metadata},
+        )
+    if status in {"available", "partial"} and _is_stale(parsed_source_date, reference_date=reference_date, max_age_days=FUNDAMENTAL_STALE_AFTER_DAYS):
         status = "stale"
         blockers = ["stale_fundamental_context"]
     missing_fields = [field for field in str(row.get("missing_required_fields") or "").split("|") if field]
@@ -422,12 +634,13 @@ def _fundamental_context(symbol: str, rows: Mapping[str, Mapping[str, str]], *, 
         status,
         "fundamental_context",
         source_path=source_path,
-        source_date=source_date,
+        source_date=parsed_source_date.isoformat(),
         values={
             "quality_state": row.get("quality_state"),
             "quality_reason": row.get("quality_reason"),
             "source_name": row.get("source_name"),
             "missing_required_fields": missing_fields,
+            "selection_metadata": selection_metadata,
         },
         blockers=blockers,
         missing=missing_fields,
@@ -450,6 +663,7 @@ def _portfolio_context_for_instrument(
     portfolio: Mapping[str, Any],
     *,
     generated_at: str,
+    reference_date: date,
     run_id: str,
 ) -> dict[str, Any]:
     positions = portfolio.get("positions_by_ticker") or {}
@@ -473,8 +687,17 @@ def _portfolio_context_for_instrument(
         return _evidence("missing", "portfolio_context", blockers=["missing_applicable_portfolio_context"], missing=missing, source_path=source_path)
     status = "available"
     blockers: list[str] = []
+    try:
+        parsed_source_date = _parse_source_date(
+            metadata.get("portfolio_snapshot_timestamp"),
+            reference_date=reference_date,
+            missing_blocker="missing_portfolio_snapshot_date",
+            invalid_blocker="invalid_portfolio_snapshot_date",
+        )
+    except BroadAdviceReadinessError as exc:
+        return _evidence("invalid", "portfolio_context", blockers=[str(exc)], source_path=source_path)
     source_date = str(metadata.get("portfolio_snapshot_timestamp") or generated_at)
-    if _stale(source_date[:10], max_age_days=PORTFOLIO_STALE_AFTER_DAYS):
+    if _is_stale(parsed_source_date, reference_date=reference_date, max_age_days=PORTFOLIO_STALE_AFTER_DAYS):
         status = "stale"
         blockers.append("stale_portfolio_context")
     payload = {
@@ -499,7 +722,7 @@ def _portfolio_context_for_instrument(
             "no_portfolio_or_watchlist_mutation": True,
         },
     }
-    return _evidence(status, "portfolio_context", source_path=source_path, source_date=source_date, values=payload, blockers=blockers)
+    return _evidence(status, "portfolio_context", source_path=source_path, source_date=parsed_source_date.isoformat(), values=payload, blockers=blockers)
 
 
 def _setup_context_from_technical(
@@ -846,6 +1069,11 @@ def _coverage_summary(
         "portfolio_counts": {status: portfolio.get(status, 0) for status in EVIDENCE_STATUSES},
         "portfolio_applicable": total - portfolio.get("not_applicable", 0),
         "canonical_advice_input_ready": sum(1 for row in entries if row.get("canonical_advice_input_ready")),
+        "advice_generation_attempted": total,
+        "advice_engine_completed": len(advice_index.get("tickers") or []),
+        "advice_input_ready": sum(1 for row in entries if row.get("canonical_advice_input_ready")),
+        "advice_output_actionable": sum(1 for row in entries if row.get("canonical_advice_label") in {"buy_candidate", "hold_existing", "take_loss_review"}),
+        "non_unable_advice_outputs": sum(1 for row in entries if row.get("canonical_advice_label") != "unable_to_advise"),
         "advice_attempted": total,
         "advice_completed": len(advice_index.get("tickers") or []),
         "full_advice_ready": sum(1 for row in entries if row.get("full_advice_ready")),
@@ -880,6 +1108,9 @@ def _throughput_report(
         "portfolio_context_resolved": sum(1 for row in entries if row.get("portfolio_context", {}).get("status") == "available"),
         "canonical_advice_attempted": attempted,
         "canonical_advice_completed": attempted,
+        "advice_engine_completed": sum(1 for row in entries if row.get("advice_generation_status") == "completed"),
+        "canonical_advice_input_ready": sum(1 for row in entries if row.get("canonical_advice_input_ready")),
+        "non_unable_advice_outputs": sum(1 for row in entries if row.get("canonical_advice_label") != "unable_to_advise"),
         "full_advice_ready": sum(1 for row in entries if row.get("full_advice_ready")),
         "partial_advice": sum(1 for row in entries if row.get("advice_readiness") == "partial"),
         "unable_to_advise": sum(1 for row in entries if row.get("canonical_advice_label") == "unable_to_advise"),
@@ -910,6 +1141,8 @@ def _artifacts(
     canonical_universe: str | Path,
     price_history_root: str | Path,
     technical_screening_artifact: Path,
+    technical_input: Mapping[str, Any],
+    freshness_policy: Mapping[str, Any],
     fundamental_evidence_path: str | Path,
     market_context_path: str | Path,
     portfolio_context_path: str | Path | None,
@@ -941,7 +1174,24 @@ def _artifacts(
         },
         "input_checksums": _input_checksums(canonical_universe, technical_screening_artifact, fundamental_evidence_path, market_context_path, portfolio_context_path),
         "canonical_universe_version": universe.get("universe_version"),
-        "technical_screening_run_id": _read_json(technical_screening_artifact / "manifest.json").get("run_id") if (technical_screening_artifact / "manifest.json").exists() else None,
+        "technical_screening_run_id": technical_input.get("run_id"),
+        "freshness_policy": _freshness_policy_for_artifact(freshness_policy),
+        "technical_input_validation": {
+            "technical_input_status": technical_input.get("technical_input_status"),
+            "technical_screening_run_id": technical_input.get("run_id"),
+            "technical_input_universe_version": technical_input.get("technical_input_universe_version"),
+            "current_canonical_universe_version": technical_input.get("current_canonical_universe_version"),
+            "universe_compatibility": technical_input.get("universe_compatibility"),
+            "manifest_cutoff_date": technical_input.get("manifest_cutoff_date"),
+            "manifest_path": Path(technical_input.get("manifest_path")).as_posix() if technical_input.get("manifest_path") else None,
+            "index_path": Path(technical_input.get("index_path")).as_posix() if technical_input.get("index_path") else None,
+        },
+        "fundamental_selection_policy": "latest_valid_source_date",
+        "market_context_selection_policy": "latest_valid_market_context_date",
+        "compact_evidence_package": None,
+        "full_artifact_tree_digest": None,
+        "full_artifact_file_count": None,
+        "full_artifact_total_size_bytes": None,
         "evidence_roots": {
             "fundamental": Path(fundamental_evidence_path).parent.as_posix(),
             "market": Path(market_context_path).parent.as_posix(),
@@ -972,11 +1222,24 @@ def _artifacts(
     return {
         "manifest": manifest,
         "evidence_coverage_index": {"schema_version": "market-engine-run31-evidence-coverage-index-v1", "run_id": run_id, "instruments": list(entries)},
-        "evidence_coverage_summary": {"schema_version": "market-engine-run31-evidence-coverage-summary-v1", "run_id": run_id, "summary": summary},
+        "evidence_coverage_summary": {
+            "schema_version": "market-engine-run31-evidence-coverage-summary-v1",
+            "run_id": run_id,
+            "freshness_policy": _freshness_policy_for_artifact(freshness_policy),
+            "technical_input_validation": manifest["technical_input_validation"],
+            "summary": summary,
+        },
         "evidence_coverage_summary_md": _render_coverage_summary(run_id, summary),
         "canonical_advice_input_index": _read_json(status_index_path),
         "canonical_advice_output_index": advice_index,
-        "advice_readiness_report": {"schema_version": "market-engine-run31-advice-readiness-report-v1", "run_id": run_id, "summary": summary, "transitions": transition},
+        "advice_readiness_report": {
+            "schema_version": "market-engine-run31-advice-readiness-report-v1",
+            "run_id": run_id,
+            "freshness_policy": _freshness_policy_for_artifact(freshness_policy),
+            "technical_input_validation": manifest["technical_input_validation"],
+            "summary": summary,
+            "transitions": transition,
+        },
         "advice_readiness_report_md": _render_advice_readiness(run_id, summary, transition),
         "technical_to_advice_transition": transition,
         "technical_ranking": {"schema_version": "market-engine-run31-technical-ranking-v1", "ranking_scope": TECHNICAL_RANKING_SCOPE, "candidates": list(technical_ranking)},
@@ -1056,6 +1319,143 @@ def _replace_string_values(value: Any, old: str, new: str) -> Any:
     if isinstance(value, dict):
         return {key: _replace_string_values(item, old, new) for key, item in value.items()}
     return value
+
+
+def _write_compact_evidence_package(
+    *,
+    run_id: str,
+    generated_at: str,
+    full_output_dir: Path,
+    compact_evidence_root: str | Path,
+    artifacts: Mapping[str, Any],
+    freshness_policy: Mapping[str, Any],
+    technical_input: Mapping[str, Any],
+    allow_overwrite: bool,
+) -> Path:
+    compact_dir = Path(compact_evidence_root) / run_id
+    if compact_dir.exists() and not allow_overwrite:
+        raise FileExistsError(f"compact evidence directory already exists: {compact_dir}")
+    temp_dir = Path(compact_evidence_root) / f".{run_id}.tmp"
+    if temp_dir.exists():
+        shutil.rmtree(temp_dir)
+    if compact_dir.exists():
+        shutil.rmtree(compact_dir)
+    temp_dir.mkdir(parents=True, exist_ok=False)
+
+    copied = {
+        "manifest": "manifest.json",
+        "evidence_coverage_summary": "evidence_coverage_summary.json",
+        "advice_readiness_report": "advice_readiness_report.json",
+        "technical_to_advice_transition": "technical_to_advice_transition.json",
+        "blocker_report": "blocker_report.json",
+        "throughput_report": "throughput_report.json",
+        "full_advice_ranking": "full_advice_ranking.json",
+    }
+    for filename in copied.values():
+        shutil.copyfile(full_output_dir / filename, temp_dir / filename)
+    top_level_checksums = _top_level_file_checksums(full_output_dir)
+    _write_json(temp_dir / "top_level_checksums.json", top_level_checksums)
+    stats = _artifact_tree_stats(full_output_dir)
+    summary = artifacts["evidence_coverage_summary"]["summary"]
+    run_evidence_index = {
+        "schema_version": "market-engine-run31-compact-run-evidence-v1",
+        "run_id": run_id,
+        "generated_at": generated_at,
+        "git_commit": _git_commit(),
+        "canonical_universe_version": artifacts["manifest"].get("canonical_universe_version"),
+        "freshness_reference_date": freshness_policy["reference_date"],
+        "technical_screening_run_id": technical_input.get("run_id"),
+        "input_artifacts": artifacts["manifest"].get("input_artifacts"),
+        "input_checksums": artifacts["manifest"].get("input_checksums"),
+        "full_artifact": {
+            "local_path": full_output_dir.as_posix(),
+            "file_count": stats["file_count"],
+            "total_size_bytes": stats["total_size_bytes"],
+            "top_level_file_checksums": top_level_checksums,
+            "full_tree_digest": stats["tree_digest"],
+        },
+        "metrics": {
+            "attempted_instruments": summary["attempted_instruments"],
+            "technical_analysed": summary["technical_analysed"],
+            "technical_ranking_eligible": summary["technical_ranking_eligible"],
+            "canonical_advice_input_ready": summary["canonical_advice_input_ready"],
+            "advice_engine_completed": summary["advice_engine_completed"],
+            "full_advice_ready": summary["full_advice_ready"],
+            "failed": summary["failed"],
+        },
+        "advice_counts": summary["advice_counts"],
+        "evidence_status_counts": {
+            "fundamental": summary["fundamental_counts"],
+            "market": summary["market_counts"],
+            "portfolio": summary["portfolio_counts"],
+        },
+        "top_blockers": summary["top_blockers"],
+        "compact_outputs": {key: value for key, value in copied.items()} | {"top_level_checksums": "top_level_checksums.json"},
+    }
+    _write_json(temp_dir / "run_evidence_index.json", run_evidence_index)
+    temp_dir.rename(compact_dir)
+    return compact_dir
+
+
+def _refresh_final_manifest_and_compact_index(*, final_output_dir: Path, compact_dir: Path, artifacts: Mapping[str, Any]) -> dict[str, Any]:
+    stats = _artifact_tree_stats(final_output_dir)
+    manifest_path = final_output_dir / "manifest.json"
+    manifest = _read_json(manifest_path)
+    manifest.update(
+        {
+            "compact_evidence_package": compact_dir.as_posix(),
+            "full_artifact_tree_digest": stats["tree_digest"],
+            "full_artifact_file_count": stats["file_count"],
+            "full_artifact_total_size_bytes": stats["total_size_bytes"],
+        }
+    )
+    _write_json(manifest_path, manifest)
+    stats = _artifact_tree_stats(final_output_dir)
+    manifest["full_artifact_tree_digest"] = stats["tree_digest"]
+    manifest["full_artifact_file_count"] = stats["file_count"]
+    manifest["full_artifact_total_size_bytes"] = stats["total_size_bytes"]
+    _write_json(manifest_path, manifest)
+    top_level_checksums = _top_level_file_checksums(final_output_dir)
+    _write_json(compact_dir / "manifest.json", manifest)
+    _write_json(compact_dir / "top_level_checksums.json", top_level_checksums)
+    index_path = compact_dir / "run_evidence_index.json"
+    index = _read_json(index_path)
+    index["full_artifact"]["file_count"] = stats["file_count"]
+    index["full_artifact"]["total_size_bytes"] = stats["total_size_bytes"]
+    index["full_artifact"]["top_level_file_checksums"] = top_level_checksums
+    index["full_artifact"]["full_tree_digest"] = stats["tree_digest"]
+    index["compact_outputs"]["manifest"] = "manifest.json"
+    index["compact_outputs"]["run_evidence_index"] = "run_evidence_index.json"
+    _write_json(index_path, index)
+    return {**dict(artifacts), "manifest": manifest, "compact_evidence_dir": compact_dir.as_posix(), "run_evidence_index": index}
+
+
+def _artifact_tree_stats(root: Path) -> dict[str, Any]:
+    files = [path for path in root.rglob("*") if path.is_file() and "/." not in path.relative_to(root).as_posix()]
+    return {
+        "file_count": len(files),
+        "total_size_bytes": sum(path.stat().st_size for path in files),
+        "tree_digest": _artifact_tree_digest(root),
+    }
+
+
+def _artifact_tree_digest(root: Path) -> str:
+    hasher = hashlib.sha256()
+    for path in sorted((path for path in root.rglob("*") if path.is_file()), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix()
+        if relative.startswith("."):
+            continue
+        if relative == "manifest.json":
+            continue
+        hasher.update(relative.encode("utf-8"))
+        hasher.update(b"\0")
+        hasher.update(_sha256(path).encode("utf-8"))
+        hasher.update(b"\0")
+    return hasher.hexdigest()
+
+
+def _top_level_file_checksums(root: Path) -> dict[str, str]:
+    return {path.name: _sha256(path) for path in sorted(root.iterdir(), key=lambda item: item.name) if path.is_file()}
 
 
 def _required_outputs() -> dict[str, str]:
@@ -1149,7 +1549,8 @@ def _render_coverage_summary(run_id: str, summary: Mapping[str, Any]) -> str:
         "attempted_instruments",
         "technical_analysed",
         "canonical_advice_input_ready",
-        "advice_attempted",
+        "advice_engine_completed",
+        "non_unable_advice_outputs",
         "full_advice_ready",
         "partial_advice",
         "unable_to_advise",
@@ -1169,6 +1570,16 @@ def _render_advice_readiness(run_id: str, summary: Mapping[str, Any], transition
         rows.append(f"| {transition_name} | {count} |")
     rows.append("")
     return "\n".join(rows)
+
+
+def _freshness_policy_for_artifact(freshness_policy: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "reference_date": freshness_policy["reference_date"],
+        "resolution_source": freshness_policy["resolution_source"],
+        "fundamental_stale_after_days": FUNDAMENTAL_STALE_AFTER_DAYS,
+        "market_stale_after_days": MARKET_STALE_AFTER_DAYS,
+        "portfolio_stale_after_days": PORTFOLIO_STALE_AFTER_DAYS,
+    }
 
 
 def _render_full_advice_ranking(ranking: Sequence[Mapping[str, Any]]) -> str:
@@ -1255,15 +1666,40 @@ def _sha256_payload(payload: Mapping[str, Any]) -> str:
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()
 
 
-def _stale(value: str | None, *, max_age_days: int) -> bool:
-    if not value:
-        return False
+def _first_present(row: Mapping[str, Any], fields: Sequence[str]) -> str | None:
+    for field in fields:
+        value = row.get(field)
+        if value not in (None, ""):
+            return str(value)
+    return None
+
+
+def _canonical_row(row: Mapping[str, Any]) -> str:
+    comparable = {key: value for key, value in row.items() if not str(key).startswith("_")}
+    return json.dumps(comparable, sort_keys=True, separators=(",", ":"))
+
+
+def _parse_source_date(value: Any, *, reference_date: date, missing_blocker: str, invalid_blocker: str) -> date:
+    if value in (None, ""):
+        raise BroadAdviceReadinessError(missing_blocker)
+    parsed = _parse_iso_date(str(value)[:10], blocker=invalid_blocker)
+    if parsed > reference_date:
+        raise BroadAdviceReadinessError(invalid_blocker)
+    return parsed
+
+
+def _parse_iso_date(value: str, *, blocker: str) -> date:
     try:
-        observed = date.fromisoformat(value[:10])
-        reference = date.fromisoformat(FRESHNESS_REFERENCE_DATE)
-    except ValueError:
-        return True
-    return (reference - observed).days > max_age_days
+        parsed = date.fromisoformat(value)
+    except ValueError as exc:
+        raise BroadAdviceReadinessError(blocker) from exc
+    if parsed.isoformat() != value:
+        raise BroadAdviceReadinessError(blocker)
+    return parsed
+
+
+def _is_stale(source_date: date, *, reference_date: date, max_age_days: int) -> bool:
+    return (reference_date - source_date).days > max_age_days
 
 
 def _percentile_nearest_rank(sorted_values: Sequence[float], percentile: int) -> float:
@@ -1306,13 +1742,15 @@ def run_command(argv: Sequence[str] | None = None, *, stdout: TextIO, stderr: Te
     try:
         artifacts, output_dir = run_broad_non_price_evidence_advice_readiness(
             run_id=args.run_id,
+            technical_screening_artifact=args.technical_screening_artifact,
             canonical_universe=args.canonical_universe,
             price_history_root=args.price_history_root,
-            technical_screening_artifact=args.technical_screening_artifact,
             output_root=args.output_root,
+            compact_evidence_root=args.compact_evidence_root,
             fundamental_evidence_path=args.fundamental_evidence_path,
             market_context_path=args.market_context_path,
             portfolio_context_path=args.portfolio_context_path,
+            freshness_reference_date=args.freshness_reference_date,
             tickers=_split(args.tickers),
             ticker_limit=args.ticker_limit,
             top_limit=args.top_limit,
@@ -1330,11 +1768,13 @@ def _argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--canonical-universe", default=DEFAULT_CANONICAL_CONFIG.as_posix())
     parser.add_argument("--price-history-root", default=DEFAULT_PRICE_HISTORY_ROOT.as_posix())
-    parser.add_argument("--technical-screening-artifact", default=DEFAULT_TECHNICAL_SCREENING_ARTIFACT.as_posix())
+    parser.add_argument("--technical-screening-artifact", required=True)
     parser.add_argument("--output-root", default=DEFAULT_OUTPUT_ROOT.as_posix())
+    parser.add_argument("--compact-evidence-root", default=DEFAULT_COMPACT_EVIDENCE_ROOT.as_posix())
     parser.add_argument("--fundamental-evidence-path", default=DEFAULT_FUNDAMENTAL_EVIDENCE_PATH.as_posix())
     parser.add_argument("--market-context-path", default=DEFAULT_MARKET_CONTEXT_PATH.as_posix())
     parser.add_argument("--portfolio-context-path", default=DEFAULT_PORTFOLIO_CONTEXT_PATH)
+    parser.add_argument("--freshness-reference-date", default=None)
     parser.add_argument("--tickers", default=None)
     parser.add_argument("--ticker-limit", type=int, default=None)
     parser.add_argument("--top-limit", type=int, default=25)

@@ -1,0 +1,87 @@
+{
+  "advice_engine_completed": 952,
+  "attempted": 952,
+  "blocked": 0,
+  "canonical_advice_attempted": 952,
+  "canonical_advice_completed": 952,
+  "canonical_advice_input_ready": 4,
+  "end_time": "2026-07-15T11:23:38Z",
+  "failed": 0,
+  "full_advice_ready": 0,
+  "fundamental_context_resolved": 21,
+  "market_context_resolved": 952,
+  "max_ticker_runtime_seconds": 0.00198188,
+  "mean_ticker_runtime_seconds": 7.455e-05,
+  "median_ticker_runtime_seconds": 6.937e-05,
+  "min_ticker_runtime_seconds": 6.313e-05,
+  "non_unable_advice_outputs": 4,
+  "p95_ticker_runtime_seconds": 9.5e-05,
+  "partial_advice": 4,
+  "phase_runtime_seconds": {
+    "artifact_writing": 0.07065841706935316,
+    "canonical_advice_execution": 0.246873,
+    "fundamental_evidence_resolution": 0.002687,
+    "market_context_resolution": 0.000392,
+    "portfolio_context_resolution": 0.000164,
+    "technical_input_loading": 0.021211
+  },
+  "portfolio_context_resolved": 1,
+  "schema_version": "market-engine-run31-throughput-report-v1",
+  "slowest_tickers": [
+    {
+      "instrument_id": "equity:cop",
+      "runtime_seconds": 0.00198188,
+      "symbol": "COP"
+    },
+    {
+      "instrument_id": "equity:rrx",
+      "runtime_seconds": 0.00064537,
+      "symbol": "RRX"
+    },
+    {
+      "instrument_id": "equity:byd",
+      "runtime_seconds": 0.00017387,
+      "symbol": "BYD"
+    },
+    {
+      "instrument_id": "equity:agco",
+      "runtime_seconds": 0.000146,
+      "symbol": "AGCO"
+    },
+    {
+      "instrument_id": "equity:aes",
+      "runtime_seconds": 0.00014246,
+      "symbol": "AES"
+    },
+    {
+      "instrument_id": "equity:fdxf",
+      "runtime_seconds": 0.00013783,
+      "symbol": "FDXF"
+    },
+    {
+      "instrument_id": "equity:csl",
+      "runtime_seconds": 0.00013467,
+      "symbol": "CSL"
+    },
+    {
+      "instrument_id": "equity:msci",
+      "runtime_seconds": 0.00013454,
+      "symbol": "MSCI"
+    },
+    {
+      "instrument_id": "equity:tgt",
+      "runtime_seconds": 0.00013117,
+      "symbol": "TGT"
+    },
+    {
+      "instrument_id": "equity:fe",
+      "runtime_seconds": 0.00012854,
+      "symbol": "FE"
+    }
+  ],
+  "start_time": "2026-07-15T11:23:37Z",
+  "technical_context_loaded": 946,
+  "tickers_per_second": 2752.742893,
+  "total_runtime_seconds": 0.345837,
+  "unable_to_advise": 948
+}

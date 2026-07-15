@@ -144,13 +144,17 @@ candidates are `full_advice_ready: false`.
 ME-RUN31 then attached available local non-price evidence to the ME-RUN30
 technical screening result and handed the generated ticker status index to the
 existing deterministic advice engine. The full run
-`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T095117Z`
-attempted all 952 canonical instruments, completed canonical advice generation
-for all 952, found 4 canonical advice-input-ready instruments, produced 4
+`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z`
+attempted all 952 canonical instruments, completed the advice engine for all
+952, found 4 canonical advice-input-ready instruments, produced 4
 `wait_for_price` partial advice outputs, kept 948 instruments
 `unable_to_advise`, and produced 0 full-advice-ready ranking candidates. The
-dominant blocker is fundamental evidence coverage: 931 missing and 17 partial
-fundamental contexts.
+review fix removed hardcoded freshness, made technical input explicit,
+validated source dates and duplicate rows, and wrote a compact committed
+evidence package under
+`artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z/`.
+The dominant blocker remains fundamental evidence coverage: 931 missing and
+17 partial fundamental contexts.
 
 ### ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
 
@@ -287,7 +291,9 @@ changes.
 Result: the implementation added
 `src/market_engine/run/broad_non_price_evidence_advice_readiness.py`, broad
 evidence coverage tests, and the full advice-readiness run under
-`artifacts/market_engine/full_advice_readiness_runs/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T095117Z/`.
+`artifacts/market_engine/full_advice_readiness_runs/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z/`.
+The compact committed evidence package is under
+`artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z/`.
 The sprint confirms the adapter and canonical advice handoff are operational,
 but full-advice ranking remains empty because local fundamental evidence is
 mostly missing.
