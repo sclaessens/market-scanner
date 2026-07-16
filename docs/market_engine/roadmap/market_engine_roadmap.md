@@ -114,7 +114,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
   -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
   -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
-  -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources
+  -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
+  -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -221,7 +222,7 @@ penalised as missing evidence. All ranked candidates remain
 ME-RUN31 connected available local non-price evidence to the ME-RUN30 broad
 technical screening result and reused the existing deterministic advice engine
 for canonical advice output. The full run
-`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z`
+`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z`
 attempted all 952 canonical instruments, completed the advice engine for all
 952, found 4 canonical advice-input-ready instruments, produced 4
 `wait_for_price` partial advice outputs, kept 948 instruments
@@ -229,13 +230,26 @@ attempted all 952 canonical instruments, completed the advice engine for all
 review fix removed hardcoded freshness, made the ME-RUN30 technical input
 explicit, added deterministic fundamental and market row selection, and wrote
 a compact committed evidence package under
-`artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z/`.
+`artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z/`.
 The dominant blocker is non-price evidence coverage: 931 missing and 17
 partial fundamental contexts.
 
-ME-DATA06 is now the recommended baseline sprint because ME-RUN31 proved the
-adapter and advice handoff, while showing that full-advice readiness is mostly
-blocked by missing local fundamental evidence rather than ranking mechanics.
+ME-DATA06 implemented the local fundamental evidence coverage expansion flow.
+The run
+`me-data06-fundamental-evidence-coverage-expansion-20260715T163629Z`
+discovered 5 local evidence source families, consumed 3, rejected 2 as not
+runtime fundamental-quality evidence, normalized consumeable evidence into the
+existing ME-RUN31 contract, and reran ME-RUN31 as
+`me-run31-after-me-data06-fundamental-evidence-coverage-20260715T163629Z`.
+Measured coverage improved from 4 to 6 complete fundamental contexts, 17 to
+39 partial contexts, and 931 to 907 missing contexts. Canonical
+advice-input-ready improved from 4 to 6, `unable_to_advise` improved from 948
+to 946, and full-advice-ready remained 0.
+
+ME-DATA07 is now the recommended baseline sprint because ME-DATA06 proved the
+adapter and local evidence-normalization path, while showing that the remaining
+blocker is the absence of approved, current, normalized MVP fundamental
+metrics for 907 canonical instruments.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 

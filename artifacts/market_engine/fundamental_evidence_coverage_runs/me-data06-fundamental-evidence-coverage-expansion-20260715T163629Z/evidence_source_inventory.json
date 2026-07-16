@@ -1,0 +1,97 @@
+{
+  "schema_version": "market-engine-data06-evidence-source-inventory-v1",
+  "sources": [
+    {
+      "acquired_at": "2026-05-22",
+      "canonical_matches": 290,
+      "consumeability_reason": "existing ME-RUN31 contract input",
+      "dataset_name": "processed fundamental quality CSV",
+      "evidence_family": "existing_processed_fundamental_quality",
+      "format": "csv",
+      "freshness_status": "current",
+      "market_engine_consumeable": true,
+      "path": "data/processed/fundamental_quality.csv",
+      "provenance_status": "available",
+      "schema_version": "market-engine-fundamental-quality-csv-v1",
+      "source_date": "2026-05-22",
+      "tickers_found": 291,
+      "unsupported_tickers": [
+        "BRK-B"
+      ],
+      "validation_status": "consumeable_baseline"
+    },
+    {
+      "acquired_at": "2026-05-24",
+      "canonical_matches": 36,
+      "consumeability_reason": "consumed for normalized MVP fundamental quality where rows validate",
+      "dataset_name": "raw manual MVP fundamentals CSV",
+      "evidence_family": "manual_mvp_fundamentals",
+      "format": "csv",
+      "freshness_status": "current",
+      "market_engine_consumeable": true,
+      "path": "data/raw/fundamentals.csv",
+      "provenance_status": "available",
+      "schema_version": "local-manual-mvp-fundamentals-csv-v1",
+      "source_date": "2026-05-24",
+      "tickers_found": 36,
+      "unsupported_tickers": [],
+      "validation_status": "consumeable"
+    },
+    {
+      "acquired_at": "2026-06-22",
+      "canonical_matches": 12,
+      "consumeability_reason": "source-context observations are consumed as partial evidence only; they do not satisfy the MVP quality metric contract",
+      "dataset_name": "local SEC CompanyFacts raw snapshots",
+      "evidence_family": "sec_companyfacts_source_context",
+      "format": "sec-companyfacts-raw-v1",
+      "freshness_status": "current",
+      "market_engine_consumeable": true,
+      "path": "data/market_engine/source_snapshots/sec_companyfacts",
+      "provenance_status": "available",
+      "schema_version": "sec-companyfacts-source-context-v1",
+      "source_date": "2026-06-22",
+      "tickers_found": 12,
+      "unsupported_tickers": [],
+      "validation_status": "valid"
+    },
+    {
+      "acquired_at": "",
+      "canonical_matches": 10,
+      "consumeability_reason": "intake placeholder rows require source acquisition and are not runtime evidence",
+      "dataset_name": "OS5 AB fundamentals intake pilot",
+      "evidence_family": "intake_placeholder_fundamentals",
+      "format": "csv",
+      "freshness_status": "current",
+      "market_engine_consumeable": false,
+      "path": "data/intake/os5_scanner_ab_fundamentals_intake_pilot.csv",
+      "provenance_status": "available",
+      "schema_version": "local-manual-mvp-fundamentals-csv-v1",
+      "source_date": "",
+      "tickers_found": 10,
+      "unsupported_tickers": [],
+      "validation_status": "not_consumeable"
+    },
+    {
+      "acquired_at": "",
+      "canonical_matches": 3,
+      "consumeability_reason": "company profile evidence is descriptive identity/profile context, not canonical fundamental quality metrics",
+      "dataset_name": "local company profile snapshots",
+      "evidence_family": "company_profile",
+      "format": "company_profile.json",
+      "freshness_status": "not_assessed_for_fundamental_quality",
+      "market_engine_consumeable": false,
+      "path": "artifacts/market_engine",
+      "provenance_status": "available",
+      "schema_version": "market-engine-company-profile-source-context-v1",
+      "source_date": "",
+      "tickers_found": 9,
+      "unsupported_tickers": [],
+      "validation_status": "not_consumeable_for_fundamental_quality"
+    }
+  ],
+  "summary": {
+    "sources_consumed": 3,
+    "sources_discovered": 5,
+    "sources_rejected": 2
+  }
+}

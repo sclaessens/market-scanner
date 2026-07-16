@@ -1,0 +1,516 @@
+{
+  "examples": [
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "A",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AA",
+      "technical_screening_label": "technical_risk_exclusion"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AAL",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AAON",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AAPL",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ABBV",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ABNB",
+      "technical_screening_label": "technical_setup_candidate"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ABT",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ACGL",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ACI",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ACM",
+      "technical_screening_label": "technical_risk_exclusion"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ACN",
+      "technical_screening_label": "technical_risk_exclusion"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ADBE",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ADC",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ADI",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ADM",
+      "technical_screening_label": "technical_setup_candidate"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ADP",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ADSK",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AEE",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AEIS",
+      "technical_screening_label": "technical_risk_exclusion"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AEP",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AES",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AFG",
+      "technical_screening_label": "technical_setup_candidate"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AFL",
+      "technical_screening_label": "technical_setup_candidate"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AGCO",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AHR",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AIG",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AIT",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AIZ",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AJG",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AKAM",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ALB",
+      "technical_screening_label": "technical_risk_exclusion"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ALGM",
+      "technical_screening_label": "technical_risk_exclusion"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ALGN",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ALK",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ALL",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ALLE",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ALLY",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ALSN",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "ALV",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AM",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AMAT",
+      "technical_screening_label": "technical_risk_exclusion"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AMCR",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AMD",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AME",
+      "technical_screening_label": "technical_watch"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AMG",
+      "technical_screening_label": "technical_setup_candidate"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AMGN",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AMH",
+      "technical_screening_label": "technical_wait_for_entry"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AMKR",
+      "technical_screening_label": "technical_risk_exclusion"
+    },
+    {
+      "advice_readiness": "not_ready",
+      "canonical_advice_label": "unable_to_advise",
+      "full_advice_ready": false,
+      "missing_evidence": [
+        "fundamental_context"
+      ],
+      "symbol": "AMP",
+      "technical_screening_label": "technical_wait_for_entry"
+    }
+  ],
+  "schema_version": "market-engine-run31-technical-to-advice-transition-v1",
+  "transition_counts": {
+    "technical_risk_exclusion -> avoid_for_now": 1,
+    "technical_risk_exclusion -> unable_to_advise": 176,
+    "technical_setup_candidate -> unable_to_advise": 105,
+    "technical_wait_for_entry -> avoid_for_now": 1,
+    "technical_wait_for_entry -> unable_to_advise": 254,
+    "technical_wait_for_entry -> wait_for_price": 2,
+    "technical_watch -> unable_to_advise": 405,
+    "technical_watch -> wait_for_price": 2,
+    "unable_to_analyse -> unable_to_advise": 6
+  }
+}

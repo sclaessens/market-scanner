@@ -1,0 +1,89 @@
+{
+  "freshness_policy": {
+    "fundamental_stale_after_days": 120,
+    "market_stale_after_days": 120,
+    "portfolio_stale_after_days": 45,
+    "reference_date": "2026-07-10",
+    "resolution_source": "explicit_cli"
+  },
+  "run_id": "me-run31-after-me-data06-fundamental-evidence-coverage-20260715T163629Z",
+  "schema_version": "market-engine-run31-evidence-coverage-summary-v1",
+  "summary": {
+    "advice_attempted": 952,
+    "advice_completed": 952,
+    "advice_counts": {
+      "avoid_for_now": 2,
+      "buy_candidate": 0,
+      "hold_existing": 0,
+      "take_loss_review": 0,
+      "unable_to_advise": 946,
+      "wait_for_price": 4,
+      "watchlist": 0
+    },
+    "advice_engine_completed": 952,
+    "advice_generation_attempted": 952,
+    "advice_input_ready": 6,
+    "advice_output_actionable": 0,
+    "attempted_instruments": 952,
+    "blocked": 0,
+    "canonical_advice_input_ready": 6,
+    "canonical_instruments": 952,
+    "failed": 0,
+    "full_advice_ranking_eligible": 0,
+    "full_advice_ready": 0,
+    "fundamental_counts": {
+      "available": 6,
+      "blocked": 0,
+      "invalid": 0,
+      "missing": 907,
+      "not_applicable": 0,
+      "partial": 39,
+      "stale": 0
+    },
+    "market_counts": {
+      "available": 952,
+      "blocked": 0,
+      "invalid": 0,
+      "missing": 0,
+      "not_applicable": 0,
+      "partial": 0,
+      "stale": 0
+    },
+    "non_unable_advice_outputs": 6,
+    "partial_advice": 6,
+    "portfolio_applicable": 1,
+    "portfolio_counts": {
+      "available": 1,
+      "blocked": 0,
+      "invalid": 0,
+      "missing": 0,
+      "not_applicable": 951,
+      "partial": 0,
+      "stale": 0
+    },
+    "technical_analysed": 946,
+    "technical_ranking_eligible": 330,
+    "top_blockers": {
+      "evidence_readiness": 946,
+      "insufficient_forward_data": 2,
+      "insufficient_history": 4,
+      "missing_fundamental_context": 907,
+      "no_clear_setup": 407,
+      "partial_fundamental_context": 39,
+      "price_or_risk_not_preferred": 257,
+      "technical_context_not_available": 6,
+      "weak_or_high_risk_setup": 177
+    },
+    "unable_to_advise": 946
+  },
+  "technical_input_validation": {
+    "current_canonical_universe_version": "me-data04-complete-canonical-local-market-dataset-v1",
+    "index_path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/universe_analysis_index.json",
+    "manifest_cutoff_date": null,
+    "manifest_path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/manifest.json",
+    "technical_input_status": "valid",
+    "technical_input_universe_version": null,
+    "technical_screening_run_id": "me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z",
+    "universe_compatibility": "inferred_from_exact_instrument_ids"
+  }
+}

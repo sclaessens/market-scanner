@@ -1,0 +1,81 @@
+{
+  "artifact_type": "market-engine-fundamental-evidence-coverage-run",
+  "as_of_date": "2026-07-10",
+  "attempted_tickers": 952,
+  "blocker_summary": {
+    "missing_fundamental_context": 907,
+    "sec_companyfacts_not_sufficient_for_mvp_quality_contract": 9
+  },
+  "canonical_universe": {
+    "snapshot_date": "2026-07-13",
+    "total_instruments": 952,
+    "universe_version": "me-data04-complete-canonical-local-market-dataset-v1"
+  },
+  "command": "python -m market_engine.data.fundamental_evidence_coverage",
+  "completed_at": "2026-07-16T09:27:39Z",
+  "coverage_counts": {
+    "complete": 6,
+    "conflicting": 0,
+    "invalid": 0,
+    "missing": 907,
+    "partial": 39,
+    "stale": 0,
+    "unsupported": 0
+  },
+  "downstream_rerun_result": {
+    "advice_engine_completed": 952,
+    "attempted": 952,
+    "canonical_advice_input_ready": 6,
+    "compact_evidence_dir": "artifacts/market_engine/run_evidence/me-run31-after-me-data06-fundamental-evidence-coverage-20260715T163629Z",
+    "full_advice_ready": 0,
+    "output_dir": "artifacts/market_engine/full_advice_readiness_runs/me-run31-after-me-data06-fundamental-evidence-coverage-20260715T163629Z",
+    "run_id": "me-run31-after-me-data06-fundamental-evidence-coverage-20260715T163629Z",
+    "unable_to_advise": 946
+  },
+  "git_commit": "02b13ad8acbd30015869d300e1a84382237512df",
+  "input_checksums": {
+    "config/market_engine/universes/canonical_universe.json": "c0e2c466af51ee3f34202148b5275f46248c893ce4b3851352d0fbded87148be",
+    "data/intake/os5_scanner_ab_fundamentals_intake_pilot.csv": "af1dbc0d6a4c84458999492d90a2edf6ac49a65b97ea56d0478ca46b0c1b9968",
+    "data/market_engine/portfolio_contexts/local_portfolio_context.json": "f1bcea21b5f31753b5e2c1513a91c896450339175521ca945d128fd8a1328581",
+    "data/processed/fundamental_quality.csv": "a10758925f717136dd990b17437c334142edda659255cefb6411104663b7eff3",
+    "data/processed/market_regime.csv": "00939334d6005df87ec92d314c9ad7305cf9296d159b18878de12139c50f8d66",
+    "data/raw/fundamentals.csv": "56d16e99c65b5d021955f1d24e597b4ea96d5c0cf70dc4806957bbce09e73080"
+  },
+  "input_paths": {
+    "canonical_universe": "config/market_engine/universes/canonical_universe.json",
+    "company_profile_root": "artifacts/market_engine",
+    "existing_fundamental_path": "data/processed/fundamental_quality.csv",
+    "intake_fundamentals_path": "data/intake/os5_scanner_ab_fundamentals_intake_pilot.csv",
+    "market_context_path": "data/processed/market_regime.csv",
+    "portfolio_context_path": "data/market_engine/portfolio_contexts/local_portfolio_context.json",
+    "price_history_root": "data/processed",
+    "raw_fundamentals_path": "data/raw/fundamentals.csv",
+    "sec_companyfacts_root": "data/market_engine/source_snapshots/sec_companyfacts",
+    "technical_screening_artifact": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z"
+  },
+  "outputs": {
+    "downstream_me_run31_compact_evidence_dir": "artifacts/market_engine/run_evidence/me-run31-after-me-data06-fundamental-evidence-coverage-20260715T163629Z",
+    "downstream_me_run31_output_dir": "artifacts/market_engine/full_advice_readiness_runs/me-run31-after-me-data06-fundamental-evidence-coverage-20260715T163629Z",
+    "normalized_fundamental_quality": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-expansion-20260715T163629Z/normalized_fundamental_quality.csv"
+  },
+  "run_id": "me-data06-fundamental-evidence-coverage-expansion-20260715T163629Z",
+  "schema_version": "market-engine-data06-fundamental-evidence-coverage-v1",
+  "schema_versions": {
+    "me_data06": "market-engine-data06-fundamental-evidence-coverage-v1",
+    "normalized_fundamental_quality": "market-engine-fundamental-quality-csv-v1"
+  },
+  "side_effects": {
+    "allocation_performed": false,
+    "broker_order_execution_performed": false,
+    "decision_engine_authority_changed": false,
+    "model_invocation_performed": false,
+    "network_access_performed": false,
+    "portfolio_watchlist_mutation_performed": false,
+    "provider_api_call_performed": false,
+    "recommendation_rules_changed": false,
+    "telegram_delivery_performed": false
+  },
+  "sprint_id": "ME-DATA06",
+  "started_at": "2026-07-16T09:27:38Z",
+  "validation_result": "passed"
+}

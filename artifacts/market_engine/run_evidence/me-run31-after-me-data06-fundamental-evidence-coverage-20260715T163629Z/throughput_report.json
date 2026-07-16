@@ -1,0 +1,87 @@
+{
+  "advice_engine_completed": 952,
+  "attempted": 952,
+  "blocked": 0,
+  "canonical_advice_attempted": 952,
+  "canonical_advice_completed": 952,
+  "canonical_advice_input_ready": 6,
+  "end_time": "2026-07-16T09:27:38Z",
+  "failed": 0,
+  "full_advice_ready": 0,
+  "fundamental_context_resolved": 45,
+  "market_context_resolved": 952,
+  "max_ticker_runtime_seconds": 0.01496092,
+  "mean_ticker_runtime_seconds": 0.00015307,
+  "median_ticker_runtime_seconds": 0.00013117,
+  "min_ticker_runtime_seconds": 0.00012796,
+  "non_unable_advice_outputs": 6,
+  "p95_ticker_runtime_seconds": 0.00015892,
+  "partial_advice": 6,
+  "phase_runtime_seconds": {
+    "artifact_writing": 0.07145637506619096,
+    "canonical_advice_execution": 0.220279,
+    "fundamental_evidence_resolution": 0.007393,
+    "market_context_resolution": 0.000282,
+    "portfolio_context_resolution": 0.000163,
+    "technical_input_loading": 0.018316
+  },
+  "portfolio_context_resolved": 1,
+  "schema_version": "market-engine-run31-throughput-report-v1",
+  "slowest_tickers": [
+    {
+      "instrument_id": "equity:udr",
+      "runtime_seconds": 0.01496092,
+      "symbol": "UDR"
+    },
+    {
+      "instrument_id": "equity:erie",
+      "runtime_seconds": 0.00158933,
+      "symbol": "ERIE"
+    },
+    {
+      "instrument_id": "equity:tex",
+      "runtime_seconds": 0.00075471,
+      "symbol": "TEX"
+    },
+    {
+      "instrument_id": "equity:sam",
+      "runtime_seconds": 0.00026442,
+      "symbol": "SAM"
+    },
+    {
+      "instrument_id": "equity:uthr",
+      "runtime_seconds": 0.0002575,
+      "symbol": "UTHR"
+    },
+    {
+      "instrument_id": "equity:acm",
+      "runtime_seconds": 0.00023696,
+      "symbol": "ACM"
+    },
+    {
+      "instrument_id": "equity:asb",
+      "runtime_seconds": 0.00023575,
+      "symbol": "ASB"
+    },
+    {
+      "instrument_id": "equity:doc",
+      "runtime_seconds": 0.00023008,
+      "symbol": "DOC"
+    },
+    {
+      "instrument_id": "equity:cof",
+      "runtime_seconds": 0.00022179,
+      "symbol": "COF"
+    },
+    {
+      "instrument_id": "equity:hum",
+      "runtime_seconds": 0.00021517,
+      "symbol": "HUM"
+    }
+  ],
+  "start_time": "2026-07-16T09:27:38Z",
+  "technical_context_loaded": 946,
+  "tickers_per_second": 2406.852453,
+  "total_runtime_seconds": 0.395537,
+  "unable_to_advise": 946
+}

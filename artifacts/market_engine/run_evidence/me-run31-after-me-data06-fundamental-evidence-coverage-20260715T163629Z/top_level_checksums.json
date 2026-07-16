@@ -1,0 +1,20 @@
+{
+  "advice_readiness_report.json": "3f5425e0b34ccb6b19573326a4852efaf45c4f280ea02339c9af8c7d4a69d0f9",
+  "advice_readiness_report.md": "bdd08702c0d941099eab01b845b1cc921b351f4155966a8369da70867400d896",
+  "blocker_report.json": "ffbfe43a97ca7e85991149d15abd593f504a0dc59613658dde1604dc60c26b28",
+  "canonical_advice_input_index.json": "c300c25875cf1c57ba2007d64565f1b64be1dd196366cb52356b23f0858801b5",
+  "canonical_advice_output_index.json": "6067673bb0e9d7e8808fb6567ad65291c63cf09bf8cf2253f64ea33903a77547",
+  "evidence_coverage_index.json": "76ac7309f4d16e48e9fb8f051b2c3bae993b39848d951f7c6c0b63ba49caa4b2",
+  "evidence_coverage_summary.json": "3063f8d5c6de96f1d1e798f6d5fe32030057f1c45bd926e1556fb85fc83a9eb8",
+  "evidence_coverage_summary.md": "8bd419a00a023a62b41f84ad8a824e0a0c124944c6a6e297a136125902a190d2",
+  "full_advice_ranking.json": "d391b4dd331cda938b98f6e805bc696d0ed7014792753b94756ae9b0331d975c",
+  "full_advice_ranking.md": "56451f6e0b5df58275ee874b8d1a24f0ca4e7b8102f805bee3bbd1c34bf96e5c",
+  "manifest.json": "6b23525df115590db7f5781f9a65639c7971a937fdf49633a3f39d18effe41c7",
+  "source_lineage.json": "4c11ba347e71e6a7e6780760d666fe6c32e9df56ff2244dc197cc38d7c768df1",
+  "technical_ranking.json": "b80acefeb013ce05bf20d839bf35f175ae92ea377dd5237405385511e55e33c6",
+  "technical_to_advice_transition.json": "aa4f895cd2304b356d35de0689cdec09b49aa5bc797d9762959cd1fd61c0bcd2",
+  "throughput_report.json": "8191aab0af4471fa046e43745cecaff3de3023b3a55d8d6804ea32a97c47b9de",
+  "top_full_advice_candidates.md": "5baf56e48da9231e3b4d531e5ae17a004fc861b927c0d043ace537049f8cf051",
+  "unable_to_advise.json": "39ed76c419e9d6935b0c0d1920315e6597cd121acf5bc8e9063c1002c3d3cc24",
+  "unable_to_advise.md": "d49bf6ff1daff2fa1b187c13764d7e06077f9e6e01f4deac5ca93346f6e349fd"
+}
