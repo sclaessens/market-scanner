@@ -56,7 +56,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
   -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
   -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
-  -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers
+  -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
+  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -369,7 +370,7 @@ Owner roles: Product Owner / Operator / Data Steward / Development Lead / QA Lea
 
 Job family: ME-DATA / Local evidence coverage
 
-Status: RECOMMENDED NEXT BASELINE SPRINT AFTER ME-DATA06
+Status: IMPLEMENTED / operator_import_operational / pilot_blocked_missing_operator_evidence
 
 Goal: expand approved, current, normalized MVP fundamental metrics for the
 remaining canonical-universe instruments still blocked by missing fundamental
@@ -380,6 +381,25 @@ evidence import, validation, normalization, and coverage reporting only. No
 recommendation-rule changes, allocation authority, broker/order execution,
 portfolio/watchlist mutation, Telegram delivery, scheduler behavior, or
 Decision Engine changes.
+
+Result: ME-DATA07 confirmed the five-metric MVP contract, reconciled 952
+canonical tickers, and implemented the source-approval, symbol-mapping,
+operator-import, validation, immutable-snapshot, normalization, and explicit
+ME-DATA06 downstream gates. The actual pilot run
+`me-data07-validated-mvp-fundamental-metric-sourcing-20260718T122028Z` selected
+12 tickers and failed closed because the explicit operator evidence package was
+absent. It performed zero provider calls, imported and normalized zero records,
+created no raw snapshot, and did not run ME-DATA06 or ME-RUN31. Coverage
+therefore remains 6 complete, 39 partial, 907 missing, 6 canonical
+advice-input-ready, 0 full-advice-ready, and 946 unable-to-advise; no coverage
+improvement or regression claim was made.
+
+Remaining blocker: a governance-approved operator package with primary-source
+metric lineage is required. Recommended next sprint:
+
+```text
+ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
+```
 
 ## Current ChatGPT Advisory Artifact Chain
 
