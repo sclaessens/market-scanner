@@ -1,0 +1,119 @@
+{
+  "advice_counts": {
+    "avoid_for_now": 2,
+    "buy_candidate": 0,
+    "hold_existing": 0,
+    "take_loss_review": 0,
+    "unable_to_advise": 946,
+    "wait_for_price": 4,
+    "watchlist": 0
+  },
+  "canonical_universe_version": "me-data04-complete-canonical-local-market-dataset-v1",
+  "compact_outputs": {
+    "advice_readiness_report": "advice_readiness_report.json",
+    "blocker_report": "blocker_report.json",
+    "evidence_coverage_summary": "evidence_coverage_summary.json",
+    "full_advice_ranking": "full_advice_ranking.json",
+    "manifest": "manifest.json",
+    "run_evidence_index": "run_evidence_index.json",
+    "technical_to_advice_transition": "technical_to_advice_transition.json",
+    "throughput_report": "throughput_report.json",
+    "top_level_checksums": "top_level_checksums.json"
+  },
+  "evidence_status_counts": {
+    "fundamental": {
+      "available": 6,
+      "blocked": 0,
+      "invalid": 0,
+      "missing": 907,
+      "not_applicable": 0,
+      "partial": 39,
+      "stale": 0
+    },
+    "market": {
+      "available": 952,
+      "blocked": 0,
+      "invalid": 0,
+      "missing": 0,
+      "not_applicable": 0,
+      "partial": 0,
+      "stale": 0
+    },
+    "portfolio": {
+      "available": 1,
+      "blocked": 0,
+      "invalid": 0,
+      "missing": 0,
+      "not_applicable": 951,
+      "partial": 0,
+      "stale": 0
+    }
+  },
+  "freshness_reference_date": "2026-07-10",
+  "full_artifact": {
+    "file_count": 971,
+    "full_tree_digest": "bbb1ed7af794b9dd6d260acf396d5eed0c377c9afe25697c121b329aba738c1a",
+    "local_path": "artifacts/market_engine/full_advice_readiness_runs/me-run31-after-me-data06-review-fix-20260718T113254Z",
+    "top_level_file_checksums": {
+      "advice_readiness_report.json": "b6f49f0f6903158cd0bac693194878906ad04712ab163c37fe8d3c324032a75e",
+      "advice_readiness_report.md": "d97b95f8111509ee14cc48d6bc00a3edd91c5cf096038591fd87371b86e71290",
+      "blocker_report.json": "ffbfe43a97ca7e85991149d15abd593f504a0dc59613658dde1604dc60c26b28",
+      "canonical_advice_input_index.json": "b69e99f92dc19fd85a25a351ac946adbeda60db8244cb9dad459af7fb7f211ae",
+      "canonical_advice_output_index.json": "c7da0be87fcd9977ca87468717941df2008dcbe58ee8715db49986f8d011b7c3",
+      "evidence_coverage_index.json": "448808da5eafde8bed2aadb3b84d3da7bb1d9e1eb7d68ed9e80e5125f82b310c",
+      "evidence_coverage_summary.json": "c9fa4d5b9e064bd3948c9572bc4dace62627b97c16fa2f10371a7e0b3bffd938",
+      "evidence_coverage_summary.md": "17338e9f5940ba3d39419d092855c0c118f94d2fa88a72855eb577a78d23d058",
+      "full_advice_ranking.json": "d391b4dd331cda938b98f6e805bc696d0ed7014792753b94756ae9b0331d975c",
+      "full_advice_ranking.md": "56451f6e0b5df58275ee874b8d1a24f0ca4e7b8102f805bee3bbd1c34bf96e5c",
+      "manifest.json": "396e9b7d936b6e0dfe7e797db5c13ed074c45d54435982058d00bac81279c569",
+      "source_lineage.json": "27ab3ced359452f556244ed8d367353d2378f90c0619ccffb902db2d6d0965f1",
+      "technical_ranking.json": "b80acefeb013ce05bf20d839bf35f175ae92ea377dd5237405385511e55e33c6",
+      "technical_to_advice_transition.json": "aa4f895cd2304b356d35de0689cdec09b49aa5bc797d9762959cd1fd61c0bcd2",
+      "throughput_report.json": "35cfe827d037755517407a41345dad213ee9cb3e023bf4b2a752e2f7dbe5a387",
+      "top_full_advice_candidates.md": "5baf56e48da9231e3b4d531e5ae17a004fc861b927c0d043ace537049f8cf051",
+      "unable_to_advise.json": "b425b616a1b6f3990738d334d57e9bb80178206256a67bb17d9298284e708724",
+      "unable_to_advise.md": "d49bf6ff1daff2fa1b187c13764d7e06077f9e6e01f4deac5ca93346f6e349fd"
+    },
+    "total_size_bytes": 27646712
+  },
+  "generated_at": "2026-07-18T11:37:08Z",
+  "git_commit": "848b7cd9e1cceebc464cdf04791efe59fc328e9e",
+  "input_artifacts": {
+    "canonical_universe": "config/market_engine/universes/canonical_universe.json",
+    "fundamental_evidence_path": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z/normalized_fundamental_quality.csv",
+    "market_context_path": "data/processed/market_regime.csv",
+    "portfolio_context_path": "data/market_engine/portfolio_contexts/local_portfolio_context.json",
+    "price_history_root": "data/processed",
+    "technical_screening_artifact": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z"
+  },
+  "input_checksums": {
+    "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z/normalized_fundamental_quality.csv": "bbc7303989077076e769f9e7fc9b72aef458091e9aa7055ee752f7d844968721",
+    "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z": "1361c3d16aad412025d0dbd9612dfacfca0eeeff762fbd31bd73f0ad04a2ebae",
+    "config/market_engine/universes/canonical_universe.json": "c0e2c466af51ee3f34202148b5275f46248c893ce4b3851352d0fbded87148be",
+    "data/market_engine/portfolio_contexts/local_portfolio_context.json": "f1bcea21b5f31753b5e2c1513a91c896450339175521ca945d128fd8a1328581",
+    "data/processed/market_regime.csv": "00939334d6005df87ec92d314c9ad7305cf9296d159b18878de12139c50f8d66"
+  },
+  "metrics": {
+    "advice_engine_completed": 952,
+    "attempted_instruments": 952,
+    "canonical_advice_input_ready": 6,
+    "failed": 0,
+    "full_advice_ready": 0,
+    "technical_analysed": 946,
+    "technical_ranking_eligible": 330
+  },
+  "run_id": "me-run31-after-me-data06-review-fix-20260718T113254Z",
+  "schema_version": "market-engine-run31-compact-run-evidence-v1",
+  "technical_screening_run_id": "me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z",
+  "top_blockers": {
+    "evidence_readiness": 946,
+    "insufficient_forward_data": 2,
+    "insufficient_history": 4,
+    "missing_fundamental_context": 907,
+    "no_clear_setup": 407,
+    "partial_fundamental_context": 39,
+    "price_or_risk_not_preferred": 257,
+    "technical_context_not_available": 6,
+    "weak_or_high_risk_setup": 177
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "absolute_improvement": {
+    "canonical_advice_input_ready": 2,
+    "full_advice_ready": 0,
+    "fundamental_complete": 2,
+    "fundamental_missing": -24,
+    "fundamental_partial": 22,
+    "unable_to_advise": -2
+  },
+  "missing_to_complete_tickers": [
+    "ENPH",
+    "FTNT"
+  ],
+  "missing_to_partial_tickers": [
+    "AMAT",
+    "ANET",
+    "ASML",
+    "AVGO",
+    "COST",
+    "DELL",
+    "EOG",
+    "EQIX",
+    "EW",
+    "EXPD",
+    "FDX",
+    "HAL",
+    "HLT",
+    "HPE",
+    "META",
+    "MSFT",
+    "NVDA",
+    "TSM"
+  ],
+  "newly_advice_input_ready_tickers": [
+    "ENPH",
+    "FTNT"
+  ],
+  "partial_to_complete_tickers": [],
+  "percent_improvement": {
+    "canonical_advice_input_ready": 50.0,
+    "fundamental_complete": 50.0,
+    "fundamental_partial": 129.4118
+  },
+  "regressions": []
+}

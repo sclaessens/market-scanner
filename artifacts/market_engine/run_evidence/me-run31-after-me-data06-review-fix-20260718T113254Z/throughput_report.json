@@ -1,0 +1,87 @@
+{
+  "advice_engine_completed": 952,
+  "attempted": 952,
+  "blocked": 0,
+  "canonical_advice_attempted": 952,
+  "canonical_advice_completed": 952,
+  "canonical_advice_input_ready": 6,
+  "end_time": "2026-07-18T11:37:09Z",
+  "failed": 0,
+  "full_advice_ready": 0,
+  "fundamental_context_resolved": 45,
+  "market_context_resolved": 952,
+  "max_ticker_runtime_seconds": 0.01991437,
+  "mean_ticker_runtime_seconds": 0.00018185,
+  "median_ticker_runtime_seconds": 0.00014792,
+  "min_ticker_runtime_seconds": 0.00013871,
+  "non_unable_advice_outputs": 6,
+  "p95_ticker_runtime_seconds": 0.00021829,
+  "partial_advice": 6,
+  "phase_runtime_seconds": {
+    "artifact_writing": 0.0814937500981614,
+    "canonical_advice_execution": 0.250787,
+    "fundamental_evidence_resolution": 0.007738,
+    "market_context_resolution": 0.000141,
+    "portfolio_context_resolution": 6.8e-05,
+    "technical_input_loading": 0.017976
+  },
+  "portfolio_context_resolved": 1,
+  "schema_version": "market-engine-run31-throughput-report-v1",
+  "slowest_tickers": [
+    {
+      "instrument_id": "equity:tex",
+      "runtime_seconds": 0.01991437,
+      "symbol": "TEX"
+    },
+    {
+      "instrument_id": "equity:dov",
+      "runtime_seconds": 0.00254575,
+      "symbol": "DOV"
+    },
+    {
+      "instrument_id": "equity:snx",
+      "runtime_seconds": 0.00108758,
+      "symbol": "SNX"
+    },
+    {
+      "instrument_id": "equity:saro",
+      "runtime_seconds": 0.00048708,
+      "symbol": "SARO"
+    },
+    {
+      "instrument_id": "equity:crdo",
+      "runtime_seconds": 0.00045013,
+      "symbol": "CRDO"
+    },
+    {
+      "instrument_id": "equity:wst",
+      "runtime_seconds": 0.00045012,
+      "symbol": "WST"
+    },
+    {
+      "instrument_id": "equity:cmi",
+      "runtime_seconds": 0.00039463,
+      "symbol": "CMI"
+    },
+    {
+      "instrument_id": "equity:cnp",
+      "runtime_seconds": 0.00038108,
+      "symbol": "CNP"
+    },
+    {
+      "instrument_id": "equity:cr",
+      "runtime_seconds": 0.00037542,
+      "symbol": "CR"
+    },
+    {
+      "instrument_id": "equity:psn",
+      "runtime_seconds": 0.00035954,
+      "symbol": "PSN"
+    }
+  ],
+  "start_time": "2026-07-18T11:37:08Z",
+  "technical_context_loaded": 946,
+  "tickers_per_second": 2098.144648,
+  "total_runtime_seconds": 0.453734,
+  "unable_to_advise": 946
+}

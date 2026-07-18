@@ -55,7 +55,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
   -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
   -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
-  -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources
+  -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
+  -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -144,7 +145,7 @@ candidates are `full_advice_ready: false`.
 ME-RUN31 then attached available local non-price evidence to the ME-RUN30
 technical screening result and handed the generated ticker status index to the
 existing deterministic advice engine. The full run
-`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z`
+`me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z`
 attempted all 952 canonical instruments, completed the advice engine for all
 952, found 4 canonical advice-input-ready instruments, produced 4
 `wait_for_price` partial advice outputs, kept 948 instruments
@@ -152,9 +153,26 @@ attempted all 952 canonical instruments, completed the advice engine for all
 review fix removed hardcoded freshness, made technical input explicit,
 validated source dates and duplicate rows, and wrote a compact committed
 evidence package under
-`artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T112146Z/`.
+`artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z/`.
 The dominant blocker remains fundamental evidence coverage: 931 missing and
 17 partial fundamental contexts.
+
+ME-DATA06 then inventoried local fundamental evidence sources, normalized
+consumeable local evidence into the existing ME-RUN31 fundamental quality CSV
+contract, and reran ME-RUN31 using the normalized artifact. The run
+`me-data06-fundamental-evidence-coverage-expansion-20260715T163629Z`
+discovered 5 source families, consumed 3, rejected 2 as not runtime
+fundamental-quality evidence, and reduced missing fundamental contexts from
+931 to 907. Complete contexts improved from 4 to 6, partial contexts from
+17 to 39, canonical advice-input-ready instruments from 4 to 6, and
+unable-to-advise instruments from 948 to 946. Full-advice-ready remained 0.
+The newly advice-input-ready tickers were `ENPH` and `FTNT`.
+PR #462 review follow-up reran the comparison as
+`me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z` with an
+explicit validated ME-RUN31 per-ticker baseline. Aggregate coverage remained
+unchanged, no regressions were found, and the corrected transition set contains
+22 rather than 18 `missing_to_partial` tickers because `CLS`, `CRDO`, `IREN`,
+and `VRT` were omitted by the earlier CSV-based transition comparison.
 
 ### ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
 
@@ -304,7 +322,7 @@ Owner roles: Product Owner / Operator / Data Steward / Development Lead / QA Lea
 
 Job family: ME-DATA / Local evidence coverage
 
-Status: RECOMMENDED NEXT BASELINE SPRINT AFTER ME-RUN31
+Status: IMPLEMENTED / local_coverage_improved_with_remaining_blockers
 
 Goal: increase canonical-universe fundamental context coverage from approved
 local evidence sources so more ME-RUN31 candidates can reach deterministic
@@ -315,6 +333,53 @@ coverage reporting only. No provider side effects unless explicitly approved,
 no allocation authority, no advice rule changes, no broker/order execution, no
 portfolio or watchlist mutation, no Telegram delivery, and no Decision Engine
 changes.
+
+Result: ME-DATA06 implemented
+`src/market_engine/data/fundamental_evidence_coverage.py`, wrote the full run
+artifact under
+`artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-expansion-20260715T163629Z/`,
+and reran ME-RUN31 as
+`me-run31-after-me-data06-fundamental-evidence-coverage-20260715T163629Z`.
+Measured before/after:
+
+```text
+fundamental_complete: 4 -> 6
+fundamental_partial: 17 -> 39
+fundamental_missing: 931 -> 907
+canonical_advice_input_ready: 4 -> 6
+full_advice_ready: 0 -> 0
+unable_to_advise: 948 -> 946
+```
+
+Remaining dominant blocker:
+
+```text
+missing_fundamental_context: 907
+```
+
+PR #462 review follow-up status: `completed`. The validated rerun
+`me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z` preserved
+the aggregate counts above, derived readiness from the baseline artifact,
+found no regressions, and corrected inventory freshness to three current
+sources, one unknown source, and one not-assessed source.
+
+### ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers
+
+Owner roles: Product Owner / Operator / Data Steward / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-DATA / Local evidence coverage
+
+Status: RECOMMENDED NEXT BASELINE SPRINT AFTER ME-DATA06
+
+Goal: expand approved, current, normalized MVP fundamental metrics for the
+remaining canonical-universe instruments still blocked by missing fundamental
+context after ME-DATA06.
+
+Scope: source approval, local evidence acquisition or operator-supplied local
+evidence import, validation, normalization, and coverage reporting only. No
+recommendation-rule changes, allocation authority, broker/order execution,
+portfolio/watchlist mutation, Telegram delivery, scheduler behavior, or
+Decision Engine changes.
 
 ## Current ChatGPT Advisory Artifact Chain
 

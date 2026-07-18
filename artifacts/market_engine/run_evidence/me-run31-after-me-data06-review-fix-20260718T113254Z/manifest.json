@@ -1,0 +1,169 @@
+{
+  "advice_summary": {
+    "advice_counts": {
+      "avoid_for_now": 2,
+      "buy_candidate": 0,
+      "hold_existing": 0,
+      "take_loss_review": 0,
+      "unable_to_advise": 946,
+      "wait_for_price": 4,
+      "watchlist": 0
+    }
+  },
+  "artifact_type": "market-engine-run31-broad-non-price-evidence-advice-readiness",
+  "canonical_universe_version": "me-data04-complete-canonical-local-market-dataset-v1",
+  "compact_evidence_package": "artifacts/market_engine/run_evidence/me-run31-after-me-data06-review-fix-20260718T113254Z",
+  "coverage_summary": {
+    "advice_attempted": 952,
+    "advice_completed": 952,
+    "advice_counts": {
+      "avoid_for_now": 2,
+      "buy_candidate": 0,
+      "hold_existing": 0,
+      "take_loss_review": 0,
+      "unable_to_advise": 946,
+      "wait_for_price": 4,
+      "watchlist": 0
+    },
+    "advice_engine_completed": 952,
+    "advice_generation_attempted": 952,
+    "advice_input_ready": 6,
+    "advice_output_actionable": 0,
+    "attempted_instruments": 952,
+    "blocked": 0,
+    "canonical_advice_input_ready": 6,
+    "canonical_instruments": 952,
+    "failed": 0,
+    "full_advice_ranking_eligible": 0,
+    "full_advice_ready": 0,
+    "fundamental_counts": {
+      "available": 6,
+      "blocked": 0,
+      "invalid": 0,
+      "missing": 907,
+      "not_applicable": 0,
+      "partial": 39,
+      "stale": 0
+    },
+    "market_counts": {
+      "available": 952,
+      "blocked": 0,
+      "invalid": 0,
+      "missing": 0,
+      "not_applicable": 0,
+      "partial": 0,
+      "stale": 0
+    },
+    "non_unable_advice_outputs": 6,
+    "partial_advice": 6,
+    "portfolio_applicable": 1,
+    "portfolio_counts": {
+      "available": 1,
+      "blocked": 0,
+      "invalid": 0,
+      "missing": 0,
+      "not_applicable": 951,
+      "partial": 0,
+      "stale": 0
+    },
+    "technical_analysed": 946,
+    "technical_ranking_eligible": 330,
+    "top_blockers": {
+      "evidence_readiness": 946,
+      "insufficient_forward_data": 2,
+      "insufficient_history": 4,
+      "missing_fundamental_context": 907,
+      "no_clear_setup": 407,
+      "partial_fundamental_context": 39,
+      "price_or_risk_not_preferred": 257,
+      "technical_context_not_available": 6,
+      "weak_or_high_risk_setup": 177
+    },
+    "unable_to_advise": 946
+  },
+  "evidence_roots": {
+    "fundamental": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z",
+    "market": "data/processed"
+  },
+  "freshness_policy": {
+    "fundamental_stale_after_days": 120,
+    "market_stale_after_days": 120,
+    "portfolio_stale_after_days": 45,
+    "reference_date": "2026-07-10",
+    "resolution_source": "explicit_cli"
+  },
+  "full_artifact_file_count": 971,
+  "full_artifact_total_size_bytes": 27646712,
+  "full_artifact_tree_digest": "bbb1ed7af794b9dd6d260acf396d5eed0c377c9afe25697c121b329aba738c1a",
+  "fundamental_selection_policy": "latest_valid_source_date",
+  "generated_at": "2026-07-18T11:37:08Z",
+  "git_commit": "848b7cd9e1cceebc464cdf04791efe59fc328e9e",
+  "guardrails": {
+    "allocation_performed": false,
+    "broker_order_execution_performed": false,
+    "decision_engine_authority_changed": false,
+    "live_provider_call_performed": false,
+    "model_invocation_performed": false,
+    "openai_api_invocation_performed": false,
+    "parallel_advice_rules_added": false,
+    "portfolio_watchlist_mutation_performed": false,
+    "scheduler_or_worker_started": false,
+    "telegram_delivery_performed": false,
+    "yfinance_download_performed": false
+  },
+  "input_artifacts": {
+    "canonical_universe": "config/market_engine/universes/canonical_universe.json",
+    "fundamental_evidence_path": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z/normalized_fundamental_quality.csv",
+    "market_context_path": "data/processed/market_regime.csv",
+    "portfolio_context_path": "data/market_engine/portfolio_contexts/local_portfolio_context.json",
+    "price_history_root": "data/processed",
+    "technical_screening_artifact": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z"
+  },
+  "input_checksums": {
+    "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z/normalized_fundamental_quality.csv": "bbc7303989077076e769f9e7fc9b72aef458091e9aa7055ee752f7d844968721",
+    "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z": "1361c3d16aad412025d0dbd9612dfacfca0eeeff762fbd31bd73f0ad04a2ebae",
+    "config/market_engine/universes/canonical_universe.json": "c0e2c466af51ee3f34202148b5275f46248c893ce4b3851352d0fbded87148be",
+    "data/market_engine/portfolio_contexts/local_portfolio_context.json": "f1bcea21b5f31753b5e2c1513a91c896450339175521ca945d128fd8a1328581",
+    "data/processed/market_regime.csv": "00939334d6005df87ec92d314c9ad7305cf9296d159b18878de12139c50f8d66"
+  },
+  "market_context_selection_policy": "latest_valid_market_context_date",
+  "outputs": {
+    "advice_readiness_report": "advice_readiness_report.json",
+    "advice_readiness_report_md": "advice_readiness_report.md",
+    "blocker_report": "blocker_report.json",
+    "canonical_advice_input_index": "canonical_advice_input_index.json",
+    "canonical_advice_output_index": "canonical_advice_output_index.json",
+    "evidence_coverage_index": "evidence_coverage_index.json",
+    "evidence_coverage_summary": "evidence_coverage_summary.json",
+    "evidence_coverage_summary_md": "evidence_coverage_summary.md",
+    "full_advice_ranking": "full_advice_ranking.json",
+    "full_advice_ranking_md": "full_advice_ranking.md",
+    "manifest": "manifest.json",
+    "source_lineage": "source_lineage.json",
+    "technical_ranking": "technical_ranking.json",
+    "technical_to_advice_transition": "technical_to_advice_transition.json",
+    "throughput_report": "throughput_report.json",
+    "top_full_advice_candidates": "top_full_advice_candidates.md",
+    "unable_to_advise": "unable_to_advise.json",
+    "unable_to_advise_md": "unable_to_advise.md"
+  },
+  "portfolio_context_path": "data/market_engine/portfolio_contexts/local_portfolio_context.json",
+  "ranking_summary": {
+    "full_advice_ranking_count": 0,
+    "technical_ranking_count": 330
+  },
+  "run_id": "me-run31-after-me-data06-review-fix-20260718T113254Z",
+  "run_status": "completed_with_blockers",
+  "schema_version": "market-engine-run31-broad-non-price-evidence-advice-readiness-v1",
+  "technical_input_validation": {
+    "current_canonical_universe_version": "me-data04-complete-canonical-local-market-dataset-v1",
+    "index_path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/universe_analysis_index.json",
+    "manifest_cutoff_date": null,
+    "manifest_path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/manifest.json",
+    "technical_input_status": "valid",
+    "technical_input_universe_version": null,
+    "technical_screening_run_id": "me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z",
+    "universe_compatibility": "inferred_from_exact_instrument_ids"
+  },
+  "technical_screening_run_id": "me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z"
+}

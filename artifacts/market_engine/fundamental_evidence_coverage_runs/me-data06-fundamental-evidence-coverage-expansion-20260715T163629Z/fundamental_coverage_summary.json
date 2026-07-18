@@ -1,0 +1,140 @@
+{
+  "after": {
+    "canonical_advice_input_ready": 6,
+    "full_advice_ready": 0,
+    "fundamental_complete": 6,
+    "fundamental_missing": 907,
+    "fundamental_partial": 39,
+    "invalid_stale_conflicting": 0,
+    "unable_to_advise": 946
+  },
+  "before": {
+    "canonical_advice_input_ready": 4,
+    "full_advice_ready": 0,
+    "fundamental_complete": 4,
+    "fundamental_missing": 931,
+    "fundamental_partial": 17,
+    "invalid_stale_conflicting": 0,
+    "source_run_id": "me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z",
+    "unable_to_advise": 948
+  },
+  "blocker_summary": {
+    "missing_fundamental_context": 907,
+    "sec_companyfacts_not_sufficient_for_mvp_quality_contract": 9
+  },
+  "canonical_universe_size": 952,
+  "canonical_universe_version": "me-data04-complete-canonical-local-market-dataset-v1",
+  "classification_rules": {
+    "complete": "all existing MVP fundamental quality metrics are present, numeric, current, and non-conflicting",
+    "conflicting": "same-priority same-date evidence rows disagree materially",
+    "invalid": "source schema, source date, provenance, or numeric metric validation failed",
+    "missing": "no approved local fundamental evidence source matched the canonical ticker",
+    "partial": "at least one approved local fundamental evidence family is present but the MVP quality contract is incomplete",
+    "stale": "source date is more than 120 days before the as-of date",
+    "unsupported": "local evidence exists but is not a supported fundamental-quality contract input"
+  },
+  "comparison": {
+    "absolute_improvement": {
+      "canonical_advice_input_ready": 2,
+      "full_advice_ready": 0,
+      "fundamental_complete": 2,
+      "fundamental_missing": -24,
+      "fundamental_partial": 22,
+      "unable_to_advise": -2
+    },
+    "missing_to_complete_tickers": [
+      "ENPH",
+      "FTNT"
+    ],
+    "missing_to_partial_tickers": [
+      "AMAT",
+      "ANET",
+      "ASML",
+      "AVGO",
+      "COST",
+      "DELL",
+      "EOG",
+      "EQIX",
+      "EW",
+      "EXPD",
+      "FDX",
+      "HAL",
+      "HLT",
+      "HPE",
+      "META",
+      "MSFT",
+      "NVDA",
+      "TSM"
+    ],
+    "newly_advice_input_ready_tickers": [
+      "ENPH",
+      "FTNT"
+    ],
+    "partial_to_complete_tickers": [],
+    "percent_improvement": {
+      "canonical_advice_input_ready": 50.0,
+      "fundamental_complete": 50.0,
+      "fundamental_partial": 129.4118
+    },
+    "regressions": []
+  },
+  "downstream_me_run31": {
+    "advice_engine_completed": 952,
+    "attempted": 952,
+    "canonical_advice_input_ready": 6,
+    "compact_evidence_dir": "artifacts/market_engine/run_evidence/me-run31-after-me-data06-fundamental-evidence-coverage-20260715T163629Z",
+    "full_advice_ready": 0,
+    "output_dir": "artifacts/market_engine/full_advice_readiness_runs/me-run31-after-me-data06-fundamental-evidence-coverage-20260715T163629Z",
+    "run_id": "me-run31-after-me-data06-fundamental-evidence-coverage-20260715T163629Z",
+    "unable_to_advise": 946
+  },
+  "family_counts": {
+    "balance_sheet_strength": {
+      "complete": 8,
+      "missing": 944
+    },
+    "cash_flow": {
+      "missing": 907,
+      "partial": 9,
+      "unsupported": 36
+    },
+    "company_identity_profile": {
+      "complete": 36,
+      "missing": 907,
+      "partial": 9
+    },
+    "overall_canonical_fundamental_context": {
+      "complete": 6,
+      "missing": 907,
+      "partial": 39
+    },
+    "profitability": {
+      "complete": 12,
+      "missing": 907,
+      "partial": 33
+    },
+    "revenue_growth": {
+      "complete": 19,
+      "missing": 924,
+      "partial": 9
+    },
+    "valuation": {
+      "unsupported": 952
+    }
+  },
+  "overall_counts": {
+    "complete": 6,
+    "conflicting": 0,
+    "invalid": 0,
+    "missing": 907,
+    "partial": 39,
+    "stale": 0,
+    "unsupported": 0
+  },
+  "schema_version": "market-engine-data06-fundamental-coverage-summary-v1",
+  "source_priority": {
+    "existing_processed_fundamental_quality": 80,
+    "manual_mvp_fundamentals": 100,
+    "sec_companyfacts_source_context": 60
+  }
+}
