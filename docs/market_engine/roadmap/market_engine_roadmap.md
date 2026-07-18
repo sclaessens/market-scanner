@@ -115,7 +115,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
   -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
   -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
-  -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers
+  -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
+  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -253,10 +254,29 @@ aggregate coverage counts, found no regressions, and corrected the transition
 set from 18 to 22 `missing_to_partial` tickers. Inventory freshness now
 distinguishes current, unknown, and not-assessed sources from consumeability.
 
-ME-DATA07 is now the recommended baseline sprint because ME-DATA06 proved the
-adapter and local evidence-normalization path, while showing that the remaining
-blocker is the absence of approved, current, normalized MVP fundamental
-metrics for 907 canonical instruments.
+ME-DATA07 implemented a governance-gated operator import and metric-validation
+flow. Its actual pilot
+`me-data07-validated-mvp-fundamental-metric-sourcing-20260718T122028Z` selected
+12 tickers but performed zero provider calls and imported zero records because
+the explicit operator evidence package was absent. Expanded/full sourcing and
+downstream ME-DATA06 and ME-RUN31 remained gated, so the validated baseline
+remains 6 complete, 39 partial, 907 missing, 6 canonical advice-input-ready,
+0 full-advice-ready, and 946 unable-to-advise. No coverage or regression claim
+was made.
+
+PR #463 review follow-up reran the blocked pilot as
+`me-data07-validated-mvp-fundamental-metric-sourcing-review-fix-20260718T141045Z`
+and corrected terminal batch reconciliation. The run now reports 12 selected,
+0 successful, 12 blocked, 0 failed, 0 pending, and 940 not selected from the
+same canonical per-ticker statuses. The missing input caused one presence check
+and zero actual import attempts. Coverage and readiness remain unchanged.
+
+ME-DATA08 is now the recommended baseline sprint. It should prepare and
+validate a governance-approved operator package with primary-source metric
+lineage, then use the existing ME-DATA07 pilot and downstream gates. A new live
+provider route remains out of scope until source identity, licensing,
+credentials, metric definitions, mappings, and snapshot persistence are
+explicitly approved.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 

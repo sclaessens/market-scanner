@@ -50,7 +50,8 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
   -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
   -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
-  -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers
+  -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
+  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
 ```
 
 ## Superseded baseline pointers
@@ -568,6 +569,54 @@ not-assessed source.
 ME-DATA06 proves that local evidence inventory, normalization, validation, and
 ME-RUN31 consumption work. The remaining baseline blocker is still fundamental
 coverage breadth: 907 canonical instruments have missing fundamental context.
+
+## Current implemented ME-DATA07 result
+
+ME-DATA07 added the validated sourcing command:
+
+```text
+src/market_engine/data/validated_fundamental_metric_sourcing.py
+```
+
+The actual pilot run was:
+
+```text
+run_id: me-data07-validated-mvp-fundamental-metric-sourcing-20260718T122028Z
+source_mode: operator_import
+batch: pilot
+selected: 12
+provider_calls: 0
+imported: 0
+normalized: 0
+status: blocked_external_source_requirement
+reason: operator_import_package_missing
+```
+
+The runtime reconciled 952 canonical tickers and classified 322 Tier 1, 22
+Tier 2, and 593 Tier 3 eligible sourcing targets. It implemented source
+approval, explicit symbol mapping, operator package validation, immutable raw
+snapshot persistence after validation, per-metric lineage, deterministic
+normalization, and an explicit downstream ME-DATA06 gate.
+
+No approved full-contract provider adapter exists in the repository and no
+operator package was present. Expanded/full sourcing and downstream ME-DATA06
+and ME-RUN31 runs therefore remained gated. Coverage was not mutated and stays
+at 6 complete, 39 partial, 907 missing, 6 canonical advice-input-ready, 0
+full-advice-ready, and 946 unable-to-advise. No improvement or regression was
+claimed without a measured downstream run.
+
+PR #463 review follow-up reran the blocked pilot as
+`me-data07-validated-mvp-fundamental-metric-sourcing-review-fix-20260718T141045Z`.
+Canonical per-ticker status reconciliation now reports 12 selected, 0
+successful, 12 blocked, 0 failed, 0 pending, and 940 not selected. The missing
+input records one presence check and zero parser/import attempts. Coverage,
+readiness, and the recommended architecture direction are unchanged.
+
+The next baseline sprint is:
+
+```text
+ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
+```
 
 ## Completed ME-ADV01 result
 

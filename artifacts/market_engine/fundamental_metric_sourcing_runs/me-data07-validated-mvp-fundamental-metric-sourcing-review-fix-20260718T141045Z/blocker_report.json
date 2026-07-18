@@ -1,0 +1,17 @@
+{
+  "next_action": "supply a governance-approved operator package with primary-source metric lineage",
+  "primary_blocker": "operator_import_package_missing",
+  "remaining_fundamental_missing": 907,
+  "remaining_fundamental_partial": 39,
+  "run_status": "blocked_external_source_requirement",
+  "schema_version": "market-engine-data07-blocker-report-v1",
+  "selected_blocked_count": 12,
+  "selected_failed_count": 0,
+  "selected_status_counts": {
+    "blocked_no_source": 12
+  },
+  "status_counts": {
+    "blocked_no_source": 12,
+    "not_selected": 940
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "allowed_metric_families": [
+    "revenue_growth_yoy",
+    "eps_growth_yoy",
+    "gross_margin",
+    "operating_margin",
+    "debt_to_equity"
+  ],
+  "approval_status": "approved_operator_supplied_import",
+  "authentication_method": "none for local operator import",
+  "chosen_source_path": "operator_input/market_engine/me-data07/fundamental_metrics.json",
+  "credentials_status": "not_required_for_operator_import",
+  "freshness_capability": "source_date validated against 120-day threshold",
+  "licensing_constraints": "no broad provider license is documented; operator must supply evidence with permitted local use",
+  "local_persistence": "immutable run-scoped raw snapshot plus checksum manifest after validation",
+  "provenance_quality": "primary-source reference and checksum required",
+  "provider_identity": "operator-supplied primary-source package",
+  "rate_limit": {
+    "budget": 0,
+    "requests": 0,
+    "retries": 0,
+    "timeout_seconds": 0
+  },
+  "region_exchange_support": "only unambiguous canonical mappings",
+  "rejection_reason": null,
+  "routes_inspected": [
+    {
+      "decision": "approved_existing_local_acquisition",
+      "limitation": "already consumed; does not expand the remaining coverage",
+      "repository_support": "operational",
+      "route": "existing_local_me_data06_evidence"
+    },
+    {
+      "decision": "blocked_unsupported_metric_contract",
+      "limitation": "not approved as broad provider and does not supply all five MVP ratios",
+      "repository_support": "bounded smoke only",
+      "route": "sec_companyfacts_bounded_smoke_adapter"
+    },
+    {
+      "decision": "blocked_unsupported_metric_contract",
+      "limitation": "company profiles are not fundamental-quality evidence",
+      "repository_support": "deterministic company_profile adapter only",
+      "route": "automated_cached_source_acquisition"
+    },
+    {
+      "decision": "approved_operator_supplied_import",
+      "limitation": "requires an operator package with primary-source provenance",
+      "repository_support": "local import/staging precedent exists; ME-DATA07 adds metric validator",
+      "route": "operator_supplied_import"
+    },
+    {
+      "decision": "blocked_no_approved_source",
+      "limitation": "provider identity, licensing, credentials, mappings, and metric definitions are absent",
+      "repository_support": "no concrete approved adapter or provider contract",
+      "route": "third_party_fundamental_provider"
+    },
+    {
+      "decision": "blocked_missing_credentials",
+      "limitation": "credentials cannot authorize a provider route that has not first passed source approval",
+      "repository_support": "no approved full-contract adapter or credential boundary",
+      "route": "credentialed_provider_acquisition"
+    },
+    {
+      "decision": "blocked_unsupported_region",
+      "limitation": "no automatic cross-listing substitution is permitted",
+      "repository_support": "canonical mappings explicitly fail closed where source identity is unsupported",
+      "route": "unsupported_region_or_exchange"
+    }
+  ],
+  "schema_version": "market-engine-data07-source-approval-decision-v1",
+  "secret_names_detected": [],
+  "secret_values_persisted": false,
+  "source_mode": "operator_import",
+  "ticker_coverage": "canonical mapped equities supplied by operator",
+  "use_purpose": "MVP fundamental metric evidence only"
+}
