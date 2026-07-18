@@ -35,8 +35,20 @@ DEFAULT_INTAKE_FUNDAMENTALS_PATH = Path("data/intake/os5_scanner_ab_fundamentals
 DEFAULT_SEC_COMPANYFACTS_ROOT = Path("data/market_engine/source_snapshots/sec_companyfacts")
 DEFAULT_COMPANY_PROFILE_ROOT = Path("artifacts/market_engine")
 DEFAULT_TECHNICAL_SCREENING_ARTIFACT = Path("artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z")
+DEFAULT_BASELINE_RUN_EVIDENCE = Path(
+    "artifacts/market_engine/run_evidence/"
+    "me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z"
+)
 DEFAULT_AS_OF_DATE = "2026-07-10"
 FRESHNESS_MAX_AGE_DAYS = 120
+BASELINE_MANIFEST_ARTIFACT_TYPE = "market-engine-run31-broad-non-price-evidence-advice-readiness"
+BASELINE_MANIFEST_SCHEMA_VERSION = "market-engine-run31-broad-non-price-evidence-advice-readiness-v1"
+BASELINE_INDEX_ARTIFACT_TYPE = "market-engine-run31-evidence-coverage-index"
+BASELINE_INDEX_SCHEMA_VERSION = "market-engine-run31-evidence-coverage-index-v1"
+BASELINE_COMPACT_SCHEMA_VERSION = "market-engine-run31-compact-run-evidence-v1"
+RUN_STATUS_COMPLETED = "completed"
+RUN_STATUS_COMPLETED_WITH_REGRESSIONS = "completed_with_regressions"
+RUN_STATUS_FAILED_VALIDATION = "failed_validation"
 
 FUNDAMENTAL_QUALITY_COLUMNS = (
     "ticker",
@@ -85,6 +97,10 @@ class FundamentalEvidenceCoverageError(ValueError):
     pass
 
 
+class FundamentalEvidenceCoverageValidationError(FundamentalEvidenceCoverageError):
+    run_status = RUN_STATUS_FAILED_VALIDATION
+
+
 def run_fundamental_evidence_coverage(
     *,
     run_id: str,
@@ -97,6 +113,7 @@ def run_fundamental_evidence_coverage(
     sec_companyfacts_root: str | Path = DEFAULT_SEC_COMPANYFACTS_ROOT,
     company_profile_root: str | Path = DEFAULT_COMPANY_PROFILE_ROOT,
     as_of_date: str = DEFAULT_AS_OF_DATE,
+    baseline_run_evidence: str | Path | None = None,
     technical_screening_artifact: str | Path = DEFAULT_TECHNICAL_SCREENING_ARTIFACT,
     market_context_path: str | Path = DEFAULT_MARKET_CONTEXT_PATH,
     portfolio_context_path: str | Path | None = DEFAULT_PORTFOLIO_CONTEXT_PATH,
@@ -110,12 +127,18 @@ def run_fundamental_evidence_coverage(
     output_dir = Path(output_root) / run_id
     if output_dir.exists() and not allow_overwrite:
         raise FileExistsError(f"ME-DATA06 output directory already exists: {output_dir}")
-    output_dir.mkdir(parents=True, exist_ok=True)
 
     universe = build_universe_snapshot(canonical_universe, price_history_root=price_history_root)
     instruments = sorted(universe["instruments"], key=lambda row: str(row["instrument_id"]))
     canonical_symbols = [str(row["symbol"]).upper() for row in instruments]
     canonical_set = set(canonical_symbols)
+    baseline_input = Path(baseline_run_evidence or DEFAULT_BASELINE_RUN_EVIDENCE)
+    baseline = _load_before_baseline(
+        baseline_input,
+        canonical_symbols=canonical_symbols,
+        canonical_universe_version=universe.get("universe_version"),
+    )
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     existing_rows = _load_existing_fundamental_quality(existing_fundamental_path)
     manual_sources = _load_manual_fundamentals(raw_fundamentals_path, parsed_as_of)
@@ -142,7 +165,7 @@ def run_fundamental_evidence_coverage(
     normalized_path = output_dir / "normalized_fundamental_quality.csv"
     _write_csv(normalized_path, normalized_rows, FUNDAMENTAL_QUALITY_COLUMNS)
 
-    before = _before_baseline()
+    before = dict(baseline["counts"])
     summary = _coverage_summary(per_ticker, before=before, universe=universe)
     inventory = _evidence_source_inventory(
         canonical_set=canonical_set,
@@ -152,6 +175,7 @@ def run_fundamental_evidence_coverage(
         sec=sec_sources,
         intake=intake_sources,
         company_profiles=company_profile_inventory,
+        as_of=parsed_as_of,
     )
     run31_id = run31_run_id or f"{run_id}-me-run31-rerun"
     run31_artifacts, run31_output_dir = run_broad_non_price_evidence_advice_readiness(
@@ -169,7 +193,8 @@ def run_fundamental_evidence_coverage(
     )
     downstream = _downstream_summary(run31_artifacts, run31_output_dir)
     after = _after_summary(per_ticker, downstream)
-    comparison = _before_after_comparison(before, after, per_ticker, run31_artifacts)
+    comparison, transitions = _before_after_comparison(baseline, after, per_ticker, run31_artifacts)
+    run_status = comparison["run_status"]
     summary["after"] = after
     summary["comparison"] = comparison
     summary["downstream_me_run31"] = downstream
@@ -180,6 +205,7 @@ def run_fundamental_evidence_coverage(
             "artifact_type": "market-engine-fundamental-evidence-coverage-run",
             "sprint_id": SPRINT_ID,
             "run_id": run_id,
+            "run_status": run_status,
             "command": "python -m market_engine.data.fundamental_evidence_coverage",
             "started_at": started_at,
             "completed_at": _utc_now(),
@@ -192,6 +218,8 @@ def run_fundamental_evidence_coverage(
                 "intake_fundamentals_path": Path(intake_fundamentals_path).as_posix(),
                 "sec_companyfacts_root": Path(sec_companyfacts_root).as_posix(),
                 "company_profile_root": Path(company_profile_root).as_posix(),
+                "baseline_run_evidence": baseline_input.as_posix(),
+                "baseline_artifact_path": baseline["artifact_path"],
                 "technical_screening_artifact": Path(technical_screening_artifact).as_posix(),
                 "market_context_path": Path(market_context_path).as_posix(),
                 "portfolio_context_path": Path(portfolio_context_path).as_posix() if portfolio_context_path else None,
@@ -203,7 +231,15 @@ def run_fundamental_evidence_coverage(
                 intake_fundamentals_path,
                 market_context_path,
                 portfolio_context_path,
+                baseline["artifact_path"],
             ),
+            "baseline_run_id": baseline["run_id"],
+            "baseline_artifact_path": baseline["artifact_path"],
+            "baseline_artifact_type": baseline["artifact_type"],
+            "baseline_schema_version": baseline["schema_version"],
+            "baseline_checksum": baseline["checksum"],
+            "baseline_canonical_universe_version": baseline["canonical_universe_version"],
+            "baseline_canonical_universe_size": baseline["canonical_universe_size"],
             "canonical_universe": {
                 "universe_version": universe.get("universe_version"),
                 "snapshot_date": universe.get("snapshot_date"),
@@ -234,6 +270,7 @@ def run_fundamental_evidence_coverage(
                 "normalized_fundamental_quality": normalized_path.as_posix(),
                 "downstream_me_run31_output_dir": run31_output_dir.as_posix(),
                 "downstream_me_run31_compact_evidence_dir": run31_artifacts.get("compact_evidence_dir"),
+                "per_ticker_fundamental_transitions": (output_dir / "per_ticker_fundamental_transitions.json").as_posix(),
             },
         },
         "evidence_source_inventory": inventory,
@@ -246,23 +283,28 @@ def run_fundamental_evidence_coverage(
         "missing_fundamental_evidence": {
             "schema_version": "market-engine-data06-missing-fundamental-evidence-v1",
             "run_id": run_id,
-            "tickers": [row["ticker"] for row in per_ticker if row["overall_fundamental_status"] == "missing"],
+            "tickers": sorted(
+                row["ticker"] for row in per_ticker if row["overall_fundamental_status"] == "missing"
+            ),
         },
         "partial_fundamental_evidence": {
             "schema_version": "market-engine-data06-partial-fundamental-evidence-v1",
             "run_id": run_id,
-            "tickers": [row["ticker"] for row in per_ticker if row["overall_fundamental_status"] == "partial"],
+            "tickers": sorted(
+                row["ticker"] for row in per_ticker if row["overall_fundamental_status"] == "partial"
+            ),
         },
         "invalid_or_stale_evidence": {
             "schema_version": "market-engine-data06-invalid-or-stale-evidence-v1",
             "run_id": run_id,
-            "tickers": [
+            "tickers": sorted(
                 row["ticker"]
                 for row in per_ticker
                 if row["overall_fundamental_status"] in {"invalid", "stale", "conflicting"}
-            ],
+            ),
         },
         "before_after_comparison": comparison,
+        "per_ticker_fundamental_transitions": transitions,
     }
     _write_artifacts(output_dir, artifacts)
     (output_dir / "coverage_report.md").write_text(_render_report(artifacts), encoding="utf-8")
@@ -722,24 +764,230 @@ def _coverage_summary(per_ticker: Sequence[Mapping[str, Any]], *, before: Mappin
     }
 
 
-def _before_baseline() -> dict[str, Any]:
-    path = Path("artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z/run_evidence_index.json")
-    if not path.exists():
-        return {}
-    payload = _read_json(path)
-    fundamental = (payload.get("evidence_status_counts") or {}).get("fundamental") or {}
-    metrics = payload.get("metrics") or {}
-    advice_counts = payload.get("advice_counts") or {}
+def _load_before_baseline(
+    baseline_run_evidence: str | Path,
+    *,
+    canonical_symbols: Sequence[str],
+    canonical_universe_version: Any,
+) -> dict[str, Any]:
+    operator_path = Path(baseline_run_evidence)
+    if not operator_path.exists():
+        raise FundamentalEvidenceCoverageValidationError(f"baseline path does not exist: {operator_path}")
+    index_path, compact_payload = _resolve_baseline_index(operator_path)
+    manifest_path = index_path.parent / "manifest.json"
+    if not manifest_path.exists():
+        raise FundamentalEvidenceCoverageValidationError(f"baseline manifest missing: {manifest_path}")
+    index = _read_baseline_json(index_path)
+    manifest = _read_baseline_json(manifest_path)
+    if not isinstance(index, Mapping) or not isinstance(manifest, Mapping):
+        raise FundamentalEvidenceCoverageValidationError("baseline JSON artifacts must be objects")
+    if manifest.get("artifact_type") != BASELINE_MANIFEST_ARTIFACT_TYPE:
+        raise FundamentalEvidenceCoverageValidationError(
+            f"unsupported baseline artifact type: {manifest.get('artifact_type')!r}"
+        )
+    if manifest.get("schema_version") != BASELINE_MANIFEST_SCHEMA_VERSION:
+        raise FundamentalEvidenceCoverageValidationError(
+            f"unsupported baseline manifest schema version: {manifest.get('schema_version')!r}"
+        )
+    if index.get("schema_version") != BASELINE_INDEX_SCHEMA_VERSION:
+        raise FundamentalEvidenceCoverageValidationError(
+            f"unsupported baseline index schema version: {index.get('schema_version')!r}"
+        )
+    run_id = str(index.get("run_id") or "").strip()
+    if not run_id or run_id != str(manifest.get("run_id") or "").strip():
+        raise FundamentalEvidenceCoverageValidationError("baseline run ID is missing or inconsistent")
+    if compact_payload is not None and run_id != str(compact_payload.get("run_id") or "").strip():
+        raise FundamentalEvidenceCoverageValidationError("compact and full baseline run IDs do not match")
+    fundamental_input = str((manifest.get("input_artifacts") or {}).get("fundamental_evidence_path") or "")
+    if "after-me-data06" in run_id.lower() or "fundamental_evidence_coverage_runs" in fundamental_input:
+        raise FundamentalEvidenceCoverageValidationError("ME-DATA06 after-output cannot be used as the before baseline")
+    baseline_version = manifest.get("canonical_universe_version")
+    if baseline_version is None:
+        raise FundamentalEvidenceCoverageValidationError("baseline canonical universe version is missing")
+    if canonical_universe_version is None:
+        raise FundamentalEvidenceCoverageValidationError("current canonical universe version is missing")
+    if str(baseline_version) != str(canonical_universe_version):
+        raise FundamentalEvidenceCoverageValidationError(
+            f"baseline canonical universe version mismatch: {baseline_version!r} != {canonical_universe_version!r}"
+        )
+    instruments = index.get("instruments")
+    if not isinstance(instruments, list):
+        raise FundamentalEvidenceCoverageValidationError("baseline per-ticker instruments are missing")
+    canonical = [str(symbol).upper() for symbol in canonical_symbols]
+    if len(canonical) != len(set(canonical)):
+        raise FundamentalEvidenceCoverageValidationError("current canonical universe contains duplicate tickers")
+    if len(instruments) != len(canonical):
+        raise FundamentalEvidenceCoverageValidationError(
+            f"baseline canonical universe size mismatch: {len(instruments)} != {len(canonical)}"
+        )
+    records = []
+    raw_status_counts: Counter[str] = Counter()
+    seen: set[str] = set()
+    for item in instruments:
+        if not isinstance(item, Mapping):
+            raise FundamentalEvidenceCoverageValidationError("baseline per-ticker record is not an object")
+        ticker = str(item.get("symbol") or "").upper()
+        if not ticker:
+            raise FundamentalEvidenceCoverageValidationError("baseline ticker is missing")
+        if ticker in seen:
+            raise FundamentalEvidenceCoverageValidationError(f"duplicate baseline ticker: {ticker}")
+        seen.add(ticker)
+        fundamental = item.get("fundamental_context")
+        if not isinstance(fundamental, Mapping):
+            raise FundamentalEvidenceCoverageValidationError(f"baseline fundamental context missing for {ticker}")
+        raw_status = str(fundamental.get("status") or "")
+        raw_status_counts[raw_status] += 1
+        status = _normalize_run31_fundamental_status(fundamental, ticker=ticker)
+        canonical_ready = item.get("canonical_advice_input_ready")
+        full_ready = item.get("full_advice_ready")
+        if not isinstance(canonical_ready, bool) or not isinstance(full_ready, bool):
+            raise FundamentalEvidenceCoverageValidationError(f"baseline readiness flags missing for {ticker}")
+        advice_label = item.get("canonical_advice_label")
+        if not isinstance(advice_label, str) or not advice_label:
+            raise FundamentalEvidenceCoverageValidationError(f"baseline advice status missing for {ticker}")
+        records.append(
+            {
+                "ticker": ticker,
+                "fundamental_status": status,
+                "advice_input_ready": canonical_ready,
+                "full_advice_ready": full_ready,
+                "unable_to_advise": advice_label == "unable_to_advise",
+            }
+        )
+    if seen != set(canonical):
+        missing = sorted(set(canonical) - seen)
+        extra = sorted(seen - set(canonical))
+        raise FundamentalEvidenceCoverageValidationError(
+            f"baseline canonical ticker identity mismatch; missing={missing[:10]}, extra={extra[:10]}"
+        )
+    coverage = manifest.get("coverage_summary")
+    if not isinstance(coverage, Mapping):
+        raise FundamentalEvidenceCoverageValidationError("baseline coverage summary is missing")
+    declared_fundamental = coverage.get("fundamental_counts")
+    if not isinstance(declared_fundamental, Mapping):
+        raise FundamentalEvidenceCoverageValidationError("baseline fundamental counts are missing")
+    for status in ("available", "partial", "missing", "stale", "invalid", "blocked", "not_applicable"):
+        if _strict_count(declared_fundamental.get(status), f"baseline fundamental {status}") != raw_status_counts.get(status, 0):
+            raise FundamentalEvidenceCoverageValidationError(f"baseline fundamental count mismatch for {status}")
+    if sum(raw_status_counts.values()) != len(records):
+        raise FundamentalEvidenceCoverageValidationError("baseline fundamental counts do not reconcile")
+    _validate_declared_count(coverage, "canonical_instruments", len(records), "baseline canonical instruments")
+    _validate_declared_count(coverage, "attempted_instruments", len(records), "baseline attempted instruments")
+    _validate_declared_count(
+        coverage,
+        "canonical_advice_input_ready",
+        sum(1 for row in records if row["advice_input_ready"]),
+        "baseline advice-input-ready",
+    )
+    _validate_declared_count(
+        coverage,
+        "full_advice_ready",
+        sum(1 for row in records if row["full_advice_ready"]),
+        "baseline full-advice-ready",
+    )
+    advice_counts = coverage.get("advice_counts")
+    if not isinstance(advice_counts, Mapping):
+        raise FundamentalEvidenceCoverageValidationError("baseline advice counts are missing")
+    _validate_declared_count(
+        advice_counts,
+        "unable_to_advise",
+        sum(1 for row in records if row["unable_to_advise"]),
+        "baseline unable-to-advise",
+    )
+    normalized_counts = Counter(str(row["fundamental_status"]) for row in records)
+    checksum = _sha256(index_path)
+    if compact_payload is not None:
+        expected_checksum = (
+            ((compact_payload.get("full_artifact") or {}).get("top_level_file_checksums") or {}).get(index_path.name)
+        )
+        if not expected_checksum or expected_checksum != checksum:
+            raise FundamentalEvidenceCoverageValidationError("baseline index checksum does not match compact evidence metadata")
+    records.sort(key=lambda row: row["ticker"])
     return {
-        "fundamental_complete": int(fundamental.get("available") or 0),
-        "fundamental_partial": int(fundamental.get("partial") or 0),
-        "fundamental_missing": int(fundamental.get("missing") or 0),
-        "invalid_stale_conflicting": int(fundamental.get("invalid") or 0) + int(fundamental.get("stale") or 0),
-        "canonical_advice_input_ready": int(metrics.get("canonical_advice_input_ready") or 0),
-        "full_advice_ready": int(metrics.get("full_advice_ready") or 0),
-        "unable_to_advise": int(advice_counts.get("unable_to_advise") or 0),
-        "source_run_id": payload.get("run_id"),
+        "run_id": run_id,
+        "artifact_path": index_path.as_posix(),
+        "artifact_type": BASELINE_INDEX_ARTIFACT_TYPE,
+        "schema_version": str(index["schema_version"]),
+        "checksum": checksum,
+        "canonical_universe_version": str(baseline_version),
+        "canonical_universe_size": len(records),
+        "records": records,
+        "counts": {
+            "fundamental_complete": normalized_counts.get("complete", 0),
+            "fundamental_partial": normalized_counts.get("partial", 0),
+            "fundamental_missing": normalized_counts.get("missing", 0),
+            "invalid_stale_conflicting": sum(
+                normalized_counts.get(status, 0) for status in ("invalid", "stale", "conflicting")
+            ),
+            "canonical_advice_input_ready": sum(1 for row in records if row["advice_input_ready"]),
+            "full_advice_ready": sum(1 for row in records if row["full_advice_ready"]),
+            "unable_to_advise": sum(1 for row in records if row["unable_to_advise"]),
+            "source_run_id": run_id,
+        },
     }
+
+
+def _resolve_baseline_index(path: Path) -> tuple[Path, Mapping[str, Any] | None]:
+    if path.is_dir() and (path / "evidence_coverage_index.json").exists():
+        return path / "evidence_coverage_index.json", None
+    compact_index = path / "run_evidence_index.json" if path.is_dir() else path
+    if compact_index.name == "evidence_coverage_index.json":
+        return compact_index, None
+    if compact_index.name != "run_evidence_index.json" or not compact_index.exists():
+        raise FundamentalEvidenceCoverageValidationError(
+            "baseline must be a full ME-RUN31 evidence directory, evidence_coverage_index.json, "
+            "or compact ME-RUN31 evidence directory"
+        )
+    compact = _read_baseline_json(compact_index)
+    if not isinstance(compact, Mapping):
+        raise FundamentalEvidenceCoverageValidationError("compact baseline index must be an object")
+    if compact.get("schema_version") != BASELINE_COMPACT_SCHEMA_VERSION:
+        raise FundamentalEvidenceCoverageValidationError(
+            f"unsupported compact baseline schema version: {compact.get('schema_version')!r}"
+        )
+    full_path = (compact.get("full_artifact") or {}).get("local_path")
+    if not full_path:
+        raise FundamentalEvidenceCoverageValidationError("compact baseline does not identify its full artifact")
+    index_path = Path(str(full_path)) / "evidence_coverage_index.json"
+    if not index_path.exists():
+        raise FundamentalEvidenceCoverageValidationError(
+            f"compact baseline lacks required per-ticker full artifact: {index_path}"
+        )
+    return index_path, compact
+
+
+def _read_baseline_json(path: Path) -> Any:
+    try:
+        return _read_json(path)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise FundamentalEvidenceCoverageValidationError(f"baseline JSON is not parseable: {path}") from exc
+
+
+def _normalize_run31_fundamental_status(context: Mapping[str, Any], *, ticker: str) -> str:
+    raw_status = str(context.get("status") or "")
+    if raw_status == "available":
+        return "complete"
+    if raw_status in {"partial", "missing", "stale"}:
+        return raw_status
+    if raw_status in {"invalid", "blocked"}:
+        blockers = {str(item) for item in context.get("blockers") or []}
+        if "duplicate_fundamental_rows_conflict" in blockers or any("conflict" in item for item in blockers):
+            return "conflicting"
+        return "invalid"
+    raise FundamentalEvidenceCoverageValidationError(
+        f"unsupported baseline fundamental status for {ticker}: {raw_status!r}"
+    )
+
+
+def _strict_count(value: Any, label: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise FundamentalEvidenceCoverageValidationError(f"{label} must be a non-negative integer")
+    return value
+
+
+def _validate_declared_count(payload: Mapping[str, Any], key: str, actual: int, label: str) -> None:
+    if _strict_count(payload.get(key), label) != actual:
+        raise FundamentalEvidenceCoverageValidationError(f"{label} count mismatch")
 
 
 def _after_summary(per_ticker: Sequence[Mapping[str, Any]], downstream: Mapping[str, Any]) -> dict[str, Any]:
@@ -756,29 +1004,146 @@ def _after_summary(per_ticker: Sequence[Mapping[str, Any]], downstream: Mapping[
 
 
 def _before_after_comparison(
-    before: Mapping[str, Any],
+    baseline: Mapping[str, Any],
     after: Mapping[str, Any],
     per_ticker: Sequence[Mapping[str, Any]],
     run31_artifacts: Mapping[str, Any],
-) -> dict[str, Any]:
-    before_missing = set()
-    before_partial = set()
-    # The compact before package does not retain all complete per-ticker rows, so
-    # transitions are computed against the current baseline CSV states.
-    for row in _load_existing_fundamental_quality(DEFAULT_EXISTING_FUNDAMENTAL_PATH):
-        ticker = str(row.get("ticker") or "").upper()
-        if row.get("quality_metadata_status") == "row_missing":
-            before_missing.add(ticker)
-        elif row.get("quality_metadata_status") == "partial":
-            before_partial.add(ticker)
-    after_complete = {str(row["ticker"]) for row in per_ticker if row["overall_fundamental_status"] == "complete"}
-    after_partial = {str(row["ticker"]) for row in per_ticker if row["overall_fundamental_status"] == "partial"}
-    ready_tickers = [
-        row["symbol"]
-        for row in (run31_artifacts.get("evidence_coverage_index") or {}).get("instruments", [])
-        if row.get("canonical_advice_input_ready")
-    ]
-    return {
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    before_records = {str(row["ticker"]): row for row in baseline["records"]}
+    after_status = {str(row["ticker"]): str(row["overall_fundamental_status"]) for row in per_ticker}
+    if len(after_status) != len(per_ticker):
+        raise FundamentalEvidenceCoverageValidationError("duplicate after fundamental tickers")
+    run31_index = run31_artifacts.get("evidence_coverage_index")
+    if not isinstance(run31_index, Mapping) or run31_index.get("schema_version") != BASELINE_INDEX_SCHEMA_VERSION:
+        raise FundamentalEvidenceCoverageValidationError("after ME-RUN31 evidence index is missing or unsupported")
+    after_instruments = run31_index.get("instruments")
+    if not isinstance(after_instruments, list):
+        raise FundamentalEvidenceCoverageValidationError("after ME-RUN31 per-ticker evidence is missing")
+    after_records: dict[str, dict[str, Any]] = {}
+    after_raw_status_counts: Counter[str] = Counter()
+    for item in after_instruments:
+        if not isinstance(item, Mapping):
+            raise FundamentalEvidenceCoverageValidationError("after ME-RUN31 per-ticker record is not an object")
+        ticker = str(item.get("symbol") or "").upper()
+        if not ticker or ticker in after_records:
+            raise FundamentalEvidenceCoverageValidationError(f"duplicate or missing after ticker: {ticker!r}")
+        fundamental = item.get("fundamental_context")
+        if not isinstance(fundamental, Mapping):
+            raise FundamentalEvidenceCoverageValidationError(f"after fundamental context missing for {ticker}")
+        after_raw_status_counts[str(fundamental.get("status") or "")] += 1
+        status = _normalize_run31_fundamental_status(fundamental, ticker=ticker)
+        if after_status.get(ticker) != status:
+            raise FundamentalEvidenceCoverageValidationError(f"after fundamental status mismatch for {ticker}")
+        advice_ready = item.get("canonical_advice_input_ready")
+        full_ready = item.get("full_advice_ready")
+        if not isinstance(advice_ready, bool) or not isinstance(full_ready, bool):
+            raise FundamentalEvidenceCoverageValidationError(f"after readiness flags missing for {ticker}")
+        advice_label = item.get("canonical_advice_label")
+        if not isinstance(advice_label, str) or not advice_label:
+            raise FundamentalEvidenceCoverageValidationError(f"after advice status missing for {ticker}")
+        after_records[ticker] = {
+            "ticker": ticker,
+            "fundamental_status": status,
+            "advice_input_ready": advice_ready,
+            "full_advice_ready": full_ready,
+            "unable_to_advise": advice_label == "unable_to_advise",
+        }
+    if set(before_records) != set(after_records) or set(after_records) != set(after_status):
+        raise FundamentalEvidenceCoverageValidationError("before and after canonical ticker identities do not match")
+    expected_after = {
+        "fundamental_complete": sum(1 for row in after_records.values() if row["fundamental_status"] == "complete"),
+        "fundamental_partial": sum(1 for row in after_records.values() if row["fundamental_status"] == "partial"),
+        "fundamental_missing": sum(1 for row in after_records.values() if row["fundamental_status"] == "missing"),
+        "invalid_stale_conflicting": sum(
+            1 for row in after_records.values() if row["fundamental_status"] in {"invalid", "stale", "conflicting"}
+        ),
+        "canonical_advice_input_ready": sum(1 for row in after_records.values() if row["advice_input_ready"]),
+        "full_advice_ready": sum(1 for row in after_records.values() if row["full_advice_ready"]),
+        "unable_to_advise": sum(1 for row in after_records.values() if row["unable_to_advise"]),
+    }
+    for key, value in expected_after.items():
+        if after.get(key) != value:
+            raise FundamentalEvidenceCoverageValidationError(f"after count mismatch for {key}")
+    after_summary = (run31_artifacts.get("evidence_coverage_summary") or {}).get("summary")
+    if not isinstance(after_summary, Mapping):
+        raise FundamentalEvidenceCoverageValidationError("after ME-RUN31 coverage summary is missing")
+    _validate_declared_count(after_summary, "attempted_instruments", len(after_records), "after attempted instruments")
+    _validate_declared_count(after_summary, "canonical_instruments", len(after_records), "after canonical instruments")
+    _validate_declared_count(
+        after_summary,
+        "canonical_advice_input_ready",
+        expected_after["canonical_advice_input_ready"],
+        "after advice-input-ready",
+    )
+    _validate_declared_count(
+        after_summary,
+        "full_advice_ready",
+        expected_after["full_advice_ready"],
+        "after full-advice-ready",
+    )
+    after_advice_counts = after_summary.get("advice_counts")
+    if not isinstance(after_advice_counts, Mapping):
+        raise FundamentalEvidenceCoverageValidationError("after ME-RUN31 advice counts are missing")
+    _validate_declared_count(
+        after_advice_counts,
+        "unable_to_advise",
+        expected_after["unable_to_advise"],
+        "after unable-to-advise",
+    )
+    after_fundamental_counts = after_summary.get("fundamental_counts")
+    if not isinstance(after_fundamental_counts, Mapping):
+        raise FundamentalEvidenceCoverageValidationError("after ME-RUN31 fundamental counts are missing")
+    for status in ("available", "partial", "missing", "stale", "invalid", "blocked", "not_applicable"):
+        if _strict_count(after_fundamental_counts.get(status), f"after fundamental {status}") != after_raw_status_counts.get(status, 0):
+            raise FundamentalEvidenceCoverageValidationError(f"after fundamental count mismatch for {status}")
+    transitions = []
+    improvement_tickers: dict[str, list[str]] = {}
+    regression_tickers: dict[str, list[str]] = {}
+    transition_tickers: dict[str, list[str]] = {}
+    for ticker in sorted(before_records):
+        before_row = before_records[ticker]
+        after_row = after_records[ticker]
+        transition_types = _fundamental_transition_types(before_row, after_row)
+        for transition_type in transition_types:
+            transition_tickers.setdefault(transition_type, []).append(ticker)
+            if transition_type in _improvement_transition_types():
+                improvement_tickers.setdefault(transition_type, []).append(ticker)
+            if transition_type in _regression_transition_types():
+                regression_tickers.setdefault(transition_type, []).append(ticker)
+        transitions.append(
+            {
+                "ticker": ticker,
+                "before_fundamental_status": before_row["fundamental_status"],
+                "after_fundamental_status": after_row["fundamental_status"],
+                "before_advice_input_ready": before_row["advice_input_ready"],
+                "after_advice_input_ready": after_row["advice_input_ready"],
+                "before_full_advice_ready": before_row["full_advice_ready"],
+                "after_full_advice_ready": after_row["full_advice_ready"],
+                "transition_types": transition_types,
+            }
+        )
+    for transition_type in sorted(_improvement_transition_types()):
+        improvement_tickers.setdefault(transition_type, [])
+    for transition_type in sorted(_regression_transition_types()):
+        regression_tickers.setdefault(transition_type, [])
+    regression_ticker_set = {ticker for tickers in regression_tickers.values() for ticker in tickers}
+    improvement_ticker_set = {ticker for tickers in improvement_tickers.values() for ticker in tickers}
+    before = baseline["counts"]
+    run_status = RUN_STATUS_COMPLETED_WITH_REGRESSIONS if regression_ticker_set else RUN_STATUS_COMPLETED
+    comparison = {
+        "schema_version": "market-engine-data06-before-after-comparison-v2",
+        "run_status": run_status,
+        "baseline": {
+            "run_id": baseline["run_id"],
+            "artifact_path": baseline["artifact_path"],
+            "artifact_type": baseline["artifact_type"],
+            "schema_version": baseline["schema_version"],
+            "checksum": baseline["checksum"],
+            "canonical_universe_version": baseline["canonical_universe_version"],
+            "canonical_universe_size": baseline["canonical_universe_size"],
+        },
+        "before_counts": dict(before),
+        "after_counts": dict(after),
         "absolute_improvement": {
             key: (after.get(key, 0) or 0) - (before.get(key, 0) or 0)
             for key in ("fundamental_complete", "fundamental_partial", "fundamental_missing", "canonical_advice_input_ready", "full_advice_ready", "unable_to_advise")
@@ -787,11 +1152,104 @@ def _before_after_comparison(
             key: _percent_change(before.get(key, 0) or 0, after.get(key, 0) or 0)
             for key in ("fundamental_complete", "fundamental_partial", "canonical_advice_input_ready")
         },
-        "missing_to_partial_tickers": sorted(before_missing & after_partial),
-        "missing_to_complete_tickers": sorted(before_missing & after_complete),
-        "partial_to_complete_tickers": sorted(before_partial & after_complete),
-        "newly_advice_input_ready_tickers": sorted(set(ready_tickers) - {"GM", "PLD", "TT", "WELL"}),
-        "regressions": [],
+        "improvement_counts": {key: len(value) for key, value in sorted(improvement_tickers.items())},
+        "regression_counts": {key: len(value) for key, value in sorted(regression_tickers.items())},
+        "improvement_tickers": dict(sorted(improvement_tickers.items())),
+        "regression_tickers": dict(sorted(regression_tickers.items())),
+        "improvement_ticker_count": len(improvement_ticker_set),
+        "regression_ticker_count": len(regression_ticker_set),
+        "transition_counts": {key: len(value) for key, value in sorted(transition_tickers.items())},
+        "transition_detail_artifact": "per_ticker_fundamental_transitions.json",
+        "transition_reconciliation": {
+            "ticker_count": len(transitions),
+            "before_unique_tickers": len(before_records),
+            "after_unique_tickers": len(after_records),
+            "counts_reconciled": True,
+        },
+    }
+    detail = {
+        "schema_version": "market-engine-data06-per-ticker-fundamental-transitions-v1",
+        "artifact_type": "market-engine-data06-per-ticker-fundamental-transitions",
+        "baseline_run_id": baseline["run_id"],
+        "after_run_id": run31_index.get("run_id"),
+        "ticker_count": len(transitions),
+        "tickers": transitions,
+    }
+    return comparison, detail
+
+
+def _fundamental_transition_types(before: Mapping[str, Any], after: Mapping[str, Any]) -> list[str]:
+    before_status = str(before["fundamental_status"])
+    after_status = str(after["fundamental_status"])
+    transitions = []
+    direct = f"{before_status}_to_{after_status}"
+    if direct in {
+        "complete_to_partial",
+        "complete_to_missing",
+        "complete_to_stale",
+        "complete_to_invalid",
+        "complete_to_conflicting",
+        "partial_to_missing",
+        "partial_to_stale",
+        "partial_to_invalid",
+        "partial_to_conflicting",
+        "missing_to_partial",
+        "missing_to_complete",
+        "partial_to_complete",
+    }:
+        transitions.append(direct)
+    if before_status != "stale" and after_status == "stale":
+        transitions.append("became_stale")
+    if before_status != "invalid" and after_status == "invalid":
+        transitions.append("became_invalid")
+    if before_status != "conflicting" and after_status == "conflicting":
+        transitions.append("became_conflicting")
+    if before_status == "stale" and after_status in {"complete", "partial"}:
+        transitions.append("resolved_stale")
+    if before_status == "invalid" and after_status in {"complete", "partial"}:
+        transitions.append("resolved_invalid")
+    if before_status == "conflicting" and after_status in {"complete", "partial"}:
+        transitions.append("resolved_conflicting")
+    if before["advice_input_ready"] and not after["advice_input_ready"]:
+        transitions.append("lost_advice_input_readiness")
+    if not before["advice_input_ready"] and after["advice_input_ready"]:
+        transitions.append("newly_advice_input_ready")
+    if before["full_advice_ready"] and not after["full_advice_ready"]:
+        transitions.append("lost_full_advice_readiness")
+    if not before["full_advice_ready"] and after["full_advice_ready"]:
+        transitions.append("newly_full_advice_ready")
+    return transitions
+
+
+def _improvement_transition_types() -> set[str]:
+    return {
+        "missing_to_partial",
+        "missing_to_complete",
+        "partial_to_complete",
+        "resolved_stale",
+        "resolved_invalid",
+        "resolved_conflicting",
+        "newly_advice_input_ready",
+        "newly_full_advice_ready",
+    }
+
+
+def _regression_transition_types() -> set[str]:
+    return {
+        "complete_to_partial",
+        "complete_to_missing",
+        "complete_to_stale",
+        "complete_to_invalid",
+        "complete_to_conflicting",
+        "partial_to_missing",
+        "partial_to_stale",
+        "partial_to_invalid",
+        "partial_to_conflicting",
+        "became_stale",
+        "became_invalid",
+        "became_conflicting",
+        "lost_advice_input_readiness",
+        "lost_full_advice_readiness",
     }
 
 
@@ -819,11 +1277,44 @@ def _evidence_source_inventory(
     sec: Mapping[str, Any],
     intake: Mapping[str, Any],
     company_profiles: Mapping[str, Any],
+    as_of: date,
 ) -> dict[str, Any]:
     sources = []
-    sources.append(_inventory_row("existing_processed_fundamental_quality", "processed fundamental quality CSV", existing_path, existing_rows, canonical_set, "consumeable_baseline", "existing ME-RUN31 contract input"))
-    sources.append(_inventory_row("manual_mvp_fundamentals", "raw manual MVP fundamentals CSV", manual["path"], manual.get("rows") or [], canonical_set, manual["status"], "consumed for normalized MVP fundamental quality where rows validate"))
+    sources.append(
+        _inventory_row(
+            "existing_processed_fundamental_quality",
+            "processed fundamental quality CSV",
+            existing_path,
+            existing_rows,
+            canonical_set,
+            "consumeable_baseline",
+            "existing ME-RUN31 contract input",
+            as_of=as_of,
+            date_fields=("source_last_updated", "source_timestamp", "date"),
+        )
+    )
+    sources.append(
+        _inventory_row(
+            "manual_mvp_fundamentals",
+            "raw manual MVP fundamentals CSV",
+            manual["path"],
+            manual.get("rows") or [],
+            canonical_set,
+            manual["status"],
+            "consumed for normalized MVP fundamental quality where rows validate",
+            as_of=as_of,
+            date_fields=("source_freshness_date", "as_of_date"),
+            validation_failed=manual.get("status") == "unsupported_schema"
+            and bool(set(manual.get("missing_columns") or []) & {"source_freshness_date", "as_of_date"}),
+        )
+    )
     sec_tickers = [row["ticker"] for row in sec.get("candidates") or []]
+    sec_freshness = _classify_inventory_freshness(
+        sec.get("candidates") or [],
+        as_of=as_of,
+        date_fields=("source_date",),
+        validation_failed=bool(sec.get("errors")),
+    )
     sources.append(
         {
             "evidence_family": "sec_companyfacts_source_context",
@@ -834,16 +1325,35 @@ def _evidence_source_inventory(
             "tickers_found": len(set(sec_tickers)),
             "canonical_matches": len(set(sec_tickers) & canonical_set),
             "unsupported_tickers": sorted(set(sec_tickers) - canonical_set),
-            "source_date": max((row.get("source_date") or "" for row in sec.get("candidates") or []), default=""),
-            "acquired_at": max((row.get("source_date") or "" for row in sec.get("candidates") or []), default=""),
+            "source_date": sec_freshness["latest_source_date"],
+            "acquired_at": sec_freshness["latest_source_date"],
             "provenance_status": "available" if sec.get("candidates") else "missing",
-            "freshness_status": "current",
+            "freshness_status": sec_freshness["freshness_status"],
+            "freshness_counts": sec_freshness["freshness_counts"],
             "validation_status": "valid" if not sec.get("errors") else "partial_with_errors",
             "market_engine_consumeable": True,
             "consumeability_reason": "source-context observations are consumed as partial evidence only; they do not satisfy the MVP quality metric contract",
         }
     )
-    sources.append(_inventory_row("intake_placeholder_fundamentals", "OS5 AB fundamentals intake pilot", intake["path"], intake.get("rows") or [], canonical_set, "not_consumeable", intake.get("reason") or "not runtime evidence"))
+    sources.append(
+        _inventory_row(
+            "intake_placeholder_fundamentals",
+            "OS5 AB fundamentals intake pilot",
+            intake["path"],
+            intake.get("rows") or [],
+            canonical_set,
+            "not_consumeable",
+            intake.get("reason") or "not runtime evidence",
+            as_of=as_of,
+            date_fields=("fundamentals_last_updated",),
+        )
+    )
+    company_profile_freshness = _classify_inventory_freshness(
+        [{} for _ in range(int(company_profiles["total_records"]))],
+        as_of=as_of,
+        date_fields=(),
+        applicable=False,
+    )
     sources.append(
         {
             "evidence_family": "company_profile",
@@ -857,7 +1367,8 @@ def _evidence_source_inventory(
             "source_date": "",
             "acquired_at": "",
             "provenance_status": "available" if company_profiles["total_records"] else "missing",
-            "freshness_status": "not_assessed_for_fundamental_quality",
+            "freshness_status": company_profile_freshness["freshness_status"],
+            "freshness_counts": company_profile_freshness["freshness_counts"],
             "validation_status": "not_consumeable_for_fundamental_quality",
             "market_engine_consumeable": False,
             "consumeability_reason": company_profiles["reason"],
@@ -870,6 +1381,9 @@ def _evidence_source_inventory(
             "sources_discovered": len(sources),
             "sources_consumed": sum(1 for row in sources if row["market_engine_consumeable"]),
             "sources_rejected": sum(1 for row in sources if not row["market_engine_consumeable"]),
+            "freshness_counts": dict(
+                sorted(Counter(str(row["freshness_status"]) for row in sources).items())
+            ),
         },
     }
 
@@ -882,9 +1396,18 @@ def _inventory_row(
     canonical_set: set[str],
     status: str,
     reason: str,
+    *,
+    as_of: date,
+    date_fields: Sequence[str],
+    validation_failed: bool = False,
 ) -> dict[str, Any]:
     tickers = {str(row.get("ticker") or "").upper() for row in rows if row.get("ticker")}
-    source_dates = [str(row.get("source_freshness_date") or row.get("source_last_updated") or row.get("source_timestamp") or row.get("as_of_date") or "") for row in rows]
+    freshness = _classify_inventory_freshness(
+        rows,
+        as_of=as_of,
+        date_fields=date_fields,
+        validation_failed=validation_failed,
+    )
     return {
         "evidence_family": family,
         "dataset_name": name,
@@ -894,13 +1417,73 @@ def _inventory_row(
         "tickers_found": len(tickers),
         "canonical_matches": len(tickers & canonical_set),
         "unsupported_tickers": sorted(tickers - canonical_set),
-        "source_date": max(source_dates) if source_dates else "",
-        "acquired_at": max(source_dates) if source_dates else "",
+        "source_date": freshness["latest_source_date"],
+        "acquired_at": freshness["latest_source_date"],
         "provenance_status": "available" if rows else "missing",
-        "freshness_status": "current",
+        "freshness_status": freshness["freshness_status"],
+        "freshness_counts": freshness["freshness_counts"],
         "validation_status": status,
         "market_engine_consumeable": status in {"consumeable", "consumeable_baseline"},
         "consumeability_reason": reason,
+    }
+
+
+def _classify_inventory_freshness(
+    records: Sequence[Mapping[str, Any]],
+    *,
+    as_of: date,
+    date_fields: Sequence[str],
+    applicable: bool = True,
+    validation_failed: bool = False,
+) -> dict[str, Any]:
+    if not applicable:
+        return {
+            "freshness_status": "not_assessed",
+            "freshness_counts": {"not_assessed": len(records)},
+            "latest_source_date": "",
+        }
+    counts: Counter[str] = Counter()
+    valid_dates: list[date] = []
+    for record in records:
+        raw = next((record.get(field) for field in date_fields if record.get(field) not in (None, "")), None)
+        if raw is None:
+            counts["unknown"] += 1
+            continue
+        try:
+            source_date = _parse_date(raw, field_name="inventory_source_date")
+        except FundamentalEvidenceCoverageError:
+            counts["invalid"] += 1
+            continue
+        if source_date > as_of:
+            counts["invalid"] += 1
+            continue
+        valid_dates.append(source_date)
+        counts["stale" if _is_stale(source_date, as_of=as_of) else "current"] += 1
+    if validation_failed:
+        counts["invalid"] += 1
+    if counts["invalid"]:
+        status = "invalid"
+    elif counts["unknown"]:
+        status = "unknown"
+    elif counts["current"] and counts["stale"]:
+        status = "mixed"
+    elif counts["current"]:
+        status = "current"
+    elif counts["stale"]:
+        status = "stale"
+    else:
+        status = "unknown"
+    freshness_counts = {
+        key: counts.get(key, 0)
+        for key in ("current", "stale", "invalid", "unknown")
+        if counts.get(key, 0)
+    }
+    if not freshness_counts and status == "unknown":
+        freshness_counts = {"unknown": 0}
+    return {
+        "freshness_status": status,
+        "freshness_counts": freshness_counts,
+        "latest_source_date": max(valid_dates).isoformat() if valid_dates else "",
     }
 
 
@@ -913,6 +1496,10 @@ def _write_artifacts(output_dir: Path, artifacts: Mapping[str, Any]) -> None:
     _write_json(output_dir / "partial_fundamental_evidence.json", artifacts["partial_fundamental_evidence"])
     _write_json(output_dir / "invalid_or_stale_evidence.json", artifacts["invalid_or_stale_evidence"])
     _write_json(output_dir / "before_after_comparison.json", artifacts["before_after_comparison"])
+    _write_json(
+        output_dir / "per_ticker_fundamental_transitions.json",
+        artifacts["per_ticker_fundamental_transitions"],
+    )
 
 
 def _render_report(artifacts: Mapping[str, Any]) -> str:
@@ -927,7 +1514,9 @@ def _render_report(artifacts: Mapping[str, Any]) -> str:
             f"# ME-DATA06 Fundamental Evidence Coverage Report",
             "",
             f"Run ID: `{manifest['run_id']}`",
+            f"Run status: `{manifest['run_status']}`",
             f"As-of date: `{manifest['as_of_date']}`",
+            f"Baseline run ID: `{manifest['baseline_run_id']}`",
             "",
             "## Evidence Sources",
             "",
@@ -955,10 +1544,11 @@ def _render_report(artifacts: Mapping[str, Any]) -> str:
             "",
             "## Improvements",
             "",
-            f"- missing to partial: {len(comparison['missing_to_partial_tickers'])}",
-            f"- missing to complete: {len(comparison['missing_to_complete_tickers'])}",
-            f"- partial to complete: {len(comparison['partial_to_complete_tickers'])}",
-            f"- newly advice-input-ready: {len(comparison['newly_advice_input_ready_tickers'])}",
+            f"- missing to partial: {comparison['improvement_counts']['missing_to_partial']}",
+            f"- missing to complete: {comparison['improvement_counts']['missing_to_complete']}",
+            f"- partial to complete: {comparison['improvement_counts']['partial_to_complete']}",
+            f"- newly advice-input-ready: {comparison['improvement_counts']['newly_advice_input_ready']}",
+            f"- regression tickers: {comparison['regression_ticker_count']}",
             "",
             "## Side Effects",
             "",
@@ -1052,6 +1642,13 @@ def _argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sec-companyfacts-root", default=DEFAULT_SEC_COMPANYFACTS_ROOT)
     parser.add_argument("--company-profile-root", default=DEFAULT_COMPANY_PROFILE_ROOT)
     parser.add_argument("--as-of-date", default=DEFAULT_AS_OF_DATE)
+    parser.add_argument(
+        "--baseline-run-evidence",
+        help=(
+            "ME-RUN31 compact/full evidence directory or evidence_coverage_index.json "
+            f"(default: {DEFAULT_BASELINE_RUN_EVIDENCE})"
+        ),
+    )
     parser.add_argument("--technical-screening-artifact", default=DEFAULT_TECHNICAL_SCREENING_ARTIFACT)
     parser.add_argument("--market-context-path", default=DEFAULT_MARKET_CONTEXT_PATH)
     parser.add_argument("--portfolio-context-path", default=DEFAULT_PORTFOLIO_CONTEXT_PATH)
@@ -1077,6 +1674,7 @@ def run_command(argv: Sequence[str] | None = None, *, stdout: TextIO, stderr: Te
             sec_companyfacts_root=args.sec_companyfacts_root,
             company_profile_root=args.company_profile_root,
             as_of_date=args.as_of_date,
+            baseline_run_evidence=args.baseline_run_evidence,
             technical_screening_artifact=args.technical_screening_artifact,
             market_context_path=args.market_context_path,
             portfolio_context_path=args.portfolio_context_path,

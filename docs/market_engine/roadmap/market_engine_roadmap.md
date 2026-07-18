@@ -246,6 +246,13 @@ Measured coverage improved from 4 to 6 complete fundamental contexts, 17 to
 advice-input-ready improved from 4 to 6, `unable_to_advise` improved from 948
 to 946, and full-advice-ready remained 0.
 
+The PR #462 review follow-up rerun
+`me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z` validated
+the before baseline from 952 per-ticker ME-RUN31 records, preserved the same
+aggregate coverage counts, found no regressions, and corrected the transition
+set from 18 to 22 `missing_to_partial` tickers. Inventory freshness now
+distinguishes current, unknown, and not-assessed sources from consumeability.
+
 ME-DATA07 is now the recommended baseline sprint because ME-DATA06 proved the
 adapter and local evidence-normalization path, while showing that the remaining
 blocker is the absence of approved, current, normalized MVP fundamental

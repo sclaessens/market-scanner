@@ -167,6 +167,12 @@ fundamental-quality evidence, and reduced missing fundamental contexts from
 17 to 39, canonical advice-input-ready instruments from 4 to 6, and
 unable-to-advise instruments from 948 to 946. Full-advice-ready remained 0.
 The newly advice-input-ready tickers were `ENPH` and `FTNT`.
+PR #462 review follow-up reran the comparison as
+`me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z` with an
+explicit validated ME-RUN31 per-ticker baseline. Aggregate coverage remained
+unchanged, no regressions were found, and the corrected transition set contains
+22 rather than 18 `missing_to_partial` tickers because `CLS`, `CRDO`, `IREN`,
+and `VRT` were omitted by the earlier CSV-based transition comparison.
 
 ### ME-EVAL02 - Scheduled/future outcome refresh using local snapshots
 
@@ -350,6 +356,12 @@ Remaining dominant blocker:
 ```text
 missing_fundamental_context: 907
 ```
+
+PR #462 review follow-up status: `completed`. The validated rerun
+`me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z` preserved
+the aggregate counts above, derived readiness from the baseline artifact,
+found no regressions, and corrected inventory freshness to three current
+sources, one unknown source, and one not-assessed source.
 
 ### ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers
 

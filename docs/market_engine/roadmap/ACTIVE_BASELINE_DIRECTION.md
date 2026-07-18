@@ -556,6 +556,15 @@ ENPH
 FTNT
 ```
 
+PR #462 review follow-up reran ME-DATA06 as
+`me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z` against an
+explicit checksum-validated 952-ticker ME-RUN31 baseline. The aggregate result
+remained unchanged, no regressions were detected, and the corrected comparison
+identified 22 `missing_to_partial` transitions, including `CLS`, `CRDO`,
+`IREN`, and `VRT`, which the earlier CSV-based comparison omitted. Inventory
+freshness now reports three current sources, one unknown source, and one
+not-assessed source.
+
 ME-DATA06 proves that local evidence inventory, normalization, validation, and
 ME-RUN31 consumption work. The remaining baseline blocker is still fundamental
 coverage breadth: 907 canonical instruments have missing fundamental context.
