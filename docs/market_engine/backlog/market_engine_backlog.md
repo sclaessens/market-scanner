@@ -394,6 +394,13 @@ therefore remains 6 complete, 39 partial, 907 missing, 6 canonical
 advice-input-ready, 0 full-advice-ready, and 946 unable-to-advise; no coverage
 improvement or regression claim was made.
 
+PR #463 review follow-up: the corrected blocked pilot
+`me-data07-validated-mvp-fundamental-metric-sourcing-review-fix-20260718T141045Z`
+now derives terminal batch counts from the canonical per-ticker statuses. It
+reconciles 12 selected as 0 successful, 12 blocked, 0 failed, and 0 pending,
+with 940 not selected. The missing operator input records one presence check
+and zero actual import attempts. Coverage and readiness remain unchanged.
+
 Remaining blocker: a governance-approved operator package with primary-source
 metric lineage is required. Recommended next sprint:
 

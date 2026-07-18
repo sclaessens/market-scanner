@@ -605,6 +605,13 @@ at 6 complete, 39 partial, 907 missing, 6 canonical advice-input-ready, 0
 full-advice-ready, and 946 unable-to-advise. No improvement or regression was
 claimed without a measured downstream run.
 
+PR #463 review follow-up reran the blocked pilot as
+`me-data07-validated-mvp-fundamental-metric-sourcing-review-fix-20260718T141045Z`.
+Canonical per-ticker status reconciliation now reports 12 selected, 0
+successful, 12 blocked, 0 failed, 0 pending, and 940 not selected. The missing
+input records one presence check and zero parser/import attempts. Coverage,
+readiness, and the recommended architecture direction are unchanged.
+
 The next baseline sprint is:
 
 ```text

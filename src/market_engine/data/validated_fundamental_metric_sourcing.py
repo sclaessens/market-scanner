@@ -46,6 +46,31 @@ DEFAULT_RAW_SNAPSHOT_ROOT = Path(
 SUPPORTED_SOURCE_MODES = frozenset({"inventory_only", "operator_import", "approved_acquisition"})
 SUPPORTED_BATCH_TIERS = frozenset({"pilot", "expanded", "full"})
 ALLOWED_METRIC_UNITS = frozenset({"ratio", "percent"})
+SUCCESS_SOURCING_STATUSES = frozenset({"complete", "partial"})
+BLOCKED_SOURCING_STATUSES = frozenset(
+    {
+        "blocked_no_source",
+        "blocked_missing_credentials",
+        "blocked_mapping",
+        "blocked_provider_coverage",
+        "blocked_missing_metric",
+        "blocked_invalid_payload",
+        "blocked_stale",
+        "blocked_period_mismatch",
+        "blocked_conflict",
+        "unsupported",
+    }
+)
+FAILED_SOURCING_STATUSES = frozenset({"failed_request", "failed_validation"})
+PENDING_SOURCING_STATUSES = frozenset({"selected"})
+TERMINAL_RUN_STATUSES = frozenset(
+    {
+        "blocked_external_source_requirement",
+        "failed_validation",
+        "completed_import_without_downstream",
+        "completed_with_coverage_measurement",
+    }
+)
 OUTPUT_NAMES = (
     "manifest",
     "source_approval_decision",
@@ -111,6 +136,7 @@ def run_validated_fundamental_metric_sourcing(
     snapshot: dict[str, Any] | None = None
     execution_status = "not_executed"
     execution_reason = "inventory_only_mode"
+    import_attempted = False
     if source_mode == "operator_import":
         import_path = Path(operator_import_path) if operator_import_path else None
         if import_path is None or not import_path.exists():
@@ -120,6 +146,7 @@ def run_validated_fundamental_metric_sourcing(
             execution_status = "blocked"
             execution_reason = "source_approval_failed"
         else:
+            import_attempted = True
             normalized_records, validation = _load_and_validate_operator_import(
                 import_path,
                 mappings={row["ticker"]: row for row in mappings},
@@ -145,7 +172,20 @@ def run_validated_fundamental_metric_sourcing(
         execution_reason = "no_approved_mvp_fundamental_provider"
 
     imported_by_ticker = {row["ticker"]: row for row in normalized_records}
-    _apply_execution_status(per_ticker, selected, imported_by_ticker, execution_status, execution_reason)
+    _apply_execution_status(
+        per_ticker,
+        selected,
+        imported_by_ticker,
+        execution_status,
+        execution_reason,
+        failed_tickers=set(validation.get("failed_tickers") or []),
+    )
+    preliminary_run_status = _run_status(source_mode, execution_status, None)
+    status_reconciliation = _reconcile_sourcing_status_counts(
+        per_ticker,
+        selected,
+        run_status=preliminary_run_status,
+    )
 
     output_dir.mkdir(parents=True, exist_ok=True)
     normalized_csv_path: Path | None = None
@@ -181,7 +221,7 @@ def run_validated_fundamental_metric_sourcing(
     before_counts = dict(baseline["counts"])
     after_counts = dict(downstream["after"]) if downstream else dict(before_counts)
     run_status = _run_status(source_mode, execution_status, downstream)
-    blocker_report = _blocker_report(per_ticker, execution_reason, run_status)
+    blocker_report = _blocker_report(per_ticker, execution_reason, run_status, status_reconciliation)
     batch_summary = _batch_execution_summary(
         source_mode=source_mode,
         batch_tier=batch_tier,
@@ -190,6 +230,8 @@ def run_validated_fundamental_metric_sourcing(
         validation=validation,
         execution_status=execution_status,
         execution_reason=execution_reason,
+        import_attempted=import_attempted,
+        status_reconciliation=status_reconciliation,
     )
     coverage = {
         "schema_version": "market-engine-data07-coverage-before-after-v1",
@@ -239,6 +281,7 @@ def run_validated_fundamental_metric_sourcing(
             ),
             "raw_snapshot": snapshot,
             "downstream": downstream,
+            "sourcing_status_reconciliation": status_reconciliation,
             "guardrails": {
                 "provider_calls_performed": False,
                 "network_access_performed": False,
@@ -754,6 +797,11 @@ def _load_and_validate_operator_import(
         ).hexdigest()
         normalized.append(normalized_row)
     normalized.sort(key=lambda row: row["ticker"])
+    failed_tickers = sorted(
+        ticker
+        for ticker in instruments
+        if any(issue.startswith(f"{ticker}_") for issue in issues)
+    )
     return normalized, {
         "schema_version": "market-engine-data07-metric-validation-summary-v1",
         "validation_status": "passed" if not issues else "failed",
@@ -763,6 +811,9 @@ def _load_and_validate_operator_import(
         "partial_count": sum(row["coverage_status"] == "partial" for row in normalized),
         "duplicate_records_deduplicated": duplicate_records_deduplicated,
         "excluded_unselected_count": excluded_unselected_count,
+        "failed_tickers": failed_tickers,
+        "validation_failed_record_count": len(failed_tickers),
+        "package_validation_failed": bool(issues),
         "metric_counts": {metric: metric_counts[metric] for metric in MVP_METRIC_FIELDS},
         "issues": sorted(set(issues)),
         "null_preserved": True,
@@ -810,19 +861,25 @@ def _apply_execution_status(
     imported: Mapping[str, Mapping[str, Any]],
     execution_status: str,
     execution_reason: str,
+    *,
+    failed_tickers: set[str] | None = None,
 ) -> None:
     selected_set = set(selected)
+    failed_ticker_set = failed_tickers or set()
     for row in rows:
         ticker = row["ticker"]
         if ticker not in selected_set:
             row["sourcing_status"] = "not_selected"
+        elif execution_status == "failed_validation" and ticker in failed_ticker_set:
+            row["sourcing_status"] = "failed_validation"
+            row["execution_issues"] = [execution_reason]
+        elif execution_status == "failed_validation":
+            row["sourcing_status"] = "blocked_invalid_payload"
+            row["execution_issues"] = ["operator_import_package_validation_failed"]
         elif ticker in imported:
             row["sourcing_status"] = imported[ticker]["coverage_status"]
         elif execution_reason == "operator_import_package_missing":
             row["sourcing_status"] = "blocked_no_source"
-            row["execution_issues"] = [execution_reason]
-        elif execution_status == "failed_validation":
-            row["sourcing_status"] = "failed_validation"
             row["execution_issues"] = [execution_reason]
         elif execution_reason == "no_approved_mvp_fundamental_provider":
             row["sourcing_status"] = "blocked_no_source"
@@ -834,35 +891,117 @@ def _apply_execution_status(
             row["sourcing_status"] = "selected"
 
 
+def _reconcile_sourcing_status_counts(
+    rows: Sequence[Mapping[str, Any]],
+    selected: Sequence[str],
+    *,
+    run_status: str,
+) -> dict[str, Any]:
+    selected_set = set(selected)
+    if len(selected_set) != len(selected):
+        raise ValidatedFundamentalMetricSourcingError("selected sourcing tickers are not unique")
+    rows_by_ticker = _unique_by_ticker(rows, key="ticker", label="ME-DATA07 sourcing status")
+    if not selected_set <= set(rows_by_ticker):
+        raise ValidatedFundamentalMetricSourcingError("selected sourcing tickers are missing from per-ticker status")
+
+    selected_status_counts = Counter(str(rows_by_ticker[ticker].get("sourcing_status") or "") for ticker in selected_set)
+    global_status_counts = Counter(str(row.get("sourcing_status") or "") for row in rows)
+    classified = SUCCESS_SOURCING_STATUSES | BLOCKED_SOURCING_STATUSES | FAILED_SOURCING_STATUSES | PENDING_SOURCING_STATUSES
+    unknown = sorted(status for status in selected_status_counts if status not in classified)
+    if unknown:
+        raise ValidatedFundamentalMetricSourcingError(
+            f"selected sourcing statuses are not classified: {', '.join(unknown)}"
+        )
+
+    success_count = sum(selected_status_counts[status] for status in SUCCESS_SOURCING_STATUSES)
+    blocked_count = sum(selected_status_counts[status] for status in BLOCKED_SOURCING_STATUSES)
+    failed_count = sum(selected_status_counts[status] for status in FAILED_SOURCING_STATUSES)
+    pending_count = sum(selected_status_counts[status] for status in PENDING_SOURCING_STATUSES)
+    selected_count = len(selected_set)
+    terminal_total = success_count + blocked_count + failed_count + pending_count
+    not_selected_count = global_status_counts["not_selected"]
+    if terminal_total != selected_count:
+        raise ValidatedFundamentalMetricSourcingError(
+            "selected sourcing status reconciliation failed: "
+            f"selected={selected_count}, success={success_count}, blocked={blocked_count}, "
+            f"failed={failed_count}, pending={pending_count}"
+        )
+    if not_selected_count != len(rows) - selected_count:
+        raise ValidatedFundamentalMetricSourcingError(
+            "not-selected sourcing status reconciliation failed: "
+            f"not_selected={not_selected_count}, expected={len(rows) - selected_count}"
+        )
+    if run_status in TERMINAL_RUN_STATUSES and pending_count:
+        raise ValidatedFundamentalMetricSourcingError(
+            f"terminal run status {run_status} contains {pending_count} pending selected tickers"
+        )
+
+    return {
+        "selected_count": selected_count,
+        "success_count": success_count,
+        "blocked_count": blocked_count,
+        "failed_count": failed_count,
+        "pending_count": pending_count,
+        "not_selected_count": not_selected_count,
+        "selected_status_counts": dict(sorted(selected_status_counts.items())),
+        "global_status_counts": dict(sorted(global_status_counts.items())),
+        "reconciliation": {
+            "selected_count": selected_count,
+            "terminal_success_count": success_count,
+            "terminal_blocked_count": blocked_count,
+            "terminal_failed_count": failed_count,
+            "pending_count": pending_count,
+            "reconciled": True,
+        },
+    }
+
+
 def _batch_execution_summary(**values: Any) -> dict[str, Any]:
     records = values["normalized_records"]
-    missing_selected = max(0, len(values["selected"]) - len(records)) if values["execution_status"] == "completed" else 0
+    status = values["status_reconciliation"]
+    imported_count = len(records) if values["execution_status"] == "completed" else 0
     return {
         "schema_version": "market-engine-data07-batch-execution-summary-v1",
         "source_mode": values["source_mode"],
         "batch_tier": values["batch_tier"],
         "execution_status": values["execution_status"],
         "execution_reason": values["execution_reason"],
-        "selected_count": len(values["selected"]),
+        "selected_count": status["selected_count"],
+        "success_count": status["success_count"],
+        "blocked_count": status["blocked_count"],
+        "failed_count": status["failed_count"],
+        "pending_count": status["pending_count"],
+        "not_selected_count": status["not_selected_count"],
+        "selected_status_counts": status["selected_status_counts"],
+        "reconciliation": status["reconciliation"],
         "requests_attempted": 0,
         "provider_calls_performed": 0,
-        "imports_attempted": 1 if values["source_mode"] == "operator_import" else 0,
-        "imported_count": len(records),
+        "input_presence_checks": 1 if values["source_mode"] == "operator_import" else 0,
+        "imports_attempted": 1 if values["import_attempted"] else 0,
+        "imported_count": imported_count,
         "normalized_count": len(records),
-        "complete_count": sum(row["coverage_status"] == "complete" for row in records),
-        "partial_count": sum(row["coverage_status"] == "partial" for row in records),
-        "blocked_count": missing_selected,
-        "failed_count": len(values["validation"].get("issues") or []),
+        "complete_count": status["selected_status_counts"].get("complete", 0),
+        "partial_count": status["selected_status_counts"].get("partial", 0),
+        "validation_issue_count": len(values["validation"].get("issues") or []),
+        "validation_failed_record_count": values["validation"].get("validation_failed_record_count", 0),
+        "package_validation_failed": bool(values["validation"].get("package_validation_failed")),
     }
 
 
-def _blocker_report(rows: Sequence[Mapping[str, Any]], execution_reason: str, run_status: str) -> dict[str, Any]:
-    status_counts = Counter(row["sourcing_status"] for row in rows)
+def _blocker_report(
+    rows: Sequence[Mapping[str, Any]],
+    execution_reason: str,
+    run_status: str,
+    status_reconciliation: Mapping[str, Any],
+) -> dict[str, Any]:
     return {
         "schema_version": "market-engine-data07-blocker-report-v1",
         "run_status": run_status,
         "primary_blocker": execution_reason,
-        "status_counts": dict(sorted(status_counts.items())),
+        "status_counts": status_reconciliation["global_status_counts"],
+        "selected_status_counts": status_reconciliation["selected_status_counts"],
+        "selected_blocked_count": status_reconciliation["blocked_count"],
+        "selected_failed_count": status_reconciliation["failed_count"],
         "remaining_fundamental_missing": sum(row["overall_fundamental_status"] == "missing" for row in rows),
         "remaining_fundamental_partial": sum(row["overall_fundamental_status"] == "partial" for row in rows),
         "next_action": "supply a governance-approved operator package with primary-source metric lineage",
@@ -891,6 +1030,9 @@ def _empty_validation_summary() -> dict[str, Any]:
         "partial_count": 0,
         "duplicate_records_deduplicated": 0,
         "excluded_unselected_count": 0,
+        "failed_tickers": [],
+        "validation_failed_record_count": 0,
+        "package_validation_failed": False,
         "metric_counts": {metric: 0 for metric in MVP_METRIC_FIELDS},
         "issues": [],
         "null_preserved": True,
@@ -966,6 +1108,14 @@ def _render_report(artifacts: Mapping[str, Any]) -> str:
             "## Execution",
             "",
             f"- selected: {batch['selected_count']}",
+            f"- successful: {batch['success_count']}",
+            f"- blocked: {batch['blocked_count']}",
+            f"- failed: {batch['failed_count']}",
+            f"- pending: {batch['pending_count']}",
+            f"- not selected: {batch['not_selected_count']}",
+            f"- reconciled: {str(batch['reconciliation']['reconciled']).lower()}",
+            f"- input presence checks: {batch['input_presence_checks']}",
+            f"- imports attempted: {batch['imports_attempted']}",
             f"- imported: {batch['imported_count']}",
             f"- normalized: {batch['normalized_count']}",
             f"- reason: {batch['execution_reason']}",

@@ -1,0 +1,25 @@
+{
+  "after": {
+    "canonical_advice_input_ready": 6,
+    "full_advice_ready": 0,
+    "fundamental_complete": 6,
+    "fundamental_missing": 907,
+    "fundamental_partial": 39,
+    "invalid_stale_conflicting": 0,
+    "unable_to_advise": 946
+  },
+  "before": {
+    "canonical_advice_input_ready": 6,
+    "full_advice_ready": 0,
+    "fundamental_complete": 6,
+    "fundamental_missing": 907,
+    "fundamental_partial": 39,
+    "invalid_stale_conflicting": 0,
+    "unable_to_advise": 946
+  },
+  "coverage_claim": "no_coverage_change_claimed",
+  "downstream": null,
+  "downstream_executed": false,
+  "run_status": "blocked_external_source_requirement",
+  "schema_version": "market-engine-data07-coverage-before-after-v1"
+}

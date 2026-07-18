@@ -1,0 +1,62 @@
+{
+  "aggregations": {
+    "asset_type": {
+      "equity": 943,
+      "etf": 9
+    },
+    "canonical_advice_input_blocker": {
+      "fundamental_context": 946,
+      "none": 6
+    },
+    "mapping_status": {
+      "mapped": 939,
+      "mapped_with_explicit_alias": 4,
+      "unsupported_asset_type": 9
+    },
+    "market_region": {
+      "US": 952
+    },
+    "source_family": {
+      "manual_mvp_fundamentals": 36,
+      "none": 907,
+      "sec_companyfacts_source_context": 9
+    },
+    "sourcing_eligibility": {
+      "eligible": 937,
+      "ineligible": 15
+    },
+    "sourcing_tier": {
+      "not_selected": 15,
+      "tier_1": 322,
+      "tier_2": 22,
+      "tier_3": 593
+    },
+    "technical_candidate_status": {
+      "eligible": 330,
+      "not_eligible": 622
+    }
+  },
+  "canonical_universe_size": 952,
+  "detail_artifact": "per_ticker_sourcing_status.json",
+  "missing_metric_combinations": {
+    "debt_to_equity": 2,
+    "debt_to_equity|eps_growth_yoy": 4,
+    "debt_to_equity|eps_growth_yoy|gross_margin|operating_margin|revenue_growth_yoy": 933,
+    "debt_to_equity|gross_margin": 5,
+    "eps_growth_yoy|operating_margin": 2,
+    "none": 6
+  },
+  "missing_metric_counts": {
+    "debt_to_equity": 944,
+    "eps_growth_yoy": 939,
+    "gross_margin": 938,
+    "operating_margin": 935,
+    "revenue_growth_yoy": 933
+  },
+  "schema_version": "market-engine-data07-metric-gap-analysis-v1",
+  "status_counts": {
+    "complete": 6,
+    "missing": 907,
+    "partial": 39
+  }
+}

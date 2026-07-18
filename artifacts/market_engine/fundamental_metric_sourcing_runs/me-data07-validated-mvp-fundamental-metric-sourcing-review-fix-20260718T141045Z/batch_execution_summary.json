@@ -1,0 +1,35 @@
+{
+  "batch_tier": "pilot",
+  "blocked_count": 12,
+  "complete_count": 0,
+  "execution_reason": "operator_import_package_missing",
+  "execution_status": "blocked",
+  "failed_count": 0,
+  "imported_count": 0,
+  "imports_attempted": 0,
+  "input_presence_checks": 1,
+  "normalized_count": 0,
+  "not_selected_count": 940,
+  "package_validation_failed": false,
+  "partial_count": 0,
+  "pending_count": 0,
+  "provider_calls_performed": 0,
+  "reconciliation": {
+    "pending_count": 0,
+    "reconciled": true,
+    "selected_count": 12,
+    "terminal_blocked_count": 12,
+    "terminal_failed_count": 0,
+    "terminal_success_count": 0
+  },
+  "requests_attempted": 0,
+  "schema_version": "market-engine-data07-batch-execution-summary-v1",
+  "selected_count": 12,
+  "selected_status_counts": {
+    "blocked_no_source": 12
+  },
+  "source_mode": "operator_import",
+  "success_count": 0,
+  "validation_failed_record_count": 0,
+  "validation_issue_count": 0
+}

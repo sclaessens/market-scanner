@@ -1,0 +1,95 @@
+{
+  "artifact_type": "market-engine-data07-validated-fundamental-metric-sourcing-run",
+  "as_of_date": "2026-07-10",
+  "batch_tier": "pilot",
+  "canonical_universe_size": 952,
+  "canonical_universe_version": "me-data04-complete-canonical-local-market-dataset-v1",
+  "downstream": null,
+  "generated_at": "2026-07-18T14:10:53Z",
+  "git_commit": "1a0a615789cab6e3c66b889c3a23b687e68f4dcf",
+  "guardrails": {
+    "allocation_performed": false,
+    "broker_order_execution_performed": false,
+    "credentials_logged": false,
+    "decision_engine_changed": false,
+    "model_invocation_performed": false,
+    "network_access_performed": false,
+    "portfolio_watchlist_mutation_performed": false,
+    "provider_calls_performed": false,
+    "recommendation_rules_changed": false,
+    "telegram_delivery_performed": false
+  },
+  "input_checksums": {
+    "artifacts/market_engine/full_advice_readiness_runs/me-run31-after-me-data06-review-fix-20260718T113254Z/evidence_coverage_index.json": "448808da5eafde8bed2aadb3b84d3da7bb1d9e1eb7d68ed9e80e5125f82b310c",
+    "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z/manifest.json": "559dc37009903f8c2e0bca34d7645f96977284280b836d534c5baa70ae56826a",
+    "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z/per_ticker_fundamental_status.json": "63c6b27d76b6d0f53ece2eb5db2b724f47eab3ddc9e2bba12d7af6528612ecc8",
+    "artifacts/market_engine/run_evidence/me-run31-after-me-data06-review-fix-20260718T113254Z/run_evidence_index.json": "c420c6ec1de8fce049b4c1997aaacba5ffb165b8240ce0d4065f8463c52e259d",
+    "config/market_engine/universes/canonical_universe.json": "c0e2c466af51ee3f34202148b5275f46248c893ce4b3851352d0fbded87148be",
+    "operator_input/market_engine/me-data07/fundamental_metrics.json": null
+  },
+  "input_paths": {
+    "baseline_data06_run": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z",
+    "baseline_run31_evidence": "artifacts/market_engine/run_evidence/me-run31-after-me-data06-review-fix-20260718T113254Z",
+    "canonical_universe": "config/market_engine/universes/canonical_universe.json",
+    "operator_import_path": "operator_input/market_engine/me-data07/fundamental_metrics.json",
+    "price_history_root": "data/processed"
+  },
+  "mvp_metric_contract": {
+    "completeness_rule": "all required metrics valid, current, same-period, non-conflicting, and provenance-backed",
+    "debt_to_equity_rule": "source-reported total-debt-to-total-equity ratio only; no synthetic derivation",
+    "freshness_max_age_days": 120,
+    "growth_period_rule": "source-reported comparable year-over-year periods only; no derivation or annualization",
+    "normalized_unit": "ratio",
+    "required_metrics": [
+      "revenue_growth_yoy",
+      "eps_growth_yoy",
+      "gross_margin",
+      "operating_margin",
+      "debt_to_equity"
+    ]
+  },
+  "outputs": {
+    "batch_execution_summary": "batch_execution_summary.json",
+    "blocker_report": "blocker_report.json",
+    "coverage_before_after": "coverage_before_after.json",
+    "coverage_report": "coverage_report.md",
+    "fundamental_source_symbol_mapping": "fundamental_source_symbol_mapping.json",
+    "manifest": "manifest.json",
+    "metric_gap_analysis": "metric_gap_analysis.json",
+    "metric_validation_summary": "metric_validation_summary.json",
+    "normalized_metric_csv": null,
+    "normalized_metric_evidence": "normalized_metric_evidence.json",
+    "per_ticker_sourcing_status": "per_ticker_sourcing_status.json",
+    "source_approval_decision": "source_approval_decision.json",
+    "sourcing_plan": "sourcing_plan.json"
+  },
+  "raw_snapshot": null,
+  "run_id": "me-data07-validated-mvp-fundamental-metric-sourcing-review-fix-20260718T141045Z",
+  "run_status": "blocked_external_source_requirement",
+  "schema_version": "market-engine-data07-validated-fundamental-metric-sourcing-v1",
+  "source_mode": "operator_import",
+  "sourcing_status_reconciliation": {
+    "blocked_count": 12,
+    "failed_count": 0,
+    "global_status_counts": {
+      "blocked_no_source": 12,
+      "not_selected": 940
+    },
+    "not_selected_count": 940,
+    "pending_count": 0,
+    "reconciliation": {
+      "pending_count": 0,
+      "reconciled": true,
+      "selected_count": 12,
+      "terminal_blocked_count": 12,
+      "terminal_failed_count": 0,
+      "terminal_success_count": 0
+    },
+    "selected_count": 12,
+    "selected_status_counts": {
+      "blocked_no_source": 12
+    },
+    "success_count": 0
+  },
+  "sprint_id": "ME-DATA07"
+}

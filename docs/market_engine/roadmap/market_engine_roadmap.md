@@ -264,6 +264,13 @@ remains 6 complete, 39 partial, 907 missing, 6 canonical advice-input-ready,
 0 full-advice-ready, and 946 unable-to-advise. No coverage or regression claim
 was made.
 
+PR #463 review follow-up reran the blocked pilot as
+`me-data07-validated-mvp-fundamental-metric-sourcing-review-fix-20260718T141045Z`
+and corrected terminal batch reconciliation. The run now reports 12 selected,
+0 successful, 12 blocked, 0 failed, 0 pending, and 940 not selected from the
+same canonical per-ticker statuses. The missing input caused one presence check
+and zero actual import attempts. Coverage and readiness remain unchanged.
+
 ME-DATA08 is now the recommended baseline sprint. It should prepare and
 validate a governance-approved operator package with primary-source metric
 lineage, then use the existing ME-DATA07 pilot and downstream gates. A new live

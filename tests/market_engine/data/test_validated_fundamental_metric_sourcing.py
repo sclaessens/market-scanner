@@ -203,12 +203,75 @@ def test_gap_analysis_is_unique_deterministic_and_prioritized(run_fixture: dict[
 def test_missing_operator_package_fails_closed_without_provider_calls(run_fixture: dict[str, object]) -> None:
     artifacts, output = _run(run_fixture)
 
+    batch = artifacts["batch_execution_summary"]
+    blocker = artifacts["blocker_report"]
     assert artifacts["manifest"]["run_status"] == "blocked_external_source_requirement"
-    assert artifacts["batch_execution_summary"]["provider_calls_performed"] == 0
-    assert artifacts["batch_execution_summary"]["requests_attempted"] == 0
+    assert batch["provider_calls_performed"] == 0
+    assert batch["requests_attempted"] == 0
+    assert batch["input_presence_checks"] == 1
+    assert batch["imports_attempted"] == 0
+    assert {
+        "selected_count": batch["selected_count"],
+        "success_count": batch["success_count"],
+        "blocked_count": batch["blocked_count"],
+        "failed_count": batch["failed_count"],
+        "pending_count": batch["pending_count"],
+        "not_selected_count": batch["not_selected_count"],
+    } == {
+        "selected_count": 2,
+        "success_count": 0,
+        "blocked_count": 2,
+        "failed_count": 0,
+        "pending_count": 0,
+        "not_selected_count": 2,
+    }
+    assert batch["reconciliation"]["reconciled"] is True
+    assert batch["selected_status_counts"] == {"blocked_no_source": 2}
+    assert blocker["selected_status_counts"] == batch["selected_status_counts"]
+    assert blocker["selected_blocked_count"] == batch["blocked_count"]
+    assert artifacts["manifest"]["sourcing_status_reconciliation"]["reconciliation"] == batch["reconciliation"]
     assert artifacts["coverage_before_after"]["coverage_claim"] == "no_coverage_change_claimed"
     assert output.joinpath("blocker_report.json").exists()
+    report = output.joinpath("coverage_report.md").read_text(encoding="utf-8")
+    assert "- blocked: 2" in report
+    assert "- reconciled: true" in report
     assert not Path(run_fixture["tmp"], "snapshots", "fixture-run").exists()
+
+
+def test_missing_package_reconciles_twelve_selected_across_952_tickers() -> None:
+    rows = [
+        {
+            "ticker": f"T{index:03d}",
+            "sourcing_status": "blocked_no_source" if index < 12 else "not_selected",
+        }
+        for index in range(952)
+    ]
+    selected = [row["ticker"] for row in rows[:12]]
+
+    result = sourcing._reconcile_sourcing_status_counts(
+        rows,
+        selected,
+        run_status="blocked_external_source_requirement",
+    )
+
+    assert result == {
+        "selected_count": 12,
+        "success_count": 0,
+        "blocked_count": 12,
+        "failed_count": 0,
+        "pending_count": 0,
+        "not_selected_count": 940,
+        "selected_status_counts": {"blocked_no_source": 12},
+        "global_status_counts": {"blocked_no_source": 12, "not_selected": 940},
+        "reconciliation": {
+            "selected_count": 12,
+            "terminal_success_count": 0,
+            "terminal_blocked_count": 12,
+            "terminal_failed_count": 0,
+            "pending_count": 0,
+            "reconciled": True,
+        },
+    }
 
 
 def test_inventory_and_unapproved_acquisition_never_call_a_provider(run_fixture: dict[str, object]) -> None:
@@ -415,14 +478,18 @@ def test_batch_scope_excludes_unselected_records_without_failing(tmp_path: Path)
     assert summary["validation_status"] == "passed"
 
 
-def test_successful_operator_import_persists_immutable_snapshot(run_fixture: dict[str, object]) -> None:
+def test_partial_operator_package_reconciles_success_and_blocked_tickers(run_fixture: dict[str, object]) -> None:
     tmp = run_fixture["tmp"]
     package = _operator_package(tmp / "operator.json", [_operator_record("AAA")])
     artifacts, output = _run(run_fixture, operator_import_path=package)
 
     assert artifacts["manifest"]["run_status"] == "completed_import_without_downstream"
     assert artifacts["batch_execution_summary"]["imported_count"] == 1
+    assert artifacts["batch_execution_summary"]["success_count"] == 1
     assert artifacts["batch_execution_summary"]["blocked_count"] == 1
+    assert artifacts["batch_execution_summary"]["failed_count"] == 0
+    assert artifacts["batch_execution_summary"]["pending_count"] == 0
+    assert artifacts["batch_execution_summary"]["reconciliation"]["reconciled"] is True
     statuses = {row["ticker"]: row["sourcing_status"] for row in artifacts["per_ticker_sourcing_status"]["tickers"]}
     assert statuses["AAA"] == "complete"
     assert statuses["BBB"] == "blocked_provider_coverage"
@@ -431,6 +498,27 @@ def test_successful_operator_import_persists_immutable_snapshot(run_fixture: dic
     assert Path(snapshot["raw_path"]).exists()
     assert output.joinpath("normalized_fundamental_metrics.csv").exists()
     assert artifacts["coverage_before_after"]["downstream_executed"] is False
+
+
+def test_full_operator_package_reconciles_all_selected_as_success(run_fixture: dict[str, object]) -> None:
+    tmp = run_fixture["tmp"]
+    package = _operator_package(
+        tmp / "operator-full.json",
+        [_operator_record("AAA"), _operator_record("BBB")],
+    )
+    artifacts, _ = _run(run_fixture, run_id="full-import", operator_import_path=package)
+
+    batch = artifacts["batch_execution_summary"]
+    assert batch["selected_count"] == 2
+    assert batch["success_count"] == 2
+    assert batch["complete_count"] == 2
+    assert batch["partial_count"] == 0
+    assert batch["blocked_count"] == 0
+    assert batch["failed_count"] == 0
+    assert batch["pending_count"] == 0
+    assert batch["not_selected_count"] == 2
+    assert batch["selected_status_counts"] == {"complete": 2}
+    assert batch["reconciliation"]["reconciled"] is True
 
 
 def test_existing_output_and_snapshot_are_not_overwritten_by_default(run_fixture: dict[str, object]) -> None:
@@ -452,6 +540,53 @@ def test_invalid_package_creates_no_raw_snapshot(run_fixture: dict[str, object])
     assert artifacts["manifest"]["run_status"] == "failed_validation"
     assert artifacts["manifest"]["raw_snapshot"] is None
     assert not Path(tmp, "snapshots", "fixture-run").exists()
+
+
+def test_validation_issues_are_not_counted_as_failed_tickers(run_fixture: dict[str, object]) -> None:
+    tmp = run_fixture["tmp"]
+    record = _operator_record("AAA")
+    record["metrics"]["gross_margin"]["value"] = "invalid"
+    record["metrics"]["operating_margin"]["value"] = "also-invalid"
+    package = _operator_package(tmp / "operator-invalid.json", [record])
+    artifacts, _ = _run(run_fixture, run_id="invalid-counts", operator_import_path=package)
+
+    batch = artifacts["batch_execution_summary"]
+    assert batch["success_count"] == 0
+    assert batch["blocked_count"] == 1
+    assert batch["failed_count"] == 1
+    assert batch["pending_count"] == 0
+    assert batch["validation_issue_count"] == 2
+    assert batch["validation_failed_record_count"] == 1
+    assert batch["package_validation_failed"] is True
+    assert batch["selected_status_counts"] == {
+        "blocked_invalid_payload": 1,
+        "failed_validation": 1,
+    }
+    assert batch["reconciliation"]["reconciled"] is True
+
+
+def test_unknown_selected_status_fails_reconciliation_closed() -> None:
+    with pytest.raises(
+        sourcing.ValidatedFundamentalMetricSourcingError,
+        match="selected sourcing statuses are not classified: unknown_status",
+    ):
+        sourcing._reconcile_sourcing_status_counts(
+            [{"ticker": "AAA", "sourcing_status": "unknown_status"}],
+            ["AAA"],
+            run_status="blocked_external_source_requirement",
+        )
+
+
+def test_pending_selected_status_is_rejected_for_terminal_run() -> None:
+    with pytest.raises(
+        sourcing.ValidatedFundamentalMetricSourcingError,
+        match="terminal run status blocked_external_source_requirement contains 1 pending selected tickers",
+    ):
+        sourcing._reconcile_sourcing_status_counts(
+            [{"ticker": "AAA", "sourcing_status": "selected"}],
+            ["AAA"],
+            run_status="blocked_external_source_requirement",
+        )
 
 
 def test_downstream_uses_real_normalized_artifact_when_explicitly_enabled(

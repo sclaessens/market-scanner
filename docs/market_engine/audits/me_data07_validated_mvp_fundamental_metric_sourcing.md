@@ -244,11 +244,11 @@ records, no snapshot, no downstream run, and identical before/after coverage.
 Executed test results:
 
 ```text
-ME-DATA07 targeted: 30 passed
-data tests: 105 passed
+ME-DATA07 targeted: 35 passed
+data tests: 110 passed
 ME-RUN31 targeted: 37 passed
-tests/market_engine: 1130 passed
-full pytest: 1797 passed
+tests/market_engine: 1135 passed
+full pytest: 1802 passed
 ```
 
 ## 16. Before And After ME-DATA06
@@ -339,7 +339,74 @@ and Markdown report.
 - Source licensing remains an operator responsibility until a documented
   provider route is approved.
 
-## 25. Recommended Next Sprint
+## PR review follow-up — batch status reconciliation
+
+The original blocked pilot exposed an artifact reconciliation defect. Its 12
+selected tickers were correctly assigned `blocked_no_source` in the canonical
+per-ticker artifact and blocker report, but `batch_execution_summary.json`
+reported `blocked_count: 0`. The batch summary derived blocked count only when
+`execution_status == "completed"`; a blocked terminal run therefore fell
+through to zero. The same summary also treated validation issue count as failed
+ticker count.
+
+The review fix introduces shared terminal sourcing status groups:
+
+```text
+success: complete, partial
+blocked: blocked_no_source, blocked_missing_credentials, blocked_mapping,
+         blocked_provider_coverage, blocked_missing_metric,
+         blocked_invalid_payload, blocked_stale, blocked_period_mismatch,
+         blocked_conflict, unsupported
+failed:  failed_request, failed_validation
+pending: selected
+```
+
+One canonical reconciliation helper now derives batch, blocker, manifest, and
+report counts from the final per-ticker statuses. It validates:
+
+```text
+selected_count = success_count + blocked_count + failed_count + pending_count
+```
+
+Terminal runs must have zero pending tickers. Unknown selected statuses,
+duplicate selected tickers, missing per-ticker identities, count mismatches,
+or pending terminal statuses raise
+`ValidatedFundamentalMetricSourcingError` before an artifact package is
+written. Validation issue count is reported separately from the number of
+selected tickers with `failed_validation`.
+
+The import-attempt semantics are also explicit. An operator-mode run always
+records one `input_presence_checks` operation. `imports_attempted` becomes one
+only when the input exists and the parser/validator is actually invoked. A
+missing package therefore reports one presence check and zero import attempts.
+
+Corrected review-fix run:
+
+```text
+run_id: me-data07-validated-mvp-fundamental-metric-sourcing-review-fix-20260718T141045Z
+run_status: blocked_external_source_requirement
+selected_count: 12
+success_count: 0
+blocked_count: 12
+failed_count: 0
+pending_count: 0
+not_selected_count: 940
+selected_status_counts: blocked_no_source=12
+reconciled: true
+input_presence_checks: 1
+imports_attempted: 0
+provider_calls_performed: 0
+```
+
+The blocker report retains global counts of 12 `blocked_no_source` and 940
+`not_selected`, while separately identifying the 12 selected blocked tickers.
+The manifest and Markdown report use the same reconciliation result. Coverage
+and readiness remain unchanged at 6 complete, 39 partial, 907 missing, 6
+canonical advice-input-ready, 0 full-advice-ready, and 946 unable-to-advise.
+No ME-DATA06 or ME-RUN31 rerun was performed because no validated evidence was
+available.
+
+## 26. Recommended Next Sprint
 
 ```text
 ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
