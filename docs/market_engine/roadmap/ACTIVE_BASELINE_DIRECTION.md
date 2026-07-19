@@ -52,7 +52,8 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
   -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
   -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
-  -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (planned / next active)
+  -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
+  -> ME-DATA10 - Define and execute a governed primary-source fundamental metric derivation pilot (planned / next active)
 ```
 
 ## Superseded baseline pointers
@@ -638,7 +639,7 @@ approval, and it does not authorize ME-DATA07 import. No provider, downstream,
 recommendation, portfolio, delivery, broker, or Decision Engine action is
 performed.
 
-The next baseline sprint is:
+The completed baseline sprint was:
 
 ```text
 ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot
@@ -649,6 +650,22 @@ concrete ME-DATA08-accepted package. Only an approved package may enter the
 existing ME-DATA07 pilot. Any coverage change must be measured through the
 existing explicit ME-DATA06/ME-RUN31 downstream gate; unverifiable evidence
 must stop fail-closed without an improvement claim.
+
+ME-DATA09 completed this boundary for AAPL on 2026-07-19. The approved package
+contained only directly reported FY2026 Q2 revenue and diluted EPS growth.
+ME-DATA07 imported one partial AAPL record, blocked the other eleven selected
+pilot tickers, made zero provider/network calls, and reconciled all 952 universe
+members. DATA06/RUN31 measurement retained 6 complete, 39 partial, 907 missing,
+6 advice-input-ready, 0 full-advice-ready, and 946 unable-to-advise. AAPL stayed
+partial and not advice-input-ready. ME-DATA10 is the next active bounded pilot:
+define and execute a governed primary-source fundamental metric derivation
+pilot. The future contract must version formulas, preserve numerator and
+denominator lineage, align periods and units, reject zero/negative/missing
+denominators, bind freshness and checksums, and expose direct-versus-derived
+classification for gross margin, operating margin, and/or debt-to-equity.
+ME-DATA10 is not implemented here; automatic approval, broad batches,
+estimates, hidden formulas, advice authority, and operational side effects
+remain out of scope.
 
 ## Completed ME-ADV01 result
 

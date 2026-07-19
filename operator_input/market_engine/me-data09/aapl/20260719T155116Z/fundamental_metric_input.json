@@ -1,0 +1,53 @@
+{
+  "schema_version": "market-engine-data08-operator-fundamental-metric-input-v1",
+  "package_id": "me-data09-aapl-fy2026-q2-20260719T155116Z",
+  "created_at": "2026-07-19T15:51:16Z",
+  "records": [
+    {
+      "ticker": "AAPL",
+      "company_identity": {"name": "Apple Inc.", "instrument_id": "equity:aapl"},
+      "canonical_metric": "revenue_growth_yoy",
+      "value": 17.0,
+      "unit": "percent",
+      "currency": null,
+      "period_type": "quarter",
+      "period_start": "2025-12-28",
+      "period_end": "2026-03-28",
+      "instant_date": null,
+      "fiscal_year": 2026,
+      "fiscal_period": "Q2",
+      "provenance": {
+        "source_name": "Apple Newsroom FY2026 Q2 earnings release",
+        "source_reference": "https://www.apple.com/newsroom/2026/04/apple-reports-second-quarter-results/",
+        "raw_source_field": "quarterly revenue up 17 percent year over year",
+        "source_date": "2026-04-30",
+        "observed_at": "2026-07-19T15:51:16Z",
+        "acquired_at": "2026-07-19T15:51:16Z",
+        "parser_version": "market-engine-data09-bounded-manual-primary-source-extraction-v1"
+      }
+    },
+    {
+      "ticker": "AAPL",
+      "company_identity": {"name": "Apple Inc.", "instrument_id": "equity:aapl"},
+      "canonical_metric": "eps_growth_yoy",
+      "value": 22.0,
+      "unit": "percent",
+      "currency": null,
+      "period_type": "quarter",
+      "period_start": "2025-12-28",
+      "period_end": "2026-03-28",
+      "instant_date": null,
+      "fiscal_year": 2026,
+      "fiscal_period": "Q2",
+      "provenance": {
+        "source_name": "Apple Newsroom FY2026 Q2 earnings release",
+        "source_reference": "https://www.apple.com/newsroom/2026/04/apple-reports-second-quarter-results/",
+        "raw_source_field": "quarterly diluted EPS up 22 percent year over year",
+        "source_date": "2026-04-30",
+        "observed_at": "2026-07-19T15:51:16Z",
+        "acquired_at": "2026-07-19T15:51:16Z",
+        "parser_version": "market-engine-data09-bounded-manual-primary-source-extraction-v1"
+      }
+    }
+  ]
+}

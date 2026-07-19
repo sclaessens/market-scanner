@@ -106,3 +106,16 @@ reports/*.md
 # ========================
 *.tmp
 *.bak
+
+# ME-DATA09 full local run evidence retained outside the compact PR package.
+/artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data09-aapl-20260719T150409Z/
+/artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data09-aapl-20260719T155116Z/
+/artifacts/market_engine/fundamental_metric_sourcing_runs/me-data09-aapl-bounded-operator-pilot-20260719T150409Z/
+/artifacts/market_engine/fundamental_metric_sourcing_runs/me-data09-aapl-bounded-operator-pilot-20260719T155116Z/
+/artifacts/market_engine/run_evidence/me-run31-after-me-data09-aapl-20260719T150409Z/
+/artifacts/market_engine/run_evidence/me-run31-after-me-data09-aapl-20260719T155116Z/
+/artifacts/market_engine/me_data09_full_advice_readiness_runs/me-run31-after-me-data09-aapl-20260719T155116Z/
+/data/market_engine/source_snapshots/fundamental_metrics/me-data09-aapl-bounded-operator-pilot-20260719T150409Z/
+/data/market_engine/source_snapshots/fundamental_metrics/me-data09-aapl-bounded-operator-pilot-20260719T155116Z/
+/operator_input/market_engine/me-data09/aapl/20260719T150409Z/
+/artifacts/market_engine/operator_fundamental_metric_packages/me-data09-aapl-20260719T150409Z/

@@ -1,0 +1,21 @@
+{
+  "documents": [
+    {
+      "document_id": "apple-newsroom-fy2026-q2-earnings-release",
+      "official_url": "https://www.apple.com/newsroom/2026/04/apple-reports-second-quarter-results/",
+      "publication_date": "2026-04-30",
+      "relative_path": "apple-fy2026-q2-earnings-release.html",
+      "sha256": "b421dd69c74aab85ac6d003884ec0017cfa2ca4bc4c4a89576e7eb6e0baba954",
+      "title": "Apple reports second quarter results"
+    },
+    {
+      "document_id": "sec-aapl-20260328-10q",
+      "official_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm",
+      "publication_date": "2026-05-01",
+      "relative_path": "aapl-20260328-10q.html",
+      "sha256": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
+      "title": "Apple Inc. Form 10-Q for the quarter ended March 28, 2026"
+    }
+  ],
+  "schema_version": "market-engine-data09-source-document-checksums-v1"
+}

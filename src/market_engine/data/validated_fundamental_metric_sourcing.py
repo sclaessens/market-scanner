@@ -25,6 +25,7 @@ from market_engine.data.local_market_data_universe import (
     DEFAULT_PRICE_HISTORY_ROOT,
     build_universe_snapshot,
 )
+from market_engine.data.operator_source_approval import validate_source_approval_decision
 
 
 SCHEMA_VERSION = "market-engine-data07-validated-fundamental-metric-sourcing-v1"
@@ -74,6 +75,7 @@ TERMINAL_RUN_STATUSES = frozenset(
 OUTPUT_NAMES = (
     "manifest",
     "source_approval_decision",
+    "concrete_source_approval_validation",
     "metric_gap_analysis",
     "sourcing_plan",
     "fundamental_source_symbol_mapping",
@@ -101,12 +103,15 @@ def run_validated_fundamental_metric_sourcing(
     baseline_data06_run: str | Path = DEFAULT_BASELINE_DATA06_RUN,
     baseline_run31_evidence: str | Path = DEFAULT_BASELINE_RUN31_EVIDENCE,
     operator_import_path: str | Path | None = DEFAULT_OPERATOR_IMPORT_PATH,
+    source_approval_decision_path: str | Path | None = None,
+    source_document_root: str | Path | None = None,
     output_root: str | Path = DEFAULT_OUTPUT_ROOT,
     raw_snapshot_root: str | Path = DEFAULT_RAW_SNAPSHOT_ROOT,
     execute_downstream: bool = False,
     data06_run_id: str | None = None,
     run31_run_id: str | None = None,
     data06_output_root: str | Path | None = None,
+    run31_output_root: str | Path | None = None,
     allow_overwrite: bool = False,
 ) -> tuple[dict[str, Any], Path]:
     if source_mode not in SUPPORTED_SOURCE_MODES:
@@ -137,6 +142,13 @@ def run_validated_fundamental_metric_sourcing(
     execution_status = "not_executed"
     execution_reason = "inventory_only_mode"
     import_attempted = False
+    concrete_approval = {
+        "schema_version": "market-engine-data09-source-approval-validation-v1",
+        "validation_status": "not_applicable",
+        "concrete_package_source_approved": False,
+        "reason_codes": [],
+        "issues": [],
+    }
     if source_mode == "operator_import":
         import_path = Path(operator_import_path) if operator_import_path else None
         if import_path is None or not import_path.exists():
@@ -146,27 +158,36 @@ def run_validated_fundamental_metric_sourcing(
             execution_status = "blocked"
             execution_reason = "source_approval_failed"
         else:
-            import_attempted = True
-            normalized_records, validation = _load_and_validate_operator_import(
+            concrete_approval = validate_source_approval_decision(
+                source_approval_decision_path,
                 import_path,
-                mappings={row["ticker"]: row for row in mappings},
-                instruments={str(row["symbol"]).upper(): row for row in instruments},
-                as_of=as_of,
-                allowed_tickers=set(selected),
+                source_document_root=source_document_root,
             )
-            if validation["validation_status"] == "passed":
-                snapshot = _persist_operator_snapshot(
-                    import_path,
-                    run_id=run_id,
-                    raw_snapshot_root=Path(raw_snapshot_root),
-                    normalized_records=normalized_records,
-                    allow_overwrite=allow_overwrite,
-                )
-                execution_status = "completed"
-                execution_reason = "operator_import_validated"
+            if not concrete_approval["concrete_package_source_approved"]:
+                execution_status = "blocked"
+                execution_reason = "concrete_source_approval_failed"
             else:
-                execution_status = "failed_validation"
-                execution_reason = "operator_import_validation_failed"
+                import_attempted = True
+                normalized_records, validation = _load_and_validate_operator_import(
+                    import_path,
+                    mappings={row["ticker"]: row for row in mappings},
+                    instruments={str(row["symbol"]).upper(): row for row in instruments},
+                    as_of=as_of,
+                    allowed_tickers=set(selected),
+                )
+                if validation["validation_status"] == "passed":
+                    snapshot = _persist_operator_snapshot(
+                        import_path,
+                        run_id=run_id,
+                        raw_snapshot_root=Path(raw_snapshot_root),
+                        normalized_records=normalized_records,
+                        allow_overwrite=allow_overwrite,
+                    )
+                    execution_status = "completed"
+                    execution_reason = "operator_import_validated"
+                else:
+                    execution_status = "failed_validation"
+                    execution_reason = "operator_import_validation_failed"
     elif source_mode == "approved_acquisition":
         execution_status = "blocked"
         execution_reason = "no_approved_mvp_fundamental_provider"
@@ -197,15 +218,20 @@ def run_validated_fundamental_metric_sourcing(
     if execute_downstream and normalized_csv_path is not None and validation["validation_status"] == "passed":
         data06_id = data06_run_id or f"{run_id}-me-data06"
         run31_id = run31_run_id or f"{run_id}-me-run31"
+        downstream_baseline = (
+            (baseline["manifest"].get("input_paths") or {}).get("baseline_run_evidence")
+            or baseline_run31_evidence
+        )
         downstream_artifacts, downstream_dir = run_fundamental_evidence_coverage(
             run_id=data06_id,
             existing_fundamental_path=Path(baseline_data06_run) / "normalized_fundamental_quality.csv",
             raw_fundamentals_path=normalized_csv_path,
-            baseline_run_evidence=baseline_run31_evidence,
+            baseline_run_evidence=downstream_baseline,
             canonical_universe=canonical_universe,
             price_history_root=price_history_root,
             technical_screening_artifact=DEFAULT_TECHNICAL_SCREENING_ARTIFACT,
             output_root=data06_output_root or Path("artifacts/market_engine/fundamental_evidence_coverage_runs"),
+            run31_output_root=run31_output_root or Path("artifacts/market_engine/full_advice_readiness_runs"),
             run31_run_id=run31_id,
             allow_overwrite=allow_overwrite,
         )
@@ -215,7 +241,10 @@ def run_validated_fundamental_metric_sourcing(
             "data06_output_dir": downstream_dir.as_posix(),
             "data06_run_status": downstream_artifacts["manifest"]["run_status"],
             "after": downstream_artifacts["fundamental_coverage_summary"]["after"],
-            "comparison": downstream_artifacts["before_after_comparison"],
+            "historical_origin_comparison": {
+                **downstream_artifacts["before_after_comparison"],
+                "attributable_to_current_sprint": False,
+            },
         }
 
     before_counts = dict(baseline["counts"])
@@ -233,13 +262,57 @@ def run_validated_fundamental_metric_sourcing(
         import_attempted=import_attempted,
         status_reconciliation=status_reconciliation,
     )
+    absolute_delta = {
+        key: after_counts.get(key, 0) - before_counts.get(key, 0)
+        for key in (
+            "fundamental_complete",
+            "fundamental_partial",
+            "fundamental_missing",
+            "invalid_stale_conflicting",
+            "canonical_advice_input_ready",
+            "full_advice_ready",
+            "unable_to_advise",
+        )
+    }
+    imported_ticker = normalized_records[0]["ticker"] if len(normalized_records) == 1 else None
+    before_ticker = baseline["by_ticker"].get(imported_ticker, {}) if imported_ticker else {}
+    after_ticker = None
+    if imported_ticker and downstream:
+        after_rows = downstream_artifacts["per_ticker_fundamental_status"]["tickers"]
+        after_ticker = next((row for row in after_rows if row.get("ticker") == imported_ticker), None)
+    ticker_delta = None
+    if imported_ticker:
+        imported_record = normalized_records[0]
+        ticker_delta = {
+            "ticker": imported_ticker,
+            "before_status": before_ticker.get("overall_fundamental_status"),
+            "after_status": (after_ticker or {}).get("overall_fundamental_status", before_ticker.get("overall_fundamental_status")),
+            "new_metrics": sorted(
+                metric
+                for metric, value in (imported_record.get("metrics") or {}).items()
+                if value is not None
+            ),
+            "remaining_missing_metrics": sorted(imported_record.get("missing_metrics") or []),
+            "advice_input_ready_before": bool((run31["by_ticker"].get(imported_ticker) or {}).get("canonical_advice_input_ready")),
+            "advice_input_ready_after": bool((after_ticker or {}).get("canonical_advice_input_ready", False)),
+        }
     coverage = {
         "schema_version": "market-engine-data07-coverage-before-after-v1",
         "run_status": run_status,
         "before": before_counts,
         "after": after_counts,
+        "current_sprint_comparison": {
+            "before": before_counts,
+            "after": after_counts,
+            "absolute_delta": absolute_delta,
+        },
+        "ticker_delta": ticker_delta,
+        "historical_origin_comparison": downstream.get("historical_origin_comparison") if downstream else None,
         "downstream_executed": downstream is not None,
-        "downstream": downstream,
+        "downstream_run_identity": {
+            key: downstream[key]
+            for key in ("data06_run_id", "run31_run_id", "data06_output_dir", "data06_run_status")
+        } if downstream else None,
         "coverage_claim": "measured_downstream_result" if downstream else "no_coverage_change_claimed",
     }
     artifacts = {
@@ -270,6 +343,8 @@ def run_validated_fundamental_metric_sourcing(
                 "baseline_data06_run": Path(baseline_data06_run).as_posix(),
                 "baseline_run31_evidence": Path(baseline_run31_evidence).as_posix(),
                 "operator_import_path": Path(operator_import_path).as_posix() if operator_import_path else None,
+                "source_approval_decision_path": Path(source_approval_decision_path).as_posix() if source_approval_decision_path else None,
+                "source_document_root_supplied": source_document_root is not None,
             },
             "input_checksums": _input_checksums(
                 Path(canonical_universe),
@@ -278,6 +353,7 @@ def run_validated_fundamental_metric_sourcing(
                 _run31_input_index_path(Path(baseline_run31_evidence)),
                 Path(run31["index_path"]),
                 Path(operator_import_path) if operator_import_path else None,
+                Path(source_approval_decision_path) if source_approval_decision_path else None,
             ),
             "raw_snapshot": snapshot,
             "downstream": downstream,
@@ -301,6 +377,7 @@ def run_validated_fundamental_metric_sourcing(
             },
         },
         "source_approval_decision": approval,
+        "concrete_source_approval_validation": concrete_approval,
         "metric_gap_analysis": gap,
         "sourcing_plan": plan,
         "fundamental_source_symbol_mapping": {
@@ -878,7 +955,11 @@ def _apply_execution_status(
             row["execution_issues"] = ["operator_import_package_validation_failed"]
         elif ticker in imported:
             row["sourcing_status"] = imported[ticker]["coverage_status"]
-        elif execution_reason == "operator_import_package_missing":
+        elif execution_reason in {
+            "operator_import_package_missing",
+            "source_approval_failed",
+            "concrete_source_approval_failed",
+        }:
             row["sourcing_status"] = "blocked_no_source"
             row["execution_issues"] = [execution_reason]
         elif execution_reason == "no_approved_mvp_fundamental_provider":
@@ -1124,6 +1205,10 @@ def _render_report(artifacts: Mapping[str, Any]) -> str:
             "",
             f"- claim: {coverage['coverage_claim']}",
             f"- downstream executed: {str(coverage['downstream_executed']).lower()}",
+            f"- current sprint before: {json.dumps(coverage['current_sprint_comparison']['before'], sort_keys=True)}",
+            f"- current sprint after: {json.dumps(coverage['current_sprint_comparison']['after'], sort_keys=True)}",
+            f"- current sprint absolute delta: {json.dumps(coverage['current_sprint_comparison']['absolute_delta'], sort_keys=True)}",
+            f"- historical origin comparison attributable to current sprint: false" if coverage["historical_origin_comparison"] else "- historical origin comparison: not executed",
             "",
             "No provider/network call, secret persistence, broker/order action, allocation, portfolio/watchlist mutation, Telegram delivery, Decision Engine change, or recommendation-rule change was performed.",
             "",
@@ -1202,12 +1287,15 @@ def _argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--baseline-data06-run", default=DEFAULT_BASELINE_DATA06_RUN)
     parser.add_argument("--baseline-run-evidence", default=DEFAULT_BASELINE_RUN31_EVIDENCE)
     parser.add_argument("--operator-import-path", default=DEFAULT_OPERATOR_IMPORT_PATH)
+    parser.add_argument("--source-approval-decision")
+    parser.add_argument("--source-document-root")
     parser.add_argument("--output-root", default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--raw-snapshot-root", default=DEFAULT_RAW_SNAPSHOT_ROOT)
     parser.add_argument("--execute-downstream", action="store_true")
     parser.add_argument("--data06-run-id")
     parser.add_argument("--run31-run-id")
     parser.add_argument("--data06-output-root")
+    parser.add_argument("--run31-output-root")
     parser.add_argument("--allow-overwrite", action="store_true")
     return parser
 
@@ -1225,12 +1313,15 @@ def run_command(argv: Sequence[str] | None = None, *, stdout: TextIO, stderr: Te
             baseline_data06_run=args.baseline_data06_run,
             baseline_run31_evidence=args.baseline_run_evidence,
             operator_import_path=args.operator_import_path,
+            source_approval_decision_path=args.source_approval_decision,
+            source_document_root=args.source_document_root,
             output_root=args.output_root,
             raw_snapshot_root=args.raw_snapshot_root,
             execute_downstream=args.execute_downstream,
             data06_run_id=args.data06_run_id,
             run31_run_id=args.run31_run_id,
             data06_output_root=args.data06_output_root,
+            run31_output_root=args.run31_output_root,
             allow_overwrite=args.allow_overwrite,
         )
     except Exception as exc:

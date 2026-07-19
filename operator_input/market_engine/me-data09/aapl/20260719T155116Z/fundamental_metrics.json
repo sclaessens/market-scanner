@@ -1,0 +1,40 @@
+{
+  "package_id": "me-data09-aapl-fy2026-q2-20260719T155116Z",
+  "package_schema_version": "market-engine-data08-operator-fundamental-metric-input-v1",
+  "records": [
+    {
+      "acquired_at": "2026-07-19T15:51:16Z",
+      "company_name": "Apple Inc.",
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "instrument_id": "equity:aapl",
+      "metrics": {
+        "eps_growth_yoy": {
+          "raw_source_field": "quarterly diluted EPS up 22 percent year over year",
+          "reporting_period": "2026-Q2",
+          "unit": "percent",
+          "value": 22.0
+        },
+        "revenue_growth_yoy": {
+          "raw_source_field": "quarterly revenue up 17 percent year over year",
+          "reporting_period": "2026-Q2",
+          "unit": "percent",
+          "value": 17.0
+        }
+      },
+      "observed_at": "2026-07-19T15:51:16Z",
+      "parser_version": "market-engine-data09-bounded-manual-primary-source-extraction-v1",
+      "period_end": "2026-03-28",
+      "period_start": "2025-12-28",
+      "period_type": "quarter",
+      "provider": "Apple Newsroom FY2026 Q2 earnings release",
+      "provider_symbol": "AAPL",
+      "reporting_period": "2026-Q2",
+      "snapshot_id": "me-data09-aapl-fy2026-q2-20260719T155116Z",
+      "source_date": "2026-04-30",
+      "source_reference": "https://www.apple.com/newsroom/2026/04/apple-reports-second-quarter-results/",
+      "ticker": "AAPL"
+    }
+  ],
+  "schema_version": "market-engine-data07-operator-fundamental-metrics-v1"
+}

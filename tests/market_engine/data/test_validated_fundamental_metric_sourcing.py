@@ -9,6 +9,8 @@ from pathlib import Path
 import pytest
 
 from market_engine.data import validated_fundamental_metric_sourcing as sourcing
+from market_engine.data import operator_source_approval as source_approval
+from market_engine.data.operator_fundamental_metric_package import INPUT_SCHEMA_VERSION, REPORT_SCHEMA_VERSION, VALIDATOR_VERSION
 
 
 METRICS = {
@@ -66,6 +68,48 @@ def _operator_package(path: Path, records: list[dict[str, object]]) -> Path:
         path,
         {"schema_version": sourcing.OPERATOR_IMPORT_SCHEMA_VERSION, "records": records},
     )
+
+
+def _approval_for_package(tmp: Path, package_path: Path, *, decision: str = "approved") -> Path:
+    package = json.loads(package_path.read_text(encoding="utf-8"))
+    package.setdefault("package_id", "fixture-package")
+    package.setdefault("package_schema_version", INPUT_SCHEMA_VERSION)
+    package_path.write_text(json.dumps(package), encoding="utf-8")
+    package_id = package["package_id"]
+    input_path = _write_json(tmp / f"{package_path.stem}-input.json", {"schema_version": INPUT_SCHEMA_VERSION, "package_id": package_id})
+    input_sha = hashlib.sha256(input_path.read_bytes()).hexdigest()
+    report_path = _write_json(tmp / f"{package_path.stem}-report.json", {
+        "schema_version": REPORT_SCHEMA_VERSION,
+        "validator_version": VALIDATOR_VERSION,
+        "package_id": package_id,
+        "status": "accepted",
+        "downstream_consumability": "structurally_valid_for_explicit_source_approval_review",
+        "input_sha256": input_sha,
+    })
+    source_path = tmp / f"{package_path.stem}-source.html"
+    source_path.write_text("official fixture source", encoding="utf-8")
+    metrics = sorted({metric for row in package["records"] for metric in row.get("metrics", {})})
+    reviews = {name: {"status": "approved"} for name in source_approval.REQUIRED_REVIEW_DIMENSIONS}
+    return _write_json(tmp / f"{package_path.stem}-approval.json", {
+        "schema_version": source_approval.DECISION_SCHEMA_VERSION,
+        "decision_id": "fixture-decision",
+        "decision": decision,
+        "scope": source_approval.APPROVED_SCOPE,
+        "approved_tickers": sorted({row["ticker"] for row in package["records"]}),
+        "reviewer_roles": list(source_approval.REQUIRED_REVIEWER_ROLES),
+        "package_id": package_id,
+        "artifact_bindings": {
+            "input_path": input_path.as_posix(),
+            "input_sha256": input_sha,
+            "package_sha256": hashlib.sha256(package_path.read_bytes()).hexdigest(),
+            "validation_report_path": report_path.as_posix(),
+            "validation_report_sha256": hashlib.sha256(report_path.read_bytes()).hexdigest(),
+        },
+        "source_documents": [{"relative_path": source_path.name, "sha256": hashlib.sha256(source_path.read_bytes()).hexdigest()}],
+        "reviews": reviews,
+        "approved_metrics": metrics,
+        "explicitly_missing_metrics": sorted(set(sourcing.MVP_METRIC_FIELDS) - set(metrics)),
+    })
 
 
 @pytest.fixture()
@@ -181,6 +225,11 @@ def _run(run_fixture: dict[str, object], **overrides: object):
         "raw_snapshot_root": tmp / "snapshots",
     }
     values.update(overrides)
+    package_path = Path(values["operator_import_path"])
+    if package_path.is_file() and "source_approval_decision_path" not in overrides:
+        values["source_approval_decision_path"] = _approval_for_package(Path(tmp), package_path)
+    if package_path.is_file() and "source_document_root" not in overrides:
+        values["source_document_root"] = tmp
     return sourcing.run_validated_fundamental_metric_sourcing(**values)
 
 
@@ -500,7 +549,96 @@ def test_partial_operator_package_reconciles_success_and_blocked_tickers(run_fix
     assert artifacts["coverage_before_after"]["downstream_executed"] is False
 
 
-def test_full_operator_package_reconciles_all_selected_as_success(run_fixture: dict[str, object]) -> None:
+def test_missing_concrete_approval_blocks_before_import_and_snapshot(run_fixture: dict[str, object]) -> None:
+    tmp = Path(run_fixture["tmp"])
+    package = _operator_package(tmp / "operator-no-approval.json", [_operator_record("AAA")])
+    artifacts, _ = _run(run_fixture, operator_import_path=package, source_approval_decision_path=None)
+
+    assert artifacts["manifest"]["run_status"] == "blocked_external_source_requirement"
+    assert artifacts["batch_execution_summary"]["imports_attempted"] == 0
+    assert artifacts["manifest"]["raw_snapshot"] is None
+    assert artifacts["manifest"]["downstream"] is None
+    assert artifacts["concrete_source_approval_validation"]["reason_codes"] == ["SOURCE_APPROVAL_DECISION_MISSING"]
+
+
+def test_malformed_approval_list_blocks_before_parser_snapshot_and_downstream(
+    run_fixture: dict[str, object], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    tmp = Path(run_fixture["tmp"])
+    package = _operator_package(tmp / "operator-malformed-list.json", [_operator_record("AAA")])
+    decision_path = _approval_for_package(tmp, package)
+    decision = json.loads(decision_path.read_text(encoding="utf-8"))
+    decision["approved_tickers"] = ["AAA", {"unexpected": "object"}]
+    _write_json(decision_path, decision)
+    calls = {"parser": 0, "snapshot": 0, "downstream": 0}
+
+    def fail_parser(*_args, **_kwargs):
+        calls["parser"] += 1
+        raise AssertionError("package parser must not run")
+
+    def fail_snapshot(*_args, **_kwargs):
+        calls["snapshot"] += 1
+        raise AssertionError("snapshot persistence must not run")
+
+    def fail_downstream(*_args, **_kwargs):
+        calls["downstream"] += 1
+        raise AssertionError("downstream DATA06/RUN31 must not run")
+
+    monkeypatch.setattr(sourcing, "_load_and_validate_operator_import", fail_parser)
+    monkeypatch.setattr(sourcing, "_persist_operator_snapshot", fail_snapshot)
+    monkeypatch.setattr(sourcing, "run_fundamental_evidence_coverage", fail_downstream)
+    artifacts, output = _run(
+        run_fixture,
+        run_id="malformed-list",
+        operator_import_path=package,
+        source_approval_decision_path=decision_path,
+        execute_downstream=True,
+        data06_run_id="must-not-run-data06",
+        run31_run_id="must-not-run-run31",
+    )
+
+    assert calls == {"parser": 0, "snapshot": 0, "downstream": 0}
+    assert artifacts["manifest"]["run_status"] == "blocked_external_source_requirement"
+    assert artifacts["batch_execution_summary"]["execution_reason"] == "concrete_source_approval_failed"
+    assert artifacts["batch_execution_summary"]["imports_attempted"] == 0
+    assert artifacts["batch_execution_summary"]["normalized_count"] == 0
+    assert artifacts["batch_execution_summary"]["provider_calls_performed"] == 0
+    assert artifacts["normalized_metric_evidence"]["record_count"] == 0
+    assert artifacts["manifest"]["raw_snapshot"] is None
+    assert artifacts["manifest"]["downstream"] is None
+    assert artifacts["manifest"]["guardrails"]["network_access_performed"] is False
+    assert artifacts["blocker_report"]["primary_blocker"] == "concrete_source_approval_failed"
+    assert artifacts["batch_execution_summary"]["reconciliation"]["reconciled"] is True
+    assert "APPROVED_TICKERS_INVALID" in artifacts["concrete_source_approval_validation"]["reason_codes"]
+    assert output.joinpath("concrete_source_approval_validation.json").is_file()
+
+
+@pytest.mark.parametrize("decision", ["blocked", "rejected", "unknown"])
+def test_non_approved_decision_blocks_before_parser(run_fixture: dict[str, object], decision: str) -> None:
+    tmp = Path(run_fixture["tmp"])
+    package = _operator_package(tmp / f"operator-{decision}.json", [_operator_record("AAA")])
+    approval = _approval_for_package(tmp, package, decision=decision)
+    artifacts, _ = _run(run_fixture, run_id=f"run-{decision}", operator_import_path=package, source_approval_decision_path=approval)
+
+    assert artifacts["batch_execution_summary"]["imports_attempted"] == 0
+    assert artifacts["normalized_metric_evidence"]["record_count"] == 0
+    assert artifacts["manifest"]["raw_snapshot"] is None
+
+
+def test_one_byte_package_change_invalidates_approval(run_fixture: dict[str, object]) -> None:
+    tmp = Path(run_fixture["tmp"])
+    package = _operator_package(tmp / "operator-tampered.json", [_operator_record("AAA")])
+    approval = _approval_for_package(tmp, package)
+    package.write_bytes(package.read_bytes() + b" ")
+    artifacts, _ = _run(run_fixture, run_id="tampered", operator_import_path=package, source_approval_decision_path=approval)
+
+    validation = artifacts["concrete_source_approval_validation"]
+    assert validation["concrete_package_source_approved"] is False
+    assert "PACKAGE_CHECKSUM_MISMATCH" in validation["reason_codes"]
+    assert artifacts["batch_execution_summary"]["imports_attempted"] == 0
+
+
+def test_multi_ticker_operator_package_is_blocked_by_bounded_approval(run_fixture: dict[str, object]) -> None:
     tmp = run_fixture["tmp"]
     package = _operator_package(
         tmp / "operator-full.json",
@@ -510,14 +648,15 @@ def test_full_operator_package_reconciles_all_selected_as_success(run_fixture: d
 
     batch = artifacts["batch_execution_summary"]
     assert batch["selected_count"] == 2
-    assert batch["success_count"] == 2
-    assert batch["complete_count"] == 2
+    assert batch["success_count"] == 0
+    assert batch["complete_count"] == 0
     assert batch["partial_count"] == 0
-    assert batch["blocked_count"] == 0
+    assert batch["blocked_count"] == 2
     assert batch["failed_count"] == 0
     assert batch["pending_count"] == 0
     assert batch["not_selected_count"] == 2
-    assert batch["selected_status_counts"] == {"complete": 2}
+    assert batch["selected_status_counts"] == {"blocked_no_source": 2}
+    assert "BOUNDED_PILOT_TICKER_LIMIT_EXCEEDED" in artifacts["concrete_source_approval_validation"]["reason_codes"]
     assert batch["reconciliation"]["reconciled"] is True
 
 
@@ -601,8 +740,21 @@ def test_downstream_uses_real_normalized_artifact_when_explicitly_enabled(
         return (
             {
                 "manifest": {"run_status": "completed"},
-                "fundamental_coverage_summary": {"after": {"fundamental_complete": 2}},
+                "fundamental_coverage_summary": {"after": {
+                    "fundamental_complete": 2,
+                    "fundamental_partial": 1,
+                    "fundamental_missing": 1,
+                    "invalid_stale_conflicting": 0,
+                    "canonical_advice_input_ready": 1,
+                    "full_advice_ready": 0,
+                    "unable_to_advise": 3,
+                }},
                 "before_after_comparison": {"improvement_counts": {"missing_to_complete": 1}},
+                "per_ticker_fundamental_status": {"tickers": [{
+                    "ticker": "AAA",
+                    "overall_fundamental_status": "complete",
+                    "canonical_advice_input_ready": True,
+                }]},
             },
             tmp / "downstream-data06",
         )

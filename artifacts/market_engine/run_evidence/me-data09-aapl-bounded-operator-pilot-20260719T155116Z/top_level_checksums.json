@@ -1,0 +1,14 @@
+{
+  "checksums": {
+    "approved_ticker_metric_evidence.json": "7e45a7b97523fbcd841e3408149a9285275f301571996062e70ef7d1c7aa5e89",
+    "coverage_delta.json": "27f72877d02d4dd1078b3d049435fc06adbad328bf5b8d7bc18d729fad566271",
+    "data07_pilot_summary.json": "bc27542ec4730bf960c3c08671e8e936d7fa4f32d2467c36f4a1a8ed67a81821",
+    "data08_validation_report.json": "366eab1a2311094eecf48e06a29512396b63800c5d1f664203a65a64340b1b64",
+    "downstream_run_index.json": "5df3bce1804c374bc1b354c61fa2a27ec4985ed3edfdea7eca6a80b828e5a7e8",
+    "manifest.json": "99577bef2a2f1b06472472647ae0ba322cb79c7e9744aad24f39017961bd6d0c",
+    "report.md": "704d3e3684b3401186198c79b3e7b5f153561a9883c87f99f7010c92e5a59e0d",
+    "source_approval_validation.json": "debdbe20bc11731169ce6ff0b95e8f922a39a14c223add3271a7bff731b80a00",
+    "source_document_checksums.json": "0b0155bec8200f2206340982916ed94709c7835e09e710916dd7c2ea6737bd23"
+  },
+  "schema_version": "market-engine-data09-compact-evidence-checksums-v1"
+}
