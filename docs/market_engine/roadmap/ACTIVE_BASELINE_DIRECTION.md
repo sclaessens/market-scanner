@@ -51,7 +51,8 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
   -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
   -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
-  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
+  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
+  -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (planned / next active)
 ```
 
 ## Superseded baseline pointers
@@ -593,10 +594,11 @@ reason: operator_import_package_missing
 ```
 
 The runtime reconciled 952 canonical tickers and classified 322 Tier 1, 22
-Tier 2, and 593 Tier 3 eligible sourcing targets. It implemented source
+Tier 2, and 593 Tier 3 eligible sourcing targets. It implemented route-level source-mode
 approval, explicit symbol mapping, operator package validation, immutable raw
 snapshot persistence after validation, per-metric lineage, deterministic
-normalization, and an explicit downstream ME-DATA06 gate.
+normalization, and an explicit downstream ME-DATA06 gate. It does not
+authenticate or governance-approve free-text operator evidence.
 
 No approved full-contract provider adapter exists in the repository and no
 operator package was present. Expanded/full sourcing and downstream ME-DATA06
@@ -612,11 +614,41 @@ successful, 12 blocked, 0 failed, 0 pending, and 940 not selected. The missing
 input records one presence check and zero parser/import attempts. Coverage,
 readiness, and the recommended architecture direction are unchanged.
 
+## Current implemented ME-DATA08 result
+
+ME-DATA08 added the deterministic operator package preparation and structural
+validation command:
+
+```text
+src/market_engine/data/operator_fundamental_metric_package.py
+src/market_engine/data/operator_fundamental_metric_package_command.py
+```
+
+The flow validates the existing five-metric ME-DATA06/07 allowlist, company
+and ticker identity, reporting and fiscal context, units, finite values,
+structurally complete provenance, duplicates, conflicts, and forbidden
+authority-bearing fields. It emits a deterministic ME-DATA07-compatible
+package plus a machine-readable validation report. Raw percent values and
+units are retained for deferred ME-DATA07 ratio normalization.
+
+ME-DATA08 acceptance means only
+`structurally_valid_for_explicit_source_approval_review`. It does not prove
+source authenticity, primary-source status, permitted use, or governance
+approval, and it does not authorize ME-DATA07 import. No provider, downstream,
+recommendation, portfolio, delivery, broker, or Decision Engine action is
+performed.
+
 The next baseline sprint is:
 
 ```text
-ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
+ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot
 ```
+
+ME-DATA09 must bind an explicit source-approval decision to the checksum of a
+concrete ME-DATA08-accepted package. Only an approved package may enter the
+existing ME-DATA07 pilot. Any coverage change must be measured through the
+existing explicit ME-DATA06/ME-RUN31 downstream gate; unverifiable evidence
+must stop fail-closed without an improvement claim.
 
 ## Completed ME-ADV01 result
 
