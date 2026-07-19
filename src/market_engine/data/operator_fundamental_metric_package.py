@@ -46,6 +46,10 @@ class OperatorPackageInputError(ValueError):
     pass
 
 
+class OperatorPackageConfigurationError(ValueError):
+    reason_code = "OUTPUT_PATH_COLLISION"
+
+
 def prepare_operator_fundamental_metric_package(
     input_path: str | Path,
     *,
@@ -55,6 +59,10 @@ def prepare_operator_fundamental_metric_package(
     source = Path(input_path)
     package_path = Path(package_output_path)
     report_path = Path(report_output_path)
+    if package_path.resolve(strict=False) == report_path.resolve(strict=False):
+        raise OperatorPackageConfigurationError(
+            "OUTPUT_PATH_COLLISION: package and validation report outputs resolve to the same path"
+        )
     if package_path.exists() or report_path.exists():
         raise FileExistsError("ME-DATA08 output paths must not already exist")
     try:
@@ -86,7 +94,7 @@ def validate_and_normalize_operator_input(
 ) -> tuple[dict[str, Any] | None, dict[str, Any]]:
     errors: list[dict[str, Any]] = []
     warnings: list[dict[str, Any]] = []
-    normalized_count = 0
+    deferred_normalization_count = 0
     records_out: list[dict[str, Any]] = []
     input_count = 0
     package_id: str | None = None
@@ -188,8 +196,8 @@ def validate_and_normalize_operator_input(
             raw_value = float(value)
             normalized_value = raw_value / 100.0 if unit == "percent" else raw_value
             if unit == "percent":
-                normalized_count += 1
-                warnings.append({"reason_code": "PERCENT_NORMALIZED_TO_RATIO", "path": f"{path}.value", "metric_identity": metric, "message": "percent value was transparently normalized to ratio"})
+                deferred_normalization_count += 1
+                warnings.append({"reason_code": "PERCENT_VALIDATED_FOR_DATA07_RATIO_NORMALIZATION", "path": f"{path}.value", "metric_identity": metric, "message": "raw percent value and unit are retained for deferred ME-DATA07 ratio normalization"})
             duplicate_key = (ticker, metric, reporting_period)
             fingerprint = json.dumps({"value": normalized_value, "source": source_reference}, sort_keys=True)
             if duplicate_key in seen:
@@ -250,11 +258,11 @@ def validate_and_normalize_operator_input(
         "validator_version": VALIDATOR_VERSION,
         "package_id": package_id,
         "status": "accepted" if accepted else "rejected",
-        "downstream_consumability": "eligible_for_explicit_me_data07_operator_import" if accepted else "not_consumable",
+        "downstream_consumability": "structurally_valid_for_explicit_source_approval_review" if accepted else "not_consumable",
         "counts": {
             "input_metrics": input_count,
             "accepted_metrics": input_count if accepted else 0,
-            "normalized_metrics": normalized_count if accepted else 0,
+            "deferred_normalization_metrics": deferred_normalization_count if accepted else 0,
             "warning_count": len(warnings),
             "rejected_metrics": 0 if accepted else input_count,
             "error_count": len(errors),
@@ -262,7 +270,7 @@ def validate_and_normalize_operator_input(
         "input_sha256": input_sha256,
         "errors": errors,
         "warnings": warnings,
-        "boundary": "Validation grants no automatic import, analysis readiness, recommendation, or decision authority.",
+        "boundary": "Validation proves structural provenance completeness only. Source authenticity and governance approval remain unverified; explicit source approval review is required before ME-DATA07 import. No automatic import, analysis readiness, recommendation, or decision authority is granted.",
     }
 
 

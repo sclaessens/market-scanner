@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Sequence, TextIO
 
 from market_engine.data.operator_fundamental_metric_package import (
+    OperatorPackageConfigurationError,
     OperatorPackageInputError,
     prepare_operator_fundamental_metric_package,
 )
@@ -15,7 +16,7 @@ from market_engine.data.operator_fundamental_metric_package import (
 def run_command(argv: Sequence[str] | None = None, *, stdout: TextIO, stderr: TextIO) -> int:
     parser = argparse.ArgumentParser(
         prog="market-engine-prepare-fundamental-metric-package",
-        description="Prepare and fail-closed validate a local governance-approved operator fundamental metric package for explicit ME-DATA07 staging.",
+        description="Prepare and fail-closed structurally validate a local operator fundamental metric package for explicit source-approval review.",
     )
     parser.add_argument("--input", required=True, help="Path to the immutable local operator JSON input.")
     parser.add_argument("--package-output", required=True, help="Path for the accepted ME-DATA07-compatible package.")
@@ -27,6 +28,9 @@ def run_command(argv: Sequence[str] | None = None, *, stdout: TextIO, stderr: Te
             package_output_path=args.package_output,
             report_output_path=args.report_output,
         )
+    except OperatorPackageConfigurationError as exc:
+        print(f"ME-DATA08 configuration error: {exc}", file=stderr)
+        return 2
     except OperatorPackageInputError as exc:
         print(f"ME-DATA08 input error: {exc}", file=stderr)
         return 2

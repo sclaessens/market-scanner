@@ -3,8 +3,8 @@
 ## Outcome
 
 ME-DATA08 implements a local, deterministic preparation and fail-closed
-validation flow for operator-supplied fundamental metric evidence. An accepted
-package uses the existing
+structural validation flow for operator-supplied fundamental metric evidence.
+An accepted package uses the existing
 `market-engine-data07-operator-fundamental-metrics-v1` import boundary. The
 preparation input contract is
 `market-engine-data08-operator-fundamental-metric-input-v1`; the validator and
@@ -25,8 +25,9 @@ debt_to_equity
 ```
 
 These are duration ratio metrics. `ratio` and `percent` are the only accepted
-input units; percent is transparently normalized by the existing ME-DATA07
-consumer. Currency is not applicable and a non-empty currency is rejected.
+input units. ME-DATA08 preserves a raw percent value and unit; the existing
+ME-DATA07 consumer performs the actual ratio normalization. Currency is not
+applicable and a non-empty currency is rejected.
 Aliases, inferred periods, guessed units, scale multipliers, currency
 conversion, derived ratios, estimates, interpolation, scoring, ranking, and
 qualitative classifications are not supported.
@@ -39,8 +40,8 @@ non-empty `records` array. Each record requires:
 - ticker and company identity (`name` and canonical `instrument_id`);
 - canonical metric identity, finite numeric value, and explicit unit;
 - duration period type, start/end dates, fiscal year, and fiscal period;
-- primary-source provenance: source name/reference, raw source field, source
-  date, observation/acquisition timestamps, and parser version.
+- structurally complete provenance: source name/reference, raw source field,
+  source date, observation/acquisition timestamps, and parser version.
 
 Preparation groups records by ticker and reporting period, orders records and
 metrics canonically, preserves source references and raw values, and emits the
@@ -57,17 +58,28 @@ PYTHONPATH=src python -m market_engine.data.operator_fundamental_metric_package_
   --report-output artifacts/market_engine/operator_fundamental_metric_packages/validation_report.json
 ```
 
-Exit code `0` means the package is accepted and was written. Exit code `1`
-means governance validation rejected the entire package; only the validation
+Package and report paths are resolved without requiring them to exist. A
+logical path collision, including `output.json` versus `./output.json`, fails
+before input reading, directory creation, or writes with
+`OUTPUT_PATH_COLLISION`.
+
+Exit code `0` means structural validation passed and the package was written.
+Exit code `1`
+means structural/governance-boundary validation rejected the entire package; only the validation
 report is written. Exit code `2` identifies malformed/unreadable operator
-input or command usage. Exit code `3` identifies an output filesystem error.
+input, invalid output configuration, or command usage. Exit code `3`
+identifies an output filesystem error.
 Expected rejection paths do not emit a traceback.
 
 ## Accepted and rejected semantics
 
 Acceptance means only
-`eligible_for_explicit_me_data07_operator_import`. It does not execute that
-import and does not establish completeness, analysis readiness, actionability,
+`structurally_valid_for_explicit_source_approval_review`. It does not prove
+that free-text source identity or references are authentic, primary-source,
+governance-approved, or reliable. No normative machine-readable generic
+operator-source approval allowlist existed before ME-DATA08, so explicit
+source approval remains required before ME-DATA07 import is authorized. It
+does not establish completeness, analysis readiness, actionability,
 recommendation readiness, or tradeability. Any blocking issue rejects the
 whole package and sets `downstream_consumability` to `not_consumable`; partial
 acceptance is forbidden. The report contains package identity, contract and
@@ -106,8 +118,14 @@ VALUE_NOT_FINITE
 VALUE_NOT_NUMERIC
 ```
 
-`PERCENT_NORMALIZED_TO_RATIO` is the only normalization warning. A warning
-does not override a blocking error.
+`PERCENT_VALIDATED_FOR_DATA07_RATIO_NORMALIZATION` is the only normalization
+warning. `deferred_normalization_metrics` counts accepted raw percent metrics
+whose conversion is deferred to ME-DATA07; it never claims that ME-DATA08
+rewrote the emitted value. A warning does not override a blocking error.
+
+This is a pre-merge correction to the draft, unpublished v1 report contract,
+so the v1 identifiers remain unchanged. No merged consumer depends on the
+superseded warning or count field.
 
 ## Side-effect and downstream boundary
 
@@ -128,7 +146,7 @@ PR and closeout report.
 
 ## Remaining boundary
 
-An operator must still supply genuine governance-approved primary-source
-evidence. Acceptance by ME-DATA08 permits only an explicit ME-DATA07 operator
-import attempt. Production import and automatic downstream consumption remain
-blocked.
+An operator must still supply evidence and obtain explicit source-authenticity
+and governance-approval review. Structural acceptance by ME-DATA08 does not
+authorize an ME-DATA07 import attempt. Production import and automatic
+downstream consumption remain blocked.

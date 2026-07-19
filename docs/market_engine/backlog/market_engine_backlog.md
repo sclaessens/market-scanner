@@ -401,8 +401,8 @@ reconciles 12 selected as 0 successful, 12 blocked, 0 failed, and 0 pending,
 with 940 not selected. The missing operator input records one presence check
 and zero actual import attempts. Coverage and readiness remain unchanged.
 
-Remaining blocker: a governance-approved operator package with primary-source
-metric lineage is required. Recommended next sprint:
+At ME-DATA07 closeout, the recorded blocker was an operator package with
+source-approved metric lineage. ME-DATA08 was the recommended next sprint:
 
 ```text
 ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
@@ -417,21 +417,22 @@ Job family: ME-DATA / Local evidence coverage
 Status: IMPLEMENTED / local_package_preparation_operational
 
 Goal: give an operator one deterministic, versioned, fail-closed local flow to
-prepare governance-approved primary-source metric evidence for the existing
-ME-DATA07 operator-import boundary.
+prepare structurally complete metric evidence for explicit source-approval
+review before the existing ME-DATA07 operator-import boundary.
 
 Result: ME-DATA08 implemented the
 `market-engine-data08-operator-fundamental-metric-input-v1` contract, strict
 validation against the normative five-metric ME-DATA06/07 allowlist,
-transparent percent-to-ratio normalization metadata, deterministic
+transparent deferred percent-to-ratio normalization metadata, deterministic
 ME-DATA07-compatible package serialization, a machine-readable validation
 report, stable reason codes, and explicit CLI exit behavior. Any blocking
-record rejects the whole package. Acceptance means only eligibility for an
-explicit ME-DATA07 operator-import step; it does not import evidence or grant
+record rejects the whole package. Acceptance means only structural validity
+for explicit source-approval review. ME-DATA08 cannot authenticate free-text
+source provenance and therefore does not authorize ME-DATA07 import or grant
 analysis, recommendation, tradeability, or decision authority.
 
-Remaining blocker: genuine governance-approved primary-source operator
-evidence is still required before the existing ME-DATA07 pilot can be run.
+Remaining blocker: operator evidence still requires explicit source-authenticity
+and governance-approval review before the existing ME-DATA07 pilot can be run.
 Recommended next story: execute a bounded ME-DATA07 pilot with an accepted
 ME-DATA08 package and review the resulting local coverage evidence. Production
 import, automatic downstream execution, live acquisition, and authority

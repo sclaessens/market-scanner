@@ -20,7 +20,7 @@
         "parser_version": "operator-parser-v1",
         "raw_source_field": "reportedRevenueGrowthYoY",
         "source_date": "2026-07-01",
-        "source_name": "operator-approved-primary-source",
+        "source_name": "operator-declared-source",
         "source_reference": "local-evidence://AAA/2026-Q2/revenue-growth"
       },
       "ticker": "AAA",

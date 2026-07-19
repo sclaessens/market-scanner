@@ -27,7 +27,7 @@ def _record(metric: str = "revenue_growth_yoy", value: float = 12.5) -> dict[str
         "fiscal_year": 2026,
         "fiscal_period": "Q2",
         "provenance": {
-            "source_name": "operator-approved-primary-source",
+            "source_name": "operator-declared-source",
             "source_reference": "local-evidence://AAA/2026-Q2/revenue",
             "raw_source_field": "reportedRevenueGrowthYoY",
             "source_date": "2026-07-01",
@@ -70,12 +70,15 @@ def test_happy_path_is_data07_compatible_deterministic_and_canonically_ordered()
     assert report["counts"] == {
         "input_metrics": 2,
         "accepted_metrics": 2,
-        "normalized_metrics": 2,
+        "deferred_normalization_metrics": 2,
         "warning_count": 2,
         "rejected_metrics": 0,
         "error_count": 0,
     }
-    assert report["downstream_consumability"] == "eligible_for_explicit_me_data07_operator_import"
+    assert report["downstream_consumability"] == "structurally_valid_for_explicit_source_approval_review"
+    assert {warning["reason_code"] for warning in report["warnings"]} == {
+        "PERCENT_VALIDATED_FOR_DATA07_RATIO_NORMALIZATION"
+    }
 
 
 def test_prepare_writes_stable_artifacts_without_mutating_input(tmp_path: Path) -> None:
@@ -180,6 +183,72 @@ def test_malformed_json_has_operator_error_and_no_traceback(tmp_path: Path) -> N
     assert "ME-DATA08 input error" in stderr.getvalue()
     assert "Traceback" not in stderr.getvalue()
     assert not (tmp_path / "package.json").exists()
+
+
+@pytest.mark.parametrize("equivalent_form", [False, True])
+def test_output_path_collision_fails_before_read_or_write(
+    tmp_path: Path,
+    equivalent_form: bool,
+) -> None:
+    missing_input = tmp_path / "missing-input.json"
+    target = tmp_path / "output.json"
+    report_target = f"{tmp_path}/./output.json" if equivalent_form else str(target)
+    stdout, stderr = io.StringIO(), io.StringIO()
+
+    code = run_command(
+        [
+            "--input",
+            str(missing_input),
+            "--package-output",
+            str(target),
+            "--report-output",
+            report_target,
+        ],
+        stdout=stdout,
+        stderr=stderr,
+    )
+
+    assert code == 2
+    assert "OUTPUT_PATH_COLLISION" in stderr.getvalue()
+    assert "Traceback" not in stderr.getvalue()
+    assert not target.exists()
+
+
+def test_output_path_collision_never_overwrites_existing_file(tmp_path: Path) -> None:
+    source = tmp_path / "input.json"
+    source.write_text(json.dumps(_payload()), encoding="utf-8")
+    target = tmp_path / "output.json"
+    target.write_text("protected", encoding="utf-8")
+    stdout, stderr = io.StringIO(), io.StringIO()
+
+    code = run_command(
+        ["--input", str(source), "--package-output", str(target), "--report-output", str(target)],
+        stdout=stdout,
+        stderr=stderr,
+    )
+
+    assert code == 2
+    assert target.read_text(encoding="utf-8") == "protected"
+
+
+def test_structural_provenance_does_not_claim_source_approval() -> None:
+    payload = _payload()
+    payload["records"][0]["provenance"] = {
+        "source_name": "unverified-blog",
+        "source_reference": "guess://unknown",
+        "raw_source_field": "estimated_by_operator",
+        "source_date": "2026-07-01",
+        "observed_at": "2026-07-01T09:00:00Z",
+        "acquired_at": "2026-07-02T10:00:00Z",
+        "parser_version": "manual",
+    }
+    output, report = _validate(payload)
+
+    assert output is not None
+    assert report["status"] == "accepted"
+    assert report["downstream_consumability"] == "structurally_valid_for_explicit_source_approval_review"
+    assert "governance approval remain unverified" in report["boundary"]
+    assert "eligible_for_explicit_me_data07_operator_import" not in json.dumps(report)
 
 
 def test_cli_exit_codes_and_rejection_never_write_accepted_package(tmp_path: Path) -> None:
