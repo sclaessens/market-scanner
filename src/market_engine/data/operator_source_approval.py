@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -14,6 +15,7 @@ REPORT_SCHEMA_VERSION = "market-engine-data08-operator-fundamental-metric-valida
 VALIDATOR_VERSION = "market-engine-data08-operator-fundamental-metric-validator-v1"
 APPROVED_SCOPE = "bounded_operator_fundamental_metric_pilot"
 BOUNDED_PILOT_MAX_TICKERS = 1
+_CANONICAL_TICKER = re.compile(r"^[A-Z][A-Z0-9.-]{0,14}$")
 REQUIRED_REVIEWER_ROLES = ("Operator", "Data Steward", "Governance Auditor")
 REQUIRED_REVIEW_DIMENSIONS = (
     "source_authenticity",
@@ -118,26 +120,39 @@ def validate_source_approval_decision(
                 ticker = record.get("ticker")
                 if isinstance(ticker, str) and ticker:
                     package_tickers.add(ticker)
-    approved_tickers = decision.get("approved_tickers")
-    if not isinstance(approved_tickers, list) or not approved_tickers:
-        _issue(issues, "APPROVED_TICKERS_MISSING", "$.approved_tickers", "approved tickers must be a non-empty list")
-    else:
-        valid_tickers = all(isinstance(ticker, str) and ticker and ticker == ticker.upper() for ticker in approved_tickers)
-        if not valid_tickers or len(set(approved_tickers)) != len(approved_tickers):
-            _issue(issues, "APPROVED_TICKERS_INVALID", "$.approved_tickers", "approved tickers must be unique canonical ticker strings")
-        if approved_tickers != sorted(approved_tickers):
-            _issue(issues, "APPROVED_TICKERS_NOT_SORTED", "$.approved_tickers", "approved tickers must be deterministically sorted")
-        if set(approved_tickers) != package_tickers:
-            _issue(issues, "APPROVED_TICKER_SET_MISMATCH", "$.approved_tickers", "approved tickers must exactly match package tickers")
+    approved_tickers = _validated_string_list(
+        decision,
+        "approved_tickers",
+        issues,
+        invalid_code="APPROVED_TICKERS_INVALID",
+        missing_code="APPROVED_TICKERS_MISSING",
+        require_non_empty=True,
+        sorted_code="APPROVED_TICKERS_NOT_SORTED",
+        item_pattern=_CANONICAL_TICKER,
+    )
+    if approved_tickers is not None and set(approved_tickers) != package_tickers:
+        _issue(issues, "APPROVED_TICKER_SET_MISMATCH", "$.approved_tickers", "approved tickers must exactly match package tickers")
     if not package_tickers:
         _issue(issues, "PACKAGE_TICKER_SET_EMPTY", "$.artifact_bindings.package", "accepted package must contain a ticker")
     elif len(package_tickers) > BOUNDED_PILOT_MAX_TICKERS:
         _issue(issues, "BOUNDED_PILOT_TICKER_LIMIT_EXCEEDED", "$.artifact_bindings.package", "package exceeds the bounded pilot ticker limit")
-    approved_metrics = decision.get("approved_metrics")
-    if not isinstance(approved_metrics, list) or not approved_metrics or set(approved_metrics) != package_metrics:
+    approved_metrics = _validated_string_list(
+        decision,
+        "approved_metrics",
+        issues,
+        invalid_code="APPROVED_METRICS_INVALID",
+        require_non_empty=True,
+    )
+    if approved_metrics is not None and set(approved_metrics) != package_metrics:
         _issue(issues, "APPROVED_METRIC_SET_MISMATCH", "$.approved_metrics", "approved metrics must exactly match package metrics")
-    missing_metrics = decision.get("explicitly_missing_metrics")
-    if not isinstance(missing_metrics, list) or set(missing_metrics) != set(MVP_METRIC_FIELDS) - package_metrics:
+    missing_metrics = _validated_string_list(
+        decision,
+        "explicitly_missing_metrics",
+        issues,
+        invalid_code="EXPLICIT_MISSING_METRICS_INVALID",
+        require_non_empty=False,
+    )
+    if missing_metrics is not None and set(missing_metrics) != set(MVP_METRIC_FIELDS) - package_metrics:
         _issue(issues, "EXPLICIT_MISSING_METRIC_SET_MISMATCH", "$.explicitly_missing_metrics", "explicitly missing metrics must be the exact allowlist complement")
 
     documents = decision.get("source_documents")
@@ -190,6 +205,42 @@ def _result(issues: list[dict[str, str]], decision_path: Path | None, package_pa
         "reason_codes": sorted({row["reason_code"] for row in issues}),
         "issues": issues,
     }
+
+
+def _validated_string_list(
+    value: Mapping[str, Any],
+    key: str,
+    issues: list[dict[str, str]],
+    *,
+    invalid_code: str,
+    require_non_empty: bool,
+    missing_code: str | None = None,
+    sorted_code: str | None = None,
+    item_pattern: re.Pattern[str] | None = None,
+) -> list[str] | None:
+    path = f"$.{key}"
+    if key not in value:
+        _issue(issues, missing_code or invalid_code, path, f"{key} is required")
+        return None
+    items = value[key]
+    if not isinstance(items, list):
+        _issue(issues, invalid_code, path, f"{key} must be a list of strings")
+        return None
+    if require_non_empty and not items:
+        _issue(issues, missing_code or invalid_code, path, f"{key} must be non-empty")
+        return None
+    if any(not isinstance(item, str) or not item for item in items):
+        _issue(issues, invalid_code, path, f"{key} entries must be non-empty strings")
+        return None
+    if item_pattern is not None and any(item_pattern.fullmatch(item) is None for item in items):
+        _issue(issues, invalid_code, path, f"{key} entries must be canonical strings")
+        return None
+    if len(set(items)) != len(items):
+        _issue(issues, invalid_code, path, f"{key} entries must be unique")
+        return None
+    if sorted_code is not None and items != sorted(items):
+        _issue(issues, sorted_code, path, f"{key} must be deterministically sorted")
+    return items
 
 
 def _bound_path(bindings: Mapping[str, Any], key: str, issues: list[dict[str, str]]) -> Path | None:

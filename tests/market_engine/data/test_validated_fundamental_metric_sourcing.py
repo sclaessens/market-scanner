@@ -561,6 +561,58 @@ def test_missing_concrete_approval_blocks_before_import_and_snapshot(run_fixture
     assert artifacts["concrete_source_approval_validation"]["reason_codes"] == ["SOURCE_APPROVAL_DECISION_MISSING"]
 
 
+def test_malformed_approval_list_blocks_before_parser_snapshot_and_downstream(
+    run_fixture: dict[str, object], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    tmp = Path(run_fixture["tmp"])
+    package = _operator_package(tmp / "operator-malformed-list.json", [_operator_record("AAA")])
+    decision_path = _approval_for_package(tmp, package)
+    decision = json.loads(decision_path.read_text(encoding="utf-8"))
+    decision["approved_tickers"] = ["AAA", {"unexpected": "object"}]
+    _write_json(decision_path, decision)
+    calls = {"parser": 0, "snapshot": 0, "downstream": 0}
+
+    def fail_parser(*_args, **_kwargs):
+        calls["parser"] += 1
+        raise AssertionError("package parser must not run")
+
+    def fail_snapshot(*_args, **_kwargs):
+        calls["snapshot"] += 1
+        raise AssertionError("snapshot persistence must not run")
+
+    def fail_downstream(*_args, **_kwargs):
+        calls["downstream"] += 1
+        raise AssertionError("downstream DATA06/RUN31 must not run")
+
+    monkeypatch.setattr(sourcing, "_load_and_validate_operator_import", fail_parser)
+    monkeypatch.setattr(sourcing, "_persist_operator_snapshot", fail_snapshot)
+    monkeypatch.setattr(sourcing, "run_fundamental_evidence_coverage", fail_downstream)
+    artifacts, output = _run(
+        run_fixture,
+        run_id="malformed-list",
+        operator_import_path=package,
+        source_approval_decision_path=decision_path,
+        execute_downstream=True,
+        data06_run_id="must-not-run-data06",
+        run31_run_id="must-not-run-run31",
+    )
+
+    assert calls == {"parser": 0, "snapshot": 0, "downstream": 0}
+    assert artifacts["manifest"]["run_status"] == "blocked_external_source_requirement"
+    assert artifacts["batch_execution_summary"]["execution_reason"] == "concrete_source_approval_failed"
+    assert artifacts["batch_execution_summary"]["imports_attempted"] == 0
+    assert artifacts["batch_execution_summary"]["normalized_count"] == 0
+    assert artifacts["batch_execution_summary"]["provider_calls_performed"] == 0
+    assert artifacts["normalized_metric_evidence"]["record_count"] == 0
+    assert artifacts["manifest"]["raw_snapshot"] is None
+    assert artifacts["manifest"]["downstream"] is None
+    assert artifacts["manifest"]["guardrails"]["network_access_performed"] is False
+    assert artifacts["blocker_report"]["primary_blocker"] == "concrete_source_approval_failed"
+    assert artifacts["batch_execution_summary"]["reconciliation"]["reconciled"] is True
+    assert "APPROVED_TICKERS_INVALID" in artifacts["concrete_source_approval_validation"]["reason_codes"]
+    assert output.joinpath("concrete_source_approval_validation.json").is_file()
+
+
 @pytest.mark.parametrize("decision", ["blocked", "rejected", "unknown"])
 def test_non_approved_decision_blocks_before_parser(run_fixture: dict[str, object], decision: str) -> None:
     tmp = Path(run_fixture["tmp"])

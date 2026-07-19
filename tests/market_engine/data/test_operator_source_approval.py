@@ -221,3 +221,133 @@ def test_symlink_escape_is_rejected(tmp_path: Path) -> None:
     link.symlink_to(outside)
     decision["source_documents"][0].update(relative_path=link.name, sha256=_sha(outside))
     assert "SOURCE_DOCUMENT_PATH_ESCAPE" in _validate(tmp_path, package, decision)["reason_codes"]
+
+
+@pytest.mark.parametrize("malformed", [["AAA", 1], [{"ticker": "AAA"}], [["AAA"]], [None]])
+def test_approved_ticker_wrong_element_types_return_blocked(tmp_path: Path, malformed: object) -> None:
+    package, _, decision = _fixture(tmp_path)
+    decision["approved_tickers"] = malformed
+
+    result = _validate(tmp_path, package, decision)
+
+    assert result["validation_status"] == "blocked"
+    assert result["concrete_package_source_approved"] is False
+    assert "APPROVED_TICKERS_INVALID" in result["reason_codes"]
+    assert result["issues"] == sorted(result["issues"], key=lambda row: (row["path"], row["reason_code"]))
+
+
+@pytest.mark.parametrize(
+    "malformed",
+    [
+        ["revenue_growth_yoy", 1],
+        [{"metric": "revenue_growth_yoy"}],
+        [["revenue_growth_yoy"]],
+        [None],
+    ],
+)
+def test_approved_metric_wrong_element_types_return_blocked(tmp_path: Path, malformed: object) -> None:
+    package, _, decision = _fixture(tmp_path)
+    decision["approved_metrics"] = malformed
+
+    result = _validate(tmp_path, package, decision)
+
+    assert result["validation_status"] == "blocked"
+    assert result["concrete_package_source_approved"] is False
+    assert "APPROVED_METRICS_INVALID" in result["reason_codes"]
+    assert result["issues"] == sorted(result["issues"], key=lambda row: (row["path"], row["reason_code"]))
+
+
+@pytest.mark.parametrize(
+    "malformed",
+    [
+        ["gross_margin", 1],
+        [{"metric": "gross_margin"}],
+        [["gross_margin"]],
+        [None],
+    ],
+)
+def test_explicit_missing_metric_wrong_element_types_return_blocked(tmp_path: Path, malformed: object) -> None:
+    package, _, decision = _fixture(tmp_path)
+    decision["explicitly_missing_metrics"] = malformed
+
+    result = _validate(tmp_path, package, decision)
+
+    assert result["validation_status"] == "blocked"
+    assert result["concrete_package_source_approved"] is False
+    assert "EXPLICIT_MISSING_METRICS_INVALID" in result["reason_codes"]
+    assert result["issues"] == sorted(result["issues"], key=lambda row: (row["path"], row["reason_code"]))
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "reason"),
+    [
+        ("approved_tickers", "AAA", "APPROVED_TICKERS_INVALID"),
+        ("approved_metrics", "revenue_growth_yoy", "APPROVED_METRICS_INVALID"),
+        ("explicitly_missing_metrics", "gross_margin", "EXPLICIT_MISSING_METRICS_INVALID"),
+        ("approved_tickers", [""], "APPROVED_TICKERS_INVALID"),
+        ("approved_metrics", [""], "APPROVED_METRICS_INVALID"),
+        ("explicitly_missing_metrics", [""], "EXPLICIT_MISSING_METRICS_INVALID"),
+        ("approved_metrics", ["eps_growth_yoy", "eps_growth_yoy"], "APPROVED_METRICS_INVALID"),
+        ("explicitly_missing_metrics", ["gross_margin", "gross_margin"], "EXPLICIT_MISSING_METRICS_INVALID"),
+    ],
+)
+def test_decision_string_list_shape_errors_return_blocked(
+    tmp_path: Path, field: str, value: object, reason: str
+) -> None:
+    package, _, decision = _fixture(tmp_path)
+    decision[field] = value
+
+    result = _validate(tmp_path, package, decision)
+
+    assert result["validation_status"] == "blocked"
+    assert result["concrete_package_source_approved"] is False
+    assert reason in result["reason_codes"]
+
+
+@pytest.mark.parametrize(
+    ("field", "reason"),
+    [
+        ("approved_metrics", "APPROVED_METRICS_INVALID"),
+        ("explicitly_missing_metrics", "EXPLICIT_MISSING_METRICS_INVALID"),
+    ],
+)
+def test_missing_metric_list_fields_return_blocked(tmp_path: Path, field: str, reason: str) -> None:
+    package, _, decision = _fixture(tmp_path)
+    decision.pop(field)
+
+    result = _validate(tmp_path, package, decision)
+
+    assert result["validation_status"] == "blocked"
+    assert result["concrete_package_source_approved"] is False
+    assert reason in result["reason_codes"]
+
+
+def test_empty_approved_metric_list_returns_blocked(tmp_path: Path) -> None:
+    package, _, decision = _fixture(tmp_path)
+    decision["approved_metrics"] = []
+
+    result = _validate(tmp_path, package, decision)
+
+    assert result["validation_status"] == "blocked"
+    assert "APPROVED_METRICS_INVALID" in result["reason_codes"]
+
+
+def test_full_metric_package_accepts_empty_explicit_missing_list(tmp_path: Path) -> None:
+    package, _, decision = _fixture(tmp_path)
+    payload = json.loads(package.read_text(encoding="utf-8"))
+    payload["records"][0]["metrics"].update(
+        {
+            "gross_margin": {"value": 48.0},
+            "operating_margin": {"value": 17.0},
+            "debt_to_equity": {"value": 0.42},
+        }
+    )
+    _write(package, payload)
+    decision["artifact_bindings"]["package_sha256"] = _sha(package)
+    decision["approved_metrics"] = sorted(approval.MVP_METRIC_FIELDS)
+    decision["explicitly_missing_metrics"] = []
+
+    result = _validate(tmp_path, package, decision)
+
+    assert result["validation_status"] == "approved"
+    assert result["reason_codes"] == []
