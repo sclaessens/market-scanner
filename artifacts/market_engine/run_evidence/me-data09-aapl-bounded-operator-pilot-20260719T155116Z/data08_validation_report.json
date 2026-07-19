@@ -1,7 +1,7 @@
 {
   "artifacts": {
-    "accepted_package": "operator_input/market_engine/me-data09/aapl/20260719T150409Z/fundamental_metrics.json",
-    "validation_report": "artifacts/market_engine/operator_fundamental_metric_packages/me-data09-aapl-20260719T150409Z/validation_report.json"
+    "accepted_package": "operator_input/market_engine/me-data09/aapl/20260719T155116Z/fundamental_metrics.json",
+    "validation_report": "operator_input/market_engine/me-data09/aapl/20260719T155116Z/validation_report.json"
   },
   "boundary": "Validation proves structural provenance completeness only. Source authenticity and governance approval remain unverified; explicit source approval review is required before ME-DATA07 import. No automatic import, analysis readiness, recommendation, or decision authority is granted.",
   "counts": {
@@ -14,8 +14,8 @@
   },
   "downstream_consumability": "structurally_valid_for_explicit_source_approval_review",
   "errors": [],
-  "input_sha256": "fc5b27ad944ebb5f26c7a7270d3d9b1a420e3c6c5da5933300d176c8e25d1f8d",
-  "package_id": "me-data09-aapl-fy2026-q2-20260719T150409Z",
+  "input_sha256": "b6353a66cb537a31720117bd780eaaaf51f0174590d48b8033ef330dd7a5fe39",
+  "package_id": "me-data09-aapl-fy2026-q2-20260719T155116Z",
   "schema_version": "market-engine-data08-operator-fundamental-metric-validation-report-v1",
   "status": "accepted",
   "validator_version": "market-engine-data08-operator-fundamental-metric-validator-v1",

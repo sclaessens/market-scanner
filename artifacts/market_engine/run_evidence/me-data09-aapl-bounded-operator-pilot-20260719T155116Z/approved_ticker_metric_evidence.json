@@ -1,0 +1,84 @@
+{
+  "approved_tickers": [
+    "AAPL"
+  ],
+  "record": {
+    "acquired_at": "2026-07-19T15:51:16Z",
+    "coverage_status": "partial",
+    "exchange": "UNKNOWN",
+    "instrument_id": "equity:aapl",
+    "metric_lineage": [
+      {
+        "canonical_metric": "revenue_growth_yoy",
+        "normalized_unit": "ratio",
+        "normalized_value": 0.17,
+        "provider": "Apple Newsroom FY2026 Q2 earnings release",
+        "raw_source_field": "quarterly revenue up 17 percent year over year",
+        "raw_unit": "percent",
+        "raw_value": 17.0,
+        "reporting_period": "2026-Q2",
+        "snapshot_id": "me-data09-aapl-fy2026-q2-20260719T155116Z",
+        "source_date": "2026-04-30",
+        "source_package_checksum": "9507a07605168841163460ef4e7417e7c51a4d881bbea9e15585b02aeff8f41e",
+        "transformation": "percent_to_ratio",
+        "validation_status": "valid"
+      },
+      {
+        "canonical_metric": "eps_growth_yoy",
+        "normalized_unit": "ratio",
+        "normalized_value": 0.22,
+        "provider": "Apple Newsroom FY2026 Q2 earnings release",
+        "raw_source_field": "quarterly diluted EPS up 22 percent year over year",
+        "raw_unit": "percent",
+        "raw_value": 22.0,
+        "reporting_period": "2026-Q2",
+        "snapshot_id": "me-data09-aapl-fy2026-q2-20260719T155116Z",
+        "source_date": "2026-04-30",
+        "source_package_checksum": "9507a07605168841163460ef4e7417e7c51a4d881bbea9e15585b02aeff8f41e",
+        "transformation": "percent_to_ratio",
+        "validation_status": "valid"
+      }
+    ],
+    "metrics": {
+      "debt_to_equity": null,
+      "eps_growth_yoy": 0.22,
+      "gross_margin": null,
+      "operating_margin": null,
+      "revenue_growth_yoy": 0.17
+    },
+    "missing_metrics": [
+      "gross_margin",
+      "operating_margin",
+      "debt_to_equity"
+    ],
+    "normalized_record_checksum": "48b3fa32293469b42b084b1e113a78af0d8437aa50b65d6d504a754e1daee390",
+    "parser_version": "market-engine-data09-bounded-manual-primary-source-extraction-v1",
+    "provider": "Apple Newsroom FY2026 Q2 earnings release",
+    "provider_symbol": "AAPL",
+    "region": "US",
+    "reporting_period": "2026-Q2",
+    "snapshot_id": "me-data09-aapl-fy2026-q2-20260719T155116Z",
+    "source_date": "2026-04-30",
+    "source_package_checksum": "9507a07605168841163460ef4e7417e7c51a4d881bbea9e15585b02aeff8f41e",
+    "source_reference": "https://www.apple.com/newsroom/2026/04/apple-reports-second-quarter-results/",
+    "ticker": "AAPL",
+    "validation_status": "valid"
+  },
+  "schema_version": "market-engine-data09-approved-ticker-metric-evidence-v1",
+  "ticker_delta": {
+    "advice_input_ready_after": false,
+    "advice_input_ready_before": false,
+    "after_status": "partial",
+    "before_status": "partial",
+    "new_metrics": [
+      "eps_growth_yoy",
+      "revenue_growth_yoy"
+    ],
+    "remaining_missing_metrics": [
+      "debt_to_equity",
+      "gross_margin",
+      "operating_margin"
+    ],
+    "ticker": "AAPL"
+  }
+}

@@ -12,7 +12,8 @@ OPERATOR_IMPORT_SCHEMA_VERSION = "market-engine-data07-operator-fundamental-metr
 INPUT_SCHEMA_VERSION = "market-engine-data08-operator-fundamental-metric-input-v1"
 REPORT_SCHEMA_VERSION = "market-engine-data08-operator-fundamental-metric-validation-report-v1"
 VALIDATOR_VERSION = "market-engine-data08-operator-fundamental-metric-validator-v1"
-APPROVED_SCOPE = "bounded_aapl_operator_fundamental_metric_pilot"
+APPROVED_SCOPE = "bounded_operator_fundamental_metric_pilot"
+BOUNDED_PILOT_MAX_TICKERS = 1
 REQUIRED_REVIEWER_ROLES = ("Operator", "Data Steward", "Governance Auditor")
 REQUIRED_REVIEW_DIMENSIONS = (
     "source_authenticity",
@@ -32,6 +33,8 @@ REQUIRED_REVIEW_DIMENSIONS = (
 def validate_source_approval_decision(
     decision_path: str | Path | None,
     package_path: str | Path,
+    *,
+    source_document_root: str | Path | None = None,
 ) -> dict[str, Any]:
     issues: list[dict[str, str]] = []
     decision_file = Path(decision_path) if decision_path else None
@@ -58,7 +61,7 @@ def validate_source_approval_decision(
     elif status != "approved":
         _issue(issues, "UNKNOWN_SOURCE_APPROVAL_DECISION", "$.decision", "source approval decision is unknown")
     if decision.get("scope") != APPROVED_SCOPE:
-        _issue(issues, "SOURCE_APPROVAL_SCOPE_MISMATCH", "$.scope", "decision scope is not the bounded AAPL pilot")
+        _issue(issues, "SOURCE_APPROVAL_SCOPE_MISMATCH", "$.scope", "decision scope is not the bounded operator pilot")
     if tuple(decision.get("reviewer_roles") or ()) != REQUIRED_REVIEWER_ROLES:
         _issue(issues, "REVIEWER_ROLES_MISMATCH", "$.reviewer_roles", "all required reviewer roles must be recorded in order")
 
@@ -107,10 +110,29 @@ def validate_source_approval_decision(
             _issue(issues, "REVIEW_DIMENSION_NOT_APPROVED", f"$.reviews.{dimension}.status", "review dimension must be approved")
 
     package_metrics = set()
+    package_tickers = set()
     if isinstance(package, Mapping):
         for record in package.get("records") or []:
             if isinstance(record, Mapping):
                 package_metrics.update((record.get("metrics") or {}).keys())
+                ticker = record.get("ticker")
+                if isinstance(ticker, str) and ticker:
+                    package_tickers.add(ticker)
+    approved_tickers = decision.get("approved_tickers")
+    if not isinstance(approved_tickers, list) or not approved_tickers:
+        _issue(issues, "APPROVED_TICKERS_MISSING", "$.approved_tickers", "approved tickers must be a non-empty list")
+    else:
+        valid_tickers = all(isinstance(ticker, str) and ticker and ticker == ticker.upper() for ticker in approved_tickers)
+        if not valid_tickers or len(set(approved_tickers)) != len(approved_tickers):
+            _issue(issues, "APPROVED_TICKERS_INVALID", "$.approved_tickers", "approved tickers must be unique canonical ticker strings")
+        if approved_tickers != sorted(approved_tickers):
+            _issue(issues, "APPROVED_TICKERS_NOT_SORTED", "$.approved_tickers", "approved tickers must be deterministically sorted")
+        if set(approved_tickers) != package_tickers:
+            _issue(issues, "APPROVED_TICKER_SET_MISMATCH", "$.approved_tickers", "approved tickers must exactly match package tickers")
+    if not package_tickers:
+        _issue(issues, "PACKAGE_TICKER_SET_EMPTY", "$.artifact_bindings.package", "accepted package must contain a ticker")
+    elif len(package_tickers) > BOUNDED_PILOT_MAX_TICKERS:
+        _issue(issues, "BOUNDED_PILOT_TICKER_LIMIT_EXCEEDED", "$.artifact_bindings.package", "package exceeds the bounded pilot ticker limit")
     approved_metrics = decision.get("approved_metrics")
     if not isinstance(approved_metrics, list) or not approved_metrics or set(approved_metrics) != package_metrics:
         _issue(issues, "APPROVED_METRIC_SET_MISMATCH", "$.approved_metrics", "approved metrics must exactly match package metrics")
@@ -121,14 +143,35 @@ def validate_source_approval_decision(
     documents = decision.get("source_documents")
     if not isinstance(documents, list) or not documents:
         _issue(issues, "SOURCE_DOCUMENTS_MISSING", "$.source_documents", "source document bindings are required")
+    elif source_document_root is None:
+        _issue(issues, "SOURCE_DOCUMENT_ROOT_MISSING", "$.source_documents", "an operator-supplied source document root is required")
     else:
+        root = Path(source_document_root).resolve()
         for index, document in enumerate(documents):
             if not isinstance(document, Mapping):
                 _issue(issues, "SOURCE_DOCUMENT_BINDING_INVALID", f"$.source_documents[{index}]", "source document binding must be an object")
                 continue
-            local_path = Path(str(document.get("local_path") or ""))
+            relative_value = document.get("relative_path")
+            if not isinstance(relative_value, str) or not relative_value:
+                _issue(issues, "SOURCE_DOCUMENT_PATH_INVALID", f"$.source_documents[{index}].relative_path", "relative source document path is required")
+                continue
+            relative_path = Path(relative_value)
+            if relative_path.is_absolute():
+                _issue(issues, "SOURCE_DOCUMENT_PATH_ABSOLUTE", f"$.source_documents[{index}].relative_path", "source document path must be relative")
+                continue
+            if ".." in relative_path.parts:
+                _issue(issues, "SOURCE_DOCUMENT_PATH_ESCAPE", f"$.source_documents[{index}].relative_path", "source document path must not traverse outside the source root")
+                continue
+            local_path = (root / relative_path).resolve()
+            try:
+                local_path.relative_to(root)
+            except ValueError:
+                _issue(issues, "SOURCE_DOCUMENT_PATH_ESCAPE", f"$.source_documents[{index}].relative_path", "resolved source document path escapes the source root")
+                continue
             expected = document.get("sha256")
-            if not local_path.is_file() or expected != _sha256(local_path):
+            if not local_path.is_file():
+                _issue(issues, "SOURCE_DOCUMENT_MISSING", f"$.source_documents[{index}].relative_path", "source document is missing from the supplied root")
+            elif expected != _sha256(local_path):
                 _issue(issues, "SOURCE_DOCUMENT_CHECKSUM_MISMATCH", f"$.source_documents[{index}].sha256", "source document checksum does not match local evidence")
 
     return _result(issues, decision_file, package_file, decision_id=decision.get("decision_id"), package_id=package_id)

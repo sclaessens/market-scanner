@@ -1,0 +1,59 @@
+{
+  "approved_tickers": [
+    "AAPL"
+  ],
+  "artifact_checksums": {
+    "approval_decision_sha256": "5fd17e54c948a54a448abb3849b51ce29c87c65c458d9b28de3fa73daf10b684",
+    "input_sha256": "b6353a66cb537a31720117bd780eaaaf51f0174590d48b8033ef330dd7a5fe39",
+    "package_sha256": "9507a07605168841163460ef4e7417e7c51a4d881bbea9e15585b02aeff8f41e",
+    "validation_report_sha256": "366eab1a2311094eecf48e06a29512396b63800c5d1f664203a65a64340b1b64"
+  },
+  "compact_evidence_committed": true,
+  "full_local_artifact_paths": {
+    "data06": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data09-aapl-20260719T155116Z",
+    "data07": "artifacts/market_engine/fundamental_metric_sourcing_runs/me-data09-aapl-bounded-operator-pilot-20260719T155116Z",
+    "raw_snapshot": "data/market_engine/source_snapshots/fundamental_metrics/me-data09-aapl-bounded-operator-pilot-20260719T155116Z/operator_import.json",
+    "run31_compact": "artifacts/market_engine/run_evidence/me-run31-after-me-data09-aapl-20260719T155116Z"
+  },
+  "full_run_committed": false,
+  "guardrails": {
+    "allocation_performed": false,
+    "broker_order_execution_performed": false,
+    "credentials_logged": false,
+    "decision_engine_changed": false,
+    "model_invocation_performed": false,
+    "network_access_performed": false,
+    "portfolio_watchlist_mutation_performed": false,
+    "provider_calls_performed": false,
+    "recommendation_rules_changed": false,
+    "telegram_delivery_performed": false
+  },
+  "outputs": [
+    "manifest.json",
+    "source_document_checksums.json",
+    "source_approval_validation.json",
+    "data08_validation_report.json",
+    "data07_pilot_summary.json",
+    "approved_ticker_metric_evidence.json",
+    "coverage_delta.json",
+    "downstream_run_index.json",
+    "top_level_checksums.json",
+    "report.md"
+  ],
+  "publication_boundary": "Compact facts, source identities, checksums, validation outcomes, and aggregate deltas are committed. Full run trees and source documents remain local.",
+  "run_id": "me-data09-aapl-bounded-operator-pilot-20260719T155116Z",
+  "run_ids": {
+    "data06": "me-data06-after-me-data09-aapl-20260719T155116Z",
+    "data07": "me-data09-aapl-bounded-operator-pilot-20260719T155116Z",
+    "run31": "me-run31-after-me-data09-aapl-20260719T155116Z"
+  },
+  "schema_version": "market-engine-data09-compact-operator-pilot-evidence-v1",
+  "schema_versions": {
+    "approval_decision": "market-engine-data09-source-approval-decision-v1",
+    "approval_validation": "market-engine-data09-source-approval-validation-v1",
+    "data07": "market-engine-data07-validated-fundamental-metric-sourcing-v1",
+    "data08_report": "market-engine-data08-operator-fundamental-metric-validation-report-v1",
+    "input": "market-engine-data08-operator-fundamental-metric-input-v1",
+    "package": "market-engine-data07-operator-fundamental-metrics-v1"
+  }
+}

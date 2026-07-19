@@ -59,7 +59,7 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
   -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
   -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
-  -> ME-DATA10 - Select and source-review the next deterministic bounded operator pilot (planned / next active)
+  -> ME-DATA10 - Define and execute a governed primary-source fundamental metric derivation pilot (planned / next active)
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -497,9 +497,19 @@ record without provider/network calls. The pilot reconciled as one success and
 eleven blocked tickers. DATA06/RUN31 retained 6 complete, 39 partial, 907
 missing, 6 advice-input-ready, 0 full-advice-ready, and 946 unable-to-advise.
 
-Next sprint: ME-DATA10 - Select and source-review the next deterministic bounded
-operator pilot. Preserve one-ticker scope, direct primary-source metrics, and
-explicit checksum-bound approval.
+Next sprint: ME-DATA10 - Define and execute a governed primary-source
+fundamental metric derivation pilot.
+
+ME-DATA10 will use one bounded ticker and approved primary-source financial
+facts under an explicit versioned formula contract. It requires numerator and
+denominator lineage, identical reporting periods and units, deterministic
+calculation, zero/negative/missing denominator checks, freshness and checksum
+binding, visible direct-versus-derived classification, and measured coverage
+effect for `gross_margin`, `operating_margin`, and/or `debt_to_equity`.
+
+ME-DATA10 is not implemented in ME-DATA09. Non-goals are broad batches,
+estimates, interpolation, hidden formulas, recommendation or ranking changes,
+allocation, portfolio/delivery/broker actions, and Decision Engine authority.
 
 ## Current ChatGPT Advisory Artifact Chain
 

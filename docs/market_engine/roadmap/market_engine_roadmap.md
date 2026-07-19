@@ -118,7 +118,7 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
   -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
   -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
-  -> ME-DATA10 - Select and source-review the next deterministic bounded operator pilot (planned / next active)
+  -> ME-DATA10 - Define and execute a governed primary-source fundamental metric derivation pilot (planned / next active)
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -314,8 +314,14 @@ ME-DATA08 and the new checksum-bound DATA09 source-approval gate. ME-DATA07
 normalized the two directly reported growth metrics and reconciled its pilot as
 one partial success plus eleven blocked selected tickers. The measured DATA06
 and RUN31 outputs retained the validated aggregate baseline and AAPL remained
-partial and not advice-input-ready. ME-DATA10 is the next bounded continuation;
-no expanded or automatic source acquisition is authorized.
+partial and not advice-input-ready. ME-DATA10 is the next bounded continuation:
+define and execute a governed primary-source fundamental metric derivation
+pilot. It must version formulas, retain numerator/denominator lineage, align
+periods and units, reject unsafe denominators, bind freshness and checksums, and
+label direct versus derived evidence for gross margin, operating margin, and/or
+debt-to-equity. This PR does not implement that derivation runtime. Broad
+batches, estimates, interpolation, hidden formulas, advice authority, and
+operational side effects remain prohibited.
 
 Roadmap outcome:
 

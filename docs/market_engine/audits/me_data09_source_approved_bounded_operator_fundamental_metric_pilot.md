@@ -1,126 +1,120 @@
 # ME-DATA09 Source-Approved Bounded Operator Fundamental Metric Pilot
 
-## Outcome
+## Review-fix outcome
 
-ME-DATA09 completed on 2026-07-19. The earlier preflight correctly stopped
-because no concrete operator evidence existed. The resumed sprint used the
-operator's explicit bounded authorization, an official Apple earnings release,
-and the associated SEC filing. ME-DATA08 accepted the compact input, the
-checksum-bound DATA09 approval passed, ME-DATA07 imported and normalized AAPL,
-and DATA06/RUN31 measured the downstream result.
+ME-DATA09 completed its corrected immutable run on 2026-07-19. The approval
+runtime is generic: ticker identity is data in `approved_tickers`, the generic
+scope is `bounded_operator_fundamental_metric_pilot`, and the package may contain
+at most one unique ticker. No runtime branch names AAPL, Apple, or a market.
 
-No provider or network call occurred during DATA07 processing. No downloaded
-source document is stored in the repository.
+Source documents are bound through relative logical paths and an
+operator-supplied `--source-document-root`. The root itself is used only at
+runtime and is not published. Absolute paths, empty paths, traversal, symlink
+escape, missing files, and checksum mismatches fail before package parsing.
 
-## Evidence and authorization
+## Source evidence and approval
 
-- Scope: `bounded_aapl_operator_fundamental_metric_pilot`.
-- Permitted local use: `approved_for_bounded_me_data09_aapl_pilot_only`.
-- Publication boundary: official URLs, document identities, checksums, compact
-  extracted facts, and audit metadata may be committed; complete downloaded
-  documents remain local and uncommitted.
-- Apple source: *Apple reports second quarter results*, published 2026-04-30,
+- Approved ticker set: `AAPL`.
+- Reporting period: FY2026 Q2, 2025-12-28 through 2026-03-28.
+- Apple earnings release URL:
   `https://www.apple.com/newsroom/2026/04/apple-reports-second-quarter-results/`.
 - Apple document SHA-256:
   `b421dd69c74aab85ac6d003884ec0017cfa2ca4bc4c4a89576e7eb6e0baba954`.
-- SEC cross-check: Apple Inc. Form 10-Q, CIK `0000320193`, accession
-  `0000320193-26-000013`, filed 2026-05-01, report period 2026-03-28,
+- SEC Form 10-Q URL:
   `https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm`.
 - SEC document SHA-256:
   `a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d`.
+- Permitted local use: `approved_for_bounded_me_data09_aapl_pilot_only`.
+- Full source documents remain local and uncommitted.
 
-The Apple source was approved as the direct primary metric source. The SEC
-filing independently cross-checked company identity, fiscal context, and the
-quarter from 2025-12-28 through 2026-03-28. The canonical mapping is AAPL,
-`equity:aapl`, Apple Inc. All review dimensions passed: authenticity, primary
-source, identity, mapping, lineage, reporting period, fiscal context, unit and
-scale, freshness, permitted local use, and publication boundary.
+Direct metrics are `revenue_growth_yoy` at 17.0 percent (normalized to 0.17)
+and `eps_growth_yoy` at 22.0 percent (normalized to 0.22). `gross_margin`,
+`operating_margin`, and `debt_to_equity` remain explicitly missing. No metric
+was derived, estimated, interpolated, rounded, or represented as zero.
 
-## Direct metrics
+## Immutable artifact binding
 
-The package contains only directly published percentages for FY2026 Q2:
-
-| Metric | Raw value | DATA07 normalized value |
-|---|---:|---:|
-| `revenue_growth_yoy` | 17.0 percent | 0.17 ratio |
-| `eps_growth_yoy` | 22.0 percent | 0.22 ratio |
-
-`gross_margin`, `operating_margin`, and `debt_to_equity` are explicitly
-missing. No value was derived, estimated, rounded, or represented as zero.
-
-## DATA08 and DATA09 binding
-
-- Package ID: `me-data09-aapl-fy2026-q2-20260719T150409Z`.
+- Package ID: `me-data09-aapl-fy2026-q2-20260719T155116Z`.
 - DATA08 input SHA-256:
-  `fc5b27ad944ebb5f26c7a7270d3d9b1a420e3c6c5da5933300d176c8e25d1f8d`.
+  `b6353a66cb537a31720117bd780eaaaf51f0174590d48b8033ef330dd7a5fe39`.
 - Accepted package SHA-256:
-  `264c574fa0c366262637ecefefeed5f08e40a6aa6991f4dc41707debce90c5ca`.
-- DATA08 report SHA-256:
-  `bc0ffce9fda4d2b1da101ecfc1ef23b0bcfb864ab6662f6ed144f2205611c5f8`.
-- DATA08 result: `accepted`, zero errors,
-  `structurally_valid_for_explicit_source_approval_review`.
-- DATA09 decision: `approved` by the recorded Operator, Data Steward, and
-  Governance Auditor roles.
-- DATA09 validation: `approved`, with no reason codes or issues.
+  `9507a07605168841163460ef4e7417e7c51a4d881bbea9e15585b02aeff8f41e`.
+- DATA08 validation report SHA-256:
+  `366eab1a2311094eecf48e06a29512396b63800c5d1f664203a65a64340b1b64`.
+- DATA09 decision SHA-256:
+  `5fd17e54c948a54a448abb3849b51ce29c87c65c458d9b28de3fa73daf10b684`.
+- DATA08 result: `accepted`, zero errors, structurally valid for explicit
+  source-approval review.
+- DATA09 approval validation: `approved`, with no issues or reason codes.
 
-The runtime treats `approved_operator_supplied_import` only as route
-eligibility. The explicit DATA09 artifact is required before parsing; missing,
-malformed, blocked, rejected, unknown, mismatched, or incomplete approval stops
-before parser, snapshot, and downstream work.
+## Corrected full run
 
-## DATA07 pilot
-
-- Run ID: `me-data09-aapl-bounded-operator-pilot-20260719T150409Z`.
-- Deterministically selected: AAPL, ALL, AMD, A, AAL, ABBV, ABNB, ASML, BF.B,
-  ADC, ADM, ADP.
+- DATA07: `me-data09-aapl-bounded-operator-pilot-20260719T155116Z`.
+- DATA06: `me-data06-after-me-data09-aapl-20260719T155116Z`.
+- RUN31: `me-run31-after-me-data09-aapl-20260719T155116Z`.
 - Selected 12; imported 1; normalized 1; success 1; blocked 11; failed 0;
   pending 0; not selected 940.
-- AAPL result: valid partial evidence with two metrics and three explicit
-  missing metrics.
 - Reconciliation: passed for all 952 canonical instruments.
-- Raw snapshot: validated, one AAPL record, checksum
-  `264c574fa0c366262637ecefefeed5f08e40a6aa6991f4dc41707debce90c5ca`.
-- Provider calls: 0. Network calls: 0. Requests attempted: 0.
+- Raw snapshot: validated, one record, checksum equal to the accepted package
+  checksum `9507a07605168841163460ef4e7417e7c51a4d881bbea9e15585b02aeff8f41e`.
+- DATA07 provider calls: 0. DATA07 network calls: 0.
 
-## Downstream measurement
+## Coverage attribution
 
-- DATA06: `me-data06-after-me-data09-aapl-20260719T150409Z`, completed.
-- RUN31: `me-run31-after-me-data09-aapl-20260719T150409Z`, completed.
+The current ME-DATA09 sprint comparison is measured from the validated DATA06
+baseline and the corrected downstream result:
 
-| Measure | Validated pre-pilot baseline | Post-pilot |
-|---|---:|---:|
-| Fundamental complete | 6 | 6 |
-| Fundamental partial | 39 | 39 |
-| Fundamental missing | 907 | 907 |
-| Invalid/stale/conflicting | 0 | 0 |
-| Canonical advice-input-ready | 6 | 6 |
-| Full-advice-ready | 0 | 0 |
-| Unable-to-advise | 946 | 946 |
+| Measure | Before | After | Delta |
+|---|---:|---:|---:|
+| Fundamental complete | 6 | 6 | 0 |
+| Fundamental partial | 39 | 39 | 0 |
+| Fundamental missing | 907 | 907 | 0 |
+| Invalid/stale/conflicting | 0 | 0 | 0 |
+| Canonical advice-input-ready | 6 | 6 | 0 |
+| Full-advice-ready | 0 | 0 | 0 |
+| Unable-to-advise | 946 | 946 | 0 |
 
-AAPL remained partial and not canonical advice-input-ready, but its selected
-evidence changed to the newer primary-source package with the two validated
-growth metrics. There was no AAPL readiness transition, no aggregate coverage
-change relative to the validated DATA06 baseline, and no regression. The three
-missing AAPL metrics remain the blocker. Full-advice readiness, recommendation,
-ranking, tradeability, allocation, and execution authority are unchanged.
+AAPL remained partial and not advice-input-ready. Its selected evidence now
+contains the two directly reported growth metrics, while three metrics remain
+missing. This is a traceable evidence change without an aggregate status or
+readiness transition.
 
-## Artifact map
+DATA06 also retains an internal comparison against its older historical origin
+baseline. That comparison contains 24 earlier improvement tickers and the
+historical 4/17/931 state. It is emitted only as
+`historical_origin_comparison` with `attributable_to_current_sprint: false` and
+is not a current ME-DATA09 improvement claim. The compact current-sprint delta
+does not copy those historical tickers.
 
-- Input, package, decision:
-  `operator_input/market_engine/me-data09/aapl/20260719T150409Z/`.
-- DATA08 report:
-  `artifacts/market_engine/operator_fundamental_metric_packages/me-data09-aapl-20260719T150409Z/`.
-- DATA07 manifest, approval validation, summaries, normalized AAPL evidence,
-  per-ticker status, blockers, and coverage:
-  `artifacts/market_engine/fundamental_metric_sourcing_runs/me-data09-aapl-bounded-operator-pilot-20260719T150409Z/`.
-- Raw snapshot:
-  `data/market_engine/source_snapshots/fundamental_metrics/me-data09-aapl-bounded-operator-pilot-20260719T150409Z/`.
-- DATA06 and compact RUN31 evidence:
-  `artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data09-aapl-20260719T150409Z/`
-  and `artifacts/market_engine/run_evidence/me-run31-after-me-data09-aapl-20260719T150409Z/`.
-- The committed compact RUN31 package records the full-run identity and
-  checksums; the large transient full output was not published.
+## Compact publication boundary
 
-The next bounded continuation is ME-DATA10: select and source-review the next
-ticker from the existing deterministic pilot. It must retain explicit approval,
-one-ticker evidence scope, direct facts only, and measured downstream outcomes.
+The complete DATA07, DATA06, RUN31, and raw snapshot outputs remain locally
+available at their repository-relative run paths but are removed from Git
+tracking. The old 20260719T150409Z full run and operator input are also retained
+locally and ignored through exact path rules.
+
+Committed evidence is limited to:
+
+- `operator_input/market_engine/me-data09/aapl/20260719T155116Z/`: input,
+  accepted package, DATA08 report, and portable approval decision.
+- `artifacts/market_engine/run_evidence/me-data09-aapl-bounded-operator-pilot-20260719T155116Z/`:
+  compact manifest, source checksums, approval validation, DATA08 report,
+  DATA07 summary, approved-ticker evidence, current coverage delta, downstream
+  identities, checksums, and report.
+
+The compact manifest records `full_run_committed: false` and
+`compact_evidence_committed: true`. It contains no full 952-ticker list, source
+document, absolute workstation path, credential, cookie, or secret.
+
+## Next sprint definition
+
+ME-DATA10 is **Define and execute a governed primary-source fundamental metric
+derivation pilot**. It will define one bounded ticker pilot with a versioned
+formula contract, numerator and denominator lineage, identical periods and
+units, deterministic calculations, denominator safety checks, freshness and
+checksum binding, and visible direct-versus-derived classification for gross
+margin, operating margin, and/or debt-to-equity.
+
+ME-DATA10 is not implemented in this PR. It does not authorize a broad batch,
+estimates, interpolation, hidden formulas, recommendations, ranking, allocation,
+portfolio or delivery writes, broker actions, or Decision Engine authority.

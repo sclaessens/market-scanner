@@ -104,6 +104,7 @@ def run_validated_fundamental_metric_sourcing(
     baseline_run31_evidence: str | Path = DEFAULT_BASELINE_RUN31_EVIDENCE,
     operator_import_path: str | Path | None = DEFAULT_OPERATOR_IMPORT_PATH,
     source_approval_decision_path: str | Path | None = None,
+    source_document_root: str | Path | None = None,
     output_root: str | Path = DEFAULT_OUTPUT_ROOT,
     raw_snapshot_root: str | Path = DEFAULT_RAW_SNAPSHOT_ROOT,
     execute_downstream: bool = False,
@@ -157,7 +158,11 @@ def run_validated_fundamental_metric_sourcing(
             execution_status = "blocked"
             execution_reason = "source_approval_failed"
         else:
-            concrete_approval = validate_source_approval_decision(source_approval_decision_path, import_path)
+            concrete_approval = validate_source_approval_decision(
+                source_approval_decision_path,
+                import_path,
+                source_document_root=source_document_root,
+            )
             if not concrete_approval["concrete_package_source_approved"]:
                 execution_status = "blocked"
                 execution_reason = "concrete_source_approval_failed"
@@ -236,7 +241,10 @@ def run_validated_fundamental_metric_sourcing(
             "data06_output_dir": downstream_dir.as_posix(),
             "data06_run_status": downstream_artifacts["manifest"]["run_status"],
             "after": downstream_artifacts["fundamental_coverage_summary"]["after"],
-            "comparison": downstream_artifacts["before_after_comparison"],
+            "historical_origin_comparison": {
+                **downstream_artifacts["before_after_comparison"],
+                "attributable_to_current_sprint": False,
+            },
         }
 
     before_counts = dict(baseline["counts"])
@@ -254,13 +262,57 @@ def run_validated_fundamental_metric_sourcing(
         import_attempted=import_attempted,
         status_reconciliation=status_reconciliation,
     )
+    absolute_delta = {
+        key: after_counts.get(key, 0) - before_counts.get(key, 0)
+        for key in (
+            "fundamental_complete",
+            "fundamental_partial",
+            "fundamental_missing",
+            "invalid_stale_conflicting",
+            "canonical_advice_input_ready",
+            "full_advice_ready",
+            "unable_to_advise",
+        )
+    }
+    imported_ticker = normalized_records[0]["ticker"] if len(normalized_records) == 1 else None
+    before_ticker = baseline["by_ticker"].get(imported_ticker, {}) if imported_ticker else {}
+    after_ticker = None
+    if imported_ticker and downstream:
+        after_rows = downstream_artifacts["per_ticker_fundamental_status"]["tickers"]
+        after_ticker = next((row for row in after_rows if row.get("ticker") == imported_ticker), None)
+    ticker_delta = None
+    if imported_ticker:
+        imported_record = normalized_records[0]
+        ticker_delta = {
+            "ticker": imported_ticker,
+            "before_status": before_ticker.get("overall_fundamental_status"),
+            "after_status": (after_ticker or {}).get("overall_fundamental_status", before_ticker.get("overall_fundamental_status")),
+            "new_metrics": sorted(
+                metric
+                for metric, value in (imported_record.get("metrics") or {}).items()
+                if value is not None
+            ),
+            "remaining_missing_metrics": sorted(imported_record.get("missing_metrics") or []),
+            "advice_input_ready_before": bool((run31["by_ticker"].get(imported_ticker) or {}).get("canonical_advice_input_ready")),
+            "advice_input_ready_after": bool((after_ticker or {}).get("canonical_advice_input_ready", False)),
+        }
     coverage = {
         "schema_version": "market-engine-data07-coverage-before-after-v1",
         "run_status": run_status,
         "before": before_counts,
         "after": after_counts,
+        "current_sprint_comparison": {
+            "before": before_counts,
+            "after": after_counts,
+            "absolute_delta": absolute_delta,
+        },
+        "ticker_delta": ticker_delta,
+        "historical_origin_comparison": downstream.get("historical_origin_comparison") if downstream else None,
         "downstream_executed": downstream is not None,
-        "downstream": downstream,
+        "downstream_run_identity": {
+            key: downstream[key]
+            for key in ("data06_run_id", "run31_run_id", "data06_output_dir", "data06_run_status")
+        } if downstream else None,
         "coverage_claim": "measured_downstream_result" if downstream else "no_coverage_change_claimed",
     }
     artifacts = {
@@ -292,6 +344,7 @@ def run_validated_fundamental_metric_sourcing(
                 "baseline_run31_evidence": Path(baseline_run31_evidence).as_posix(),
                 "operator_import_path": Path(operator_import_path).as_posix() if operator_import_path else None,
                 "source_approval_decision_path": Path(source_approval_decision_path).as_posix() if source_approval_decision_path else None,
+                "source_document_root_supplied": source_document_root is not None,
             },
             "input_checksums": _input_checksums(
                 Path(canonical_universe),
@@ -1152,6 +1205,10 @@ def _render_report(artifacts: Mapping[str, Any]) -> str:
             "",
             f"- claim: {coverage['coverage_claim']}",
             f"- downstream executed: {str(coverage['downstream_executed']).lower()}",
+            f"- current sprint before: {json.dumps(coverage['current_sprint_comparison']['before'], sort_keys=True)}",
+            f"- current sprint after: {json.dumps(coverage['current_sprint_comparison']['after'], sort_keys=True)}",
+            f"- current sprint absolute delta: {json.dumps(coverage['current_sprint_comparison']['absolute_delta'], sort_keys=True)}",
+            f"- historical origin comparison attributable to current sprint: false" if coverage["historical_origin_comparison"] else "- historical origin comparison: not executed",
             "",
             "No provider/network call, secret persistence, broker/order action, allocation, portfolio/watchlist mutation, Telegram delivery, Decision Engine change, or recommendation-rule change was performed.",
             "",
@@ -1231,6 +1288,7 @@ def _argument_parser() -> argparse.ArgumentParser:
     parser.add_argument("--baseline-run-evidence", default=DEFAULT_BASELINE_RUN31_EVIDENCE)
     parser.add_argument("--operator-import-path", default=DEFAULT_OPERATOR_IMPORT_PATH)
     parser.add_argument("--source-approval-decision")
+    parser.add_argument("--source-document-root")
     parser.add_argument("--output-root", default=DEFAULT_OUTPUT_ROOT)
     parser.add_argument("--raw-snapshot-root", default=DEFAULT_RAW_SNAPSHOT_ROOT)
     parser.add_argument("--execute-downstream", action="store_true")
@@ -1256,6 +1314,7 @@ def run_command(argv: Sequence[str] | None = None, *, stdout: TextIO, stderr: Te
             baseline_run31_evidence=args.baseline_run_evidence,
             operator_import_path=args.operator_import_path,
             source_approval_decision_path=args.source_approval_decision,
+            source_document_root=args.source_document_root,
             output_root=args.output_root,
             raw_snapshot_root=args.raw_snapshot_root,
             execute_downstream=args.execute_downstream,
