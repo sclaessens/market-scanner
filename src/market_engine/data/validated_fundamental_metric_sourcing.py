@@ -26,6 +26,10 @@ from market_engine.data.local_market_data_universe import (
     build_universe_snapshot,
 )
 from market_engine.data.operator_source_approval import validate_source_approval_decision
+from market_engine.data.primary_source_metric_derivation import (
+    DATA07_GOVERNED_PACKAGE_SCHEMA_VERSION,
+    validate_derivation_approval_decision,
+)
 
 
 SCHEMA_VERSION = "market-engine-data07-validated-fundamental-metric-sourcing-v1"
@@ -158,11 +162,18 @@ def run_validated_fundamental_metric_sourcing(
             execution_status = "blocked"
             execution_reason = "source_approval_failed"
         else:
-            concrete_approval = validate_source_approval_decision(
-                source_approval_decision_path,
-                import_path,
-                source_document_root=source_document_root,
-            )
+            if _package_schema_version(import_path) == DATA07_GOVERNED_PACKAGE_SCHEMA_VERSION:
+                concrete_approval = validate_derivation_approval_decision(
+                    source_approval_decision_path,
+                    import_path,
+                    source_document_root=source_document_root,
+                )
+            else:
+                concrete_approval = validate_source_approval_decision(
+                    source_approval_decision_path,
+                    import_path,
+                    source_document_root=source_document_root,
+                )
             if not concrete_approval["concrete_package_source_approved"]:
                 execution_status = "blocked"
                 execution_reason = "concrete_source_approval_failed"
@@ -333,7 +344,8 @@ def run_validated_fundamental_metric_sourcing(
                 "completeness_rule": "all required metrics valid, current, same-period, non-conflicting, and provenance-backed",
                 "normalized_unit": "ratio",
                 "growth_period_rule": "source-reported comparable year-over-year periods only; no derivation or annualization",
-                "debt_to_equity_rule": "source-reported total-debt-to-total-equity ratio only; no synthetic derivation",
+                "derived_metric_rule": "DATA08/DATA07 v1 remains direct-only; DATA10 derived evidence requires the explicit governed v2 contract and checksum-bound derivation approval",
+                "debt_to_equity_rule": "source-reported ratio or explicitly approved DATA10 interest-bearing-debt component derivation; total liabilities is forbidden",
             },
             "canonical_universe_version": universe.get("universe_version"),
             "canonical_universe_size": len(instruments),
@@ -732,7 +744,9 @@ def _load_and_validate_operator_import(
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     payload = _read_json_required(path)
     issues = []
-    if payload.get("schema_version") != OPERATOR_IMPORT_SCHEMA_VERSION:
+    package_schema_version = payload.get("schema_version")
+    governed_v2 = package_schema_version == DATA07_GOVERNED_PACKAGE_SCHEMA_VERSION
+    if package_schema_version not in {OPERATOR_IMPORT_SCHEMA_VERSION, DATA07_GOVERNED_PACKAGE_SCHEMA_VERSION}:
         issues.append("unsupported_import_schema")
     records = payload.get("records")
     if not isinstance(records, list):
@@ -799,6 +813,17 @@ def _load_and_validate_operator_import(
                 issues.append(f"{ticker}_{metric}_invalid_evidence")
                 record_invalid = True
                 continue
+            evidence_type = evidence.get("evidence_type") if governed_v2 else "direct"
+            if evidence_type not in {"direct", "derived"}:
+                issues.append(f"{ticker}_{metric}_invalid_evidence_type")
+                record_invalid = True
+                continue
+            if governed_v2:
+                lineage_key = "direct_lineage" if evidence_type == "direct" else "derivation_lineage"
+                if not isinstance(evidence.get(lineage_key), Mapping):
+                    issues.append(f"{ticker}_{metric}_{lineage_key}_missing")
+                    record_invalid = True
+                    continue
             raw_value = evidence.get("value")
             if raw_value is None:
                 normalized_metrics[metric] = None
@@ -823,7 +848,12 @@ def _load_and_validate_operator_import(
             lineage.append(
                 {
                     "canonical_metric": metric,
-                    "raw_source_field": evidence.get("raw_source_field") or metric,
+                    "evidence_type": evidence_type,
+                    "raw_source_field": (
+                        evidence.get("raw_source_field")
+                        or ((evidence.get("direct_lineage") or {}).get("raw_source_field") if governed_v2 else None)
+                        or metric
+                    ),
                     "raw_value": raw_value,
                     "raw_unit": unit,
                     "normalized_value": normalized_value,
@@ -835,6 +865,8 @@ def _load_and_validate_operator_import(
                     "source_package_checksum": source_package_checksum,
                     "transformation": "percent_to_ratio" if unit == "percent" else "identity",
                     "validation_status": "valid",
+                    "direct_lineage": evidence.get("direct_lineage") if governed_v2 and evidence_type == "direct" else None,
+                    "derivation_lineage": evidence.get("derivation_lineage") if governed_v2 and evidence_type == "derived" else None,
                 }
             )
         if record_invalid:
@@ -1226,6 +1258,14 @@ def _read_json_required(path: Path) -> Mapping[str, Any]:
     if not isinstance(payload, Mapping):
         raise ValidatedFundamentalMetricSourcingError(f"required JSON artifact must be an object: {path}")
     return payload
+
+
+def _package_schema_version(path: Path) -> str | None:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return str(payload.get("schema_version")) if isinstance(payload, Mapping) else None
 
 
 def _parse_date(value: Any, label: str) -> date:

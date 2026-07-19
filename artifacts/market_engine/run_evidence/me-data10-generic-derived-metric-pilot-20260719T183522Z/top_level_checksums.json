@@ -1,0 +1,15 @@
+{
+  "checksums": {
+    "approval_validation.json": "f255e97241d135b6304777068c4df3f252a7351d9f00d3ac501f8599eec8ea82",
+    "coverage_delta.json": "15616057f0e46c85ad726794e5af7c5257722f540dbe33d224050ec3a5f43bce",
+    "derivation_validation.json": "c082523c037591e6441bf02d456f4c71dc1aaea7523d701f03e1a9e624460e86",
+    "derived_metric_evidence.json": "606c76b2ebace199552644407b7ad6b37a8a2e0a0d01208cfd5a62b4bb6dd312",
+    "downstream_run_index.json": "18cd38a9ddbe0e32fc92caef0156a678d9cfb193c30b913f94fd2bf633ba9156",
+    "formula_catalog_snapshot.json": "4679c6895a8cffeea79058e1aacd048097242cb019e74bec3ebfdd152193d8bf",
+    "manifest.json": "8fadb920b4bfe3b70930f0d0848fae4f77087e5cda1d117fafb2669253d8911b",
+    "pilot_summary.json": "d78c44f5933ba4a570e6b738791e9cb2c637d6e926621186aab80db503074b47",
+    "report.md": "8a46dac2d36db5efe0cd2cc4a5fd3b9e792e12d1c8292710449765a6b3dc7029",
+    "source_fact_summary.json": "45952919efe6fc6dab4e6bd607efb51a82e232f7ce89bc781e666a29f0d81755"
+  },
+  "schema_version": "market-engine-data10-compact-evidence-checksums-v1"
+}

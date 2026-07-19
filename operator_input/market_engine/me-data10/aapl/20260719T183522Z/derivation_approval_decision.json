@@ -1,0 +1,78 @@
+{
+  "approved_calculation_checksums": [
+    "79e732202853d8e8d8d6e32352302f0f84f3f48f03923d52c0f01293592ad7cf",
+    "89da43e233a27efa800dae2c2c40e00cd5737087846e515c7f5f84d709d3a01a"
+  ],
+  "approved_derived_metrics": [
+    "gross_margin",
+    "operating_margin"
+  ],
+  "approved_tickers": [
+    "AAPL"
+  ],
+  "artifact_bindings": {
+    "derived_package_path": "operator_input/market_engine/me-data10/aapl/20260719T183522Z/derived_metrics.json",
+    "derived_package_sha256": "25a2b5e43ce11a90157a404ec4e268a3cdc5411a4fcd277c8c6b6fd49d6b57cb",
+    "direct_approval_path": "operator_input/market_engine/me-data09/aapl/20260719T155116Z/source_approval_decision.json",
+    "direct_approval_sha256": "5fd17e54c948a54a448abb3849b51ce29c87c65c458d9b28de3fa73daf10b684",
+    "direct_package_path": "operator_input/market_engine/me-data09/aapl/20260719T155116Z/fundamental_metrics.json",
+    "direct_package_sha256": "9507a07605168841163460ef4e7417e7c51a4d881bbea9e15585b02aeff8f41e",
+    "fact_package_path": "operator_input/market_engine/me-data10/aapl/20260719T183522Z/primary_source_facts.json",
+    "fact_package_sha256": "990c2bdb533a8d9604aa29cdd39ee8ceb05f77efbc2f6ed2230f8a32b6c9fcc8",
+    "formula_catalog_path": "config/market_engine/data10_fundamental_metric_formula_catalog.json",
+    "formula_catalog_sha256": "4679c6895a8cffeea79058e1aacd048097242cb019e74bec3ebfdd152193d8bf",
+    "governed_package_path": "operator_input/market_engine/me-data10/aapl/20260719T183522Z/governed_fundamental_metrics.json",
+    "governed_package_sha256": "b4bf17e99eae7dc3364ddacc863ffabf7b281578d1679ee67aaf90923a312149"
+  },
+  "decision": "approved",
+  "decision_at": "2026-07-19T18:35:22Z",
+  "decision_id": "me-data10-derivation-approval-20260719T183522Z",
+  "explicitly_blocked_metrics": [
+    "debt_to_equity"
+  ],
+  "limitations": [
+    "Approval is limited to the exact checksum-bound AAPL package and two successful margin calculations.",
+    "Debt-to-equity remains blocked because the approved fact package lacks the complete debt-component and equity fact set.",
+    "No automatic approval, broad ticker permission, recommendation, ranking, allocation, or execution authority is granted."
+  ],
+  "reviewer_roles": [
+    "Operator",
+    "Data Steward",
+    "Governance Auditor"
+  ],
+  "reviews": {
+    "accounting_framework": {"status": "approved"},
+    "calculation_checksum": {"status": "approved"},
+    "canonical_concept_mapping": {"status": "approved"},
+    "debt_component_selection": {"status": "approved"},
+    "denominator_safety": {"status": "approved"},
+    "denominator_selection": {"status": "approved"},
+    "direct_versus_derived_classification": {"status": "approved"},
+    "fact_package_checksum": {"status": "approved"},
+    "formula_catalog_checksum": {"status": "approved"},
+    "formula_identity_and_version": {"status": "approved"},
+    "freshness": {"status": "approved"},
+    "numerator_selection": {"status": "approved"},
+    "package_checksum": {"status": "approved"},
+    "permitted_local_use": {"status": "approved"},
+    "primary_source_status": {"status": "approved"},
+    "publication_boundary": {"status": "approved"},
+    "raw_source_tag_mapping": {"status": "approved"},
+    "reporting_period_alignment": {"status": "approved"},
+    "source_authenticity": {"status": "approved"},
+    "ticker_instrument_company_mapping": {"status": "approved"},
+    "unit_currency_scale_compatibility": {"status": "approved"}
+  },
+  "schema_version": "market-engine-data10-derivation-approval-decision-v1",
+  "scope": "bounded_governed_primary_source_metric_derivation_pilot",
+  "source_documents": [
+    {
+      "document_id": "sec-aapl-20260328-10q",
+      "official_url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm",
+      "publication_date": "2026-05-01",
+      "relative_path": "aapl-20260328-10q.html",
+      "sha256": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
+      "title": "Apple Inc. Form 10-Q for the quarter ended March 28, 2026"
+    }
+  ]
+}

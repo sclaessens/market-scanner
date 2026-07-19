@@ -118,7 +118,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
   -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
   -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
-  -> ME-DATA10 - Define and execute a governed primary-source fundamental metric derivation pilot (planned / next active)
+  -> ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot (completed / two AAPL margins derived / downstream measured)
+  -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / next active)
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -314,14 +315,27 @@ ME-DATA08 and the new checksum-bound DATA09 source-approval gate. ME-DATA07
 normalized the two directly reported growth metrics and reconciled its pilot as
 one partial success plus eleven blocked selected tickers. The measured DATA06
 and RUN31 outputs retained the validated aggregate baseline and AAPL remained
-partial and not advice-input-ready. ME-DATA10 is the next bounded continuation:
-define and execute a governed primary-source fundamental metric derivation
-pilot. It must version formulas, retain numerator/denominator lineage, align
-periods and units, reject unsafe denominators, bind freshness and checksums, and
-label direct versus derived evidence for gross margin, operating margin, and/or
-debt-to-equity. This PR does not implement that derivation runtime. Broad
-batches, estimates, interpolation, hidden formulas, advice authority, and
-operational side effects remain prohibited.
+partial and not advice-input-ready.
+
+### ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot
+
+Implemented result (2026-07-19): ME-DATA10 introduced a generic versioned
+primary-fact contract, declarative formula catalog, derived-evidence contract,
+checksum-bound derivation approval, and explicit DATA07 governed-v2 adapter.
+The runtime contains no ticker or issuer branch and is proven by US-GAAP, IFRS,
+and multiple arbitrary-ticker fixtures. DATA08-v1 and DATA07-v1 remain
+direct-evidence contracts and retain their existing semantics.
+
+The bounded AAPL pilot derived `gross_margin` and `operating_margin` from the
+exact FY2026 Q2 three-month revenue, gross-profit, and operating-income facts.
+`debt_to_equity` remained fail-closed because the complete approved debt and
+equity fact set was absent. The checksum-bound package passed DATA07, DATA06,
+and RUN31 with one imported partial record, no regressions, no aggregate status
+change, and zero provider/network calls.
+
+The next active sprint is ME-DATA11 — Execute a diversified US-GAAP/IFRS
+multi-ticker derivation pilot. It must reuse the generic ME-DATA10 engine
+without code changes for issuer identity, source tags, or formula selection.
 
 Roadmap outcome:
 
