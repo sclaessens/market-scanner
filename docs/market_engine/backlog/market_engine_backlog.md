@@ -57,7 +57,7 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
   -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
   -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
-  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
+  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / local_package_preparation_operational)
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -407,6 +407,35 @@ metric lineage is required. Recommended next sprint:
 ```text
 ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
 ```
+
+### ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
+
+Owner roles: Product Owner / Operator / Data Steward / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-DATA / Local evidence coverage
+
+Status: IMPLEMENTED / local_package_preparation_operational
+
+Goal: give an operator one deterministic, versioned, fail-closed local flow to
+prepare governance-approved primary-source metric evidence for the existing
+ME-DATA07 operator-import boundary.
+
+Result: ME-DATA08 implemented the
+`market-engine-data08-operator-fundamental-metric-input-v1` contract, strict
+validation against the normative five-metric ME-DATA06/07 allowlist,
+transparent percent-to-ratio normalization metadata, deterministic
+ME-DATA07-compatible package serialization, a machine-readable validation
+report, stable reason codes, and explicit CLI exit behavior. Any blocking
+record rejects the whole package. Acceptance means only eligibility for an
+explicit ME-DATA07 operator-import step; it does not import evidence or grant
+analysis, recommendation, tradeability, or decision authority.
+
+Remaining blocker: genuine governance-approved primary-source operator
+evidence is still required before the existing ME-DATA07 pilot can be run.
+Recommended next story: execute a bounded ME-DATA07 pilot with an accepted
+ME-DATA08 package and review the resulting local coverage evidence. Production
+import, automatic downstream execution, live acquisition, and authority
+changes remain blocked.
 
 ## Current ChatGPT Advisory Artifact Chain
 

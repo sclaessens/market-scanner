@@ -116,7 +116,7 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
   -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
   -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
-  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
+  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / local_package_preparation_operational)
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -277,6 +277,20 @@ lineage, then use the existing ME-DATA07 pilot and downstream gates. A new live
 provider route remains out of scope until source identity, licensing,
 credentials, metric definitions, mappings, and snapshot persistence are
 explicitly approved.
+
+ME-DATA08 implemented that local preparation boundary. The versioned input is
+validated fail-closed against the existing five-metric ME-DATA06/07 allowlist
+and is deterministically serialized into the existing ME-DATA07 operator
+package contract. The validation report distinguishes accepted from rejected
+packages with stable reason codes and explicitly denies automatic import,
+readiness, recommendation, tradeability, and decision authority. No provider
+or downstream process is invoked.
+
+The recommended continuation is a bounded ME-DATA07 pilot using genuine
+governance-approved primary-source evidence that has passed ME-DATA08. That
+pilot must remain explicit and locally reviewed before any ME-DATA06 coverage
+measurement. Live acquisition and production import remain blocked pending
+their own governance decisions.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 
