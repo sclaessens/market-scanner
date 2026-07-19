@@ -116,7 +116,7 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
   -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
   -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
-  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package
+  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / local_package_preparation_operational)
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -271,12 +271,29 @@ and corrected terminal batch reconciliation. The run now reports 12 selected,
 same canonical per-ticker statuses. The missing input caused one presence check
 and zero actual import attempts. Coverage and readiness remain unchanged.
 
-ME-DATA08 is now the recommended baseline sprint. It should prepare and
-validate a governance-approved operator package with primary-source metric
-lineage, then use the existing ME-DATA07 pilot and downstream gates. A new live
+ME-DATA08 was selected to prepare and structurally validate an operator package
+with explicit metric lineage before a separate source-approval review and the
+existing ME-DATA07 pilot/downstream gates. A new live
 provider route remains out of scope until source identity, licensing,
 credentials, metric definitions, mappings, and snapshot persistence are
 explicitly approved.
+
+ME-DATA08 implemented that local preparation boundary. The versioned input is
+validated fail-closed against the existing five-metric ME-DATA06/07 allowlist
+and is deterministically serialized into the existing ME-DATA07 operator
+package shape. The validation report distinguishes accepted from rejected
+packages with stable reason codes and classifies acceptance only as
+structurally valid for explicit source-approval review. Free-text provenance
+does not prove source authenticity or governance approval. The flow explicitly
+denies import authorization, readiness, recommendation, tradeability, and
+decision authority. No provider or downstream process is invoked.
+
+The recommended continuation is an explicit source-authenticity and governance
+review of real operator evidence that has passed ME-DATA08, followed by a
+bounded ME-DATA07 pilot only after approval. That pilot must remain explicit
+and locally reviewed before any ME-DATA06 coverage measurement. Live
+acquisition and production import remain blocked pending their own governance
+decisions.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 
