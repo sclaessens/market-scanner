@@ -57,7 +57,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
   -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
   -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
-  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / local_package_preparation_operational)
+  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
+  -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (planned / next active)
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -414,7 +415,7 @@ Owner roles: Product Owner / Operator / Data Steward / Development Lead / QA Lea
 
 Job family: ME-DATA / Local evidence coverage
 
-Status: IMPLEMENTED / local_package_preparation_operational
+Status: IMPLEMENTED / structural_package_validation_operational / source_approval_pending
 
 Goal: give an operator one deterministic, versioned, fail-closed local flow to
 prepare structurally complete metric evidence for explicit source-approval
@@ -433,10 +434,60 @@ analysis, recommendation, tradeability, or decision authority.
 
 Remaining blocker: operator evidence still requires explicit source-authenticity
 and governance-approval review before the existing ME-DATA07 pilot can be run.
-Recommended next story: execute a bounded ME-DATA07 pilot with an accepted
-ME-DATA08 package and review the resulting local coverage evidence. Production
-import, automatic downstream execution, live acquisition, and authority
-changes remain blocked.
+This continuation is now preserved as ME-DATA09. Production import, automatic
+downstream execution, live acquisition, and authority changes remain blocked.
+
+### ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot
+
+Owner roles: Product Owner / Operator / Data Steward / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-DATA / Local evidence coverage and governed pilot execution
+
+Status: PLANNED / NEXT ACTIVE
+
+Goal: take a concrete operator evidence package that passes ME-DATA08
+structural validation, perform an explicit source-authenticity and
+governance-approval review, and only after approval execute the existing
+ME-DATA07 pilot to measure the resulting local fundamental coverage.
+
+Prerequisites:
+
+- one immutable operator input package with concrete source references;
+- an ME-DATA08 accepted structural validation report and input checksum;
+- an explicit operator/governance decision covering source identity,
+  authenticity, permitted local use, metric lineage, periods, and freshness;
+- no assumption that free-text provenance or ME-DATA08 acceptance proves
+  source approval.
+
+Scope:
+
+- review and record the source-approval decision for the concrete package;
+- run ME-DATA08 again when required to bind approval to the final checksum;
+- execute the existing ME-DATA07 `operator_import` pilot only when approval
+  passes;
+- retain fail-closed package, mapping, freshness, period, unit, provenance,
+  snapshot, and batch-reconciliation gates;
+- measure ME-DATA06/ME-RUN31 coverage only through the existing explicit
+  downstream option and only after a successful pilot import;
+- write an audit that reports accepted, rejected, or blocked outcome without
+  manufacturing a coverage-improvement claim.
+
+Acceptance criteria:
+
+- the source-approval decision is explicit, reviewable, and checksum-bound;
+- a rejected or unverifiable source never reaches ME-DATA07 import;
+- an approved package is processed through the existing ME-DATA07 pilot with a
+  new run ID and without provider/network calls;
+- imported, normalized, blocked, and failed counts reconcile with per-ticker
+  evidence;
+- any downstream coverage change is measured from persisted artifacts;
+- readiness, recommendation, ranking, tradeability, allocation, and execution
+  authority remain unchanged.
+
+Out of scope: new live-provider architecture, credential setup, automatic
+source approval, expanded/full batch execution before the pilot passes,
+production import, portfolio/watchlist mutation, delivery sends, broker/order
+execution, recommendation-rule changes, or Decision Engine authority.
 
 ## Current ChatGPT Advisory Artifact Chain
 
