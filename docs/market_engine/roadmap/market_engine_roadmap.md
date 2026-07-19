@@ -116,7 +116,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
   -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
   -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
-  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / local_package_preparation_operational)
+  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
+  -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (planned / next active)
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -288,12 +289,41 @@ does not prove source authenticity or governance approval. The flow explicitly
 denies import authorization, readiness, recommendation, tradeability, and
 decision authority. No provider or downstream process is invoked.
 
-The recommended continuation is an explicit source-authenticity and governance
-review of real operator evidence that has passed ME-DATA08, followed by a
-bounded ME-DATA07 pilot only after approval. That pilot must remain explicit
-and locally reviewed before any ME-DATA06 coverage measurement. Live
-acquisition and production import remain blocked pending their own governance
-decisions.
+The recommended continuation is now preserved as ME-DATA09: an explicit
+source-authenticity and governance review of real operator evidence that has
+passed ME-DATA08, followed by a bounded ME-DATA07 pilot only after approval.
+That pilot must remain explicit and locally reviewed before any ME-DATA06
+coverage measurement. Live acquisition and production import remain blocked
+pending their own governance decisions.
+
+### ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot
+
+Owner roles: Product Owner / Operator / Data Steward / Development Lead / QA Lead / Governance Auditor
+
+Job family: ME-DATA / Local evidence coverage and governed pilot execution
+
+Status: PLANNED / NEXT ACTIVE
+
+Goal: bind a concrete ME-DATA08-accepted package to an explicit
+source-authenticity and governance-approval decision, then run the existing
+ME-DATA07 operator-import pilot only when that decision passes.
+
+Roadmap outcome:
+
+- preserve source approval as a human/governance decision, not an inference
+  from structurally complete free-text provenance;
+- reuse the ME-DATA08 package and report contracts without creating a parallel
+  schema;
+- reuse the ME-DATA07 pilot, snapshot, normalization, reconciliation, and
+  explicit downstream gates;
+- measure any ME-DATA06/ME-RUN31 coverage change from persisted artifacts;
+- stop fail-closed with an audit when evidence cannot be authenticated,
+  approved, mapped, validated, or imported.
+
+Not in scope: live-provider acquisition, automatic source approval,
+expanded/full batches before the pilot passes, production import, advice-rule
+changes, ranking authority, allocation, portfolio/watchlist mutation,
+delivery, broker/order execution, or Decision Engine changes.
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 
