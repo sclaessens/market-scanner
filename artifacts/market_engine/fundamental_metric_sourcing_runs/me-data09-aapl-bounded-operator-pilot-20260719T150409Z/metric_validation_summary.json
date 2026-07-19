@@ -1,0 +1,24 @@
+{
+  "complete_count": 0,
+  "deterministic_ordering": true,
+  "duplicate_records_deduplicated": 0,
+  "excluded_unselected_count": 0,
+  "failed_tickers": [],
+  "input_record_count": 1,
+  "issues": [],
+  "metric_counts": {
+    "debt_to_equity": 0,
+    "eps_growth_yoy": 1,
+    "gross_margin": 0,
+    "operating_margin": 0,
+    "revenue_growth_yoy": 1
+  },
+  "negative_values_allowed": true,
+  "normalized_record_count": 1,
+  "null_preserved": true,
+  "package_validation_failed": false,
+  "partial_count": 1,
+  "schema_version": "market-engine-data07-metric-validation-summary-v1",
+  "validation_failed_record_count": 0,
+  "validation_status": "passed"
+}

@@ -1,0 +1,36 @@
+{
+  "artifacts": {
+    "accepted_package": "operator_input/market_engine/me-data09/aapl/20260719T150409Z/fundamental_metrics.json",
+    "validation_report": "artifacts/market_engine/operator_fundamental_metric_packages/me-data09-aapl-20260719T150409Z/validation_report.json"
+  },
+  "boundary": "Validation proves structural provenance completeness only. Source authenticity and governance approval remain unverified; explicit source approval review is required before ME-DATA07 import. No automatic import, analysis readiness, recommendation, or decision authority is granted.",
+  "counts": {
+    "accepted_metrics": 2,
+    "deferred_normalization_metrics": 2,
+    "error_count": 0,
+    "input_metrics": 2,
+    "rejected_metrics": 0,
+    "warning_count": 2
+  },
+  "downstream_consumability": "structurally_valid_for_explicit_source_approval_review",
+  "errors": [],
+  "input_sha256": "fc5b27ad944ebb5f26c7a7270d3d9b1a420e3c6c5da5933300d176c8e25d1f8d",
+  "package_id": "me-data09-aapl-fy2026-q2-20260719T150409Z",
+  "schema_version": "market-engine-data08-operator-fundamental-metric-validation-report-v1",
+  "status": "accepted",
+  "validator_version": "market-engine-data08-operator-fundamental-metric-validator-v1",
+  "warnings": [
+    {
+      "message": "raw percent value and unit are retained for deferred ME-DATA07 ratio normalization",
+      "metric_identity": "revenue_growth_yoy",
+      "path": "$.records[0].value",
+      "reason_code": "PERCENT_VALIDATED_FOR_DATA07_RATIO_NORMALIZATION"
+    },
+    {
+      "message": "raw percent value and unit are retained for deferred ME-DATA07 ratio normalization",
+      "metric_identity": "eps_growth_yoy",
+      "path": "$.records[1].value",
+      "reason_code": "PERCENT_VALIDATED_FOR_DATA07_RATIO_NORMALIZATION"
+    }
+  ]
+}

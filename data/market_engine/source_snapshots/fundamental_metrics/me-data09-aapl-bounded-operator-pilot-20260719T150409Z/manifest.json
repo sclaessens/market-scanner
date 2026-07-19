@@ -1,0 +1,19 @@
+{
+  "parser_version": "market-engine-data07-operator-import-parser-v1",
+  "persisted_at": "2026-07-19T15:14:17Z",
+  "provenance": "operator-supplied package; source_reference retained per record",
+  "raw_checksum": "264c574fa0c366262637ecefefeed5f08e40a6aa6991f4dc41707debce90c5ca",
+  "raw_path": "data/market_engine/source_snapshots/fundamental_metrics/me-data09-aapl-bounded-operator-pilot-20260719T150409Z/operator_import.json",
+  "record_count": 1,
+  "request_identity": {
+    "mode": "operator_import",
+    "request_count": 0
+  },
+  "run_id": "me-data09-aapl-bounded-operator-pilot-20260719T150409Z",
+  "schema_version": "market-engine-data07-raw-fundamental-metric-snapshot-v1",
+  "source_mode": "operator_import",
+  "status": "validated",
+  "tickers": [
+    "AAPL"
+  ]
+}
