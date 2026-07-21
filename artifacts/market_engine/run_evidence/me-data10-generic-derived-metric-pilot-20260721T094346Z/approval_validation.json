@@ -1,0 +1,15 @@
+{
+  "concrete_package_source_approved": true,
+  "cross_artifact_reconciliation": "passed",
+  "decision_id": "me-data10-derivation-approval-20260721T094346Z",
+  "decision_path": "operator_input/market_engine/me-data10/aapl/20260721T094346Z/derivation_approval_decision.json",
+  "deterministic_derivation_replay_required": true,
+  "direct_source_approval_revalidation_required": true,
+  "governed_package_reconstruction_required": true,
+  "issues": [],
+  "package_id": "me-data10-aapl-governed-metrics-fy2026-q2-20260721T094346Z",
+  "package_path": "operator_input/market_engine/me-data10/aapl/20260721T094346Z/governed_fundamental_metrics.json",
+  "reason_codes": [],
+  "schema_version": "market-engine-data10-derivation-approval-validation-v2",
+  "validation_status": "approved"
+}

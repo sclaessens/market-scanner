@@ -613,6 +613,67 @@ def test_malformed_approval_list_blocks_before_parser_snapshot_and_downstream(
     assert output.joinpath("concrete_source_approval_validation.json").is_file()
 
 
+def test_governed_v2_route_uses_strong_reconciliation_before_parser_snapshot_and_downstream(
+    run_fixture: dict[str, object], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    tmp = Path(run_fixture["tmp"])
+    package = _write_json(
+        tmp / "tampered-governed-v2.json",
+        {
+            "schema_version": sourcing.DATA07_GOVERNED_PACKAGE_SCHEMA_VERSION,
+            "package_id": "tampered-governed-v2",
+            "records": [],
+        },
+    )
+    decision = _write_json(tmp / "derivation-approval.json", {"decision": "approved"})
+    calls = {"strong_gate": 0, "parser": 0, "snapshot": 0, "downstream": 0}
+
+    def blocked_gate(*_args, **_kwargs):
+        calls["strong_gate"] += 1
+        return {
+            "schema_version": "market-engine-data10-derivation-approval-validation-v2",
+            "validation_status": "blocked",
+            "concrete_package_source_approved": False,
+            "reason_codes": ["GOVERNED_PACKAGE_REPLAY_MISMATCH"],
+            "issues": [],
+        }
+
+    def fail_parser(*_args, **_kwargs):
+        calls["parser"] += 1
+        raise AssertionError("parser must not run before strong reconciliation passes")
+
+    def fail_snapshot(*_args, **_kwargs):
+        calls["snapshot"] += 1
+        raise AssertionError("snapshot must not be written after reconciliation failure")
+
+    def fail_downstream(*_args, **_kwargs):
+        calls["downstream"] += 1
+        raise AssertionError("DATA06/RUN31 must not run after reconciliation failure")
+
+    monkeypatch.setattr(sourcing, "validate_derivation_approval_decision", blocked_gate)
+    monkeypatch.setattr(sourcing, "_load_and_validate_operator_import", fail_parser)
+    monkeypatch.setattr(sourcing, "_persist_operator_snapshot", fail_snapshot)
+    monkeypatch.setattr(sourcing, "run_fundamental_evidence_coverage", fail_downstream)
+    artifacts, _ = _run(
+        run_fixture,
+        run_id="strong-gate-block",
+        operator_import_path=package,
+        source_approval_decision_path=decision,
+        source_document_root=tmp,
+        execute_downstream=True,
+        data06_run_id="must-not-run-data06",
+        run31_run_id="must-not-run-run31",
+    )
+
+    assert calls == {"strong_gate": 1, "parser": 0, "snapshot": 0, "downstream": 0}
+    assert artifacts["manifest"]["raw_snapshot"] is None
+    assert artifacts["manifest"]["downstream"] is None
+    assert artifacts["batch_execution_summary"]["imports_attempted"] == 0
+    assert artifacts["concrete_source_approval_validation"]["reason_codes"] == [
+        "GOVERNED_PACKAGE_REPLAY_MISMATCH"
+    ]
+
+
 @pytest.mark.parametrize("decision", ["blocked", "rejected", "unknown"])
 def test_non_approved_decision_blocks_before_parser(run_fixture: dict[str, object], decision: str) -> None:
     tmp = Path(run_fixture["tmp"])

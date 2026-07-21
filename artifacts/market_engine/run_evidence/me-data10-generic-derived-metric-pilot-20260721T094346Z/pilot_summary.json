@@ -1,0 +1,43 @@
+{
+  "counts": {
+    "blocked_count": 11,
+    "failed_count": 0,
+    "imported_count": 1,
+    "normalized_count": 1,
+    "not_selected_count": 940,
+    "pending_count": 0,
+    "selected_count": 12,
+    "success_count": 1
+  },
+  "network_access_performed": false,
+  "provider_calls_performed": 0,
+  "raw_snapshot": {
+    "parser_version": "market-engine-data07-operator-import-parser-v1",
+    "persisted_at": "2026-07-21T09:44:52Z",
+    "provenance": "operator-supplied package; source_reference retained per record",
+    "raw_checksum": "048405bf32005d1d956f93608e6f97e27374e126b16bb4fcac8ce48c441e3cde",
+    "raw_path": "data/market_engine/source_snapshots/fundamental_metrics/me-data10-aapl-governed-operator-pilot-20260721T094346Z/operator_import.json",
+    "record_count": 1,
+    "request_identity": {
+      "mode": "operator_import",
+      "request_count": 0
+    },
+    "run_id": "me-data10-aapl-governed-operator-pilot-20260721T094346Z",
+    "schema_version": "market-engine-data07-raw-fundamental-metric-snapshot-v1",
+    "source_mode": "operator_import",
+    "status": "validated",
+    "tickers": [
+      "AAPL"
+    ]
+  },
+  "reconciliation": {
+    "pending_count": 0,
+    "reconciled": true,
+    "selected_count": 12,
+    "terminal_blocked_count": 11,
+    "terminal_failed_count": 0,
+    "terminal_success_count": 1
+  },
+  "run_id": "me-data10-aapl-governed-operator-pilot-20260721T094346Z",
+  "schema_version": "market-engine-data10-data07-pilot-summary-v1"
+}

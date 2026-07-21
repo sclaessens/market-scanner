@@ -1,0 +1,89 @@
+{
+  "current_sprint_comparison": {
+    "absolute_delta": {
+      "canonical_advice_input_ready": 0,
+      "full_advice_ready": 0,
+      "fundamental_complete": 0,
+      "fundamental_missing": 0,
+      "fundamental_partial": 0,
+      "invalid_stale_conflicting": 0,
+      "unable_to_advise": 0
+    },
+    "after": {
+      "canonical_advice_input_ready": 6,
+      "full_advice_ready": 0,
+      "fundamental_complete": 6,
+      "fundamental_missing": 907,
+      "fundamental_partial": 39,
+      "invalid_stale_conflicting": 0,
+      "unable_to_advise": 946
+    },
+    "before": {
+      "canonical_advice_input_ready": 6,
+      "full_advice_ready": 0,
+      "fundamental_complete": 6,
+      "fundamental_missing": 907,
+      "fundamental_partial": 39,
+      "invalid_stale_conflicting": 0,
+      "unable_to_advise": 946
+    }
+  },
+  "historical_origin_comparison": {
+    "attributable_to_current_sprint": false,
+    "baseline": {
+      "artifact_path": "artifacts/market_engine/full_advice_readiness_runs/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z/evidence_coverage_index.json",
+      "artifact_type": "market-engine-run31-evidence-coverage-index",
+      "canonical_universe_size": 952,
+      "canonical_universe_version": "me-data04-complete-canonical-local-market-dataset-v1",
+      "checksum": "1d3a598aabc4ad0278c9b249fd7191d651f81d423a1beaf77918544ac8ff09a3",
+      "run_id": "me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z",
+      "schema_version": "market-engine-run31-evidence-coverage-index-v1"
+    },
+    "boundary": "Historical DATA06 transitions are not current ME-DATA10 sprint improvements."
+  },
+  "regressions": {
+    "became_conflicting": 0,
+    "became_invalid": 0,
+    "became_stale": 0,
+    "complete_to_conflicting": 0,
+    "complete_to_invalid": 0,
+    "complete_to_missing": 0,
+    "complete_to_partial": 0,
+    "complete_to_stale": 0,
+    "lost_advice_input_readiness": 0,
+    "lost_full_advice_readiness": 0,
+    "partial_to_conflicting": 0,
+    "partial_to_invalid": 0,
+    "partial_to_missing": 0,
+    "partial_to_stale": 0
+  },
+  "schema_version": "market-engine-data10-current-sprint-coverage-delta-v1",
+  "ticker_delta": {
+    "advice_input_ready_after": false,
+    "advice_input_ready_before": false,
+    "after_status": "partial",
+    "before_status": "partial",
+    "imported_metric_set": [
+      "eps_growth_yoy",
+      "gross_margin",
+      "operating_margin",
+      "revenue_growth_yoy"
+    ],
+    "new_derived_metrics": [
+      "gross_margin",
+      "operating_margin"
+    ],
+    "new_metrics": [
+      "gross_margin",
+      "operating_margin"
+    ],
+    "remaining_missing_metrics": [
+      "debt_to_equity"
+    ],
+    "retained_direct_metrics": [
+      "eps_growth_yoy",
+      "revenue_growth_yoy"
+    ],
+    "ticker": "AAPL"
+  }
+}

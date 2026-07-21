@@ -1,0 +1,323 @@
+{
+  "approval_decision_reference": "me-data10-derivation-approval-20260721T094346Z",
+  "boundary": "Direct and derived evidence remain explicitly classified; this v2 package requires derivation approval before DATA07 import.",
+  "package_id": "me-data10-aapl-governed-metrics-fy2026-q2-20260721T094346Z",
+  "package_schema_version": "market-engine-data10-derived-fundamental-metrics-v1",
+  "records": [
+    {
+      "acquired_at": "2026-07-19T15:51:16Z",
+      "company_name": "Apple Inc.",
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "instrument_id": "equity:aapl",
+      "metrics": {
+        "eps_growth_yoy": {
+          "direct_lineage": {
+            "raw_source_field": "quarterly diluted EPS up 22 percent year over year",
+            "source_approval_checksum": "5fd17e54c948a54a448abb3849b51ce29c87c65c458d9b28de3fa73daf10b684",
+            "source_approval_reference": "me-data09-source-approval-20260719T155116Z",
+            "source_package_checksum": "9507a07605168841163460ef4e7417e7c51a4d881bbea9e15585b02aeff8f41e"
+          },
+          "evidence_type": "direct",
+          "reporting_period": "2026-Q2",
+          "unit": "percent",
+          "value": 22.0
+        },
+        "gross_margin": {
+          "derivation_lineage": {
+            "approval_decision_reference": "me-data10-derivation-approval-20260721T094346Z",
+            "calculation_checksum": "02b47e7ea1f21286a8c492bd2363fb2c30cf10d295920c8e37401718d70b934c",
+            "calculation_result": 0.492705785005,
+            "canonical_metric": "gross_margin",
+            "company_identity": "Apple Inc.",
+            "component_fact_ids": [],
+            "denominator_fact_ids": [
+              "aapl-revenue-fy2026-q2-quarter"
+            ],
+            "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v2",
+            "derivation_timestamp": "2026-07-21T09:43:46Z",
+            "evidence_type": "derived",
+            "fiscal_period": "Q2",
+            "fiscal_year": 2026,
+            "formula": {
+              "canonical_expression": "gross_profit / revenue",
+              "formula_id": "gross_margin",
+              "operand_contract": {
+                "applicability_policy": "explicit_approved",
+                "components": {
+                  "aggregation_policy": "forbidden",
+                  "allowed_canonical_concepts": [],
+                  "overlap_policy": "not_applicable",
+                  "role": "numerator_components"
+                },
+                "denominator": {
+                  "cardinality": "exactly_one",
+                  "required_canonical_concepts": [
+                    "revenue"
+                  ],
+                  "role": "denominator"
+                },
+                "denominator_safety_policy": "strictly_positive",
+                "numerator": {
+                  "cardinality": "exactly_one",
+                  "required_canonical_concepts": [
+                    "gross_profit"
+                  ],
+                  "role": "numerator"
+                },
+                "period_alignment_policy": "exact_start_end_and_fiscal_period",
+                "unit_currency_scale_policy": "exact_match"
+              },
+              "operation": "ratio",
+              "version": "2.0.0"
+            },
+            "formula_id": "gross_margin",
+            "formula_version": "2.0.0",
+            "input_facts": [
+              {
+                "canonical_concept": "gross_profit",
+                "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+                "currency": "USD",
+                "fact_id": "aapl-gross-profit-fy2026-q2-quarter",
+                "input_unit": "USD",
+                "input_value": 54781,
+                "normalized_value": "54781000000",
+                "period_end": "2026-03-28",
+                "period_start": "2025-12-28",
+                "period_type": "duration",
+                "raw_source_concept": "us-gaap:GrossProfit",
+                "scale": 6,
+                "source_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+                "source_document_checksum": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
+                "source_reference": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm"
+              },
+              {
+                "canonical_concept": "revenue",
+                "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+                "currency": "USD",
+                "fact_id": "aapl-revenue-fy2026-q2-quarter",
+                "input_unit": "USD",
+                "input_value": 111184,
+                "normalized_value": "111184000000",
+                "period_end": "2026-03-28",
+                "period_start": "2025-12-28",
+                "period_type": "duration",
+                "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                "scale": 6,
+                "source_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+                "source_document_checksum": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
+                "source_reference": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm"
+              }
+            ],
+            "instrument_id": "equity:aapl",
+            "limitations": [
+              "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
+              "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
+            ],
+            "normalized_denominator": "111184000000",
+            "normalized_numerator": "54781000000",
+            "numerator_fact_ids": [
+              "aapl-gross-profit-fy2026-q2-quarter"
+            ],
+            "period": {
+              "fiscal_period": "Q2",
+              "fiscal_year": 2026,
+              "period_end": "2026-03-28",
+              "period_start": "2025-12-28",
+              "period_type": "duration"
+            },
+            "reporting_period": "2026-Q2",
+            "request_id": "aapl-fy2026-q2-gross-margin",
+            "result_unit": "ratio",
+            "source_document_checksums": [
+              "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d"
+            ],
+            "source_publication_dates": [
+              "2026-05-01"
+            ],
+            "status": "derived",
+            "ticker": "AAPL",
+            "validation": {
+              "currency_compatibility": "passed",
+              "denominator_safety": "passed",
+              "period_alignment": "passed",
+              "scale_compatibility": "passed",
+              "unit_compatibility": "passed"
+            }
+          },
+          "evidence_type": "derived",
+          "reporting_period": "2026-Q2",
+          "unit": "ratio",
+          "value": 0.492705785005
+        },
+        "operating_margin": {
+          "derivation_lineage": {
+            "approval_decision_reference": "me-data10-derivation-approval-20260721T094346Z",
+            "calculation_checksum": "c0c0ab90f90546fb1c7a37fb7320490577594a43f0d362c25fcda5950d62cc46",
+            "calculation_result": 0.322753273852,
+            "canonical_metric": "operating_margin",
+            "company_identity": "Apple Inc.",
+            "component_fact_ids": [],
+            "denominator_fact_ids": [
+              "aapl-revenue-fy2026-q2-quarter"
+            ],
+            "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v2",
+            "derivation_timestamp": "2026-07-21T09:43:46Z",
+            "evidence_type": "derived",
+            "fiscal_period": "Q2",
+            "fiscal_year": 2026,
+            "formula": {
+              "canonical_expression": "operating_income / revenue",
+              "formula_id": "operating_margin",
+              "operand_contract": {
+                "applicability_policy": "explicit_approved",
+                "components": {
+                  "aggregation_policy": "forbidden",
+                  "allowed_canonical_concepts": [],
+                  "overlap_policy": "not_applicable",
+                  "role": "numerator_components"
+                },
+                "denominator": {
+                  "cardinality": "exactly_one",
+                  "required_canonical_concepts": [
+                    "revenue"
+                  ],
+                  "role": "denominator"
+                },
+                "denominator_safety_policy": "strictly_positive",
+                "numerator": {
+                  "cardinality": "exactly_one",
+                  "required_canonical_concepts": [
+                    "operating_income"
+                  ],
+                  "role": "numerator"
+                },
+                "period_alignment_policy": "exact_start_end_and_fiscal_period",
+                "unit_currency_scale_policy": "exact_match"
+              },
+              "operation": "ratio",
+              "version": "2.0.0"
+            },
+            "formula_id": "operating_margin",
+            "formula_version": "2.0.0",
+            "input_facts": [
+              {
+                "canonical_concept": "operating_income",
+                "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+                "currency": "USD",
+                "fact_id": "aapl-operating-income-fy2026-q2-quarter",
+                "input_unit": "USD",
+                "input_value": 35885,
+                "normalized_value": "35885000000",
+                "period_end": "2026-03-28",
+                "period_start": "2025-12-28",
+                "period_type": "duration",
+                "raw_source_concept": "us-gaap:OperatingIncomeLoss",
+                "scale": 6,
+                "source_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+                "source_document_checksum": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
+                "source_reference": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm"
+              },
+              {
+                "canonical_concept": "revenue",
+                "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+                "currency": "USD",
+                "fact_id": "aapl-revenue-fy2026-q2-quarter",
+                "input_unit": "USD",
+                "input_value": 111184,
+                "normalized_value": "111184000000",
+                "period_end": "2026-03-28",
+                "period_start": "2025-12-28",
+                "period_type": "duration",
+                "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                "scale": 6,
+                "source_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+                "source_document_checksum": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
+                "source_reference": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm"
+              }
+            ],
+            "instrument_id": "equity:aapl",
+            "limitations": [
+              "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
+              "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
+            ],
+            "normalized_denominator": "111184000000",
+            "normalized_numerator": "35885000000",
+            "numerator_fact_ids": [
+              "aapl-operating-income-fy2026-q2-quarter"
+            ],
+            "period": {
+              "fiscal_period": "Q2",
+              "fiscal_year": 2026,
+              "period_end": "2026-03-28",
+              "period_start": "2025-12-28",
+              "period_type": "duration"
+            },
+            "reporting_period": "2026-Q2",
+            "request_id": "aapl-fy2026-q2-operating-margin",
+            "result_unit": "ratio",
+            "source_document_checksums": [
+              "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d"
+            ],
+            "source_publication_dates": [
+              "2026-05-01"
+            ],
+            "status": "derived",
+            "ticker": "AAPL",
+            "validation": {
+              "currency_compatibility": "passed",
+              "denominator_safety": "passed",
+              "period_alignment": "passed",
+              "scale_compatibility": "passed",
+              "unit_compatibility": "passed"
+            }
+          },
+          "evidence_type": "derived",
+          "reporting_period": "2026-Q2",
+          "unit": "ratio",
+          "value": 0.322753273852
+        },
+        "revenue_growth_yoy": {
+          "direct_lineage": {
+            "raw_source_field": "quarterly revenue up 17 percent year over year",
+            "source_approval_checksum": "5fd17e54c948a54a448abb3849b51ce29c87c65c458d9b28de3fa73daf10b684",
+            "source_approval_reference": "me-data09-source-approval-20260719T155116Z",
+            "source_package_checksum": "9507a07605168841163460ef4e7417e7c51a4d881bbea9e15585b02aeff8f41e"
+          },
+          "evidence_type": "direct",
+          "reporting_period": "2026-Q2",
+          "unit": "percent",
+          "value": 17.0
+        }
+      },
+      "observed_at": "2026-07-19T15:51:16Z",
+      "parser_version": "market-engine-data10-primary-source-metric-derivation-engine-v2",
+      "period_end": "2026-03-28",
+      "period_start": "2025-12-28",
+      "period_type": "quarter",
+      "provider": "governed_primary_source_merge",
+      "provider_symbol": "AAPL",
+      "reporting_period": "2026-Q2",
+      "snapshot_id": "me-data10-aapl-governed-metrics-fy2026-q2-20260721T094346Z",
+      "source_date": "2026-05-01",
+      "source_reference": "governed-evidence://me-data10-aapl-governed-metrics-fy2026-q2-20260721T094346Z/AAPL/2026-Q2",
+      "ticker": "AAPL"
+    }
+  ],
+  "schema_version": "market-engine-data07-governed-fundamental-metrics-v2",
+  "source_packages": {
+    "derived": {
+      "approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+      "package_checksum": "28df6975e398114f6cbd93e4b295ec9f8b7614a18dafa2fd735d5a7d09e16066",
+      "package_id": "me-data10-aapl-primary-facts-fy2026-q2-20260721T094346Z-derived",
+      "schema_version": "market-engine-data10-derived-fundamental-metrics-v1"
+    },
+    "direct": {
+      "approval_checksum": "5fd17e54c948a54a448abb3849b51ce29c87c65c458d9b28de3fa73daf10b684",
+      "approval_reference": "me-data09-source-approval-20260719T155116Z",
+      "package_checksum": "9507a07605168841163460ef4e7417e7c51a4d881bbea9e15585b02aeff8f41e",
+      "package_id": "me-data09-aapl-fy2026-q2-20260719T155116Z",
+      "schema_version": "market-engine-data07-operator-fundamental-metrics-v1"
+    }
+  }
+}

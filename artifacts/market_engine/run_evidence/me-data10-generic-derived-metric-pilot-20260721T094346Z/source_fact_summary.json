@@ -1,0 +1,107 @@
+{
+  "blocked_fact_requirements": [
+    {
+      "canonical_metric": "debt_to_equity",
+      "component_fact_ids": [
+        "aapl-commercial-paper-20260328",
+        "aapl-current-term-debt-20260328",
+        "aapl-noncurrent-term-debt-20260328"
+      ],
+      "denominator_fact_ids": [
+        "aapl-total-equity-20260328"
+      ],
+      "reason_codes": [
+        "DEBT_COMPONENT_MISSING",
+        "DENOMINATOR_MISSING",
+        "FORMULA_DENOMINATOR_CONCEPT_MISMATCH",
+        "FORMULA_INPUT_CARDINALITY_INVALID",
+        "FORMULA_OPERAND_SET_INVALID"
+      ]
+    }
+  ],
+  "fact_package_id": "me-data10-aapl-primary-facts-fy2026-q2-20260721T094346Z",
+  "facts": [
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-07-21T09:43:46Z",
+      "canonical_concept": "gross_profit",
+      "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+      "company_identity": "Apple Inc.",
+      "currency": "USD",
+      "fact_id": "aapl-gross-profit-fy2026-q2-quarter",
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "instrument_id": "equity:aapl",
+      "observed_at": "2026-07-21T09:43:46Z",
+      "parser_version": "market-engine-data10-manual-inline-xbrl-fact-extraction-v1",
+      "period_end": "2026-03-28",
+      "period_start": "2025-12-28",
+      "period_type": "duration",
+      "raw_source_concept": "us-gaap:GrossProfit",
+      "scale": 6,
+      "source_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+      "source_document_checksum": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
+      "source_name": "SEC Form 10-Q",
+      "source_publication_date": "2026-05-01",
+      "source_reference": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm",
+      "ticker": "AAPL",
+      "unit": "USD",
+      "value": 54781
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-07-21T09:43:46Z",
+      "canonical_concept": "operating_income",
+      "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+      "company_identity": "Apple Inc.",
+      "currency": "USD",
+      "fact_id": "aapl-operating-income-fy2026-q2-quarter",
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "instrument_id": "equity:aapl",
+      "observed_at": "2026-07-21T09:43:46Z",
+      "parser_version": "market-engine-data10-manual-inline-xbrl-fact-extraction-v1",
+      "period_end": "2026-03-28",
+      "period_start": "2025-12-28",
+      "period_type": "duration",
+      "raw_source_concept": "us-gaap:OperatingIncomeLoss",
+      "scale": 6,
+      "source_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+      "source_document_checksum": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
+      "source_name": "SEC Form 10-Q",
+      "source_publication_date": "2026-05-01",
+      "source_reference": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm",
+      "ticker": "AAPL",
+      "unit": "USD",
+      "value": 35885
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-07-21T09:43:46Z",
+      "canonical_concept": "revenue",
+      "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+      "company_identity": "Apple Inc.",
+      "currency": "USD",
+      "fact_id": "aapl-revenue-fy2026-q2-quarter",
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "instrument_id": "equity:aapl",
+      "observed_at": "2026-07-21T09:43:46Z",
+      "parser_version": "market-engine-data10-manual-inline-xbrl-fact-extraction-v1",
+      "period_end": "2026-03-28",
+      "period_start": "2025-12-28",
+      "period_type": "duration",
+      "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "scale": 6,
+      "source_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
+      "source_document_checksum": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
+      "source_name": "SEC Form 10-Q",
+      "source_publication_date": "2026-05-01",
+      "source_reference": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm",
+      "ticker": "AAPL",
+      "unit": "USD",
+      "value": 111184
+    }
+  ],
+  "schema_version": "market-engine-data10-source-fact-summary-v1"
+}

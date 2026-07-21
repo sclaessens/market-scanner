@@ -108,12 +108,13 @@ document, absolute workstation path, credential, cookie, or secret.
 
 ## Next sprint definition
 
-ME-DATA10 is **Define and execute a governed primary-source fundamental metric
-derivation pilot**. It will define one bounded ticker pilot with a versioned
-formula contract, numerator and denominator lineage, identical periods and
-units, deterministic calculations, denominator safety checks, freshness and
-checksum binding, and visible direct-versus-derived classification for gross
-margin, operating margin, and/or debt-to-equity.
+ME-DATA10 is **Implement a generic governed primary-source fundamental metric
+derivation engine and execute a bounded pilot**. It will define one bounded
+ticker pilot with a versioned formula contract, numerator and denominator
+lineage, identical periods and units, deterministic calculations, denominator
+safety checks, freshness and checksum binding, and visible
+direct-versus-derived classification for gross margin, operating margin, and/or
+debt-to-equity.
 
 ME-DATA10 is not implemented in this PR. It does not authorize a broad batch,
 estimates, interpolation, hidden formulas, recommendations, ranking, allocation,
