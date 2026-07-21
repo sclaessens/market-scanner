@@ -1,12 +1,10 @@
 {
-  "approval_decision_reference": "me-data10-derivation-approval-20260719T183522Z",
-  "blocked_metric_count": 1,
-  "boundary": "Every emitted metric is derived evidence. The source documents did not publish these ratios; DATA07 consumption requires a separate checksum-bound derivation approval.",
-  "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v1",
-  "derivation_timestamp": "2026-07-19T18:35:22Z",
+  "blocked_derivation_count": 1,
+  "boundary": "Successful derived evidence remains blocked from DATA07 until an explicit checksum-bound derivation approval passes.",
+  "data07_consumable_candidate": true,
   "derivations": [
     {
-      "approval_decision_reference": "me-data10-derivation-approval-20260719T183522Z",
+      "approval_decision_reference": "me-data10-derivation-approval-20260721T094346Z",
       "canonical_metric": "debt_to_equity",
       "component_fact_ids": [
         "aapl-commercial-paper-20260328",
@@ -17,12 +15,14 @@
         "aapl-total-equity-20260328"
       ],
       "formula_id": "debt_to_equity",
-      "formula_version": "1.0.0",
+      "formula_version": "2.0.0",
       "numerator_fact_ids": [],
       "reason_codes": [
         "DEBT_COMPONENT_MISSING",
         "DENOMINATOR_MISSING",
-        "FORMULA_INPUT_CARDINALITY_INVALID"
+        "FORMULA_DENOMINATOR_CONCEPT_MISMATCH",
+        "FORMULA_INPUT_CARDINALITY_INVALID",
+        "FORMULA_OPERAND_SET_INVALID"
       ],
       "reporting_period": "2026-Q2",
       "request_id": "aapl-fy2026-q2-debt-to-equity",
@@ -30,8 +30,8 @@
       "ticker": "AAPL"
     },
     {
-      "approval_decision_reference": "me-data10-derivation-approval-20260719T183522Z",
-      "calculation_checksum": "79e732202853d8e8d8d6e32352302f0f84f3f48f03923d52c0f01293592ad7cf",
+      "approval_decision_reference": "me-data10-derivation-approval-20260721T094346Z",
+      "calculation_checksum": "02b47e7ea1f21286a8c492bd2363fb2c30cf10d295920c8e37401718d70b934c",
       "calculation_result": 0.492705785005,
       "canonical_metric": "gross_margin",
       "company_identity": "Apple Inc.",
@@ -39,23 +39,49 @@
       "denominator_fact_ids": [
         "aapl-revenue-fy2026-q2-quarter"
       ],
-      "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v1",
-      "derivation_timestamp": "2026-07-19T18:35:22Z",
+      "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v2",
+      "derivation_timestamp": "2026-07-21T09:43:46Z",
       "evidence_type": "derived",
       "fiscal_period": "Q2",
       "fiscal_year": 2026,
       "formula": {
         "canonical_expression": "gross_profit / revenue",
         "formula_id": "gross_margin",
+        "operand_contract": {
+          "applicability_policy": "explicit_approved",
+          "components": {
+            "aggregation_policy": "forbidden",
+            "allowed_canonical_concepts": [],
+            "overlap_policy": "not_applicable",
+            "role": "numerator_components"
+          },
+          "denominator": {
+            "cardinality": "exactly_one",
+            "required_canonical_concepts": [
+              "revenue"
+            ],
+            "role": "denominator"
+          },
+          "denominator_safety_policy": "strictly_positive",
+          "numerator": {
+            "cardinality": "exactly_one",
+            "required_canonical_concepts": [
+              "gross_profit"
+            ],
+            "role": "numerator"
+          },
+          "period_alignment_policy": "exact_start_end_and_fiscal_period",
+          "unit_currency_scale_policy": "exact_match"
+        },
         "operation": "ratio",
-        "version": "1.0.0"
+        "version": "2.0.0"
       },
       "formula_id": "gross_margin",
-      "formula_version": "1.0.0",
+      "formula_version": "2.0.0",
       "input_facts": [
         {
           "canonical_concept": "gross_profit",
-          "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260719T183522Z",
+          "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
           "currency": "USD",
           "fact_id": "aapl-gross-profit-fy2026-q2-quarter",
           "input_unit": "USD",
@@ -66,13 +92,13 @@
           "period_type": "duration",
           "raw_source_concept": "us-gaap:GrossProfit",
           "scale": 6,
-          "source_approval_reference": "me-data10-derivation-approval-20260719T183522Z",
+          "source_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
           "source_document_checksum": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
           "source_reference": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm"
         },
         {
           "canonical_concept": "revenue",
-          "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260719T183522Z",
+          "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
           "currency": "USD",
           "fact_id": "aapl-revenue-fy2026-q2-quarter",
           "input_unit": "USD",
@@ -83,7 +109,7 @@
           "period_type": "duration",
           "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
           "scale": 6,
-          "source_approval_reference": "me-data10-derivation-approval-20260719T183522Z",
+          "source_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
           "source_document_checksum": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
           "source_reference": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm"
         }
@@ -125,8 +151,8 @@
       }
     },
     {
-      "approval_decision_reference": "me-data10-derivation-approval-20260719T183522Z",
-      "calculation_checksum": "89da43e233a27efa800dae2c2c40e00cd5737087846e515c7f5f84d709d3a01a",
+      "approval_decision_reference": "me-data10-derivation-approval-20260721T094346Z",
+      "calculation_checksum": "c0c0ab90f90546fb1c7a37fb7320490577594a43f0d362c25fcda5950d62cc46",
       "calculation_result": 0.322753273852,
       "canonical_metric": "operating_margin",
       "company_identity": "Apple Inc.",
@@ -134,23 +160,49 @@
       "denominator_fact_ids": [
         "aapl-revenue-fy2026-q2-quarter"
       ],
-      "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v1",
-      "derivation_timestamp": "2026-07-19T18:35:22Z",
+      "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v2",
+      "derivation_timestamp": "2026-07-21T09:43:46Z",
       "evidence_type": "derived",
       "fiscal_period": "Q2",
       "fiscal_year": 2026,
       "formula": {
         "canonical_expression": "operating_income / revenue",
         "formula_id": "operating_margin",
+        "operand_contract": {
+          "applicability_policy": "explicit_approved",
+          "components": {
+            "aggregation_policy": "forbidden",
+            "allowed_canonical_concepts": [],
+            "overlap_policy": "not_applicable",
+            "role": "numerator_components"
+          },
+          "denominator": {
+            "cardinality": "exactly_one",
+            "required_canonical_concepts": [
+              "revenue"
+            ],
+            "role": "denominator"
+          },
+          "denominator_safety_policy": "strictly_positive",
+          "numerator": {
+            "cardinality": "exactly_one",
+            "required_canonical_concepts": [
+              "operating_income"
+            ],
+            "role": "numerator"
+          },
+          "period_alignment_policy": "exact_start_end_and_fiscal_period",
+          "unit_currency_scale_policy": "exact_match"
+        },
         "operation": "ratio",
-        "version": "1.0.0"
+        "version": "2.0.0"
       },
       "formula_id": "operating_margin",
-      "formula_version": "1.0.0",
+      "formula_version": "2.0.0",
       "input_facts": [
         {
           "canonical_concept": "operating_income",
-          "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260719T183522Z",
+          "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
           "currency": "USD",
           "fact_id": "aapl-operating-income-fy2026-q2-quarter",
           "input_unit": "USD",
@@ -161,13 +213,13 @@
           "period_type": "duration",
           "raw_source_concept": "us-gaap:OperatingIncomeLoss",
           "scale": 6,
-          "source_approval_reference": "me-data10-derivation-approval-20260719T183522Z",
+          "source_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
           "source_document_checksum": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
           "source_reference": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm"
         },
         {
           "canonical_concept": "revenue",
-          "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260719T183522Z",
+          "canonical_mapping_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
           "currency": "USD",
           "fact_id": "aapl-revenue-fy2026-q2-quarter",
           "input_unit": "USD",
@@ -178,7 +230,7 @@
           "period_type": "duration",
           "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
           "scale": 6,
-          "source_approval_reference": "me-data10-derivation-approval-20260719T183522Z",
+          "source_approval_reference": "me-data10-derivation-approval-20260721T094346Z",
           "source_document_checksum": "a61f508a797f02384801dadc55b18feef248e28c83ec07281e960dd7d0f4620d",
           "source_reference": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000013/aapl-20260328.htm"
         }
@@ -220,11 +272,18 @@
       }
     }
   ],
-  "fact_package_checksum": "581511f00b7a59e81ac7a63940ea188c7a1acfb9c86c071e048f80a3f12c920b",
-  "fact_package_id": "me-data10-aapl-primary-facts-fy2026-q2-20260719T183522Z",
-  "formula_catalog_checksum": "f3d941aaf293845ac7e08b623798a1facba21cbd9c1a57329ff5fc7b051f551a",
-  "formula_catalog_id": "market-engine-data10-fundamental-metric-formulas-2026-07-19",
-  "package_id": "me-data10-aapl-primary-facts-fy2026-q2-20260719T183522Z-derived",
-  "schema_version": "market-engine-data10-derived-fundamental-metrics-v1",
-  "successful_metric_count": 2
+  "derived_package_checksum": "28df6975e398114f6cbd93e4b295ec9f8b7614a18dafa2fd735d5a7d09e16066",
+  "fact_package_id": "me-data10-aapl-primary-facts-fy2026-q2-20260721T094346Z",
+  "issues": [],
+  "reason_codes": [
+    "DEBT_COMPONENT_MISSING",
+    "DENOMINATOR_MISSING",
+    "FORMULA_DENOMINATOR_CONCEPT_MISMATCH",
+    "FORMULA_INPUT_CARDINALITY_INVALID",
+    "FORMULA_OPERAND_SET_INVALID"
+  ],
+  "schema_version": "market-engine-data10-derivation-validation-v1",
+  "successful_derivation_count": 2,
+  "validation_status": "passed_with_blocked_derivations",
+  "validator_version": "market-engine-data10-primary-source-metric-derivation-engine-v2"
 }

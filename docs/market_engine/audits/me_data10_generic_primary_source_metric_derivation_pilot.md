@@ -26,13 +26,16 @@ The implementation uses five explicit boundaries:
 
 1. a versioned primary-source fact package contains canonical facts and raw
    source-tag lineage;
-2. a versioned declarative formula catalog defines permitted operations;
+2. a versioned declarative formula catalog defines machine-readable operand
+   roles, exact concepts, aggregation, alignment, compatibility, safety, and
+   applicability policies;
 3. the generic engine validates and derives candidates without approval
    authority;
-4. a separate human-authored derivation decision binds the candidate and all
-   relevant inputs by checksum;
-5. a DATA07 governed-v2 package merges approved direct and derived evidence
-   while preserving evidence type and lineage.
+4. a separate operator decision binds the candidate and all relevant inputs by
+   checksum after the runtime emits only a non-authoritative pending candidate;
+5. one authoritative approval validator replays the derivation, revalidates the
+   DATA09 direct approval, reconstructs the governed package, and only then
+   allows DATA07 to parse, snapshot, or execute downstream work.
 
 The runtime performs only two generic operations: a one-numerator ratio and an
 explicit component-sum ratio. Formula identity, canonical concepts, selected
@@ -60,14 +63,14 @@ classification and the complete appropriate lineage object.
 ## Contract and Schema Versions
 
 - primary facts: `market-engine-data10-primary-source-fact-package-v1`;
-- formula catalog: `market-engine-data10-fundamental-metric-formula-catalog-v1`;
+- formula catalog: `market-engine-data10-fundamental-metric-formula-catalog-v2`;
 - derived metrics: `market-engine-data10-derived-fundamental-metrics-v1`;
 - derivation validation: `market-engine-data10-derivation-validation-v1`;
-- derivation approval: `market-engine-data10-derivation-approval-decision-v1`;
-- approval validation: `market-engine-data10-derivation-approval-validation-v1`;
+- derivation approval: `market-engine-data10-derivation-approval-decision-v2`;
+- approval validation: `market-engine-data10-derivation-approval-validation-v2`;
 - DATA07 adapter: `market-engine-data07-governed-fundamental-metrics-v2`;
 - compact evidence: `market-engine-data10-compact-derived-metric-pilot-evidence-v1`;
-- engine: `market-engine-data10-primary-source-metric-derivation-engine-v1`.
+- engine: `market-engine-data10-primary-source-metric-derivation-engine-v2`.
 
 ## Formula Catalog
 
@@ -76,15 +79,24 @@ The versioned catalog is
 
 | Formula ID | Version | Canonical expression | Period type |
 |---|---:|---|---|
-| `gross_margin` | `1.0.0` | `gross_profit / revenue` | duration |
-| `operating_margin` | `1.0.0` | `operating_income / revenue` | duration |
-| `debt_to_equity` | `1.0.0` | `sum(explicitly_approved_interest_bearing_debt_components) / total_equity` | instant |
+| `gross_margin` | `2.0.0` | `gross_profit / revenue` | duration |
+| `operating_margin` | `2.0.0` | `operating_income / revenue` | duration |
+| `debt_to_equity` | `2.0.0` | `sum(explicitly_approved_interest_bearing_debt_components) / total_equity` | instant |
+
+Each formula now carries a machine-readable `operand_contract`. Gross margin
+requires exactly `gross_profit` as numerator and `revenue` as denominator.
+Operating margin requires exactly `operating_income` as numerator and
+`revenue` as denominator. Canonical expression text is retained for lineage,
+but a correct string cannot mask wrong machine operands and a changed string is
+rejected as a lineage mismatch.
 
 The debt formula permits only explicit canonical interest-bearing concepts:
 `commercial_paper`, `short_term_borrowings`, `current_term_debt`,
 `noncurrent_term_debt`, and `total_interest_bearing_debt`. The request must
-declare the complete required component set and matching fact IDs. The engine
-never substitutes total liabilities.
+declare the complete required component set and matching fact IDs. A reported
+`total_interest_bearing_debt` cannot be combined with its components, duplicate
+component concepts are rejected, missing components are not zero-filled, and
+the engine never substitutes total liabilities.
 
 ## Canonical Concepts
 
@@ -138,6 +150,46 @@ Failed derivation and failed approval tests prove that DATA07 is not invoked.
 Consequently no raw snapshot is written and DATA06/RUN31 do not execute. The
 derivation and import path performs zero provider and network calls.
 
+## Integrity Review Corrections
+
+The first blocking finding was caused by treating `canonical_expression` as
+descriptive lineage while validating only formula identity, metric identity,
+operation, and cardinality. Version 2 of the formula catalog now defines exact
+numerator and denominator roles and canonical concepts, component aggregation
+and overlap rules, period alignment, unit/currency/scale compatibility,
+denominator safety, and applicability policy. Runtime enforcement uses stable
+codes including `FORMULA_NUMERATOR_CONCEPT_MISMATCH`,
+`FORMULA_DENOMINATOR_CONCEPT_MISMATCH`,
+`FORMULA_COMPONENT_CONCEPT_NOT_ALLOWED`, `FORMULA_COMPONENT_OVERLAP`,
+`FORMULA_OPERAND_ROLE_MISMATCH`, `FORMULA_OPERAND_SET_INVALID`, and
+`FORMULA_CANONICAL_EXPRESSION_MISMATCH`.
+
+The second blocking finding was caused by validating bound artifacts and their
+file checksums independently. The authoritative v2 approval validator now:
+
+1. validates every bound schema and recomputes every file checksum;
+2. revalidates the exact DATA09 package through
+   `validate_source_approval_decision` and its original input, report, source
+   documents, and approval;
+3. validates the fact package and formula catalog and deterministically calls
+   `derive_primary_source_metrics` again;
+4. compares both the replayed derived package and derivation validation using
+   canonical serialization and independently recalculates each calculation
+   checksum;
+5. reconstructs the DATA07-v2 package from the exact bound direct and derived
+   artifacts and compares it with the offered package;
+6. reconciles package IDs, approval references, metric identities, ticker,
+   instrument, company, fiscal context, evidence type, and checksum sets.
+
+Both `execute_approved_derivation_import` and the ordinary DATA07 operator
+import route call this same validator before parsing. Negative tests rechecksum
+tampered fact, catalog, direct, derived, governed, validation, and approval
+files where applicable and still prove fail-closed reconciliation. They also
+cover operand substitution, swapped roles, wrong denominators, total-liability
+substitution, debt-total/component overlap, duplicate metrics, identity and
+fiscal mismatches, malformed artifacts, and prevention of parser, raw snapshot,
+DATA06, and RUN31 execution after failure.
+
 ## AAPL Primary Facts
 
 The bounded pilot uses the official SEC Form 10-Q for the quarter ended
@@ -174,7 +226,7 @@ contract. They are documented as unused rather than assumed.
 ```
 
 Calculation checksum:
-`5756c0bb73abc219b68703c93704c989e31c27368da9dcb52d281b81b40ccef0`.
+`02b47e7ea1f21286a8c492bd2363fb2c30cf10d295920c8e37401718d70b934c`.
 
 ### Operating margin
 
@@ -183,7 +235,7 @@ Calculation checksum:
 ```
 
 Calculation checksum:
-`0abf93d67f5486d5f9438ace0196d3d23c8eac5adcae073d9ba5d56b6e02c67a`.
+`c0c0ab90f90546fb1c7a37fb7320490577594a43f0d362c25fcda5950d62cc46`.
 
 ### Debt to equity
 
@@ -193,7 +245,9 @@ Reason codes:
 
 - `DEBT_COMPONENT_MISSING`;
 - `DENOMINATOR_MISSING`;
-- `FORMULA_INPUT_CARDINALITY_INVALID`.
+- `FORMULA_DENOMINATOR_CONCEPT_MISMATCH`;
+- `FORMULA_INPUT_CARDINALITY_INVALID`;
+- `FORMULA_OPERAND_SET_INVALID`.
 
 No calculation result was emitted.
 
@@ -218,13 +272,16 @@ The original DATA09 package was not mutated.
 
 ## Derivation Approval
 
-Runtime never creates an approval decision. The manually reviewed decision is
-`me-data10-derivation-approval-20260719T183522Z`. It covers source authenticity,
-primary-source status, permitted use, publication boundary, identity,
-accounting framework, canonical and raw-tag mappings, formula identity,
-numerator, denominator, debt components, reporting period, unit/currency/scale,
-denominator safety, evidence classification, freshness, and every relevant
-checksum.
+Runtime creates only a checksum-bound pending approval candidate; it has no
+approval authority. For this pilot the normal flow persisted the candidate and
+an explicit operator review changed only its decision and review statuses to
+approved. No checksum field was manually fabricated or edited. The resulting
+decision is `me-data10-derivation-approval-20260721T094346Z`. It covers source
+authenticity, primary-source status, permitted use, publication boundary,
+identity, accounting framework, canonical and raw-tag mappings, formula
+identity, numerator, denominator, debt components, reporting period,
+unit/currency/scale, denominator safety, evidence classification, freshness,
+and every relevant checksum.
 
 The decision approves only AAPL, gross margin, and operating margin. It records
 debt-to-equity as explicitly blocked. DATA07 cannot parse the governed package
@@ -232,23 +289,23 @@ until this decision validates.
 
 ## Checksums
 
-- fact package: `990c2bdb533a8d9604aa29cdd39ee8ceb05f77efbc2f6ed2230f8a32b6c9fcc8`;
-- formula catalog: `4679c6895a8cffeea79058e1aacd048097242cb019e74bec3ebfdd152193d8bf`;
-- derived package: `25a2b5e43ce11a90157a404ec4e268a3cdc5411a4fcd277c8c6b6fd49d6b57cb`;
-- derivation validation: `c082523c037591e6441bf02d456f4c71dc1aaea7523d701f03e1a9e624460e86`;
-- governed DATA07 package: `b4bf17e99eae7dc3364ddacc863ffabf7b281578d1679ee67aaf90923a312149`;
-- derivation approval: `308b23b7a4ae98b376473308ca0f4f777f1f0b84304a9a09579aab27128d7372`.
+- fact package: `315ddaf3cc80bc1e6e92aa5786426c60d895eb3829aa972d0828424fa297591a`;
+- formula catalog: `7ae5ca07ad9b45eaed54fccd9e77de254616da6f598d42cd44ff78dcd80673d1`;
+- derived package: `c6fa2759d9629fc0276083b6e497a132d03c35229803adf91e0fc2f5ee094b01`;
+- derivation validation: `6457d8b15ad3f8d7c70ed8e5c30d6cbc546dd4155357685f46a515364d760248`;
+- governed DATA07 package: `048405bf32005d1d956f93608e6f97e27374e126b16bb4fcac8ce48c441e3cde`;
+- derivation approval: `1ad1376c2019353d48fbb1b62461ef3cf022ed62017859dc12d6da2b35bcad32`.
 
 ## Pilot and Downstream Result
 
 Run identities:
 
-- derivation: `me-data10-aapl-primary-facts-fy2026-q2-20260719T183522Z`;
-- package validation: `me-data10-package-validation-20260719T183522Z`;
-- approval: `me-data10-derivation-approval-20260719T183522Z`;
-- DATA07: `me-data10-aapl-governed-operator-pilot-20260719T183522Z`;
-- DATA06: `me-data06-after-me-data10-aapl-20260719T183522Z`;
-- RUN31: `me-run31-after-me-data10-aapl-20260719T183522Z`.
+- derivation: `me-data10-aapl-primary-facts-fy2026-q2-20260721T094346Z`;
+- package validation: `me-data10-package-validation-20260721T094346Z`;
+- approval: `me-data10-derivation-approval-20260721T094346Z`;
+- DATA07: `me-data10-aapl-governed-operator-pilot-20260721T094346Z`;
+- DATA06: `me-data06-after-me-data10-aapl-20260721T094346Z`;
+- RUN31: `me-run31-after-me-data10-aapl-20260721T094346Z`.
 
 DATA07 counts:
 
@@ -289,7 +346,7 @@ All regression counters are zero.
 Committed compact evidence:
 
 ```text
-artifacts/market_engine/run_evidence/me-data10-generic-derived-metric-pilot-20260719T183522Z/
+artifacts/market_engine/run_evidence/me-data10-generic-derived-metric-pilot-20260721T094346Z/
 ```
 
 It contains the manifest, source-fact summary, formula snapshot, derivation
@@ -299,17 +356,18 @@ delta, downstream index, checksum index, and report.
 Full local-only evidence:
 
 ```text
-artifacts/market_engine/fundamental_metric_sourcing_runs/me-data10-aapl-governed-operator-pilot-20260719T183522Z/
-artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data10-aapl-20260719T183522Z/
-artifacts/market_engine/run_evidence/me-run31-after-me-data10-aapl-20260719T183522Z/
-artifacts/market_engine/me_data10_full_advice_readiness_runs/me-run31-after-me-data10-aapl-20260719T183522Z/
-data/market_engine/source_snapshots/fundamental_metrics/me-data10-aapl-governed-operator-pilot-20260719T183522Z/
+artifacts/market_engine/fundamental_metric_sourcing_runs/me-data10-aapl-governed-operator-pilot-20260721T094346Z/
+artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data10-aapl-20260721T094346Z/
+artifacts/market_engine/run_evidence/me-run31-after-me-data10-aapl-20260721T094346Z/
+artifacts/market_engine/me_data10_full_advice_readiness_runs/me-run31-after-me-data10-aapl-20260721T094346Z/
+data/market_engine/source_snapshots/fundamental_metrics/me-data10-aapl-governed-operator-pilot-20260721T094346Z/
 ```
 
-The superseded local self-review runs with timestamps `20260719T181552Z` and
-`20260719T182135Z` also remain uncommitted. The final immutable run includes
-the certified DATA09 package file checksum in direct metric lineage and enforces
-direct-versus-derived instrument, company, and fiscal identity. No committed
+The superseded committed `20260719T183522Z` operator input and compact evidence
+are removed and replaced by the immutable `20260721T094346Z` pilot. Earlier
+local self-review runs remain uncommitted. The replacement includes the
+certified DATA09 package file checksum in direct metric lineage and enforces
+direct-versus-derived instrument, company, and fiscal identity. No DATA09
 historical artifact was changed.
 
 ## Governance Boundary
@@ -322,10 +380,10 @@ Engine remains the only allocation authority.
 
 ## Validation
 
-The required focused suites passed with 37 derivation tests, 57 source-approval
-tests, 29 operator-package tests, 41 DATA07 sourcing tests, 5 DATA09 compact
+The required focused suites passed with 60 derivation tests, 57 source-approval
+tests, 29 operator-package tests, 42 DATA07 sourcing tests, 5 DATA09 compact
 evidence tests, and 2 DATA10 compact evidence tests. The aggregate commands
-passed with 246 data tests, 1,271 Market Engine tests, and 1,938 repository-wide
+passed with 270 data tests, 1,295 Market Engine tests, and 1,962 repository-wide
 tests. The matrix covers US-GAAP, IFRS, a second arbitrary ticker, formulas,
 debt components, every period/unit/currency/scale safety gate, denominator
 safety, malformed packages, deterministic ordering, approval failure, DATA07

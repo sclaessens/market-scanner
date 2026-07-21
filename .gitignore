@@ -138,3 +138,10 @@ reports/*.md
 /data/market_engine/source_snapshots/fundamental_metrics/me-data10-aapl-governed-operator-pilot-20260719T182135Z/
 /data/market_engine/source_snapshots/fundamental_metrics/me-data10-aapl-governed-operator-pilot-20260719T183522Z/
 /operator_input/market_engine/me-data10/aapl/20260719T181552Z/
+
+# ME-DATA10 integrity-review replay full runs retained outside the compact PR package.
+/artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data10-aapl-20260721T094346Z/
+/artifacts/market_engine/fundamental_metric_sourcing_runs/me-data10-aapl-governed-operator-pilot-20260721T094346Z/
+/artifacts/market_engine/run_evidence/me-run31-after-me-data10-aapl-20260721T094346Z/
+/artifacts/market_engine/me_data10_full_advice_readiness_runs/me-run31-after-me-data10-aapl-20260721T094346Z/
+/data/market_engine/source_snapshots/fundamental_metrics/me-data10-aapl-governed-operator-pilot-20260721T094346Z/

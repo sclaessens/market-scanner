@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from market_engine.data import primary_source_metric_derivation as derivation
+from market_engine.data import operator_source_approval as direct_approval
 from market_engine.data.validated_fundamental_metric_sourcing import _load_and_validate_operator_import
 
 
@@ -76,7 +77,7 @@ def _request(
         "ticker": ticker,
         "canonical_metric": formula_id,
         "formula_id": formula_id,
-        "formula_version": "1.0.0",
+        "formula_version": "2.0.0",
         "fiscal_year": 2026,
         "fiscal_period": "Q2",
         "numerator_fact_ids": numerator or [],
@@ -179,6 +180,117 @@ def test_explicit_debt_components_are_summed_before_equity_division() -> None:
     assert result["calculation_result"] == 0.5
     assert result["normalized_numerator"] == "50"
     assert result["canonical_metric"] == "debt_to_equity"
+
+
+@pytest.mark.parametrize(
+    ("formula_id", "numerator_concept"),
+    [
+        ("gross_margin", "operating_income"),
+        ("operating_margin", "gross_profit"),
+    ],
+)
+def test_margin_formula_rejects_substituted_numerator_concepts(
+    formula_id: str, numerator_concept: str
+) -> None:
+    package = _package(
+        [_fact("numerator", numerator_concept, 40), _fact("revenue", "revenue", 100)],
+        [_request(formula_id, numerator=["numerator"], denominator=["revenue"])],
+    )
+
+    derived, validation = _derive(package)
+
+    assert derived["derivations"][0]["status"] == "blocked"
+    assert "FORMULA_NUMERATOR_CONCEPT_MISMATCH" in validation["reason_codes"]
+
+
+def test_formula_rejects_wrong_denominator_and_role_swap() -> None:
+    wrong_denominator = _package(
+        [_fact("gross", "gross_profit", 40), _fact("equity", "total_equity", 100)],
+        [_request("gross_margin", numerator=["gross"], denominator=["equity"])],
+    )
+    swapped = _package(
+        [_fact("gross", "gross_profit", 40), _fact("revenue", "revenue", 100)],
+        [_request("gross_margin", numerator=["revenue"], denominator=["gross"])],
+    )
+
+    _, wrong_validation = _derive(wrong_denominator)
+    _, swapped_validation = _derive(swapped)
+
+    assert "FORMULA_DENOMINATOR_CONCEPT_MISMATCH" in wrong_validation["reason_codes"]
+    assert "FORMULA_NUMERATOR_CONCEPT_MISMATCH" in swapped_validation["reason_codes"]
+    assert "FORMULA_DENOMINATOR_CONCEPT_MISMATCH" in swapped_validation["reason_codes"]
+
+
+def test_debt_formula_rejects_non_debt_concept_total_liabilities_and_overlap() -> None:
+    instant = {"period_type": "instant", "period_start": None, "period_end": "2026-06-30"}
+    unsupported = _package(
+        [_fact("operating", "operating_income", 10, **instant), _fact("equity", "total_equity", 100, **instant)],
+        [
+            _request(
+                "debt_to_equity",
+                denominator=["equity"],
+                components=["operating"],
+                required_components=["operating_income"],
+            )
+        ],
+    )
+    total_liabilities = copy.deepcopy(unsupported)
+    total_liabilities["facts"][0]["canonical_concept"] = "total_liabilities"
+    overlap = _package(
+        [
+            _fact("total-debt", "total_interest_bearing_debt", 50, **instant),
+            _fact("commercial", "commercial_paper", 10, **instant),
+            _fact("equity", "total_equity", 100, **instant),
+        ],
+        [
+            _request(
+                "debt_to_equity",
+                denominator=["equity"],
+                components=["total-debt", "commercial"],
+                required_components=["total_interest_bearing_debt", "commercial_paper"],
+            )
+        ],
+    )
+
+    _, unsupported_validation = _derive(unsupported)
+    rejected, liabilities_validation = _derive(total_liabilities)
+    _, overlap_validation = _derive(overlap)
+
+    assert "FORMULA_COMPONENT_CONCEPT_NOT_ALLOWED" in unsupported_validation["reason_codes"]
+    assert rejected is None
+    assert "CANONICAL_CONCEPT_UNSUPPORTED" in liabilities_validation["reason_codes"]
+    assert "FORMULA_COMPONENT_OVERLAP" in overlap_validation["reason_codes"]
+
+
+def test_formula_rejects_unexpected_extra_operand() -> None:
+    package = _margin_package()
+    package["facts"].append(_fact("extra", "commercial_paper", 1))
+    package["derivation_requests"][0]["component_fact_ids"] = ["extra"]
+
+    _, validation = _derive(package)
+
+    assert "FORMULA_OPERAND_SET_INVALID" in validation["reason_codes"]
+
+
+def test_expression_text_cannot_mask_or_change_machine_readable_semantics() -> None:
+    wrong_operands = _catalog()
+    wrong_operands["formulas"][0]["operand_contract"]["numerator"]["required_canonical_concepts"] = [
+        "operating_income"
+    ]
+    forged_expression = _catalog()
+    forged_expression["formulas"][0]["canonical_expression"] = "operating_income / revenue"
+
+    wrong_package, wrong_validation = derivation.derive_primary_source_metrics(
+        _margin_package(), wrong_operands
+    )
+    forged_package, forged_validation = derivation.derive_primary_source_metrics(
+        _margin_package(), forged_expression
+    )
+
+    assert wrong_package is None
+    assert "FORMULA_SEMANTIC_CONTRACT_MISMATCH" in wrong_validation["reason_codes"]
+    assert forged_package is None
+    assert "FORMULA_CANONICAL_EXPRESSION_MISMATCH" in forged_validation["reason_codes"]
 
 
 @pytest.mark.parametrize(
@@ -353,6 +465,7 @@ def test_malformed_request_and_json_return_controlled_failures(tmp_path: Path) -
 def _direct_package(ticker: str = "AAA") -> dict[str, object]:
     return {
         "schema_version": "market-engine-data07-operator-fundamental-metrics-v1",
+        "package_schema_version": direct_approval.INPUT_SCHEMA_VERSION,
         "package_id": "direct-package",
         "records": [
             {
@@ -433,19 +546,68 @@ def test_direct_and_derived_merge_rejects_identity_mismatch(field: str) -> None:
         )
 
 
+def _direct_approval_fixture(tmp_path: Path, package_path: Path) -> tuple[Path, Path]:
+    input_path = _write(
+        tmp_path / "direct-input.json",
+        {"schema_version": direct_approval.INPUT_SCHEMA_VERSION, "package_id": "direct-package"},
+    )
+    report_path = _write(
+        tmp_path / "direct-report.json",
+        {
+            "schema_version": direct_approval.REPORT_SCHEMA_VERSION,
+            "validator_version": direct_approval.VALIDATOR_VERSION,
+            "package_id": "direct-package",
+            "status": "accepted",
+            "downstream_consumability": "structurally_valid_for_explicit_source_approval_review",
+            "input_sha256": _sha(input_path),
+        },
+    )
+    source_path = tmp_path / "source.html"
+    source_path.write_text("official source", encoding="utf-8")
+    decision = {
+        "schema_version": direct_approval.DECISION_SCHEMA_VERSION,
+        "decision_id": "direct-approval",
+        "decision": "approved",
+        "scope": direct_approval.APPROVED_SCOPE,
+        "approved_tickers": ["AAA"],
+        "reviewer_roles": list(direct_approval.REQUIRED_REVIEWER_ROLES),
+        "package_id": "direct-package",
+        "artifact_bindings": {
+            "input_path": input_path.as_posix(),
+            "input_sha256": _sha(input_path),
+            "package_sha256": _sha(package_path),
+            "validation_report_path": report_path.as_posix(),
+            "validation_report_sha256": _sha(report_path),
+        },
+        "source_documents": [{"relative_path": source_path.name, "sha256": _sha(source_path)}],
+        "reviews": {name: {"status": "approved"} for name in direct_approval.REQUIRED_REVIEW_DIMENSIONS},
+        "approved_metrics": ["revenue_growth_yoy"],
+        "explicitly_missing_metrics": [
+            "debt_to_equity",
+            "eps_growth_yoy",
+            "gross_margin",
+            "operating_margin",
+        ],
+    }
+    return _write(tmp_path / "direct-approval.json", decision), source_path
+
+
 def _approval_fixture(tmp_path: Path) -> tuple[dict[str, Path], dict[str, object]]:
     fact_package = _margin_package()
     catalog = _catalog()
     derived, _ = derivation.derive_primary_source_metrics(fact_package, catalog)
     direct = _direct_package()
-    direct_approval = {"decision_id": "direct-approval"}
     paths = {
         "fact_package": _write(tmp_path / "facts.json", fact_package),
         "formula_catalog": _write(tmp_path / "catalog.json", catalog),
         "derived_package": _write(tmp_path / "derived.json", derived),
+        "derivation_validation": _write(
+            tmp_path / "derivation-validation.json",
+            derivation.derive_primary_source_metrics(fact_package, catalog)[1],
+        ),
         "direct_package": _write(tmp_path / "direct.json", direct),
-        "direct_approval": _write(tmp_path / "direct-approval.json", direct_approval),
     }
+    paths["direct_approval"], source = _direct_approval_fixture(tmp_path, paths["direct_package"])
     governed = derivation.build_data07_governed_package(
         direct,
         derived,
@@ -455,13 +617,12 @@ def _approval_fixture(tmp_path: Path) -> tuple[dict[str, Path], dict[str, object
         direct_package_checksum=_sha(paths["direct_package"]),
     )
     paths["governed_package"] = _write(tmp_path / "governed.json", governed)
-    source = tmp_path / "source.html"
-    source.write_text("official source", encoding="utf-8")
     decision = {
         "schema_version": derivation.DERIVATION_APPROVAL_DECISION_SCHEMA_VERSION,
         "decision_id": "derivation-approval-1",
         "decision": "approved",
         "scope": derivation.APPROVED_SCOPE,
+        "governed_package_id": "governed-package",
         "reviewer_roles": list(derivation.REQUIRED_REVIEWER_ROLES),
         "reviews": {name: {"status": "approved"} for name in derivation.REQUIRED_REVIEW_DIMENSIONS},
         "artifact_bindings": {
@@ -495,6 +656,35 @@ def test_checksum_bound_derivation_approval_accepts_and_tamper_blocks(tmp_path: 
     assert "DERIVATION_ARTIFACT_CHECKSUM_MISMATCH" in blocked["reason_codes"]
 
 
+def test_approval_candidate_binds_replay_artifacts_without_granting_approval(tmp_path: Path) -> None:
+    paths, _ = _approval_fixture(tmp_path)
+    candidate_path = tmp_path / "approval-candidate.json"
+
+    candidate = derivation.persist_derivation_approval_candidate(
+        decision_id="derivation-approval-1",
+        fact_package_path=paths["fact_package"],
+        formula_catalog_path=paths["formula_catalog"],
+        derived_package_path=paths["derived_package"],
+        derivation_validation_path=paths["derivation_validation"],
+        direct_package_path=paths["direct_package"],
+        direct_approval_path=paths["direct_approval"],
+        governed_package_path=paths["governed_package"],
+        source_document_template_path=paths["direct_approval"],
+        output_path=candidate_path,
+    )
+
+    assert candidate["decision"] == "pending"
+    assert {review["status"] for review in candidate["reviews"].values()} == {"pending"}
+    assert candidate["artifact_bindings"]["derivation_validation_sha256"] == _sha(
+        paths["derivation_validation"]
+    )
+    result = derivation.validate_derivation_approval_decision(
+        candidate_path, paths["governed_package"], source_document_root=tmp_path
+    )
+    assert result["validation_status"] == "blocked"
+    assert "DERIVATION_APPROVAL_BLOCKED" in result["reason_codes"]
+
+
 def test_derivation_approval_rejects_a_different_governed_package_path(tmp_path: Path) -> None:
     paths, decision = _approval_fixture(tmp_path)
     decision_path = _write(tmp_path / "decision.json", decision)
@@ -507,6 +697,156 @@ def test_derivation_approval_rejects_a_different_governed_package_path(tmp_path:
 
     assert blocked["validation_status"] == "blocked"
     assert "DERIVATION_GOVERNED_PACKAGE_PATH_MISMATCH" in blocked["reason_codes"]
+
+
+def _rebind(decision: dict[str, object], stem: str, path: Path) -> None:
+    decision["artifact_bindings"][f"{stem}_sha256"] = _sha(path)
+
+
+def _update_direct_approval_for_package(paths: dict[str, Path], decision: dict[str, object]) -> None:
+    approval = json.loads(paths["direct_approval"].read_text(encoding="utf-8"))
+    package = json.loads(paths["direct_package"].read_text(encoding="utf-8"))
+    approval["artifact_bindings"]["package_sha256"] = _sha(paths["direct_package"])
+    approval["approved_metrics"] = sorted(package["records"][0]["metrics"])
+    approval["explicitly_missing_metrics"] = sorted(
+        {"revenue_growth_yoy", "eps_growth_yoy", "gross_margin", "operating_margin", "debt_to_equity"}
+        - set(approval["approved_metrics"])
+    )
+    _write(paths["direct_approval"], approval)
+    _rebind(decision, "direct_package", paths["direct_package"])
+    _rebind(decision, "direct_approval", paths["direct_approval"])
+
+
+def _tamper_reconciled_fixture(
+    case: str, paths: dict[str, Path], decision: dict[str, object]
+) -> None:
+    if case in {"derived_content", "derived_governed_value", "calculation_checksum", "canonical_replay"}:
+        derived = json.loads(paths["derived_package"].read_text(encoding="utf-8"))
+        row = derived["derivations"][0]
+        if case == "derived_content":
+            row["limitations"].append("tampered but internally rechecksummed")
+            calculation = dict(row)
+            calculation.pop("calculation_checksum")
+            row["calculation_checksum"] = derivation._canonical_checksum(calculation)
+            decision["approved_calculation_checksums"] = [row["calculation_checksum"]]
+        elif case == "derived_governed_value":
+            row["calculation_result"] = 0.41
+            calculation = dict(row)
+            calculation.pop("calculation_checksum")
+            row["calculation_checksum"] = derivation._canonical_checksum(calculation)
+            decision["approved_calculation_checksums"] = [row["calculation_checksum"]]
+        elif case == "calculation_checksum":
+            row["calculation_checksum"] = "f" * 64
+            decision["approved_calculation_checksums"] = ["f" * 64]
+        else:
+            derived["boundary"] = "tampered canonical replay boundary"
+        _write(paths["derived_package"], derived)
+        _rebind(decision, "derived_package", paths["derived_package"])
+    elif case in {"governed_content", "governed_calculation_checksum", "identity_mismatch"}:
+        governed = json.loads(paths["governed_package"].read_text(encoding="utf-8"))
+        if case == "governed_content":
+            governed["records"][0]["metrics"]["gross_margin"]["value"] = 0.41
+        elif case == "governed_calculation_checksum":
+            governed["records"][0]["metrics"]["gross_margin"]["derivation_lineage"][
+                "calculation_checksum"
+            ] = "e" * 64
+        else:
+            governed["records"][0]["company_name"] = "Different Corporation"
+        _write(paths["governed_package"], governed)
+        _rebind(decision, "governed_package", paths["governed_package"])
+    elif case == "formula_catalog":
+        catalog = json.loads(paths["formula_catalog"].read_text(encoding="utf-8"))
+        catalog["catalog_id"] = "different-catalog-id"
+        _write(paths["formula_catalog"], catalog)
+        _rebind(decision, "formula_catalog", paths["formula_catalog"])
+    elif case == "fact_package":
+        facts = json.loads(paths["fact_package"].read_text(encoding="utf-8"))
+        facts["facts"][0]["value"] = 101
+        _write(paths["fact_package"], facts)
+        _rebind(decision, "fact_package", paths["fact_package"])
+    elif case == "derivation_validation":
+        validation = json.loads(paths["derivation_validation"].read_text(encoding="utf-8"))
+        validation["boundary"] = "tampered validation boundary"
+        _write(paths["derivation_validation"], validation)
+        _rebind(decision, "derivation_validation", paths["derivation_validation"])
+    elif case == "direct_package_without_approval":
+        direct = json.loads(paths["direct_package"].read_text(encoding="utf-8"))
+        direct["records"][0]["metrics"]["revenue_growth_yoy"]["value"] = 11.0
+        _write(paths["direct_package"], direct)
+        _rebind(decision, "direct_package", paths["direct_package"])
+    elif case == "invalid_direct_approval":
+        approval = json.loads(paths["direct_approval"].read_text(encoding="utf-8"))
+        approval["decision"] = "rejected"
+        _write(paths["direct_approval"], approval)
+        _rebind(decision, "direct_approval", paths["direct_approval"])
+    elif case == "approval_package_id":
+        decision["governed_package_id"] = "different-governed-package"
+    elif case == "fiscal_mismatch":
+        direct = json.loads(paths["direct_package"].read_text(encoding="utf-8"))
+        direct["records"][0]["fiscal_period"] = "Q3"
+        _write(paths["direct_package"], direct)
+        _update_direct_approval_for_package(paths, decision)
+    elif case == "duplicate_metric":
+        direct = json.loads(paths["direct_package"].read_text(encoding="utf-8"))
+        direct["records"][0]["metrics"]["gross_margin"] = {
+            "value": 40.0,
+            "unit": "percent",
+            "reporting_period": "2026-Q2",
+            "raw_source_field": "reported_gross_margin",
+        }
+        _write(paths["direct_package"], direct)
+        _update_direct_approval_for_package(paths, decision)
+    else:
+        raise AssertionError(f"unknown tamper case: {case}")
+
+
+@pytest.mark.parametrize(
+    ("case", "reason"),
+    [
+        ("derived_content", "DERIVED_PACKAGE_REPLAY_MISMATCH"),
+        ("governed_content", "GOVERNED_PACKAGE_REPLAY_MISMATCH"),
+        ("derived_governed_value", "DERIVED_PACKAGE_REPLAY_MISMATCH"),
+        ("governed_calculation_checksum", "GOVERNED_PACKAGE_REPLAY_MISMATCH"),
+        ("formula_catalog", "DERIVED_FORMULA_CATALOG_ID_MISMATCH"),
+        ("fact_package", "DERIVED_FACT_PACKAGE_CHECKSUM_MISMATCH"),
+        ("derivation_validation", "DERIVATION_VALIDATION_REPLAY_MISMATCH"),
+        ("direct_package_without_approval", "DIRECT_SOURCE_APPROVAL_REVALIDATION_FAILED"),
+        ("invalid_direct_approval", "DIRECT_SOURCE_APPROVAL_REVALIDATION_FAILED"),
+        ("approval_package_id", "DERIVATION_APPROVAL_PACKAGE_ID_MISMATCH"),
+        ("identity_mismatch", "GOVERNED_PACKAGE_REPLAY_MISMATCH"),
+        ("fiscal_mismatch", "GOVERNED_PACKAGE_RECONSTRUCTION_FAILED"),
+        ("duplicate_metric", "GOVERNED_PACKAGE_RECONSTRUCTION_FAILED"),
+        ("calculation_checksum", "CALCULATION_CHECKSUM_REPLAY_MISMATCH"),
+        ("canonical_replay", "DERIVED_PACKAGE_REPLAY_MISMATCH"),
+    ],
+)
+def test_cross_artifact_tampering_with_refreshed_file_checksums_is_blocked(
+    tmp_path: Path, case: str, reason: str
+) -> None:
+    paths, decision = _approval_fixture(tmp_path)
+    _tamper_reconciled_fixture(case, paths, decision)
+    decision_path = _write(tmp_path / "decision.json", decision)
+
+    result = derivation.validate_derivation_approval_decision(
+        decision_path, paths["governed_package"], source_document_root=tmp_path
+    )
+
+    assert result["validation_status"] == "blocked"
+    assert reason in result["reason_codes"]
+
+
+def test_malformed_bound_artifact_is_controlled_and_blocks_reconciliation(tmp_path: Path) -> None:
+    paths, decision = _approval_fixture(tmp_path)
+    paths["fact_package"].write_text("{", encoding="utf-8")
+    _rebind(decision, "fact_package", paths["fact_package"])
+    decision_path = _write(tmp_path / "decision.json", decision)
+
+    result = derivation.validate_derivation_approval_decision(
+        decision_path, paths["governed_package"], source_document_root=tmp_path
+    )
+
+    assert result["validation_status"] == "blocked"
+    assert "BOUND_ARTIFACT_MALFORMED" in result["reason_codes"]
 
 
 def test_failed_derivation_and_failed_approval_never_reach_data07(tmp_path: Path) -> None:

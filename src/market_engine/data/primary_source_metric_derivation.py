@@ -10,15 +10,17 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_EVEN
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
+from market_engine.data.operator_source_approval import validate_source_approval_decision
+
 
 FACT_PACKAGE_SCHEMA_VERSION = "market-engine-data10-primary-source-fact-package-v1"
-FORMULA_CATALOG_SCHEMA_VERSION = "market-engine-data10-fundamental-metric-formula-catalog-v1"
+FORMULA_CATALOG_SCHEMA_VERSION = "market-engine-data10-fundamental-metric-formula-catalog-v2"
 DERIVED_PACKAGE_SCHEMA_VERSION = "market-engine-data10-derived-fundamental-metrics-v1"
 DERIVATION_VALIDATION_SCHEMA_VERSION = "market-engine-data10-derivation-validation-v1"
-DERIVATION_APPROVAL_DECISION_SCHEMA_VERSION = "market-engine-data10-derivation-approval-decision-v1"
-DERIVATION_APPROVAL_VALIDATION_SCHEMA_VERSION = "market-engine-data10-derivation-approval-validation-v1"
+DERIVATION_APPROVAL_DECISION_SCHEMA_VERSION = "market-engine-data10-derivation-approval-decision-v2"
+DERIVATION_APPROVAL_VALIDATION_SCHEMA_VERSION = "market-engine-data10-derivation-approval-validation-v2"
 DATA07_GOVERNED_PACKAGE_SCHEMA_VERSION = "market-engine-data07-governed-fundamental-metrics-v2"
-ENGINE_VERSION = "market-engine-data10-primary-source-metric-derivation-engine-v1"
+ENGINE_VERSION = "market-engine-data10-primary-source-metric-derivation-engine-v2"
 APPROVED_SCOPE = "bounded_governed_primary_source_metric_derivation_pilot"
 SUPPORTED_ACCOUNTING_FRAMEWORKS = frozenset({"us_gaap", "ifrs"})
 SUPPORTED_PERIOD_TYPES = frozenset({"duration", "instant"})
@@ -36,6 +38,101 @@ CANONICAL_CONCEPTS = frozenset(
         "total_equity",
     }
 )
+FORMULA_SEMANTIC_POLICIES: Mapping[str, Mapping[str, Any]] = {
+    "gross_margin": {
+        "version": "2.0.0",
+        "canonical_metric": "gross_margin",
+        "canonical_expression": "gross_profit / revenue",
+        "operation": "ratio",
+        "period_type": "duration",
+        "operand_contract": {
+            "numerator": {
+                "role": "numerator",
+                "cardinality": "exactly_one",
+                "required_canonical_concepts": ["gross_profit"],
+            },
+            "denominator": {
+                "role": "denominator",
+                "cardinality": "exactly_one",
+                "required_canonical_concepts": ["revenue"],
+            },
+            "components": {
+                "role": "numerator_components",
+                "aggregation_policy": "forbidden",
+                "allowed_canonical_concepts": [],
+                "overlap_policy": "not_applicable",
+            },
+            "period_alignment_policy": "exact_start_end_and_fiscal_period",
+            "unit_currency_scale_policy": "exact_match",
+            "denominator_safety_policy": "strictly_positive",
+            "applicability_policy": "explicit_approved",
+        },
+    },
+    "operating_margin": {
+        "version": "2.0.0",
+        "canonical_metric": "operating_margin",
+        "canonical_expression": "operating_income / revenue",
+        "operation": "ratio",
+        "period_type": "duration",
+        "operand_contract": {
+            "numerator": {
+                "role": "numerator",
+                "cardinality": "exactly_one",
+                "required_canonical_concepts": ["operating_income"],
+            },
+            "denominator": {
+                "role": "denominator",
+                "cardinality": "exactly_one",
+                "required_canonical_concepts": ["revenue"],
+            },
+            "components": {
+                "role": "numerator_components",
+                "aggregation_policy": "forbidden",
+                "allowed_canonical_concepts": [],
+                "overlap_policy": "not_applicable",
+            },
+            "period_alignment_policy": "exact_start_end_and_fiscal_period",
+            "unit_currency_scale_policy": "exact_match",
+            "denominator_safety_policy": "strictly_positive",
+            "applicability_policy": "explicit_approved",
+        },
+    },
+    "debt_to_equity": {
+        "version": "2.0.0",
+        "canonical_metric": "debt_to_equity",
+        "canonical_expression": "sum(explicitly_approved_interest_bearing_debt_components) / total_equity",
+        "operation": "component_sum_ratio",
+        "period_type": "instant",
+        "operand_contract": {
+            "numerator": {
+                "role": "numerator",
+                "cardinality": "forbidden",
+                "required_canonical_concepts": [],
+            },
+            "denominator": {
+                "role": "denominator",
+                "cardinality": "exactly_one",
+                "required_canonical_concepts": ["total_equity"],
+            },
+            "components": {
+                "role": "numerator_components",
+                "aggregation_policy": "explicit_selected_complete_set",
+                "allowed_canonical_concepts": [
+                    "commercial_paper",
+                    "current_term_debt",
+                    "noncurrent_term_debt",
+                    "short_term_borrowings",
+                    "total_interest_bearing_debt",
+                ],
+                "overlap_policy": "forbid_reported_total_with_components",
+            },
+            "period_alignment_policy": "exact_balance_sheet_date_and_fiscal_period",
+            "unit_currency_scale_policy": "exact_match",
+            "denominator_safety_policy": "strictly_positive",
+            "applicability_policy": "explicit_approved",
+        },
+    },
+}
 REQUIRED_REVIEWER_ROLES = ("Operator", "Data Steward", "Governance Auditor")
 REQUIRED_REVIEW_DIMENSIONS = (
     "source_authenticity",
@@ -315,24 +412,74 @@ def validate_derivation_approval_decision(
         issues,
     )
     bound_payloads: dict[str, Mapping[str, Any]] = {}
-    for stem in ("fact_package", "formula_catalog", "derived_package", "direct_package", "direct_approval"):
+    bound_paths: dict[str, Path] = {}
+    for stem in (
+        "fact_package",
+        "formula_catalog",
+        "derived_package",
+        "derivation_validation",
+        "direct_package",
+        "direct_approval",
+    ):
         path = _binding_path(bindings, f"{stem}_path", issues)
         _binding_checksum(bindings, f"{stem}_path", f"{stem}_sha256", path, issues)
-        if path is not None and path.is_file() and stem != "direct_approval":
+        if path is not None:
+            bound_paths[stem] = path
+        if path is not None and path.is_file():
             try:
                 bound_payloads[stem] = load_strict_json(path)
             except PrimarySourceMetricDerivationError:
                 _issue(issues, "BOUND_ARTIFACT_MALFORMED", f"$.artifact_bindings.{stem}_path", "bound artifact must be strict JSON")
 
     derived = bound_payloads.get("derived_package", {})
+    derivation_validation = bound_payloads.get("derivation_validation", {})
     fact_package = bound_payloads.get("fact_package", {})
     formula_catalog = bound_payloads.get("formula_catalog", {})
+    direct_package = bound_payloads.get("direct_package", {})
+    direct_approval = bound_payloads.get("direct_approval", {})
     if derived.get("schema_version") != DERIVED_PACKAGE_SCHEMA_VERSION:
         _issue(issues, "DERIVED_PACKAGE_SCHEMA_MISMATCH", "$.artifact_bindings.derived_package_path", "derived package schema is invalid")
     if fact_package.get("schema_version") != FACT_PACKAGE_SCHEMA_VERSION:
         _issue(issues, "FACT_PACKAGE_SCHEMA_MISMATCH", "$.artifact_bindings.fact_package_path", "fact package schema is invalid")
     if formula_catalog.get("schema_version") != FORMULA_CATALOG_SCHEMA_VERSION:
         _issue(issues, "FORMULA_CATALOG_SCHEMA_MISMATCH", "$.artifact_bindings.formula_catalog_path", "formula catalog schema is invalid")
+    if derivation_validation.get("schema_version") != DERIVATION_VALIDATION_SCHEMA_VERSION:
+        _issue(
+            issues,
+            "DERIVATION_VALIDATION_SCHEMA_MISMATCH",
+            "$.artifact_bindings.derivation_validation_path",
+            "derivation validation schema is invalid",
+        )
+    if decision.get("governed_package_id") != package.get("package_id"):
+        _issue(
+            issues,
+            "DERIVATION_APPROVAL_PACKAGE_ID_MISMATCH",
+            "$.governed_package_id",
+            "approval must name the exact governed package ID",
+        )
+    if fact_package.get("derivation_approval_reference") != decision.get("decision_id"):
+        _issue(
+            issues,
+            "FACT_PACKAGE_APPROVAL_REFERENCE_MISMATCH",
+            "$.artifact_bindings.fact_package_path",
+            "fact package approval reference does not match the derivation decision",
+        )
+    if derived.get("approval_decision_reference") != decision.get("decision_id"):
+        _issue(
+            issues,
+            "DERIVED_PACKAGE_APPROVAL_REFERENCE_MISMATCH",
+            "$.artifact_bindings.derived_package_path",
+            "derived package approval reference does not match the derivation decision",
+        )
+
+    _reconcile_derivation_artifacts(
+        decision=decision,
+        governed_package=package,
+        bound_payloads=bound_payloads,
+        bound_paths=bound_paths,
+        source_document_root=source_document_root,
+        issues=issues,
+    )
 
     successful_metrics = sorted(row.get("canonical_metric") for row in derived.get("derivations") or [] if row.get("status") == "derived")
     blocked_metrics = sorted(row.get("canonical_metric") for row in derived.get("derivations") or [] if row.get("status") == "blocked")
@@ -357,6 +504,163 @@ def validate_derivation_approval_decision(
     )
 
 
+def _reconcile_derivation_artifacts(
+    *,
+    decision: Mapping[str, Any],
+    governed_package: Mapping[str, Any],
+    bound_payloads: Mapping[str, Mapping[str, Any]],
+    bound_paths: Mapping[str, Path],
+    source_document_root: str | Path | None,
+    issues: list[dict[str, str]],
+) -> None:
+    fact_package = bound_payloads.get("fact_package")
+    formula_catalog = bound_payloads.get("formula_catalog")
+    derived_package = bound_payloads.get("derived_package")
+    derivation_validation = bound_payloads.get("derivation_validation")
+    direct_package = bound_payloads.get("direct_package")
+    direct_approval = bound_payloads.get("direct_approval")
+    required_payloads = {
+        "fact_package": fact_package,
+        "formula_catalog": formula_catalog,
+        "derived_package": derived_package,
+        "derivation_validation": derivation_validation,
+        "direct_package": direct_package,
+        "direct_approval": direct_approval,
+    }
+    if any(not isinstance(payload, Mapping) or not payload for payload in required_payloads.values()):
+        _issue(
+            issues,
+            "DERIVATION_RECONCILIATION_INPUT_MISSING",
+            "$.artifact_bindings",
+            "all bound artifacts are required for deterministic reconciliation",
+        )
+        return
+
+    direct_package_path = bound_paths.get("direct_package")
+    direct_approval_path = bound_paths.get("direct_approval")
+    if direct_package_path is None or direct_approval_path is None:
+        _issue(
+            issues,
+            "DIRECT_SOURCE_APPROVAL_REVALIDATION_FAILED",
+            "$.artifact_bindings.direct_approval_path",
+            "bound DATA09 package and approval paths are required",
+        )
+    else:
+        direct_validation = validate_source_approval_decision(
+            direct_approval_path,
+            direct_package_path,
+            source_document_root=source_document_root,
+        )
+        if not direct_validation.get("concrete_package_source_approved"):
+            codes = ",".join(direct_validation.get("reason_codes") or [])
+            _issue(
+                issues,
+                "DIRECT_SOURCE_APPROVAL_REVALIDATION_FAILED",
+                "$.artifact_bindings.direct_approval_path",
+                f"authoritative DATA09 approval revalidation failed: {codes}",
+            )
+
+    if derived_package.get("fact_package_id") != fact_package.get("package_id"):
+        _issue(
+            issues,
+            "DERIVED_FACT_PACKAGE_ID_MISMATCH",
+            "$.artifact_bindings.derived_package_path",
+            "derived package does not identify the bound fact package",
+        )
+    if derived_package.get("formula_catalog_id") != formula_catalog.get("catalog_id"):
+        _issue(
+            issues,
+            "DERIVED_FORMULA_CATALOG_ID_MISMATCH",
+            "$.artifact_bindings.derived_package_path",
+            "derived package does not identify the bound formula catalog",
+        )
+    if derived_package.get("fact_package_checksum") != _fact_package_checksum(fact_package):
+        _issue(
+            issues,
+            "DERIVED_FACT_PACKAGE_CHECKSUM_MISMATCH",
+            "$.artifact_bindings.derived_package_path",
+            "derived package fact checksum does not match canonical bound facts",
+        )
+    if derived_package.get("formula_catalog_checksum") != _canonical_checksum(formula_catalog):
+        _issue(
+            issues,
+            "DERIVED_FORMULA_CATALOG_CHECKSUM_MISMATCH",
+            "$.artifact_bindings.derived_package_path",
+            "derived package formula checksum does not match the canonical bound catalog",
+        )
+
+    replayed_derived: Mapping[str, Any] | None = None
+    replayed_validation: Mapping[str, Any] | None = None
+    try:
+        replayed_derived, replayed_validation = derive_primary_source_metrics(fact_package, formula_catalog)
+    except (PrimarySourceMetricDerivationError, TypeError, ValueError):
+        _issue(
+            issues,
+            "DERIVATION_REPLAY_FAILED",
+            "$.artifact_bindings",
+            "deterministic derivation replay failed in a controlled manner",
+        )
+    if replayed_derived is None or replayed_validation is None:
+        _issue(
+            issues,
+            "DERIVATION_REPLAY_REJECTED",
+            "$.artifact_bindings",
+            "bound fact and formula artifacts do not produce a valid derived package",
+        )
+    else:
+        if _canonical_bytes(replayed_derived) != _canonical_bytes(derived_package):
+            _issue(
+                issues,
+                "DERIVED_PACKAGE_REPLAY_MISMATCH",
+                "$.artifact_bindings.derived_package_path",
+                "bound derived package differs from deterministic replay",
+            )
+        if _canonical_bytes(replayed_validation) != _canonical_bytes(derivation_validation):
+            _issue(
+                issues,
+                "DERIVATION_VALIDATION_REPLAY_MISMATCH",
+                "$.artifact_bindings.derivation_validation_path",
+                "bound derivation validation differs from deterministic replay",
+            )
+
+    for index, row in enumerate(derived_package.get("derivations") or []):
+        if not isinstance(row, Mapping) or row.get("status") != "derived":
+            continue
+        calculation = dict(row)
+        stored_checksum = calculation.pop("calculation_checksum", None)
+        if stored_checksum != _canonical_checksum(calculation):
+            _issue(
+                issues,
+                "CALCULATION_CHECKSUM_REPLAY_MISMATCH",
+                f"$.artifact_bindings.derived_package_path.derivations[{index}]",
+                "calculation checksum does not match canonical calculation content",
+            )
+
+    try:
+        rebuilt_governed = build_data07_governed_package(
+            direct_package,
+            derived_package,
+            package_id=_required_text(governed_package, "package_id", "governed_package.package_id"),
+            direct_approval_reference=_required_text(direct_approval, "decision_id", "direct_approval.decision_id"),
+            direct_approval_checksum=_sha256(bound_paths["direct_approval"]),
+            direct_package_checksum=_sha256(bound_paths["direct_package"]),
+        )
+    except (KeyError, OSError, PrimarySourceMetricDerivationError, TypeError, ValueError):
+        _issue(
+            issues,
+            "GOVERNED_PACKAGE_RECONSTRUCTION_FAILED",
+            "$.artifact_bindings.governed_package_path",
+            "governed package could not be reconstructed from the exact bound artifacts",
+        )
+    else:
+        if _canonical_bytes(rebuilt_governed) != _canonical_bytes(governed_package):
+            _issue(
+                issues,
+                "GOVERNED_PACKAGE_REPLAY_MISMATCH",
+                "$.artifact_bindings.governed_package_path",
+                "offered governed package differs from deterministic reconstruction",
+            )
+
 def execute_approved_derivation_import(
     *,
     fact_package_path: str | Path,
@@ -368,18 +672,6 @@ def execute_approved_derivation_import(
     data07_runner: Callable[..., Any],
     data07_kwargs: Mapping[str, Any],
 ) -> dict[str, Any]:
-    try:
-        expected, validation = derive_primary_source_metrics(
-            load_strict_json(fact_package_path),
-            load_strict_json(formula_catalog_path),
-        )
-        committed_derived = load_strict_json(derived_package_path)
-    except PrimarySourceMetricDerivationError:
-        return {"status": "blocked", "reason_codes": ["DERIVATION_INPUT_MALFORMED"], "data07_executed": False}
-    if expected is None or not any(row.get("status") == "derived" for row in validation.get("derivations") or []):
-        return {"status": "blocked", "reason_codes": validation["reason_codes"] or ["NO_SUCCESSFUL_DERIVATION"], "data07_executed": False}
-    if _canonical_bytes(expected) != _canonical_bytes(committed_derived):
-        return {"status": "blocked", "reason_codes": ["DERIVED_PACKAGE_REPRODUCTION_MISMATCH"], "data07_executed": False}
     approval = validate_derivation_approval_decision(
         approval_decision_path,
         governed_package_path,
@@ -387,6 +679,31 @@ def execute_approved_derivation_import(
     )
     if not approval["concrete_package_source_approved"]:
         return {"status": "blocked", "reason_codes": approval["reason_codes"], "data07_executed": False}
+    try:
+        decision = load_strict_json(approval_decision_path) if approval_decision_path is not None else {}
+    except PrimarySourceMetricDerivationError:
+        return {
+            "status": "blocked",
+            "reason_codes": ["DERIVATION_APPROVAL_MALFORMED"],
+            "data07_executed": False,
+        }
+    bindings = decision.get("artifact_bindings") if isinstance(decision.get("artifact_bindings"), Mapping) else {}
+    expected_paths = {
+        "fact_package_path": Path(fact_package_path),
+        "formula_catalog_path": Path(formula_catalog_path),
+        "derived_package_path": Path(derived_package_path),
+        "governed_package_path": Path(governed_package_path),
+    }
+    if any(
+        not isinstance(bindings.get(key), str)
+        or Path(str(bindings[key])).resolve() != expected.resolve()
+        for key, expected in expected_paths.items()
+    ):
+        return {
+            "status": "blocked",
+            "reason_codes": ["DERIVATION_EXECUTION_PATH_BINDING_MISMATCH"],
+            "data07_executed": False,
+        }
     result = data07_runner(**dict(data07_kwargs))
     return {"status": "completed", "reason_codes": [], "data07_executed": True, "data07_result": result}
 
@@ -424,6 +741,98 @@ def persist_derivation_candidate(
         path.parent.mkdir(parents=True, exist_ok=True)
         _write_json(path, payload)
     return derived, validation, governed
+
+
+def persist_derivation_approval_candidate(
+    *,
+    decision_id: str,
+    fact_package_path: str | Path,
+    formula_catalog_path: str | Path,
+    derived_package_path: str | Path,
+    derivation_validation_path: str | Path,
+    direct_package_path: str | Path,
+    direct_approval_path: str | Path,
+    governed_package_path: str | Path,
+    source_document_template_path: str | Path,
+    output_path: str | Path,
+) -> dict[str, Any]:
+    destination = Path(output_path)
+    if destination.exists():
+        raise FileExistsError("derivation approval candidate output must not already exist")
+    paths = {
+        "fact_package": Path(fact_package_path),
+        "formula_catalog": Path(formula_catalog_path),
+        "derived_package": Path(derived_package_path),
+        "derivation_validation": Path(derivation_validation_path),
+        "direct_package": Path(direct_package_path),
+        "direct_approval": Path(direct_approval_path),
+        "governed_package": Path(governed_package_path),
+    }
+    payloads = {name: load_strict_json(path) for name, path in paths.items()}
+    template = load_strict_json(source_document_template_path)
+    source_documents = template.get("source_documents")
+    if not isinstance(source_documents, list) or not source_documents:
+        raise PrimarySourceMetricDerivationError("approval candidate requires source-document bindings")
+    fact_package = payloads["fact_package"]
+    derived = payloads["derived_package"]
+    governed = payloads["governed_package"]
+    if fact_package.get("derivation_approval_reference") != decision_id:
+        raise PrimarySourceMetricDerivationError("fact package approval reference must match candidate decision ID")
+    if derived.get("approval_decision_reference") != decision_id:
+        raise PrimarySourceMetricDerivationError("derived package approval reference must match candidate decision ID")
+    successful = sorted(
+        row.get("canonical_metric")
+        for row in derived.get("derivations") or []
+        if isinstance(row, Mapping) and row.get("status") == "derived"
+    )
+    blocked = sorted(
+        row.get("canonical_metric")
+        for row in derived.get("derivations") or []
+        if isinstance(row, Mapping) and row.get("status") == "blocked"
+    )
+    calculation_checksums = sorted(
+        row.get("calculation_checksum")
+        for row in derived.get("derivations") or []
+        if isinstance(row, Mapping) and row.get("status") == "derived"
+    )
+    tickers = sorted(
+        {
+            row.get("ticker")
+            for row in governed.get("records") or []
+            if isinstance(row, Mapping) and isinstance(row.get("ticker"), str)
+        }
+    )
+    candidate = {
+        "schema_version": DERIVATION_APPROVAL_DECISION_SCHEMA_VERSION,
+        "decision_id": decision_id,
+        "decision": "pending",
+        "decision_at": fact_package.get("derivation_timestamp"),
+        "scope": APPROVED_SCOPE,
+        "governed_package_id": governed.get("package_id"),
+        "approved_tickers": tickers,
+        "approved_derived_metrics": successful,
+        "explicitly_blocked_metrics": blocked,
+        "approved_calculation_checksums": calculation_checksums,
+        "reviewer_roles": list(REQUIRED_REVIEWER_ROLES),
+        "reviews": {name: {"status": "pending"} for name in REQUIRED_REVIEW_DIMENSIONS},
+        "artifact_bindings": {
+            key: value
+            for name, path in paths.items()
+            for key, value in (
+                (f"{name}_path", path.as_posix()),
+                (f"{name}_sha256", _sha256(path)),
+            )
+        },
+        "source_documents": source_documents,
+        "limitations": [
+            "This file is an approval candidate and grants no authority while decision or any review is pending.",
+            "Approval is limited to the exact checksum-bound artifacts and deterministic reconciliation.",
+            "No automatic approval, broad ticker permission, recommendation, ranking, allocation, or execution authority is granted.",
+        ],
+    }
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    _write_json(destination, candidate)
+    return candidate
 
 
 def _validate_fact_package(value: Mapping[str, Any], issues: list[dict[str, str]]) -> dict[str, Mapping[str, Any]]:
@@ -528,20 +937,62 @@ def _validate_formula_catalog(value: Mapping[str, Any], issues: list[dict[str, s
         if not isinstance(formula, Mapping):
             _issue(issues, "FORMULA_NOT_OBJECT", path, "formula must be an object")
             continue
-        for key in ("formula_id", "version", "canonical_metric", "canonical_expression", "operation", "period_type"):
+        for key in (
+            "formula_id",
+            "version",
+            "canonical_metric",
+            "canonical_expression",
+            "operation",
+            "period_type",
+        ):
             _validate_required_text(formula, key, f"{path}.{key}", issues)
         formula_id = formula.get("formula_id")
-        if formula.get("operation") not in SUPPORTED_OPERATIONS:
-            _issue(issues, "FORMULA_OPERATION_UNSUPPORTED", f"{path}.operation", "formula operation is unsupported")
-        if formula.get("period_type") not in SUPPORTED_PERIOD_TYPES:
-            _issue(issues, "FORMULA_PERIOD_TYPE_INVALID", f"{path}.period_type", "formula period type is invalid")
-        concepts = formula.get("allowed_component_concepts")
-        if formula.get("operation") == "component_sum_ratio" and (not isinstance(concepts, list) or not concepts):
-            _issue(issues, "FORMULA_COMPONENT_ALLOWLIST_MISSING", f"{path}.allowed_component_concepts", "component formula requires an allowlist")
         if isinstance(formula_id, str):
             if formula_id in formulas:
                 _issue(issues, "DUPLICATE_FORMULA_ID", f"{path}.formula_id", "formula ID is duplicated")
             formulas[formula_id] = formula
+        policy = FORMULA_SEMANTIC_POLICIES.get(str(formula_id))
+        if policy is None:
+            _issue(
+                issues,
+                "FORMULA_SEMANTIC_POLICY_UNSUPPORTED",
+                f"{path}.formula_id",
+                "formula ID has no governed machine-readable semantic policy",
+            )
+            continue
+        allowed_fields = {"formula_id", *policy.keys()}
+        if set(formula) != allowed_fields:
+            _issue(
+                issues,
+                "FORMULA_CONTRACT_FIELD_SET_INVALID",
+                path,
+                "formula fields must exactly match the governed semantic contract",
+            )
+        for key, expected in policy.items():
+            if formula.get(key) != expected:
+                code = (
+                    "FORMULA_CANONICAL_EXPRESSION_MISMATCH"
+                    if key == "canonical_expression"
+                    else "FORMULA_SEMANTIC_CONTRACT_MISMATCH"
+                )
+                _issue(
+                    issues,
+                    code,
+                    f"{path}.{key}",
+                    "formula definition does not match the governed machine-readable semantic policy",
+                )
+        if formula.get("operation") not in SUPPORTED_OPERATIONS:
+            _issue(issues, "FORMULA_OPERATION_UNSUPPORTED", f"{path}.operation", "formula operation is unsupported")
+        if formula.get("period_type") not in SUPPORTED_PERIOD_TYPES:
+            _issue(issues, "FORMULA_PERIOD_TYPE_INVALID", f"{path}.period_type", "formula period type is invalid")
+    missing = sorted(set(FORMULA_SEMANTIC_POLICIES) - set(formulas))
+    for formula_id in missing:
+        _issue(
+            issues,
+            "FORMULA_REQUIRED_POLICY_MISSING",
+            "$.formulas",
+            f"required governed formula is missing: {formula_id}",
+        )
     return formulas
 
 
@@ -605,21 +1056,58 @@ def _derive_request(
     numerator_facts = _resolve_facts(numerator_ids, facts, "NUMERATOR_MISSING", problems)
     denominator_facts = _resolve_facts(denominator_ids, facts, "DENOMINATOR_MISSING", problems)
     component_facts = _resolve_facts(component_ids, facts, "DEBT_COMPONENT_MISSING", problems)
+    if (
+        set(numerator_ids) & set(denominator_ids)
+        or set(numerator_ids) & set(component_ids)
+        or set(denominator_ids) & set(component_ids)
+    ):
+        problems.append("FORMULA_OPERAND_ROLE_MISMATCH")
+    operand_contract = formula.get("operand_contract")
+    if not isinstance(operand_contract, Mapping):
+        problems.append("FORMULA_OPERAND_CONTRACT_INVALID")
+        operand_contract = {}
+    numerator_contract = operand_contract.get("numerator")
+    denominator_contract = operand_contract.get("denominator")
+    component_contract = operand_contract.get("components")
+    numerator_contract = numerator_contract if isinstance(numerator_contract, Mapping) else {}
+    denominator_contract = denominator_contract if isinstance(denominator_contract, Mapping) else {}
+    component_contract = component_contract if isinstance(component_contract, Mapping) else {}
+    expected_numerator_concepts = numerator_contract.get("required_canonical_concepts") or []
+    expected_denominator_concepts = denominator_contract.get("required_canonical_concepts") or []
+    actual_numerator_concepts = [fact.get("canonical_concept") for fact in numerator_facts]
+    actual_denominator_concepts = [fact.get("canonical_concept") for fact in denominator_facts]
+    if sorted(actual_numerator_concepts) != sorted(expected_numerator_concepts):
+        problems.append("FORMULA_NUMERATOR_CONCEPT_MISMATCH")
+    if sorted(actual_denominator_concepts) != sorted(expected_denominator_concepts):
+        problems.append("FORMULA_DENOMINATOR_CONCEPT_MISMATCH")
     if operation == "ratio" and (len(numerator_facts) != 1 or len(denominator_facts) != 1 or component_facts):
-        problems.append("FORMULA_INPUT_CARDINALITY_INVALID")
+        problems.extend(("FORMULA_INPUT_CARDINALITY_INVALID", "FORMULA_OPERAND_SET_INVALID"))
     if operation == "component_sum_ratio":
         required = request.get("required_component_concepts")
-        if not isinstance(required, list) or not required or any(not isinstance(item, str) or not item for item in required):
+        if (
+            not isinstance(required, list)
+            or not required
+            or any(not isinstance(item, str) or not item for item in required)
+            or len(set(required)) != len(required)
+        ):
             problems.append("DEBT_COMPONENT_SET_NOT_APPROVED")
             required = []
         selected = [str(fact.get("canonical_concept")) for fact in component_facts]
         if sorted(selected) != sorted(required):
-            problems.append("DEBT_COMPONENT_MISSING")
-        allowed = formula.get("allowed_component_concepts") or []
+            problems.extend(("DEBT_COMPONENT_MISSING", "FORMULA_OPERAND_SET_INVALID"))
+        allowed = component_contract.get("allowed_canonical_concepts") or []
         if any(concept not in allowed for concept in selected):
-            problems.append("DEBT_COMPONENT_UNSUPPORTED")
+            problems.extend(("DEBT_COMPONENT_UNSUPPORTED", "FORMULA_COMPONENT_CONCEPT_NOT_ALLOWED"))
+        if any(concept not in allowed for concept in required):
+            problems.append("FORMULA_COMPONENT_CONCEPT_NOT_ALLOWED")
+        if len(set(selected)) != len(selected):
+            problems.append("FORMULA_COMPONENT_OVERLAP")
+        if "total_interest_bearing_debt" in selected and len(selected) > 1:
+            problems.append("FORMULA_COMPONENT_OVERLAP")
         if numerator_facts or len(denominator_facts) != 1 or not component_facts:
-            problems.append("FORMULA_INPUT_CARDINALITY_INVALID")
+            problems.extend(("FORMULA_INPUT_CARDINALITY_INVALID", "FORMULA_OPERAND_SET_INVALID"))
+        if numerator_ids:
+            problems.append("FORMULA_OPERAND_ROLE_MISMATCH")
     selected_facts = numerator_facts + denominator_facts + component_facts
     if selected_facts:
         if any(fact.get("ticker") != ticker for fact in selected_facts):
@@ -678,6 +1166,7 @@ def _derive_request(
             "version": formula["version"],
             "canonical_expression": formula["canonical_expression"],
             "operation": operation,
+            "operand_contract": formula["operand_contract"],
         },
         "numerator_fact_ids": sorted(numerator_ids),
         "denominator_fact_ids": sorted(denominator_ids),
@@ -873,6 +1362,10 @@ def _approval_result(
         "schema_version": DERIVATION_APPROVAL_VALIDATION_SCHEMA_VERSION,
         "validation_status": "approved" if approved else "blocked",
         "concrete_package_source_approved": approved,
+        "cross_artifact_reconciliation": "passed" if approved else "blocked",
+        "deterministic_derivation_replay_required": True,
+        "direct_source_approval_revalidation_required": True,
+        "governed_package_reconstruction_required": True,
         "decision_path": decision_path.as_posix() if decision_path else None,
         "package_path": package_path.as_posix(),
         **identity,
@@ -984,7 +1477,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--validation-output", required=True)
     parser.add_argument("--governed-output", required=True)
     parser.add_argument("--governed-package-id", required=True)
+    parser.add_argument("--approval-candidate-output")
+    parser.add_argument("--approval-decision-id")
+    parser.add_argument("--approval-source-document-template")
     args = parser.parse_args(argv)
+    approval_options = (
+        args.approval_candidate_output,
+        args.approval_decision_id,
+        args.approval_source_document_template,
+    )
+    if any(approval_options) and not all(approval_options):
+        parser.error("approval candidate output, decision ID, and source-document template are required together")
     try:
         persist_derivation_candidate(
             fact_package_path=args.fact_package,
@@ -996,6 +1499,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             governed_output_path=args.governed_output,
             governed_package_id=args.governed_package_id,
         )
+        if all(approval_options):
+            persist_derivation_approval_candidate(
+                decision_id=args.approval_decision_id,
+                fact_package_path=args.fact_package,
+                formula_catalog_path=args.formula_catalog,
+                derived_package_path=args.derived_output,
+                derivation_validation_path=args.validation_output,
+                direct_package_path=args.direct_package,
+                direct_approval_path=args.direct_approval,
+                governed_package_path=args.governed_output,
+                source_document_template_path=args.approval_source_document_template,
+                output_path=args.approval_candidate_output,
+            )
     except (FileExistsError, PrimarySourceMetricDerivationError) as exc:
         parser.error(str(exc))
     return 0

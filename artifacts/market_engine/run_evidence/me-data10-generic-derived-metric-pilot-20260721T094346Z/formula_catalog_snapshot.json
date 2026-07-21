@@ -15,13 +15,17 @@
         },
         "denominator": {
           "cardinality": "exactly_one",
-          "required_canonical_concepts": ["revenue"],
+          "required_canonical_concepts": [
+            "revenue"
+          ],
           "role": "denominator"
         },
         "denominator_safety_policy": "strictly_positive",
         "numerator": {
           "cardinality": "exactly_one",
-          "required_canonical_concepts": ["gross_profit"],
+          "required_canonical_concepts": [
+            "gross_profit"
+          ],
           "role": "numerator"
         },
         "period_alignment_policy": "exact_start_end_and_fiscal_period",
@@ -45,13 +49,17 @@
         },
         "denominator": {
           "cardinality": "exactly_one",
-          "required_canonical_concepts": ["revenue"],
+          "required_canonical_concepts": [
+            "revenue"
+          ],
           "role": "denominator"
         },
         "denominator_safety_policy": "strictly_positive",
         "numerator": {
           "cardinality": "exactly_one",
-          "required_canonical_concepts": ["operating_income"],
+          "required_canonical_concepts": [
+            "operating_income"
+          ],
           "role": "numerator"
         },
         "period_alignment_policy": "exact_start_end_and_fiscal_period",
@@ -81,7 +89,9 @@
         },
         "denominator": {
           "cardinality": "exactly_one",
-          "required_canonical_concepts": ["total_equity"],
+          "required_canonical_concepts": [
+            "total_equity"
+          ],
           "role": "denominator"
         },
         "denominator_safety_policy": "strictly_positive",

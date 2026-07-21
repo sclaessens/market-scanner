@@ -1,0 +1,41 @@
+{
+  "data06": {
+    "coverage_summary_sha256": "e78c5dc0f7189ed5ce2b574f4dc5b32f127ca0785759efe7ca84e045a71405d3",
+    "manifest_path": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data10-aapl-20260721T094346Z/manifest.json",
+    "manifest_sha256": "e7cbe7925a903449d80c5dfb6762bc81b89283d2b665ceab94bdee701b25cf84",
+    "per_ticker_status_sha256": "9c7d560e63715994b6e013ff31781ad7edc8b70483269b55c920f643bd2bb47c",
+    "run_id": "me-data06-after-me-data10-aapl-20260721T094346Z"
+  },
+  "run31": {
+    "compact_index_path": "artifacts/market_engine/run_evidence/me-run31-after-me-data10-aapl-20260721T094346Z/run_evidence_index.json",
+    "compact_index_sha256": "cd86b2bdc0db3cd26567386fd1225d0a47aefd82737b3c505c8534b1ab21dd29",
+    "full_artifact": {
+      "file_count": 971,
+      "full_tree_digest": "2118fe11e3ad4b9c2c2c9910d05ecdb5a751f97c487bec5a1cb23dc6456d7f8b",
+      "local_path": "artifacts/market_engine/me_data10_full_advice_readiness_runs/me-run31-after-me-data10-aapl-20260721T094346Z",
+      "top_level_file_checksums": {
+        "advice_readiness_report.json": "7204eb543f678a09ba47c8337f73a39a86216952f07f45f38aca5c76f85aac9d",
+        "advice_readiness_report.md": "a2bdfdc865459a1bb78cb576e3ef93afae992835a75b503425f0dbbf5b7097b4",
+        "blocker_report.json": "ffbfe43a97ca7e85991149d15abd593f504a0dc59613658dde1604dc60c26b28",
+        "canonical_advice_input_index.json": "19375f995bd4dd17828db0d60a6e2cff0c5ead761e7390bb7343109629a45673",
+        "canonical_advice_output_index.json": "8161c6f20691280f19b7efd1aaf4626db475bf566ea57cd3d0acce2f7fe17e57",
+        "evidence_coverage_index.json": "12012b2fc122bd1e58495b983e66b6d4b99c895613d4e8da0e76a59a9b608ed6",
+        "evidence_coverage_summary.json": "f793460ae25d3d5d11951d92e65a7b817d67ab535ac81d31fdb2ab27b532c379",
+        "evidence_coverage_summary.md": "a7a3923dc4c6f6b2f29347a414170513acd999dcf4dc8cf4d14a537d5e763db1",
+        "full_advice_ranking.json": "d391b4dd331cda938b98f6e805bc696d0ed7014792753b94756ae9b0331d975c",
+        "full_advice_ranking.md": "56451f6e0b5df58275ee874b8d1a24f0ca4e7b8102f805bee3bbd1c34bf96e5c",
+        "manifest.json": "767f1678e585aa16be4aa0ba5490f2c56f56946b49839480216d7a0651e73861",
+        "source_lineage.json": "b6b5125e695be7e56a03e6b8c295c9cf3257cdde908bee1101fa6c0ab9a55202",
+        "technical_ranking.json": "b80acefeb013ce05bf20d839bf35f175ae92ea377dd5237405385511e55e33c6",
+        "technical_to_advice_transition.json": "aa4f895cd2304b356d35de0689cdec09b49aa5bc797d9762959cd1fd61c0bcd2",
+        "throughput_report.json": "0f6ffd06e54f623b3009daac7cab589706f955e7e7087cd8165caf58343eceee",
+        "top_full_advice_candidates.md": "5baf56e48da9231e3b4d531e5ae17a004fc861b927c0d043ace537049f8cf051",
+        "unable_to_advise.json": "bbe1390e3be2a34de6d60565450473bbcd727809f34c4e1e59b1165b07ee70b0",
+        "unable_to_advise.md": "d49bf6ff1daff2fa1b187c13764d7e06077f9e6e01f4deac5ca93346f6e349fd"
+      },
+      "total_size_bytes": 27570029
+    },
+    "run_id": "me-run31-after-me-data10-aapl-20260721T094346Z"
+  },
+  "schema_version": "market-engine-data10-downstream-run-index-v1"
+}

@@ -1,6 +1,6 @@
 # ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot
 
-DATA07 run: `me-data10-aapl-governed-operator-pilot-20260719T183522Z`
+DATA07 run: `me-data10-aapl-governed-operator-pilot-20260721T094346Z`
 Ticker status: `partial` -> `partial`
 New governed metrics: `["gross_margin", "operating_margin"]`
 Remaining missing metrics: `["debt_to_equity"]`
