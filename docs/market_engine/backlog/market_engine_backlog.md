@@ -60,6 +60,7 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
   -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
   -> ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot (completed / two AAPL margins derived / downstream measured)
+  -> ME-SR17 — Implement scheduled canonical price refresh and freshness publication (implemented / post-merge production canary required)
   -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / next active)
 ```
 
@@ -517,11 +518,35 @@ and equity fact set was present. DATA07 imported one governed partial record,
 DATA06/RUN31 executed, and the measured 6 complete / 39 partial / 907 missing
 baseline remained unchanged with no regressions or provider/network calls.
 
-Next sprint: ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker
-derivation pilot. It may expand governed fact packages and approvals across a
-small diversified ticker set, but it must use the already generic ME-DATA10
-runtime without ticker-specific code, automatic approval, estimates, hidden
-formula fallbacks, recommendation changes, or allocation authority.
+### ME-SR17 — Implement scheduled canonical price refresh and freshness publication
+
+Status: IMPLEMENTED / POST-MERGE PRODUCTION CANARY REQUIRED
+
+ME-SR17 is the infrastructure and price-freshness insertion between ME-DATA10
+and ME-DATA11. It reuses the 952-instrument ME-DATA04 universe and ME-DATA05
+incremental runtime, adds exchange-aware completed-session calendars, isolated
+staging, bounded batch/retry behavior, canonical freshness evidence, atomic
+publication to a data-only `market-data` branch, and a fail-closed analysis
+consumption boundary. Featurebranch runs cannot publish and no fundamental
+operator approval is automated.
+
+The sequence is now:
+
+```text
+ME-DATA10 -> ME-SR17 -> ME-DATA11
+```
+
+ME-SR17 is implementation-complete only. Production operation still requires
+a real post-merge canary from `main` that proves provider behavior, remote
+`market-data` publication, repository permissions, downloadable evidence, and
+validated analysis consumption.
+
+Next sprint after the ME-SR17 canary: ME-DATA11 — Execute a diversified
+US-GAAP/IFRS multi-ticker derivation pilot. It may expand governed fact
+packages and approvals across a small diversified ticker set, but it must use
+the already generic ME-DATA10 runtime without ticker-specific code, automatic
+approval, estimates, hidden formula fallbacks, recommendation changes, or
+allocation authority.
 
 ## Current ChatGPT Advisory Artifact Chain
 

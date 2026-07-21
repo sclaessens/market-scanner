@@ -33,6 +33,7 @@ from market_engine.evaluation.advice_outcome_refresh import run_advice_outcome_r
 
 DEFAULT_OVERLAP_CALENDAR_DAYS = 7
 DEFAULT_HISTORICAL_START_DATE = "2025-01-01"
+DEFAULT_PROVIDER_TIMEOUT_SECONDS = 15
 REFRESH_SCHEMA_VERSION = "market-engine-data05-incremental-refresh-run-v1"
 UNSUPPORTED_UNIVERSE_REFRESH_MESSAGE = (
     "universe refresh requested but no supported universe refresh implementation is available"
@@ -228,6 +229,7 @@ def refresh_one_instrument(
     cutoff_date: str,
     overlap_calendar_days: int,
     provider: Provider,
+    missing_range_only: bool = False,
 ) -> dict[str, Any]:
     source_symbol = str(instrument["source_symbol"])
     provider_symbol = _to_yfinance_symbol(source_symbol)
@@ -289,7 +291,11 @@ def refresh_one_instrument(
                 "final_validation_status": "valid",
             }
         else:
-            download_start = (date.fromisoformat(local_end) - timedelta(days=overlap_calendar_days)).isoformat()
+            download_start = (
+                date.fromisoformat(local_end) + timedelta(days=1)
+                if missing_range_only
+                else date.fromisoformat(local_end) - timedelta(days=overlap_calendar_days)
+            ).isoformat()
             mode = "incremental"
     elif existing["status"] == "missing":
         existing_frame = pd.DataFrame()
@@ -451,8 +457,31 @@ def _download_yfinance_history(provider_symbol: str, start: str, end: str) -> pd
         progress=False,
         threads=False,
         group_by="column",
+        timeout=DEFAULT_PROVIDER_TIMEOUT_SECONDS,
     )
     return _normalize_yfinance_frame(frame, provider_symbol)
+
+
+def download_yfinance_batch(
+    provider_symbols: Sequence[str],
+    start: str,
+    end: str,
+) -> dict[str, pd.DataFrame]:
+    symbols = sorted({str(symbol).strip() for symbol in provider_symbols if str(symbol).strip()})
+    if not symbols:
+        return {}
+    frame = yf.download(
+        symbols,
+        start=start,
+        end=end,
+        interval="1d",
+        auto_adjust=False,
+        progress=False,
+        threads=False,
+        group_by="column",
+        timeout=DEFAULT_PROVIDER_TIMEOUT_SECONDS,
+    )
+    return {symbol: _normalize_yfinance_frame(frame, symbol) for symbol in symbols}
 
 
 def _read_existing_history(path: Path) -> dict[str, Any]:

@@ -1,0 +1,220 @@
+name: Canonical Price Refresh
+
+on:
+  schedule:
+    - cron: "30 5 * * *"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish validated changes when this run uses main
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: canonical-price-refresh-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  refresh-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      publication-required: ${{ steps.result.outputs.publication-required }}
+      publication-set-valid: ${{ steps.result.outputs.publication-set-valid }}
+      trusted-publish: ${{ steps.result.outputs.trusted-publish }}
+      run-status: ${{ steps.result.outputs.run-status }}
+      run-id: ${{ steps.identity.outputs.run-id }}
+    steps:
+      - name: Checkout executable source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install project dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Establish run identity
+        id: identity
+        run: |
+          run_id="me-sr17-canonical-price-refresh-$(date -u +%Y%m%dT%H%M%SZ)"
+          echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
+          echo "report=$RUNNER_TEMP/freshness/$run_id.json" >> "$GITHUB_OUTPUT"
+          echo "published-root=$RUNNER_TEMP/published-market-data" >> "$GITHUB_OUTPUT"
+          echo "staging-root=$RUNNER_TEMP/publication-bundle" >> "$GITHUB_OUTPUT"
+
+      - name: Materialize current market-data publication when present
+        env:
+          PUBLISHED_ROOT: ${{ steps.identity.outputs.published-root }}
+        run: |
+          if git ls-remote --exit-code --heads origin market-data >/dev/null 2>&1; then
+            git fetch --depth=1 origin market-data:refs/remotes/origin/market-data
+            git worktree add --detach "$PUBLISHED_ROOT" refs/remotes/origin/market-data
+          else
+            mkdir -p "$PUBLISHED_ROOT"
+          fi
+
+      - name: Refresh into isolated staging and validate
+        id: refresh
+        continue-on-error: true
+        env:
+          PUBLISHED_ROOT: ${{ steps.identity.outputs.published-root }}
+          REPORT_PATH: ${{ steps.identity.outputs.report }}
+          RUN_ID: ${{ steps.identity.outputs.run-id }}
+          STAGING_ROOT: ${{ steps.identity.outputs.staging-root }}
+          WORKFLOW_RUN_ID: ${{ github.run_id }}
+        run: |
+          git fetch origin main
+          source_main_sha="$(git rev-parse origin/main)"
+          PYTHONPATH=src python -m market_engine.data.scheduled_canonical_price_refresh refresh \
+            --run-id "$RUN_ID" \
+            --source-main-sha "$source_main_sha" \
+            --published-root "$PUBLISHED_ROOT" \
+            --staging-root "$STAGING_ROOT" \
+            --report-output "$REPORT_PATH" \
+            --workflow-run-id "$WORKFLOW_RUN_ID"
+
+      - name: Read compact refresh result
+        id: result
+        if: always()
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_PUBLISH: ${{ inputs.publish }}
+          REPORT_PATH: ${{ steps.identity.outputs.report }}
+        run: |
+          python - "$REPORT_PATH" "$GITHUB_OUTPUT" "$GITHUB_REF" "$EVENT_NAME" "$INPUT_PUBLISH" <<'PY'
+          import json
+          import pathlib
+          import sys
+
+          report = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+          publication = report.get("publication") or {}
+          trusted = sys.argv[3] == "refs/heads/main" and (
+              sys.argv[4] == "schedule" or sys.argv[5].lower() == "true"
+          )
+          with pathlib.Path(sys.argv[2]).open("a", encoding="utf-8") as output:
+              output.write(f"publication-required={str(bool(publication.get('publication_required'))).lower()}\n")
+              output.write(f"publication-set-valid={str(bool(publication.get('publication_set_valid'))).lower()}\n")
+              output.write(f"trusted-publish={str(trusted).lower()}\n")
+              output.write(f"run-status={report.get('run_status', 'failed')}\n")
+          print(json.dumps({
+              "run_id": report.get("run_id"),
+              "run_status": report.get("run_status"),
+              "status_counts": report.get("status_counts"),
+              "publication": publication,
+              "trusted_publish": trusted,
+          }, sort_keys=True))
+          PY
+
+      - name: Upload freshness evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: canonical-price-freshness-${{ steps.identity.outputs.run-id }}
+          path: ${{ steps.identity.outputs.report }}
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload validated publication bundle
+        if: steps.result.outputs.publication-required == 'true' && steps.result.outputs.publication-set-valid == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: canonical-price-publication-${{ steps.identity.outputs.run-id }}
+          path: ${{ steps.identity.outputs.staging-root }}
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Mark degraded or failed refresh visibly
+        if: steps.result.outputs.run-status != 'completed'
+        run: exit 1
+
+  publish-market-data:
+    needs: refresh-and-validate
+    if: >-
+      ${{
+        always() &&
+        needs.refresh-and-validate.outputs.trusted-publish == 'true' &&
+        needs.refresh-and-validate.outputs.publication-required == 'true' &&
+        needs.refresh-and-validate.outputs.publication-set-valid == 'true'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout trusted main source
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install validation dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download validated publication bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: canonical-price-publication-${{ needs.refresh-and-validate.outputs.run-id }}
+          path: publication-bundle
+
+      - name: Revalidate bundle using trusted main code
+        run: |
+          source_main_sha="$(git rev-parse HEAD)"
+          PYTHONPATH=src python -m market_engine.data.scheduled_canonical_price_refresh \
+            validate-publication \
+            --publication-root publication-bundle \
+            --allow-degraded \
+            --expected-source-main-sha "$source_main_sha"
+
+      - name: Materialize data-only branch
+        run: |
+          if git ls-remote --exit-code --heads origin market-data >/dev/null 2>&1; then
+            git fetch origin market-data:refs/remotes/origin/market-data
+            git worktree add publication refs/remotes/origin/market-data
+            git -C publication switch -c market-data
+          else
+            git worktree add --detach publication
+            git -C publication switch --orphan market-data
+            git -C publication rm -r --ignore-unmatch .
+          fi
+          mkdir -p publication/data/processed publication/manifests
+          rsync --archive --delete publication-bundle/data/processed/ publication/data/processed/
+          rsync --archive --delete publication-bundle/manifests/ publication/manifests/
+
+      - name: Revalidate exact publication tree
+        run: |
+          source_main_sha="$(git rev-parse HEAD)"
+          PYTHONPATH=src python -m market_engine.data.scheduled_canonical_price_refresh \
+            validate-publication \
+            --publication-root publication \
+            --allow-degraded \
+            --expected-source-main-sha "$source_main_sha"
+
+      - name: Commit changed validated data only
+        env:
+          RUN_ID: ${{ needs.refresh-and-validate.outputs.run-id }}
+        run: |
+          git -C publication config user.name "github-actions[bot]"
+          git -C publication config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C publication add data/processed manifests/canonical_price_freshness_latest.json
+          if git -C publication diff --cached --quiet; then
+            echo "No validated data change; no market-data commit created."
+            exit 0
+          fi
+          git -C publication commit -m "market-data: publish $RUN_ID"
+          git -C publication push origin HEAD:market-data

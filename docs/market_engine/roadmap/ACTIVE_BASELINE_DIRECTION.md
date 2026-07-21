@@ -54,6 +54,7 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
   -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
   -> ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot (completed / two AAPL margins derived / downstream measured)
+  -> ME-SR17 — Implement scheduled canonical price refresh and freshness publication (implemented / post-merge production canary required)
   -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / next active)
 ```
 
@@ -669,10 +670,24 @@ debt-to-equity blocked for missing approved components. DATA07, DATA06, and
 RUN31 completed with zero provider/network calls, no regressions, and no
 aggregate status delta from 6 complete / 39 partial / 907 missing.
 
-The next active sprint is ME-DATA11 — Execute a diversified US-GAAP/IFRS
-multi-ticker derivation pilot. It must reuse the generic ME-DATA10 runtime and
-must not introduce automatic approval, estimates, hidden formula fallbacks,
-advice authority, or operational side effects.
+ME-SR17 — Implement scheduled canonical price refresh and freshness
+publication — now sits between ME-DATA10 and ME-DATA11. It provides the missing
+application-owned daily price-refresh, `market-data` publication, freshness
+manifest, and validated analysis handoff. It does not automate DATA09/DATA10
+approvals or change recommendation, ranking, allocation, or Decision Engine
+authority. Its implementation is locally complete, but production status
+requires a post-merge canary from `main`.
+
+The locked sequence is:
+
+```text
+ME-DATA10 -> ME-SR17 -> ME-DATA11
+```
+
+After that canary, ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker
+derivation pilot — remains next. It must reuse the generic ME-DATA10 runtime
+and must not introduce automatic approval, estimates, hidden formula
+fallbacks, advice authority, or unrelated operational side effects.
 
 ## Completed ME-ADV01 result
 
