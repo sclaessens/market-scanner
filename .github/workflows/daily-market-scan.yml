@@ -2,21 +2,33 @@ name: Daily Market Scan
 
 on:
   workflow_dispatch:
-  # Scheduled legacy daily scan paused during v2 cutover.
-  # Re-enable only after explicit governance approval.
+  workflow_run:
+    workflows: ["Canonical Price Refresh"]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
 
 jobs:
-  canonical-dry-run:
+  validated-canonical-analysis:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
+
+      - name: Materialize published market data without executing it
+        uses: actions/checkout@v4
+        with:
+          ref: market-data
+          path: published-market-data
+          fetch-depth: 1
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -27,6 +39,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Validate and consume the published canonical dataset
+        run: >-
+          PYTHONPATH=src python -m market_engine.data.scheduled_canonical_price_refresh
+          consume-analysis
+          --publication-root published-market-data
+          --run-id "me-sr17-validated-daily-analysis-${{ github.run_id }}"
+          --output-root "$RUNNER_TEMP/market-engine-analysis"
 
       - name: Run canonical app dry-run
         run: PYTHONPATH=src python -m market_scanner.app --dry-run

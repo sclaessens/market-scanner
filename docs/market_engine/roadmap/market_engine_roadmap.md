@@ -119,6 +119,7 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
   -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
   -> ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot (completed / two AAPL margins derived / downstream measured)
+  -> ME-SR17 — Implement scheduled canonical price refresh and freshness publication (implemented / post-merge production canary required)
   -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / next active)
 ```
 
@@ -333,9 +334,26 @@ equity fact set was absent. The checksum-bound package passed DATA07, DATA06,
 and RUN31 with one imported partial record, no regressions, no aggregate status
 change, and zero provider/network calls.
 
-The next active sprint is ME-DATA11 — Execute a diversified US-GAAP/IFRS
-multi-ticker derivation pilot. It must reuse the generic ME-DATA10 engine
-without code changes for issuer identity, source tags, or formula selection.
+ME-SR17 — Implement scheduled canonical price refresh and freshness
+publication — is inserted between ME-DATA10 and ME-DATA11 because the existing
+daily ChatGPT expectation had no executable scheduled refresh, durable dataset,
+freshness manifest, or validated analysis handoff. ME-SR17 reuses ME-DATA05,
+keeps executable code on `main`, publishes only validated price data and a
+canonical manifest to `market-data`, and blocks automated analysis until that
+publication reconciles. The implementation is local/offline complete; a
+post-merge canary must still prove the real GitHub schedule, provider calls,
+branch publication, and consumption flow.
+
+The active order is:
+
+```text
+ME-DATA10 -> ME-SR17 -> ME-DATA11
+```
+
+After the ME-SR17 canary, ME-DATA11 — Execute a diversified US-GAAP/IFRS
+multi-ticker derivation pilot — remains next. It must reuse the generic
+ME-DATA10 engine without code changes for issuer identity, source tags, or
+formula selection.
 
 Roadmap outcome:
 
