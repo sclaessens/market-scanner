@@ -78,7 +78,9 @@ def test_missing_local_history_creates_a_valid_snapshot(tmp_path: Path) -> None:
     assert (fixture["stage"] / "data/processed/AAA.csv").is_file()
 
 
-def test_valid_but_short_current_history_is_insufficient(tmp_path: Path) -> None:
+def test_short_current_history_has_separate_unexplained_coverage(
+    tmp_path: Path,
+) -> None:
     fixture = _fixture(tmp_path, [_instrument("AAA")], end="2026-07-14")
     path = fixture["published"] / "data/processed/AAA.csv"
     _frame(
@@ -88,8 +90,12 @@ def test_valid_but_short_current_history_is_insufficient(tmp_path: Path) -> None
         fixture,
         provider=lambda *_args: (_ for _ in ()).throw(AssertionError("provider must not run")),
     )
-    assert report["tickers"][0]["freshness_status"] == "insufficient"
-    assert report["tickers"][0]["reason_code"] == "VALID_HISTORY_INSUFFICIENT_ROWS"
+    assert report["tickers"][0]["freshness_status"] == "already_current"
+    assert (
+        report["tickers"][0]["history_coverage_status"]
+        == "insufficient_unexplained"
+    )
+    assert report["run_status"] == "degraded"
 
 
 def test_default_provider_is_called_in_bounded_multi_symbol_batches(
@@ -134,8 +140,9 @@ def test_already_current_and_weekend_runs_do_not_call_provider_or_request_commit
     assert report["tickers"][0]["freshness_status"] == "already_current"
     assert report["tickers"][0]["reason_code"] == "NO_NEW_SESSION_EXPECTED"
     assert report["tickers"][0]["expected_completed_session"] == "2026-07-17"
-    assert report["publication"]["publication_required"] is False
-    assert not (fixture["stage"] / scheduled.LATEST_MANIFEST).exists()
+    assert report["publication"]["publication_required"] is True
+    assert report["publication"]["manifest_change_required"] is True
+    assert (fixture["stage"] / scheduled.LATEST_MANIFEST).is_file()
 
 
 @pytest.mark.parametrize(
@@ -254,6 +261,32 @@ def test_empty_provider_response_is_stale_and_preserves_history(tmp_path: Path) 
     assert report["tickers"][0]["freshness_status"] == "stale"
     assert report["tickers"][0]["reason_code"] == "EXPECTED_SESSION_NOT_AVAILABLE"
     assert (fixture["stage"] / "data/processed/AAA.csv").read_bytes() == original
+
+
+def test_allow_degraded_still_reconciles_declared_freshness(
+    tmp_path: Path,
+) -> None:
+    fixture = _fixture(tmp_path, [_instrument("AAA")], end="2026-07-13")
+    _run(fixture, provider=lambda *_args: pd.DataFrame())
+    path = fixture["stage"] / scheduled.LATEST_MANIFEST
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    manifest["tickers"][0]["freshness_status"] = "already_current"
+    manifest["status_counts"]["already_current"] = 1
+    manifest["status_counts"]["stale"] = 0
+    manifest["run_status"] = "completed"
+    manifest["manifest_checksum"] = scheduled._manifest_checksum(manifest)
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    validation = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        run_at=RUN_AT,
+        allow_degraded=True,
+    )
+    assert (
+        "PUBLISHED_FRESHNESS_CLASSIFICATION_INVALID"
+        in validation["reason_codes"]
+    )
 
 
 def test_historical_rewrite_is_restored_byte_for_byte(tmp_path: Path) -> None:
@@ -444,6 +477,9 @@ def test_analysis_consumption_runs_only_after_manifest_validation(tmp_path: Path
     )
     assert result["analysis_executed"] is True
     assert calls[0]["price_history_root"] == fixture["stage"] / "data/processed"
+    assert [row["symbol"] for row in calls[0]["universe_snapshot"]["instruments"]] == [
+        "AAA"
+    ]
 
 
 def test_analysis_consumption_blocks_stale_or_invalid_publication(tmp_path: Path) -> None:

@@ -47,7 +47,7 @@ jobs:
       - name: Establish run identity
         id: identity
         run: |
-          run_id="me-sr17-canonical-price-refresh-$(date -u +%Y%m%dT%H%M%SZ)"
+          run_id="me-sr18-canonical-price-refresh-$(date -u +%Y%m%dT%H%M%SZ)"
           echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
           echo "report=$RUNNER_TEMP/freshness/$run_id.json" >> "$GITHUB_OUTPUT"
           echo "published-root=$RUNNER_TEMP/published-market-data" >> "$GITHUB_OUTPUT"

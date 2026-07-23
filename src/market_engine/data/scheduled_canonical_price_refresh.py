@@ -25,6 +25,13 @@ from market_engine.data.incremental_market_data_refresh import (
     download_yfinance_batch,
     refresh_one_instrument,
 )
+from market_engine.data.instrument_lifecycle import (
+    DEFAULT_LIFECYCLE_REGISTRY,
+    LIFECYCLE_SCHEMA_VERSION,
+    InstrumentLifecycleError,
+    apply_lifecycle_registry,
+    load_lifecycle_registry,
+)
 from market_engine.data.local_market_data_universe import (
     DEFAULT_MIN_HISTORY_ROWS,
     UNIVERSE_SNAPSHOT_SCHEMA_VERSION,
@@ -32,8 +39,8 @@ from market_engine.data.local_market_data_universe import (
 )
 
 
-SCHEMA_VERSION = "market-engine-me-sr17-canonical-price-freshness-manifest-v1"
-VALIDATION_SCHEMA_VERSION = "market-engine-me-sr17-published-price-dataset-validation-v1"
+SCHEMA_VERSION = "market-engine-me-sr18-canonical-price-freshness-manifest-v2"
+VALIDATION_SCHEMA_VERSION = "market-engine-me-sr18-published-price-dataset-validation-v2"
 DEFAULT_UNIVERSE_SNAPSHOT = Path(
     "artifacts/market_engine/data_runs/"
     "me-data04-complete-dataset-20260713T133000Z-coverage-after/universe_snapshot.json"
@@ -46,8 +53,23 @@ DEFAULT_BATCH_SIZE = 25
 DEFAULT_MAX_ATTEMPTS = 3
 DEFAULT_PROVIDER_TIMEOUT_SECONDS = 15
 DEFAULT_SCHEDULED_OVERLAP_CALENDAR_DAYS = 0
-STATUS_ORDER = ("updated", "already_current", "stale", "failed", "insufficient", "unsupported")
-DEGRADED_STATUSES = frozenset({"stale", "failed", "insufficient", "unsupported"})
+STATUS_ORDER = (
+    "updated",
+    "already_current",
+    "not_expected",
+    "stale",
+    "failed",
+    "unsupported",
+)
+HISTORY_COVERAGE_ORDER = (
+    "sufficient",
+    "limited_history",
+    "insufficient_unexplained",
+    "retained_inactive",
+    "not_applicable",
+)
+DEGRADED_STATUSES = frozenset({"stale", "failed", "unsupported"})
+DEGRADED_HISTORY_COVERAGE = frozenset({"insufficient_unexplained"})
 SHA1 = re.compile(r"^[0-9a-f]{40}$")
 
 Provider = Callable[[str, str, str], pd.DataFrame]
@@ -99,6 +121,7 @@ def run_scheduled_refresh(
     run_id: str,
     source_main_sha: str,
     universe_snapshot_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
+    lifecycle_registry_path: str | Path | None = None,
     published_root: str | Path,
     staging_root: str | Path,
     report_output: str | Path,
@@ -116,7 +139,16 @@ def run_scheduled_refresh(
         raise ScheduledPriceRefreshError("batch size and maximum attempts must be positive")
     generated_at = _as_utc(run_at or datetime.now(UTC))
     universe = load_authoritative_universe(universe_snapshot_path)
-    instruments = [row for row in universe["instruments"] if row.get("active", True)]
+    lifecycle_registry = _lifecycle_registry_for_universe(
+        universe_snapshot_path,
+        lifecycle_registry_path,
+    )
+    governed = apply_lifecycle_registry(
+        universe["instruments"],
+        lifecycle_registry,
+        as_of=generated_at.date(),
+    )
+    instruments = governed["active_instruments"]
     source_root = Path(published_root)
     stage_root = Path(staging_root)
     _prepare_staging_root(source_root, stage_root)
@@ -145,16 +177,46 @@ def run_scheduled_refresh(
                     sleeper=sleeper,
                 )
             )
+    for instrument in (
+        governed["inactive_instruments"] + governed["pending_instruments"]
+    ):
+        rows.append(_non_refreshable_lifecycle_row(instrument, price_root=price_root))
 
     rows.sort(key=lambda row: (row["instrument_id"], row["ticker"]))
     counts = Counter(row["freshness_status"] for row in rows)
+    history_counts = Counter(row["history_coverage_status"] for row in rows)
     updated_count = counts.get("updated", 0)
-    mapped_rows = [row for row in rows if row["provider_identity"] is not None]
+    bound_rows = [
+        row for row in rows if row["lifecycle_status"] != "pending"
+    ]
     publication_set_valid = all(
-        row["validation_status"] == "valid" and isinstance(row.get("persisted_file_checksum"), str)
-        for row in mapped_rows
+        row["validation_status"] == "valid"
+        and isinstance(row.get("persisted_file_checksum"), str)
+        for row in bound_rows
+    ) and all(
+        row.get("persisted_file_checksum") is None
+        for row in rows
+        if row["lifecycle_status"] == "pending"
     )
-    degraded = any(counts.get(status, 0) for status in DEGRADED_STATUSES)
+    previous_manifest = _load_optional_manifest(source_root / LATEST_MANIFEST)
+    manifest_change_required = (
+        previous_manifest.get("schema_version") != SCHEMA_VERSION
+        or previous_manifest.get("canonical_universe_checksum")
+        != universe["universe_checksum"]
+        or previous_manifest.get("lifecycle_registry_checksum")
+        != governed["registry_checksum"]
+        or previous_manifest.get("active_universe_checksum")
+        != governed["active_universe_checksum"]
+        or previous_manifest.get("governed_universe_checksum")
+        != governed["governed_universe_checksum"]
+    )
+    degraded = (
+        any(counts.get(status, 0) for status in DEGRADED_STATUSES)
+        or any(
+            history_counts.get(status, 0)
+            for status in DEGRADED_HISTORY_COVERAGE
+        )
+    )
     run_status = "failed" if not publication_set_valid else "degraded" if degraded else "completed"
     report = {
         "schema_version": SCHEMA_VERSION,
@@ -164,8 +226,17 @@ def run_scheduled_refresh(
         "workflow_run_id": workflow_run_id,
         "data_branch": DATA_BRANCH,
         "universe_version": universe["universe_version"],
-        "universe_checksum": universe["universe_checksum"],
-        "universe_size": len(instruments),
+        "canonical_universe_checksum": universe["universe_checksum"],
+        "canonical_universe_size": len(universe["instruments"]),
+        "lifecycle_schema_version": LIFECYCLE_SCHEMA_VERSION,
+        "lifecycle_registry_checksum": governed["registry_checksum"],
+        "active_universe_checksum": governed["active_universe_checksum"],
+        "governed_universe_checksum": governed["governed_universe_checksum"],
+        "active_universe_size": governed["active_universe_size"],
+        "inactive_retained_instrument_count": governed[
+            "inactive_retained_instrument_count"
+        ],
+        "pending_instrument_count": governed["pending_instrument_count"],
         "provider_configuration": {
             "identity": PROVIDER_IDENTITY,
             "batch_size": batch_size,
@@ -178,11 +249,17 @@ def run_scheduled_refresh(
         },
         "expected_completed_sessions": _expected_session_summary(rows),
         "status_counts": {status: counts.get(status, 0) for status in STATUS_ORDER},
+        "history_coverage_counts": {
+            status: history_counts.get(status, 0)
+            for status in HISTORY_COVERAGE_ORDER
+        },
         "run_status": run_status,
         "publication": {
             "publication_set_valid": publication_set_valid,
-            "publication_required": publication_set_valid and updated_count > 0,
+            "publication_required": publication_set_valid
+            and (updated_count > 0 or manifest_change_required),
             "changed_price_file_count": updated_count,
+            "manifest_change_required": manifest_change_required,
             "empty_commit_required": False,
         },
         "fundamental_evidence": {
@@ -250,6 +327,7 @@ def validate_published_dataset(
     publication_root: str | Path,
     *,
     universe_snapshot_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
+    lifecycle_registry_path: str | Path | None = None,
     run_at: datetime | None = None,
     allow_degraded: bool = False,
     expected_source_main_sha: str | None = None,
@@ -263,7 +341,16 @@ def validate_published_dataset(
         return _validation_result(issues=[_validation_issue("PUBLISHED_MANIFEST_MISSING_OR_MALFORMED", "manifest")])
     try:
         universe = load_authoritative_universe(universe_snapshot_path)
-    except ScheduledPriceRefreshError:
+        lifecycle_registry = _lifecycle_registry_for_universe(
+            universe_snapshot_path,
+            lifecycle_registry_path,
+        )
+        governed = apply_lifecycle_registry(
+            universe["instruments"],
+            lifecycle_registry,
+            as_of=_as_utc(run_at or datetime.now(UTC)).date(),
+        )
+    except (ScheduledPriceRefreshError, InstrumentLifecycleError):
         return _validation_result(issues=[_validation_issue("AUTHORITATIVE_UNIVERSE_INVALID", "universe")])
 
     if manifest.get("schema_version") != SCHEMA_VERSION:
@@ -277,11 +364,26 @@ def validate_published_dataset(
         issues.append(_validation_issue("PUBLISHED_SOURCE_MAIN_SHA_MISMATCH", "source_main_sha"))
     if manifest.get("manifest_checksum") != _manifest_checksum(manifest):
         issues.append(_validation_issue("PUBLISHED_MANIFEST_CHECKSUM_MISMATCH", "manifest_checksum"))
-    active_instruments = [row for row in universe["instruments"] if row.get("active", True)]
     if (
         manifest.get("universe_version") != universe.get("universe_version")
-        or manifest.get("universe_checksum") != universe.get("universe_checksum")
-        or manifest.get("universe_size") != len(active_instruments)
+        or manifest.get("canonical_universe_checksum")
+        != universe.get("universe_checksum")
+        or manifest.get("canonical_universe_size")
+        != len(universe["instruments"])
+        or manifest.get("lifecycle_schema_version")
+        != LIFECYCLE_SCHEMA_VERSION
+        or manifest.get("lifecycle_registry_checksum")
+        != governed["registry_checksum"]
+        or manifest.get("active_universe_checksum")
+        != governed["active_universe_checksum"]
+        or manifest.get("governed_universe_checksum")
+        != governed["governed_universe_checksum"]
+        or manifest.get("active_universe_size")
+        != governed["active_universe_size"]
+        or manifest.get("inactive_retained_instrument_count")
+        != governed["inactive_retained_instrument_count"]
+        or manifest.get("pending_instrument_count")
+        != governed["pending_instrument_count"]
     ):
         issues.append(_validation_issue("PUBLISHED_UNIVERSE_BINDING_MISMATCH", "universe"))
     if _contains_executable_content(root):
@@ -292,12 +394,18 @@ def validate_published_dataset(
     manifest_updated_count = (
         manifest_status_counts.get("updated", 0) if isinstance(manifest_status_counts, Mapping) else 0
     )
+    manifest_change_required = (
+        publication.get("manifest_change_required")
+        if isinstance(publication, Mapping)
+        else None
+    )
     if not isinstance(publication, Mapping) or not (
         publication.get("publication_set_valid") is True
         and publication.get("publication_required") is True
         and isinstance(publication.get("changed_price_file_count"), int)
         and publication["changed_price_file_count"] == manifest_updated_count
-        and manifest_updated_count > 0
+        and isinstance(manifest_change_required, bool)
+        and (manifest_updated_count > 0 or manifest_change_required)
         and publication.get("empty_commit_required") is False
     ):
         issues.append(_validation_issue("PUBLISHED_PUBLICATION_DECISION_INVALID", "publication"))
@@ -313,11 +421,13 @@ def validate_published_dataset(
     if not isinstance(entries, list):
         entries = []
         issues.append(_validation_issue("PUBLISHED_TICKER_ENTRIES_INVALID", "tickers"))
-    expected_ids = [row["instrument_id"] for row in active_instruments]
+    expected_ids = [row["instrument_id"] for row in governed["instruments"]]
     actual_ids = [row.get("instrument_id") for row in entries if isinstance(row, Mapping)]
     if actual_ids != expected_ids:
         issues.append(_validation_issue("PUBLISHED_TICKER_SET_MISMATCH", "tickers"))
-    expected_by_id = {row["instrument_id"]: row for row in active_instruments}
+    expected_by_id = {
+        row["instrument_id"]: row for row in governed["instruments"]
+    }
     actual_status_counts = Counter(
         str(row.get("freshness_status")) for row in entries if isinstance(row, Mapping)
     )
@@ -327,10 +437,35 @@ def validate_published_dataset(
         or manifest_status_counts != expected_status_counts
     ):
         issues.append(_validation_issue("PUBLISHED_STATUS_COUNTS_MISMATCH", "status_counts"))
+    manifest_history_counts = manifest.get("history_coverage_counts")
+    actual_history_counts = Counter(
+        str(row.get("history_coverage_status"))
+        for row in entries
+        if isinstance(row, Mapping)
+    )
+    expected_history_counts = {
+        status: actual_history_counts.get(status, 0)
+        for status in HISTORY_COVERAGE_ORDER
+    }
+    if (
+        any(
+            status not in HISTORY_COVERAGE_ORDER
+            for status in actual_history_counts
+        )
+        or manifest_history_counts != expected_history_counts
+    ):
+        issues.append(
+            _validation_issue(
+                "PUBLISHED_HISTORY_COVERAGE_COUNTS_MISMATCH",
+                "history_coverage_counts",
+            )
+        )
     bound_files = {
         str(row.get("persisted_file_path"))
         for row in entries
-        if isinstance(row, Mapping) and isinstance(row.get("persisted_file_path"), str)
+        if isinstance(row, Mapping)
+        and isinstance(row.get("persisted_file_checksum"), str)
+        and isinstance(row.get("persisted_file_path"), str)
     }
     actual_files = {
         path.relative_to(root).as_posix()
@@ -357,10 +492,20 @@ def validate_published_dataset(
             expected_instrument is None
             or entry.get("ticker") != expected_instrument["symbol"]
             or relative != expected_relative
+            or not _entry_lifecycle_matches(entry, expected_instrument)
         ):
             issues.append(_validation_issue("PUBLISHED_TICKER_IDENTITY_MISMATCH", f"tickers[{index}]"))
             continue
-        relative_path = Path(relative)
+        if expected_instrument["lifecycle_status"] == "pending":
+            if checksum is not None:
+                issues.append(
+                    _validation_issue(
+                        "PUBLISHED_PRE_LISTING_FILE_UNEXPECTED",
+                        f"tickers[{index}]",
+                    )
+                )
+            continue
+        relative_path = Path(str(relative))
         if relative_path.is_absolute() or relative_path.parent != DATA_RELATIVE_ROOT or relative_path.suffix != ".csv":
             issues.append(_validation_issue("PUBLISHED_FILE_PATH_INVALID", f"tickers[{index}]"))
             continue
@@ -377,16 +522,72 @@ def validate_published_dataset(
         resulting = entry.get("resulting_last_observation")
         if resulting != validation.get("end_date"):
             issues.append(_validation_issue("PUBLISHED_LAST_OBSERVATION_MISMATCH", f"tickers[{index}]"))
+        if expected_instrument["lifecycle_status"] == "inactive":
+            if (
+                entry.get("freshness_status") != "not_expected"
+                or entry.get("history_coverage_status")
+                != "retained_inactive"
+            ):
+                issues.append(
+                    _validation_issue(
+                        "PUBLISHED_INACTIVE_CLASSIFICATION_INVALID",
+                        f"tickers[{index}]",
+                    )
+                )
+            continue
+        expected_history_status, expected_history_reason = _history_coverage(
+            expected_instrument,
+            validation=validation,
+        )
+        if (
+            entry.get("history_coverage_status") != expected_history_status
+            or entry.get("history_coverage_reason_code")
+            != expected_history_reason
+        ):
+            issues.append(
+                _validation_issue(
+                    "PUBLISHED_HISTORY_COVERAGE_CLASSIFICATION_INVALID",
+                    f"tickers[{index}]",
+                )
+            )
         profile, required = expected_completed_session(expected_instrument, validation_at)
         actual_end = validation.get("end_date")
-        if profile is None or required is None or not isinstance(actual_end, str) or actual_end < required.isoformat():
+        declared_freshness = entry.get("freshness_status")
+        actual_is_stale = (
+            profile is None
+            or required is None
+            or not isinstance(actual_end, str)
+            or actual_end < required.isoformat()
+        )
+        if (
+            actual_is_stale
+            and declared_freshness not in {"stale", "failed", "unsupported"}
+        ) or (
+            not actual_is_stale and declared_freshness == "stale"
+        ):
+            issues.append(
+                _validation_issue(
+                    "PUBLISHED_FRESHNESS_CLASSIFICATION_INVALID",
+                    f"tickers[{index}]",
+                )
+            )
+        if actual_is_stale:
             stale.append(str(entry.get("ticker") or entry.get("instrument_id") or index))
     if stale and not allow_degraded:
         issues.append(_validation_issue("PUBLISHED_DATASET_STALE", "tickers", ",".join(sorted(stale))))
     run_status = manifest.get("run_status")
     expected_run_status = (
         "degraded"
-        if any(actual_status_counts.get(status, 0) for status in DEGRADED_STATUSES)
+        if (
+            any(
+                actual_status_counts.get(status, 0)
+                for status in DEGRADED_STATUSES
+            )
+            or any(
+                actual_history_counts.get(status, 0)
+                for status in DEGRADED_HISTORY_COVERAGE
+            )
+        )
         else "completed"
     )
     if run_status != expected_run_status:
@@ -400,6 +601,7 @@ def run_validated_analysis(
     publication_root: str | Path,
     *,
     universe_snapshot_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
+    lifecycle_registry_path: str | Path | None = None,
     run_at: datetime | None = None,
     analysis_runner: Callable[..., Any],
     analysis_kwargs: Mapping[str, Any],
@@ -407,12 +609,55 @@ def run_validated_analysis(
     validation = validate_published_dataset(
         publication_root,
         universe_snapshot_path=universe_snapshot_path,
+        lifecycle_registry_path=lifecycle_registry_path,
         run_at=run_at,
     )
     if not validation["validated"]:
         return {"status": "blocked", "analysis_executed": False, "validation": validation}
+    universe = load_authoritative_universe(universe_snapshot_path)
+    governed = apply_lifecycle_registry(
+        universe["instruments"],
+        _lifecycle_registry_for_universe(
+            universe_snapshot_path,
+            lifecycle_registry_path,
+        ),
+        as_of=_as_utc(run_at or datetime.now(UTC)).date(),
+    )
+    manifest = _load_json(Path(publication_root) / LATEST_MANIFEST)
+    entries_by_id = {
+        row["instrument_id"]: row
+        for row in manifest["tickers"]
+        if isinstance(row, Mapping)
+    }
+    active_instruments = [
+        {
+            **instrument,
+            "freshness_status": entries_by_id[instrument["instrument_id"]][
+                "freshness_status"
+            ],
+            "history_coverage_status": entries_by_id[
+                instrument["instrument_id"]
+            ]["history_coverage_status"],
+            "history_coverage_reason_code": entries_by_id[
+                instrument["instrument_id"]
+            ]["history_coverage_reason_code"],
+        }
+        for instrument in governed["active_instruments"]
+    ]
+    analysis_universe = {
+        **universe,
+        "instruments": active_instruments,
+        "summary": {
+            **dict(universe.get("summary") or {}),
+            "total_instruments": len(active_instruments),
+        },
+        "lifecycle_schema_version": LIFECYCLE_SCHEMA_VERSION,
+        "lifecycle_registry_checksum": governed["registry_checksum"],
+        "active_universe_checksum": governed["active_universe_checksum"],
+    }
     result = analysis_runner(
         price_history_root=Path(publication_root) / DATA_RELATIVE_ROOT,
+        universe_snapshot=analysis_universe,
         **dict(analysis_kwargs),
     )
     return {"status": "completed", "analysis_executed": True, "validation": validation, "analysis_result": result}
@@ -432,21 +677,35 @@ def _refresh_instrument(
     source_symbol = str(instrument["source_symbol"])
     path = price_root / f"{source_symbol}.csv"
     profile, expected = expected_completed_session(instrument, run_at)
+    initial_validation = (
+        validate_price_history_csv(path, min_history_rows=1)
+        if path.is_file()
+        else {"status": "missing"}
+    )
+    initial_history_status, initial_history_reason = _history_coverage(
+        instrument,
+        validation=initial_validation,
+    )
     base = {
         "ticker": ticker,
         "instrument_id": str(instrument["instrument_id"]),
         "exchange": profile.market if profile else str(instrument.get("exchange") or "UNKNOWN"),
         "market_timezone": profile.timezone if profile else None,
         "provider_identity": PROVIDER_IDENTITY if instrument.get("source_mapping_status") == "mapped" else None,
-        "previous_last_observation": None,
-        "resulting_last_observation": None,
+        "previous_last_observation": initial_validation.get("end_date"),
+        "resulting_last_observation": initial_validation.get("end_date"),
         "expected_completed_session": expected.isoformat() if expected else None,
         "rows_added": 0,
-        "validation_status": "blocked",
+        "validation_status": (
+            "valid" if initial_validation.get("status") == "valid" else "blocked"
+        ),
         "freshness_status": "unsupported",
         "reason_code": "UNSUPPORTED_EXCHANGE" if profile is None else "PROVIDER_MAPPING_MISSING",
         "persisted_file_path": (DATA_RELATIVE_ROOT / f"{source_symbol}.csv").as_posix(),
         "persisted_file_checksum": _sha256_file(path) if path.is_file() else None,
+        **_lifecycle_fields(instrument),
+        "history_coverage_status": initial_history_status,
+        "history_coverage_reason_code": initial_history_reason,
     }
     if profile is None or expected is None:
         return base
@@ -454,7 +713,7 @@ def _refresh_instrument(
         return base
 
     before_bytes = path.read_bytes() if path.is_file() else None
-    before_validation = validate_price_history_csv(path, min_history_rows=1) if path.is_file() else {"status": "missing"}
+    before_validation = initial_validation
     before_frame = pd.read_csv(path) if before_validation.get("status") == "valid" else None
     previous_end = before_validation.get("end_date")
     error: dict[str, str] = {}
@@ -502,6 +761,13 @@ def _refresh_instrument(
         had_existing_valid=before_validation.get("status") == "valid",
         no_session_expected=_no_new_session_expected(profile, run_at, expected),
     )
+    history_status, history_reason = _history_coverage(
+        instrument,
+        validation=final_validation,
+    )
+    if history_reason == "LISTING_START_AFTER_FIRST_OBSERVATION":
+        status = "failed"
+        reason = history_reason
     return {
         **base,
         "previous_last_observation": previous_end,
@@ -510,7 +776,118 @@ def _refresh_instrument(
         "validation_status": "valid" if final_validation.get("status") == "valid" else "blocked",
         "freshness_status": status,
         "reason_code": reason,
+        "history_coverage_status": history_status,
+        "history_coverage_reason_code": history_reason,
         "persisted_file_checksum": final_validation.get("checksum"),
+    }
+
+
+def _non_refreshable_lifecycle_row(
+    instrument: Mapping[str, Any],
+    *,
+    price_root: Path,
+) -> dict[str, Any]:
+    source_symbol = str(instrument["source_symbol"])
+    path = price_root / f"{source_symbol}.csv"
+    validation = (
+        validate_price_history_csv(path, min_history_rows=1)
+        if path.is_file()
+        else {"status": "missing"}
+    )
+    lifecycle_status = str(instrument["lifecycle_status"])
+    is_retained = lifecycle_status == "inactive"
+    valid = validation.get("status") == "valid"
+    status = "not_expected"
+    reason = (
+        "INACTIVE_AFTER_COMPLETED_CORPORATE_ACTION"
+        if is_retained
+        else "PRE_LISTING_NOT_EXPECTED"
+    )
+    history_status = "retained_inactive" if is_retained else "not_applicable"
+    history_reason = (
+        "RETAINED_INACTIVE_HISTORY"
+        if is_retained
+        else "PRE_LISTING_NOT_APPLICABLE"
+    )
+    if is_retained and not valid:
+        status = "failed"
+        reason = "RETAINED_INACTIVE_HISTORY_INVALID"
+        history_status = "not_applicable"
+        history_reason = "RETAINED_INACTIVE_HISTORY_INVALID"
+    elif (
+        is_retained
+        and isinstance(instrument.get("delisting_end_date"), str)
+        and str(validation.get("end_date"))
+        < str(instrument["delisting_end_date"])
+    ):
+        status = "failed"
+        reason = "RETAINED_INACTIVE_HISTORY_END_MISSING"
+        history_status = "not_applicable"
+        history_reason = "RETAINED_INACTIVE_HISTORY_END_MISSING"
+    elif not is_retained and valid:
+        status = "failed"
+        reason = "PRE_LISTING_HISTORY_UNEXPECTED"
+        history_reason = "PRE_LISTING_HISTORY_UNEXPECTED"
+    return {
+        "ticker": str(instrument["symbol"]),
+        "instrument_id": str(instrument["instrument_id"]),
+        "exchange": str(instrument.get("exchange") or "UNKNOWN"),
+        "market_timezone": None,
+        "provider_identity": None,
+        "previous_last_observation": validation.get("end_date"),
+        "resulting_last_observation": validation.get("end_date"),
+        "expected_completed_session": instrument.get("delisting_end_date"),
+        "rows_added": 0,
+        "validation_status": "valid" if valid else "not_applicable",
+        "freshness_status": status,
+        "reason_code": reason,
+        "history_coverage_status": history_status,
+        "history_coverage_reason_code": history_reason,
+        "persisted_file_path": (
+            DATA_RELATIVE_ROOT / f"{source_symbol}.csv"
+        ).as_posix(),
+        "persisted_file_checksum": validation.get("checksum"),
+        **_lifecycle_fields(instrument),
+    }
+
+
+def _history_coverage(
+    instrument: Mapping[str, Any],
+    *,
+    validation: Mapping[str, Any],
+) -> tuple[str, str]:
+    if validation.get("status") != "valid":
+        return "not_applicable", "PRICE_HISTORY_INVALID"
+    row_count = int(validation.get("row_count") or 0)
+    if row_count >= DEFAULT_MIN_HISTORY_ROWS:
+        return "sufficient", "MINIMUM_ANALYTICAL_HISTORY_AVAILABLE"
+    listing_start = instrument.get("listing_start_date")
+    first_observation = validation.get("start_date")
+    if not isinstance(listing_start, str):
+        return (
+            "insufficient_unexplained",
+            "INSUFFICIENT_HISTORY_WITHOUT_LISTING_EVIDENCE",
+        )
+    if not isinstance(first_observation, str) or first_observation < listing_start:
+        return "not_applicable", "LISTING_START_AFTER_FIRST_OBSERVATION"
+    return "limited_history", "LIMITED_HISTORY_SINCE_LISTING"
+
+
+def _lifecycle_fields(instrument: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "lifecycle_status": instrument["lifecycle_status"],
+        "lifecycle_record_status": instrument["lifecycle_record_status"],
+        "lifecycle_status_effective_date": instrument[
+            "lifecycle_status_effective_date"
+        ],
+        "listing_start_date": instrument["listing_start_date"],
+        "regular_way_listing_date": instrument["regular_way_listing_date"],
+        "delisting_end_date": instrument["delisting_end_date"],
+        "lifecycle_reason": instrument["lifecycle_reason"],
+        "corporate_action_type": instrument["corporate_action_type"],
+        "lifecycle_provenance_checksum": instrument[
+            "lifecycle_provenance_checksum"
+        ],
     }
 
 
@@ -667,14 +1044,10 @@ def _normalize_status(
     if error_code:
         return "failed", error_code
     if status == "already_current":
-        if final_row_count < DEFAULT_MIN_HISTORY_ROWS:
-            return "insufficient", "VALID_HISTORY_INSUFFICIENT_ROWS"
         return "already_current", "NO_NEW_SESSION_EXPECTED" if no_session_expected else "ALREADY_CURRENT"
     if status in {"incrementally_updated", "new_snapshot_created", "full_rebuild_completed"}:
         if resulting_end is None or resulting_end < expected_session.isoformat():
             return "stale", "EXPECTED_SESSION_NOT_AVAILABLE"
-        if final_row_count < DEFAULT_MIN_HISTORY_ROWS:
-            return "insufficient", "VALID_HISTORY_INSUFFICIENT_ROWS"
         return "updated", "VALIDATED_UPDATE_PERSISTED"
     if status in {"stale_after_update", "empty_provider_response"}:
         return (
@@ -682,7 +1055,9 @@ def _normalize_status(
             "EXPECTED_SESSION_NOT_AVAILABLE" if had_existing_valid else "LOCAL_HISTORY_MISSING_AND_PROVIDER_EMPTY",
         )
     if status == "insufficient_history":
-        return "insufficient", "VALID_HISTORY_INSUFFICIENT_ROWS"
+        if resulting_end is not None and resulting_end >= expected_session.isoformat():
+            return "already_current", "ALREADY_CURRENT"
+        return "stale", "EXPECTED_SESSION_NOT_AVAILABLE"
     if status == "unsupported_mapping":
         return "unsupported", "PROVIDER_MAPPING_MISSING"
     if status == "historical_conflict":
@@ -827,6 +1202,42 @@ def _expected_session_summary(rows: Sequence[Mapping[str, Any]]) -> dict[str, st
     return dict(sorted(summary.items()))
 
 
+def _entry_lifecycle_matches(
+    entry: Mapping[str, Any],
+    instrument: Mapping[str, Any],
+) -> bool:
+    expected = _lifecycle_fields(instrument)
+    return all(entry.get(key) == value for key, value in expected.items())
+
+
+def _lifecycle_registry_for_universe(
+    universe_snapshot_path: str | Path,
+    lifecycle_registry_path: str | Path | None,
+) -> dict[str, Any]:
+    if lifecycle_registry_path is not None:
+        return load_lifecycle_registry(lifecycle_registry_path)
+    if Path(universe_snapshot_path) == DEFAULT_UNIVERSE_SNAPSHOT:
+        return load_lifecycle_registry(DEFAULT_LIFECYCLE_REGISTRY)
+    payload = {
+        "schema_version": LIFECYCLE_SCHEMA_VERSION,
+        "records": [],
+    }
+    return {
+        **payload,
+        "registry_checksum": _canonical_checksum(payload),
+        "records_by_instrument_id": {},
+    }
+
+
+def _load_optional_manifest(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {}
+    try:
+        return _load_json(path)
+    except ScheduledPriceRefreshError:
+        return {}
+
+
 def _contains_executable_content(root: Path) -> bool:
     for path in root.rglob("*"):
         if not path.is_file() or ".git" in path.parts:
@@ -957,6 +1368,10 @@ def _argument_parser() -> argparse.ArgumentParser:
     refresh.add_argument("--run-id", required=True)
     refresh.add_argument("--source-main-sha", required=True)
     refresh.add_argument("--universe-snapshot", default=DEFAULT_UNIVERSE_SNAPSHOT.as_posix())
+    refresh.add_argument(
+        "--lifecycle-registry",
+        default=DEFAULT_LIFECYCLE_REGISTRY.as_posix(),
+    )
     refresh.add_argument("--published-root", required=True)
     refresh.add_argument("--staging-root", required=True)
     refresh.add_argument("--report-output", required=True)
@@ -966,11 +1381,19 @@ def _argument_parser() -> argparse.ArgumentParser:
     validate = subparsers.add_parser("validate-publication")
     validate.add_argument("--publication-root", required=True)
     validate.add_argument("--universe-snapshot", default=DEFAULT_UNIVERSE_SNAPSHOT.as_posix())
+    validate.add_argument(
+        "--lifecycle-registry",
+        default=DEFAULT_LIFECYCLE_REGISTRY.as_posix(),
+    )
     validate.add_argument("--allow-degraded", action="store_true")
     validate.add_argument("--expected-source-main-sha")
     consume = subparsers.add_parser("consume-analysis")
     consume.add_argument("--publication-root", required=True)
     consume.add_argument("--universe-snapshot", default=DEFAULT_UNIVERSE_SNAPSHOT.as_posix())
+    consume.add_argument(
+        "--lifecycle-registry",
+        default=DEFAULT_LIFECYCLE_REGISTRY.as_posix(),
+    )
     consume.add_argument("--run-id", required=True)
     consume.add_argument("--output-root", required=True)
     return parser
@@ -989,6 +1412,7 @@ def run_command(argv: Sequence[str] | None, *, stdout: TextIO, stderr: TextIO) -
                 run_id=args.run_id,
                 source_main_sha=args.source_main_sha,
                 universe_snapshot_path=args.universe_snapshot,
+                lifecycle_registry_path=args.lifecycle_registry,
                 published_root=args.published_root,
                 staging_root=args.staging_root,
                 report_output=args.report_output,
@@ -1025,6 +1449,7 @@ def run_command(argv: Sequence[str] | None, *, stdout: TextIO, stderr: TextIO) -
         validation = validate_published_dataset(
             args.publication_root,
             universe_snapshot_path=args.universe_snapshot,
+            lifecycle_registry_path=args.lifecycle_registry,
             allow_degraded=args.allow_degraded,
             expected_source_main_sha=args.expected_source_main_sha,
         )
@@ -1036,6 +1461,7 @@ def run_command(argv: Sequence[str] | None, *, stdout: TextIO, stderr: TextIO) -
     result = run_validated_analysis(
         args.publication_root,
         universe_snapshot_path=args.universe_snapshot,
+        lifecycle_registry_path=args.lifecycle_registry,
         analysis_runner=run_full_canonical_universe_analysis,
         analysis_kwargs={
             "run_id": args.run_id,

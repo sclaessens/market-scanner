@@ -45,7 +45,7 @@ jobs:
           PYTHONPATH=src python -m market_engine.data.scheduled_canonical_price_refresh
           consume-analysis
           --publication-root published-market-data
-          --run-id "me-sr17-validated-daily-analysis-${{ github.run_id }}"
+          --run-id "me-sr18-validated-daily-analysis-${{ github.run_id }}"
           --output-root "$RUNNER_TEMP/market-engine-analysis"
 
       - name: Run canonical app dry-run

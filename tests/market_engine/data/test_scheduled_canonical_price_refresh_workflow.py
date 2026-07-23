@@ -15,6 +15,7 @@ def test_refresh_workflow_has_daily_and_manual_triggers_with_concurrency() -> No
     assert "cancel-in-progress: false" in workflow
     assert "timeout-minutes: 60" in workflow
     assert "timeout-minutes: 15" in workflow
+    assert 'run_id="me-sr18-canonical-price-refresh-' in workflow
 
 
 def test_publication_is_privileged_separately_and_only_trusted_main_can_publish() -> None:
@@ -57,6 +58,8 @@ def test_daily_analysis_materializes_and_validates_market_data_before_consumptio
     assert "ref: market-data" in workflow
     assert "workflow_run:" in workflow
     assert 'workflows: ["Canonical Price Refresh"]' in workflow
+    assert "github.event.workflow_run.conclusion == 'success'" in workflow
+    assert "me-sr18-validated-daily-analysis-" in workflow
     assert "git add data/" not in workflow
 
 

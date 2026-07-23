@@ -60,7 +60,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
   -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
   -> ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot (completed / two AAPL margins derived / downstream measured)
-  -> ME-SR17 — Implement scheduled canonical price refresh and freshness publication (implemented / post-merge production canary required)
+  -> ME-SR17 — Implement scheduled canonical price refresh and freshness publication (completed / production publication canary exposed lifecycle gap)
+  -> ME-SR18 — Add corporate-action-aware lifecycle and listing-age freshness (implemented / post-merge production canary required)
   -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / next active)
 ```
 
@@ -533,15 +534,35 @@ operator approval is automated.
 The sequence is now:
 
 ```text
-ME-DATA10 -> ME-SR17 -> ME-DATA11
+ME-DATA10 -> ME-SR17 -> ME-SR18 -> ME-DATA11
 ```
 
-ME-SR17 is implementation-complete only. Production operation still requires
-a real post-merge canary from `main` that proves provider behavior, remote
-`market-data` publication, repository permissions, downloadable evidence, and
-validated analysis consumption.
+The first ME-SR17 production canary proved provider refresh, normal
+`market-data` publication, exact-fileset validation, and downloadable
+evidence. It also exposed that one freshness status combined operational
+freshness with lifecycle and analytical-history sufficiency. The refresh
+therefore remained degraded and Daily Market Scan correctly did not start.
 
-Next sprint after the ME-SR17 canary: ME-DATA11 — Execute a diversified
+### ME-SR18 — Add corporate-action-aware lifecycle and listing-age freshness
+
+Status: IMPLEMENTED / POST-MERGE PRODUCTION CANARY REQUIRED
+
+ME-SR18 introduces a checksum-bound, primary-evidence lifecycle registry and
+effective-date evaluation. Completed acquisitions retain their published CSV
+bytes but leave the active refresh and analysis universe after the final
+expected trading session. Recent listings remain freshness-current while
+their separate history-coverage status is `limited_history`; unexplained short
+history remains degraded. Manifest v2 binds the 952-instrument canonical
+universe, the 949-instrument active universe, three retained-inactive files,
+lifecycle provenance, freshness, history coverage, and every persisted file.
+
+The consumer reconstructs those bindings from trusted `main`, rejects unknown
+schema versions and tampering, and supplies only active instruments to
+ME-RUN30 while preserving limited-history metadata. Feature branches still
+cannot publish, real stale/provider/validation failures remain red, and no
+fundamental approval is generated.
+
+Next sprint after the ME-SR18 canary: ME-DATA11 — Execute a diversified
 US-GAAP/IFRS multi-ticker derivation pilot. It may expand governed fact
 packages and approvals across a small diversified ticker set, but it must use
 the already generic ME-DATA10 runtime without ticker-specific code, automatic
