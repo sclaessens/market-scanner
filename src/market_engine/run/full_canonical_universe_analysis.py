@@ -64,11 +64,19 @@ def run_full_canonical_universe_analysis(
     top_candidate_limit: int = DEFAULT_TOP_CANDIDATE_LIMIT,
     min_history_rows: int = DEFAULT_MIN_HISTORY_ROWS,
     allow_overwrite: bool = False,
+    universe_snapshot: Mapping[str, Any] | None = None,
 ) -> tuple[dict[str, Any], Path]:
     effective_cutoff = cutoff_date or determine_safe_cutoff_date()
     start_time = _utc_now()
     started = time.perf_counter()
-    universe = build_universe_snapshot(universe_path, price_history_root=price_history_root)
+    universe = (
+        dict(universe_snapshot)
+        if universe_snapshot is not None
+        else build_universe_snapshot(
+            universe_path,
+            price_history_root=price_history_root,
+        )
+    )
     entries = [
         _analyse_instrument(
             instrument,
@@ -117,6 +125,14 @@ def _analyse_instrument(
         "source_symbol": instrument["source_symbol"],
         "asset_type": instrument["asset_type"],
         "universe_memberships": instrument["universe_memberships"],
+        "lifecycle_status": instrument.get("lifecycle_status", "active"),
+        "freshness_status": instrument.get("freshness_status"),
+        "history_coverage_status": instrument.get(
+            "history_coverage_status"
+        ),
+        "history_coverage_reason_code": instrument.get(
+            "history_coverage_reason_code"
+        ),
     }
     try:
         inspection = inspect_price_history(

@@ -119,7 +119,8 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
   -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
   -> ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot (completed / two AAPL margins derived / downstream measured)
-  -> ME-SR17 — Implement scheduled canonical price refresh and freshness publication (implemented / post-merge production canary required)
+  -> ME-SR17 — Implement scheduled canonical price refresh and freshness publication (completed / production publication canary exposed lifecycle gap)
+  -> ME-SR18 — Add corporate-action-aware lifecycle and listing-age freshness (implemented / post-merge production canary required)
   -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / next active)
 ```
 
@@ -344,13 +345,30 @@ publication reconciles. The implementation is local/offline complete; a
 post-merge canary must still prove the real GitHub schedule, provider calls,
 branch publication, and consumption flow.
 
+The ME-SR17 canary published the complete validated fileset but remained
+degraded because terminated listings, current recent listings, and true
+freshness failures shared one status axis. ME-SR18 is the evidence-bound
+lifecycle correction: it removes completed listings from active refresh after
+their effective dates, retains their history, and separates freshness from
+analytical history coverage in manifest v3 and the trusted consumer.
+Lifecycle registry v2 additionally binds evidence authority to official
+hosts, canonical identity, and announcement/completion transition support.
+Retained history must end exactly on the governed final session, and
+listing-age coverage must reconcile every expected exchange-calendar session
+after a bounded one-session start tolerance.
+
 The active order is:
 
 ```text
-ME-DATA10 -> ME-SR17 -> ME-DATA11
+ME-DATA10 -> ME-SR17 -> ME-SR18 -> post-merge canary -> ME-DATA11
 ```
 
-After the ME-SR17 canary, ME-DATA11 — Execute a diversified US-GAAP/IFRS
+ME-SR18 is locally implemented with a 949-active / 3-retained-inactive
+lifecycle projection. Its production status requires a post-merge canary that
+proves the healthy workflow handoff to Daily Market Scan while continuing to
+fail closed on any real stale or provider failure.
+
+After the ME-SR18 canary, ME-DATA11 — Execute a diversified US-GAAP/IFRS
 multi-ticker derivation pilot — remains next. It must reuse the generic
 ME-DATA10 engine without code changes for issuer identity, source tags, or
 formula selection.

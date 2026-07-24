@@ -1,0 +1,350 @@
+{
+  "records": [
+    {
+      "corporate_action_type": "cash_and_stock_acquisition",
+      "delisting_end_date": "2026-06-30",
+      "evidence": [
+        {
+          "evidence_retrieved_at": "2026-07-23T10:00:00Z",
+          "source_authority": "sec",
+          "source_host": "www.sec.gov",
+          "source_publication_date": "2026-07-01",
+          "source_type": "form_8_k",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1633931/000110465926079876/tm2618991d10_8k.htm",
+          "subject_exchange": "NYSE",
+          "subject_instrument_id": "equity:bld",
+          "subject_ticker": "BLD",
+          "transition_support": [
+            "corporate_action_completion",
+            "trading_termination"
+          ]
+        },
+        {
+          "evidence_retrieved_at": "2026-07-23T10:00:00Z",
+          "source_authority": "acquirer",
+          "source_host": "investors.qxo.com",
+          "source_publication_date": "2026-07-01",
+          "source_type": "completion_release",
+          "source_url": "https://investors.qxo.com/news/news-details/2026/QXO-Completes-Acquisition-of-TopBuild/default.aspx",
+          "subject_exchange": "NYSE",
+          "subject_instrument_id": "equity:bld",
+          "subject_ticker": "BLD",
+          "transition_support": [
+            "corporate_action_completion"
+          ]
+        }
+      ],
+      "exchange": "NYSE",
+      "instrument_id": "equity:bld",
+      "issuer_name": "TopBuild Corp.",
+      "lifecycle_reason": "inactive_after_completed_corporate_action",
+      "lifecycle_status": "inactive",
+      "listing_start_date": null,
+      "official_source_hosts": {
+        "acquirer": [
+          "investors.qxo.com"
+        ]
+      },
+      "provenance_checksum": "667383922f27cd75b9c135ae2991b72a54b4e73204fa37622cf8df085444105c",
+      "regular_way_listing_date": null,
+      "status_effective_date": "2026-07-01",
+      "successor_or_acquirer": {
+        "name": "QXO, Inc.",
+        "ticker": "QXO"
+      },
+      "ticker": "BLD"
+    },
+    {
+      "corporate_action_type": "spin_off_listing",
+      "delisting_end_date": null,
+      "evidence": [
+        {
+          "evidence_retrieved_at": "2026-07-23T10:00:00Z",
+          "source_authority": "sec",
+          "source_host": "www.sec.gov",
+          "source_publication_date": "2026-06-01",
+          "source_type": "form_8_k",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2082247/000110465926068521/tm2615735d2_8k.htm",
+          "subject_exchange": "NYSE",
+          "subject_instrument_id": "equity:fdxf",
+          "subject_ticker": "FDXF",
+          "transition_support": [
+            "listing_completion",
+            "listing_schedule"
+          ]
+        },
+        {
+          "evidence_retrieved_at": "2026-07-23T10:00:00Z",
+          "source_authority": "issuer",
+          "source_host": "investors.fedex.com",
+          "source_publication_date": "2026-06-01",
+          "source_type": "completion_release",
+          "source_url": "https://investors.fedex.com/news-and-events/investor-news/investor-news-details/2026/FedEx-Completes-Spin-Off-of-FedEx-Freight/default.aspx",
+          "subject_exchange": "NYSE",
+          "subject_instrument_id": "equity:fdxf",
+          "subject_ticker": "FDXF",
+          "transition_support": [
+            "listing_completion"
+          ]
+        }
+      ],
+      "exchange": "NYSE",
+      "instrument_id": "equity:fdxf",
+      "issuer_name": "FedEx Freight Holding Company, Inc.",
+      "lifecycle_reason": "active_recent_listing",
+      "lifecycle_status": "active",
+      "listing_start_date": "2026-05-27",
+      "official_source_hosts": {
+        "issuer": [
+          "investors.fedex.com"
+        ]
+      },
+      "provenance_checksum": "d76c2a9b360f426e1fb15142411608cc9bafd5d69886c2a234b6b45c1537b9a6",
+      "regular_way_listing_date": "2026-06-01",
+      "status_effective_date": "2026-05-27",
+      "successor_or_acquirer": null,
+      "ticker": "FDXF"
+    },
+    {
+      "corporate_action_type": "cash_acquisition",
+      "delisting_end_date": "2026-07-16",
+      "evidence": [
+        {
+          "evidence_retrieved_at": "2026-07-23T10:00:00Z",
+          "source_authority": "sec",
+          "source_host": "www.sec.gov",
+          "source_publication_date": "2026-07-16",
+          "source_type": "form_8_k",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/892553/000119312526305482/d10289d8k.htm",
+          "subject_exchange": "NYSE",
+          "subject_instrument_id": "equity:gtls",
+          "subject_ticker": "GTLS",
+          "transition_support": [
+            "corporate_action_completion",
+            "trading_termination"
+          ]
+        },
+        {
+          "evidence_retrieved_at": "2026-07-23T10:00:00Z",
+          "source_authority": "acquirer",
+          "source_host": "investors.bakerhughes.com",
+          "source_publication_date": "2026-07-16",
+          "source_type": "completion_release",
+          "source_url": "https://investors.bakerhughes.com/news/press-releases/news-details/2026/Baker-Hughes-Completes-Acquisition-of-Chart-Industries/default.aspx",
+          "subject_exchange": "NYSE",
+          "subject_instrument_id": "equity:gtls",
+          "subject_ticker": "GTLS",
+          "transition_support": [
+            "corporate_action_completion"
+          ]
+        }
+      ],
+      "exchange": "NYSE",
+      "instrument_id": "equity:gtls",
+      "issuer_name": "Chart Industries, Inc.",
+      "lifecycle_reason": "inactive_after_completed_corporate_action",
+      "lifecycle_status": "inactive",
+      "listing_start_date": null,
+      "official_source_hosts": {
+        "acquirer": [
+          "investors.bakerhughes.com"
+        ]
+      },
+      "provenance_checksum": "a9eec4306695a858067054f90a7eafd247a09cde931913bd2c6ccbce9be67fb3",
+      "regular_way_listing_date": null,
+      "status_effective_date": "2026-07-17",
+      "successor_or_acquirer": {
+        "name": "Baker Hughes Company",
+        "ticker": "BKR"
+      },
+      "ticker": "GTLS"
+    },
+    {
+      "corporate_action_type": "spin_off_listing",
+      "delisting_end_date": null,
+      "evidence": [
+        {
+          "evidence_retrieved_at": "2026-07-23T10:00:00Z",
+          "source_authority": "issuer",
+          "source_host": "www.honeywell.com",
+          "source_publication_date": "2026-06-05",
+          "source_type": "distribution_timing_release",
+          "source_url": "https://www.honeywell.com/us/en/news/press-releases/2026/06/honeywell-board-of-directors-sets-record-date-and-announces-expected-timing-for-spin-off-of-honeywell-aerospace-and-honeywell-reverse-stock-split",
+          "subject_exchange": "NASDAQ",
+          "subject_instrument_id": "equity:hona",
+          "subject_ticker": "HONA",
+          "transition_support": [
+            "listing_schedule"
+          ]
+        },
+        {
+          "evidence_retrieved_at": "2026-07-23T10:00:00Z",
+          "source_authority": "issuer",
+          "source_host": "www.honeywell.com",
+          "source_publication_date": "2026-06-29",
+          "source_type": "completion_release",
+          "source_url": "https://www.honeywell.com/us/en/news/press-releases/2026/06/honeywell-aerospace-completes-spin-off-from-honeywell-technologies-and-begins-trading-on-nasdaq",
+          "subject_exchange": "NASDAQ",
+          "subject_instrument_id": "equity:hona",
+          "subject_ticker": "HONA",
+          "transition_support": [
+            "listing_completion"
+          ]
+        }
+      ],
+      "exchange": "NASDAQ",
+      "instrument_id": "equity:hona",
+      "issuer_name": "Honeywell Aerospace Inc.",
+      "lifecycle_reason": "active_recent_listing",
+      "lifecycle_status": "active",
+      "listing_start_date": "2026-06-15",
+      "official_source_hosts": {
+        "issuer": [
+          "www.honeywell.com"
+        ]
+      },
+      "provenance_checksum": "5b0976cd87ed68e17de6430352abc688b2bea59267469824ffa21f70a7305b4b",
+      "regular_way_listing_date": "2026-06-29",
+      "status_effective_date": "2026-06-15",
+      "successor_or_acquirer": null,
+      "ticker": "HONA"
+    },
+    {
+      "corporate_action_type": "take_private_acquisition",
+      "delisting_end_date": "2026-06-30",
+      "evidence": [
+        {
+          "evidence_retrieved_at": "2026-07-23T10:00:00Z",
+          "source_authority": "sec",
+          "source_host": "www.sec.gov",
+          "source_publication_date": "2026-06-30",
+          "source_type": "form_8_k",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1274173/000110465926079401/tm2619303d2_8k.htm",
+          "subject_exchange": "NYSE",
+          "subject_instrument_id": "equity:jhg",
+          "subject_ticker": "JHG",
+          "transition_support": [
+            "corporate_action_completion",
+            "trading_termination"
+          ]
+        }
+      ],
+      "exchange": "NYSE",
+      "instrument_id": "equity:jhg",
+      "issuer_name": "Janus Henderson Group plc",
+      "lifecycle_reason": "inactive_after_completed_corporate_action",
+      "lifecycle_status": "inactive",
+      "listing_start_date": null,
+      "official_source_hosts": {},
+      "provenance_checksum": "21ab30331c93eba1ab66f4ffa77205e3ba1322f5ec431f6b9d426d438ca73e26",
+      "regular_way_listing_date": null,
+      "status_effective_date": "2026-07-01",
+      "successor_or_acquirer": {
+        "name": "Jupiter Company Limited",
+        "ticker": null
+      },
+      "ticker": "JHG"
+    },
+    {
+      "corporate_action_type": "spin_off_listing",
+      "delisting_end_date": null,
+      "evidence": [
+        {
+          "evidence_retrieved_at": "2026-07-23T10:00:00Z",
+          "source_authority": "issuer",
+          "source_host": "www.investors.dupont.com",
+          "source_publication_date": "2025-10-15",
+          "source_type": "distribution_timing_release",
+          "source_url": "https://www.investors.dupont.com/news-and-media/press-release-details/2025/DuPont-Board-of-Directors-Approves-Qnity-Distribution/default.aspx",
+          "subject_exchange": "NYSE",
+          "subject_instrument_id": "equity:q",
+          "subject_ticker": "Q",
+          "transition_support": [
+            "listing_schedule"
+          ]
+        },
+        {
+          "evidence_retrieved_at": "2026-07-23T10:00:00Z",
+          "source_authority": "sec",
+          "source_host": "www.sec.gov",
+          "source_publication_date": "2025-11-03",
+          "source_type": "form_8_k",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2058873/000119312525261603/d65598d8k.htm",
+          "subject_exchange": "NYSE",
+          "subject_instrument_id": "equity:q",
+          "subject_ticker": "Q",
+          "transition_support": [
+            "listing_completion"
+          ]
+        }
+      ],
+      "exchange": "NYSE",
+      "instrument_id": "equity:q",
+      "issuer_name": "Qnity Electronics, Inc.",
+      "lifecycle_reason": "active_recent_listing",
+      "lifecycle_status": "active",
+      "listing_start_date": "2025-10-27",
+      "official_source_hosts": {
+        "issuer": [
+          "www.investors.dupont.com"
+        ]
+      },
+      "provenance_checksum": "952a60b96c95497f62c62c1b6bb60d996416cbd1eb56a49b310cede24bff1a16",
+      "regular_way_listing_date": "2025-11-03",
+      "status_effective_date": "2025-10-27",
+      "successor_or_acquirer": null,
+      "ticker": "Q"
+    },
+    {
+      "corporate_action_type": "spin_off_listing",
+      "delisting_end_date": null,
+      "evidence": [
+        {
+          "evidence_retrieved_at": "2026-07-23T10:00:00Z",
+          "source_authority": "issuer",
+          "source_host": "www.honeywell.com",
+          "source_publication_date": "2025-10-01",
+          "source_type": "distribution_timing_release",
+          "source_url": "https://www.honeywell.com/us/en/news/press-releases/2025/10/honeywell-board-of-directors-sets-record-date-and-announces-expected-timing-for-spin-off-of-solstice-advanced-materials",
+          "subject_exchange": "NASDAQ",
+          "subject_instrument_id": "equity:sols",
+          "subject_ticker": "SOLS",
+          "transition_support": [
+            "listing_schedule"
+          ]
+        },
+        {
+          "evidence_retrieved_at": "2026-07-24T14:50:00Z",
+          "source_authority": "sec",
+          "source_host": "www.sec.gov",
+          "source_publication_date": "2025-10-30",
+          "source_type": "form_8_k",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/2064953/000162828025047305/sols-20251029.htm",
+          "subject_exchange": "NASDAQ",
+          "subject_instrument_id": "equity:sols",
+          "subject_ticker": "SOLS",
+          "transition_support": [
+            "listing_completion"
+          ]
+        }
+      ],
+      "exchange": "NASDAQ",
+      "instrument_id": "equity:sols",
+      "issuer_name": "Solstice Advanced Materials Inc.",
+      "lifecycle_reason": "active_recent_listing",
+      "lifecycle_status": "active",
+      "listing_start_date": "2025-10-20",
+      "official_source_hosts": {
+        "issuer": [
+          "www.honeywell.com"
+        ]
+      },
+      "provenance_checksum": "c5755e6a6a40e4c2c12c4db1315c351e144234e69c3fff3ff018c60433e1175b",
+      "regular_way_listing_date": "2025-10-30",
+      "status_effective_date": "2025-10-20",
+      "successor_or_acquirer": null,
+      "ticker": "SOLS"
+    }
+  ],
+  "schema_version": "market-engine-instrument-lifecycle-registry-v2"
+}

@@ -47,7 +47,7 @@ jobs:
       - name: Establish run identity
         id: identity
         run: |
-          run_id="me-sr17-canonical-price-refresh-$(date -u +%Y%m%dT%H%M%SZ)"
+          run_id="me-sr18-canonical-price-refresh-$(date -u +%Y%m%dT%H%M%SZ)"
           echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
           echo "report=$RUNNER_TEMP/freshness/$run_id.json" >> "$GITHUB_OUTPUT"
           echo "published-root=$RUNNER_TEMP/published-market-data" >> "$GITHUB_OUTPUT"
@@ -142,7 +142,8 @@ jobs:
     needs: refresh-and-validate
     if: >-
       ${{
-        always() &&
+        needs.refresh-and-validate.result == 'success' &&
+        needs.refresh-and-validate.outputs.run-status == 'completed' &&
         needs.refresh-and-validate.outputs.trusted-publish == 'true' &&
         needs.refresh-and-validate.outputs.publication-required == 'true' &&
         needs.refresh-and-validate.outputs.publication-set-valid == 'true'
@@ -178,7 +179,6 @@ jobs:
           PYTHONPATH=src python -m market_engine.data.scheduled_canonical_price_refresh \
             validate-publication \
             --publication-root publication-bundle \
-            --allow-degraded \
             --expected-source-main-sha "$source_main_sha"
 
       - name: Materialize data-only branch
@@ -202,7 +202,6 @@ jobs:
           PYTHONPATH=src python -m market_engine.data.scheduled_canonical_price_refresh \
             validate-publication \
             --publication-root publication \
-            --allow-degraded \
             --expected-source-main-sha "$source_main_sha"
 
       - name: Commit changed validated data only
