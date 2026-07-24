@@ -98,9 +98,13 @@ source type, publication date, retrieval timestamp, URL, and record checksum.
 
 The earliest official when-issued session is the governed `listing_start_date`.
 The separate `regular_way_listing_date` prevents a false assertion that valid
-when-issued observations predate the listing. Tickers appear only in governed
-records, regression fixtures, and this audit; runtime behavior branches only
-on validated lifecycle fields.
+when-issued observations predate the listing. These dates have separate
+validation responsibilities: history coverage begins at `listing_start_date`,
+while evidence claiming `listing_completion` cannot be published before
+`regular_way_listing_date`. Publication on that regular-way date is valid at
+the registry's day-level granularity. Tickers appear only in governed records,
+regression fixtures, and this audit; runtime behavior branches only on
+validated lifecycle fields.
 
 ## Lifecycle Contract
 
@@ -144,6 +148,14 @@ contradictory dates, evidence identity mismatches, future publication dates,
 announcement-only completed transitions, and missing or mismatched provenance
 checksums. Registry v1 is explicitly rejected; it is not silently reinterpreted
 under v2 semantics.
+
+For an active listing, `listing_schedule` and `listing_completion` remain
+distinct evidence capabilities. A schedule may be published before trading
+starts. Completion evidence is rejected with
+`LISTING_COMPLETION_BEFORE_REGULAR_WAY` when its publication date is earlier
+than the governed `regular_way_listing_date`, including when the date falls
+inside a valid when-issued trading period. Missing or contradictory listing
+metadata continues to fail closed before this evidence check.
 
 ## Active and Retained Data
 
@@ -253,6 +265,7 @@ RETAINED_HISTORY_DATE_BOUNDARY_INVALID
 PRE_LISTING_NOT_EXPECTED
 EXPECTED_SESSION_NOT_AVAILABLE
 LISTING_START_AFTER_FIRST_OBSERVATION
+LISTING_COMPLETION_BEFORE_REGULAR_WAY
 PROVIDER_MAPPING_MISSING
 PROVIDER_TIMEOUT
 PROVIDER_ERROR
@@ -394,6 +407,24 @@ authorities. Every evidence item repeats and validates canonical instrument
 ID, ticker, and exchange. Checksum-valid but semantically invalid combinations
 therefore fail before lifecycle projection.
 
+The second review pass reproduced a further date-boundary defect. The active
+evidence validator compared `listing_completion` publication against
+`listing_start_date`. For a generic listing with a 2026-06-15 when-issued
+start and a 2026-06-29 regular-way start, checksum-valid completion evidence
+published on 2026-06-16 was therefore accepted. The regression failed before
+the fix because the loader raised no exception. The validator now compares
+every evidence entry carrying `listing_completion` against
+`regular_way_listing_date` and raises
+`LISTING_COMPLETION_BEFORE_REGULAR_WAY` when it is early.
+
+Regression coverage proves rejection both before the when-issued start and
+between when-issued and regular-way, acceptance on and after the regular-way
+date, separation of announcement-only schedule evidence, and the same generic
+boundary for FDXF, HONA, Q, SOLS, and a fictitious ticker. The
+exchange-calendar history test separately proves that expected sessions still
+begin at the governed `listing_start_date`; the evidence fix does not move
+coverage to regular-way.
+
 The seven records were reverified from official SEC, issuer, or acquirer
 sources. The inaccessible Honeywell IR completion URL for SOLS was replaced by
 Solstice's official SEC Form 8-K; its dates and lifecycle decision are
@@ -411,14 +442,17 @@ failures, listing-date contradictions, malformed evidence, missing provenance,
 unknown lifecycle/manifest schemas, deterministic checksums and ordering,
 lifecycle/file tampering, partial-success isolation, schema migration,
 idempotent no-commit behavior, workflow security, and approval non-generation.
+Active evidence tests additionally cover completion before when-issued,
+between when-issued and regular-way, on regular-way, after regular-way,
+announcement-only schedules, and all four governed recent listings.
 
 Final local command results:
 
 - targeted lifecycle-aware refresh and existing SR17 contract tests:
-  93 passed;
-- complete Market Engine data suite: 363 passed;
-- complete Market Engine suite: 1,388 passed;
-- complete repository suite: 2,055 passed;
+  101 passed;
+- complete Market Engine data suite: 371 passed;
+- complete Market Engine suite: 1,396 passed;
+- complete repository suite: 2,063 passed;
 - Ruby standard-library parsing: both relevant workflow YAML files valid;
 - `actionlint`: not installed locally and not added as an uncontrolled
   dependency;
@@ -522,7 +556,8 @@ Only a post-merge canary can prove:
    decision that establishes the authoritative retained bytes.
 10. After such remediation, rerun from `main` and confirm FDXF, HONA, Q, and
     SOLS are `limited_history` only when their manifest v3 session counts show
-    complete coverage.
+    complete coverage from `listing_start_date`, and their
+    `listing_completion` evidence is on or after `regular_way_listing_date`.
 11. Confirm any `stale`, `failed`, `unsupported`, or
     `insufficient_unexplained` active count is zero; investigate any genuine
     failure rather than bypassing it.

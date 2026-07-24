@@ -345,7 +345,6 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
         _validate_active_evidence(
             normalized_evidence,
             instrument_id=instrument_id,
-            listing_start_date=listing_start_date,
             regular_way_listing_date=regular_way_listing_date,
         )
     else:
@@ -559,7 +558,6 @@ def _validate_active_evidence(
     evidence: Sequence[Mapping[str, Any]],
     *,
     instrument_id: str,
-    listing_start_date: date,
     regular_way_listing_date: date,
 ) -> None:
     support = {
@@ -596,10 +594,12 @@ def _validate_active_evidence(
             )
         if (
             "listing_completion" in entry_support
-            and publication < listing_start_date
+            and publication < regular_way_listing_date
         ):
             raise InstrumentLifecycleError(
-                f"listing completion evidence predates the listing for {instrument_id}"
+                "LISTING_COMPLETION_BEFORE_REGULAR_WAY: "
+                "listing completion evidence predates regular-way listing for "
+                f"{instrument_id}"
             )
 
 

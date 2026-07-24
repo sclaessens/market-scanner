@@ -137,6 +137,10 @@ def test_scheduled_listing_requires_completion_before_later_active_projection(
     )
     registry_path = _write_registry(tmp_path, [record])
     registry = load_lifecycle_registry(registry_path)
+    evidence = registry["records"][0]["evidence"][0]
+
+    assert evidence["source_publication_date"] < "2026-07-22"
+    assert evidence["transition_support"] == ["listing_schedule"]
 
     pending = apply_lifecycle_registry(
         [instrument],
@@ -579,6 +583,8 @@ def test_recent_listing_coverage_uses_when_issued_sessions_and_holidays(
     assert row["freshness_status"] == "already_current"
     assert row["history_coverage_status"] == "limited_history"
     assert row["history_listing_boundary_type"] == "when_issued_start"
+    assert row["history_expected_session_count"] == len(sessions)
+    assert len(_us_sessions("2026-06-15", "2026-06-28")) > 0
     assert row["history_initial_session_lag"] == 0
     assert row["history_missing_session_count"] == 0
     assert row["history_session_coverage_ratio"] == 1.0
@@ -930,6 +936,122 @@ def test_announcement_only_cannot_prove_completed_listing(
         load_lifecycle_registry(_write_registry(tmp_path, [row]))
 
 
+def test_listing_completion_between_when_issued_and_regular_way_is_rejected(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("GENERIC")
+    row = _record(
+        instrument,
+        lifecycle_status="active",
+        status_effective_date="2026-06-15",
+        listing_start_date="2026-06-15",
+        regular_way_listing_date="2026-06-29",
+    )
+    row["evidence"][0].update(
+        source_publication_date="2026-06-16",
+        transition_support=["listing_completion", "listing_schedule"],
+    )
+    row["provenance_checksum"] = record_provenance_checksum(row)
+
+    with pytest.raises(
+        InstrumentLifecycleError,
+        match="LISTING_COMPLETION_BEFORE_REGULAR_WAY",
+    ):
+        load_lifecycle_registry(_write_registry(tmp_path, [row]))
+
+
+def test_listing_completion_before_when_issued_is_rejected(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("PRESTART")
+    row = _record(
+        instrument,
+        lifecycle_status="active",
+        status_effective_date="2026-06-15",
+        listing_start_date="2026-06-15",
+        regular_way_listing_date="2026-06-29",
+    )
+    _set_active_listing_evidence(
+        row,
+        schedule_date="2026-06-01",
+        completion_date="2026-06-14",
+    )
+    row["provenance_checksum"] = record_provenance_checksum(row)
+
+    with pytest.raises(
+        InstrumentLifecycleError,
+        match="LISTING_COMPLETION_BEFORE_REGULAR_WAY",
+    ):
+        load_lifecycle_registry(_write_registry(tmp_path, [row]))
+
+
+@pytest.mark.parametrize(
+    "completion_date",
+    ["2026-06-29", "2026-06-30"],
+)
+def test_listing_completion_on_or_after_regular_way_is_accepted(
+    tmp_path: Path,
+    completion_date: str,
+) -> None:
+    instrument = _instrument("BOUNDARY")
+    row = _record(
+        instrument,
+        lifecycle_status="active",
+        status_effective_date="2026-06-15",
+        listing_start_date="2026-06-15",
+        regular_way_listing_date="2026-06-29",
+    )
+    _set_active_listing_evidence(
+        row,
+        schedule_date="2026-06-01",
+        completion_date=completion_date,
+    )
+    row["provenance_checksum"] = record_provenance_checksum(row)
+
+    registry = load_lifecycle_registry(_write_registry(tmp_path, [row]))
+
+    assert registry["records"][0]["ticker"] == "BOUNDARY"
+
+
+@pytest.mark.parametrize("ticker", ["FDXF", "HONA", "Q", "SOLS"])
+def test_governed_recent_listing_completion_is_bound_to_regular_way(
+    tmp_path: Path,
+    ticker: str,
+) -> None:
+    registry = load_lifecycle_registry(DEFAULT_LIFECYCLE_REGISTRY)
+    row = json.loads(
+        json.dumps(
+            next(
+                record
+                for record in registry["records"]
+                if record["ticker"] == ticker
+            )
+        )
+    )
+    regular_way = date.fromisoformat(row["regular_way_listing_date"])
+    completion_evidence = [
+        evidence
+        for evidence in row["evidence"]
+        if "listing_completion" in evidence["transition_support"]
+    ]
+    assert completion_evidence
+    assert all(
+        date.fromisoformat(evidence["source_publication_date"]) >= regular_way
+        for evidence in completion_evidence
+    )
+    premature_date = (regular_way - timedelta(days=1)).isoformat()
+    for evidence in row["evidence"]:
+        if "listing_completion" in evidence["transition_support"]:
+            evidence["source_publication_date"] = premature_date
+    row["provenance_checksum"] = record_provenance_checksum(row)
+
+    with pytest.raises(
+        InstrumentLifecycleError,
+        match="LISTING_COMPLETION_BEFORE_REGULAR_WAY",
+    ):
+        load_lifecycle_registry(_write_registry(tmp_path, [row]))
+
+
 def test_lifecycle_v1_is_explicitly_rejected(tmp_path: Path) -> None:
     path = tmp_path / "registry-v1.json"
     path.write_text(
@@ -1115,6 +1237,28 @@ def _instrument(symbol: str) -> dict[str, Any]:
         "symbol": symbol,
         "universe_memberships": ["test"],
     }
+
+
+def _set_active_listing_evidence(
+    row: dict[str, Any],
+    *,
+    schedule_date: str,
+    completion_date: str,
+) -> None:
+    schedule = dict(row["evidence"][0])
+    schedule.update(
+        source_publication_date=schedule_date,
+        transition_support=["listing_schedule"],
+    )
+    completion = dict(schedule)
+    completion.update(
+        source_publication_date=completion_date,
+        source_url=(
+            "https://www.sec.gov/Archives/edgar/data/1/completion.htm"
+        ),
+        transition_support=["listing_completion"],
+    )
+    row["evidence"] = [schedule, completion]
 
 
 def _record(
