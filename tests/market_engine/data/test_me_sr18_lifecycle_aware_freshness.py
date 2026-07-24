@@ -329,7 +329,9 @@ def test_review_repro_post_delisting_flat_rows_are_not_retained_healthy(
     row = report["tickers"][0]
     assert row["freshness_status"] == "failed"
     assert row["reason_code"] == "RETAINED_HISTORY_EXTENDS_AFTER_DELISTING"
+    assert report["run_status"] == "failed"
     assert report["publication"]["publication_set_valid"] is False
+    assert report["publication"]["publication_required"] is False
     assert (fixture["stage"] / "data/processed/OLD.csv").read_bytes() == original
 
 

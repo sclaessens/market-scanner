@@ -37,6 +37,15 @@ announcement/completion support. The historical BLD and JHG tails are
 preserved byte for byte but now block publication instead of being declared
 healthy.
 
+The third review found a publication-control gap independent of data-byte
+validity. A mixed refresh could update one instrument, preserve a technically
+valid stale or failed peer file, end `degraded`, and still set
+`publication_required=true`. The publisher also used `always()` and two
+`--allow-degraded` validations, so it could run after the upstream job was
+marked red. The hardened contract now requires a completed runtime decision,
+a successful upstream job, and strict non-degraded validation before any
+`market-data` publication can start.
+
 ## ME-SR17 Canary Evidence
 
 Input production run:
@@ -299,6 +308,23 @@ cannot create an empty data commit. A run containing the current BLD/JHG
 boundary anomalies is not a valid first v3 publication and therefore creates
 neither a manifest nor an empty data commit.
 
+`publication_set_valid` answers only whether the staged bytes satisfy their
+structural and checksum contract. It does not authorize publication. The
+central decision is now equivalent to:
+
+```text
+run_status == completed
+AND publication_set_valid
+AND changed price bytes or a meaningful manifest migration exists
+```
+
+Any `degraded` or `failed` run therefore reports
+`publication_required=false` and does not materialize a publishable manifest,
+even when one instrument was successfully updated and the remaining staged
+CSV bytes are technically valid. A completed changed run remains publishable;
+a completed identical v3 run remains non-publishable and cannot create an
+empty commit.
+
 The existing security model is unchanged:
 
 - executable workflow code is checked out from `main`;
@@ -306,6 +332,9 @@ The existing security model is unchanged:
 - feature-branch runs cannot publish;
 - the refresh job has read permission and only the isolated publisher has
   write permission;
+- the publisher requires the upstream job result `success`, output
+  `run-status=completed`, a valid publication set, a required publication, and
+  a trusted-main invocation;
 - all pushes are normal non-force pushes;
 - publication is revalidated with trusted `main` code before and after
   materialization;
@@ -339,9 +368,14 @@ and fully proven limited history can complete successfully. A retained
 boundary anomaly, real stale active ticker, unexplained insufficiency,
 provider/validation failure, malformed manifest, or checksum mismatch still
 prevents automatic analysis. The refresh workflow's existing
-`continue-on-error`/`always()` pair only captures and uploads failure evidence;
-its final status step still turns degraded or failed results red. Daily Market
-Scan has no bypass and starts automatically only after real upstream success.
+step-level `continue-on-error` remains necessary to read the compact report
+and upload diagnostic evidence. The result-reader and evidence-upload steps
+retain their diagnostic `always()` conditions, while the final status step
+still turns degraded or failed results red. The publisher itself no longer
+uses `always()`: it requires an actually successful upstream job and exact
+`run-status=completed`. Its two trusted-main validations no longer pass
+`--allow-degraded`. Daily Market Scan has no bypass and starts automatically
+only after real upstream success.
 
 ## Fundamental and Governance Boundaries
 
@@ -425,6 +459,45 @@ exchange-calendar history test separately proves that expected sessions still
 begin at the governed `listing_start_date`; the evidence fix does not move
 coverage to regular-way.
 
+The third review pass reproduced the publication bypass with two fictitious
+active instruments. One received and persisted the expected session; the
+other raised a provider timeout while its existing CSV remained structurally
+valid. The run measured one changed price file,
+`publication_set_valid=true`, and `run_status=degraded`, but the old central
+decision returned `publication_required=true`. Workflow contract tests then
+confirmed that `publish-market-data` used `always()` without checking
+`needs.refresh-and-validate.result` or `run-status`, and both pre-push
+validators passed `--allow-degraded`.
+
+The runtime now includes `run_status == "completed"` in the central
+`publication_required` expression. Regressions cover a valid update paired
+with a provider failure, a stale peer, and an invalid provider payload. Each
+case retains the valid staged bytes for diagnosis but returns
+`publication_required=false` and writes no publishable manifest. A separate
+synthetic checksum-valid degraded manifest proves that diagnostic validation
+may still opt into `allow_degraded`, while the default validation used by the
+publisher rejects it with `PUBLISHED_DATASET_DEGRADED` and
+`PUBLISHED_DATASET_STALE`.
+
+The publisher job gate now requires:
+
+```text
+needs.refresh-and-validate.result == success
+AND needs.refresh-and-validate.outputs.run-status == completed
+AND trusted-publish == true
+AND publication-required == true
+AND publication-set-valid == true
+```
+
+Contract tests cover upstream failure, cancellation, or skipping; degraded,
+failed, unknown, empty, or missing run statuses; and an untrusted
+feature-branch invocation. Only an upstream-successful completed trusted run
+with a valid, required publication passes. `always()` is absent from the
+publisher job, and
+`--allow-degraded` is absent from both publisher validations. The diagnostic
+step behavior, final red status, permissions, trusted-code checkout,
+data-only branch, and Daily Market Scan success gate remain unchanged.
+
 The seven records were reverified from official SEC, issuer, or acquirer
 sources. The inaccessible Honeywell IR completion URL for SOLS was replaced by
 Solstice's official SEC Form 8-K; its dates and lifecycle decision are
@@ -445,14 +518,19 @@ idempotent no-commit behavior, workflow security, and approval non-generation.
 Active evidence tests additionally cover completion before when-issued,
 between when-issued and regular-way, on regular-way, after regular-way,
 announcement-only schedules, and all four governed recent listings.
+Publication tests additionally cover mixed update/provider-failure,
+update/stale, and update/validation-failure runs; a technically valid degraded
+fileset; completed changed and completed identical runs; strict publisher
+validation; the upstream result/status truth table; feature-branch denial; and
+the Daily Market Scan success-only handoff.
 
 Final local command results:
 
 - targeted lifecycle-aware refresh and existing SR17 contract tests:
-  101 passed;
-- complete Market Engine data suite: 371 passed;
-- complete Market Engine suite: 1,396 passed;
-- complete repository suite: 2,063 passed;
+  107 passed;
+- complete Market Engine data suite: 377 passed;
+- complete Market Engine suite: 1,402 passed;
+- complete repository suite: 2,069 passed;
 - Ruby standard-library parsing: both relevant workflow YAML files valid;
 - `actionlint`: not installed locally and not added as an uncontrolled
   dependency;
@@ -516,6 +594,12 @@ Locally proven:
 - current recent listings as freshness-healthy and analytically limited;
 - full calendar-session proof for FDXF, HONA, Q, SOLS, and arbitrary listings;
 - unexplained short history and true freshness/provider failures remain red;
+- every non-completed runtime returns `publication_required=false`, including
+  mixed partial-success runs with otherwise valid staged bytes;
+- the publisher requires upstream success plus exact `run-status=completed`
+  and performs two strict validations without `--allow-degraded`;
+- failed, cancelled, skipped, degraded, unknown, empty, untrusted, or
+  non-required publication states cannot enter the publisher;
 - manifest v3 canonical serialization, checksums, lifecycle binding, retained
   boundaries, session coverage, and exact
   fileset reconciliation;
@@ -529,6 +613,8 @@ Only a post-merge canary can prove:
 
 - current real provider availability and session coverage;
 - live rejection of the inherited BLD/JHG tails without rewriting them;
+- the first red workflow skips the publisher job, creates no `market-data`
+  commit, and does not start Daily Market Scan;
 - after separately reviewed data remediation, a normal remote `market-data`
   v3 publication;
 - the real run's active/retained/limited counts;

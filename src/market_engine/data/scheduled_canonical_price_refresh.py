@@ -258,7 +258,8 @@ def run_scheduled_refresh(
         "run_status": run_status,
         "publication": {
             "publication_set_valid": publication_set_valid,
-            "publication_required": publication_set_valid
+            "publication_required": run_status == "completed"
+            and publication_set_valid
             and (updated_count > 0 or manifest_change_required),
             "changed_price_file_count": updated_count,
             "manifest_change_required": manifest_change_required,
