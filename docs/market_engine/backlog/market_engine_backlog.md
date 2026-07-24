@@ -534,7 +534,7 @@ operator approval is automated.
 The sequence is now:
 
 ```text
-ME-DATA10 -> ME-SR17 -> ME-SR18 -> ME-DATA11
+ME-DATA10 -> ME-SR17 -> ME-SR18 -> post-merge canary -> ME-DATA11
 ```
 
 The first ME-SR17 production canary proved provider refresh, normal
@@ -552,15 +552,20 @@ effective-date evaluation. Completed acquisitions retain their published CSV
 bytes but leave the active refresh and analysis universe after the final
 expected trading session. Recent listings remain freshness-current while
 their separate history-coverage status is `limited_history`; unexplained short
-history remains degraded. Manifest v2 binds the 952-instrument canonical
+history remains degraded. Manifest v3 and lifecycle registry v2 bind the
+952-instrument canonical
 universe, the 949-instrument active universe, three retained-inactive files,
-lifecycle provenance, freshness, history coverage, and every persisted file.
+lifecycle provenance, exact retained-history date boundaries,
+exchange-calendar session coverage, freshness, and every persisted file.
 
 The consumer reconstructs those bindings from trusted `main`, rejects unknown
-schema versions and tampering, and supplies only active instruments to
-ME-RUN30 while preserving limited-history metadata. Feature branches still
-cannot publish, real stale/provider/validation failures remain red, and no
-fundamental approval is generated.
+schema versions and tampering, rejects post-delisting retained-history tails,
+and supplies only active instruments to ME-RUN30 while preserving
+limited-history metadata. Evidence authority, official hosts, instrument
+identity, and announcement/completion support are validated under lifecycle
+registry v2. Feature branches still cannot publish, real
+stale/provider/validation failures remain red, and no fundamental approval is
+generated.
 
 Next sprint after the ME-SR18 canary: ME-DATA11 — Execute a diversified
 US-GAAP/IFRS multi-ticker derivation pilot. It may expand governed fact

@@ -5,15 +5,72 @@ import json
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, Mapping, Sequence
+from urllib.parse import urlsplit
 
 
-LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v1"
+LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v2"
 DEFAULT_LIFECYCLE_REGISTRY = Path(
     "config/market_engine/universes/instrument_lifecycle.json"
 )
 LIFECYCLE_STATUSES = frozenset({"active", "inactive"})
 EFFECTIVE_LIFECYCLE_STATUSES = frozenset({"active", "inactive", "pending"})
 SOURCE_AUTHORITIES = frozenset({"sec", "issuer", "acquirer", "exchange"})
+LIFECYCLE_REASONS = frozenset(
+    {
+        "active_recent_listing",
+        "inactive_after_completed_corporate_action",
+    }
+)
+CORPORATE_ACTION_TYPES = frozenset(
+    {
+        "cash_acquisition",
+        "cash_and_stock_acquisition",
+        "spin_off_listing",
+        "take_private_acquisition",
+    }
+)
+SOURCE_TYPES = frozenset(
+    {
+        "completion_release",
+        "distribution_timing_release",
+        "exchange_notice",
+        "form_8_k",
+    }
+)
+SUPPORTED_EXCHANGES = frozenset({"NASDAQ", "NYSE"})
+EVIDENCE_SUPPORT_TYPES = frozenset(
+    {
+        "corporate_action_completion",
+        "listing_completion",
+        "listing_schedule",
+        "trading_termination",
+    }
+)
+SOURCE_TYPE_SUPPORT = {
+    "completion_release": frozenset(
+        {"corporate_action_completion", "listing_completion", "trading_termination"}
+    ),
+    "distribution_timing_release": frozenset({"listing_schedule"}),
+    "exchange_notice": frozenset({"listing_schedule", "trading_termination"}),
+    "form_8_k": EVIDENCE_SUPPORT_TYPES,
+}
+AUTHORITY_SOURCE_TYPES = {
+    "sec": frozenset({"form_8_k"}),
+    "issuer": frozenset({"completion_release", "distribution_timing_release"}),
+    "acquirer": frozenset({"completion_release"}),
+    "exchange": frozenset({"exchange_notice"}),
+}
+EXCHANGE_EVIDENCE_HOSTS = {
+    "NASDAQ": frozenset({"nasdaq.com", "www.nasdaq.com"}),
+    "NYSE": frozenset({"nyse.com", "www.nyse.com"}),
+}
+SEC_EVIDENCE_HOSTS = frozenset({"sec.gov", "www.sec.gov"})
+EVIDENCE_AUTHORITY_ORDER = {
+    "sec": 0,
+    "exchange": 1,
+    "issuer": 2,
+    "acquirer": 3,
+}
 
 
 class InstrumentLifecycleError(ValueError):
@@ -175,7 +232,36 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
     )
     delisting_end_date = _optional_date(record, "delisting_end_date")
     lifecycle_reason = _required_text(record, "lifecycle_reason")
+    if lifecycle_reason not in LIFECYCLE_REASONS:
+        raise InstrumentLifecycleError(
+            f"unknown lifecycle reason for {instrument_id}: {lifecycle_reason}"
+        )
     corporate_action_type = _required_text(record, "corporate_action_type")
+    if corporate_action_type not in CORPORATE_ACTION_TYPES:
+        raise InstrumentLifecycleError(
+            "unknown corporate action type for "
+            f"{instrument_id}: {corporate_action_type}"
+        )
+    if exchange not in SUPPORTED_EXCHANGES:
+        raise InstrumentLifecycleError(
+            f"unsupported lifecycle exchange for {instrument_id}: {exchange}"
+        )
+    if (
+        lifecycle_status == "active"
+        and (
+            lifecycle_reason != "active_recent_listing"
+            or corporate_action_type != "spin_off_listing"
+        )
+    ) or (
+        lifecycle_status == "inactive"
+        and (
+            lifecycle_reason != "inactive_after_completed_corporate_action"
+            or corporate_action_type == "spin_off_listing"
+        )
+    ):
+        raise InstrumentLifecycleError(
+            f"lifecycle transition semantics are contradictory for {instrument_id}"
+        )
     successor_or_acquirer = record.get("successor_or_acquirer")
     if successor_or_acquirer is not None:
         if not isinstance(successor_or_acquirer, Mapping):
@@ -191,21 +277,49 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
             ),
         }
 
+    official_source_hosts = _validate_official_source_hosts(
+        record.get("official_source_hosts"),
+        instrument_id=instrument_id,
+    )
     evidence = record.get("evidence")
     if not isinstance(evidence, list) or not evidence:
         raise InstrumentLifecycleError(
             f"lifecycle evidence is required for {instrument_id}"
         )
     normalized_evidence = [
-        _validate_evidence(entry, instrument_id=instrument_id, index=evidence_index)
+        _validate_evidence(
+            entry,
+            instrument_id=instrument_id,
+            ticker=ticker,
+            exchange=exchange,
+            official_source_hosts=official_source_hosts,
+            index=evidence_index,
+        )
         for evidence_index, entry in enumerate(evidence)
     ]
     normalized_evidence.sort(
         key=lambda row: (
             row["source_publication_date"],
+            EVIDENCE_AUTHORITY_ORDER[row["source_authority"]],
             row["source_url"],
         )
     )
+    governed_host_authorities = {
+        entry["source_authority"]
+        for entry in normalized_evidence
+        if entry["source_authority"] in {"issuer", "acquirer"}
+    }
+    if set(official_source_hosts) != governed_host_authorities:
+        raise InstrumentLifecycleError(
+            f"official source host bindings are incomplete or unused for {instrument_id}"
+        )
+    if any(
+        entry["source_authority"] == "acquirer"
+        for entry in normalized_evidence
+    ) and successor_or_acquirer is None:
+        raise InstrumentLifecycleError(
+            f"acquirer evidence is not identity-bound for {instrument_id}"
+        )
 
     if lifecycle_status == "active":
         if listing_start_date is None or regular_way_listing_date is None:
@@ -224,7 +338,21 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
             raise InstrumentLifecycleError(
                 f"active lifecycle record cannot have a delisting date for {instrument_id}"
             )
+        if successor_or_acquirer is not None:
+            raise InstrumentLifecycleError(
+                f"active listing cannot declare an acquirer for {instrument_id}"
+            )
+        _validate_active_evidence(
+            normalized_evidence,
+            instrument_id=instrument_id,
+            listing_start_date=listing_start_date,
+            regular_way_listing_date=regular_way_listing_date,
+        )
     else:
+        if successor_or_acquirer is None:
+            raise InstrumentLifecycleError(
+                f"inactive acquisition requires an acquirer for {instrument_id}"
+            )
         if delisting_end_date is None:
             raise InstrumentLifecycleError(
                 f"inactive lifecycle record requires a delisting end date for {instrument_id}"
@@ -233,6 +361,12 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
             raise InstrumentLifecycleError(
                 f"inactive effective date must follow the final trading date for {instrument_id}"
             )
+        _validate_inactive_evidence(
+            normalized_evidence,
+            instrument_id=instrument_id,
+            delisting_end_date=delisting_end_date,
+            status_effective_date=status_effective_date,
+        )
 
     normalized = {
         "instrument_id": instrument_id,
@@ -255,6 +389,7 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
         "lifecycle_reason": lifecycle_reason,
         "corporate_action_type": corporate_action_type,
         "successor_or_acquirer": successor_or_acquirer,
+        "official_source_hosts": official_source_hosts,
         "evidence": normalized_evidence,
         "provenance_checksum": record.get("provenance_checksum"),
     }
@@ -272,8 +407,11 @@ def _validate_evidence(
     value: Any,
     *,
     instrument_id: str,
+    ticker: str,
+    exchange: str,
+    official_source_hosts: Mapping[str, Sequence[str]],
     index: int,
-) -> dict[str, str]:
+) -> dict[str, Any]:
     if not isinstance(value, Mapping):
         raise InstrumentLifecycleError(
             f"lifecycle evidence {index} must be an object for {instrument_id}"
@@ -284,10 +422,74 @@ def _validate_evidence(
             f"unsupported evidence authority for {instrument_id}: {authority}"
         )
     source_type = _required_text(value, "source_type")
+    if source_type not in SOURCE_TYPES:
+        raise InstrumentLifecycleError(
+            f"unsupported evidence source type for {instrument_id}: {source_type}"
+        )
+    if source_type not in AUTHORITY_SOURCE_TYPES[authority]:
+        raise InstrumentLifecycleError(
+            f"evidence authority/source type mismatch for {instrument_id}"
+        )
     source_url = _required_text(value, "source_url")
-    if not source_url.startswith("https://"):
+    parsed_url = urlsplit(source_url)
+    try:
+        source_port = parsed_url.port
+    except ValueError as exc:
+        raise InstrumentLifecycleError(
+            f"lifecycle evidence URL is invalid for {instrument_id}"
+        ) from exc
+    if (
+        parsed_url.scheme != "https"
+        or not parsed_url.hostname
+        or parsed_url.username is not None
+        or parsed_url.password is not None
+        or source_port not in {None, 443}
+    ):
         raise InstrumentLifecycleError(
             f"lifecycle evidence URL must use HTTPS for {instrument_id}"
+        )
+    source_host = parsed_url.hostname.lower().rstrip(".")
+    if authority == "sec":
+        allowed_hosts = SEC_EVIDENCE_HOSTS
+    elif authority == "exchange":
+        allowed_hosts = EXCHANGE_EVIDENCE_HOSTS[exchange]
+    else:
+        allowed_hosts = frozenset(official_source_hosts.get(authority, ()))
+    if source_host not in allowed_hosts:
+        raise InstrumentLifecycleError(
+            f"lifecycle evidence host is not authorized for {instrument_id}"
+        )
+    subject_instrument_id = _required_text(value, "subject_instrument_id")
+    subject_ticker = _required_text(value, "subject_ticker").upper()
+    subject_exchange = _required_text(value, "subject_exchange").upper()
+    if (
+        subject_instrument_id != instrument_id
+        or subject_ticker != ticker
+        or subject_exchange != exchange
+    ):
+        raise InstrumentLifecycleError(
+            f"lifecycle evidence identity mismatch for {instrument_id}"
+        )
+    supports = value.get("transition_support")
+    if (
+        not isinstance(supports, list)
+        or not supports
+        or any(not isinstance(item, str) for item in supports)
+    ):
+        raise InstrumentLifecycleError(
+            f"lifecycle evidence transition support is required for {instrument_id}"
+        )
+    normalized_supports = sorted(set(supports))
+    if (
+        len(normalized_supports) != len(supports)
+        or any(item not in EVIDENCE_SUPPORT_TYPES for item in normalized_supports)
+        or any(
+            item not in SOURCE_TYPE_SUPPORT[source_type]
+            for item in normalized_supports
+        )
+    ):
+        raise InstrumentLifecycleError(
+            f"lifecycle evidence transition support is invalid for {instrument_id}"
         )
     publication_date = _required_date(value, "source_publication_date")
     retrieved_at = _required_timestamp(value, "evidence_retrieved_at")
@@ -299,9 +501,134 @@ def _validate_evidence(
         "source_authority": authority,
         "source_type": source_type,
         "source_url": source_url,
+        "source_host": source_host,
+        "subject_instrument_id": subject_instrument_id,
+        "subject_ticker": subject_ticker,
+        "subject_exchange": subject_exchange,
+        "transition_support": normalized_supports,
         "source_publication_date": publication_date.isoformat(),
         "evidence_retrieved_at": _utc_text(retrieved_at),
     }
+
+
+def _validate_official_source_hosts(
+    value: Any,
+    *,
+    instrument_id: str,
+) -> dict[str, list[str]]:
+    if not isinstance(value, Mapping):
+        raise InstrumentLifecycleError(
+            f"official source hosts must be an object for {instrument_id}"
+        )
+    normalized: dict[str, list[str]] = {}
+    for authority, hosts in value.items():
+        if authority not in {"issuer", "acquirer"}:
+            raise InstrumentLifecycleError(
+                f"official source host authority is invalid for {instrument_id}"
+            )
+        if (
+            not isinstance(hosts, list)
+            or not hosts
+            or any(not isinstance(host, str) for host in hosts)
+        ):
+            raise InstrumentLifecycleError(
+                f"official source hosts are invalid for {instrument_id}"
+            )
+        normalized_hosts = sorted(
+            {host.lower().rstrip(".") for host in hosts}
+        )
+        if (
+            len(normalized_hosts) != len(hosts)
+            or any(
+                not host
+                or "://" in host
+                or "/" in host
+                or ":" in host
+                or "." not in host
+                for host in normalized_hosts
+            )
+        ):
+            raise InstrumentLifecycleError(
+                f"official source hosts are invalid for {instrument_id}"
+            )
+        normalized[authority] = normalized_hosts
+    return dict(sorted(normalized.items()))
+
+
+def _validate_active_evidence(
+    evidence: Sequence[Mapping[str, Any]],
+    *,
+    instrument_id: str,
+    listing_start_date: date,
+    regular_way_listing_date: date,
+) -> None:
+    support = {
+        item
+        for entry in evidence
+        for item in entry["transition_support"]
+    }
+    if "listing_schedule" not in support:
+        raise InstrumentLifecycleError(
+            f"listing schedule evidence is required for {instrument_id}"
+        )
+    latest_retrieval = max(
+        datetime.fromisoformat(
+            str(entry["evidence_retrieved_at"]).replace("Z", "+00:00")
+        ).date()
+        for entry in evidence
+    )
+    if (
+        latest_retrieval >= regular_way_listing_date
+        and "listing_completion" not in support
+    ):
+        raise InstrumentLifecycleError(
+            f"listing completion evidence is required for {instrument_id}"
+        )
+    for entry in evidence:
+        publication = date.fromisoformat(entry["source_publication_date"])
+        entry_support = set(entry["transition_support"])
+        if (
+            "listing_schedule" in entry_support
+            and publication > regular_way_listing_date
+        ):
+            raise InstrumentLifecycleError(
+                f"listing schedule evidence is too late for {instrument_id}"
+            )
+        if (
+            "listing_completion" in entry_support
+            and publication < listing_start_date
+        ):
+            raise InstrumentLifecycleError(
+                f"listing completion evidence predates the listing for {instrument_id}"
+            )
+
+
+def _validate_inactive_evidence(
+    evidence: Sequence[Mapping[str, Any]],
+    *,
+    instrument_id: str,
+    delisting_end_date: date,
+    status_effective_date: date,
+) -> None:
+    support = {
+        item
+        for entry in evidence
+        for item in entry["transition_support"]
+    }
+    required = {"corporate_action_completion", "trading_termination"}
+    if not required.issubset(support):
+        raise InstrumentLifecycleError(
+            f"completion and trading termination evidence are required for {instrument_id}"
+        )
+    for entry in evidence:
+        relevant = required.intersection(entry["transition_support"])
+        if not relevant:
+            continue
+        publication = date.fromisoformat(entry["source_publication_date"])
+        if not delisting_end_date <= publication <= status_effective_date:
+            raise InstrumentLifecycleError(
+                f"inactive transition evidence date is invalid for {instrument_id}"
+            )
 
 
 def _apply_record(
@@ -338,6 +665,22 @@ def _apply_record(
     effective_date = date.fromisoformat(record["status_effective_date"])
     record_status = record["lifecycle_status"]
     if record_status == "active":
+        regular_way_date = date.fromisoformat(
+            record["regular_way_listing_date"]
+        )
+        evidence_support = {
+            support
+            for entry in record["evidence"]
+            for support in entry["transition_support"]
+        }
+        if (
+            as_of >= regular_way_date
+            and "listing_completion" not in evidence_support
+        ):
+            raise InstrumentLifecycleError(
+                "listing completion evidence is required before active "
+                f"projection for {record['instrument_id']}"
+            )
         current_status = "active" if as_of >= effective_date else "pending"
         current_reason = (
             record["lifecycle_reason"]

@@ -19,12 +19,23 @@ freshness from analytical history coverage. Current recent listings may now be
 `limited_history` without making the refresh unhealthy; analyses still receive
 that limitation and apply their existing minimum-history block.
 
-Manifest v2 binds the canonical universe, active universe, retained history,
+Manifest v3 binds the canonical universe, active universe, retained history,
 lifecycle registry, provenance, freshness, history coverage, and persisted
 file bytes. The trusted consumer independently reconstructs those bindings and
 passes only active instruments to ME-RUN30. True stale data, provider errors,
 unexplained short history, malformed evidence, unknown schemas, checksum
 tampering, or incomplete publication sets remain fail closed.
+
+The PR review found three additional integrity gaps: post-delisting rows could
+be called healthy retained history, short history needed no session-level
+proof, and checksum-valid evidence was not semantically bound to its authority
+or transition. The review hardening introduces lifecycle registry v2 and
+manifest/consumer v3. It requires an exact inactive end-date boundary,
+exchange-calendar-complete listing coverage after a bounded one-session start
+tolerance, and governed evidence identity, host, enum, and
+announcement/completion support. The historical BLD and JHG tails are
+preserved byte for byte but now block publication instead of being declared
+healthy.
 
 ## ME-SR17 Canary Evidence
 
@@ -83,7 +94,7 @@ source type, publication date, retrieval timestamp, URL, and record checksum.
 | FDXF | FedEx Freight Holding Company spin-off; NYSE when-issued listing | 2026-05-27 | 2026-06-01 | n/a | 2026-05-27 active | [SEC Form 8-K](https://www.sec.gov/Archives/edgar/data/2082247/000110465926068521/tm2615735d2_8k.htm), [FedEx completion release](https://investors.fedex.com/news-and-events/investor-news/investor-news-details/2026/FedEx-Completes-Spin-Off-of-FedEx-Freight/default.aspx) |
 | HONA | Honeywell Aerospace spin-off; Nasdaq when-issued listing | 2026-06-15 | 2026-06-29 | n/a | 2026-06-15 active | [Honeywell distribution release](https://www.honeywell.com/us/en/news/press-releases/2026/06/honeywell-board-of-directors-sets-record-date-and-announces-expected-timing-for-spin-off-of-honeywell-aerospace-and-honeywell-reverse-stock-split), [Honeywell completion release](https://www.honeywell.com/us/en/news/press-releases/2026/06/honeywell-aerospace-completes-spin-off-from-honeywell-technologies-and-begins-trading-on-nasdaq) |
 | Q | Qnity spin-off; NYSE when-issued listing | 2025-10-27 | 2025-11-03 | n/a | 2025-10-27 active | [DuPont distribution release](https://www.investors.dupont.com/news-and-media/press-release-details/2025/DuPont-Board-of-Directors-Approves-Qnity-Distribution/default.aspx), [SEC Form 8-K](https://www.sec.gov/Archives/edgar/data/2058873/000119312525261603/d65598d8k.htm) |
-| SOLS | Solstice Advanced Materials spin-off; Nasdaq when-issued listing | 2025-10-20 | 2025-10-30 | n/a | 2025-10-20 active | [Honeywell distribution release](https://www.honeywell.com/us/en/news/press-releases/2025/10/honeywell-board-of-directors-sets-record-date-and-announces-expected-timing-for-spin-off-of-solstice-advanced-materials), [Honeywell completion release](https://investor.honeywell.com/news-releases/news-release-details/honeywell-completes-spin-solstice-advanced-materials) |
+| SOLS | Solstice Advanced Materials spin-off; Nasdaq when-issued listing | 2025-10-20 | 2025-10-30 | n/a | 2025-10-20 active | [Honeywell distribution release](https://www.honeywell.com/us/en/news/press-releases/2025/10/honeywell-board-of-directors-sets-record-date-and-announces-expected-timing-for-spin-off-of-solstice-advanced-materials), [SEC Form 8-K](https://www.sec.gov/Archives/edgar/data/2064953/000162828025047305/sols-20251029.htm) |
 
 The earliest official when-issued session is the governed `listing_start_date`.
 The separate `regular_way_listing_date` prevents a false assertion that valid
@@ -102,7 +113,7 @@ config/market_engine/universes/instrument_lifecycle.json
 Schema:
 
 ```text
-market-engine-instrument-lifecycle-registry-v1
+market-engine-instrument-lifecycle-registry-v2
 ```
 
 Each governed record binds:
@@ -112,7 +123,12 @@ Each governed record binds:
 - when-issued/start and regular-way dates for recent listings;
 - final expected trading date for terminated listings;
 - reason, corporate-action type, and reliable successor/acquirer identity;
-- one or more primary evidence records;
+- controlled status, reason, action, exchange, authority, source-type, and
+  transition-support enums;
+- one or more primary evidence records bound to canonical instrument ID,
+  ticker, exchange, HTTPS host, publication date, and retrieval timestamp;
+- fixed SEC/exchange host policy and checksum-bound issuer/acquirer official
+  host metadata;
 - a SHA-256 provenance checksum over canonical record bytes.
 
 Records absent from the registry inherit the canonical snapshot status. A
@@ -121,10 +137,13 @@ that date. A governed inactive record remains active before the inactive
 effective date and becomes inactive on that date. A future event is therefore
 never applied early.
 
-The loader rejects malformed JSON, unsupported schemas/statuses, duplicate or
-unknown instrument IDs, ticker/exchange mismatches, contradictory dates,
-missing evidence, non-HTTPS evidence URLs, future publication dates, and
-missing or mismatched provenance checksums.
+The loader rejects malformed JSON, unsupported schema versions or enums,
+duplicate or unknown instrument IDs, ticker/exchange mismatches,
+authority/source-type/host mismatches, unbound issuer/acquirer hosts,
+contradictory dates, evidence identity mismatches, future publication dates,
+announcement-only completed transitions, and missing or mismatched provenance
+checksums. Registry v1 is explicitly rejected; it is not silently reinterpreted
+under v2 semantics.
 
 ## Active and Retained Data
 
@@ -139,20 +158,29 @@ pending:              0
 
 Inactive instruments are never submitted to the provider after their
 effective date. Their current `market-data` CSVs are copied into isolated
-staging and remain part of the checksum-bound publication. They are not
-deleted, truncated, rewritten, or treated as stale active instruments.
+staging for validation. They are not deleted, truncated, rewritten, or treated
+as stale active instruments.
 
-The inherited BLD and JHG CSVs contain provider-dated observations through
-2026-07-02 even though the official final expected trading session is
-2026-06-30. ME-SR18 does not silently delete or rewrite those already
-published rows. It records the authoritative end date separately, freezes the
-files after the effective date, and preserves their exact bytes for audit.
+The inherited BLD and JHG CSVs contain flat, zero-volume provider-dated
+observations on 2026-07-01 and 2026-07-02 even though the official final
+expected trading session is 2026-06-30. The review reproduction proved that
+the original comparison checked only `actual_end < expected_end`, so these
+tails were accepted. The hardened contract requires equality. It classifies
+these two files as `extends_after` with
+`RETAINED_HISTORY_EXTENDS_AFTER_DELISTING`, preserves the exact bytes for
+audit, sets their row validation to blocked, and makes
+`publication_set_valid=false`. It never auto-deletes or rewrites historical
+data. GTLS ends exactly on 2026-07-16 and is the real aligned control case.
 
-The publication exact-fileset contract now binds both active and retained
-inactive paths. A retained file is not orphaned: its manifest row contains
-`lifecycle_status=inactive`, its dates, lifecycle provenance checksum,
-`freshness_status=not_expected`, and
-`history_coverage_status=retained_inactive`.
+For an aligned retained file, the exact-fileset contract binds the inactive
+path, file checksum, expected and actual end date, lifecycle provenance,
+`freshness_status=not_expected`,
+`history_coverage_status=retained_inactive`, and
+`retained_history_boundary_status=aligned`. Before/after anomalies remain in
+the run evidence but cannot cross the publication boundary. The trusted
+consumer independently rereads the CSV and recomputes the same exact boundary,
+so a forged manifest checksum cannot use the prior inactive-record `continue`
+to bypass date reconciliation.
 
 ## Freshness and History Coverage
 
@@ -177,11 +205,32 @@ retained_inactive
 not_applicable
 ```
 
-An active short history is `limited_history` only when its first persisted
-observation is on or after a checksum-valid listing start. If observations
-precede that start, the row fails with
-`LISTING_START_AFTER_FIRST_OBSERVATION`. Without listing evidence, a short
-history is `insufficient_unexplained` and degrades the run.
+The history coverage boundary is the governed `listing_start_date`. When this
+precedes `regular_way_listing_date`, it is explicitly a when-issued boundary;
+regular-way is not substituted for it. The existing exchange profile and
+holiday calendar produce every expected completed session through the same
+run boundary used for freshness. Weekends and exchange holidays are excluded.
+
+An active short history is `limited_history` only when:
+
+- no observation predates the evidence-bound listing start;
+- the first observed session is the first expected session or at most one
+  expected session later;
+- the latest expected completed session is present;
+- every expected session from the accepted start through that boundary is
+  present;
+- the bounded-session coverage ratio is exactly `1.0` (the manifest also
+  exposes the raw ratio including any tolerated first-session lag);
+- the base CSV validator has already rejected duplicates and out-of-order
+  dates.
+
+The one-session start tolerance is explicit and does not excuse an internal
+gap. Any later start, missing internal session, or missing end session is
+`insufficient_unexplained` and degrades the run. A listing date after the first
+observation remains the controlled
+`LISTING_START_AFTER_FIRST_OBSERVATION` failure. Future listings remain
+`pending` and are neither refreshed nor called limited. Without lifecycle
+evidence, short history remains `INSUFFICIENT_HISTORY_WITHOUT_LISTING_EVIDENCE`.
 
 `limited_history` is not promoted to analytical sufficiency. ME-RUN30 receives
 the status, then its existing price-history inspection continues to report the
@@ -192,8 +241,15 @@ Key reason codes include:
 ```text
 LIMITED_HISTORY_SINCE_LISTING
 INSUFFICIENT_HISTORY_WITHOUT_LISTING_EVIDENCE
+HISTORY_START_TOO_LATE_AFTER_LISTING
+HISTORY_SESSION_GAPS_AFTER_LISTING
+HISTORY_END_BEFORE_EXPECTED_SESSION
 INACTIVE_AFTER_COMPLETED_CORPORATE_ACTION
 RETAINED_INACTIVE_HISTORY
+RETAINED_HISTORY_ENDS_ON_EXPECTED_SESSION
+RETAINED_HISTORY_ENDS_BEFORE_EXPECTED_SESSION
+RETAINED_HISTORY_EXTENDS_AFTER_DELISTING
+RETAINED_HISTORY_DATE_BOUNDARY_INVALID
 PRE_LISTING_NOT_EXPECTED
 EXPECTED_SESSION_NOT_AVAILABLE
 LISTING_START_AFTER_FIRST_OBSERVATION
@@ -208,24 +264,27 @@ PRICE_VALIDATION_FAILED
 Manifest schema:
 
 ```text
-market-engine-me-sr18-canonical-price-freshness-manifest-v2
+market-engine-me-sr18-canonical-price-freshness-manifest-v3
 ```
 
 Validation schema:
 
 ```text
-market-engine-me-sr18-published-price-dataset-validation-v2
+market-engine-me-sr18-published-price-dataset-validation-v3
 ```
 
-V2 adds canonical-, active-, and governed-universe checksums and sizes,
-lifecycle schema/registry checksum, retained/pending counts, per-entry lifecycle
-and provenance fields, separate history-coverage statuses/reasons and totals,
-and a manifest-migration decision.
+V3 retains the v2 canonical-, active-, and governed-universe bindings and adds
+per-entry retained-history expected/actual end dates and boundary status, plus
+listing boundary type, coverage boundary, expected/observed/missing session
+counts, initial-session lag, and coverage ratio.
 
-V1 is never silently accepted by the v2 consumer. The first v2 run requires a
-manifest publication even if zero price files changed, because the schema and
-lifecycle binding are a meaningful data change. Subsequent identical v2 runs
-do not request publication and therefore cannot create an empty data commit.
+Prior manifest versions are never silently accepted by the v3 consumer. The
+first valid v3 run requires a manifest publication even if zero price files
+changed, because the schema and lifecycle binding are a meaningful data
+change. Subsequent identical v3 runs do not request publication and therefore
+cannot create an empty data commit. A run containing the current BLD/JHG
+boundary anomalies is not a valid first v3 publication and therefore creates
+neither a manifest nor an empty data commit.
 
 The existing security model is unchanged:
 
@@ -250,6 +309,9 @@ from trusted source, evaluates them at validation time, and reconciles:
 - lifecycle dates and provenance per entry;
 - freshness and history-coverage totals;
 - every declared persisted file checksum and actual CSV date range;
+- exact retained-history expected/actual end dates before inactive records are
+  excluded from analysis;
+- exchange-calendar listing-session sets and coverage metrics;
 - the exact fileset and absence of executable data-branch content;
 - overall run status.
 
@@ -259,11 +321,14 @@ into analysis. ME-RUN30 accepts this already validated snapshot and includes
 lifecycle/freshness/history coverage in each analysis row.
 
 Daily Market Scan retains its existing `workflow_run` success gate. A run
-containing only current active histories, valid retained-inactive history, and
-explained limited history can complete successfully. A real stale active
-ticker, unexplained insufficiency, provider/validation failure, malformed
-manifest, or checksum mismatch still prevents automatic analysis. There is no
-new `always()` bypass for Daily Market Scan.
+containing only current active histories, aligned retained-inactive history,
+and fully proven limited history can complete successfully. A retained
+boundary anomaly, real stale active ticker, unexplained insufficiency,
+provider/validation failure, malformed manifest, or checksum mismatch still
+prevents automatic analysis. The refresh workflow's existing
+`continue-on-error`/`always()` pair only captures and uploads failure evidence;
+its final status step still turns degraded or failed results red. Daily Market
+Scan has no bypass and starts automatically only after real upstream success.
 
 ## Fundamental and Governance Boundaries
 
@@ -284,6 +349,58 @@ approval. The sprint adds no recommendation, ranking, conviction, urgency,
 tradeability, portfolio, allocation, Telegram, broker, order, or Decision
 Engine behavior.
 
+## Review Hardening
+
+The three review findings were reproduced before implementation:
+
+1. An inactive file ending after `delisting_end_date` returned
+   `not_expected` / `retained_inactive`; the comparison had no greater-than
+   branch.
+2. A current ten-row file beginning weeks after an older listing returned
+   `limited_history`; the classifier checked only the first date and row
+   count.
+3. A provenance-checksum-valid record declared `source_authority=sec` while
+   using `example.com`; the loader checked only the authority string and HTTPS
+   syntax.
+
+The fixes remain generic. Runtime code contains no governed ticker branch.
+Retained history uses one exact boundary function in refresh and consumer.
+Listing coverage uses the existing market-profile calendar and one explicit
+session-set algorithm. Evidence uses one versioned registry with controlled
+enums and transition requirements rather than a parallel evidence store.
+
+Lifecycle registry v2 distinguishes evidence capabilities:
+
+```text
+listing_schedule
+listing_completion
+corporate_action_completion
+trading_termination
+```
+
+`distribution_timing_release` can support only a schedule.
+`completion_release` and `form_8_k` may support appropriate completion facts;
+an exchange notice may support a listing schedule or trading termination.
+Inactive transitions require both completion and trading-termination support
+with publication dates between the final session and effective date. A mature
+active listing requires schedule and completion support. A future scheduled
+listing can remain pending with schedule evidence, but it cannot be projected
+active early.
+
+SEC evidence is restricted to `sec.gov`; exchange evidence is restricted to
+the governed exchange's domains. Issuer/acquirer hosts are explicit per-record
+metadata covered by the record checksum and must correspond exactly to used
+authorities. Every evidence item repeats and validates canonical instrument
+ID, ticker, and exchange. Checksum-valid but semantically invalid combinations
+therefore fail before lifecycle projection.
+
+The seven records were reverified from official SEC, issuer, or acquirer
+sources. The inaccessible Honeywell IR completion URL for SOLS was replaced by
+Solstice's official SEC Form 8-K; its dates and lifecycle decision are
+unchanged. BLD/JHG real tails and GTLS exact end were inspected from current
+`origin/market-data`. No price CSV in this repository or the data branch was
+edited by this review fix.
+
 ## Offline Validation
 
 Deterministic tests cover effective dates before/on transition, future
@@ -298,35 +415,60 @@ idempotent no-commit behavior, workflow security, and approval non-generation.
 Final local command results:
 
 - targeted lifecycle-aware refresh and existing SR17 contract tests:
-  59 passed;
-- complete Market Engine data suite: 329 passed;
-- complete Market Engine suite: 1,354 passed;
-- complete repository suite: 2,021 passed;
-- Ruby standard-library parsing: both changed workflow YAML files valid;
+  93 passed;
+- complete Market Engine data suite: 363 passed;
+- complete Market Engine suite: 1,388 passed;
+- complete repository suite: 2,055 passed;
+- Ruby standard-library parsing: both relevant workflow YAML files valid;
 - `actionlint`: not installed locally and not added as an uncontrolled
   dependency;
 - `git diff --check`: passed.
 
-An additional offline projection of current `market-data` commit `0558b5cd`
-produced:
+An additional read-only inspection of current `origin/market-data` commit
+`525ef93fcc6612726ab65d0b996d8cf5fc56e5db` produced:
 
 ```text
-canonical universe:          952
-active universe:             949
-retained inactive:             3
-already_current:             948
-not_expected:                  3
-stale:                         1 (NSA)
-sufficient history:          945
-limited_history:               4
-insufficient_unexplained:      0
-retained_inactive history:     3
+BLD:  3 rows, 2026-06-30 through 2026-07-02; expected end 2026-06-30
+JHG:  3 rows, 2026-06-30 through 2026-07-02; expected end 2026-06-30
+GTLS: 384 rows, final date 2026-07-16; expected end 2026-07-16
+FDXF: 40/40 expected sessions through 2026-07-23
+HONA: 27/27 expected sessions through 2026-07-23
+Q:   185/185 expected sessions through 2026-07-23
+SOLS: 190/190 expected sessions through 2026-07-23
 ```
 
-The projected v2 publication passed trusted validation with `allow_degraded`.
-It remained degraded only because NSA still lacked the expected 2026-07-22
-session in that fixed snapshot. This proves that lifecycle cases are corrected
-without hiding a genuine active-instrument stale result.
+The four recent listings therefore satisfy the v3 session contract on the
+current data tip. GTLS satisfies the retained boundary. BLD and JHG
+deterministically fail the retained boundary, so the hardened runtime must
+block publication before any live provider outcome can make the overall run
+green.
+
+An offline run against those exact bytes, evaluated through the completed
+2026-07-23 US session, measured:
+
+```text
+run_status:                    failed
+publication_set_valid:         false
+publication_required:          false
+empty_commit_required:         false
+active / inactive / pending:   949 / 3 / 0
+already_current / stale:       948 / 1
+not_expected / failed:         1 / 2
+sufficient / limited:          945 / 4
+retained / not_applicable:     1 / 2
+```
+
+BLD and JHG were the two failed boundary rows; GTLS was the one aligned
+retained row. The one real stale active history remained stale with the
+injected offline-empty provider, proving that lifecycle hardening does not
+hide a freshness failure. Source and staged SHA-256 checksums matched exactly
+for all three inactive files:
+
+```text
+BLD  f5503fa97cc9bfe651728dd27419249a1f329c68bf619f9126c6d1a36fb0f0cb
+JHG  05f370cf792ea44a360cf61501b564054167fa28c72d038f16844a6caa7be5fa
+GTLS 1b59ccd05928b59b797379300f145e81b59f55cf1de5dc675cf1ad6284f0accb
+```
 
 ## Local Proof and Live Proof
 
@@ -335,20 +477,26 @@ Locally proven:
 - generic effective-date transitions;
 - 952 canonical to 949 active plus three retained-inactive projection;
 - no provider calls for inactive or pending instruments;
-- retained history byte preservation;
+- retained history byte preservation plus exact before/aligned/after boundary
+  classification;
 - current recent listings as freshness-healthy and analytically limited;
+- full calendar-session proof for FDXF, HONA, Q, SOLS, and arbitrary listings;
 - unexplained short history and true freshness/provider failures remain red;
-- manifest v2 canonical serialization, checksums, lifecycle binding, and exact
+- manifest v3 canonical serialization, checksums, lifecycle binding, retained
+  boundaries, session coverage, and exact
   fileset reconciliation;
 - active-only downstream analysis input;
-- v1-to-v2 meaningful manifest publication and subsequent no-empty-commit
+- registry v1 and prior manifest rejection, meaningful v3 publication, and
+  subsequent no-empty-commit
   behavior;
 - unchanged workflow permission and trusted-code boundaries.
 
 Only a post-merge canary can prove:
 
 - current real provider availability and session coverage;
-- a normal remote `market-data` v2 publication;
+- live rejection of the inherited BLD/JHG tails without rewriting them;
+- after separately reviewed data remediation, a normal remote `market-data`
+  v3 publication;
 - the real run's active/retained/limited counts;
 - a green workflow when no genuine stale/provider failure exists;
 - automatic Daily Market Scan activation and acceptance;
@@ -360,30 +508,40 @@ Only a post-merge canary can prove:
 2. Open **Actions → Canonical Price Refresh → Run workflow**.
 3. Select `main`, set `publish=true`, and start the run.
 4. Confirm canonical size 952, active size 949, retained inactive count 3.
-5. Confirm BLD, JHG, and GTLS are `inactive` / `not_expected` and no provider
-   request was made for them.
-6. Confirm their persisted file checksums still match the prior publication.
-7. Confirm FDXF, HONA, Q, and SOLS are current and `limited_history`.
-8. Confirm any `stale`, `failed`, `unsupported`, or
-   `insufficient_unexplained` count is zero; if a real one occurs, accept the
-   degraded result and investigate it rather than bypassing it.
-9. Confirm manifest v2, lifecycle registry checksum, active/governed universe
-   checksums, exact fileset, and all file checksums validate.
-10. Confirm `market-data` advanced through one normal non-force commit
-    containing data and the v2 manifest only.
-11. Confirm Canonical Price Refresh concludes success.
-12. Confirm Daily Market Scan starts automatically through `workflow_run`.
-13. Confirm it validates the published boundary and analyzes 949 active
+5. Confirm BLD and JHG are inactive, are not sent to the provider, retain their
+   original checksums, and fail with
+   `RETAINED_HISTORY_EXTENDS_AFTER_DELISTING`.
+6. Confirm GTLS is inactive, is not sent to the provider, and reports
+   `RETAINED_HISTORY_ENDS_ON_EXPECTED_SESSION`.
+7. Confirm the current inherited anomaly makes
+   `publication_set_valid=false`, the workflow red, creates no `market-data`
+   commit, and does not start Daily Market Scan.
+8. Treat that first run as the required live proof of the fail-closed review
+   fix. Do not bypass it and do not auto-truncate either historical file.
+9. Resolve BLD/JHG only through a separate, explicitly reviewed data-remediation
+   decision that establishes the authoritative retained bytes.
+10. After such remediation, rerun from `main` and confirm FDXF, HONA, Q, and
+    SOLS are `limited_history` only when their manifest v3 session counts show
+    complete coverage.
+11. Confirm any `stale`, `failed`, `unsupported`, or
+    `insufficient_unexplained` active count is zero; investigate any genuine
+    failure rather than bypassing it.
+12. Confirm manifest v3, lifecycle registry v2 checksum, active/governed
+    universe checksums, exact fileset, retained boundaries, session coverage,
+    and all file checksums validate.
+13. Confirm `market-data` advances through one normal non-force commit
+    containing data and the v3 manifest only.
+14. Confirm Canonical Price Refresh concludes success and Daily Market Scan
+    starts automatically through `workflow_run`.
+15. Confirm the consumer validates the boundary and analyzes 949 active
     instruments, with recent-listing limitations visible.
-14. Inspect compact artifacts and logs for unexpected provider calls or
-    secrets.
-15. Run the same workflow again after no newly completed session.
-16. Confirm the second run creates no empty `market-data` commit.
+16. Run the same workflow again after no newly completed session and confirm
+    it creates no empty `market-data` commit.
 
 Production correction is operational only after those live checks pass.
 
 ## Locked Baseline Order
 
 ```text
-ME-DATA10 -> ME-SR17 -> ME-SR18 -> ME-DATA11
+ME-DATA10 -> ME-SR17 -> ME-SR18 -> post-merge canary -> ME-DATA11
 ```

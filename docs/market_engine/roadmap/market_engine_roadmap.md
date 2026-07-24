@@ -350,12 +350,17 @@ degraded because terminated listings, current recent listings, and true
 freshness failures shared one status axis. ME-SR18 is the evidence-bound
 lifecycle correction: it removes completed listings from active refresh after
 their effective dates, retains their history, and separates freshness from
-analytical history coverage in manifest v2 and the trusted consumer.
+analytical history coverage in manifest v3 and the trusted consumer.
+Lifecycle registry v2 additionally binds evidence authority to official
+hosts, canonical identity, and announcement/completion transition support.
+Retained history must end exactly on the governed final session, and
+listing-age coverage must reconcile every expected exchange-calendar session
+after a bounded one-session start tolerance.
 
 The active order is:
 
 ```text
-ME-DATA10 -> ME-SR17 -> ME-SR18 -> ME-DATA11
+ME-DATA10 -> ME-SR17 -> ME-SR18 -> post-merge canary -> ME-DATA11
 ```
 
 ME-SR18 is locally implemented with a 949-active / 3-retained-inactive

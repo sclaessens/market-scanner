@@ -39,8 +39,8 @@ from market_engine.data.local_market_data_universe import (
 )
 
 
-SCHEMA_VERSION = "market-engine-me-sr18-canonical-price-freshness-manifest-v2"
-VALIDATION_SCHEMA_VERSION = "market-engine-me-sr18-published-price-dataset-validation-v2"
+SCHEMA_VERSION = "market-engine-me-sr18-canonical-price-freshness-manifest-v3"
+VALIDATION_SCHEMA_VERSION = "market-engine-me-sr18-published-price-dataset-validation-v3"
 DEFAULT_UNIVERSE_SNAPSHOT = Path(
     "artifacts/market_engine/data_runs/"
     "me-data04-complete-dataset-20260713T133000Z-coverage-after/universe_snapshot.json"
@@ -70,6 +70,8 @@ HISTORY_COVERAGE_ORDER = (
 )
 DEGRADED_STATUSES = frozenset({"stale", "failed", "unsupported"})
 DEGRADED_HISTORY_COVERAGE = frozenset({"insufficient_unexplained"})
+MAX_LISTING_START_SESSION_LAG = 1
+REQUIRED_LISTING_SESSION_COVERAGE_RATIO = 1.0
 SHA1 = re.compile(r"^[0-9a-f]{40}$")
 
 Provider = Callable[[str, str, str], pd.DataFrame]
@@ -513,7 +515,7 @@ def validate_published_dataset(
         if not path.is_file() or not isinstance(checksum, str) or _sha256_file(path) != checksum:
             issues.append(_validation_issue("PUBLISHED_FILE_CHECKSUM_MISMATCH", f"tickers[{index}]"))
             continue
-        validation = validate_price_history_csv(path, min_history_rows=1)
+        validation = _validate_price_history(path)
         if validation.get("status") != "valid":
             issues.append(_validation_issue("PUBLISHED_PRICE_FILE_INVALID", f"tickers[{index}]"))
             continue
@@ -523,6 +525,21 @@ def validate_published_dataset(
         if resulting != validation.get("end_date"):
             issues.append(_validation_issue("PUBLISHED_LAST_OBSERVATION_MISMATCH", f"tickers[{index}]"))
         if expected_instrument["lifecycle_status"] == "inactive":
+            retained_boundary = _retained_history_boundary(
+                expected_instrument,
+                validation=validation,
+            )
+            if (
+                retained_boundary["retained_history_boundary_status"]
+                != "aligned"
+                or not _row_fields_match(entry, retained_boundary)
+            ):
+                issues.append(
+                    _validation_issue(
+                        "PUBLISHED_RETAINED_HISTORY_BOUNDARY_INVALID",
+                        f"tickers[{index}]",
+                    )
+                )
             if (
                 entry.get("freshness_status") != "not_expected"
                 or entry.get("history_coverage_status")
@@ -535,22 +552,33 @@ def validate_published_dataset(
                     )
                 )
             continue
-        expected_history_status, expected_history_reason = _history_coverage(
+        profile, required = expected_completed_session(
+            expected_instrument,
+            validation_at,
+        )
+        expected_history = _history_coverage(
             expected_instrument,
             validation=validation,
+            expected_session=required,
         )
-        if (
-            entry.get("history_coverage_status") != expected_history_status
-            or entry.get("history_coverage_reason_code")
-            != expected_history_reason
-        ):
+        if not _row_fields_match(entry, expected_history):
             issues.append(
                 _validation_issue(
                     "PUBLISHED_HISTORY_COVERAGE_CLASSIFICATION_INVALID",
                     f"tickers[{index}]",
                 )
             )
-        profile, required = expected_completed_session(expected_instrument, validation_at)
+        expected_retained_boundary = _retained_history_boundary(
+            expected_instrument,
+            validation=validation,
+        )
+        if not _row_fields_match(entry, expected_retained_boundary):
+            issues.append(
+                _validation_issue(
+                    "PUBLISHED_RETAINED_HISTORY_BOUNDARY_INVALID",
+                    f"tickers[{index}]",
+                )
+            )
         actual_end = validation.get("end_date")
         declared_freshness = entry.get("freshness_status")
         actual_is_stale = (
@@ -678,13 +706,14 @@ def _refresh_instrument(
     path = price_root / f"{source_symbol}.csv"
     profile, expected = expected_completed_session(instrument, run_at)
     initial_validation = (
-        validate_price_history_csv(path, min_history_rows=1)
+        _validate_price_history(path)
         if path.is_file()
         else {"status": "missing"}
     )
-    initial_history_status, initial_history_reason = _history_coverage(
+    initial_history = _history_coverage(
         instrument,
         validation=initial_validation,
+        expected_session=expected,
     )
     base = {
         "ticker": ticker,
@@ -704,8 +733,11 @@ def _refresh_instrument(
         "persisted_file_path": (DATA_RELATIVE_ROOT / f"{source_symbol}.csv").as_posix(),
         "persisted_file_checksum": _sha256_file(path) if path.is_file() else None,
         **_lifecycle_fields(instrument),
-        "history_coverage_status": initial_history_status,
-        "history_coverage_reason_code": initial_history_reason,
+        **initial_history,
+        **_retained_history_boundary(
+            instrument,
+            validation=initial_validation,
+        ),
     }
     if profile is None or expected is None:
         return base
@@ -750,7 +782,11 @@ def _refresh_instrument(
             result = {**result, "status": "historical_conflict", "file_changed": False, "rows_added": 0}
             error["reason_code"] = conflict
 
-    final_validation = validate_price_history_csv(path, min_history_rows=1) if path.is_file() else {"status": "missing"}
+    final_validation = (
+        _validate_price_history(path)
+        if path.is_file()
+        else {"status": "missing"}
+    )
     resulting_end = final_validation.get("end_date")
     status, reason = _normalize_status(
         result,
@@ -761,13 +797,17 @@ def _refresh_instrument(
         had_existing_valid=before_validation.get("status") == "valid",
         no_session_expected=_no_new_session_expected(profile, run_at, expected),
     )
-    history_status, history_reason = _history_coverage(
+    history_coverage = _history_coverage(
         instrument,
         validation=final_validation,
+        expected_session=expected,
     )
-    if history_reason == "LISTING_START_AFTER_FIRST_OBSERVATION":
+    if (
+        history_coverage["history_coverage_reason_code"]
+        == "LISTING_START_AFTER_FIRST_OBSERVATION"
+    ):
         status = "failed"
-        reason = history_reason
+        reason = history_coverage["history_coverage_reason_code"]
     return {
         **base,
         "previous_last_observation": previous_end,
@@ -776,8 +816,11 @@ def _refresh_instrument(
         "validation_status": "valid" if final_validation.get("status") == "valid" else "blocked",
         "freshness_status": status,
         "reason_code": reason,
-        "history_coverage_status": history_status,
-        "history_coverage_reason_code": history_reason,
+        **history_coverage,
+        **_retained_history_boundary(
+            instrument,
+            validation=final_validation,
+        ),
         "persisted_file_checksum": final_validation.get("checksum"),
     }
 
@@ -790,7 +833,7 @@ def _non_refreshable_lifecycle_row(
     source_symbol = str(instrument["source_symbol"])
     path = price_root / f"{source_symbol}.csv"
     validation = (
-        validate_price_history_csv(path, min_history_rows=1)
+        _validate_price_history(path)
         if path.is_file()
         else {"status": "missing"}
     )
@@ -809,21 +852,22 @@ def _non_refreshable_lifecycle_row(
         if is_retained
         else "PRE_LISTING_NOT_APPLICABLE"
     )
+    retained_boundary = _retained_history_boundary(
+        instrument,
+        validation=validation,
+    )
     if is_retained and not valid:
         status = "failed"
         reason = "RETAINED_INACTIVE_HISTORY_INVALID"
         history_status = "not_applicable"
         history_reason = "RETAINED_INACTIVE_HISTORY_INVALID"
-    elif (
-        is_retained
-        and isinstance(instrument.get("delisting_end_date"), str)
-        and str(validation.get("end_date"))
-        < str(instrument["delisting_end_date"])
+    elif is_retained and (
+        retained_boundary["retained_history_boundary_status"] != "aligned"
     ):
         status = "failed"
-        reason = "RETAINED_INACTIVE_HISTORY_END_MISSING"
+        reason = retained_boundary["retained_history_boundary_reason_code"]
         history_status = "not_applicable"
-        history_reason = "RETAINED_INACTIVE_HISTORY_END_MISSING"
+        history_reason = reason
     elif not is_retained and valid:
         status = "failed"
         reason = "PRE_LISTING_HISTORY_UNEXPECTED"
@@ -838,7 +882,18 @@ def _non_refreshable_lifecycle_row(
         "resulting_last_observation": validation.get("end_date"),
         "expected_completed_session": instrument.get("delisting_end_date"),
         "rows_added": 0,
-        "validation_status": "valid" if valid else "not_applicable",
+        "validation_status": (
+            "valid"
+            if valid
+            and (
+                not is_retained
+                or retained_boundary["retained_history_boundary_status"]
+                == "aligned"
+            )
+            else "blocked"
+            if is_retained
+            else "not_applicable"
+        ),
         "freshness_status": status,
         "reason_code": reason,
         "history_coverage_status": history_status,
@@ -848,6 +903,7 @@ def _non_refreshable_lifecycle_row(
         ).as_posix(),
         "persisted_file_checksum": validation.get("checksum"),
         **_lifecycle_fields(instrument),
+        **retained_boundary,
     }
 
 
@@ -855,22 +911,271 @@ def _history_coverage(
     instrument: Mapping[str, Any],
     *,
     validation: Mapping[str, Any],
-) -> tuple[str, str]:
+    expected_session: date | None,
+) -> dict[str, Any]:
+    base = {
+        "history_coverage_status": "not_applicable",
+        "history_coverage_reason_code": "PRICE_HISTORY_INVALID",
+        "history_coverage_boundary_date": (
+            expected_session.isoformat() if expected_session else None
+        ),
+        "history_listing_boundary_type": None,
+        "history_expected_session_count": None,
+        "history_observed_session_count": None,
+        "history_missing_session_count": None,
+        "history_initial_session_lag": None,
+        "history_session_coverage_ratio": None,
+        "history_bounded_session_coverage_ratio": None,
+        "history_required_session_coverage_ratio": None,
+    }
     if validation.get("status") != "valid":
-        return "not_applicable", "PRICE_HISTORY_INVALID"
+        return base
     row_count = int(validation.get("row_count") or 0)
-    if row_count >= DEFAULT_MIN_HISTORY_ROWS:
-        return "sufficient", "MINIMUM_ANALYTICAL_HISTORY_AVAILABLE"
     listing_start = instrument.get("listing_start_date")
     first_observation = validation.get("start_date")
     if not isinstance(listing_start, str):
-        return (
-            "insufficient_unexplained",
-            "INSUFFICIENT_HISTORY_WITHOUT_LISTING_EVIDENCE",
-        )
+        return {
+            **base,
+            "history_coverage_status": (
+                "sufficient"
+                if row_count >= DEFAULT_MIN_HISTORY_ROWS
+                else "insufficient_unexplained"
+            ),
+            "history_coverage_reason_code": (
+                "MINIMUM_ANALYTICAL_HISTORY_AVAILABLE"
+                if row_count >= DEFAULT_MIN_HISTORY_ROWS
+                else "INSUFFICIENT_HISTORY_WITHOUT_LISTING_EVIDENCE"
+            ),
+        }
     if not isinstance(first_observation, str) or first_observation < listing_start:
-        return "not_applicable", "LISTING_START_AFTER_FIRST_OBSERVATION"
-    return "limited_history", "LIMITED_HISTORY_SINCE_LISTING"
+        return {
+            **base,
+            "history_coverage_reason_code": (
+                "LISTING_START_AFTER_FIRST_OBSERVATION"
+            ),
+        }
+    profile = _resolve_market_profile(instrument)
+    if profile is None or expected_session is None:
+        return {
+            **base,
+            "history_coverage_reason_code": (
+                "HISTORY_COVERAGE_BOUNDARY_UNAVAILABLE"
+            ),
+        }
+    listing_date = date.fromisoformat(listing_start)
+    regular_way = instrument.get("regular_way_listing_date")
+    boundary_type = (
+        "when_issued_start"
+        if isinstance(regular_way, str) and listing_start < regular_way
+        else "regular_way_start"
+    )
+    first_expected = listing_date
+    while not _is_trading_session(
+        first_expected,
+        profile.holiday_calendar,
+    ):
+        first_expected += timedelta(days=1)
+    if expected_session < first_expected:
+        return {
+            **base,
+            "history_coverage_reason_code": "FUTURE_LISTING_NOT_APPLICABLE",
+            "history_listing_boundary_type": boundary_type,
+        }
+    expected_sessions = _trading_sessions(
+        first_expected,
+        expected_session,
+        profile.holiday_calendar,
+    )
+    observed_dates = {
+        day
+        for day in validation.get("observation_dates", ())
+        if isinstance(day, date)
+    }
+    observed_sessions = [
+        day for day in expected_sessions if day in observed_dates
+    ]
+    observed_count = len(observed_sessions)
+    expected_count = len(expected_sessions)
+    missing_count = expected_count - observed_count
+    first_observed_session = (
+        observed_sessions[0] if observed_sessions else None
+    )
+    initial_lag = (
+        expected_sessions.index(first_observed_session)
+        if first_observed_session is not None
+        else expected_count
+    )
+    coverage_ratio = (
+        round(observed_count / expected_count, 8)
+        if expected_count
+        else 0.0
+    )
+    required_observed_count = expected_count - initial_lag
+    bounded_ratio = (
+        observed_count / required_observed_count
+        if required_observed_count
+        else 0.0
+    )
+    detail = {
+        **base,
+        "history_coverage_boundary_date": expected_session.isoformat(),
+        "history_listing_boundary_type": boundary_type,
+        "history_expected_session_count": expected_count,
+        "history_observed_session_count": observed_count,
+        "history_missing_session_count": missing_count,
+        "history_initial_session_lag": initial_lag,
+        "history_session_coverage_ratio": coverage_ratio,
+        "history_bounded_session_coverage_ratio": round(
+            bounded_ratio,
+            8,
+        ),
+        "history_required_session_coverage_ratio": (
+            REQUIRED_LISTING_SESSION_COVERAGE_RATIO
+        ),
+    }
+    if str(validation.get("end_date")) < expected_session.isoformat():
+        return {
+            **detail,
+            "history_coverage_status": "insufficient_unexplained",
+            "history_coverage_reason_code": (
+                "HISTORY_END_BEFORE_EXPECTED_SESSION"
+            ),
+        }
+    if initial_lag > MAX_LISTING_START_SESSION_LAG:
+        return {
+            **detail,
+            "history_coverage_status": "insufficient_unexplained",
+            "history_coverage_reason_code": (
+                "HISTORY_START_TOO_LATE_AFTER_LISTING"
+            ),
+        }
+    missing_after_start = [
+        day
+        for day in expected_sessions[initial_lag:]
+        if day not in observed_dates
+    ]
+    if missing_after_start:
+        return {
+            **detail,
+            "history_coverage_status": "insufficient_unexplained",
+            "history_coverage_reason_code": (
+                "HISTORY_SESSION_GAPS_AFTER_LISTING"
+            ),
+        }
+    if bounded_ratio < REQUIRED_LISTING_SESSION_COVERAGE_RATIO:
+        return {
+            **detail,
+            "history_coverage_status": "insufficient_unexplained",
+            "history_coverage_reason_code": (
+                "HISTORY_SESSION_COVERAGE_BELOW_REQUIRED_RATIO"
+            ),
+        }
+    return {
+        **detail,
+        "history_coverage_status": (
+            "sufficient"
+            if observed_count >= DEFAULT_MIN_HISTORY_ROWS
+            else "limited_history"
+        ),
+        "history_coverage_reason_code": (
+            "MINIMUM_ANALYTICAL_HISTORY_AVAILABLE"
+            if observed_count >= DEFAULT_MIN_HISTORY_ROWS
+            else "LIMITED_HISTORY_SINCE_LISTING"
+        ),
+    }
+
+
+def _retained_history_boundary(
+    instrument: Mapping[str, Any],
+    *,
+    validation: Mapping[str, Any],
+) -> dict[str, Any]:
+    lifecycle_status = str(instrument.get("lifecycle_status") or "")
+    expected_end = instrument.get("delisting_end_date")
+    actual_end = validation.get("end_date")
+    base = {
+        "retained_history_boundary_status": "not_applicable",
+        "retained_history_boundary_reason_code": (
+            "RETAINED_HISTORY_BOUNDARY_NOT_APPLICABLE"
+        ),
+        "retained_history_expected_end_date": (
+            expected_end if isinstance(expected_end, str) else None
+        ),
+        "retained_history_actual_end_date": (
+            actual_end if isinstance(actual_end, str) else None
+        ),
+    }
+    if lifecycle_status != "inactive":
+        return base
+    if (
+        validation.get("status") != "valid"
+        or not isinstance(expected_end, str)
+        or not isinstance(actual_end, str)
+    ):
+        return {
+            **base,
+            "retained_history_boundary_status": "invalid",
+            "retained_history_boundary_reason_code": (
+                "RETAINED_HISTORY_DATE_BOUNDARY_INVALID"
+            ),
+        }
+    if actual_end < expected_end:
+        return {
+            **base,
+            "retained_history_boundary_status": "ends_before",
+            "retained_history_boundary_reason_code": (
+                "RETAINED_HISTORY_ENDS_BEFORE_EXPECTED_SESSION"
+            ),
+        }
+    if actual_end > expected_end:
+        return {
+            **base,
+            "retained_history_boundary_status": "extends_after",
+            "retained_history_boundary_reason_code": (
+                "RETAINED_HISTORY_EXTENDS_AFTER_DELISTING"
+            ),
+        }
+    return {
+        **base,
+        "retained_history_boundary_status": "aligned",
+        "retained_history_boundary_reason_code": (
+            "RETAINED_HISTORY_ENDS_ON_EXPECTED_SESSION"
+        ),
+    }
+
+
+def _validate_price_history(path: Path) -> dict[str, Any]:
+    validation = validate_price_history_csv(path, min_history_rows=1)
+    if validation.get("status") != "valid":
+        return validation
+    frame = pd.read_csv(path, usecols=lambda column: column.strip().lower() == "date")
+    date_column = next(
+        (
+            column
+            for column in frame.columns
+            if column.strip().lower() == "date"
+        ),
+        None,
+    )
+    if date_column is None:
+        return {
+            **validation,
+            "status": "validation_failed",
+            "note": "Price-history date column is unavailable.",
+        }
+    return {
+        **validation,
+        "observation_dates": tuple(
+            pd.to_datetime(frame[date_column], errors="raise").dt.date
+        ),
+    }
+
+
+def _row_fields_match(
+    row: Mapping[str, Any],
+    expected: Mapping[str, Any],
+) -> bool:
+    return all(row.get(key) == value for key, value in expected.items())
 
 
 def _lifecycle_fields(instrument: Mapping[str, Any]) -> dict[str, Any]:
@@ -936,7 +1241,11 @@ def _prefetch_batch_provider(
         if expected is None:
             continue
         path = price_root / f"{instrument['source_symbol']}.csv"
-        validation = validate_price_history_csv(path, min_history_rows=1) if path.is_file() else {"status": "missing"}
+        validation = (
+            _validate_price_history(path)
+            if path.is_file()
+            else {"status": "missing"}
+        )
         if validation.get("status") == "valid" and validation.get("end_date") >= expected.isoformat():
             continue
         start = (
@@ -1100,6 +1409,20 @@ def _is_trading_session(day: date, calendar_name: str) -> bool:
         else _continental_equity_holidays(day.year)
     )
     return day not in holidays
+
+
+def _trading_sessions(
+    start: date,
+    end: date,
+    calendar_name: str,
+) -> list[date]:
+    sessions: list[date] = []
+    cursor = start
+    while cursor <= end:
+        if _is_trading_session(cursor, calendar_name):
+            sessions.append(cursor)
+        cursor += timedelta(days=1)
+    return sessions
 
 
 def _us_equity_holidays(year: int) -> set[date]:
