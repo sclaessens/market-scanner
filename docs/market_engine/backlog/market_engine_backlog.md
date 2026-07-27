@@ -589,6 +589,32 @@ green publication canary requires their separate remediation. ME-DATA11 —
 Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot — remains
 planned and has not started.
 
+### ME-SR20 — Provider OHLC diagnostic capture and controlled revalidation
+
+Status: IMPLEMENTED / DRAFT REVIEW REQUIRED
+
+ME-SR20 adds safe rejected-bar evidence and controlled revalidation without
+weakening the OHLC contract. The historical canary did not retain enough raw
+evidence to prove a precision defect, so all 44 original causes remain
+explicitly classified as insufficient historical evidence.
+
+### ME-SR21 — Empty provider-batch completeness and retry remediation
+
+Status: IMPLEMENTED / DRAFT REVIEW REQUIRED
+
+ME-SR21 detects complete and partial empty provider batches, applies bounded
+retry, deterministic splitting, and bounded single-ticker fallback, and
+records the route per ticker. NSA remains a separate provider data gap.
+
+### ME-SR22 — TMHC lifecycle and final-session remediation
+
+Status: PARTIALLY IMPLEMENTED / DATA EVIDENCE BLOCKED
+
+Primary SEC evidence proves July 24 as TMHC's final regular-way session and
+July 25 as its first inactive date. The lifecycle record is implemented, but
+the approved provider no longer returns the required July 24 bar. No canonical
+data change is authorized.
+
 ## Current ChatGPT Advisory Artifact Chain
 
 The current ME-CI advisory chain is:

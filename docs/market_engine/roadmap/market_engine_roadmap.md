@@ -374,6 +374,13 @@ separate `market-data` pull request, and preserves the generic fail-closed
 runtime contract. The canary's other 70 provider/session blockers are outside
 ME-SR19 and must be remediated separately before a green publication canary.
 
+ME-SR20 adds rejected-provider-bar diagnostics and unchanged-contract
+revalidation. ME-SR21 adds bounded empty/partial batch retry, deterministic
+split, and single-ticker fallback. ME-SR22 proves and records TMHC's July 24
+final regular-way session and July 25 inactive boundary. NSA and TMHC's
+unavailable provider sessions remain visible blockers; these stories do not
+authorize a publication canary.
+
 ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot —
 remains planned and has not started. It must reuse the generic ME-DATA10
 engine without code changes for issuer identity, source tags, or formula
