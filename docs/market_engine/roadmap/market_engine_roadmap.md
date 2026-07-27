@@ -120,8 +120,9 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
   -> ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot (completed / two AAPL margins derived / downstream measured)
   -> ME-SR17 — Implement scheduled canonical price refresh and freshness publication (completed / production publication canary exposed lifecycle gap)
-  -> ME-SR18 — Add corporate-action-aware lifecycle and listing-age freshness (implemented / post-merge production canary required)
-  -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / next active)
+  -> ME-SR18 — Add corporate-action-aware lifecycle and listing-age freshness (implemented / first post-merge canary failed closed)
+  -> ME-SR19 — BLD/JHG retained-history boundary remediation (implemented / draft review required)
+  -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / not started)
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -360,18 +361,23 @@ after a bounded one-session start tolerance.
 The active order is:
 
 ```text
-ME-DATA10 -> ME-SR17 -> ME-SR18 -> post-merge canary -> ME-DATA11
+ME-DATA10 -> ME-SR17 -> ME-SR18 -> failed post-merge canary -> ME-SR19 -> ME-DATA11
 ```
 
-ME-SR18 is locally implemented with a 949-active / 3-retained-inactive
-lifecycle projection. Its production status requires a post-merge canary that
-proves the healthy workflow handoff to Daily Market Scan while continuing to
-fail closed on any real stale or provider failure.
+ME-SR18 is implemented with a 949-active / 3-retained-inactive lifecycle
+projection. Its first post-merge canary failed closed on two inherited
+post-delisting price tails and did not start Daily Market Scan.
 
-After the ME-SR18 canary, ME-DATA11 — Execute a diversified US-GAAP/IFRS
-multi-ticker derivation pilot — remains next. It must reuse the generic
-ME-DATA10 engine without code changes for issuer identity, source tags, or
-formula selection.
+ME-SR19 proves June 30, 2026 as the final regular-way date for BLD and JHG,
+corrects only their zero-volume July 1 and July 2 carry-forward rows through a
+separate `market-data` pull request, and preserves the generic fail-closed
+runtime contract. The canary's other 70 provider/session blockers are outside
+ME-SR19 and must be remediated separately before a green publication canary.
+
+ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot —
+remains planned and has not started. It must reuse the generic ME-DATA10
+engine without code changes for issuer identity, source tags, or formula
+selection.
 
 Roadmap outcome:
 
