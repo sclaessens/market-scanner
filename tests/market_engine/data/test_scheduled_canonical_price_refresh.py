@@ -4,7 +4,7 @@ import copy
 import json
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 import pandas as pd
 import pytest
@@ -264,6 +264,152 @@ def test_empty_provider_response_is_stale_and_preserves_history(tmp_path: Path) 
     assert report["tickers"][0]["freshness_status"] == "stale"
     assert report["tickers"][0]["reason_code"] == "EXPECTED_SESSION_NOT_AVAILABLE"
     assert (fixture["stage"] / "data/processed/AAA.csv").read_bytes() == original
+
+
+def test_rejected_ohlc_bar_records_safe_exact_diagnostics(tmp_path: Path) -> None:
+    fixture = _fixture(tmp_path, [_instrument("AAA")], end="2026-07-13")
+    report = _run(
+        fixture,
+        provider=lambda *_args: _frame(
+            [("2026-07-14", 500)],
+            high=490,
+        ),
+    )
+
+    row = report["tickers"][0]
+    diagnostic = row["rejected_bar_diagnostics"][0]
+    assert row["reason_code"] == "PROVIDER_OHLC_INVALID"
+    assert diagnostic["ticker"] == "AAA"
+    assert diagnostic["session_date"] == "2026-07-14"
+    assert diagnostic["provider"] == scheduled.PROVIDER_IDENTITY
+    assert diagnostic["raw_ohlcv"]["open"] == 499.5
+    assert diagnostic["canonicalized_ohlcv"]["open"] == 499.5
+    assert diagnostic["violations"] == [
+        {
+            "relation": "HIGH_BELOW_OPEN",
+            "left_value": 490.0,
+            "right_value": 499.5,
+            "absolute_deviation": 9.5,
+            "relative_deviation": 9.5 / 499.5,
+        },
+        {
+            "relation": "HIGH_BELOW_CLOSE",
+            "left_value": 490.0,
+            "right_value": 500.0,
+            "absolute_deviation": 10.0,
+            "relative_deviation": 0.02,
+        },
+        {
+            "relation": "HIGH_BELOW_LOW",
+            "left_value": 490.0,
+            "right_value": 499.0,
+            "absolute_deviation": 9.0,
+            "relative_deviation": 9.0 / 499.0,
+        },
+    ]
+    assert "token" not in json.dumps(diagnostic).lower()
+
+
+def test_material_open_below_low_remains_blocked() -> None:
+    frame = _frame([("2026-07-14", 100)])
+    frame.loc[0, "Low"] = 110
+    with pytest.raises(scheduled.ProviderBoundaryError) as exc_info:
+        scheduled._validate_provider_frame(
+            frame,
+            date(2026, 7, 14),
+            provider_symbol="AAA",
+            retry_number=1,
+        )
+    assert exc_info.value.reason_code == "PROVIDER_OHLC_INVALID"
+    assert exc_info.value.diagnostic["violations"][0]["absolute_deviation"] == 10.5
+
+
+def test_empty_batch_retries_splits_and_uses_single_ticker_fallback(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = _fixture(
+        tmp_path,
+        [_instrument("AAA"), _instrument("BBB")],
+        end="2026-07-13",
+    )
+    calls: list[tuple[str, ...]] = []
+    sleeps: list[float] = []
+
+    def empty_batch(
+        symbols: Sequence[str],
+        _start: str,
+        _end: str,
+    ) -> dict[str, pd.DataFrame]:
+        calls.append(tuple(symbols))
+        return {symbol: pd.DataFrame() for symbol in symbols}
+
+    def single(symbol: str, *_args: Any) -> pd.DataFrame:
+        return _frame([("2026-07-14", 500 if symbol == "AAA" else 600)])
+
+    monkeypatch.setattr(scheduled, "download_yfinance_batch", empty_batch)
+    monkeypatch.setattr(scheduled, "_download_yfinance_history", single)
+    report = _run(
+        fixture,
+        provider=None,
+        sleeper=sleeps.append,
+        max_attempts=2,
+    )
+
+    assert calls == [
+        ("AAA", "BBB"),
+        ("AAA", "BBB"),
+        ("AAA",),
+        ("AAA",),
+        ("BBB",),
+        ("BBB",),
+    ]
+    by_ticker = {row["ticker"]: row for row in report["tickers"]}
+    assert by_ticker["AAA"]["freshness_status"] == "updated"
+    assert by_ticker["BBB"]["freshness_status"] == "updated"
+    assert by_ticker["AAA"]["provider_retrieval"][-1]["request_mode"] == "single_ticker"
+    assert report["publication"]["publication_set_valid"] is True
+
+
+def test_partial_batch_retries_only_missing_ticker(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = _fixture(
+        tmp_path,
+        [_instrument("AAA"), _instrument("BBB")],
+        end="2026-07-13",
+    )
+    calls: list[tuple[str, ...]] = []
+
+    def partial_batch(
+        symbols: Sequence[str],
+        _start: str,
+        _end: str,
+    ) -> dict[str, pd.DataFrame]:
+        calls.append(tuple(symbols))
+        return {
+            symbol: (
+                _frame([("2026-07-14", 500)])
+                if symbol == "AAA"
+                else pd.DataFrame()
+            )
+            for symbol in symbols
+        }
+
+    monkeypatch.setattr(scheduled, "download_yfinance_batch", partial_batch)
+    monkeypatch.setattr(
+        scheduled,
+        "_download_yfinance_history",
+        lambda *_args: pd.DataFrame(),
+    )
+    report = _run(fixture, provider=None, sleeper=lambda _delay: None, max_attempts=2)
+
+    assert calls == [("AAA", "BBB"), ("AAA", "BBB")]
+    by_ticker = {row["ticker"]: row for row in report["tickers"]}
+    assert by_ticker["AAA"]["freshness_status"] == "updated"
+    assert by_ticker["BBB"]["reason_code"] == "EXPECTED_SESSION_NOT_AVAILABLE"
+    assert report["publication"]["publication_required"] is False
 
 
 def test_allow_degraded_still_reconciles_declared_freshness(
@@ -666,6 +812,7 @@ def _run(
     provider: Any,
     run_at: datetime = RUN_AT,
     sleeper: Any = lambda _seconds: None,
+    max_attempts: int = 3,
 ) -> dict[str, Any]:
     return scheduled.run_scheduled_refresh(
         run_id="me-sr17-test-20260715T100000Z",
@@ -677,7 +824,7 @@ def _run(
         run_at=run_at,
         workflow_run_id="123",
         provider=provider,
-        max_attempts=3,
+        max_attempts=max_attempts,
         sleeper=sleeper,
     )
 

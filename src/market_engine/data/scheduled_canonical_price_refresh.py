@@ -83,9 +83,16 @@ class ScheduledPriceRefreshError(ValueError):
 
 
 class ProviderBoundaryError(RuntimeError):
-    def __init__(self, reason_code: str, message: str) -> None:
+    def __init__(
+        self,
+        reason_code: str,
+        message: str,
+        *,
+        diagnostic: Mapping[str, Any] | None = None,
+    ) -> None:
         super().__init__(message)
         self.reason_code = reason_code
+        self.diagnostic = dict(diagnostic or {})
 
 
 @dataclass(frozen=True)
@@ -750,6 +757,7 @@ def _refresh_instrument(
     before_frame = pd.read_csv(path) if before_validation.get("status") == "valid" else None
     previous_end = before_validation.get("end_date")
     error: dict[str, str] = {}
+    rejected_bar_diagnostics: list[dict[str, Any]] = []
 
     def guarded_provider(symbol: str, start: str, end: str) -> pd.DataFrame:
         try:
@@ -764,6 +772,8 @@ def _refresh_instrument(
             )
         except ProviderBoundaryError as exc:
             error["reason_code"] = exc.reason_code
+            if exc.diagnostic:
+                rejected_bar_diagnostics.append(exc.diagnostic)
             raise
 
     result = refresh_one_instrument(
@@ -809,6 +819,11 @@ def _refresh_instrument(
     ):
         status = "failed"
         reason = history_coverage["history_coverage_reason_code"]
+    provider_retrieval = (
+        provider.diagnostics_for(source_symbol)
+        if hasattr(provider, "diagnostics_for")
+        else []
+    )
     return {
         **base,
         "previous_last_observation": previous_end,
@@ -817,6 +832,8 @@ def _refresh_instrument(
         "validation_status": "valid" if final_validation.get("status") == "valid" else "blocked",
         "freshness_status": status,
         "reason_code": reason,
+        "provider_retrieval": provider_retrieval,
+        "rejected_bar_diagnostics": rejected_bar_diagnostics,
         **history_coverage,
         **_retained_history_boundary(
             instrument,
@@ -1211,7 +1228,12 @@ def _provider_with_retries(
     for attempt in range(1, max_attempts + 1):
         try:
             frame = provider(symbol, start, end)
-            return _validate_provider_frame(frame, expected_session)
+            return _validate_provider_frame(
+                frame,
+                expected_session,
+                provider_symbol=symbol,
+                retry_number=attempt,
+            )
         except ProviderBoundaryError:
             raise
         except (TimeoutError, ConnectionError) as exc:
@@ -1260,24 +1282,114 @@ def _prefetch_batch_provider(
     symbols = [row[0] for row in requests]
     start = min(row[1] for row in requests).isoformat()
     end = (max(row[2] for row in requests) + timedelta(days=1)).isoformat()
-    cache: dict[str, pd.DataFrame] | None = None
+    cache: dict[str, pd.DataFrame] = {}
     failure: ProviderBoundaryError | None = None
-    for attempt in range(1, max_attempts + 1):
-        try:
-            cache = download_yfinance_batch(symbols, start, end)
-            break
-        except (TimeoutError, ConnectionError) as exc:
-            failure = ProviderBoundaryError("PROVIDER_TIMEOUT", type(exc).__name__)
-        except Exception as exc:
-            detail = str(exc).lower()
-            reason = "PROVIDER_RATE_LIMITED" if "429" in detail or "rate limit" in detail else "PROVIDER_ERROR"
-            failure = ProviderBoundaryError(reason, type(exc).__name__)
-        if attempt < max_attempts:
-            sleeper(float(2 ** (attempt - 1)))
+    diagnostics: dict[str, list[dict[str, Any]]] = {symbol: [] for symbol in symbols}
+
+    def fetch_batch(batch_symbols: Sequence[str], *, split_depth: int) -> None:
+        nonlocal failure
+        received: dict[str, pd.DataFrame] = {}
+        for attempt in range(1, max_attempts + 1):
+            failure = None
+            try:
+                received = download_yfinance_batch(batch_symbols, start, end)
+            except (TimeoutError, ConnectionError) as exc:
+                failure = ProviderBoundaryError("PROVIDER_TIMEOUT", type(exc).__name__)
+            except Exception as exc:
+                detail = str(exc).lower()
+                reason = (
+                    "PROVIDER_RATE_LIMITED"
+                    if "429" in detail or "rate limit" in detail
+                    else "PROVIDER_ERROR"
+                )
+                failure = ProviderBoundaryError(reason, type(exc).__name__)
+            missing = [
+                symbol
+                for symbol in batch_symbols
+                if received.get(symbol, pd.DataFrame()).empty
+            ]
+            classification = (
+                failure.reason_code
+                if failure is not None
+                else "PROVIDER_BATCH_EMPTY"
+                if len(missing) == len(batch_symbols)
+                else "PROVIDER_BATCH_PARTIAL"
+                if missing
+                else "PROVIDER_BATCH_COMPLETE"
+            )
+            for symbol in batch_symbols:
+                diagnostics[symbol].append(
+                    {
+                        "request_mode": "batch",
+                        "batch_symbols": list(batch_symbols),
+                        "attempt": attempt,
+                        "split_depth": split_depth,
+                        "classification": classification,
+                        "received_bar_count": int(
+                            len(received.get(symbol, pd.DataFrame()))
+                        ),
+                    }
+                )
+            for symbol, frame in received.items():
+                if symbol in batch_symbols and not frame.empty:
+                    cache[symbol] = frame.copy()
+            if not missing:
+                return
+            if attempt < max_attempts:
+                sleeper(float(2 ** (attempt - 1)))
+
+        unresolved = [
+            symbol for symbol in batch_symbols if symbol not in cache
+        ]
+        if not unresolved:
+            return
+        if len(unresolved) > 1:
+            midpoint = len(unresolved) // 2
+            fetch_batch(unresolved[:midpoint], split_depth=split_depth + 1)
+            fetch_batch(unresolved[midpoint:], split_depth=split_depth + 1)
+            return
+        symbol = unresolved[0]
+        for attempt in range(1, max_attempts + 1):
+            try:
+                frame = _download_yfinance_history(symbol, start, end)
+                reason = (
+                    "PROVIDER_SINGLE_TICKER_EMPTY"
+                    if frame.empty
+                    else "PROVIDER_SINGLE_TICKER_COMPLETE"
+                )
+            except (TimeoutError, ConnectionError) as exc:
+                frame = pd.DataFrame()
+                reason = "PROVIDER_TIMEOUT"
+                failure = ProviderBoundaryError(reason, type(exc).__name__)
+            except Exception as exc:
+                frame = pd.DataFrame()
+                detail = str(exc).lower()
+                reason = (
+                    "PROVIDER_RATE_LIMITED"
+                    if "429" in detail or "rate limit" in detail
+                    else "PROVIDER_ERROR"
+                )
+                failure = ProviderBoundaryError(reason, type(exc).__name__)
+            diagnostics[symbol].append(
+                {
+                    "request_mode": "single_ticker",
+                    "batch_symbols": [symbol],
+                    "attempt": attempt,
+                    "split_depth": split_depth + 1,
+                    "classification": reason,
+                    "received_bar_count": int(len(frame)),
+                }
+            )
+            if not frame.empty:
+                cache[symbol] = frame.copy()
+                return
+            if attempt < max_attempts:
+                sleeper(float(2 ** (attempt - 1)))
+
+    fetch_batch(symbols, split_depth=0)
 
     def cached_provider(symbol: str, requested_start: str, requested_end: str) -> pd.DataFrame:
-        if cache is None:
-            assert failure is not None
+        if not cache and failure is not None:
             raise failure
         frame = cache.get(symbol, pd.DataFrame()).copy()
         if frame.empty:
@@ -1285,10 +1397,19 @@ def _prefetch_batch_provider(
         dates = pd.to_datetime(frame["Date"])
         return frame[(dates >= pd.Timestamp(requested_start)) & (dates < pd.Timestamp(requested_end))].copy()
 
+    cached_provider.diagnostics_for = lambda symbol: list(
+        diagnostics.get(_to_yfinance_symbol(str(symbol)), [])
+    )
     return cached_provider
 
 
-def _validate_provider_frame(frame: pd.DataFrame | None, expected_session: date) -> pd.DataFrame:
+def _validate_provider_frame(
+    frame: pd.DataFrame | None,
+    expected_session: date,
+    *,
+    provider_symbol: str | None = None,
+    retry_number: int | None = None,
+) -> pd.DataFrame:
     if frame is None or frame.empty:
         return pd.DataFrame()
     required = {"Date", "Open", "High", "Low", "Close", "Adj Close", "Volume"}
@@ -1308,14 +1429,82 @@ def _validate_provider_frame(frame: pd.DataFrame | None, expected_session: date)
         values = pd.to_numeric(frame[column], errors="coerce")
         if values.isna().any() or any(not math.isfinite(float(value)) for value in values):
             raise ProviderBoundaryError("PROVIDER_PAYLOAD_MALFORMED", f"provider {column} values are invalid")
+    fetch_timestamp = _utc_text(datetime.now(UTC))
     for row in frame.itertuples(index=False):
         open_price = float(getattr(row, "Open"))
         high = float(getattr(row, "High"))
         low = float(getattr(row, "Low"))
         close = float(getattr(row, "Close"))
-        if low > min(open_price, close) or high < max(open_price, close) or high < low:
-            raise ProviderBoundaryError("PROVIDER_OHLC_INVALID", "provider OHLC relationship is invalid")
+        violations = _ohlc_violations(
+            open_price=open_price,
+            high=high,
+            low=low,
+            close=close,
+        )
+        if violations:
+            raw = {
+                "open": getattr(row, "Open"),
+                "high": getattr(row, "High"),
+                "low": getattr(row, "Low"),
+                "close": getattr(row, "Close"),
+                "volume": getattr(row, "Volume"),
+            }
+            canonicalized = {
+                key: float(value) if key != "volume" else int(value)
+                for key, value in raw.items()
+            }
+            raise ProviderBoundaryError(
+                "PROVIDER_OHLC_INVALID",
+                "provider OHLC relationship is invalid",
+                diagnostic={
+                    "ticker": provider_symbol,
+                    "session_date": pd.Timestamp(getattr(row, "Date")).date().isoformat(),
+                    "provider": PROVIDER_IDENTITY,
+                    "fetch_timestamp": fetch_timestamp,
+                    "raw_ohlcv": raw,
+                    "canonicalized_ohlcv": canonicalized,
+                    "numeric_representation": {
+                        key: type(value).__name__ for key, value in raw.items()
+                    },
+                    "violations": violations,
+                    "retry_number": retry_number,
+                    "final_reason_code": "PROVIDER_OHLC_INVALID",
+                },
+            )
     return frame
+
+
+def _ohlc_violations(
+    *,
+    open_price: float,
+    high: float,
+    low: float,
+    close: float,
+) -> list[dict[str, Any]]:
+    checks = (
+        ("LOW_ABOVE_OPEN", low, open_price, low - open_price),
+        ("LOW_ABOVE_CLOSE", low, close, low - close),
+        ("HIGH_BELOW_OPEN", high, open_price, open_price - high),
+        ("HIGH_BELOW_CLOSE", high, close, close - high),
+        ("HIGH_BELOW_LOW", high, low, low - high),
+    )
+    violations = []
+    for relation, left, right, absolute_deviation in checks:
+        if absolute_deviation <= 0:
+            continue
+        denominator = max(abs(right), abs(left))
+        violations.append(
+            {
+                "relation": relation,
+                "left_value": left,
+                "right_value": right,
+                "absolute_deviation": absolute_deviation,
+                "relative_deviation": (
+                    absolute_deviation / denominator if denominator else None
+                ),
+            }
+        )
+    return violations
 
 
 def _historical_conflict(before: pd.DataFrame, after: pd.DataFrame) -> str | None:
