@@ -55,8 +55,9 @@ ME-GH02 - Batch artifact discovery and ticker status index
   -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
   -> ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot (completed / two AAPL margins derived / downstream measured)
   -> ME-SR17 — Implement scheduled canonical price refresh and freshness publication (completed / production publication canary exposed lifecycle gap)
-  -> ME-SR18 — Add corporate-action-aware lifecycle and listing-age freshness (implemented / post-merge production canary required)
-  -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / next active)
+  -> ME-SR18 — Add corporate-action-aware lifecycle and listing-age freshness (implemented / first post-merge canary failed closed)
+  -> ME-SR19 — BLD/JHG retained-history boundary remediation (implemented / draft review required)
+  -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / not started)
 ```
 
 ## Superseded baseline pointers
@@ -687,17 +688,24 @@ effective date while their price files remain retained and validated. Recent
 listings may be current and `limited_history`; unexplained short history and
 real stale/provider/validation failures remain degraded.
 
+Its first post-merge canary failed closed on inherited BLD and JHG price tails.
+ME-SR19 proves the existing lifecycle boundaries from primary SEC evidence and
+removes only the zero-volume July 1 and July 2 carry-forward rows through a
+reviewable data-only pull request. No runtime or lifecycle configuration
+change is required. The other 70 provider/session blockers remain separate.
+
 The locked sequence is:
 
 ```text
-ME-DATA10 -> ME-SR17 -> ME-SR18 -> ME-DATA11
+ME-DATA10 -> ME-SR17 -> ME-SR18 -> ME-SR19 -> ME-DATA11
 ```
 
-After the ME-SR18 post-merge canary, ME-DATA11 — Execute a diversified
-US-GAAP/IFRS multi-ticker
-derivation pilot — remains next. It must reuse the generic ME-DATA10 runtime
-and must not introduce automatic approval, estimates, hidden formula
-fallbacks, advice authority, or unrelated operational side effects.
+ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot —
+remains planned and has not started. A green publication canary first requires
+separate resolution of the remaining 44 `PROVIDER_OHLC_INVALID` and 26
+`EXPECTED_SESSION_NOT_AVAILABLE` results. ME-DATA11 must reuse the generic
+ME-DATA10 runtime and must not introduce automatic approval, estimates, hidden
+formula fallbacks, advice authority, or unrelated operational side effects.
 
 ## Completed ME-ADV01 result
 

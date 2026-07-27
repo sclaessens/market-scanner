@@ -61,8 +61,9 @@ ME-GH02 - Batch artifact discovery and ticker status index (completed)
   -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
   -> ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot (completed / two AAPL margins derived / downstream measured)
   -> ME-SR17 — Implement scheduled canonical price refresh and freshness publication (completed / production publication canary exposed lifecycle gap)
-  -> ME-SR18 — Add corporate-action-aware lifecycle and listing-age freshness (implemented / post-merge production canary required)
-  -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / next active)
+  -> ME-SR18 — Add corporate-action-aware lifecycle and listing-age freshness (implemented / first post-merge canary failed closed)
+  -> ME-SR19 — BLD/JHG retained-history boundary remediation (implemented / draft review required)
+  -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / not started)
 ```
 
 ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
@@ -521,7 +522,7 @@ baseline remained unchanged with no regressions or provider/network calls.
 
 ### ME-SR17 — Implement scheduled canonical price refresh and freshness publication
 
-Status: IMPLEMENTED / POST-MERGE PRODUCTION CANARY REQUIRED
+Status: IMPLEMENTED / FIRST POST-MERGE CANARY FAILED CLOSED
 
 ME-SR17 is the infrastructure and price-freshness insertion between ME-DATA10
 and ME-DATA11. It reuses the 952-instrument ME-DATA04 universe and ME-DATA05
@@ -534,7 +535,7 @@ operator approval is automated.
 The sequence is now:
 
 ```text
-ME-DATA10 -> ME-SR17 -> ME-SR18 -> post-merge canary -> ME-DATA11
+ME-DATA10 -> ME-SR17 -> ME-SR18 -> failed post-merge canary -> ME-SR19 -> ME-DATA11
 ```
 
 The first ME-SR17 production canary proved provider refresh, normal
@@ -567,12 +568,26 @@ registry v2. Feature branches still cannot publish, real
 stale/provider/validation failures remain red, and no fundamental approval is
 generated.
 
-Next sprint after the ME-SR18 canary: ME-DATA11 — Execute a diversified
-US-GAAP/IFRS multi-ticker derivation pilot. It may expand governed fact
-packages and approvals across a small diversified ticker set, but it must use
-the already generic ME-DATA10 runtime without ticker-specific code, automatic
-approval, estimates, hidden formula fallbacks, recommendation changes, or
-allocation authority.
+The first ME-SR18 post-merge canary completed the implementation's production
+proof and failed closed on the inherited BLD/JHG retained-history tails. It did
+not reopen ME-SR18. ME-SR19 owns the separate evidence-first data correction.
+
+### ME-SR19 — BLD/JHG retained-history boundary remediation
+
+Status: IMPLEMENTED / DRAFT REVIEW REQUIRED
+
+ME-SR19 proves from official SEC completion and delisting disclosures that
+June 30, 2026 was the final regular-way trading day for BLD and JHG. It
+retains the correct lifecycle boundary, removes only the zero-volume July 1
+and July 2 carry-forward rows in a separate reviewable `market-data` pull
+request, and adds explicit generic boundary regression coverage on `main`.
+No runtime or lifecycle configuration changes are required.
+
+The first ME-SR18 canary's other 44 `PROVIDER_OHLC_INVALID` and 26
+`EXPECTED_SESSION_NOT_AVAILABLE` results remain outside this sprint. A later
+green publication canary requires their separate remediation. ME-DATA11 —
+Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot — remains
+planned and has not started.
 
 ## Current ChatGPT Advisory Artifact Chain
 

@@ -499,6 +499,49 @@ def test_real_post_delisting_tail_shape_is_blocked_generically(
     )
 
 
+@pytest.mark.parametrize("ticker", ["BLD", "JHG"])
+def test_bld_jhg_boundary_remediation_preserves_valid_history(
+    tmp_path: Path,
+    ticker: str,
+) -> None:
+    instrument = _instrument(ticker)
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-01",
+        delisting_end_date="2026-06-30",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={},
+    )
+    path = fixture["published"] / "data/processed" / f"{ticker}.csv"
+    _write_rows(path, [("2026-06-30", 100.0, 1000)])
+    retained_bytes = path.read_bytes()
+
+    report = _run(
+        fixture,
+        provider=lambda *_args: (_ for _ in ()).throw(
+            AssertionError("inactive instrument must not call provider")
+        ),
+    )
+    row = report["tickers"][0]
+
+    assert row["retained_history_boundary_status"] == "aligned"
+    assert row["retained_history_boundary_reason_code"] == (
+        "RETAINED_HISTORY_ENDS_ON_EXPECTED_SESSION"
+    )
+    assert row["freshness_status"] == "not_expected"
+    assert row["history_coverage_status"] == "retained_inactive"
+    assert report["run_status"] == "completed"
+    assert report["publication"]["publication_set_valid"] is True
+    assert (
+        fixture["stage"] / "data/processed" / f"{ticker}.csv"
+    ).read_bytes() == retained_bytes
+
+
 def test_consumer_recomputes_retained_history_date_boundary(
     tmp_path: Path,
 ) -> None:
