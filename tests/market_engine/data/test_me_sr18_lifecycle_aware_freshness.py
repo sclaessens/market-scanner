@@ -27,17 +27,27 @@ def test_governed_canary_records_reconcile_to_official_dates() -> None:
     registry = load_lifecycle_registry(DEFAULT_LIFECYCLE_REGISTRY)
     by_ticker = {row["ticker"]: row for row in registry["records"]}
 
-    assert set(by_ticker) == {"BLD", "JHG", "GTLS", "FDXF", "HONA", "Q", "SOLS"}
+    assert set(by_ticker) == {
+        "BLD",
+        "JHG",
+        "GTLS",
+        "FDXF",
+        "HONA",
+        "Q",
+        "SOLS",
+        "TMHC",
+    }
     assert {
         ticker: (
             by_ticker[ticker]["delisting_end_date"],
             by_ticker[ticker]["status_effective_date"],
         )
-        for ticker in ("BLD", "JHG", "GTLS")
+        for ticker in ("BLD", "JHG", "GTLS", "TMHC")
     } == {
         "BLD": ("2026-06-30", "2026-07-01"),
         "JHG": ("2026-06-30", "2026-07-01"),
         "GTLS": ("2026-07-16", "2026-07-17"),
+        "TMHC": ("2026-07-24", "2026-07-25"),
     }
     assert {
         ticker: (
@@ -73,6 +83,34 @@ def test_repository_universe_becomes_949_active_and_retains_three_inactive() -> 
     assert {
         row["symbol"] for row in governed["inactive_instruments"]
     } == {"BLD", "JHG", "GTLS"}
+
+
+def test_tmhc_becomes_inactive_after_proven_final_regular_way_session() -> None:
+    universe = scheduled.load_authoritative_universe(
+        scheduled.DEFAULT_UNIVERSE_SNAPSHOT
+    )
+    registry = load_lifecycle_registry(DEFAULT_LIFECYCLE_REGISTRY)
+    on_final_session = apply_lifecycle_registry(
+        universe["instruments"],
+        registry,
+        as_of=date(2026, 7, 24),
+    )
+    after_final_session = apply_lifecycle_registry(
+        universe["instruments"],
+        registry,
+        as_of=date(2026, 7, 25),
+    )
+
+    assert "TMHC" in {
+        row["symbol"] for row in on_final_session["active_instruments"]
+    }
+    tmhc = next(
+        row
+        for row in after_final_session["inactive_instruments"]
+        if row["symbol"] == "TMHC"
+    )
+    assert tmhc["delisting_end_date"] == "2026-07-24"
+    assert tmhc["lifecycle_status_effective_date"] == "2026-07-25"
 
 
 def test_inactive_effective_date_is_not_applied_early_and_checksum_changes() -> None:
