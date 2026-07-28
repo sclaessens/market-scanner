@@ -589,6 +589,17 @@ green publication canary requires their separate remediation. ME-DATA11 —
 Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot — remains
 planned and has not started.
 
+### ME-RUN32 — Post-PR472 non-publishing canonical price refresh audit
+
+Status: COMPLETED WITH BLOCKERS
+
+One `publish=false` run from merged `main` recovered 68 of the 70 original
+provider/session blockers without an invalid-OHLC recurrence. NSA and TMHC
+remained blocked, and 12 newly observed symbols were stale because the provider
+stopped at the prior completed session. The publish job was skipped and the
+`market-data` branch SHA remained unchanged. A green publication canary remains
+unauthorized pending evidence review of the 14 current blockers.
+
 ### ME-SR20 — Provider OHLC diagnostic capture and controlled revalidation
 
 Status: IMPLEMENTED / DRAFT REVIEW REQUIRED

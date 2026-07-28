@@ -381,6 +381,14 @@ final regular-way session and July 25 inactive boundary. NSA and TMHC's
 unavailable provider sessions remain visible blockers; these stories do not
 authorize a publication canary.
 
+ME-RUN32 completed the post-PR472 non-publishing operational audit. One
+`publish=false` canonical refresh recovered 68 of the original 70 blockers;
+NSA and TMHC remained fail-closed and 12 new provider/session freshness
+blockers were observed. No invalid-OHLC result recurred, no publication bundle
+was produced, and `market-data` remained unchanged. The next roadmap action is
+evidence review of the 14 current blockers. A publication canary or retry is
+not authorized by ME-RUN32.
+
 ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot —
 remains planned and has not started. It must reuse the generic ME-DATA10
 engine without code changes for issuer identity, source tags, or formula
