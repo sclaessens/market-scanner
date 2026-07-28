@@ -707,6 +707,12 @@ separate resolution of the remaining 44 `PROVIDER_OHLC_INVALID` and 26
 ME-DATA10 runtime and must not introduce automatic approval, estimates, hidden
 formula fallbacks, advice authority, or unrelated operational side effects.
 
+ME-SR20 and ME-SR21 now provide the reviewable generic diagnostics and bounded
+provider-completeness path for those failures. ME-SR22 proves and implements
+TMHC's lifecycle boundary, but TMHC's final provider bar and NSA's
+three-session data gap remain fail-closed. A publication canary is not
+authorized by these changes.
+
 ## Completed ME-ADV01 result
 
 ME-ADV01 produces deterministic advice output with labels:

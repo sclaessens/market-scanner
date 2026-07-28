@@ -344,6 +344,42 @@
       "status_effective_date": "2025-10-20",
       "successor_or_acquirer": null,
       "ticker": "SOLS"
+    },
+    {
+      "corporate_action_type": "cash_acquisition",
+      "delisting_end_date": "2026-07-24",
+      "evidence": [
+        {
+          "evidence_retrieved_at": "2026-07-27T12:00:00Z",
+          "source_authority": "sec",
+          "source_host": "www.sec.gov",
+          "source_publication_date": "2026-07-24",
+          "source_type": "form_8_k",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1562476/000119312526316037/d148123d8k.htm",
+          "subject_exchange": "NYSE",
+          "subject_instrument_id": "equity:tmhc",
+          "subject_ticker": "TMHC",
+          "transition_support": [
+            "corporate_action_completion",
+            "trading_termination"
+          ]
+        }
+      ],
+      "exchange": "NYSE",
+      "instrument_id": "equity:tmhc",
+      "issuer_name": "Taylor Morrison Home Corporation",
+      "lifecycle_reason": "inactive_after_completed_corporate_action",
+      "lifecycle_status": "inactive",
+      "listing_start_date": null,
+      "official_source_hosts": {},
+      "provenance_checksum": "773b27d5882292fdf4fb98d1ce8e39cd1de5a00db096829c947f07212d3db173",
+      "regular_way_listing_date": null,
+      "status_effective_date": "2026-07-25",
+      "successor_or_acquirer": {
+        "name": "Berkshire Hathaway Inc.",
+        "ticker": "BRK.B"
+      },
+      "ticker": "TMHC"
     }
   ],
   "schema_version": "market-engine-instrument-lifecycle-registry-v2"
