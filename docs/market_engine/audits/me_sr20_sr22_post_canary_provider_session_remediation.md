@@ -38,7 +38,11 @@ supports controlled revalidation but does not prove a precision defect.
   "original_violated_relationship": null,
   "refetch_result": "VALID_2026-07-24",
   "classification": "INSUFFICIENT_EVIDENCE_ORIGINAL_REJECTED_BAR",
-  "end_status": "REVALIDATION_PATH_READY",
+  "runtime_retry_path_verified": true,
+  "valid_bar_observed_in_bounded_dry_run": true,
+  "canonical_history_updated": false,
+  "historical_root_cause_proven": false,
+  "still_blocked": true,
   "tickers": [
     "ABT", "ACM", "ADC", "ALL", "ATR", "AVNT", "BBY", "BJ", "BRO",
     "CLS", "CSL", "CUBE", "DAR", "DCI", "DOCN", "DTE", "EFX", "EGP",
@@ -69,7 +73,11 @@ depth, classification, and received bar count. Persistent missingness remains
   "classification": "TRANSIENT_EMPTY_PROVIDER_BATCH",
   "refetch_result": "VALID_2026-07-24",
   "added_sessions": [],
-  "end_status": "RETRY_PATH_READY",
+  "runtime_retry_path_verified": true,
+  "valid_bar_observed_in_bounded_dry_run": true,
+  "canonical_history_updated": false,
+  "historical_root_cause_proven": false,
+  "still_blocked": true,
   "tickers": [
     "MZTI", "NBIX", "NCLH", "NDAQ", "NDSN", "NEE", "NEM", "NET",
     "NEU", "NFG", "NFLX", "NI", "NJR", "NKE", "NLY", "NNN", "NOC",
@@ -140,3 +148,31 @@ lifecycle configuration, and governance documentation belong on `main`.
 There is no data branch in this remediation. Any later TMHC or NSA data-only
 pull request must be supported by independently reproducible provider
 evidence and must follow the reviewed runtime/lifecycle pull request.
+
+## PR 472 Review-Blocker Follow-Up
+
+The first draft captured an invalid batch bar but immediately propagated
+`PROVIDER_OHLC_INVALID`; it did not perform the promised isolated
+single-ticker revalidation. It also retained response and error state across
+batch attempts and recursive ticker groups.
+
+The follow-up isolates both boundaries:
+
+- `original_invalid_bar` records the batch rejection before any re-fetch;
+- each `single_ticker_revalidation` diagnostic is a bounded
+  single-ticker re-fetch attempt;
+- terminal outcomes are `single_ticker_refetch_valid`,
+  `single_ticker_refetch_invalid`, `single_ticker_refetch_missing`, or
+  `single_ticker_refetch_provider_failure`;
+- the new frame traverses the complete unchanged provider-frame and
+  downstream canonical-history contracts;
+- every batch attempt creates a new response map and exception value;
+- successful ticker frames become terminal and leave later retry requests;
+- unresolved tickers recurse independently and each ticker owns its terminal
+  provider failure.
+
+The 24 batch tickers with a valid bar observed during bounded research are
+not durably resolved: the runtime retry path and dry-run observation are
+verified, but canonical history was not updated and the historical root cause
+was not proven. NSA and TMHC remain blocked. No canonical data or publication
+workflow is part of this follow-up.

@@ -371,6 +371,146 @@ def test_empty_batch_retries_splits_and_uses_single_ticker_fallback(
     assert report["publication"]["publication_set_valid"] is True
 
 
+def test_invalid_batch_bar_is_revalidated_by_bounded_single_ticker_fetch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = _fixture(tmp_path, [_instrument("AAA")], end="2026-07-13")
+    single_calls: list[str] = []
+
+    monkeypatch.setattr(
+        scheduled,
+        "download_yfinance_batch",
+        lambda symbols, _start, _end: {
+            symbol: _frame([("2026-07-14", 500)], high=490)
+            for symbol in symbols
+        },
+    )
+
+    def valid_single(symbol: str, *_args: Any) -> pd.DataFrame:
+        single_calls.append(symbol)
+        return _frame([("2026-07-14", 500)])
+
+    monkeypatch.setattr(scheduled, "_download_yfinance_history", valid_single)
+    report = _run(fixture, provider=None, max_attempts=2)
+
+    row = report["tickers"][0]
+    assert single_calls == ["AAA"]
+    assert row["freshness_status"] == "updated"
+    assert row["reason_code"] == "VALIDATED_UPDATE_PERSISTED"
+    assert len(row["rejected_bar_diagnostics"]) == 1
+    assert [
+        item["classification"] for item in row["provider_retrieval"][-2:]
+    ] == ["original_invalid_bar", "single_ticker_refetch_valid"]
+
+
+@pytest.mark.parametrize(
+    ("single_result", "expected_reason", "terminal_classification"),
+    [
+        (
+            lambda *_args: _frame([("2026-07-14", 500)], high=490),
+            "PROVIDER_OHLC_INVALID",
+            "single_ticker_refetch_invalid",
+        ),
+        (
+            lambda *_args: pd.DataFrame(),
+            "EXPECTED_SESSION_NOT_AVAILABLE",
+            "single_ticker_refetch_missing",
+        ),
+        (
+            lambda *_args: (_ for _ in ()).throw(TimeoutError("bounded")),
+            "PROVIDER_TIMEOUT",
+            "single_ticker_refetch_provider_failure",
+        ),
+    ],
+)
+def test_invalid_batch_bar_remains_blocked_when_single_ticker_revalidation_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    single_result: Any,
+    expected_reason: str,
+    terminal_classification: str,
+) -> None:
+    fixture = _fixture(tmp_path, [_instrument("AAA")], end="2026-07-13")
+    original = (fixture["published"] / "data/processed/AAA.csv").read_bytes()
+    single_calls = 0
+
+    monkeypatch.setattr(
+        scheduled,
+        "download_yfinance_batch",
+        lambda symbols, _start, _end: {
+            symbol: _frame([("2026-07-14", 500)], high=490)
+            for symbol in symbols
+        },
+    )
+
+    def bounded_single(*args: Any) -> pd.DataFrame:
+        nonlocal single_calls
+        single_calls += 1
+        return single_result(*args)
+
+    monkeypatch.setattr(scheduled, "_download_yfinance_history", bounded_single)
+    report = _run(fixture, provider=None, max_attempts=2)
+    row = report["tickers"][0]
+
+    assert single_calls == 2
+    assert row["reason_code"] == expected_reason
+    assert row["freshness_status"] == "failed"
+    assert row["provider_retrieval"][-1]["classification"] == terminal_classification
+    assert (fixture["stage"] / "data/processed/AAA.csv").read_bytes() == original
+    assert "secret" not in json.dumps(row["provider_retrieval"]).lower()
+
+
+def test_ohlc_revalidation_is_ticker_local_and_revalidates_full_payload(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = _fixture(
+        tmp_path,
+        [_instrument("AAA"), _instrument("BBB")],
+        end="2026-07-13",
+    )
+    single_calls: list[str] = []
+
+    def batch(
+        symbols: Sequence[str],
+        _start: str,
+        _end: str,
+    ) -> dict[str, pd.DataFrame]:
+        return {
+            symbol: (
+                _frame([("2026-07-14", 500)], high=490)
+                if symbol == "AAA"
+                else _frame([("2026-07-14", 600)])
+            )
+            for symbol in symbols
+        }
+
+    def future_single(symbol: str, *_args: Any) -> pd.DataFrame:
+        single_calls.append(symbol)
+        return _frame([("2026-07-15", 500)])
+
+    monkeypatch.setattr(scheduled, "download_yfinance_batch", batch)
+    monkeypatch.setattr(scheduled, "_download_yfinance_history", future_single)
+    report = _run(fixture, provider=None, max_attempts=1)
+    by_ticker = {row["ticker"]: row for row in report["tickers"]}
+
+    assert single_calls == ["AAA"]
+    assert by_ticker["AAA"]["reason_code"] == "PROVIDER_FUTURE_DATED_BAR"
+    assert by_ticker["BBB"]["freshness_status"] == "updated"
+    assert by_ticker["BBB"]["provider_retrieval"] == [
+        {
+            "request_mode": "batch",
+            "batch_symbols": ["AAA", "BBB"],
+            "attempt": 1,
+            "split_depth": 0,
+            "classification": "PROVIDER_BATCH_COMPLETE",
+            "received_bar_count": 1,
+        }
+    ]
+    assert report["publication"]["publication_required"] is False
+
+
 def test_partial_batch_retries_only_missing_ticker(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -405,10 +545,92 @@ def test_partial_batch_retries_only_missing_ticker(
     )
     report = _run(fixture, provider=None, sleeper=lambda _delay: None, max_attempts=2)
 
-    assert calls == [("AAA", "BBB"), ("AAA", "BBB")]
+    assert calls == [("AAA", "BBB"), ("BBB",)]
     by_ticker = {row["ticker"]: row for row in report["tickers"]}
     assert by_ticker["AAA"]["freshness_status"] == "updated"
     assert by_ticker["BBB"]["reason_code"] == "EXPECTED_SESSION_NOT_AVAILABLE"
+    assert report["publication"]["publication_required"] is False
+
+
+def test_partial_success_is_terminal_and_later_timeout_has_attempt_local_state(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = _fixture(
+        tmp_path,
+        [_instrument("AAA"), _instrument("BBB")],
+        end="2026-07-13",
+    )
+    batch_calls: list[tuple[str, ...]] = []
+
+    def partial_then_timeout(
+        symbols: Sequence[str],
+        _start: str,
+        _end: str,
+    ) -> dict[str, pd.DataFrame]:
+        batch_calls.append(tuple(symbols))
+        if len(batch_calls) == 1:
+            return {
+                "AAA": _frame([("2026-07-14", 500)]),
+                "BBB": pd.DataFrame(),
+            }
+        raise TimeoutError("later attempt")
+
+    monkeypatch.setattr(scheduled, "download_yfinance_batch", partial_then_timeout)
+    monkeypatch.setattr(
+        scheduled,
+        "_download_yfinance_history",
+        lambda *_args: (_ for _ in ()).throw(TimeoutError("singleton")),
+    )
+    report = _run(fixture, provider=None, max_attempts=2)
+    by_ticker = {row["ticker"]: row for row in report["tickers"]}
+
+    assert batch_calls == [("AAA", "BBB"), ("BBB",)]
+    assert by_ticker["AAA"]["freshness_status"] == "updated"
+    assert len(by_ticker["AAA"]["provider_retrieval"]) == 1
+    assert by_ticker["BBB"]["reason_code"] == "PROVIDER_TIMEOUT"
+    assert [
+        item["received_bar_count"]
+        for item in by_ticker["BBB"]["provider_retrieval"][:2]
+    ] == [0, 0]
+    assert by_ticker["BBB"]["provider_retrieval"][1]["classification"] == "PROVIDER_TIMEOUT"
+
+
+def test_terminal_singleton_failures_are_isolated_per_ticker(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = _fixture(
+        tmp_path,
+        [_instrument("AAA"), _instrument("BBB")],
+        end="2026-07-13",
+    )
+
+    def batch(
+        symbols: Sequence[str],
+        _start: str,
+        _end: str,
+    ) -> dict[str, pd.DataFrame]:
+        if len(symbols) > 1:
+            return {symbol: pd.DataFrame() for symbol in symbols}
+        if symbols[0] == "AAA":
+            raise TimeoutError("aaa")
+        raise RuntimeError("429 rate limit")
+
+    def single(symbol: str, *_args: Any) -> pd.DataFrame:
+        if symbol == "AAA":
+            raise TimeoutError("aaa")
+        raise RuntimeError("429 rate limit")
+
+    monkeypatch.setattr(scheduled, "download_yfinance_batch", batch)
+    monkeypatch.setattr(scheduled, "_download_yfinance_history", single)
+    report = _run(fixture, provider=None, max_attempts=1)
+    by_ticker = {row["ticker"]: row for row in report["tickers"]}
+
+    assert by_ticker["AAA"]["reason_code"] == "PROVIDER_TIMEOUT"
+    assert by_ticker["BBB"]["reason_code"] == "PROVIDER_RATE_LIMITED"
+    assert by_ticker["AAA"]["provider_retrieval"][-1]["classification"] == "PROVIDER_TIMEOUT"
+    assert by_ticker["BBB"]["provider_retrieval"][-1]["classification"] == "PROVIDER_RATE_LIMITED"
     assert report["publication"]["publication_required"] is False
 
 
