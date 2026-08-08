@@ -1,6 +1,6 @@
 # ME-SR23 Corporate-Action Lifecycle Cutoff Remediation Audit
 
-Status: `review_remediation_locally_validated_canary_pending`
+Status: `ready_for_re_review`
 
 ## Incident and Review Findings
 
@@ -101,10 +101,36 @@ not independently reconcile the changed fileset.
 
 ## Remediation Canary
 
-Pending. Exactly one full-universe `publish=false` run will be dispatched only
-after the locally validated changes are committed and pushed. This section will
-be replaced with run, artifact, ticker, fileset, publish-job, and unchanged
-`market-data` evidence from that run.
+Exactly one new full-universe canary was dispatched after local validation and
+the remediation commit was pushed. No retry was run.
+
+| Evidence | Result |
+|---|---|
+| Workflow run | [`31278593816`](https://github.com/sclaessens/market-scanner/actions/runs/31278593816) |
+| Input | `publish=false` |
+| Branch / head SHA | `me-sr23-corporate-action-lifecycle-cutoff-remediation` / `ca3c970c10d8835d3a32c3ad2703efe7e07f4fcd` |
+| Manifest source-main SHA | `a0409a49e8f8f3ef9dce352c22b039ce4387faab` |
+| Freshness artifact | `canonical-price-freshness-me-sr23-canonical-price-refresh-20260808T210853Z` |
+| Publication artifact | `canonical-price-publication-me-sr23-canonical-price-refresh-20260808T210853Z` |
+| Run status / duration | `completed` / 4 minutes 8 seconds |
+| Status counts | 942 updated; 4 already current; 6 not expected; 0 stale, failed, or unsupported |
+| History coverage | 942 sufficient; 4 limited history; 6 retained inactive; 0 insufficient unexplained |
+| Publication decision | required `true`; set valid `true`; empty commit `false` |
+| Changed files | 947: 942 updated, 4 changed already-current histories, and EA's inactive bounded backfill |
+| EA | inactive; observed cutoff 2026-08-04; one bounded row added; checksum changed; no later canonical row |
+| NSA | inactive; observed cutoff 2026-07-21; checksum unchanged; no later canonical row |
+| TMHC | formal session 2026-07-24; no-valid-observation cutoff 2026-07-23; checksum unchanged; no July 24 canonical bar fabricated |
+| Independent baseline validation | schema v5 validated; zero issues, reason codes, or stale tickers |
+| Publish job | skipped |
+| `market-data` before / after | `95c88276763b1762cbbfbccc402ec8535268127b` / unchanged |
+
+The publication artifact contains exactly 952 governed price CSVs and one
+manifest. The manifest's sorted 947-file list and count reconcile against all
+ticker previous/persisted checksums, the staged canonical files, and a detached
+copy of the unchanged `market-data` baseline. Direct CSV inspection confirms
+the EA, NSA, and TMHC terminal dates above. Regression tests supply the batch
+and singleton post-cutoff-route evidence; the canary introduced no unexpected
+provider or quarantine event.
 
 ## Remaining Risks and Recovery
 
