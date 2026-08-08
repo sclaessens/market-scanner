@@ -44,7 +44,7 @@ def test_refresh_workflow_has_daily_and_manual_triggers_with_concurrency() -> No
     assert "cancel-in-progress: false" in workflow
     assert "timeout-minutes: 60" in workflow
     assert "timeout-minutes: 15" in workflow
-    assert 'run_id="me-sr18-canonical-price-refresh-' in workflow
+    assert 'run_id="me-sr23-canonical-price-refresh-' in workflow
 
 
 def test_publication_is_privileged_separately_and_only_trusted_main_can_publish() -> None:

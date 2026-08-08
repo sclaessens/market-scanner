@@ -615,6 +615,18 @@ July 25 as its first inactive date. The lifecycle record is implemented, but
 the approved provider no longer returns the required July 24 bar. No canonical
 data change is authorized.
 
+### ME-SR23 — Corporate-action lifecycle cutoff remediation and safe republish
+
+Status: IMPLEMENTED / NON-PUBLISHING CANARY PENDING
+
+ME-SR23 separates transaction closing, last trading session, suspension and
+inactive dates in lifecycle registry v3. It adds primary-source records for
+EA and NSA, corrects TMHC's price boundary without using its closing date as a
+session requirement, generically quarantines provider bars after a governed
+cutoff, and permits bounded inactive-history backfill without weakening atomic
+publication. A publish=false full-universe canary is required before review
+can authorize the existing trusted-main publication workflow.
+
 ## Current ChatGPT Advisory Artifact Chain
 
 The current ME-CI advisory chain is:

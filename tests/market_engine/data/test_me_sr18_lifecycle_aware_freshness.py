@@ -35,6 +35,8 @@ def test_governed_canary_records_reconcile_to_official_dates() -> None:
         "HONA",
         "Q",
         "SOLS",
+        "EA",
+        "NSA",
         "TMHC",
     }
     assert {
@@ -42,12 +44,14 @@ def test_governed_canary_records_reconcile_to_official_dates() -> None:
             by_ticker[ticker]["delisting_end_date"],
             by_ticker[ticker]["status_effective_date"],
         )
-        for ticker in ("BLD", "JHG", "GTLS", "TMHC")
+        for ticker in ("BLD", "JHG", "GTLS", "EA", "NSA", "TMHC")
     } == {
         "BLD": ("2026-06-30", "2026-07-01"),
         "JHG": ("2026-06-30", "2026-07-01"),
         "GTLS": ("2026-07-16", "2026-07-17"),
-        "TMHC": ("2026-07-24", "2026-07-25"),
+        "EA": ("2026-08-04", "2026-08-05"),
+        "NSA": ("2026-07-21", "2026-07-22"),
+        "TMHC": ("2026-07-23", "2026-07-24"),
     }
     assert {
         ticker: (
@@ -78,11 +82,11 @@ def test_repository_universe_becomes_949_active_and_retains_three_inactive() -> 
         as_of=date(2026, 7, 23),
     )
 
-    assert governed["active_universe_size"] == 949
-    assert governed["inactive_retained_instrument_count"] == 3
+    assert governed["active_universe_size"] == 948
+    assert governed["inactive_retained_instrument_count"] == 4
     assert {
         row["symbol"] for row in governed["inactive_instruments"]
-    } == {"BLD", "JHG", "GTLS"}
+    } == {"BLD", "JHG", "GTLS", "NSA"}
 
 
 def test_tmhc_becomes_inactive_after_proven_final_regular_way_session() -> None:
@@ -93,12 +97,12 @@ def test_tmhc_becomes_inactive_after_proven_final_regular_way_session() -> None:
     on_final_session = apply_lifecycle_registry(
         universe["instruments"],
         registry,
-        as_of=date(2026, 7, 24),
+        as_of=date(2026, 7, 23),
     )
     after_final_session = apply_lifecycle_registry(
         universe["instruments"],
         registry,
-        as_of=date(2026, 7, 25),
+        as_of=date(2026, 7, 24),
     )
 
     assert "TMHC" in {
@@ -109,8 +113,9 @@ def test_tmhc_becomes_inactive_after_proven_final_regular_way_session() -> None:
         for row in after_final_session["inactive_instruments"]
         if row["symbol"] == "TMHC"
     )
-    assert tmhc["delisting_end_date"] == "2026-07-24"
-    assert tmhc["lifecycle_status_effective_date"] == "2026-07-25"
+    assert tmhc["last_trading_session"] == "2026-07-23"
+    assert tmhc["transaction_closing_date"] == "2026-07-24"
+    assert tmhc["lifecycle_status_effective_date"] == "2026-07-24"
 
 
 def test_inactive_effective_date_is_not_applied_early_and_checksum_changes() -> None:
@@ -885,8 +890,11 @@ def test_governed_official_issuer_and_acquirer_hosts_are_accepted() -> None:
             "identity mismatch",
         ),
         (
-            lambda row: row.update(delisting_end_date=None),
-            "requires a delisting end date",
+            lambda row: row.update(
+                delisting_end_date=None,
+                last_trading_session=None,
+            ),
+            "requires a last trading session",
         ),
     ],
 )
@@ -1344,6 +1352,107 @@ def _set_active_listing_evidence(
     row["evidence"] = [schedule, completion]
 
 
+def test_transaction_closing_date_never_extends_freshness_cutoff() -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    record["transaction_closing_date"] = "2026-07-15"
+    record["provenance_checksum"] = record_provenance_checksum(record)
+    governed = apply_lifecycle_registry(
+        [instrument],
+        _normalized_registry([record]),
+        as_of=date(2026, 7, 15),
+    )
+
+    _profile, expected = scheduled.expected_completed_session(
+        governed["inactive_instruments"][0],
+        datetime(2026, 7, 16, 10, 0, tzinfo=UTC),
+    )
+
+    assert expected == date(2026, 7, 14)
+
+
+def test_inactive_backfill_quarantines_post_cutoff_bar_and_completes(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-13")},
+    )
+
+    def provider(_symbol: str, _start: str, _end: str) -> pd.DataFrame:
+        return pd.DataFrame(
+            [
+                {
+                    "Date": day,
+                    "Open": 100.0,
+                    "High": 101.0,
+                    "Low": 99.0,
+                    "Close": 100.0,
+                    "Adj Close": 100.0,
+                    "Volume": 1000,
+                }
+                for day in ("2026-07-14", "2026-07-15")
+            ]
+        )
+
+    report = _run(fixture, provider=provider)
+    row = report["tickers"][0]
+    staged = pd.read_csv(fixture["stage"] / "data/processed/OLD.csv")
+
+    assert row["freshness_status"] == "not_expected"
+    assert row["validation_status"] == "valid"
+    assert row["resulting_last_observation"] == "2026-07-14"
+    assert staged["Date"].max() == "2026-07-14"
+    assert row["rejected_bar_diagnostics"] == [
+        {
+            "ticker": "OLD",
+            "session_date": "2026-07-15",
+            "cutoff_date": "2026-07-14",
+            "lifecycle_event": "inactive_after_completed_corporate_action",
+            "lifecycle_provenance_checksum": record["provenance_checksum"],
+            "provider": scheduled.PROVIDER_IDENTITY,
+            "retry_number": 1,
+            "final_reason_code": "PROVIDER_BAR_AFTER_LIFECYCLE_CUTOFF",
+            "disposition": "quarantined_not_persisted",
+        }
+    ]
+    assert report["run_status"] == "completed"
+
+
+def test_contradictory_inactive_effective_date_fails_closed(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    record["inactive_effective_date"] = "2026-07-16"
+    record["provenance_checksum"] = record_provenance_checksum(record)
+
+    with pytest.raises(
+        InstrumentLifecycleError,
+        match="inactive status and inactive effective dates must match",
+    ):
+        load_lifecycle_registry(_write_registry(tmp_path, [record]))
+
+
 def _record(
     instrument: dict[str, Any],
     *,
@@ -1379,6 +1488,16 @@ def _record(
             else "cash_acquisition"
         ),
         "delisting_end_date": delisting_end_date,
+        "last_trading_session": delisting_end_date,
+        "transaction_closing_date": (
+            status_effective_date if lifecycle_status == "inactive" else None
+        ),
+        "trading_suspension_effective_date": (
+            status_effective_date if lifecycle_status == "inactive" else None
+        ),
+        "inactive_effective_date": (
+            status_effective_date if lifecycle_status == "inactive" else None
+        ),
         "evidence": [
             {
                 "evidence_retrieved_at": "2026-07-15T09:00:00Z",
@@ -1480,7 +1599,12 @@ def _fixture(
     }
 
 
-def _run(fixture: dict[str, Path], *, provider: Any) -> dict[str, Any]:
+def _run(
+    fixture: dict[str, Path],
+    *,
+    provider: Any,
+    run_at: datetime = RUN_AT,
+) -> dict[str, Any]:
     return scheduled.run_scheduled_refresh(
         run_id="me-sr18-test-20260715T100000Z",
         source_main_sha=SOURCE_SHA,
@@ -1489,7 +1613,7 @@ def _run(fixture: dict[str, Path], *, provider: Any) -> dict[str, Any]:
         published_root=fixture["published"],
         staging_root=fixture["stage"],
         report_output=fixture["report"],
-        run_at=RUN_AT,
+        run_at=run_at,
         provider=provider,
         sleeper=lambda _seconds: None,
     )

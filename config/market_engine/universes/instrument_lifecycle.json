@@ -45,8 +45,12 @@
           "investors.qxo.com"
         ]
       },
-      "provenance_checksum": "667383922f27cd75b9c135ae2991b72a54b4e73204fa37622cf8df085444105c",
+      "provenance_checksum": "846863d3700acc36e95e0de4233a536eec24f2516ad047fdf719672b2f7daead",
       "regular_way_listing_date": null,
+      "inactive_effective_date": "2026-07-01",
+      "last_trading_session": "2026-06-30",
+      "transaction_closing_date": "2026-07-01",
+      "trading_suspension_effective_date": "2026-07-01",
       "status_effective_date": "2026-07-01",
       "successor_or_acquirer": {
         "name": "QXO, Inc.",
@@ -99,8 +103,12 @@
           "investors.fedex.com"
         ]
       },
-      "provenance_checksum": "d76c2a9b360f426e1fb15142411608cc9bafd5d69886c2a234b6b45c1537b9a6",
+      "provenance_checksum": "4aa7e8ced4828bebfeeef99c8851391a3daba394179729b72eaf7c0eaee5fdb3",
       "regular_way_listing_date": "2026-06-01",
+      "inactive_effective_date": null,
+      "last_trading_session": null,
+      "transaction_closing_date": null,
+      "trading_suspension_effective_date": null,
       "status_effective_date": "2026-05-27",
       "successor_or_acquirer": null,
       "ticker": "FDXF"
@@ -150,8 +158,12 @@
           "investors.bakerhughes.com"
         ]
       },
-      "provenance_checksum": "a9eec4306695a858067054f90a7eafd247a09cde931913bd2c6ccbce9be67fb3",
+      "provenance_checksum": "2433b73289a73ba0a1367772a380e933e08a3cfe3d956f7c22da010b397d9a4f",
       "regular_way_listing_date": null,
+      "inactive_effective_date": "2026-07-17",
+      "last_trading_session": "2026-07-16",
+      "transaction_closing_date": "2026-07-17",
+      "trading_suspension_effective_date": "2026-07-17",
       "status_effective_date": "2026-07-17",
       "successor_or_acquirer": {
         "name": "Baker Hughes Company",
@@ -203,8 +215,12 @@
           "www.honeywell.com"
         ]
       },
-      "provenance_checksum": "5b0976cd87ed68e17de6430352abc688b2bea59267469824ffa21f70a7305b4b",
+      "provenance_checksum": "b437aa51b60e46921e95018251c056453eae0c2146d67f8b228c7092c779d532",
       "regular_way_listing_date": "2026-06-29",
+      "inactive_effective_date": null,
+      "last_trading_session": null,
+      "transaction_closing_date": null,
+      "trading_suspension_effective_date": null,
       "status_effective_date": "2026-06-15",
       "successor_or_acquirer": null,
       "ticker": "HONA"
@@ -236,8 +252,12 @@
       "lifecycle_status": "inactive",
       "listing_start_date": null,
       "official_source_hosts": {},
-      "provenance_checksum": "21ab30331c93eba1ab66f4ffa77205e3ba1322f5ec431f6b9d426d438ca73e26",
+      "provenance_checksum": "7380e6f78532e784a20f06aaaf18133392b694b78fbb82abc0e97222af1d9fbd",
       "regular_way_listing_date": null,
+      "inactive_effective_date": "2026-07-01",
+      "last_trading_session": "2026-06-30",
+      "transaction_closing_date": "2026-06-30",
+      "trading_suspension_effective_date": "2026-07-01",
       "status_effective_date": "2026-07-01",
       "successor_or_acquirer": {
         "name": "Jupiter Company Limited",
@@ -289,8 +309,12 @@
           "www.investors.dupont.com"
         ]
       },
-      "provenance_checksum": "952a60b96c95497f62c62c1b6bb60d996416cbd1eb56a49b310cede24bff1a16",
+      "provenance_checksum": "700cbc65477350c45bb221555b41e65caa8615f0fc0c7ffdbf4fca442237ea99",
       "regular_way_listing_date": "2025-11-03",
+      "inactive_effective_date": null,
+      "last_trading_session": null,
+      "transaction_closing_date": null,
+      "trading_suspension_effective_date": null,
       "status_effective_date": "2025-10-27",
       "successor_or_acquirer": null,
       "ticker": "Q"
@@ -339,15 +363,118 @@
           "www.honeywell.com"
         ]
       },
-      "provenance_checksum": "c5755e6a6a40e4c2c12c4db1315c351e144234e69c3fff3ff018c60433e1175b",
+      "provenance_checksum": "50aaa0c5336aa43b83240f05674fbdafea9695ebe3fbd1d79be9ba48c26ee6af",
       "regular_way_listing_date": "2025-10-30",
+      "inactive_effective_date": null,
+      "last_trading_session": null,
+      "transaction_closing_date": null,
+      "trading_suspension_effective_date": null,
       "status_effective_date": "2025-10-20",
       "successor_or_acquirer": null,
       "ticker": "SOLS"
     },
     {
+      "corporate_action_type": "take_private_acquisition",
+      "delisting_end_date": "2026-08-04",
+      "evidence": [
+        {
+          "evidence_retrieved_at": "2026-08-08T12:00:00Z",
+          "source_authority": "sec",
+          "source_host": "www.sec.gov",
+          "source_publication_date": "2026-08-04",
+          "source_type": "form_8_k",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/712515/000114036126031157/ef20079099_8k.htm",
+          "subject_exchange": "NASDAQ",
+          "subject_instrument_id": "equity:ea",
+          "subject_ticker": "EA",
+          "transition_support": [
+            "corporate_action_completion",
+            "trading_termination"
+          ]
+        },
+        {
+          "evidence_retrieved_at": "2026-08-08T12:00:00Z",
+          "source_authority": "issuer",
+          "source_host": "www.ea.com",
+          "source_publication_date": "2026-08-04",
+          "source_type": "completion_release",
+          "source_url": "https://www.ea.com/news/ea-announces-completion-of-acquisition",
+          "subject_exchange": "NASDAQ",
+          "subject_instrument_id": "equity:ea",
+          "subject_ticker": "EA",
+          "transition_support": [
+            "corporate_action_completion",
+            "trading_termination"
+          ]
+        }
+      ],
+      "exchange": "NASDAQ",
+      "inactive_effective_date": "2026-08-05",
+      "instrument_id": "equity:ea",
+      "issuer_name": "Electronic Arts Inc.",
+      "last_trading_session": "2026-08-04",
+      "lifecycle_reason": "inactive_after_completed_corporate_action",
+      "lifecycle_status": "inactive",
+      "listing_start_date": null,
+      "official_source_hosts": {
+        "issuer": [
+          "www.ea.com"
+        ]
+      },
+      "provenance_checksum": "e12e177cacc898874cd9a733570a974d7365076b342b4a510e22962ef12a1ecb",
+      "regular_way_listing_date": null,
+      "status_effective_date": "2026-08-05",
+      "successor_or_acquirer": {
+        "name": "PIF, Silver Lake, and Affinity Partners consortium",
+        "ticker": null
+      },
+      "ticker": "EA",
+      "trading_suspension_effective_date": "2026-08-05",
+      "transaction_closing_date": "2026-08-04"
+    },
+    {
+      "corporate_action_type": "cash_and_stock_acquisition",
+      "delisting_end_date": "2026-07-21",
+      "evidence": [
+        {
+          "evidence_retrieved_at": "2026-08-08T12:00:00Z",
+          "source_authority": "sec",
+          "source_host": "www.sec.gov",
+          "source_publication_date": "2026-07-22",
+          "source_type": "form_8_k",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1618563/000110465926085888/tm2620871d8_8k.htm",
+          "subject_exchange": "NYSE",
+          "subject_instrument_id": "equity:nsa",
+          "subject_ticker": "NSA",
+          "transition_support": [
+            "corporate_action_completion",
+            "trading_termination"
+          ]
+        }
+      ],
+      "exchange": "NYSE",
+      "inactive_effective_date": "2026-07-22",
+      "instrument_id": "equity:nsa",
+      "issuer_name": "National Storage Affiliates Trust",
+      "last_trading_session": "2026-07-21",
+      "lifecycle_reason": "inactive_after_completed_corporate_action",
+      "lifecycle_status": "inactive",
+      "listing_start_date": null,
+      "official_source_hosts": {},
+      "provenance_checksum": "0a1ce3351c03b33c7aeda16160d4310bf7f5c32417ffc560f12112a35276498b",
+      "regular_way_listing_date": null,
+      "status_effective_date": "2026-07-22",
+      "successor_or_acquirer": {
+        "name": "Public Storage",
+        "ticker": "PSA"
+      },
+      "ticker": "NSA",
+      "trading_suspension_effective_date": "2026-07-22",
+      "transaction_closing_date": "2026-07-22"
+    },
+    {
       "corporate_action_type": "cash_acquisition",
-      "delisting_end_date": "2026-07-24",
+      "delisting_end_date": "2026-07-23",
       "evidence": [
         {
           "evidence_retrieved_at": "2026-07-27T12:00:00Z",
@@ -372,9 +499,13 @@
       "lifecycle_status": "inactive",
       "listing_start_date": null,
       "official_source_hosts": {},
-      "provenance_checksum": "773b27d5882292fdf4fb98d1ce8e39cd1de5a00db096829c947f07212d3db173",
+      "provenance_checksum": "05bcaa681fb8d0c6c43e844b65aaa08b0a31ec77d89ec3bb009bee3f0248beb9",
       "regular_way_listing_date": null,
-      "status_effective_date": "2026-07-25",
+      "inactive_effective_date": "2026-07-24",
+      "last_trading_session": "2026-07-23",
+      "transaction_closing_date": "2026-07-24",
+      "trading_suspension_effective_date": "2026-07-24",
+      "status_effective_date": "2026-07-24",
       "successor_or_acquirer": {
         "name": "Berkshire Hathaway Inc.",
         "ticker": "BRK.B"
@@ -382,5 +513,5 @@
       "ticker": "TMHC"
     }
   ],
-  "schema_version": "market-engine-instrument-lifecycle-registry-v2"
+  "schema_version": "market-engine-instrument-lifecycle-registry-v3"
 }

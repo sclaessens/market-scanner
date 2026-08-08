@@ -8,7 +8,7 @@ from typing import Any, Mapping, Sequence
 from urllib.parse import urlsplit
 
 
-LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v2"
+LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v3"
 DEFAULT_LIFECYCLE_REGISTRY = Path(
     "config/market_engine/universes/instrument_lifecycle.json"
 )
@@ -231,6 +231,12 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
         record, "regular_way_listing_date"
     )
     delisting_end_date = _optional_date(record, "delisting_end_date")
+    last_trading_session = _optional_date(record, "last_trading_session")
+    transaction_closing_date = _optional_date(record, "transaction_closing_date")
+    trading_suspension_effective_date = _optional_date(
+        record, "trading_suspension_effective_date"
+    )
+    inactive_effective_date = _optional_date(record, "inactive_effective_date")
     lifecycle_reason = _required_text(record, "lifecycle_reason")
     if lifecycle_reason not in LIFECYCLE_REASONS:
         raise InstrumentLifecycleError(
@@ -338,6 +344,18 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
             raise InstrumentLifecycleError(
                 f"active lifecycle record cannot have a delisting date for {instrument_id}"
             )
+        if any(
+            value is not None
+            for value in (
+                last_trading_session,
+                transaction_closing_date,
+                trading_suspension_effective_date,
+                inactive_effective_date,
+            )
+        ):
+            raise InstrumentLifecycleError(
+                f"active lifecycle record cannot have termination dates for {instrument_id}"
+            )
         if successor_or_acquirer is not None:
             raise InstrumentLifecycleError(
                 f"active listing cannot declare an acquirer for {instrument_id}"
@@ -352,19 +370,36 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
             raise InstrumentLifecycleError(
                 f"inactive acquisition requires an acquirer for {instrument_id}"
             )
-        if delisting_end_date is None:
+        if last_trading_session is None:
+            # Compatibility is limited to the established v2 meaning: this field
+            # was an explicit final trading boundary, never a closing-date alias.
+            last_trading_session = delisting_end_date
+        if last_trading_session is None:
             raise InstrumentLifecycleError(
-                f"inactive lifecycle record requires a delisting end date for {instrument_id}"
+                f"inactive lifecycle record requires a last trading session for {instrument_id}"
             )
-        if status_effective_date <= delisting_end_date:
+        if inactive_effective_date is None:
+            inactive_effective_date = status_effective_date
+        if status_effective_date != inactive_effective_date:
+            raise InstrumentLifecycleError(
+                f"inactive status and inactive effective dates must match for {instrument_id}"
+            )
+        if inactive_effective_date <= last_trading_session:
             raise InstrumentLifecycleError(
                 f"inactive effective date must follow the final trading date for {instrument_id}"
+            )
+        if (
+            trading_suspension_effective_date is not None
+            and trading_suspension_effective_date <= last_trading_session
+        ):
+            raise InstrumentLifecycleError(
+                f"trading suspension must follow the final trading session for {instrument_id}"
             )
         _validate_inactive_evidence(
             normalized_evidence,
             instrument_id=instrument_id,
-            delisting_end_date=delisting_end_date,
-            status_effective_date=status_effective_date,
+            last_trading_session=last_trading_session,
+            inactive_effective_date=inactive_effective_date,
         )
 
     normalized = {
@@ -383,7 +418,21 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
             else None
         ),
         "delisting_end_date": (
-            delisting_end_date.isoformat() if delisting_end_date else None
+            last_trading_session.isoformat() if last_trading_session else None
+        ),
+        "last_trading_session": (
+            last_trading_session.isoformat() if last_trading_session else None
+        ),
+        "transaction_closing_date": (
+            transaction_closing_date.isoformat() if transaction_closing_date else None
+        ),
+        "trading_suspension_effective_date": (
+            trading_suspension_effective_date.isoformat()
+            if trading_suspension_effective_date
+            else None
+        ),
+        "inactive_effective_date": (
+            inactive_effective_date.isoformat() if inactive_effective_date else None
         ),
         "lifecycle_reason": lifecycle_reason,
         "corporate_action_type": corporate_action_type,
@@ -607,8 +656,8 @@ def _validate_inactive_evidence(
     evidence: Sequence[Mapping[str, Any]],
     *,
     instrument_id: str,
-    delisting_end_date: date,
-    status_effective_date: date,
+    last_trading_session: date,
+    inactive_effective_date: date,
 ) -> None:
     support = {
         item
@@ -625,7 +674,7 @@ def _validate_inactive_evidence(
         if not relevant:
             continue
         publication = date.fromisoformat(entry["source_publication_date"])
-        if not delisting_end_date <= publication <= status_effective_date:
+        if not last_trading_session <= publication <= inactive_effective_date:
             raise InstrumentLifecycleError(
                 f"inactive transition evidence date is invalid for {instrument_id}"
             )
@@ -650,6 +699,10 @@ def _apply_record(
             "listing_start_date": None,
             "regular_way_listing_date": None,
             "delisting_end_date": None,
+            "last_trading_session": None,
+            "transaction_closing_date": None,
+            "trading_suspension_effective_date": None,
+            "inactive_effective_date": None,
             "lifecycle_reason": "canonical_universe_active"
             if lifecycle_status == "active"
             else "canonical_universe_inactive",
@@ -706,6 +759,12 @@ def _apply_record(
         "listing_start_date": record["listing_start_date"],
         "regular_way_listing_date": record["regular_way_listing_date"],
         "delisting_end_date": record["delisting_end_date"],
+        "last_trading_session": record["last_trading_session"],
+        "transaction_closing_date": record["transaction_closing_date"],
+        "trading_suspension_effective_date": record[
+            "trading_suspension_effective_date"
+        ],
+        "inactive_effective_date": record["inactive_effective_date"],
         "lifecycle_reason": current_reason,
         "corporate_action_type": record["corporate_action_type"],
         "successor_or_acquirer": record["successor_or_acquirer"],
@@ -731,6 +790,12 @@ def _instrument_binding(instrument: Mapping[str, Any]) -> dict[str, Any]:
         "listing_start_date": instrument["listing_start_date"],
         "regular_way_listing_date": instrument["regular_way_listing_date"],
         "delisting_end_date": instrument["delisting_end_date"],
+        "last_trading_session": instrument["last_trading_session"],
+        "transaction_closing_date": instrument["transaction_closing_date"],
+        "trading_suspension_effective_date": instrument[
+            "trading_suspension_effective_date"
+        ],
+        "inactive_effective_date": instrument["inactive_effective_date"],
         "lifecycle_provenance_checksum": instrument[
             "lifecycle_provenance_checksum"
         ],

@@ -376,10 +376,13 @@ ME-SR19 and must be remediated separately before a green publication canary.
 
 ME-SR20 adds rejected-provider-bar diagnostics and unchanged-contract
 revalidation. ME-SR21 adds bounded empty/partial batch retry, deterministic
-split, and single-ticker fallback. ME-SR22 proves and records TMHC's July 24
-final regular-way session and July 25 inactive boundary. NSA and TMHC's
-unavailable provider sessions remain visible blockers; these stories do not
-authorize a publication canary.
+split, and single-ticker fallback. ME-SR22 recorded TMHC's transaction closing
+date as a final-session requirement and remained blocked by an unavailable
+provider row. ME-SR23 supersedes that overloaded date interpretation with
+separate closing, last-trading, suspension and inactive dates; it also adds EA
+and NSA lifecycle records and generic post-cutoff quarantine. A successful
+publish=false full-universe canary is the next required gate. Trusted
+publication remains a post-review, post-merge operation from `main` only.
 
 ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot —
 remains planned and has not started. It must reuse the generic ME-DATA10

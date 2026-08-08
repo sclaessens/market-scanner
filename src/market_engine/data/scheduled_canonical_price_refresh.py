@@ -39,8 +39,8 @@ from market_engine.data.local_market_data_universe import (
 )
 
 
-SCHEMA_VERSION = "market-engine-me-sr18-canonical-price-freshness-manifest-v3"
-VALIDATION_SCHEMA_VERSION = "market-engine-me-sr18-published-price-dataset-validation-v3"
+SCHEMA_VERSION = "market-engine-me-sr23-canonical-price-freshness-manifest-v4"
+VALIDATION_SCHEMA_VERSION = "market-engine-me-sr23-published-price-dataset-validation-v4"
 DEFAULT_UNIVERSE_SNAPSHOT = Path(
     "artifacts/market_engine/data_runs/"
     "me-data04-complete-dataset-20260713T133000Z-coverage-after/universe_snapshot.json"
@@ -157,7 +157,6 @@ def run_scheduled_refresh(
         lifecycle_registry,
         as_of=generated_at.date(),
     )
-    instruments = governed["active_instruments"]
     source_root = Path(published_root)
     stage_root = Path(staging_root)
     _prepare_staging_root(source_root, stage_root)
@@ -165,6 +164,12 @@ def run_scheduled_refresh(
     price_root.mkdir(parents=True, exist_ok=True)
 
     rows: list[dict[str, Any]] = []
+    refreshable_inactive = [
+        instrument
+        for instrument in governed["inactive_instruments"]
+        if _inactive_history_needs_backfill(instrument, price_root=price_root)
+    ]
+    instruments = governed["active_instruments"] + refreshable_inactive
     for offset in range(0, len(instruments), batch_size):
         batch = instruments[offset : offset + batch_size]
         selected_provider = provider or _prefetch_batch_provider(
@@ -175,8 +180,7 @@ def run_scheduled_refresh(
             sleeper=sleeper,
         )
         for instrument in batch:
-            rows.append(
-                _refresh_instrument(
+            refreshed = _refresh_instrument(
                     instrument,
                     price_root=price_root,
                     run_at=generated_at,
@@ -185,10 +189,26 @@ def run_scheduled_refresh(
                     overlap_calendar_days=overlap_calendar_days,
                     sleeper=sleeper,
                 )
-            )
-    for instrument in (
-        governed["inactive_instruments"] + governed["pending_instruments"]
-    ):
+            if instrument["lifecycle_status"] == "inactive":
+                retained = _non_refreshable_lifecycle_row(
+                    instrument, price_root=price_root
+                )
+                refreshed = {
+                    **retained,
+                    "rows_added": refreshed["rows_added"],
+                    "provider_identity": refreshed["provider_identity"],
+                    "provider_retrieval": refreshed.get("provider_retrieval", []),
+                    "rejected_bar_diagnostics": refreshed.get(
+                        "rejected_bar_diagnostics", []
+                    ),
+                }
+            rows.append(refreshed)
+    refreshed_inactive_ids = {
+        row["instrument_id"] for row in refreshable_inactive
+    }
+    for instrument in governed["inactive_instruments"] + governed["pending_instruments"]:
+        if instrument["instrument_id"] in refreshed_inactive_ids:
+            continue
         rows.append(_non_refreshable_lifecycle_row(instrument, price_root=price_root))
 
     rows.sort(key=lambda row: (row["instrument_id"], row["ticker"]))
@@ -330,6 +350,11 @@ def expected_completed_session(instrument: Mapping[str, Any], run_at: datetime) 
         candidate -= timedelta(days=1)
     while not _is_trading_session(candidate, profile.holiday_calendar):
         candidate -= timedelta(days=1)
+    last_trading_session = instrument.get("last_trading_session")
+    if isinstance(last_trading_session, str):
+        lifecycle_cutoff = date.fromisoformat(last_trading_session)
+        if lifecycle_cutoff <= candidate:
+            candidate = lifecycle_cutoff
     return profile, candidate
 
 
@@ -761,7 +786,7 @@ def _refresh_instrument(
 
     def guarded_provider(symbol: str, start: str, end: str) -> pd.DataFrame:
         try:
-            return _provider_with_retries(
+            validated = _provider_with_retries(
                 provider,
                 symbol,
                 start,
@@ -769,7 +794,12 @@ def _refresh_instrument(
                 expected_session=expected,
                 max_attempts=max_attempts,
                 sleeper=sleeper,
+                lifecycle_context=instrument,
             )
+            terminal_rejected_bar_diagnostics.extend(
+                validated.attrs.get("rejected_bar_diagnostics", [])
+            )
+            return validated
         except ProviderBoundaryError as exc:
             error["reason_code"] = exc.reason_code
             if exc.diagnostic:
@@ -824,11 +854,11 @@ def _refresh_instrument(
         if hasattr(provider, "diagnostics_for")
         else []
     )
-    rejected_bar_diagnostics = (
-        provider.rejected_diagnostics_for(source_symbol)
-        if hasattr(provider, "rejected_diagnostics_for")
-        else terminal_rejected_bar_diagnostics
-    )
+    rejected_bar_diagnostics = list(terminal_rejected_bar_diagnostics)
+    if hasattr(provider, "rejected_diagnostics_for"):
+        rejected_bar_diagnostics.extend(
+            provider.rejected_diagnostics_for(source_symbol)
+        )
     return {
         **base,
         "previous_last_observation": previous_end,
@@ -928,6 +958,24 @@ def _non_refreshable_lifecycle_row(
         **_lifecycle_fields(instrument),
         **retained_boundary,
     }
+
+
+def _inactive_history_needs_backfill(
+    instrument: Mapping[str, Any],
+    *,
+    price_root: Path,
+) -> bool:
+    path = price_root / f"{instrument['source_symbol']}.csv"
+    validation = _validate_price_history(path) if path.is_file() else {"status": "missing"}
+    cutoff = instrument.get("last_trading_session")
+    return (
+        isinstance(cutoff, str)
+        and (
+            validation.get("status") != "valid"
+            or not isinstance(validation.get("end_date"), str)
+            or validation["end_date"] < cutoff
+        )
+    )
 
 
 def _history_coverage(
@@ -1114,7 +1162,7 @@ def _retained_history_boundary(
     validation: Mapping[str, Any],
 ) -> dict[str, Any]:
     lifecycle_status = str(instrument.get("lifecycle_status") or "")
-    expected_end = instrument.get("delisting_end_date")
+    expected_end = instrument.get("last_trading_session")
     actual_end = validation.get("end_date")
     base = {
         "retained_history_boundary_status": "not_applicable",
@@ -1211,6 +1259,12 @@ def _lifecycle_fields(instrument: Mapping[str, Any]) -> dict[str, Any]:
         "listing_start_date": instrument["listing_start_date"],
         "regular_way_listing_date": instrument["regular_way_listing_date"],
         "delisting_end_date": instrument["delisting_end_date"],
+        "last_trading_session": instrument["last_trading_session"],
+        "transaction_closing_date": instrument["transaction_closing_date"],
+        "trading_suspension_effective_date": instrument[
+            "trading_suspension_effective_date"
+        ],
+        "inactive_effective_date": instrument["inactive_effective_date"],
         "lifecycle_reason": instrument["lifecycle_reason"],
         "corporate_action_type": instrument["corporate_action_type"],
         "lifecycle_provenance_checksum": instrument[
@@ -1228,6 +1282,7 @@ def _provider_with_retries(
     expected_session: date,
     max_attempts: int,
     sleeper: Sleeper,
+    lifecycle_context: Mapping[str, Any] | None = None,
 ) -> pd.DataFrame:
     last_error: ProviderBoundaryError | None = None
     for attempt in range(1, max_attempts + 1):
@@ -1239,6 +1294,7 @@ def _provider_with_retries(
                     expected_session,
                     provider_symbol=symbol,
                     retry_number=attempt,
+                    lifecycle_context=lifecycle_context,
                 )
             except ProviderBoundaryError as exc:
                 if (
@@ -1574,6 +1630,7 @@ def _validate_provider_frame(
     *,
     provider_symbol: str | None = None,
     retry_number: int | None = None,
+    lifecycle_context: Mapping[str, Any] | None = None,
 ) -> pd.DataFrame:
     if frame is None or frame.empty:
         return pd.DataFrame()
@@ -1588,8 +1645,34 @@ def _validate_provider_frame(
         raise ProviderBoundaryError("PROVIDER_DUPLICATE_TIMESTAMP", "provider dates are duplicated")
     if list(dates) != sorted(dates):
         raise ProviderBoundaryError("PROVIDER_PAYLOAD_NOT_CHRONOLOGICAL", "provider dates are not ordered")
-    if any(day > expected_session for day in dates):
-        raise ProviderBoundaryError("PROVIDER_FUTURE_DATED_BAR", "provider returned a future or incomplete bar")
+    post_cutoff = [day for day in dates if day > expected_session]
+    if post_cutoff:
+        if not lifecycle_context or not lifecycle_context.get("last_trading_session"):
+            raise ProviderBoundaryError(
+                "PROVIDER_FUTURE_DATED_BAR",
+                "provider returned a future or incomplete bar",
+            )
+        diagnostics = [
+            {
+                "ticker": str(lifecycle_context["symbol"]),
+                "session_date": day.isoformat(),
+                "cutoff_date": expected_session.isoformat(),
+                "lifecycle_event": str(lifecycle_context["lifecycle_reason"]),
+                "lifecycle_provenance_checksum": lifecycle_context[
+                    "lifecycle_provenance_checksum"
+                ],
+                "provider": PROVIDER_IDENTITY,
+                "retry_number": retry_number,
+                "final_reason_code": "PROVIDER_BAR_AFTER_LIFECYCLE_CUTOFF",
+                "disposition": "quarantined_not_persisted",
+            }
+            for day in post_cutoff
+        ]
+        frame = frame.loc[
+            [day <= expected_session for day in dates]
+        ].copy()
+        frame.attrs["rejected_bar_diagnostics"] = diagnostics
+        dates = pd.to_datetime(frame["Date"], errors="raise").dt.date
     for column in ("Open", "High", "Low", "Close", "Adj Close", "Volume"):
         values = pd.to_numeric(frame[column], errors="coerce")
         if values.isna().any() or any(not math.isfinite(float(value)) for value in values):
