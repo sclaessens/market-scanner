@@ -1,6 +1,6 @@
 # ME-SR23 Corporate-Action Lifecycle Cutoff Remediation Audit
 
-Status: `implementation_complete_pending_non_publishing_canary`
+Status: `canary_complete_publication_requires_post_merge_operator`
 
 ## Incident and Impact
 
@@ -79,8 +79,27 @@ gate are unchanged.
 
 ## Canary and Publication
 
-The non-publishing canary result will be appended after the branch is pushed.
-The `market-data` SHA must remain unchanged and the publish job must be skipped.
+Exactly one non-publishing full-universe canary was run:
+
+| Evidence | Result |
+|---|---|
+| Workflow run | `31276951551` |
+| Workflow head SHA | `a77ab2b98e4ec5a5cd9edc21e60867d37f13f5c9` |
+| Manifest source-main SHA | `a0409a49e8f8f3ef9dce352c22b039ce4387faab` |
+| Freshness artifact | `canonical-price-freshness-me-sr23-canonical-price-refresh-20260808T202808Z` |
+| Run status | `completed` |
+| Status counts | 942 updated; 4 already current; 6 not expected; 0 stale, failed or unsupported |
+| Publication decision | required `true`; set valid `true`; changed price files 942 |
+| EA | inactive, aligned, ends 2026-08-04, one bounded row added |
+| NSA | inactive, aligned, ends 2026-07-21 |
+| TMHC | inactive, aligned, ends 2026-07-23 |
+| Publish job | skipped |
+| `market-data` before / after | `95c88276763b1762cbbfbccc402ec8535268127b` / unchanged |
+
+The downloaded publication bundle contains 952 price CSVs plus the manifest.
+Direct CSV inspection confirms no EA row after August 4, no NSA row after
+July 21 and no TMHC row after July 23. No new freshness, provider, schema,
+OHLC, validation or publisher blocker occurred.
 
 Production publication cannot be trusted from a feature branch: the workflow
 requires `refs/heads/main`. After review and merge, an operator may run exactly

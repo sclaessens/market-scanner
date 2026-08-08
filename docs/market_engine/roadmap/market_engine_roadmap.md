@@ -381,8 +381,9 @@ date as a final-session requirement and remained blocked by an unavailable
 provider row. ME-SR23 supersedes that overloaded date interpretation with
 separate closing, last-trading, suspension and inactive dates; it also adds EA
 and NSA lifecycle records and generic post-cutoff quarantine. A successful
-publish=false full-universe canary is the next required gate. Trusted
-publication remains a post-review, post-merge operation from `main` only.
+publish=false full-universe canary passed in run `31276951551`, with no
+degraded tickers and a valid 942-file update set. Trusted publication remains
+the next post-review, post-merge operation from `main` only.
 
 ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot —
 remains planned and has not started. It must reuse the generic ME-DATA10

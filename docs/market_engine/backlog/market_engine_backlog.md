@@ -617,7 +617,7 @@ data change is authorized.
 
 ### ME-SR23 — Corporate-action lifecycle cutoff remediation and safe republish
 
-Status: IMPLEMENTED / NON-PUBLISHING CANARY PENDING
+Status: IMPLEMENTED / CANARY PASSED / POST-MERGE PUBLICATION PENDING
 
 ME-SR23 separates transaction closing, last trading session, suspension and
 inactive dates in lifecycle registry v3. It adds primary-source records for
@@ -625,7 +625,11 @@ EA and NSA, corrects TMHC's price boundary without using its closing date as a
 session requirement, generically quarantines provider bars after a governed
 cutoff, and permits bounded inactive-history backfill without weakening atomic
 publication. A publish=false full-universe canary is required before review
-can authorize the existing trusted-main publication workflow.
+can authorize the existing trusted-main publication workflow. Run
+`31276951551` passed with 942 updated, four already current, six correctly
+inactive and no degraded statuses; `market-data` remained unchanged because
+the publish job was skipped. Exactly one post-merge trusted-main publishing
+dispatch remains.
 
 ## Current ChatGPT Advisory Artifact Chain
 
