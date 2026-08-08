@@ -1,117 +1,117 @@
 # ME-SR23 Corporate-Action Lifecycle Cutoff Remediation Audit
 
-Status: `canary_complete_publication_requires_post_merge_operator`
+Status: `review_remediation_locally_validated_canary_pending`
 
-## Incident and Impact
+## Incident and Review Findings
 
-Scheduled Canonical Price Refresh run `31243056845` on August 8, 2026 failed
-closed. Its freshness artifact was
-`canonical-price-freshness-me-sr18-canonical-price-refresh-20260808T060333Z`.
-The run staged 942 valid price-file updates, found four already-current
-instruments and three retained-inactive instruments, but classified EA and NSA
-as stale and TMHC as an invalid retained history. Atomic publication correctly
-prevented all staged changes from reaching `market-data`; the publish job was
-skipped and the branch remained at `95c88276763b1762cbbfbccc402ec8535268127b`.
+Scheduled Canonical Price Refresh run `31243056845` failed closed on August 8,
+2026. Atomic publication prevented all staged changes from reaching
+`market-data`. Draft PR #474 subsequently received four material review
+findings:
 
-EA's provider rows dated August 5 and August 6 existed only in the isolated
-staging result. The pre-run canonical EA file ended on July 23, and the failed
-run did not partially publish it.
+1. TMHC lifecycle truth had been lowered to the final available provider bar.
+2. `changed_price_file_count` counted freshness classifications rather than
+   actual changed canonical files.
+3. Conflicting lifecycle alias fields could be silently normalized.
+4. Singleton provider revalidation did not receive the batch route's lifecycle
+   context.
+
+This remediation addresses all four findings without changing Decision Engine
+semantics, weakening atomic publication, or editing `market-data` directly.
 
 ## Primary Evidence and Date Semantics
 
-| Ticker | Last trading session | Transaction closing | Suspension / inactive boundary | Evidence |
-|---|---:|---:|---:|---|
-| EA | 2026-08-04 | 2026-08-04 | before open 2026-08-05 | [EA completion announcement](https://www.ea.com/news/ea-announces-completion-of-acquisition), [SEC Form 8-K](https://www.sec.gov/Archives/edgar/data/712515/000114036126031157/ef20079099_8k.htm) |
-| NSA | 2026-07-21 | 2026-07-22 | before open 2026-07-22 | [SEC Form 8-K](https://www.sec.gov/Archives/edgar/data/1618563/000110465926085888/tm2620871d8_8k.htm) |
-| TMHC | 2026-07-23 | 2026-07-24 | 2026-07-24 | [SEC Form 8-K](https://www.sec.gov/Archives/edgar/data/1562476/000119312526316037/d148123d8k.htm) |
+| Ticker | Formal last trading session | Last valid price observation | Transaction closing | Suspension / inactive boundary | Evidence |
+|---|---:|---:|---:|---|---|
+| EA | 2026-08-04 | 2026-08-04 | 2026-08-04 | before open 2026-08-05 | [EA completion announcement](https://www.ea.com/news/ea-announces-completion-of-acquisition), [SEC Form 8-K](https://www.sec.gov/Archives/edgar/data/712515/000114036126031157/ef20079099_8k.htm) |
+| NSA | 2026-07-21 | 2026-07-21 | 2026-07-22 | before open 2026-07-22 | [SEC Form 8-K](https://www.sec.gov/Archives/edgar/data/1618563/000110465926085888/tm2620871d8_8k.htm) |
+| TMHC | 2026-07-24 | 2026-07-23 | 2026-07-24 | after close 2026-07-24; inactive 2026-07-25 | [SEC Form 8-K](https://www.sec.gov/Archives/edgar/data/1562476/000119312526316037/d148123d8k.htm), [NYSE Form 25](https://www.sec.gov/Archives/edgar/data/1562476/000087666126000640/xslF25X02/primary_doc.xml), [independent trade history](https://stockanalysis.com/stocks/tmhc/history/) |
 
-The TMHC filing describes an intended suspension following the close on July
-24, while the approved provider and independent market-history observations
-end on July 23. ME-SR23 records July 24 as the transaction closing and
-suspension/inactive boundary, and July 23 as the observed last trading
-session. This explicitly preserves the evidence discrepancy instead of
-silently treating the closing date as a price-session requirement.
+The SEC 8-K states that the transaction completed on July 24 and that NYSE was
+asked to suspend trading after the close on July 24. NYSE's official Form 25
+was signed on July 24. The independent history exposes July 24 as the last
+trade-price date but has no valid July 24 OHLC/volume row; the available
+canonical/provider history ends on July 23. This evidence does not establish a
+normal July 24 OHLC session or a proven zero-volume bar. The generic contract
+therefore records `last_trading_session=2026-07-24` as lifecycle truth and
+`price_observation_end_session=2026-07-23` with
+`final_session_observation_status=no_valid_price_observation`. The lifecycle
+date is not derived from provider availability.
 
-## Root Cause
+## Contract and Implementation Remediation
 
-Lifecycle registry v2 overloaded `delisting_end_date` as both an explicit
-final price boundary and, for TMHC, a transaction closing date. The freshness
-and retained-history validators then required equality to that overloaded
-date. EA and NSA had no governed lifecycle records, so they remained active;
-EA provider bars after its real trading cutoff passed ordinary active-ticker
-validation because the expected session was August 7.
+Lifecycle registry v4 separates the formal lifecycle boundary from the final
+valid price observation. It adds machine-validated
+`price_observation_end_session`, `final_session_observation_status`, and
+`trading_suspension_effective_timing`. Closing, suspension, inactive, formal
+trading, and observation dates are validated as a coherent chronology while
+allowing before-open, effective-time, and after-close events.
 
-## Contract and Implementation Decision
+Both v2 and v3 inputs remain compatibility inputs. If
+`delisting_end_date` and `last_trading_session` are both present, they must be
+equal before normalization. A conflict fails closed with ticker, both field
+names, and both values in `InstrumentLifecycleError`.
 
-Lifecycle registry v3 adds separately validated
-`last_trading_session`, `transaction_closing_date`,
-`trading_suspension_effective_date`, and `inactive_effective_date`. The legacy
-`delisting_end_date` remains a compatibility alias for an explicitly governed
-last-trading boundary; it is never interpreted as a closing date. Freshness,
-maximum accepted provider date, retained-history validation, manifest
-bindings, and consumer reconciliation use `last_trading_session`.
+Freshness manifest and validation contracts advance to v5. Every ticker entry
+binds both its previous and persisted file checksum. The changed-file list and
+count are derived from checksum differences, independently of freshness
+status, so an inactive bounded backfill is counted even though its final status
+is `not_expected`. Validation reconciles the declared count, sorted unique
+list, ticker checksum bindings, and staged canonical files. The trusted-main
+publisher additionally materializes the current `market-data` tree and checks
+the bundle against that independent baseline before installation; a forged or
+inconsistent fileset fails closed.
 
-An inactive instrument whose canonical history ends before its governed
-cutoff receives one normal bounded backfill through that cutoff. Provider rows
-after the cutoff are removed before merge, never extend freshness, and produce
-diagnostics containing ticker, row date, cutoff, lifecycle event, provenance
-checksum, provider, retry and `quarantined_not_persisted` disposition. Trusted
-lifecycle provenance permits the run to continue with the bounded valid rows;
-missing or contradictory lifecycle metadata still fails closed. Already
-aligned inactive histories never call the provider.
-
-Manifest and trusted validation contracts advance to v4. Atomic publication,
-exact-fileset validation, source-SHA binding and the trusted-main publisher
-gate are unchanged.
+The singleton retry route now receives the same lifecycle context as the batch
+route and calls the same provider-frame validator. Post-cutoff rows receive the
+same `quarantined_not_persisted` disposition and diagnostics in both routes,
+are excluded before canonical merge, do not contribute to freshness, and
+cannot reactivate an inactive instrument.
 
 ## Validation Evidence
 
-- Targeted lifecycle/refresh/workflow tests: 124 passed.
-- `tests/market_engine/run`: 197 passed.
-- `tests/market_engine`: 1,418 passed, one pre-existing missing local artifact
-  failure.
-- Full repository suite: 2,085 passed, the same one pre-existing failure.
-- The unchanged base SHA `a0409a49e8f8f3ef9dce352c22b039ce4387faab`
-  reproduces that failure in
-  `test_compact_checksums_match_committed_files_and_local_full_runs` because
-  `artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data09-aapl-20260719T155116Z/manifest.json`
-  is not committed in a clean worktree.
+| Command | Result | Duration | Notes |
+|---|---:|---:|---|
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/data/test_me_sr18_lifecycle_aware_freshness.py tests/market_engine/data/test_scheduled_canonical_price_refresh.py tests/market_engine/data/test_scheduled_canonical_price_refresh_workflow.py -q` | 138 passed | 1.52 s | Lifecycle, provider/singleton, quarantine, manifest, publisher, and workflow regressions |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/run -q` | 197 passed | 2.87 s | No failures |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine -q` | 1432 passed, 1 failed | 5.76 s | Only the known missing local artifact |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q` | 2099 passed, 1 failed | 6.90 s | Same known failure only |
+| Lifecycle v4 load/apply plus TMHC and publisher-baseline assertions | passed | 0.23 s | Registry checksum `1962d5cbf63df5c005c775bad05ad6bcc428d6b64e1ea4af3be5457a750cc43a` |
+| `git diff --check` | passed | <0.1 s | No whitespace errors |
 
-## Canary and Publication
+The only suite failure is
+`test_compact_checksums_match_committed_files_and_local_full_runs`, because
+`artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data09-aapl-20260719T155116Z/manifest.json`
+is absent. Running that exact test on clean base SHA
+`a0409a49e8f8f3ef9dce352c22b039ce4387faab` reproduces the identical failure
+in 0.02 seconds. No new test failure exists.
 
-Exactly one non-publishing full-universe canary was run:
+The required governance searches still report only the pre-existing explicit
+trade-command handling in `scripts/portfolio/parse_trade_commands.py` and
+`scripts/portfolio/portfolio_manager.py`; this remediation does not modify any
+file under `scripts/`.
 
-| Evidence | Result |
-|---|---|
-| Workflow run | `31276951551` |
-| Workflow head SHA | `a77ab2b98e4ec5a5cd9edc21e60867d37f13f5c9` |
-| Manifest source-main SHA | `a0409a49e8f8f3ef9dce352c22b039ce4387faab` |
-| Freshness artifact | `canonical-price-freshness-me-sr23-canonical-price-refresh-20260808T202808Z` |
-| Run status | `completed` |
-| Status counts | 942 updated; 4 already current; 6 not expected; 0 stale, failed or unsupported |
-| Publication decision | required `true`; set valid `true`; changed price files 942 |
-| EA | inactive, aligned, ends 2026-08-04, one bounded row added |
-| NSA | inactive, aligned, ends 2026-07-21 |
-| TMHC | inactive, aligned, ends 2026-07-23 |
-| Publish job | skipped |
-| `market-data` before / after | `95c88276763b1762cbbfbccc402ec8535268127b` / unchanged |
+## Previous Canary Correction
 
-The downloaded publication bundle contains 952 price CSVs plus the manifest.
-Direct CSV inspection confirms no EA row after August 4, no NSA row after
-July 21 and no TMHC row after July 23. No new freshness, provider, schema,
-OHLC, validation or publisher blocker occurred.
+Run `31276951551` reported 942 `updated` instruments, but EA also received a
+bounded inactive backfill. The earlier audit incorrectly equated that status
+count with changed price files. The actual prior changed price-file count was
+943. That canary is invalidated as merge evidence because its v4 manifest did
+not independently reconcile the changed fileset.
 
-Production publication cannot be trusted from a feature branch: the workflow
-requires `refs/heads/main`. After review and merge, an operator may run exactly
-one `publish=true` dispatch only if the recorded canary is fully publishable.
+## Remediation Canary
+
+Pending. Exactly one full-universe `publish=false` run will be dispatched only
+after the locally validated changes are committed and pushed. This section will
+be replaced with run, artifact, ticker, fileset, publish-job, and unchanged
+`market-data` evidence from that run.
 
 ## Remaining Risks and Recovery
 
-- TMHC's issuer filing language and observed final price date disagree; both
-  dates remain explicit and provenance-bound.
-- A provider can emit post-cutoff rows again; they are now quarantined, but the
-  diagnostic must remain visible in every affected manifest.
-- Rollback is a normal revert of the ME-SR23 main commit. No manual edit to
-  `market-data` is permitted. If a published bundle is later shown invalid,
-  restore the last known-good data commit through the normal reviewed,
-  validated publisher path rather than rewriting branch history.
+- The evidence supports a formal TMHC lifecycle through July 24 but does not
+  supply a valid July 24 OHLC/volume observation. The explicit no-observation
+  contract preserves that distinction without fabricating market data.
+- Provider corrections can change historical bars. The checksum-bound staged
+  fileset and independent publisher baseline must remain fail-closed.
+- Rollback is a normal revert of the reviewed ME-SR23 commit. No manual edit or
+  branch-history rewrite of `market-data` is permitted.

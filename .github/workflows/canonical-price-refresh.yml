@@ -173,14 +173,6 @@ jobs:
           name: canonical-price-publication-${{ needs.refresh-and-validate.outputs.run-id }}
           path: publication-bundle
 
-      - name: Revalidate bundle using trusted main code
-        run: |
-          source_main_sha="$(git rev-parse HEAD)"
-          PYTHONPATH=src python -m market_engine.data.scheduled_canonical_price_refresh \
-            validate-publication \
-            --publication-root publication-bundle \
-            --expected-source-main-sha "$source_main_sha"
-
       - name: Materialize data-only branch
         run: |
           if git ls-remote --exit-code --heads origin market-data >/dev/null 2>&1; then
@@ -193,6 +185,18 @@ jobs:
             git -C publication rm -r --ignore-unmatch .
           fi
           mkdir -p publication/data/processed publication/manifests
+
+      - name: Revalidate bundle against data-branch baseline using trusted main code
+        run: |
+          source_main_sha="$(git rev-parse HEAD)"
+          PYTHONPATH=src python -m market_engine.data.scheduled_canonical_price_refresh \
+            validate-publication \
+            --publication-root publication-bundle \
+            --baseline-publication-root publication \
+            --expected-source-main-sha "$source_main_sha"
+
+      - name: Install validated publication bundle
+        run: |
           rsync --archive --delete publication-bundle/data/processed/ publication/data/processed/
           rsync --archive --delete publication-bundle/manifests/ publication/manifests/
 

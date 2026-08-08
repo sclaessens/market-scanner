@@ -70,7 +70,16 @@ def test_market_data_branch_is_data_only_and_bootstraps_without_main_history() -
     assert "No validated data change; no market-data commit created." in workflow
     assert publish_job.count("validate-publication") == 2
     assert "--publication-root publication" in publish_job
+    assert "--baseline-publication-root publication" in publish_job
     assert "--allow-degraded" not in publish_job
+
+    materialize = publish_job.index("name: Materialize data-only branch")
+    baseline_validate = publish_job.index(
+        "name: Revalidate bundle against data-branch baseline"
+    )
+    install_bundle = publish_job.index("name: Install validated publication bundle")
+    exact_validate = publish_job.index("name: Revalidate exact publication tree")
+    assert materialize < baseline_validate < install_bundle < exact_validate
 
 
 def test_publication_job_requires_successful_completed_refresh() -> None:

@@ -8,12 +8,20 @@ from typing import Any, Mapping, Sequence
 from urllib.parse import urlsplit
 
 
-LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v3"
+LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v4"
+LEGACY_LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v2"
+PREVIOUS_LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v3"
 DEFAULT_LIFECYCLE_REGISTRY = Path(
     "config/market_engine/universes/instrument_lifecycle.json"
 )
 LIFECYCLE_STATUSES = frozenset({"active", "inactive"})
 EFFECTIVE_LIFECYCLE_STATUSES = frozenset({"active", "inactive", "pending"})
+FINAL_SESSION_OBSERVATION_STATUSES = frozenset(
+    {"observed", "no_valid_price_observation"}
+)
+SUSPENSION_EFFECTIVE_TIMINGS = frozenset(
+    {"before_open", "after_close", "effective_time"}
+)
 SOURCE_AUTHORITIES = frozenset({"sec", "issuer", "acquirer", "exchange"})
 LIFECYCLE_REASONS = frozenset(
     {
@@ -90,7 +98,12 @@ def load_lifecycle_registry(path: str | Path) -> dict[str, Any]:
         ) from exc
     if not isinstance(payload, dict):
         raise InstrumentLifecycleError("lifecycle registry must be a JSON object")
-    if payload.get("schema_version") != LIFECYCLE_SCHEMA_VERSION:
+    input_schema_version = payload.get("schema_version")
+    if input_schema_version not in {
+        LIFECYCLE_SCHEMA_VERSION,
+        LEGACY_LIFECYCLE_SCHEMA_VERSION,
+        PREVIOUS_LIFECYCLE_SCHEMA_VERSION,
+    }:
         raise InstrumentLifecycleError("lifecycle registry schema is unsupported")
     records = payload.get("records")
     if not isinstance(records, list):
@@ -103,7 +116,11 @@ def load_lifecycle_registry(path: str | Path) -> dict[str, Any]:
             raise InstrumentLifecycleError(
                 f"lifecycle record {index} must be an object"
             )
-        record = _validate_record(value, index=index)
+        record = _validate_record(
+            value,
+            index=index,
+            input_schema_version=str(input_schema_version),
+        )
         instrument_id = record["instrument_id"]
         if instrument_id in seen_instrument_ids:
             raise InstrumentLifecycleError(
@@ -214,7 +231,12 @@ def record_provenance_checksum(record: Mapping[str, Any]) -> str:
     return canonical_checksum(payload)
 
 
-def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
+def _validate_record(
+    value: Mapping[str, Any],
+    *,
+    index: int,
+    input_schema_version: str = LIFECYCLE_SCHEMA_VERSION,
+) -> dict[str, Any]:
     record = dict(value)
     instrument_id = _required_text(record, "instrument_id")
     ticker = _required_text(record, "ticker").upper()
@@ -232,11 +254,31 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
     )
     delisting_end_date = _optional_date(record, "delisting_end_date")
     last_trading_session = _optional_date(record, "last_trading_session")
+    if (
+        delisting_end_date is not None
+        and last_trading_session is not None
+        and delisting_end_date != last_trading_session
+    ):
+        raise InstrumentLifecycleError(
+            "lifecycle alias conflict for "
+            f"{ticker}: delisting_end_date={delisting_end_date.isoformat()} "
+            "does not equal "
+            f"last_trading_session={last_trading_session.isoformat()}"
+        )
     transaction_closing_date = _optional_date(record, "transaction_closing_date")
     trading_suspension_effective_date = _optional_date(
         record, "trading_suspension_effective_date"
     )
     inactive_effective_date = _optional_date(record, "inactive_effective_date")
+    price_observation_end_session = _optional_date(
+        record, "price_observation_end_session"
+    )
+    final_session_observation_status = record.get(
+        "final_session_observation_status"
+    )
+    suspension_effective_timing = record.get(
+        "trading_suspension_effective_timing"
+    )
     lifecycle_reason = _required_text(record, "lifecycle_reason")
     if lifecycle_reason not in LIFECYCLE_REASONS:
         raise InstrumentLifecycleError(
@@ -351,6 +393,7 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
                 transaction_closing_date,
                 trading_suspension_effective_date,
                 inactive_effective_date,
+                price_observation_end_session,
             )
         ):
             raise InstrumentLifecycleError(
@@ -384,16 +427,57 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
             raise InstrumentLifecycleError(
                 f"inactive status and inactive effective dates must match for {instrument_id}"
             )
-        if inactive_effective_date <= last_trading_session:
+        if inactive_effective_date < last_trading_session:
             raise InstrumentLifecycleError(
-                f"inactive effective date must follow the final trading date for {instrument_id}"
+                f"inactive effective date cannot precede the final trading date for {instrument_id}"
+            )
+        if transaction_closing_date is not None and transaction_closing_date < last_trading_session:
+            raise InstrumentLifecycleError(
+                f"transaction closing cannot precede the final trading session for {instrument_id}"
+            )
+        if trading_suspension_effective_date is None:
+            trading_suspension_effective_date = inactive_effective_date
+        if suspension_effective_timing is None:
+            suspension_effective_timing = "before_open"
+        if suspension_effective_timing not in SUSPENSION_EFFECTIVE_TIMINGS:
+            raise InstrumentLifecycleError(
+                f"trading suspension timing is invalid for {instrument_id}"
             )
         if (
-            trading_suspension_effective_date is not None
+            suspension_effective_timing == "before_open"
             and trading_suspension_effective_date <= last_trading_session
+        ) or (
+            suspension_effective_timing in {"after_close", "effective_time"}
+            and trading_suspension_effective_date < last_trading_session
         ):
             raise InstrumentLifecycleError(
-                f"trading suspension must follow the final trading session for {instrument_id}"
+                f"trading suspension chronology is invalid for {instrument_id}"
+            )
+        if price_observation_end_session is None:
+            price_observation_end_session = last_trading_session
+        if not price_observation_end_session <= last_trading_session:
+            raise InstrumentLifecycleError(
+                f"price observation end cannot follow the final trading session for {instrument_id}"
+            )
+        if final_session_observation_status is None:
+            final_session_observation_status = (
+                "observed"
+                if price_observation_end_session == last_trading_session
+                else "no_valid_price_observation"
+            )
+        if final_session_observation_status not in FINAL_SESSION_OBSERVATION_STATUSES:
+            raise InstrumentLifecycleError(
+                f"final-session observation status is invalid for {instrument_id}"
+            )
+        if (
+            final_session_observation_status == "observed"
+            and price_observation_end_session != last_trading_session
+        ) or (
+            final_session_observation_status == "no_valid_price_observation"
+            and price_observation_end_session >= last_trading_session
+        ):
+            raise InstrumentLifecycleError(
+                f"final-session observation semantics are contradictory for {instrument_id}"
             )
         _validate_inactive_evidence(
             normalized_evidence,
@@ -434,6 +518,13 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
         "inactive_effective_date": (
             inactive_effective_date.isoformat() if inactive_effective_date else None
         ),
+        "price_observation_end_session": (
+            price_observation_end_session.isoformat()
+            if price_observation_end_session
+            else None
+        ),
+        "final_session_observation_status": final_session_observation_status,
+        "trading_suspension_effective_timing": suspension_effective_timing,
         "lifecycle_reason": lifecycle_reason,
         "corporate_action_type": corporate_action_type,
         "successor_or_acquirer": successor_or_acquirer,
@@ -442,12 +533,25 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
         "provenance_checksum": record.get("provenance_checksum"),
     }
     checksum = normalized.get("provenance_checksum")
-    if not isinstance(checksum, str) or checksum != record_provenance_checksum(
-        normalized
-    ):
+    normalized_checksum = record_provenance_checksum(normalized)
+    legacy_checksum = record_provenance_checksum(record)
+    legacy_compatible = (
+        input_schema_version
+        in {
+            LEGACY_LIFECYCLE_SCHEMA_VERSION,
+            PREVIOUS_LIFECYCLE_SCHEMA_VERSION,
+        }
+        or "last_trading_session" not in record
+        or "delisting_end_date" not in record
+    )
+    if not isinstance(checksum, str) or checksum not in {
+        normalized_checksum,
+        legacy_checksum if legacy_compatible else normalized_checksum,
+    }:
         raise InstrumentLifecycleError(
             f"lifecycle provenance checksum mismatch for {instrument_id}"
         )
+    normalized["provenance_checksum"] = normalized_checksum
     return normalized
 
 
@@ -703,6 +807,9 @@ def _apply_record(
             "transaction_closing_date": None,
             "trading_suspension_effective_date": None,
             "inactive_effective_date": None,
+            "price_observation_end_session": None,
+            "final_session_observation_status": None,
+            "trading_suspension_effective_timing": None,
             "lifecycle_reason": "canonical_universe_active"
             if lifecycle_status == "active"
             else "canonical_universe_inactive",
@@ -765,6 +872,15 @@ def _apply_record(
             "trading_suspension_effective_date"
         ],
         "inactive_effective_date": record["inactive_effective_date"],
+        "price_observation_end_session": record[
+            "price_observation_end_session"
+        ],
+        "final_session_observation_status": record[
+            "final_session_observation_status"
+        ],
+        "trading_suspension_effective_timing": record[
+            "trading_suspension_effective_timing"
+        ],
         "lifecycle_reason": current_reason,
         "corporate_action_type": record["corporate_action_type"],
         "successor_or_acquirer": record["successor_or_acquirer"],
@@ -796,6 +912,15 @@ def _instrument_binding(instrument: Mapping[str, Any]) -> dict[str, Any]:
             "trading_suspension_effective_date"
         ],
         "inactive_effective_date": instrument["inactive_effective_date"],
+        "price_observation_end_session": instrument[
+            "price_observation_end_session"
+        ],
+        "final_session_observation_status": instrument[
+            "final_session_observation_status"
+        ],
+        "trading_suspension_effective_timing": instrument[
+            "trading_suspension_effective_timing"
+        ],
         "lifecycle_provenance_checksum": instrument[
             "lifecycle_provenance_checksum"
         ],

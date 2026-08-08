@@ -39,8 +39,8 @@ from market_engine.data.local_market_data_universe import (
 )
 
 
-SCHEMA_VERSION = "market-engine-me-sr23-canonical-price-freshness-manifest-v4"
-VALIDATION_SCHEMA_VERSION = "market-engine-me-sr23-published-price-dataset-validation-v4"
+SCHEMA_VERSION = "market-engine-me-sr23-canonical-price-freshness-manifest-v5"
+VALIDATION_SCHEMA_VERSION = "market-engine-me-sr23-published-price-dataset-validation-v5"
 DEFAULT_UNIVERSE_SNAPSHOT = Path(
     "artifacts/market_engine/data_runs/"
     "me-data04-complete-dataset-20260713T133000Z-coverage-after/universe_snapshot.json"
@@ -196,6 +196,9 @@ def run_scheduled_refresh(
                 refreshed = {
                     **retained,
                     "rows_added": refreshed["rows_added"],
+                    "previous_file_checksum": refreshed[
+                        "previous_file_checksum"
+                    ],
                     "provider_identity": refreshed["provider_identity"],
                     "provider_retrieval": refreshed.get("provider_retrieval", []),
                     "rejected_bar_diagnostics": refreshed.get(
@@ -214,7 +217,14 @@ def run_scheduled_refresh(
     rows.sort(key=lambda row: (row["instrument_id"], row["ticker"]))
     counts = Counter(row["freshness_status"] for row in rows)
     history_counts = Counter(row["history_coverage_status"] for row in rows)
-    updated_count = counts.get("updated", 0)
+    changed_price_files = sorted(
+        str(row["persisted_file_path"])
+        for row in rows
+        if isinstance(row.get("persisted_file_checksum"), str)
+        and row.get("previous_file_checksum")
+        != row.get("persisted_file_checksum")
+    )
+    changed_price_file_count = len(changed_price_files)
     bound_rows = [
         row for row in rows if row["lifecycle_status"] != "pending"
     ]
@@ -287,8 +297,9 @@ def run_scheduled_refresh(
             "publication_set_valid": publication_set_valid,
             "publication_required": run_status == "completed"
             and publication_set_valid
-            and (updated_count > 0 or manifest_change_required),
-            "changed_price_file_count": updated_count,
+            and (changed_price_file_count > 0 or manifest_change_required),
+            "changed_price_file_count": changed_price_file_count,
+            "changed_price_files": changed_price_files,
             "manifest_change_required": manifest_change_required,
             "empty_commit_required": False,
         },
@@ -350,9 +361,9 @@ def expected_completed_session(instrument: Mapping[str, Any], run_at: datetime) 
         candidate -= timedelta(days=1)
     while not _is_trading_session(candidate, profile.holiday_calendar):
         candidate -= timedelta(days=1)
-    last_trading_session = instrument.get("last_trading_session")
-    if isinstance(last_trading_session, str):
-        lifecycle_cutoff = date.fromisoformat(last_trading_session)
+    price_observation_cutoff = instrument.get("price_observation_end_session")
+    if isinstance(price_observation_cutoff, str):
+        lifecycle_cutoff = date.fromisoformat(price_observation_cutoff)
         if lifecycle_cutoff <= candidate:
             candidate = lifecycle_cutoff
     return profile, candidate
@@ -366,6 +377,7 @@ def validate_published_dataset(
     run_at: datetime | None = None,
     allow_degraded: bool = False,
     expected_source_main_sha: str | None = None,
+    baseline_publication_root: str | Path | None = None,
 ) -> dict[str, Any]:
     root = Path(publication_root)
     issues: list[dict[str, str]] = []
@@ -426,9 +438,6 @@ def validate_published_dataset(
 
     publication = manifest.get("publication")
     manifest_status_counts = manifest.get("status_counts")
-    manifest_updated_count = (
-        manifest_status_counts.get("updated", 0) if isinstance(manifest_status_counts, Mapping) else 0
-    )
     manifest_change_required = (
         publication.get("manifest_change_required")
         if isinstance(publication, Mapping)
@@ -438,9 +447,12 @@ def validate_published_dataset(
         publication.get("publication_set_valid") is True
         and publication.get("publication_required") is True
         and isinstance(publication.get("changed_price_file_count"), int)
-        and publication["changed_price_file_count"] == manifest_updated_count
+        and isinstance(publication.get("changed_price_files"), list)
         and isinstance(manifest_change_required, bool)
-        and (manifest_updated_count > 0 or manifest_change_required)
+        and (
+            publication["changed_price_file_count"] > 0
+            or manifest_change_required
+        )
         and publication.get("empty_commit_required") is False
     ):
         issues.append(_validation_issue("PUBLISHED_PUBLICATION_DECISION_INVALID", "publication"))
@@ -509,6 +521,73 @@ def validate_published_dataset(
     }
     if actual_files != bound_files:
         issues.append(_validation_issue("PUBLISHED_UNBOUND_PRICE_FILE_SET", "data/processed"))
+    declared_changed_files = (
+        publication.get("changed_price_files", [])
+        if isinstance(publication, Mapping)
+        else []
+    )
+    reconciled_changed_files = sorted(
+        str(row.get("persisted_file_path"))
+        for row in entries
+        if isinstance(row, Mapping)
+        and isinstance(row.get("persisted_file_checksum"), str)
+        and row.get("previous_file_checksum")
+        != row.get("persisted_file_checksum")
+    )
+    previous_checksums_valid = all(
+        row.get("previous_file_checksum") is None
+        or (
+            isinstance(row.get("previous_file_checksum"), str)
+            and re.fullmatch(r"[0-9a-f]{64}", row["previous_file_checksum"])
+        )
+        for row in entries
+        if isinstance(row, Mapping)
+    )
+    if (
+        not previous_checksums_valid
+        or declared_changed_files != sorted(set(declared_changed_files))
+        or declared_changed_files != reconciled_changed_files
+        or publication.get("changed_price_file_count")
+        != len(reconciled_changed_files)
+        or not set(reconciled_changed_files).issubset(actual_files)
+    ):
+        issues.append(
+            _validation_issue(
+                "PUBLISHED_CHANGED_PRICE_FILE_SET_MISMATCH",
+                "publication.changed_price_files",
+            )
+        )
+    if baseline_publication_root is not None:
+        baseline_root = Path(baseline_publication_root)
+        baseline_changed_files: list[str] = []
+        baseline_previous_mismatch = False
+        for entry in entries:
+            if not isinstance(entry, Mapping):
+                continue
+            relative = entry.get("persisted_file_path")
+            persisted_checksum = entry.get("persisted_file_checksum")
+            if not isinstance(relative, str) or not isinstance(
+                persisted_checksum, str
+            ):
+                continue
+            baseline_path = baseline_root / relative
+            baseline_checksum = (
+                _sha256_file(baseline_path) if baseline_path.is_file() else None
+            )
+            if entry.get("previous_file_checksum") != baseline_checksum:
+                baseline_previous_mismatch = True
+            if baseline_checksum != persisted_checksum:
+                baseline_changed_files.append(relative)
+        if (
+            baseline_previous_mismatch
+            or sorted(baseline_changed_files) != reconciled_changed_files
+        ):
+            issues.append(
+                _validation_issue(
+                    "PUBLISHED_CHANGED_PRICE_BASELINE_MISMATCH",
+                    "publication.changed_price_files",
+                )
+            )
 
     validation_at = _as_utc(run_at or datetime.now(UTC))
     stale: list[str] = []
@@ -764,6 +843,11 @@ def _refresh_instrument(
         "freshness_status": "unsupported",
         "reason_code": "UNSUPPORTED_EXCHANGE" if profile is None else "PROVIDER_MAPPING_MISSING",
         "persisted_file_path": (DATA_RELATIVE_ROOT / f"{source_symbol}.csv").as_posix(),
+        "previous_file_checksum": (
+            initial_validation.get("checksum")
+            if initial_validation.get("status") == "valid"
+            else None
+        ),
         "persisted_file_checksum": _sha256_file(path) if path.is_file() else None,
         **_lifecycle_fields(instrument),
         **initial_history,
@@ -954,6 +1038,7 @@ def _non_refreshable_lifecycle_row(
         "persisted_file_path": (
             DATA_RELATIVE_ROOT / f"{source_symbol}.csv"
         ).as_posix(),
+        "previous_file_checksum": validation.get("checksum"),
         "persisted_file_checksum": validation.get("checksum"),
         **_lifecycle_fields(instrument),
         **retained_boundary,
@@ -967,7 +1052,7 @@ def _inactive_history_needs_backfill(
 ) -> bool:
     path = price_root / f"{instrument['source_symbol']}.csv"
     validation = _validate_price_history(path) if path.is_file() else {"status": "missing"}
-    cutoff = instrument.get("last_trading_session")
+    cutoff = instrument.get("price_observation_end_session")
     return (
         isinstance(cutoff, str)
         and (
@@ -1162,7 +1247,7 @@ def _retained_history_boundary(
     validation: Mapping[str, Any],
 ) -> dict[str, Any]:
     lifecycle_status = str(instrument.get("lifecycle_status") or "")
-    expected_end = instrument.get("last_trading_session")
+    expected_end = instrument.get("price_observation_end_session")
     actual_end = validation.get("end_date")
     base = {
         "retained_history_boundary_status": "not_applicable",
@@ -1265,6 +1350,15 @@ def _lifecycle_fields(instrument: Mapping[str, Any]) -> dict[str, Any]:
             "trading_suspension_effective_date"
         ],
         "inactive_effective_date": instrument["inactive_effective_date"],
+        "price_observation_end_session": instrument[
+            "price_observation_end_session"
+        ],
+        "final_session_observation_status": instrument[
+            "final_session_observation_status"
+        ],
+        "trading_suspension_effective_timing": instrument[
+            "trading_suspension_effective_timing"
+        ],
         "lifecycle_reason": instrument["lifecycle_reason"],
         "corporate_action_type": instrument["corporate_action_type"],
         "lifecycle_provenance_checksum": instrument[
@@ -1309,6 +1403,7 @@ def _provider_with_retries(
                         expected_session=expected_session,
                         max_attempts=max_attempts,
                         sleeper=sleeper,
+                        lifecycle_context=lifecycle_context,
                     )
                 raise
         except ProviderBoundaryError:
@@ -1527,6 +1622,7 @@ def _prefetch_batch_provider(
         expected_session: date,
         max_attempts: int,
         sleeper: Sleeper,
+        lifecycle_context: Mapping[str, Any] | None = None,
     ) -> pd.DataFrame:
         provider_symbol = _to_yfinance_symbol(str(symbol))
         terminal_error: ProviderBoundaryError | None = None
@@ -1570,6 +1666,7 @@ def _prefetch_batch_provider(
                         expected_session,
                         provider_symbol=provider_symbol,
                         retry_number=attempt,
+                        lifecycle_context=lifecycle_context,
                     )
                 except ProviderBoundaryError as exc:
                     terminal_error = exc
@@ -1657,6 +1754,12 @@ def _validate_provider_frame(
                 "ticker": str(lifecycle_context["symbol"]),
                 "session_date": day.isoformat(),
                 "cutoff_date": expected_session.isoformat(),
+                "last_trading_session": lifecycle_context[
+                    "last_trading_session"
+                ],
+                "price_observation_end_session": lifecycle_context[
+                    "price_observation_end_session"
+                ],
                 "lifecycle_event": str(lifecycle_context["lifecycle_reason"]),
                 "lifecycle_provenance_checksum": lifecycle_context[
                     "lifecycle_provenance_checksum"
@@ -2148,6 +2251,7 @@ def _argument_parser() -> argparse.ArgumentParser:
     )
     validate.add_argument("--allow-degraded", action="store_true")
     validate.add_argument("--expected-source-main-sha")
+    validate.add_argument("--baseline-publication-root")
     consume = subparsers.add_parser("consume-analysis")
     consume.add_argument("--publication-root", required=True)
     consume.add_argument("--universe-snapshot", default=DEFAULT_UNIVERSE_SNAPSHOT.as_posix())
@@ -2213,6 +2317,7 @@ def run_command(argv: Sequence[str] | None, *, stdout: TextIO, stderr: TextIO) -
             lifecycle_registry_path=args.lifecycle_registry,
             allow_degraded=args.allow_degraded,
             expected_source_main_sha=args.expected_source_main_sha,
+            baseline_publication_root=args.baseline_publication_root,
         )
         print(json.dumps(validation, sort_keys=True), file=stdout if validation["validated"] else stderr)
         return 0 if validation["validated"] else 2
