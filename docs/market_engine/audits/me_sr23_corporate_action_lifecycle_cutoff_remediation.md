@@ -2,6 +2,169 @@
 
 Status: `completed_with_blockers`
 
+## Final Generic Evidence and Session Reconciliation Remediation
+
+This section is the current audit conclusion for commit
+`06ac5536769d3414e38f59d1aa3a83b155153695` and supersedes the historical
+implementation and canary details retained later in this document.
+
+The final review found two generic code defects. First, the publisher treated
+`primary_observed_sessions` as an alternative to replayable receipts, so a
+manifest could label an added row as primary and bypass provider evidence.
+Second, the acquisition path accumulated a fallback-required set before all
+primary, replay, fallback, and terminal-absence outcomes were known. That set
+could remain stale in a mixed historical-gap and terminal-absence case.
+
+Manifest classifications are no longer evidence. The v8 publisher derives a
+canonical mutation set directly from the trusted baseline and each staged CSV.
+Every added row must equal exactly one uniquely replayed observation receipt,
+regardless of whether its acquisition route is primary, primary replay, or
+fallback. Historical modifications and deletions fail closed because this
+repository has no approved correction or deletion contract. Modified rows
+retain previous and new canonical row digests plus a field-level diff for
+diagnosis, but cannot be published.
+
+The source-policy and receipt contracts are now v2. Provider approval is
+separated into acquisition, raw storage, replay, and canonical publication;
+all four approvals and the exact exchange and acquisition route are required.
+The uniform receipt binds the provider symbol, source-policy ID, route,
+request window, retrieval time, content-addressed raw artifact, parser,
+currency, normalized OHLCV and volume, canonical-row digest, and receipt
+digest. The publisher replays the raw artifacts and reconstructs the receipts
+without trusting producer labels. Per-instrument and publication-wide roots
+sort by exchange, instrument, session, canonical-row digest, and receipt
+digest, so ordering is irrelevant while missing, extra, duplicate, copied, or
+mutated leaves fail reconciliation.
+
+The new Mutation Evidence Ledger classifies baseline/staged differences as
+`row_added`, `row_modified`, `row_deleted`, or `row_unchanged`. Its central
+invariant is that publisher-derived added or modified rows equal the unique
+replayed receipt rows and exact staged canonical rows. The new Session
+Resolution Ledger assigns each considered session exactly one of
+`observed_primary`, `observed_fallback`, `explained_absent`, `unresolved`, or
+`not_expected`. Observed sessions come only from valid replayed receipts;
+explained absences come only from valid replayed absence attestations; and
+fallback candidates are rederived from the remaining unresolved sessions
+after every merge. The legacy `fallback_required_sessions` publication
+contract was removed.
+
+An absence attestation is session-specific and binds the instrument, exchange,
+formal lifecycle cutoff, terminal-only reason code, calendar expectation,
+approved acquisition route, request window, content-addressed provider
+artifact, parser result, and attestation digest. The publisher proves that the
+artifact does not contain the terminal session, that no receipt or staged row
+exists for the same session, and that the session equals the lifecycle cutoff.
+An internal gap, a status string, a non-terminal session, an unsuccessful
+response, or an unapproved source cannot explain absence.
+
+Gap-directed primary replay is ticker-agnostic. It derives a buffered bounded
+window from the earliest and latest unresolved exchange sessions and clamps it
+to the original request. A second completeness acquisition is permitted only
+when the provider exposes an identity already approved by the machine-readable
+policy for `primary_replay`; otherwise the path stops and remains unresolved.
+The production policy intentionally contains no providers, so the current
+Yahoo Finance adapter is technically reachable but is not approved for raw
+retention, replay, or canonical publication. No source approval was added and
+no manual market data was introduced.
+
+Deterministic combination tests cover arbitrary ticker shapes, multiple
+exchanges, all receipt routes, reordered sessions and rows, unchanged, added,
+modified, deleted and duplicate rows, mixed primary/fallback observations,
+terminal absence, explicit not-expected sessions, stale fallback queues, and
+root stability. Publisher regressions recompute CSV and manifest checksums and
+still reject primary-label bypasses, removed or duplicated receipts, wrong
+identity, exchange, session, parser, approval, artifact, checksum, OHLCV,
+volume, adjusted close, and publication root. Product code contains no EA or
+TMHC literal and no Investing.com reference.
+
+### Final local validation
+
+| Command | Result | Duration |
+|---|---:|---:|
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/data/test_mutation_evidence.py tests/market_engine/data/test_observation_receipts.py tests/market_engine/data/test_me_sr18_lifecycle_aware_freshness.py tests/market_engine/data/test_scheduled_canonical_price_refresh.py -q --tb=short` | 227 passed, 0 failed, 0 skipped | 3.32 s |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/run -q --tb=short` | 197 passed, 0 failed, 0 skipped | 2.56 s |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine -q --tb=short` | 1530 passed, 1 failed, 0 skipped | 8.35 s |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q --tb=short` | 2197 passed, 1 failed, 0 skipped | 9.64 s |
+| Exact broad-suite failure on PR base `a0409a49e8f8f3ef9dce352c22b039ce4387faab` | 0 passed, 1 identical failure | 0.02 s |
+| Schema, receipt replay, lifecycle alias, mutation, session-partition, and publisher contract tests | passed | included above |
+| `git diff --check` | passed | <0.1 s |
+
+The sole broad-suite failure remains the pre-existing missing artifact
+`artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data09-aapl-20260719T155116Z/manifest.json`. The exact test fails identically
+on the PR base. Mandatory governance greps still report only the pre-existing
+BUY and SELL command parsing and portfolio transaction handling; `tradeable`
+is absent. No allocation, Decision Engine, reporting, or market-data file was
+changed.
+
+### Final non-publishing canary
+
+Exactly one new workflow was dispatched after pushing the implementation:
+
+| Evidence | Result |
+|---|---|
+| Workflow | [31335952903](https://github.com/sclaessens/market-scanner/actions/runs/31335952903) |
+| Input | `publish=false` |
+| Branch / code head | `me-sr23-corporate-action-lifecycle-cutoff-remediation` / `06ac5536769d3414e38f59d1aa3a83b155153695` |
+| Run identity | `me-sr23-canonical-price-refresh-20260809T210624Z` |
+| Trusted source main | `a0409a49e8f8f3ef9dce352c22b039ce4387faab` |
+| Duration / conclusion | 5 minutes 10 seconds / expected fail-closed failure |
+| Universe | 952 total; 946 active; 6 retained inactive; 0 pending |
+| Freshness status | 942 updated; 4 already current; 5 not expected; 1 failed |
+| Mutation evidence | 946 invalid instruments; 6 valid retained instruments |
+| Invalid mutation causes | 426 added-row/receipt equality failures; 520 unsupported historical modifications |
+| Session resolution | 948 instruments and 10,415 expected sessions unresolved |
+| Receipts / absence attestations | 0 / 0 |
+| Changed files | 946 declared; 946 unique |
+| Publication roots | mutation `3f8dda447bbd1d833d3a91f0edbea18aa12898d3bf043ba0b112a832c623a95e`; receipt `4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945` |
+| Publication | set valid `false`; required `false`; publication bundle skipped |
+| Publish job | skipped |
+| Freshness artifact | `canonical-price-freshness-me-sr23-canonical-price-refresh-20260809T210624Z`; GitHub digest `0288915d1bf3813f890e0cd62d928d8af2558abc1429992ab241d33ae6dfac6e` |
+| Extracted report SHA-256 | `0cf0d86d1af78e1646c045f74a025a348c7ceb0720ca8ae038ab4bef47a01b12` |
+| Manifest | v8; checksum `1e9bf8975b20cf96154bfa04b02f105796fdc456a9ee2b7fd47aad96c2d99777` |
+| Source policy | v2; checksum `7bdc8454d4b766b9fdf2baae615846fcaff2324fe9cc3700afd3e4fce0e0d682`; zero providers |
+| `market-data` before / after | `95c88276763b1762cbbfbccc402ec8535268127b` / unchanged |
+
+The canary proves that primary labels no longer bypass evidence. EA's trusted
+baseline remains 389 rows through July 23 with checksum
+`758b5bd8ed67403eebc2ba1673e500ea8cc219ad708f4b0653ca0a180fb867a0`.
+The batch returned four bars ending August 4, but only August 4 was in the
+bounded lifecycle interval. Because the source has no approved replay/storage
+policy and produced no receipt, even that primary-labeled row was rejected.
+All eight expected sessions from July 24 through August 4 are unresolved;
+`resulting_last_observation` remains July 23 and `rows_added=0`.
+
+TMHC retains the formal July 24 cutoff and July 23 canonical observation end.
+Its legacy observation record still contains only a status string and locator,
+not a retained replayable provider artifact under the v2 source policy.
+Therefore the final ledger correctly leaves July 24 unresolved and does not
+accept the old status as an absence attestation. Local tests prove that a valid
+terminal attestation resolves the terminal session, a mixed historical gap is
+resolved independently, a later valid July 24 observation remains admissible,
+and a post-cutoff bar is rejected.
+
+The canary also exposed existing primary-path historical rewrites across 520
+files. The new mutation ledger detected and blocked them because no correction
+contract exists. This is an operational data-source blocker, not a reason to
+weaken the publisher. No retry or second workflow was dispatched.
+
+### Current blockers and rollback
+
+EA has no approved replayable canonical source for the eight required rows;
+TMHC has no replayable terminal absence attestation; and the primary refresh
+attempts unsupported historical modifications in 520 files. The correct final
+status is `COMPLETED WITH BLOCKERS`.
+
+Rollback is a normal revert of the reviewed ME-SR23 commits. Do not rewrite
+history, edit `market-data`, restore transcribed prices, approve a technically
+reachable source without governance, or relax mutation, receipt, session, or
+publisher equality checks.
+
+## Historical Review Record
+
+The remaining sections preserve earlier review and canary evidence. Where they
+conflict with the final section above, they are historical and not current
+operational claims.
+
 ## Third Review Findings
 
 The third review of draft PR #474 identified three final merge blockers:
