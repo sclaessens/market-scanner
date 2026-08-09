@@ -1,6 +1,6 @@
 # ME-SR23 Corporate-Action Lifecycle Cutoff Remediation Audit
 
-Status: `corrected_canary_pending`
+Status: `ready_for_re_review`
 
 ## Second Review Findings
 
@@ -142,7 +142,39 @@ its full local validation.
 
 ## Corrected Remediation Canary
 
-Pending after the material correction is committed and pushed.
+The corrected full-universe `publish=false` canary completed successfully:
+
+| Evidence | Result |
+|---|---|
+| Workflow | [`31319846978`](https://github.com/sclaessens/market-scanner/actions/runs/31319846978) |
+| Branch / head | `me-sr23-corporate-action-lifecycle-cutoff-remediation` / `5d8966586c3e0f85d730355539895d364aa7f030` |
+| Run identity | `me-sr23-canonical-price-refresh-20260809T145833Z` |
+| Input / duration | `publish=false` / 5 minutes 29 seconds |
+| Source main | `a0409a49e8f8f3ef9dce352c22b039ce4387faab` |
+| Status counts | 942 updated; 4 already current; 6 not expected; 0 stale, failed, or unsupported |
+| Coverage | 942 sufficient; 4 limited history; 6 retained inactive; 0 insufficient unexplained |
+| Changed files | 947 declared, 947 unique, independently reconciled |
+| Publication | required `true`; set valid `true`; empty commit `false` |
+| Freshness artifact | `canonical-price-freshness-me-sr23-canonical-price-refresh-20260809T145833Z` (SHA-256 `6b70f5920b056405d37f75338188d4f527bd66fb8c4fe1fe78b79aa11f0737d8`) |
+| Publication artifact | `canonical-price-publication-me-sr23-canonical-price-refresh-20260809T145833Z` (SHA-256 `23d07786f81bdc8fcb64240a5b16b3f14c61bccf70ad7f9fb2c5e9fe8fad6ad0`) |
+| Manifest | schema v6; checksum `466a49a8dd648e31170881c21fdc0dd7d917a8fff453efe1d1b73c0781aefdc8` |
+| Independent validation | validated against detached `market-data` baseline; zero issues, reason codes, or stale tickers |
+| Publish job | skipped |
+| `market-data` before / after | `95c88276763b1762cbbfbccc402ec8535268127b` / unchanged |
+
+The publication artifact contains 952 governed canonical CSVs plus the
+manifest. EA contains exactly the eight expected XNYS sessions from July 24
+through August 4, has no post-cutoff row, reports 389 -> 397 rows, and preserves
+`previous_last_observation=2026-07-23` and
+`resulting_last_observation=2026-08-04`. Its previous and resulting checksums
+are `758b5bd8ed67403eebc2ba1673e500ea8cc219ad708f4b0653ca0a180fb867a0`
+and `624be997bf229447fb65bb6f2094d3442387e8a1128b539160a6c36e469bc4b6`.
+
+NSA remained a 387-row no-op through July 21 with an unchanged checksum. TMHC
+remained a 389-row no-op through July 23 while its formal lifecycle cutoff
+remained July 24. The manifest explicitly reconciles July 24 as the one
+provider- and timestamp-specific explained daily-OHLCV exception; no July 25
+or later row entered canonical output.
 
 ## Remaining Risks and Rollback
 
