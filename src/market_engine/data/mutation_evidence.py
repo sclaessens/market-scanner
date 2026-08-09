@@ -1,0 +1,329 @@
+from __future__ import annotations
+
+import csv
+import hashlib
+import json
+from datetime import date
+from pathlib import Path
+from typing import Any, Mapping, Sequence
+
+from market_engine.data.observation_receipts import canonical_row_sha256
+
+
+MUTATION_SCHEMA_VERSION = "market-engine-canonical-mutation-ledger-v1"
+SESSION_LEDGER_SCHEMA_VERSION = "market-engine-session-resolution-ledger-v1"
+MUTATION_TYPES = frozenset(
+    {"row_added", "row_modified", "row_deleted", "row_unchanged"}
+)
+SESSION_STATES = frozenset(
+    {
+        "observed_primary",
+        "observed_fallback",
+        "explained_absent",
+        "unresolved",
+        "not_expected",
+    }
+)
+
+
+class MutationEvidenceError(ValueError):
+    pass
+
+
+def derive_canonical_mutations(
+    *,
+    baseline_path: str | Path | None,
+    staged_path: str | Path,
+    instrument_id: str,
+    ticker: str,
+    exchange: str,
+    currency: str,
+    include_unchanged: bool = False,
+) -> list[dict[str, Any]]:
+    baseline = _load_rows(Path(baseline_path)) if baseline_path is not None else {}
+    staged = _load_rows(Path(staged_path))
+    mutations: list[dict[str, Any]] = []
+    for session in sorted(set(baseline).union(staged)):
+        previous = baseline.get(session)
+        current = staged.get(session)
+        previous_digest = (
+            _row_digest(previous, instrument_id=instrument_id, currency=currency)
+            if previous is not None
+            else None
+        )
+        current_digest = (
+            _row_digest(current, instrument_id=instrument_id, currency=currency)
+            if current is not None
+            else None
+        )
+        mutation_type = (
+            "row_added"
+            if previous is None
+            else "row_deleted"
+            if current is None
+            else "row_unchanged"
+            if previous_digest == current_digest
+            else "row_modified"
+        )
+        if mutation_type == "row_unchanged" and not include_unchanged:
+            continue
+        field_diff = {}
+        if previous is not None and current is not None:
+            field_diff = {
+                field: {"previous": previous[field], "current": current[field]}
+                for field in ("Open", "High", "Low", "Close", "Adj Close", "Volume")
+                if previous[field] != current[field]
+            }
+        mutations.append(
+            {
+                "schema_version": MUTATION_SCHEMA_VERSION,
+                "instrument_id": instrument_id,
+                "ticker": ticker,
+                "exchange": exchange,
+                "session_date": session,
+                "mutation_type": mutation_type,
+                "previous_canonical_row_sha256": previous_digest,
+                "new_canonical_row_sha256": current_digest,
+                "field_diff": field_diff,
+            }
+        )
+    return mutations
+
+
+def reconcile_mutation_evidence(
+    mutations: Sequence[Mapping[str, Any]],
+    receipts: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    deleted = [row for row in mutations if row.get("mutation_type") == "row_deleted"]
+    modified = [row for row in mutations if row.get("mutation_type") == "row_modified"]
+    if deleted:
+        raise MutationEvidenceError("canonical row deletion is not supported")
+    if modified:
+        raise MutationEvidenceError(
+            "canonical historical modification requires an unsupported correction contract"
+        )
+    required = {
+        (str(row.get("instrument_id")), str(row.get("session_date"))): row
+        for row in mutations
+        if row.get("mutation_type") in {"row_added", "row_modified"}
+    }
+    if len(required) != sum(
+        row.get("mutation_type") in {"row_added", "row_modified"}
+        for row in mutations
+    ):
+        raise MutationEvidenceError("mutation ledger contains duplicate sessions")
+    provided: dict[tuple[str, str], Mapping[str, Any]] = {}
+    for receipt in receipts:
+        identity = (
+            str(receipt.get("instrument_id")),
+            str(receipt.get("session_date")),
+        )
+        if identity in provided:
+            raise MutationEvidenceError("observation receipts contain duplicate sessions")
+        provided[identity] = receipt
+    if set(required) != set(provided):
+        raise MutationEvidenceError(
+            "publisher-derived mutations do not equal replayed observations"
+        )
+    for identity, mutation in required.items():
+        receipt = provided[identity]
+        if (
+            mutation.get("ticker") != receipt.get("ticker")
+            or mutation.get("exchange") != receipt.get("exchange")
+            or mutation.get("new_canonical_row_sha256")
+            != receipt.get("canonical_row_sha256")
+        ):
+            raise MutationEvidenceError(
+                "observation receipt does not match publisher-derived mutation"
+            )
+    return {
+        "schema_version": MUTATION_SCHEMA_VERSION,
+        "evidence_required_mutation_count": len(required),
+        "added_count": sum(
+            row.get("mutation_type") == "row_added" for row in mutations
+        ),
+        "modified_count": len(modified),
+        "deleted_count": len(deleted),
+        "mutation_root": mutation_root(mutations, receipts),
+    }
+
+
+def mutation_root(
+    mutations: Sequence[Mapping[str, Any]],
+    receipts: Sequence[Mapping[str, Any]],
+) -> str:
+    receipts_by_identity = {
+        (str(row.get("instrument_id")), str(row.get("session_date"))): row
+        for row in receipts
+    }
+    leaves = []
+    for mutation in mutations:
+        if mutation.get("mutation_type") not in {"row_added", "row_modified"}:
+            continue
+        identity = (
+            str(mutation.get("instrument_id")),
+            str(mutation.get("session_date")),
+        )
+        receipt = receipts_by_identity.get(identity, {})
+        leaves.append(
+            {
+                "exchange": mutation.get("exchange"),
+                "instrument_id": identity[0],
+                "session_date": identity[1],
+                "canonical_row_sha256": mutation.get(
+                    "new_canonical_row_sha256"
+                ),
+                "receipt_sha256": receipt.get("receipt_sha256"),
+            }
+        )
+    return hashlib.sha256(_canonical_json(sorted(leaves, key=_leaf_key))).hexdigest()
+
+
+def derive_session_resolution(
+    *,
+    expected_sessions: Sequence[str],
+    receipts: Sequence[Mapping[str, Any]],
+    absence_attestations: Sequence[Mapping[str, Any]],
+    canonical_mutation_sessions: Sequence[str],
+    fallback_exhausted_sessions: Sequence[str] = (),
+    not_expected_sessions: Sequence[str] = (),
+) -> dict[str, Any]:
+    expected = _unique_set(expected_sessions, "expected sessions")
+    not_expected = _unique_set(not_expected_sessions, "not-expected sessions")
+    if expected.intersection(not_expected):
+        raise MutationEvidenceError(
+            "session cannot be expected and not expected"
+        )
+    exhausted = _unique_set(fallback_exhausted_sessions, "fallback exhaustion")
+    if not exhausted.issubset(expected):
+        raise MutationEvidenceError(
+            "fallback exhaustion is outside expected sessions"
+        )
+    mutation_sessions = _unique_set(
+        canonical_mutation_sessions, "canonical mutation sessions"
+    )
+    observed: dict[str, str] = {}
+    for receipt in receipts:
+        session = str(receipt.get("session_date"))
+        route = str(receipt.get("acquisition_route"))
+        state = (
+            "observed_primary"
+            if route in {"primary", "primary_replay"}
+            else "observed_fallback"
+            if route == "fallback"
+            else None
+        )
+        if state is None or session in observed:
+            raise MutationEvidenceError("observed session route is invalid or duplicate")
+        observed[session] = state
+    absent = _unique_set(
+        [str(row.get("session_date")) for row in absence_attestations],
+        "absence attestations",
+    )
+    if set(observed).intersection(absent):
+        raise MutationEvidenceError(
+            "session cannot be observed and explained absent"
+        )
+    if not set(observed).issubset(expected) or not absent.issubset(expected):
+        raise MutationEvidenceError("session evidence is outside expected sessions")
+    if not mutation_sessions.issubset(expected):
+        raise MutationEvidenceError("canonical mutation exists in not-expected session")
+    if mutation_sessions != set(observed):
+        raise MutationEvidenceError(
+            "canonical mutation sessions do not equal observed receipt sessions"
+        )
+    unresolved = expected - set(observed) - absent
+    partition = [
+        {
+            "session_date": session,
+            "state": (
+                "not_expected"
+                if session in not_expected
+                else observed.get(session)
+                or ("explained_absent" if session in absent else "unresolved")
+            ),
+        }
+        for session in sorted(expected.union(not_expected))
+    ]
+    if {row["state"] for row in partition} - SESSION_STATES:
+        raise MutationEvidenceError("session partition contains unknown state")
+    return {
+        "schema_version": SESSION_LEDGER_SCHEMA_VERSION,
+        "partition": partition,
+        "observed_sessions": sorted(observed),
+        "explained_absence_sessions": sorted(absent),
+        "unresolved_sessions": sorted(unresolved),
+        "fallback_candidates": sorted(unresolved - exhausted),
+        "not_expected_sessions": sorted(not_expected),
+    }
+
+
+def _load_rows(path: Path) -> dict[str, dict[str, str]]:
+    if not path.is_file():
+        return {}
+    try:
+        with path.open(newline="", encoding="utf-8") as handle:
+            reader = csv.DictReader(handle)
+            required = {"Date", "Open", "High", "Low", "Close", "Adj Close", "Volume"}
+            if set(reader.fieldnames or ()) != required:
+                raise MutationEvidenceError("canonical CSV columns are invalid")
+            rows: dict[str, dict[str, str]] = {}
+            for row in reader:
+                session = str(row["Date"])
+                if session in rows:
+                    raise MutationEvidenceError("canonical CSV contains duplicate sessions")
+                rows[session] = {key: str(value) for key, value in row.items()}
+            return rows
+    except (OSError, csv.Error, TypeError) as exc:
+        raise MutationEvidenceError("canonical CSV cannot be read") from exc
+
+
+def _row_digest(
+    row: Mapping[str, str], *, instrument_id: str, currency: str
+) -> str:
+    return canonical_row_sha256(
+        instrument_id=instrument_id,
+        session_date=str(row["Date"]),
+        open_value=row["Open"],
+        high=row["High"],
+        low=row["Low"],
+        close=row["Close"],
+        adj_close=row["Adj Close"],
+        volume=row["Volume"],
+        currency=currency,
+    )
+
+
+def _unique_set(values: Sequence[str], label: str) -> set[str]:
+    normalized = [str(value) for value in values]
+    if len(normalized) != len(set(normalized)):
+        raise MutationEvidenceError(f"{label} contain duplicates")
+    try:
+        for value in normalized:
+            date.fromisoformat(value)
+    except ValueError as exc:
+        raise MutationEvidenceError(f"{label} contain invalid dates") from exc
+    return set(normalized)
+
+
+def _leaf_key(value: Mapping[str, Any]) -> tuple[str, str, str, str, str]:
+    return tuple(
+        str(value.get(key))
+        for key in (
+            "exchange",
+            "instrument_id",
+            "session_date",
+            "canonical_row_sha256",
+            "receipt_sha256",
+        )
+    )
+
+
+def _canonical_json(value: Any) -> bytes:
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+        allow_nan=False,
+    ).encode("utf-8")

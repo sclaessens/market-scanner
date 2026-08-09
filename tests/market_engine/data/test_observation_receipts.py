@@ -16,7 +16,9 @@ def _policy(tmp_path: Path, **overrides: object) -> tuple[Path, dict[str, object
         "data_type": "daily_ohlcv",
         "approved_for_acquisition": True,
         "approved_for_raw_storage": True,
+        "approved_for_replay": True,
         "approved_for_canonical_publication": True,
+        "acquisition_routes": ["primary", "primary_replay", "fallback"],
         "exchanges": ["NYSE"],
         "retention_classification": "immutable_test_evidence",
         "redistribution_classification": "test_only",
@@ -69,6 +71,8 @@ def _receipt_fixture(tmp_path: Path) -> tuple[dict[str, object], bytes, list[dic
         payload,
         policy=policy,
         provider_id="approved-test-market-data",
+        provider_symbol="AAA",
+        acquisition_route="primary",
         instrument_id="equity:aaa",
         ticker="AAA",
         exchange="NYSE",
@@ -105,6 +109,7 @@ def test_approved_raw_response_replays_exact_receipt(tmp_path: Path) -> None:
     [
         ({"approved_for_acquisition": False}, "not approved"),
         ({"approved_for_raw_storage": False}, "not approved"),
+        ({"approved_for_replay": False}, "not approved"),
         ({"approved_for_canonical_publication": False}, "not approved"),
         ({"approval_id": ""}, "incomplete"),
     ],
@@ -119,10 +124,11 @@ def test_non_publishable_source_policy_fails_closed(
         return
     policy = receipts.load_source_policy(path)
     with pytest.raises(receipts.ObservationReceiptError, match=message):
-        receipts.approved_fallback_policy(
+        receipts.approved_source_policy(
             policy,
             provider_id="approved-test-market-data",
             exchange="NYSE",
+            acquisition_route="primary",
         )
 
 
@@ -130,12 +136,18 @@ def test_unknown_or_wrong_exchange_provider_fails_closed(tmp_path: Path) -> None
     path, _ = _policy(tmp_path)
     policy = receipts.load_source_policy(path)
     with pytest.raises(receipts.ObservationReceiptError, match="unknown"):
-        receipts.approved_fallback_policy(
-            policy, provider_id="reachable-but-unapproved", exchange="NYSE"
+        receipts.approved_source_policy(
+            policy,
+            provider_id="reachable-but-unapproved",
+            exchange="NYSE",
+            acquisition_route="primary",
         )
     with pytest.raises(receipts.ObservationReceiptError, match="exchange"):
-        receipts.approved_fallback_policy(
-            policy, provider_id="approved-test-market-data", exchange="NASDAQ"
+        receipts.approved_source_policy(
+            policy,
+            provider_id="approved-test-market-data",
+            exchange="NASDAQ",
+            acquisition_route="primary",
         )
 
 
@@ -206,3 +218,111 @@ def test_raw_artifact_rejects_credential_material(tmp_path: Path) -> None:
         )
     assert "must-not-be-stored" not in str(captured.value)
     assert not list(tmp_path.rglob("*.json"))
+
+
+def _absence_fixture(tmp_path: Path):
+    policy_path, _ = _policy(tmp_path)
+    policy = receipts.load_source_policy(policy_path)
+    payload = b'{"bars":[]}'
+    artifact = receipts.preserve_raw_artifact(
+        payload,
+        artifact_root=tmp_path,
+        provider_id="approved-test-market-data",
+        content_type="application/json",
+    )
+    attestation = receipts.build_absence_attestation(
+        payload,
+        policy=policy,
+        provider_id="approved-test-market-data",
+        provider_symbol="AAA",
+        acquisition_route="primary_replay",
+        instrument_id="equity:aaa",
+        ticker="AAA",
+        exchange="NYSE",
+        session_date="2026-07-24",
+        lifecycle_cutoff="2026-07-24",
+        retrieved_at="2026-08-09T12:00:00Z",
+        request_start="2026-07-24",
+        request_end_exclusive="2026-07-25",
+        raw_artifact_locator=artifact["raw_artifact_locator"],
+        raw_artifact_sha256=artifact["raw_artifact_sha256"],
+        response_status=200,
+        content_type="application/json",
+        reason_code="terminal_daily_ohlcv_not_returned",
+        calendar_expected=True,
+    )
+    return policy, payload, attestation
+
+
+def test_absence_attestation_replays_empty_terminal_provider_artifact(
+    tmp_path: Path,
+) -> None:
+    policy, _, attestation = _absence_fixture(tmp_path)
+
+    replayed = receipts.replay_absence_attestations(
+        [attestation], artifact_root=tmp_path, policy=policy
+    )
+
+    assert replayed == [attestation]
+    assert attestation["parsed_session_dates"] == []
+    assert attestation["attestation_sha256"]
+
+
+def test_absence_attestation_rejects_artifact_that_contains_session(
+    tmp_path: Path,
+) -> None:
+    policy, _, attestation = _absence_fixture(tmp_path)
+    payload = _payload()
+    artifact = receipts.preserve_raw_artifact(
+        payload,
+        artifact_root=tmp_path,
+        provider_id="approved-test-market-data",
+        content_type="application/json",
+    )
+    with pytest.raises(receipts.ObservationReceiptError, match="contains"):
+        receipts.build_absence_attestation(
+            payload,
+            policy=policy,
+            provider_id="approved-test-market-data",
+            provider_symbol="AAA",
+            acquisition_route="primary_replay",
+            instrument_id="equity:aaa",
+            ticker="AAA",
+            exchange="NYSE",
+            session_date="2026-07-24",
+            lifecycle_cutoff="2026-07-24",
+            retrieved_at="2026-08-09T12:00:00Z",
+            request_start="2026-07-24",
+            request_end_exclusive="2026-07-25",
+            raw_artifact_locator=artifact["raw_artifact_locator"],
+            raw_artifact_sha256=artifact["raw_artifact_sha256"],
+            response_status=200,
+            content_type="application/json",
+            reason_code="terminal_daily_ohlcv_not_returned",
+            calendar_expected=True,
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("lifecycle_cutoff", "2026-07-23"),
+        ("exchange", "NASDAQ"),
+        ("session_date", "2026-07-23"),
+        ("absence_reason_code", "unknown"),
+        ("parser_version", "unknown"),
+        ("raw_artifact_sha256", "0" * 64),
+        ("response_status", 500),
+    ],
+)
+def test_absence_attestation_mutations_fail_replay(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    policy, _, attestation = _absence_fixture(tmp_path)
+    changed = copy.deepcopy(attestation)
+    changed[field] = value
+
+    with pytest.raises(receipts.ObservationReceiptError):
+        receipts.replay_absence_attestations(
+            [changed], artifact_root=tmp_path, policy=policy
+        )

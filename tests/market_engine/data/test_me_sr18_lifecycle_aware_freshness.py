@@ -1361,6 +1361,7 @@ def _instrument(symbol: str) -> dict[str, Any]:
         "analysis_eligible": True,
         "asset_type": "equity",
         "country": "US",
+        "currency": "USD",
         "exchange": "NYSE",
         "instrument_id": f"equity:{symbol.lower()}",
         "source_mapping_status": "mapped",
@@ -1416,7 +1417,7 @@ def test_transaction_closing_date_never_extends_freshness_cutoff() -> None:
     assert expected == date(2026, 7, 14)
 
 
-def test_inactive_backfill_quarantines_post_cutoff_bar_and_completes(
+def test_inactive_backfill_quarantines_post_cutoff_bar_but_blocks_without_evidence(
     tmp_path: Path,
 ) -> None:
     instrument = _instrument("OLD")
@@ -1472,7 +1473,8 @@ def test_inactive_backfill_quarantines_post_cutoff_bar_and_completes(
             "disposition": "quarantined_not_persisted",
         }
     ]
-    assert report["run_status"] == "completed"
+    assert row["mutation_evidence_status"] == "invalid"
+    assert report["run_status"] == "failed"
 
 
 def test_contradictory_inactive_effective_date_fails_closed(
@@ -1834,29 +1836,7 @@ def test_aligned_inactive_history_is_not_a_changed_file(
 def test_changed_price_manifest_mismatch_is_rejected(
     tmp_path: Path,
 ) -> None:
-    instrument = _instrument("ACTIVE")
-    fixture = _fixture(
-        tmp_path,
-        [instrument],
-        [],
-        histories={"ACTIVE": ("2025-07-01", "2026-07-13")},
-    )
-    _run(
-        fixture,
-        provider=lambda *_args: pd.DataFrame(
-            [
-                {
-                    "Date": "2026-07-14",
-                    "Open": 100.0,
-                    "High": 101.0,
-                    "Low": 99.0,
-                    "Close": 100.0,
-                    "Adj Close": 100.0,
-                    "Volume": 1000,
-                }
-            ]
-        ),
-    )
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
     manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["publication"]["changed_price_file_count"] = 0
@@ -1869,6 +1849,8 @@ def test_changed_price_manifest_mismatch_is_rejected(
         universe_snapshot_path=fixture["universe"],
         lifecycle_registry_path=fixture["registry"],
         run_at=RUN_AT,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
     )
 
     assert validation["validated"] is False
@@ -1880,29 +1862,7 @@ def test_changed_price_manifest_mismatch_is_rejected(
 def test_changed_price_manifest_cannot_forge_unchanged_baseline(
     tmp_path: Path,
 ) -> None:
-    instrument = _instrument("ACTIVE")
-    fixture = _fixture(
-        tmp_path,
-        [instrument],
-        [],
-        histories={"ACTIVE": ("2025-07-01", "2026-07-13")},
-    )
-    _run(
-        fixture,
-        provider=lambda *_args: pd.DataFrame(
-            [
-                {
-                    "Date": "2026-07-14",
-                    "Open": 100.0,
-                    "High": 101.0,
-                    "Low": 99.0,
-                    "Close": 100.0,
-                    "Adj Close": 100.0,
-                    "Volume": 1000,
-                }
-            ]
-        ),
-    )
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
     manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["tickers"][0]["previous_file_checksum"] = manifest["tickers"][0][
@@ -1919,6 +1879,7 @@ def test_changed_price_manifest_cannot_forge_unchanged_baseline(
         lifecycle_registry_path=fixture["registry"],
         run_at=RUN_AT,
         baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
     )
 
     assert validation["validated"] is False
@@ -1930,17 +1891,7 @@ def test_changed_price_manifest_cannot_forge_unchanged_baseline(
 def test_manifest_cannot_forge_previous_observation_metadata(
     tmp_path: Path,
 ) -> None:
-    instrument = _instrument("ACTIVE")
-    fixture = _fixture(
-        tmp_path,
-        [instrument],
-        [],
-        histories={"ACTIVE": ("2025-07-01", "2026-07-13")},
-    )
-    _run(
-        fixture,
-        provider=lambda *_args: _provider_rows(["2026-07-14"]),
-    )
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
     manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     manifest["tickers"][0]["previous_last_observation"] = "2026-07-14"
@@ -1953,6 +1904,7 @@ def test_manifest_cannot_forge_previous_observation_metadata(
         lifecycle_registry_path=fixture["registry"],
         run_at=RUN_AT,
         baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
     )
 
     assert validation["validated"] is False
@@ -2180,16 +2132,85 @@ def test_bounded_refetch_can_fill_one_missing_session(tmp_path: Path) -> None:
     responses = iter(
         [_provider_rows(["2026-07-14"]), _provider_rows(["2026-07-13"])]
     )
+    requests: list[tuple[str, str]] = []
+
+    def approved_provider(_symbol: str, start: str, end: str) -> pd.DataFrame:
+        requests.append((start, end))
+        return next(responses)
+
+    approved_provider.provider_id = "approved-primary"
+    policy_path = tmp_path / "market-price-policy.json"
+    policy_path.write_text(
+        json.dumps(
+            {
+                "schema_version": receipt_contract.POLICY_SCHEMA_VERSION,
+                "providers": [
+                    {
+                        "provider_id": "approved-primary",
+                        "approval_id": "approved-primary-v1",
+                        "data_type": "daily_ohlcv",
+                        "approved_for_acquisition": True,
+                        "approved_for_raw_storage": True,
+                        "approved_for_replay": True,
+                        "approved_for_canonical_publication": True,
+                        "acquisition_routes": ["primary_replay"],
+                        "exchanges": ["NYSE"],
+                        "retention_classification": "immutable_test_evidence",
+                        "redistribution_classification": "test_only",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
 
     row = _run(
         fixture,
-        provider=lambda *_args: next(responses),
+        provider=approved_provider,
+        source_policy_path=policy_path,
     )["tickers"][0]
 
     assert row["freshness_status"] == "not_expected"
     assert row["rows_added"] == 2
     assert row["previous_last_observation"] == "2026-07-10"
     assert row["resulting_last_observation"] == "2026-07-14"
+    assert requests == [
+        ("2026-07-11", "2026-07-15"),
+        ("2026-07-12", "2026-07-15"),
+    ]
+
+
+def test_gap_directed_replay_window_is_bounded_and_order_independent() -> None:
+    expected = ("2026-07-12", "2026-07-16")
+    assert scheduled.gap_directed_replay_window(
+        [date(2026, 7, 15), date(2026, 7, 13)],
+        request_start="2026-07-12",
+        request_end_exclusive="2026-07-16",
+    ) == expected
+    assert scheduled.gap_directed_replay_window(
+        [date(2026, 7, 13), date(2026, 7, 15)],
+        request_start="2026-07-12",
+        request_end_exclusive="2026-07-16",
+    ) == expected
+
+
+@pytest.mark.parametrize(
+    "missing,start,end",
+    [
+        ([], "2026-07-12", "2026-07-16"),
+        ([date(2026, 7, 11)], "2026-07-12", "2026-07-16"),
+        ([date(2026, 7, 16)], "2026-07-12", "2026-07-16"),
+    ],
+)
+def test_gap_directed_replay_window_rejects_unbounded_inputs(
+    missing: list[date], start: str, end: str
+) -> None:
+    with pytest.raises(ValueError, match="gap-directed replay"):
+        scheduled.gap_directed_replay_window(
+            missing,
+            request_start=start,
+            request_end_exclusive=end,
+        )
 
 
 def test_exchange_holiday_is_not_an_expected_missing_session(
@@ -2261,7 +2282,7 @@ def test_ea_terminal_only_primary_blocks_without_approved_gap_fill(
         "2026-08-04",
     ]
     assert row["observation_receipts"] == []
-    assert row["fallback_required_sessions"] == [
+    assert row["fallback_candidate_sessions"] == [
         "2026-07-24",
         "2026-07-27",
         "2026-07-28",
@@ -2269,6 +2290,7 @@ def test_ea_terminal_only_primary_blocks_without_approved_gap_fill(
         "2026-07-30",
         "2026-07-31",
         "2026-08-03",
+        "2026-08-04",
     ]
 
 
@@ -2305,7 +2327,13 @@ def _approved_gap_fill_run(
                         "data_type": "daily_ohlcv",
                         "approved_for_acquisition": True,
                         "approved_for_raw_storage": True,
+                        "approved_for_replay": True,
                         "approved_for_canonical_publication": True,
+                        "acquisition_routes": [
+                            "primary",
+                            "primary_replay",
+                            "fallback",
+                        ],
                         "exchanges": ["NYSE"],
                         "retention_classification": "immutable_test_evidence",
                         "redistribution_classification": "test_only",
@@ -2343,6 +2371,8 @@ def _approved_gap_fill_run(
         payload,
         policy=policy,
         provider_id="approved-test-fallback",
+        provider_symbol="OLD",
+        acquisition_route="fallback",
         instrument_id=instrument["instrument_id"],
         ticker="OLD",
         exchange="NYSE",
@@ -2355,11 +2385,57 @@ def _approved_gap_fill_run(
         response_status=200,
         content_type="application/json",
     )
+    primary_receipts: list[dict[str, Any]] = []
+    if provider_sessions:
+        primary_payload = json.dumps(
+            {
+                "bars": [
+                    {
+                        "session_date": session,
+                        "open": "100",
+                        "high": "101",
+                        "low": "99",
+                        "close": "100",
+                        "adj_close": "100",
+                        "volume": 1000,
+                    }
+                    for session in provider_sessions
+                ]
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode()
+        primary_raw = receipt_contract.preserve_raw_artifact(
+            primary_payload,
+            artifact_root=fixture["published"],
+            provider_id="approved-test-fallback",
+            content_type="application/json",
+        )
+        primary_receipts = receipt_contract.build_observation_receipts(
+            primary_payload,
+            policy=policy,
+            provider_id="approved-test-fallback",
+            provider_symbol="OLD",
+            acquisition_route="primary",
+            instrument_id=instrument["instrument_id"],
+            ticker="OLD",
+            exchange="NYSE",
+            currency="USD",
+            retrieved_at="2026-07-15T09:00:00Z",
+            request_start="2026-07-13",
+            request_end_exclusive="2026-07-15",
+            raw_artifact_locator=primary_raw["raw_artifact_locator"],
+            raw_artifact_sha256=primary_raw["raw_artifact_sha256"],
+            response_status=200,
+            content_type="application/json",
+        )
     report = _run(
         fixture,
         provider=lambda *_args: _provider_rows(provider_sessions),
         source_policy_path=policy_path,
-        fallback_receipts={instrument["instrument_id"]: receipts},
+        observation_receipts={
+            instrument["instrument_id"]: receipts + primary_receipts
+        },
     )
     if expect_completed:
         assert report["run_status"] == "completed", report["tickers"]
@@ -2378,7 +2454,7 @@ def test_primary_and_fallback_conflict_fails_closed(tmp_path: Path) -> None:
     assert report["tickers"][0]["freshness_status"] == "failed"
     assert any(
         diagnostic["reason_code"]
-        == "FALLBACK_OBSERVATION_RECEIPT_IDENTITY_MISMATCH"
+        == "OBSERVATION_RECEIPT_INVALID"
         for diagnostic in report["tickers"][0]["rejected_bar_diagnostics"]
     )
 
@@ -2394,7 +2470,7 @@ def test_fallback_post_cutoff_observation_fails_closed(tmp_path: Path) -> None:
     assert report["tickers"][0]["freshness_status"] == "failed"
     assert any(
         diagnostic["reason_code"]
-        == "FALLBACK_OBSERVATION_RECEIPT_IDENTITY_MISMATCH"
+        == "OBSERVATION_RECEIPT_IDENTITY_MISMATCH"
         for diagnostic in report["tickers"][0]["rejected_bar_diagnostics"]
     )
 
@@ -2428,6 +2504,91 @@ def test_trusted_publisher_replays_raw_receipt_to_canonical_row(
     assert installed_snapshot_result["validated"] is True, (
         installed_snapshot_result
     )
+
+
+def test_primary_observed_label_cannot_replace_replayable_receipt(
+    tmp_path: Path,
+) -> None:
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
+    manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    entry = manifest["tickers"][0]
+    entry["primary_observed_sessions"] = ["2026-07-14"]
+    entry["observation_receipts"] = [
+        receipt
+        for receipt in entry["observation_receipts"]
+        if receipt["session_date"] != "2026-07-14"
+    ]
+    entry["observation_receipt_root"] = receipt_contract.observation_receipt_root(
+        entry["observation_receipts"]
+    )
+    manifest["manifest_checksum"] = scheduled._manifest_checksum(manifest)
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    result = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        expected_source_main_sha=SOURCE_SHA,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
+        run_at=RUN_AT,
+    )
+
+    assert result["validated"] is False
+    assert "PUBLISHED_MUTATION_EVIDENCE_RECONCILIATION_INVALID" in result[
+        "reason_codes"
+    ]
+
+
+def test_primary_observed_diagnostic_relabel_does_not_change_evidence(
+    tmp_path: Path,
+) -> None:
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
+    manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["tickers"][0]["primary_observed_sessions"] = [
+        "2026-07-13",
+        "2026-07-14",
+    ]
+    manifest["manifest_checksum"] = scheduled._manifest_checksum(manifest)
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    result = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        expected_source_main_sha=SOURCE_SHA,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
+        run_at=RUN_AT,
+    )
+
+    assert result["validated"] is True, result
+
+
+def test_publisher_rejects_forged_publication_mutation_root(
+    tmp_path: Path,
+) -> None:
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
+    manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["mutation_evidence_summary"]["publication_mutation_root"] = "f" * 64
+    manifest["manifest_checksum"] = scheduled._manifest_checksum(manifest)
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    result = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        expected_source_main_sha=SOURCE_SHA,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
+        run_at=RUN_AT,
+    )
+
+    assert result["validated"] is False
+    assert "PUBLISHED_MUTATION_EVIDENCE_ROOT_MISMATCH" in result["reason_codes"]
 
 
 @pytest.mark.parametrize(
@@ -2542,7 +2703,7 @@ def test_trusted_publisher_rejects_unbound_raw_artifact(tmp_path: Path) -> None:
     ]
 
 
-def test_explained_terminal_absence_does_not_require_gap_fill_receipt(
+def test_terminal_status_without_replayable_attestation_remains_unresolved(
     tmp_path: Path,
 ) -> None:
     universe = scheduled.load_authoritative_universe(
@@ -2568,10 +2729,10 @@ def test_explained_terminal_absence_does_not_require_gap_fill_receipt(
 
     assert row["expected_backfill_sessions"] == ["2026-07-24"]
     assert row["explained_missing_sessions"] == ["2026-07-24"]
-    assert row["fallback_required_sessions"] == []
+    assert row["fallback_candidate_sessions"] == ["2026-07-24"]
     assert row["observation_receipts"] == []
     assert row["observation_receipt_root"] is None
-    assert row["freshness_status"] == "not_expected"
+    assert row["session_resolution"]["unresolved_sessions"] == ["2026-07-24"]
 
 
 def test_later_terminal_daily_ohlcv_replaces_temporary_absence_status(
@@ -2810,7 +2971,10 @@ def _run(
     provider: Any,
     run_at: datetime = RUN_AT,
     source_policy_path: Path = scheduled.DEFAULT_SOURCE_POLICY,
-    fallback_receipts: Mapping[str, Sequence[Mapping[str, Any]]] | None = None,
+    observation_receipts: Mapping[str, Sequence[Mapping[str, Any]]] | None = None,
+    absence_attestations: Mapping[
+        str, Sequence[Mapping[str, Any]]
+    ] | None = None,
 ) -> dict[str, Any]:
     return scheduled.run_scheduled_refresh(
         run_id="me-sr18-test-20260715T100000Z",
@@ -2824,7 +2988,8 @@ def _run(
         provider=provider,
         sleeper=lambda _seconds: None,
         source_policy_path=source_policy_path,
-        fallback_receipts=fallback_receipts,
+        observation_receipts=observation_receipts,
+        absence_attestations=absence_attestations,
     )
 
 

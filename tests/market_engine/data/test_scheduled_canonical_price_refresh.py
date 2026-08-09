@@ -10,6 +10,7 @@ import pandas as pd
 import pytest
 
 from market_engine.data import scheduled_canonical_price_refresh as scheduled
+from market_engine.data import observation_receipts as receipt_contract
 
 
 SOURCE_SHA = "8" * 40
@@ -30,6 +31,7 @@ def _instrument(
         "source_mapping_status": "mapped",
         "exchange": exchange,
         "country": country,
+        "currency": "USD",
     }
 
 
@@ -370,7 +372,8 @@ def test_empty_batch_retries_splits_and_uses_single_ticker_fallback(
     assert by_ticker["AAA"]["freshness_status"] == "updated"
     assert by_ticker["BBB"]["freshness_status"] == "updated"
     assert by_ticker["AAA"]["provider_retrieval"][-1]["request_mode"] == "single_ticker"
-    assert report["publication"]["publication_set_valid"] is True
+    assert report["publication"]["publication_set_valid"] is False
+    assert report["run_status"] == "failed"
 
 
 def test_invalid_batch_bar_is_revalidated_by_bounded_single_ticker_fetch(
@@ -659,6 +662,7 @@ def test_allow_degraded_still_reconciles_declared_freshness(
         universe_snapshot_path=fixture["universe"],
         run_at=RUN_AT,
         allow_degraded=True,
+        source_policy_path=fixture["policy"],
     )
     assert (
         "PUBLISHED_FRESHNESS_CLASSIFICATION_INVALID"
@@ -681,7 +685,7 @@ def test_default_publication_validation_rejects_degraded_manifest(
         return _frame([("2026-07-14", 500)])
 
     manifest = _run(fixture, provider=provider)
-    assert manifest["run_status"] == "degraded"
+    assert manifest["run_status"] == "failed"
     assert manifest["publication"]["publication_required"] is False
 
     manifest["publication"]["publication_required"] = True
@@ -694,6 +698,7 @@ def test_default_publication_validation_rejects_degraded_manifest(
         fixture["stage"],
         universe_snapshot_path=fixture["universe"],
         run_at=RUN_AT,
+        source_policy_path=fixture["policy"],
         allow_degraded=True,
     )
     publication = scheduled.validate_published_dataset(
@@ -707,7 +712,7 @@ def test_default_publication_validation_rejects_degraded_manifest(
         "reason_codes"
     ]
     assert publication["validated"] is False
-    assert "PUBLISHED_DATASET_DEGRADED" in publication["reason_codes"]
+    assert "PUBLISHED_RUN_STATUS_INVALID" in publication["reason_codes"]
     assert "PUBLISHED_DATASET_STALE" in publication["reason_codes"]
 
 
@@ -748,8 +753,8 @@ def test_one_ticker_failure_does_not_discard_another_valid_update(tmp_path: Path
     by_ticker = {row["ticker"]: row for row in report["tickers"]}
     assert by_ticker["AAA"]["freshness_status"] == "updated"
     assert by_ticker["BBB"]["freshness_status"] == "failed"
-    assert report["run_status"] == "degraded"
-    assert report["publication"]["publication_set_valid"] is True
+    assert report["run_status"] == "failed"
+    assert report["publication"]["publication_set_valid"] is False
     assert report["publication"]["changed_price_file_count"] == 1
     assert report["publication"]["publication_required"] is False
     assert not (fixture["stage"] / scheduled.LATEST_MANIFEST).exists()
@@ -778,8 +783,8 @@ def test_one_stale_ticker_blocks_another_valid_update_from_publication(
     assert by_ticker["BBB"]["reason_code"] == (
         "EXPECTED_SESSION_COVERAGE_INCOMPLETE"
     )
-    assert report["run_status"] == "degraded"
-    assert report["publication"]["publication_set_valid"] is True
+    assert report["run_status"] == "failed"
+    assert report["publication"]["publication_set_valid"] is False
     assert report["publication"]["changed_price_file_count"] == 1
     assert report["publication"]["publication_required"] is False
     assert not (fixture["stage"] / scheduled.LATEST_MANIFEST).exists()
@@ -807,8 +812,8 @@ def test_one_validation_failure_blocks_another_valid_update_from_publication(
     assert by_ticker["BBB"]["reason_code"] == (
         "PROVIDER_PAYLOAD_SCHEMA_INVALID"
     )
-    assert report["run_status"] == "degraded"
-    assert report["publication"]["publication_set_valid"] is True
+    assert report["run_status"] == "failed"
+    assert report["publication"]["publication_set_valid"] is False
     assert report["publication"]["changed_price_file_count"] == 1
     assert report["publication"]["publication_required"] is False
     assert not (fixture["stage"] / scheduled.LATEST_MANIFEST).exists()
@@ -830,14 +835,20 @@ def test_published_file_checksums_validate_and_file_tampering_blocks(tmp_path: P
     fixture = _fixture(tmp_path, [_instrument("AAA")], end="2026-07-13")
     _run(fixture, provider=lambda *_args: _frame([("2026-07-14", 500)]))
     accepted = scheduled.validate_published_dataset(
-        fixture["stage"], universe_snapshot_path=fixture["universe"], run_at=RUN_AT
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        run_at=RUN_AT,
+        source_policy_path=fixture["policy"],
     )
     assert accepted["validated"] is True
 
     path = fixture["stage"] / "data/processed/AAA.csv"
     path.write_text(path.read_text(encoding="utf-8") + "\n", encoding="utf-8")
     blocked = scheduled.validate_published_dataset(
-        fixture["stage"], universe_snapshot_path=fixture["universe"], run_at=RUN_AT
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        run_at=RUN_AT,
+        source_policy_path=fixture["policy"],
     )
     assert "PUBLISHED_FILE_CHECKSUM_MISMATCH" in blocked["reason_codes"]
 
@@ -955,6 +966,7 @@ def test_analysis_consumption_runs_only_after_manifest_validation(tmp_path: Path
         fixture["stage"],
         universe_snapshot_path=fixture["universe"],
         run_at=RUN_AT,
+        source_policy_path=fixture["policy"],
         analysis_runner=runner,
         analysis_kwargs={"run_id": "analysis-1"},
     )
@@ -978,6 +990,7 @@ def test_analysis_consumption_blocks_stale_or_invalid_publication(tmp_path: Path
         fixture["stage"],
         universe_snapshot_path=fixture["universe"],
         run_at=datetime(2026, 7, 16, 10, 0, tzinfo=UTC),
+        source_policy_path=fixture["policy"],
         analysis_runner=runner,
         analysis_kwargs={},
     )
@@ -1030,11 +1043,37 @@ def _fixture(
         ),
         encoding="utf-8",
     )
+    policy = root / "market-price-policy.json"
+    policy.write_text(
+        json.dumps(
+            {
+                "schema_version": receipt_contract.POLICY_SCHEMA_VERSION,
+                "providers": [
+                    {
+                        "provider_id": "approved-test-primary",
+                        "approval_id": "approved-test-primary-v1",
+                        "data_type": "daily_ohlcv",
+                        "approved_for_acquisition": True,
+                        "approved_for_raw_storage": True,
+                        "approved_for_replay": True,
+                        "approved_for_canonical_publication": True,
+                        "acquisition_routes": ["primary", "primary_replay"],
+                        "exchanges": ["US", "XAMS", "XPAR", "XLON"],
+                        "retention_classification": "immutable_test_evidence",
+                        "redistribution_classification": "test_only",
+                    }
+                ],
+            },
+            sort_keys=True,
+        ),
+        encoding="utf-8",
+    )
     return {
         "published": published,
         "stage": root / "stage",
         "report": root / "report.json",
         "universe": universe,
+        "policy": policy,
     }
 
 
@@ -1046,6 +1085,91 @@ def _run(
     sleeper: Any = lambda _seconds: None,
     max_attempts: int = 3,
 ) -> dict[str, Any]:
+    observation_receipts: dict[str, list[dict[str, Any]]] = {
+        row["instrument_id"]: []
+        for row in json.loads(fixture["universe"].read_text(encoding="utf-8"))[
+            "instruments"
+        ]
+    }
+    instruments_by_symbol = {
+        row["source_symbol"]: row
+        for row in json.loads(fixture["universe"].read_text(encoding="utf-8"))[
+            "instruments"
+        ]
+    }
+
+    selected_provider = provider
+    if provider is not None:
+        policy = receipt_contract.load_source_policy(fixture["policy"])
+
+        def evidence_provider(symbol: str, start: str, end: str) -> pd.DataFrame:
+            frame = provider(symbol, start, end)
+            instrument = instruments_by_symbol[symbol]
+            required = {"Date", "Open", "High", "Low", "Close", "Adj Close", "Volume"}
+            if not isinstance(frame, pd.DataFrame) or not required.issubset(frame.columns):
+                return frame
+            bounded = frame[
+                (pd.to_datetime(frame["Date"]) >= pd.Timestamp(start))
+                & (pd.to_datetime(frame["Date"]) < pd.Timestamp(end))
+            ]
+            if bounded.empty:
+                return frame
+            payload = json.dumps(
+                {
+                    "bars": [
+                        {
+                            "session_date": str(row["Date"]),
+                            "open": str(row["Open"]),
+                            "high": str(row["High"]),
+                            "low": str(row["Low"]),
+                            "close": str(row["Close"]),
+                            "adj_close": str(row["Adj Close"]),
+                            "volume": int(row["Volume"]),
+                        }
+                        for _, row in bounded.iterrows()
+                    ]
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode()
+            try:
+                artifact = receipt_contract.preserve_raw_artifact(
+                    payload,
+                    artifact_root=fixture["stage"],
+                    provider_id="approved-test-primary",
+                    content_type="application/json",
+                )
+                built = receipt_contract.build_observation_receipts(
+                    payload,
+                    policy=policy,
+                    provider_id="approved-test-primary",
+                    provider_symbol=symbol,
+                    acquisition_route="primary",
+                    instrument_id=instrument["instrument_id"],
+                    ticker=instrument["symbol"],
+                    exchange=instrument["exchange"],
+                    currency=instrument["currency"],
+                    retrieved_at="2026-07-15T10:00:00Z",
+                    request_start=start,
+                    request_end_exclusive=end,
+                    raw_artifact_locator=artifact["raw_artifact_locator"],
+                    raw_artifact_sha256=artifact["raw_artifact_sha256"],
+                    response_status=200,
+                    content_type="application/json",
+                )
+            except (ValueError, receipt_contract.ObservationReceiptError):
+                return frame
+            by_session = {
+                row["session_date"]: row
+                for row in observation_receipts[instrument["instrument_id"]]
+            }
+            by_session.update({row["session_date"]: row for row in built})
+            observation_receipts[instrument["instrument_id"]][:] = [
+                by_session[session] for session in sorted(by_session)
+            ]
+            return frame
+
+        selected_provider = evidence_provider
     return scheduled.run_scheduled_refresh(
         run_id="me-sr17-test-20260715T100000Z",
         source_main_sha=SOURCE_SHA,
@@ -1055,9 +1179,11 @@ def _run(
         report_output=fixture["report"],
         run_at=run_at,
         workflow_run_id="123",
-        provider=provider,
+        provider=selected_provider,
         max_attempts=max_attempts,
         sleeper=sleeper,
+        source_policy_path=fixture["policy"],
+        observation_receipts=observation_receipts,
     )
 
 
