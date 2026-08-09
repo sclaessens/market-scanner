@@ -2,22 +2,27 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 from urllib.parse import urlsplit
 
 
-LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v4"
+LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v5"
 LEGACY_LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v2"
 PREVIOUS_LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v3"
+SECOND_PREVIOUS_LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v4"
 DEFAULT_LIFECYCLE_REGISTRY = Path(
     "config/market_engine/universes/instrument_lifecycle.json"
 )
 LIFECYCLE_STATUSES = frozenset({"active", "inactive"})
 EFFECTIVE_LIFECYCLE_STATUSES = frozenset({"active", "inactive", "pending"})
-FINAL_SESSION_OBSERVATION_STATUSES = frozenset(
-    {"observed", "no_valid_price_observation"}
+TERMINAL_SESSION_DAILY_OHLCV_STATUSES = frozenset(
+    {
+        "observed_daily_ohlcv",
+        "no_valid_daily_ohlcv_bar_from_provider_as_of",
+    }
 )
 SUSPENSION_EFFECTIVE_TIMINGS = frozenset(
     {"before_open", "after_close", "effective_time"}
@@ -103,6 +108,7 @@ def load_lifecycle_registry(path: str | Path) -> dict[str, Any]:
         LIFECYCLE_SCHEMA_VERSION,
         LEGACY_LIFECYCLE_SCHEMA_VERSION,
         PREVIOUS_LIFECYCLE_SCHEMA_VERSION,
+        SECOND_PREVIOUS_LIFECYCLE_SCHEMA_VERSION,
     }:
         raise InstrumentLifecycleError("lifecycle registry schema is unsupported")
     records = payload.get("records")
@@ -270,12 +276,25 @@ def _validate_record(
         record, "trading_suspension_effective_date"
     )
     inactive_effective_date = _optional_date(record, "inactive_effective_date")
-    price_observation_end_session = _optional_date(
-        record, "price_observation_end_session"
+    canonical_ohlcv_last_observed_session = _optional_date(
+        record, "canonical_ohlcv_last_observed_session"
     )
-    final_session_observation_status = record.get(
-        "final_session_observation_status"
+    if canonical_ohlcv_last_observed_session is None:
+        canonical_ohlcv_last_observed_session = _optional_date(
+            record, "price_observation_end_session"
+        )
+    terminal_session_daily_ohlcv_status = record.get(
+        "terminal_session_daily_ohlcv_status",
+        record.get("final_session_observation_status"),
     )
+    if terminal_session_daily_ohlcv_status == "observed":
+        terminal_session_daily_ohlcv_status = "observed_daily_ohlcv"
+    elif terminal_session_daily_ohlcv_status == "no_valid_price_observation":
+        terminal_session_daily_ohlcv_status = (
+            "no_valid_daily_ohlcv_bar_from_provider_as_of"
+        )
+    observation_status_as_of = record.get("observation_status_as_of")
+    observation_evidence = record.get("observation_evidence")
     suspension_effective_timing = record.get(
         "trading_suspension_effective_timing"
     )
@@ -393,7 +412,10 @@ def _validate_record(
                 transaction_closing_date,
                 trading_suspension_effective_date,
                 inactive_effective_date,
-                price_observation_end_session,
+                canonical_ohlcv_last_observed_session,
+                terminal_session_daily_ohlcv_status,
+                observation_status_as_of,
+                observation_evidence,
             )
         ):
             raise InstrumentLifecycleError(
@@ -453,31 +475,55 @@ def _validate_record(
             raise InstrumentLifecycleError(
                 f"trading suspension chronology is invalid for {instrument_id}"
             )
-        if price_observation_end_session is None:
-            price_observation_end_session = last_trading_session
-        if not price_observation_end_session <= last_trading_session:
+        if canonical_ohlcv_last_observed_session is None:
+            canonical_ohlcv_last_observed_session = last_trading_session
+        if not canonical_ohlcv_last_observed_session <= last_trading_session:
             raise InstrumentLifecycleError(
                 f"price observation end cannot follow the final trading session for {instrument_id}"
             )
-        if final_session_observation_status is None:
-            final_session_observation_status = (
-                "observed"
-                if price_observation_end_session == last_trading_session
-                else "no_valid_price_observation"
+        if terminal_session_daily_ohlcv_status is None:
+            terminal_session_daily_ohlcv_status = (
+                "observed_daily_ohlcv"
+                if canonical_ohlcv_last_observed_session == last_trading_session
+                else "no_valid_daily_ohlcv_bar_from_provider_as_of"
             )
-        if final_session_observation_status not in FINAL_SESSION_OBSERVATION_STATUSES:
+        if terminal_session_daily_ohlcv_status not in TERMINAL_SESSION_DAILY_OHLCV_STATUSES:
             raise InstrumentLifecycleError(
                 f"final-session observation status is invalid for {instrument_id}"
             )
         if (
-            final_session_observation_status == "observed"
-            and price_observation_end_session != last_trading_session
+            terminal_session_daily_ohlcv_status == "observed_daily_ohlcv"
+            and canonical_ohlcv_last_observed_session != last_trading_session
         ) or (
-            final_session_observation_status == "no_valid_price_observation"
-            and price_observation_end_session >= last_trading_session
+            terminal_session_daily_ohlcv_status
+            == "no_valid_daily_ohlcv_bar_from_provider_as_of"
+            and canonical_ohlcv_last_observed_session >= last_trading_session
         ):
             raise InstrumentLifecycleError(
                 f"final-session observation semantics are contradictory for {instrument_id}"
+            )
+        if (
+            terminal_session_daily_ohlcv_status
+            == "no_valid_daily_ohlcv_bar_from_provider_as_of"
+        ):
+            if not isinstance(observation_status_as_of, str):
+                raise InstrumentLifecycleError(
+                    f"observation status timestamp is required for {instrument_id}"
+                )
+            status_as_of = _required_timestamp(
+                {"observation_status_as_of": observation_status_as_of},
+                "observation_status_as_of",
+            )
+            observation_status_as_of = _utc_text(status_as_of)
+            observation_evidence = _validate_observation_evidence(
+                observation_evidence,
+                instrument_id=instrument_id,
+                last_trading_session=last_trading_session,
+                status_as_of=status_as_of,
+            )
+        elif observation_status_as_of is not None or observation_evidence is not None:
+            raise InstrumentLifecycleError(
+                f"observed daily OHLCV cannot carry contradictory absence evidence for {instrument_id}"
             )
         _validate_inactive_evidence(
             normalized_evidence,
@@ -518,12 +564,14 @@ def _validate_record(
         "inactive_effective_date": (
             inactive_effective_date.isoformat() if inactive_effective_date else None
         ),
-        "price_observation_end_session": (
-            price_observation_end_session.isoformat()
-            if price_observation_end_session
+        "canonical_ohlcv_last_observed_session": (
+            canonical_ohlcv_last_observed_session.isoformat()
+            if canonical_ohlcv_last_observed_session
             else None
         ),
-        "final_session_observation_status": final_session_observation_status,
+        "terminal_session_daily_ohlcv_status": terminal_session_daily_ohlcv_status,
+        "observation_status_as_of": observation_status_as_of,
+        "observation_evidence": observation_evidence,
         "trading_suspension_effective_timing": suspension_effective_timing,
         "lifecycle_reason": lifecycle_reason,
         "corporate_action_type": corporate_action_type,
@@ -540,9 +588,11 @@ def _validate_record(
         in {
             LEGACY_LIFECYCLE_SCHEMA_VERSION,
             PREVIOUS_LIFECYCLE_SCHEMA_VERSION,
+            SECOND_PREVIOUS_LIFECYCLE_SCHEMA_VERSION,
         }
         or "last_trading_session" not in record
         or "delisting_end_date" not in record
+        or "canonical_ohlcv_last_observed_session" not in record
     )
     if not isinstance(checksum, str) or checksum not in {
         normalized_checksum,
@@ -807,8 +857,10 @@ def _apply_record(
             "transaction_closing_date": None,
             "trading_suspension_effective_date": None,
             "inactive_effective_date": None,
-            "price_observation_end_session": None,
-            "final_session_observation_status": None,
+            "canonical_ohlcv_last_observed_session": None,
+            "terminal_session_daily_ohlcv_status": None,
+            "observation_status_as_of": None,
+            "observation_evidence": None,
             "trading_suspension_effective_timing": None,
             "lifecycle_reason": "canonical_universe_active"
             if lifecycle_status == "active"
@@ -872,12 +924,16 @@ def _apply_record(
             "trading_suspension_effective_date"
         ],
         "inactive_effective_date": record["inactive_effective_date"],
-        "price_observation_end_session": record[
-            "price_observation_end_session"
-        ],
-        "final_session_observation_status": record[
-            "final_session_observation_status"
-        ],
+        "canonical_ohlcv_last_observed_session": record.get(
+            "canonical_ohlcv_last_observed_session",
+            record.get("price_observation_end_session"),
+        ),
+        "terminal_session_daily_ohlcv_status": record.get(
+            "terminal_session_daily_ohlcv_status",
+            record.get("final_session_observation_status"),
+        ),
+        "observation_status_as_of": record.get("observation_status_as_of"),
+        "observation_evidence": record.get("observation_evidence"),
         "trading_suspension_effective_timing": record[
             "trading_suspension_effective_timing"
         ],
@@ -912,12 +968,14 @@ def _instrument_binding(instrument: Mapping[str, Any]) -> dict[str, Any]:
             "trading_suspension_effective_date"
         ],
         "inactive_effective_date": instrument["inactive_effective_date"],
-        "price_observation_end_session": instrument[
-            "price_observation_end_session"
+        "canonical_ohlcv_last_observed_session": instrument[
+            "canonical_ohlcv_last_observed_session"
         ],
-        "final_session_observation_status": instrument[
-            "final_session_observation_status"
+        "terminal_session_daily_ohlcv_status": instrument[
+            "terminal_session_daily_ohlcv_status"
         ],
+        "observation_status_as_of": instrument["observation_status_as_of"],
+        "observation_evidence": instrument["observation_evidence"],
         "trading_suspension_effective_timing": instrument[
             "trading_suspension_effective_timing"
         ],
@@ -973,10 +1031,70 @@ def _required_timestamp(value: Mapping[str, Any], key: str) -> datetime:
     return parsed.astimezone(UTC)
 
 
+def _validate_observation_evidence(
+    value: Any,
+    *,
+    instrument_id: str,
+    last_trading_session: date,
+    status_as_of: datetime,
+) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise InstrumentLifecycleError(
+            f"observation evidence is required for {instrument_id}"
+        )
+    required_text = {
+        key: _required_text(value, key)
+        for key in (
+            "provider_identity",
+            "response_outcome",
+            "daily_ohlcv_validation_status",
+            "evidence_locator",
+            "response_checksum",
+        )
+    }
+    retrieved_at = _required_timestamp(value, "retrieved_at")
+    as_of_date = _required_date(value, "as_of_date")
+    request_start = _required_date(value, "request_start")
+    request_end = _required_date(value, "request_end_exclusive")
+    relevant_session = _required_date(value, "relevant_session")
+    if retrieved_at != status_as_of or as_of_date != status_as_of.date():
+        raise InstrumentLifecycleError(
+            f"observation evidence timestamp is inconsistent for {instrument_id}"
+        )
+    if relevant_session != last_trading_session or not (
+        request_start <= relevant_session < request_end
+    ):
+        raise InstrumentLifecycleError(
+            f"observation evidence request window is inconsistent for {instrument_id}"
+        )
+    if required_text["response_outcome"] != "empty_provider_response" or required_text[
+        "daily_ohlcv_validation_status"
+    ] != "no_valid_daily_ohlcv_bar_returned":
+        raise InstrumentLifecycleError(
+            f"observation evidence outcome is contradictory for {instrument_id}"
+        )
+    if not re.fullmatch(r"[0-9a-f]{64}", required_text["response_checksum"]):
+        raise InstrumentLifecycleError(
+            f"observation response checksum is invalid for {instrument_id}"
+        )
+    return {
+        "provider_identity": required_text["provider_identity"],
+        "retrieved_at": _utc_text(retrieved_at),
+        "as_of_date": as_of_date.isoformat(),
+        "request_start": request_start.isoformat(),
+        "request_end_exclusive": request_end.isoformat(),
+        "response_outcome": required_text["response_outcome"],
+        "relevant_session": relevant_session.isoformat(),
+        "daily_ohlcv_validation_status": required_text[
+            "daily_ohlcv_validation_status"
+        ],
+        "evidence_locator": required_text["evidence_locator"],
+        "response_checksum": required_text["response_checksum"],
+    }
+
+
 def _utc_text(value: datetime) -> str:
-    return value.astimezone(UTC).replace(microsecond=0).isoformat().replace(
-        "+00:00", "Z"
-    )
+    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _normalized_exchange(value: str) -> str:

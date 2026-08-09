@@ -1,143 +1,133 @@
 # ME-SR23 Corporate-Action Lifecycle Cutoff Remediation Audit
 
-Status: `ready_for_re_review`
+Status: `canary_pending`
 
-## Incident and Review Findings
+## Second Review Findings
 
-Scheduled Canonical Price Refresh run `31243056845` failed closed on August 8,
-2026. Atomic publication prevented all staged changes from reaching
-`market-data`. Draft PR #474 subsequently received four material review
-findings:
+The second review of draft PR #474 identified three merge blockers:
 
-1. TMHC lifecycle truth had been lowered to the final available provider bar.
-2. `changed_price_file_count` counted freshness classifications rather than
-   actual changed canonical files.
-3. Conflicting lifecycle alias fields could be silently normalized.
-4. Singleton provider revalidation did not receive the batch route's lifecycle
-   context.
+1. EA's retained-inactive refresh accepted a terminal August 4 bar while seven
+   expected XNYS sessions between the July 23 baseline and that bar were absent.
+2. Retained-inactive result construction replaced EA's real pre-merge
+   `previous_last_observation` with the post-merge date.
+3. TMHC's observation contract described the absence of a complete provider
+   bar too broadly, lacked field-specific provenance, and could act as a static
+   cutoff against a later valid July 24 daily OHLCV bar.
 
-This remediation addresses all four findings without changing Decision Engine
-semantics, weakening atomic publication, or editing `market-data` directly.
+These findings supersede the previous canary's favorable EA claims. Run
+`31278593816` proved neither a complete EA backfill nor correct pre-merge
+observation metadata and is not merge-readiness evidence.
 
-## Primary Evidence and Date Semantics
+## Root Cause and Evidence
 
-| Ticker | Formal last trading session | Last valid price observation | Transaction closing | Suspension / inactive boundary | Evidence |
-|---|---:|---:|---:|---|---|
-| EA | 2026-08-04 | 2026-08-04 | 2026-08-04 | before open 2026-08-05 | [EA completion announcement](https://www.ea.com/news/ea-announces-completion-of-acquisition), [SEC Form 8-K](https://www.sec.gov/Archives/edgar/data/712515/000114036126031157/ef20079099_8k.htm) |
-| NSA | 2026-07-21 | 2026-07-21 | 2026-07-22 | before open 2026-07-22 | [SEC Form 8-K](https://www.sec.gov/Archives/edgar/data/1618563/000110465926085888/tm2620871d8_8k.htm) |
-| TMHC | 2026-07-24 | 2026-07-23 | 2026-07-24 | after close 2026-07-24; inactive 2026-07-25 | [SEC Form 8-K](https://www.sec.gov/Archives/edgar/data/1562476/000119312526316037/d148123d8k.htm), [NYSE Form 25](https://www.sec.gov/Archives/edgar/data/1562476/000087666126000640/xslF25X02/primary_doc.xml), [independent trade history](https://stockanalysis.com/stocks/tmhc/history/) |
+The EA acquisition request already covered July 24 through August 4. Provider
+parsing and retained-inactive processing did not discard rows: the supported
+Yahoo Finance response itself contained only the August 4 terminal row. The
+old validator checked only that the resulting terminal date matched the formal
+lifecycle boundary; it did not reconcile every exchange session inside the
+bounded interval. The old retained-result wrapper then derived observation
+metadata from the already merged dataframe.
 
-The SEC 8-K states that the transaction completed on July 24 and that NYSE was
-asked to suspend trading after the close on July 24. NYSE's official Form 25
-was signed on July 24. The independent history exposes July 24 as the last
-trade-price date but has no valid July 24 OHLC/volume row; the available
-canonical/provider history ends on July 23. This evidence does not establish a
-normal July 24 OHLC session or a proven zero-volume bar. The generic contract
-therefore records `last_trading_session=2026-07-24` as lifecycle truth and
-`price_observation_end_session=2026-07-23` with
-`final_session_observation_status=no_valid_price_observation`. The lifecycle
-date is not derived from provider availability.
+The corrected EA interval contains these expected XNYS sessions:
 
-## Contract and Implementation Remediation
+- 2026-07-24
+- 2026-07-27
+- 2026-07-28
+- 2026-07-29
+- 2026-07-30
+- 2026-07-31
+- 2026-08-03
+- 2026-08-04
 
-Lifecycle registry v4 separates the formal lifecycle boundary from the final
-valid price observation. It adds machine-validated
-`price_observation_end_session`, `final_session_observation_status`, and
-`trading_suspension_effective_timing`. Closing, suspension, inactive, formal
-trading, and observation dates are validated as a coherent chronology while
-allowing before-open, effective-time, and after-close events.
+Seven complete daily OHLCV observations are held in the checksum-bound
+`market-engine-verified-daily-ohlcv-evidence-v1` registry. Each row binds the
+instrument, session, complete OHLCV values, HTTPS source, source identity,
+retrieval timestamp, validation status, and record checksum. The supported
+provider supplies the August 4 observation. This evidence is merged only
+through the normal validation and staging path; canonical CSV files are never
+edited manually.
 
-Both v2 and v3 inputs remain compatibility inputs. If
-`delisting_end_date` and `last_trading_session` are both present, they must be
-equal before normalization. A conflict fails closed with ticker, both field
-names, and both values in `InstrumentLifecycleError`.
+For TMHC, the SEC 8-K and NYSE Form 25 establish the lifecycle boundary: the
+formal last trading session is July 24 and suspension followed the close. They
+do not prove the absence of trading or of a price. A provider request for the
+exact July 24 window returned an empty response on
+`2026-08-09T14:34:08.615413Z`; SHA-256
+`4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945`
+binds that empty response. This supports only the temporary, provider-specific
+claim that no complete valid daily canonical OHLCV bar was returned as of that
+retrieval.
 
-Freshness manifest and validation contracts advance to v5. Every ticker entry
-binds both its previous and persisted file checksum. The changed-file list and
-count are derived from checksum differences, independently of freshness
-status, so an inactive bounded backfill is counted even though its final status
-is `not_expected`. Validation reconciles the declared count, sorted unique
-list, ticker checksum bindings, and staged canonical files. The trusted-main
-publisher additionally materializes the current `market-data` tree and checks
-the bundle against that independent baseline before installation; a forged or
-inconsistent fileset fails closed.
+## Corrected Contracts
 
-The singleton retry route now receives the same lifecycle context as the batch
-route and calls the same provider-frame validator. Post-cutoff rows receive the
-same `quarantined_not_persisted` disposition and diagnostics in both routes,
-are excluded before canonical merge, do not contribute to freshness, and
-cannot reactivate an inactive instrument.
+Lifecycle registry v5 separates formal lifecycle truth from canonical data
+availability. `last_trading_session` remains the only lifecycle cutoff.
+`canonical_ohlcv_last_observed_session`,
+`terminal_session_daily_ohlcv_status`, `observation_status_as_of`, and
+`observation_evidence` describe current daily-OHLCV availability without
+changing that cutoff. The no-bar status requires provider identity, exact UTC
+retrieval time, as-of date, request window, response outcome, relevant session,
+daily-OHLCV validation status, locator, and response checksum.
 
-## Validation Evidence
+A later complete TMHC July 24 bar is inside the lifecycle boundary, is fully
+revalidated, and replaces the temporary no-bar status. A July 25 bar remains
+post-cutoff and is quarantined before merge. An empty response or a loose price
+cannot be canonicalized as a daily OHLCV observation.
+
+Freshness manifest and validation contracts advance to v6. For bounded
+refreshes with an existing observation, the exchange calendar determines all
+required sessions from the next session through the expected boundary. The
+contract is:
+
+`expected sessions = observed valid sessions + explicitly proven exceptions`
+
+Missing sessions trigger bounded provider re-fetch and full revalidation.
+Internal or unexplained terminal gaps fail closed. The only current terminal
+exception is the precise checksum-bound TMHC provider observation; provider
+absence alone is not a generic exception.
+
+Pre-merge checksum, last observation, and row count are captured before any
+mutation. Result checksum, last observation, row count, rows added, and the
+changed file are captured after the validated merge. Lifecycle/freshness
+classification cannot recompute those values. Manifest validation reconciles
+all fields against the independent baseline and rejects forged pre-state,
+inconsistent row counts, checksums, dates, evidence, or session coverage.
+
+## Local Validation
 
 | Command | Result | Duration | Notes |
 |---|---:|---:|---|
-| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/data/test_me_sr18_lifecycle_aware_freshness.py tests/market_engine/data/test_scheduled_canonical_price_refresh.py tests/market_engine/data/test_scheduled_canonical_price_refresh_workflow.py -q` | 138 passed | 1.52 s | Lifecycle, provider/singleton, quarantine, manifest, publisher, and workflow regressions |
-| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/run -q` | 197 passed | 2.87 s | No failures |
-| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine -q` | 1432 passed, 1 failed | 5.76 s | Only the known missing local artifact |
-| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q` | 2099 passed, 1 failed | 6.90 s | Same known failure only |
-| Lifecycle v4 load/apply plus TMHC and publisher-baseline assertions | passed | 0.23 s | Registry checksum `1962d5cbf63df5c005c775bad05ad6bcc428d6b64e1ea4af3be5457a750cc43a` |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/data/test_me_sr18_lifecycle_aware_freshness.py tests/market_engine/data/test_scheduled_canonical_price_refresh.py tests/market_engine/data/test_scheduled_canonical_price_refresh_workflow.py -q` | 149 passed | 1.79 s | Expected sessions, bounded recovery, retained metadata, TMHC semantics, provider, singleton, quarantine, manifest, and workflow regressions |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/run -q` | 197 passed | 2.51 s | No failures or skips |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine -q` | 1443 passed, 1 failed | 5.84 s | Only the known missing historical artifact |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q` | 2110 passed, 1 failed | 6.96 s | Same known failure only |
+| Lifecycle v5 and verified-observation v1 schema loaders | passed | <0.1 s | Lifecycle checksum `664416d7d81830b159a395ca4f00de5689b0180037ae5386cee75bfc1132a4db`; observation checksum `a6935b5cbe328b03bcd4b34142e606fdc0210a0f5f03f1c1f39ba69c695ef71c` |
 | `git diff --check` | passed | <0.1 s | No whitespace errors |
 
-The only suite failure is
-`test_compact_checksums_match_committed_files_and_local_full_runs`, because
+The sole suite failure is
+`test_compact_checksums_match_committed_files_and_local_full_runs`: historical
+artifact
 `artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data09-aapl-20260719T155116Z/manifest.json`
-is absent. Running that exact test on clean base SHA
-`a0409a49e8f8f3ef9dce352c22b039ce4387faab` reproduces the identical failure
-in 0.02 seconds. No new test failure exists.
-
-The required governance searches still report only the pre-existing explicit
-trade-command handling in `scripts/portfolio/parse_trade_commands.py` and
-`scripts/portfolio/portfolio_manager.py`; this remediation does not modify any
-file under `scripts/`.
-
-## Previous Canary Correction
-
-Run `31276951551` reported 942 `updated` instruments, but EA also received a
-bounded inactive backfill. The earlier audit incorrectly equated that status
-count with changed price files. The actual prior changed price-file count was
-943. That canary is invalidated as merge evidence because its v4 manifest did
-not independently reconcile the changed fileset.
+is absent. The exact test reproduces identically on clean base SHA
+`a0409a49e8f8f3ef9dce352c22b039ce4387faab` (one failure in 0.02 seconds).
+There are no new failures.
 
 ## Remediation Canary
 
-Exactly one new full-universe canary was dispatched after local validation and
-the remediation commit was pushed. No retry was run.
+Pending. Exactly one full-universe `publish=false` canary will be dispatched
+after the reviewed implementation and this pre-canary evidence are committed
+and pushed. This section will be replaced with the run, artifact, independent
+baseline, EA/NSA/TMHC, changed-fileset, publish-skip, and unchanged
+`market-data` evidence from that run.
 
-| Evidence | Result |
-|---|---|
-| Workflow run | [`31278593816`](https://github.com/sclaessens/market-scanner/actions/runs/31278593816) |
-| Input | `publish=false` |
-| Branch / head SHA | `me-sr23-corporate-action-lifecycle-cutoff-remediation` / `ca3c970c10d8835d3a32c3ad2703efe7e07f4fcd` |
-| Manifest source-main SHA | `a0409a49e8f8f3ef9dce352c22b039ce4387faab` |
-| Freshness artifact | `canonical-price-freshness-me-sr23-canonical-price-refresh-20260808T210853Z` |
-| Publication artifact | `canonical-price-publication-me-sr23-canonical-price-refresh-20260808T210853Z` |
-| Run status / duration | `completed` / 4 minutes 8 seconds |
-| Status counts | 942 updated; 4 already current; 6 not expected; 0 stale, failed, or unsupported |
-| History coverage | 942 sufficient; 4 limited history; 6 retained inactive; 0 insufficient unexplained |
-| Publication decision | required `true`; set valid `true`; empty commit `false` |
-| Changed files | 947: 942 updated, 4 changed already-current histories, and EA's inactive bounded backfill |
-| EA | inactive; observed cutoff 2026-08-04; one bounded row added; checksum changed; no later canonical row |
-| NSA | inactive; observed cutoff 2026-07-21; checksum unchanged; no later canonical row |
-| TMHC | formal session 2026-07-24; no-valid-observation cutoff 2026-07-23; checksum unchanged; no July 24 canonical bar fabricated |
-| Independent baseline validation | schema v5 validated; zero issues, reason codes, or stale tickers |
-| Publish job | skipped |
-| `market-data` before / after | `95c88276763b1762cbbfbccc402ec8535268127b` / unchanged |
+## Remaining Risks and Rollback
 
-The publication artifact contains exactly 952 governed price CSVs and one
-manifest. The manifest's sorted 947-file list and count reconcile against all
-ticker previous/persisted checksums, the staged canonical files, and a detached
-copy of the unchanged `market-data` baseline. Direct CSV inspection confirms
-the EA, NSA, and TMHC terminal dates above. Regression tests supply the batch
-and singleton post-cutoff-route evidence; the canary introduced no unexpected
-provider or quarantine event.
-
-## Remaining Risks and Recovery
-
-- The evidence supports a formal TMHC lifecycle through July 24 but does not
-  supply a valid July 24 OHLC/volume observation. The explicit no-observation
-  contract preserves that distinction without fabricating market data.
-- Provider corrections can change historical bars. The checksum-bound staged
-  fileset and independent publisher baseline must remain fail-closed.
-- Rollback is a normal revert of the reviewed ME-SR23 commit. No manual edit or
-  branch-history rewrite of `market-data` is permitted.
+- The verified EA observations depend on a governed external historical-data
+  page and its retrieval evidence; later source corrections require a new
+  checksum-bound review, not an in-place canonical edit.
+- TMHC's temporary status is provider- and time-specific. Later complete July
+  24 OHLCV must replace it; it must never be interpreted as proof of no trade.
+- Provider corrections can rewrite history. Session completeness, staged
+  checksum reconciliation, atomic publication, and the trusted-main publisher
+  gate remain fail closed.
+- Rollback is a normal revert of the reviewed ME-SR23 commits. Do not rewrite
+  branch history or edit `market-data` manually.

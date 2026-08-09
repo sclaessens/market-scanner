@@ -18,10 +18,32 @@ from market_engine.data.instrument_lifecycle import (
     load_lifecycle_registry,
     record_provenance_checksum,
 )
+from market_engine.data.verified_price_observations import (
+    DEFAULT_REGISTRY as DEFAULT_VERIFIED_PRICE_OBSERVATIONS,
+    VerifiedPriceObservationError,
+    load_verified_price_observations,
+)
 
 
 RUN_AT = datetime(2026, 7, 15, 10, 0, tzinfo=UTC)
 SOURCE_SHA = "8" * 40
+
+
+def test_verified_daily_ohlcv_evidence_rejects_checksum_tampering(
+    tmp_path: Path,
+) -> None:
+    payload = json.loads(
+        DEFAULT_VERIFIED_PRICE_OBSERVATIONS.read_text(encoding="utf-8")
+    )
+    payload["records"][0]["close"] += 0.01
+    tampered = tmp_path / "verified-price-observations.json"
+    tampered.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(
+        VerifiedPriceObservationError,
+        match="evidence checksum is invalid",
+    ):
+        load_verified_price_observations(tampered)
 
 
 def test_governed_canary_records_reconcile_to_official_dates() -> None:
@@ -115,13 +137,46 @@ def test_tmhc_becomes_inactive_after_proven_final_regular_way_session() -> None:
         if row["symbol"] == "TMHC"
     )
     assert tmhc["last_trading_session"] == "2026-07-24"
-    assert tmhc["price_observation_end_session"] == "2026-07-23"
+    assert tmhc["canonical_ohlcv_last_observed_session"] == "2026-07-23"
     assert (
-        tmhc["final_session_observation_status"]
-        == "no_valid_price_observation"
+        tmhc["terminal_session_daily_ohlcv_status"]
+        == "no_valid_daily_ohlcv_bar_from_provider_as_of"
+    )
+    assert tmhc["observation_evidence"]["provider_identity"] == (
+        "Yahoo Finance via yfinance"
     )
     assert tmhc["transaction_closing_date"] == "2026-07-24"
     assert tmhc["lifecycle_status_effective_date"] == "2026-07-25"
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda row: row.update(observation_evidence=None),
+        lambda row: row["observation_evidence"].update(
+            relevant_session="2026-07-23"
+        ),
+    ],
+    ids=["missing", "contradictory"],
+)
+def test_tmhc_observation_provenance_fails_closed(
+    tmp_path: Path,
+    mutation: Any,
+) -> None:
+    registry = json.loads(
+        Path(DEFAULT_LIFECYCLE_REGISTRY).read_text(encoding="utf-8")
+    )
+    record = next(row for row in registry["records"] if row["ticker"] == "TMHC")
+    mutation(record)
+    record["provenance_checksum"] = record_provenance_checksum(record)
+    path = tmp_path / "tmhc-observation.json"
+    path.write_text(
+        json.dumps({"schema_version": LIFECYCLE_SCHEMA_VERSION, "records": [record]}),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(InstrumentLifecycleError, match="observation evidence"):
+        load_lifecycle_registry(path)
 
 
 def test_inactive_effective_date_is_not_applied_early_and_checksum_changes() -> None:
@@ -840,7 +895,8 @@ def test_stale_freshness_remains_independent_from_listing_coverage(
 
     row = _run(fixture, provider=lambda *_args: pd.DataFrame())["tickers"][0]
 
-    assert row["freshness_status"] == "stale"
+    assert row["freshness_status"] == "failed"
+    assert row["reason_code"] == "EXPECTED_SESSION_COVERAGE_INCOMPLETE"
     assert row["history_coverage_status"] == "insufficient_unexplained"
     assert row["history_coverage_reason_code"] == (
         "HISTORY_END_BEFORE_EXPECTED_SESSION"
@@ -1429,7 +1485,7 @@ def test_inactive_backfill_quarantines_post_cutoff_bar_and_completes(
             "session_date": "2026-07-15",
             "cutoff_date": "2026-07-14",
             "last_trading_session": "2026-07-14",
-            "price_observation_end_session": "2026-07-14",
+                "canonical_ohlcv_last_observed_session": "2026-07-14",
             "lifecycle_event": "inactive_after_completed_corporate_action",
             "lifecycle_provenance_checksum": record["provenance_checksum"],
             "provider": scheduled.PROVIDER_IDENTITY,
@@ -1522,8 +1578,10 @@ def test_v2_lifecycle_record_remains_compatible(tmp_path: Path) -> None:
         "transaction_closing_date",
         "trading_suspension_effective_date",
         "inactive_effective_date",
-        "price_observation_end_session",
-        "final_session_observation_status",
+            "canonical_ohlcv_last_observed_session",
+            "terminal_session_daily_ohlcv_status",
+            "observation_status_as_of",
+            "observation_evidence",
         "trading_suspension_effective_timing",
     ):
         record.pop(field)
@@ -1542,8 +1600,10 @@ def test_v2_lifecycle_record_remains_compatible(tmp_path: Path) -> None:
     normalized = load_lifecycle_registry(path)["records"][0]
 
     assert normalized["last_trading_session"] == "2026-07-14"
-    assert normalized["price_observation_end_session"] == "2026-07-14"
-    assert normalized["final_session_observation_status"] == "observed"
+    assert normalized["canonical_ohlcv_last_observed_session"] == "2026-07-14"
+    assert normalized["terminal_session_daily_ohlcv_status"] == (
+        "observed_daily_ohlcv"
+    )
 
 
 @pytest.mark.parametrize(
@@ -1561,7 +1621,7 @@ def test_v2_lifecycle_record_remains_compatible(tmp_path: Path) -> None:
             "trading suspension chronology",
         ),
         (
-            {"price_observation_end_session": "2026-07-15"},
+            {"canonical_ohlcv_last_observed_session": "2026-07-15"},
             "price observation end cannot follow",
         ),
     ],
@@ -1782,6 +1842,43 @@ def test_changed_price_manifest_cannot_forge_unchanged_baseline(
     ]
 
 
+def test_manifest_cannot_forge_previous_observation_metadata(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("ACTIVE")
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [],
+        histories={"ACTIVE": ("2025-07-01", "2026-07-13")},
+    )
+    _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(["2026-07-14"]),
+    )
+    manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["tickers"][0]["previous_last_observation"] = "2026-07-14"
+    manifest["manifest_checksum"] = scheduled._manifest_checksum(manifest)
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    validation = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        run_at=RUN_AT,
+        baseline_publication_root=fixture["published"],
+    )
+
+    assert validation["validated"] is False
+    assert "PUBLISHED_OBSERVATION_MUTATION_METADATA_INVALID" in validation[
+        "reason_codes"
+    ]
+    assert "PUBLISHED_OBSERVATION_BASELINE_MISMATCH" in validation[
+        "reason_codes"
+    ]
+
+
 def test_singleton_revalidation_preserves_lifecycle_quarantine(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -1866,7 +1963,9 @@ def test_singleton_revalidation_preserves_lifecycle_quarantine(
     assert row["resulting_last_observation"] == "2026-07-14"
     assert staged["Date"].max() == "2026-07-14"
     assert quarantine[0]["session_date"] == "2026-07-15"
-    assert quarantine[0]["price_observation_end_session"] == "2026-07-14"
+    assert quarantine[0]["canonical_ohlcv_last_observed_session"] == (
+        "2026-07-14"
+    )
     assert quarantine[0]["disposition"] == batch_quarantine[0]["disposition"]
     assert quarantine[0]["final_reason_code"] == batch_quarantine[0][
         "final_reason_code"
@@ -1876,6 +1975,243 @@ def test_singleton_revalidation_preserves_lifecycle_quarantine(
     )
     assert row["provider_retrieval"][-1]["classification"] == (
         "single_ticker_refetch_valid"
+    )
+
+
+def test_inactive_backfill_requires_every_expected_exchange_session(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-10")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(
+            ["2026-07-13", "2026-07-14"]
+        ),
+    )["tickers"][0]
+    staged = pd.read_csv(fixture["stage"] / "data/processed/OLD.csv")
+
+    assert row["freshness_status"] == "not_expected"
+    assert row["expected_backfill_sessions"] == ["2026-07-13", "2026-07-14"]
+    assert row["observed_backfill_sessions"] == ["2026-07-13", "2026-07-14"]
+    assert staged["Date"].tolist()[-2:] == ["2026-07-13", "2026-07-14"]
+
+
+@pytest.mark.parametrize(
+    "received",
+    [["2026-07-14"], ["2026-07-13"]],
+    ids=["terminal-only", "internal-session-only"],
+)
+def test_incomplete_inactive_backfill_fails_closed(
+    tmp_path: Path,
+    received: list[str],
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-10")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(received),
+    )["tickers"][0]
+
+    assert row["freshness_status"] == "failed"
+    assert row["rows_added"] == 0
+    assert pd.read_csv(fixture["stage"] / "data/processed/OLD.csv")[
+        "Date"
+    ].max() == "2026-07-10"
+
+
+def test_bounded_refetch_can_fill_one_missing_session(tmp_path: Path) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-10")},
+    )
+    responses = iter(
+        [_provider_rows(["2026-07-14"]), _provider_rows(["2026-07-13"])]
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: next(responses),
+    )["tickers"][0]
+
+    assert row["freshness_status"] == "not_expected"
+    assert row["rows_added"] == 2
+    assert row["previous_last_observation"] == "2026-07-10"
+    assert row["resulting_last_observation"] == "2026-07-14"
+
+
+def test_exchange_holiday_is_not_an_expected_missing_session(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-07",
+        delisting_end_date="2026-07-06",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-02")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(["2026-07-06"]),
+        run_at=datetime(2026, 7, 7, 21, 0, tzinfo=UTC),
+    )["tickers"][0]
+
+    assert row["expected_backfill_sessions"] == ["2026-07-06"]
+    assert row["freshness_status"] == "not_expected"
+
+
+def test_ea_verified_evidence_completes_provider_terminal_only_backfill(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("EA")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-08-05",
+        delisting_end_date="2026-08-04",
+    )
+    record["evidence"][0]["evidence_retrieved_at"] = "2026-08-05T09:00:00Z"
+    record["provenance_checksum"] = record_provenance_checksum(record)
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"EA": ("2025-07-01", "2026-07-23")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(["2026-08-04"]),
+        run_at=datetime(2026, 8, 5, 21, 0, tzinfo=UTC),
+    )["tickers"][0]
+
+    assert row["previous_last_observation"] == "2026-07-23"
+    assert row["resulting_last_observation"] == "2026-08-04"
+    assert row["rows_added"] == 8
+    assert row["previous_row_count"] + 8 == row["resulting_row_count"]
+    assert row["expected_backfill_sessions"] == [
+        "2026-07-24",
+        "2026-07-27",
+        "2026-07-28",
+        "2026-07-29",
+        "2026-07-30",
+        "2026-07-31",
+        "2026-08-03",
+        "2026-08-04",
+    ]
+    assert len(row["verified_observation_evidence"]) == 7
+
+
+def test_later_terminal_daily_ohlcv_replaces_temporary_absence_status(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-25",
+        delisting_end_date="2026-07-24",
+    )
+    record.update(
+        canonical_ohlcv_last_observed_session="2026-07-23",
+        terminal_session_daily_ohlcv_status=(
+            "no_valid_daily_ohlcv_bar_from_provider_as_of"
+        ),
+        observation_status_as_of="2026-08-09T00:00:00Z",
+        observation_evidence={
+            "provider_identity": scheduled.PROVIDER_IDENTITY,
+            "retrieved_at": "2026-08-09T00:00:00Z",
+            "as_of_date": "2026-08-09",
+            "request_start": "2026-07-24",
+            "request_end_exclusive": "2026-07-25",
+            "response_outcome": "empty_provider_response",
+            "relevant_session": "2026-07-24",
+            "daily_ohlcv_validation_status": "no_valid_daily_ohlcv_bar_returned",
+            "evidence_locator": "provider-request:test:OLD",
+            "response_checksum": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        },
+        transaction_closing_date="2026-07-24",
+        trading_suspension_effective_date="2026-07-24",
+        trading_suspension_effective_timing="after_close",
+    )
+    record["evidence"][0]["evidence_retrieved_at"] = "2026-07-25T09:00:00Z"
+    record["provenance_checksum"] = record_provenance_checksum(record)
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-23")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(
+            ["2026-07-24", "2026-07-25"]
+        ),
+        run_at=datetime(2026, 7, 25, 21, 0, tzinfo=UTC),
+    )["tickers"][0]
+
+    assert row["resulting_last_observation"] == "2026-07-24"
+    assert row["terminal_session_daily_ohlcv_status"] == "observed_daily_ohlcv"
+    assert row["observation_status_as_of"] is None
+    assert row["observation_evidence"] is None
+    assert row["rejected_bar_diagnostics"][0]["session_date"] == "2026-07-25"
+
+
+def _provider_rows(sessions: list[str]) -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {
+                "Date": session,
+                "Open": 100.0,
+                "High": 101.0,
+                "Low": 99.0,
+                "Close": 100.0,
+                "Adj Close": 100.0,
+                "Volume": 1000,
+            }
+            for session in sessions
+        ]
     )
 
 
@@ -1924,12 +2260,14 @@ def _record(
         "inactive_effective_date": (
             status_effective_date if lifecycle_status == "inactive" else None
         ),
-        "price_observation_end_session": (
+        "canonical_ohlcv_last_observed_session": (
             delisting_end_date if lifecycle_status == "inactive" else None
         ),
-        "final_session_observation_status": (
-            "observed" if lifecycle_status == "inactive" else None
+        "terminal_session_daily_ohlcv_status": (
+            "observed_daily_ohlcv" if lifecycle_status == "inactive" else None
         ),
+        "observation_status_as_of": None,
+        "observation_evidence": None,
         "trading_suspension_effective_timing": (
             "before_open" if lifecycle_status == "inactive" else None
         ),

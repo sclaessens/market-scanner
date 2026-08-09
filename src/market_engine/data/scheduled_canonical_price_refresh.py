@@ -37,10 +37,15 @@ from market_engine.data.local_market_data_universe import (
     UNIVERSE_SNAPSHOT_SCHEMA_VERSION,
     validate_price_history_csv,
 )
+from market_engine.data.verified_price_observations import (
+    DEFAULT_REGISTRY as DEFAULT_VERIFIED_PRICE_OBSERVATIONS,
+    SCHEMA_VERSION as VERIFIED_PRICE_OBSERVATION_SCHEMA_VERSION,
+    load_verified_price_observations,
+)
 
 
-SCHEMA_VERSION = "market-engine-me-sr23-canonical-price-freshness-manifest-v5"
-VALIDATION_SCHEMA_VERSION = "market-engine-me-sr23-published-price-dataset-validation-v5"
+SCHEMA_VERSION = "market-engine-me-sr23-canonical-price-freshness-manifest-v6"
+VALIDATION_SCHEMA_VERSION = "market-engine-me-sr23-published-price-dataset-validation-v6"
 DEFAULT_UNIVERSE_SNAPSHOT = Path(
     "artifacts/market_engine/data_runs/"
     "me-data04-complete-dataset-20260713T133000Z-coverage-after/universe_snapshot.json"
@@ -157,6 +162,9 @@ def run_scheduled_refresh(
         lifecycle_registry,
         as_of=generated_at.date(),
     )
+    verified_observations = load_verified_price_observations(
+        DEFAULT_VERIFIED_PRICE_OBSERVATIONS
+    )
     source_root = Path(published_root)
     stage_root = Path(staging_root)
     _prepare_staging_root(source_root, stage_root)
@@ -188,6 +196,9 @@ def run_scheduled_refresh(
                     max_attempts=max_attempts,
                     overlap_calendar_days=overlap_calendar_days,
                     sleeper=sleeper,
+                    verified_observations=verified_observations[
+                        "records_by_instrument_id"
+                    ].get(instrument["instrument_id"], []),
                 )
             if instrument["lifecycle_status"] == "inactive":
                 retained = _non_refreshable_lifecycle_row(
@@ -199,10 +210,33 @@ def run_scheduled_refresh(
                     "previous_file_checksum": refreshed[
                         "previous_file_checksum"
                     ],
+                    "persisted_file_checksum": refreshed[
+                        "persisted_file_checksum"
+                    ],
+                    "previous_last_observation": refreshed[
+                        "previous_last_observation"
+                    ],
+                    "resulting_last_observation": refreshed[
+                        "resulting_last_observation"
+                    ],
+                    "previous_row_count": refreshed["previous_row_count"],
+                    "resulting_row_count": refreshed["resulting_row_count"],
+                    "expected_backfill_sessions": refreshed.get(
+                        "expected_backfill_sessions", []
+                    ),
+                    "observed_backfill_sessions": refreshed.get(
+                        "observed_backfill_sessions", []
+                    ),
+                    "explained_missing_sessions": refreshed.get(
+                        "explained_missing_sessions", []
+                    ),
                     "provider_identity": refreshed["provider_identity"],
                     "provider_retrieval": refreshed.get("provider_retrieval", []),
                     "rejected_bar_diagnostics": refreshed.get(
                         "rejected_bar_diagnostics", []
+                    ),
+                    "verified_observation_evidence": refreshed.get(
+                        "verified_observation_evidence", []
                     ),
                 }
             rows.append(refreshed)
@@ -269,6 +303,12 @@ def run_scheduled_refresh(
         "canonical_universe_size": len(universe["instruments"]),
         "lifecycle_schema_version": LIFECYCLE_SCHEMA_VERSION,
         "lifecycle_registry_checksum": governed["registry_checksum"],
+        "verified_price_observation_schema_version": (
+            VERIFIED_PRICE_OBSERVATION_SCHEMA_VERSION
+        ),
+        "verified_price_observation_registry_checksum": (
+            verified_observations["registry_checksum"]
+        ),
         "active_universe_checksum": governed["active_universe_checksum"],
         "governed_universe_checksum": governed["governed_universe_checksum"],
         "active_universe_size": governed["active_universe_size"],
@@ -361,9 +401,9 @@ def expected_completed_session(instrument: Mapping[str, Any], run_at: datetime) 
         candidate -= timedelta(days=1)
     while not _is_trading_session(candidate, profile.holiday_calendar):
         candidate -= timedelta(days=1)
-    price_observation_cutoff = instrument.get("price_observation_end_session")
-    if isinstance(price_observation_cutoff, str):
-        lifecycle_cutoff = date.fromisoformat(price_observation_cutoff)
+    last_trading_session = instrument.get("last_trading_session")
+    if isinstance(last_trading_session, str):
+        lifecycle_cutoff = date.fromisoformat(last_trading_session)
         if lifecycle_cutoff <= candidate:
             candidate = lifecycle_cutoff
     return profile, candidate
@@ -396,6 +436,9 @@ def validate_published_dataset(
             universe["instruments"],
             lifecycle_registry,
             as_of=_as_utc(run_at or datetime.now(UTC)).date(),
+        )
+        verified_observations = load_verified_price_observations(
+            DEFAULT_VERIFIED_PRICE_OBSERVATIONS
         )
     except (ScheduledPriceRefreshError, InstrumentLifecycleError):
         return _validation_result(issues=[_validation_issue("AUTHORITATIVE_UNIVERSE_INVALID", "universe")])
@@ -431,6 +474,10 @@ def validate_published_dataset(
         != governed["inactive_retained_instrument_count"]
         or manifest.get("pending_instrument_count")
         != governed["pending_instrument_count"]
+        or manifest.get("verified_price_observation_schema_version")
+        != VERIFIED_PRICE_OBSERVATION_SCHEMA_VERSION
+        or manifest.get("verified_price_observation_registry_checksum")
+        != verified_observations["registry_checksum"]
     ):
         issues.append(_validation_issue("PUBLISHED_UNIVERSE_BINDING_MISMATCH", "universe"))
     if _contains_executable_content(root):
@@ -636,6 +683,138 @@ def validate_published_dataset(
         resulting = entry.get("resulting_last_observation")
         if resulting != validation.get("end_date"):
             issues.append(_validation_issue("PUBLISHED_LAST_OBSERVATION_MISMATCH", f"tickers[{index}]"))
+        previous = entry.get("previous_last_observation")
+        previous_row_count = entry.get("previous_row_count")
+        resulting_row_count = entry.get("resulting_row_count")
+        rows_added = entry.get("rows_added")
+        observation_metadata_valid = (
+            (previous is None or isinstance(previous, str))
+            and isinstance(resulting, str)
+            and isinstance(previous_row_count, int)
+            and isinstance(resulting_row_count, int)
+            and isinstance(rows_added, int)
+            and resulting_row_count == int(validation.get("row_count") or 0)
+            and resulting_row_count - previous_row_count == rows_added
+            and (previous is None or previous <= resulting)
+            and (
+                rows_added == 0
+                or previous is None
+                or previous < resulting
+            )
+        )
+        if not observation_metadata_valid:
+            issues.append(
+                _validation_issue(
+                    "PUBLISHED_OBSERVATION_MUTATION_METADATA_INVALID",
+                    f"tickers[{index}]",
+                )
+            )
+        if baseline_publication_root is not None:
+            baseline_path = Path(baseline_publication_root) / str(relative)
+            baseline_validation = (
+                _validate_price_history(baseline_path)
+                if baseline_path.is_file()
+                else {"status": "missing"}
+            )
+            if (
+                entry.get("previous_file_checksum")
+                != baseline_validation.get("checksum")
+                or previous != baseline_validation.get("end_date")
+                or previous_row_count
+                != int(baseline_validation.get("row_count") or 0)
+            ):
+                issues.append(
+                    _validation_issue(
+                        "PUBLISHED_OBSERVATION_BASELINE_MISMATCH",
+                        f"tickers[{index}]",
+                    )
+                )
+        runtime_observation = _runtime_observation_fields(
+            expected_instrument,
+            validation=validation,
+        )
+        if not _row_fields_match(entry, runtime_observation):
+            issues.append(
+                _validation_issue(
+                    "PUBLISHED_DAILY_OHLCV_OBSERVATION_STATUS_INVALID",
+                    f"tickers[{index}]",
+                )
+            )
+        profile, required_session = expected_completed_session(
+            expected_instrument,
+            validation_at,
+        )
+        expected_backfill = (
+            _expected_sessions_between(
+                profile,
+                date.fromisoformat(previous) + timedelta(days=1),
+                required_session,
+            )
+            if profile is not None
+            and required_session is not None
+            and isinstance(previous, str)
+            else []
+        )
+        observed_dates = set(validation.get("observation_dates") or ())
+        expected_observed = [
+            session for session in expected_backfill if session in observed_dates
+        ]
+        expected_missing = [
+            session for session in expected_backfill if session not in observed_dates
+        ]
+        expected_explained = (
+            _explained_missing_daily_ohlcv_sessions(
+                expected_instrument,
+                missing_sessions=expected_missing,
+                expected_session=required_session,
+            )
+            if required_session is not None
+            else []
+        )
+        if (
+            entry.get("expected_backfill_sessions", [])
+            != [session.isoformat() for session in expected_backfill]
+            or entry.get("observed_backfill_sessions", [])
+            != [session.isoformat() for session in expected_observed]
+            or entry.get("explained_missing_sessions", [])
+            != expected_explained
+            or len(expected_missing) != len(expected_explained)
+        ):
+            issues.append(
+                _validation_issue(
+                    "PUBLISHED_EXPECTED_SESSION_COMPLETENESS_INVALID",
+                    f"tickers[{index}]",
+                )
+            )
+        declared_verified_evidence = entry.get(
+            "verified_observation_evidence", []
+        )
+        available_verified_evidence = {
+            (
+                row["session_date"],
+                row["evidence_checksum"],
+                row["source_url"],
+            )
+            for row in verified_observations["records_by_instrument_id"].get(
+                expected_instrument["instrument_id"], []
+            )
+        }
+        if not isinstance(declared_verified_evidence, list) or any(
+            not isinstance(item, Mapping)
+            or (
+                item.get("session_date"),
+                item.get("evidence_checksum"),
+                item.get("source_url"),
+            )
+            not in available_verified_evidence
+            for item in declared_verified_evidence
+        ):
+            issues.append(
+                _validation_issue(
+                    "PUBLISHED_VERIFIED_OBSERVATION_EVIDENCE_INVALID",
+                    f"tickers[{index}]",
+                )
+            )
         if expected_instrument["lifecycle_status"] == "inactive":
             retained_boundary = _retained_history_boundary(
                 expected_instrument,
@@ -664,10 +843,7 @@ def validate_published_dataset(
                     )
                 )
             continue
-        profile, required = expected_completed_session(
-            expected_instrument,
-            validation_at,
-        )
+        required = required_session
         expected_history = _history_coverage(
             expected_instrument,
             validation=validation,
@@ -812,6 +988,7 @@ def _refresh_instrument(
     max_attempts: int,
     overlap_calendar_days: int,
     sleeper: Sleeper,
+    verified_observations: Sequence[Mapping[str, Any]] = (),
 ) -> dict[str, Any]:
     ticker = str(instrument["symbol"])
     source_symbol = str(instrument["source_symbol"])
@@ -837,6 +1014,8 @@ def _refresh_instrument(
         "resulting_last_observation": initial_validation.get("end_date"),
         "expected_completed_session": expected.isoformat() if expected else None,
         "rows_added": 0,
+        "previous_row_count": int(initial_validation.get("row_count") or 0),
+        "resulting_row_count": int(initial_validation.get("row_count") or 0),
         "validation_status": (
             "valid" if initial_validation.get("status") == "valid" else "blocked"
         ),
@@ -867,23 +1046,77 @@ def _refresh_instrument(
     previous_end = before_validation.get("end_date")
     error: dict[str, str] = {}
     terminal_rejected_bar_diagnostics: list[dict[str, Any]] = []
+    terminal_verified_observation_evidence: list[dict[str, Any]] = []
 
     def guarded_provider(symbol: str, start: str, end: str) -> pd.DataFrame:
         try:
-            validated = _provider_with_retries(
-                provider,
-                symbol,
-                start,
-                end,
-                expected_session=expected,
-                max_attempts=max_attempts,
-                sleeper=sleeper,
-                lifecycle_context=instrument,
+            accumulated = pd.DataFrame()
+            required_sessions = (
+                _expected_sessions_between(
+                    profile,
+                    date.fromisoformat(start),
+                    expected,
+                )
+                if isinstance(previous_end, str)
+                else []
             )
-            terminal_rejected_bar_diagnostics.extend(
-                validated.attrs.get("rejected_bar_diagnostics", [])
+            for completeness_attempt in range(1, max_attempts + 1):
+                validated = _provider_with_retries(
+                    provider,
+                    symbol,
+                    start,
+                    end,
+                    expected_session=expected,
+                    max_attempts=(max_attempts if completeness_attempt == 1 else 1),
+                    sleeper=sleeper,
+                    lifecycle_context=instrument,
+                )
+                terminal_rejected_bar_diagnostics.extend(
+                    validated.attrs.get("rejected_bar_diagnostics", [])
+                )
+                accumulated = _merge_provider_attempts(accumulated, validated)
+                supplemented = _supplement_verified_observations(
+                    accumulated,
+                    verified_observations=verified_observations,
+                    instrument=instrument,
+                    requested_start=start,
+                    requested_end=end,
+                    expected_session=expected,
+                )
+                terminal_verified_observation_evidence.extend(
+                    supplemented.attrs.get("verified_observation_evidence", [])
+                )
+                missing = _missing_provider_sessions(
+                    supplemented,
+                    required_sessions=required_sessions,
+                )
+                if not missing or _explained_missing_daily_ohlcv_sessions(
+                    instrument,
+                    missing_sessions=missing,
+                    expected_session=expected,
+                ):
+                    return supplemented
+                if completeness_attempt < max_attempts:
+                    sleeper(float(2 ** (completeness_attempt - 1)))
+            raise ProviderBoundaryError(
+                "EXPECTED_SESSION_COVERAGE_INCOMPLETE",
+                "provider did not return every expected exchange session",
+                diagnostic={
+                    "ticker": ticker,
+                    "request_start": start,
+                    "request_end_exclusive": end,
+                    "expected_sessions": [day.isoformat() for day in required_sessions],
+                    "observed_sessions": sorted(
+                        value.isoformat()
+                        for value in pd.to_datetime(
+                            supplemented.get("Date", pd.Series(dtype=str))
+                        ).dt.date
+                    ),
+                    "missing_sessions": [day.isoformat() for day in missing],
+                    "attempts": max_attempts,
+                    "disposition": "blocked_not_persisted",
+                },
             )
-            return validated
         except ProviderBoundaryError as exc:
             error["reason_code"] = exc.reason_code
             if exc.diagnostic:
@@ -912,6 +1145,49 @@ def _refresh_instrument(
         if path.is_file()
         else {"status": "missing"}
     )
+    expected_backfill_sessions = _expected_sessions_between(
+        profile,
+        (
+            date.fromisoformat(previous_end) + timedelta(days=1)
+            if isinstance(previous_end, str)
+            else None
+        ),
+        expected,
+    )
+    observed_dates = set(final_validation.get("observation_dates") or ())
+    observed_backfill_sessions = [
+        session for session in expected_backfill_sessions if session in observed_dates
+    ]
+    missing_sessions = [
+        session for session in expected_backfill_sessions if session not in observed_dates
+    ]
+    explained_missing_sessions = _explained_missing_daily_ohlcv_sessions(
+        instrument,
+        missing_sessions=missing_sessions,
+        expected_session=expected,
+    )
+    unexplained_missing_sessions = [
+        session
+        for session in missing_sessions
+        if session.isoformat() not in explained_missing_sessions
+    ]
+    if unexplained_missing_sessions and not error:
+        if before_bytes is not None:
+            _atomic_write_bytes(path, before_bytes)
+        result = {
+            **result,
+            "status": "incomplete_expected_sessions",
+            "file_changed": False,
+            "rows_added": 0,
+        }
+        error["reason_code"] = "EXPECTED_SESSION_COVERAGE_INCOMPLETE"
+        final_validation = before_validation
+        observed_dates = set(final_validation.get("observation_dates") or ())
+        observed_backfill_sessions = [
+            session
+            for session in expected_backfill_sessions
+            if session in observed_dates
+        ]
     resulting_end = final_validation.get("end_date")
     status, reason = _normalize_status(
         result,
@@ -948,16 +1224,29 @@ def _refresh_instrument(
         "previous_last_observation": previous_end,
         "resulting_last_observation": resulting_end,
         "rows_added": int(result.get("rows_added") or 0),
+        "previous_row_count": int(before_validation.get("row_count") or 0),
+        "resulting_row_count": int(final_validation.get("row_count") or 0),
+        "expected_backfill_sessions": [
+            session.isoformat() for session in expected_backfill_sessions
+        ],
+        "observed_backfill_sessions": [
+            session.isoformat() for session in observed_backfill_sessions
+        ],
+        "explained_missing_sessions": explained_missing_sessions,
         "validation_status": "valid" if final_validation.get("status") == "valid" else "blocked",
         "freshness_status": status,
         "reason_code": reason,
         "provider_retrieval": provider_retrieval,
         "rejected_bar_diagnostics": rejected_bar_diagnostics,
+        "verified_observation_evidence": (
+            terminal_verified_observation_evidence
+        ),
         **history_coverage,
         **_retained_history_boundary(
             instrument,
             validation=final_validation,
         ),
+        **_runtime_observation_fields(instrument, validation=final_validation),
         "persisted_file_checksum": final_validation.get("checksum"),
     }
 
@@ -1019,6 +1308,8 @@ def _non_refreshable_lifecycle_row(
         "resulting_last_observation": validation.get("end_date"),
         "expected_completed_session": instrument.get("delisting_end_date"),
         "rows_added": 0,
+        "previous_row_count": int(validation.get("row_count") or 0),
+        "resulting_row_count": int(validation.get("row_count") or 0),
         "validation_status": (
             "valid"
             if valid
@@ -1042,6 +1333,7 @@ def _non_refreshable_lifecycle_row(
         "persisted_file_checksum": validation.get("checksum"),
         **_lifecycle_fields(instrument),
         **retained_boundary,
+        **_runtime_observation_fields(instrument, validation=validation),
     }
 
 
@@ -1052,7 +1344,7 @@ def _inactive_history_needs_backfill(
 ) -> bool:
     path = price_root / f"{instrument['source_symbol']}.csv"
     validation = _validate_price_history(path) if path.is_file() else {"status": "missing"}
-    cutoff = instrument.get("price_observation_end_session")
+    cutoff = instrument.get("last_trading_session")
     return (
         isinstance(cutoff, str)
         and (
@@ -1061,6 +1353,142 @@ def _inactive_history_needs_backfill(
             or validation["end_date"] < cutoff
         )
     )
+
+
+def _expected_sessions_between(
+    profile: MarketProfile,
+    start: date | None,
+    end: date,
+) -> list[date]:
+    if start is None or start > end:
+        return []
+    sessions: list[date] = []
+    cursor = start
+    while cursor <= end:
+        if _is_trading_session(cursor, profile.holiday_calendar):
+            sessions.append(cursor)
+        cursor += timedelta(days=1)
+    return sessions
+
+
+def _supplement_verified_observations(
+    frame: pd.DataFrame,
+    *,
+    verified_observations: Sequence[Mapping[str, Any]],
+    instrument: Mapping[str, Any],
+    requested_start: str,
+    requested_end: str,
+    expected_session: date,
+) -> pd.DataFrame:
+    if not verified_observations:
+        return frame
+    observed = {
+        value.isoformat()
+        for value in pd.to_datetime(frame.get("Date", pd.Series(dtype=str))).dt.date
+    }
+    evidence_rows = [
+        row
+        for row in verified_observations
+        if row.get("instrument_id") == instrument.get("instrument_id")
+        and row.get("ticker") == instrument.get("symbol")
+        and requested_start <= str(row.get("session_date")) < requested_end
+        and str(row.get("session_date")) not in observed
+    ]
+    if not evidence_rows:
+        return frame
+    additions = pd.DataFrame(
+        [
+            {
+                "Date": row["session_date"],
+                "Open": row["open"],
+                "High": row["high"],
+                "Low": row["low"],
+                "Close": row["close"],
+                "Adj Close": row["adj_close"],
+                "Volume": row["volume"],
+            }
+            for row in evidence_rows
+        ]
+    )
+    combined = pd.concat([frame, additions], ignore_index=True).sort_values("Date")
+    validated = _validate_provider_frame(
+        combined,
+        expected_session,
+        provider_symbol=str(instrument["source_symbol"]),
+        lifecycle_context=instrument,
+    )
+    validated.attrs["verified_observation_evidence"] = [
+        {
+            "session_date": row["session_date"],
+            "source_identity": row["source_identity"],
+            "source_url": row["source_url"],
+            "retrieved_at": row["retrieved_at"],
+            "evidence_checksum": row["evidence_checksum"],
+        }
+        for row in evidence_rows
+    ]
+    return validated
+
+
+def _merge_provider_attempts(
+    current: pd.DataFrame,
+    received: pd.DataFrame,
+) -> pd.DataFrame:
+    if current.empty:
+        return received.copy()
+    if received.empty:
+        return current.copy()
+    return (
+        pd.concat([current, received], ignore_index=True)
+        .drop_duplicates(subset=["Date"], keep="last")
+        .sort_values("Date")
+        .reset_index(drop=True)
+    )
+
+
+def _missing_provider_sessions(
+    frame: pd.DataFrame,
+    *,
+    required_sessions: Sequence[date],
+) -> list[date]:
+    observed = set(
+        pd.to_datetime(frame.get("Date", pd.Series(dtype=str))).dt.date
+    )
+    return [session for session in required_sessions if session not in observed]
+
+
+def _explained_missing_daily_ohlcv_sessions(
+    instrument: Mapping[str, Any],
+    *,
+    missing_sessions: Sequence[date],
+    expected_session: date,
+) -> list[str]:
+    if missing_sessions != [expected_session]:
+        return []
+    last_observed_text = instrument.get(
+        "canonical_ohlcv_last_observed_session"
+    )
+    try:
+        last_observed = (
+            date.fromisoformat(last_observed_text)
+            if isinstance(last_observed_text, str)
+            else None
+        )
+    except ValueError:
+        last_observed = None
+    if (
+        instrument.get("terminal_session_daily_ohlcv_status")
+        != "no_valid_daily_ohlcv_bar_from_provider_as_of"
+        or last_observed is None
+        or last_observed >= expected_session
+    ):
+        return []
+    evidence = instrument.get("observation_evidence")
+    if not isinstance(evidence, Mapping) or evidence.get(
+        "relevant_session"
+    ) != expected_session.isoformat():
+        return []
+    return [expected_session.isoformat()]
 
 
 def _history_coverage(
@@ -1247,7 +1675,7 @@ def _retained_history_boundary(
     validation: Mapping[str, Any],
 ) -> dict[str, Any]:
     lifecycle_status = str(instrument.get("lifecycle_status") or "")
-    expected_end = instrument.get("price_observation_end_session")
+    expected_end = instrument.get("last_trading_session")
     actual_end = validation.get("end_date")
     base = {
         "retained_history_boundary_status": "not_applicable",
@@ -1276,6 +1704,22 @@ def _retained_history_boundary(
             ),
         }
     if actual_end < expected_end:
+        if (
+            instrument.get("terminal_session_daily_ohlcv_status")
+            == "no_valid_daily_ohlcv_bar_from_provider_as_of"
+            and instrument.get("canonical_ohlcv_last_observed_session")
+            == actual_end
+            and isinstance(instrument.get("observation_evidence"), Mapping)
+            and instrument["observation_evidence"].get("relevant_session")
+            == expected_end
+        ):
+            return {
+                **base,
+                "retained_history_boundary_status": "aligned",
+                "retained_history_boundary_reason_code": (
+                    "RETAINED_HISTORY_TERMINAL_DAILY_OHLCV_NOT_RETURNED_AS_OF"
+                ),
+            }
         return {
             **base,
             "retained_history_boundary_status": "ends_before",
@@ -1350,12 +1794,14 @@ def _lifecycle_fields(instrument: Mapping[str, Any]) -> dict[str, Any]:
             "trading_suspension_effective_date"
         ],
         "inactive_effective_date": instrument["inactive_effective_date"],
-        "price_observation_end_session": instrument[
-            "price_observation_end_session"
+        "canonical_ohlcv_last_observed_session": instrument[
+            "canonical_ohlcv_last_observed_session"
         ],
-        "final_session_observation_status": instrument[
-            "final_session_observation_status"
+        "terminal_session_daily_ohlcv_status": instrument[
+            "terminal_session_daily_ohlcv_status"
         ],
+        "observation_status_as_of": instrument["observation_status_as_of"],
+        "observation_evidence": instrument["observation_evidence"],
         "trading_suspension_effective_timing": instrument[
             "trading_suspension_effective_timing"
         ],
@@ -1364,6 +1810,32 @@ def _lifecycle_fields(instrument: Mapping[str, Any]) -> dict[str, Any]:
         "lifecycle_provenance_checksum": instrument[
             "lifecycle_provenance_checksum"
         ],
+    }
+
+
+def _runtime_observation_fields(
+    instrument: Mapping[str, Any],
+    *,
+    validation: Mapping[str, Any],
+) -> dict[str, Any]:
+    actual_end = validation.get("end_date")
+    formal_end = instrument.get("last_trading_session")
+    if isinstance(actual_end, str) and actual_end == formal_end:
+        return {
+            "canonical_ohlcv_last_observed_session": actual_end,
+            "terminal_session_daily_ohlcv_status": "observed_daily_ohlcv",
+            "observation_status_as_of": None,
+            "observation_evidence": None,
+        }
+    return {
+        "canonical_ohlcv_last_observed_session": instrument.get(
+            "canonical_ohlcv_last_observed_session"
+        ),
+        "terminal_session_daily_ohlcv_status": instrument.get(
+            "terminal_session_daily_ohlcv_status"
+        ),
+        "observation_status_as_of": instrument.get("observation_status_as_of"),
+        "observation_evidence": instrument.get("observation_evidence"),
     }
 
 
@@ -1757,8 +2229,8 @@ def _validate_provider_frame(
                 "last_trading_session": lifecycle_context[
                     "last_trading_session"
                 ],
-                "price_observation_end_session": lifecycle_context[
-                    "price_observation_end_session"
+                "canonical_ohlcv_last_observed_session": lifecycle_context[
+                    "canonical_ohlcv_last_observed_session"
                 ],
                 "lifecycle_event": str(lifecycle_context["lifecycle_reason"]),
                 "lifecycle_provenance_checksum": lifecycle_context[
@@ -2070,7 +2542,17 @@ def _entry_lifecycle_matches(
     entry: Mapping[str, Any],
     instrument: Mapping[str, Any],
 ) -> bool:
-    expected = _lifecycle_fields(instrument)
+    expected = {
+        key: value
+        for key, value in _lifecycle_fields(instrument).items()
+        if key
+        not in {
+            "canonical_ohlcv_last_observed_session",
+            "terminal_session_daily_ohlcv_status",
+            "observation_status_as_of",
+            "observation_evidence",
+        }
+    }
     return all(entry.get(key) == value for key, value in expected.items())
 
 

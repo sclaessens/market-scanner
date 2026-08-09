@@ -257,12 +257,14 @@ def test_malformed_provider_payloads_fail_closed(
     assert (fixture["stage"] / "data/processed/AAA.csv").read_bytes() == original
 
 
-def test_empty_provider_response_is_stale_and_preserves_history(tmp_path: Path) -> None:
+def test_empty_provider_response_is_unproven_and_fails_closed(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path, [_instrument("AAA")], end="2026-07-13")
     original = (fixture["published"] / "data/processed/AAA.csv").read_bytes()
     report = _run(fixture, provider=lambda *_args: pd.DataFrame())
-    assert report["tickers"][0]["freshness_status"] == "stale"
-    assert report["tickers"][0]["reason_code"] == "EXPECTED_SESSION_NOT_AVAILABLE"
+    assert report["tickers"][0]["freshness_status"] == "failed"
+    assert report["tickers"][0]["reason_code"] == (
+        "EXPECTED_SESSION_COVERAGE_INCOMPLETE"
+    )
     assert (fixture["stage"] / "data/processed/AAA.csv").read_bytes() == original
 
 
@@ -548,7 +550,9 @@ def test_partial_batch_retries_only_missing_ticker(
     assert calls == [("AAA", "BBB"), ("BBB",)]
     by_ticker = {row["ticker"]: row for row in report["tickers"]}
     assert by_ticker["AAA"]["freshness_status"] == "updated"
-    assert by_ticker["BBB"]["reason_code"] == "EXPECTED_SESSION_NOT_AVAILABLE"
+    assert by_ticker["BBB"]["reason_code"] == (
+        "EXPECTED_SESSION_COVERAGE_INCOMPLETE"
+    )
     assert report["publication"]["publication_required"] is False
 
 
@@ -698,7 +702,10 @@ def test_default_publication_validation_rejects_degraded_manifest(
         run_at=RUN_AT,
     )
 
-    assert diagnostic["validated"] is True
+    assert diagnostic["validated"] is False
+    assert "PUBLISHED_EXPECTED_SESSION_COMPLETENESS_INVALID" in diagnostic[
+        "reason_codes"
+    ]
     assert publication["validated"] is False
     assert "PUBLISHED_DATASET_DEGRADED" in publication["reason_codes"]
     assert "PUBLISHED_DATASET_STALE" in publication["reason_codes"]
@@ -767,7 +774,10 @@ def test_one_stale_ticker_blocks_another_valid_update_from_publication(
     by_ticker = {row["ticker"]: row for row in report["tickers"]}
 
     assert by_ticker["AAA"]["freshness_status"] == "updated"
-    assert by_ticker["BBB"]["freshness_status"] == "stale"
+    assert by_ticker["BBB"]["freshness_status"] == "failed"
+    assert by_ticker["BBB"]["reason_code"] == (
+        "EXPECTED_SESSION_COVERAGE_INCOMPLETE"
+    )
     assert report["run_status"] == "degraded"
     assert report["publication"]["publication_set_valid"] is True
     assert report["publication"]["changed_price_file_count"] == 1
