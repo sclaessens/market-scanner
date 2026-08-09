@@ -1,6 +1,6 @@
 # ME-SR23 Corporate-Action Lifecycle Cutoff Remediation Audit
 
-Status: `canary_pending`
+Status: `corrected_canary_pending`
 
 ## Second Review Findings
 
@@ -96,10 +96,10 @@ inconsistent row counts, checksums, dates, evidence, or session coverage.
 
 | Command | Result | Duration | Notes |
 |---|---:|---:|---|
-| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/data/test_me_sr18_lifecycle_aware_freshness.py tests/market_engine/data/test_scheduled_canonical_price_refresh.py tests/market_engine/data/test_scheduled_canonical_price_refresh_workflow.py -q` | 149 passed | 1.79 s | Expected sessions, bounded recovery, retained metadata, TMHC semantics, provider, singleton, quarantine, manifest, and workflow regressions |
-| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/run -q` | 197 passed | 2.51 s | No failures or skips |
-| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine -q` | 1443 passed, 1 failed | 5.84 s | Only the known missing historical artifact |
-| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q` | 2110 passed, 1 failed | 6.96 s | Same known failure only |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/data/test_me_sr18_lifecycle_aware_freshness.py tests/market_engine/data/test_scheduled_canonical_price_refresh.py tests/market_engine/data/test_scheduled_canonical_price_refresh_workflow.py -q` | 150 passed | 1.71 s | Expected sessions, bounded recovery, active recent-listing bounds, retained metadata, TMHC semantics, provider, singleton, quarantine, manifest, and workflow regressions |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/run -q` | 197 passed | 2.47 s | No failures or skips |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine -q` | 1444 passed, 1 failed | 6.48 s | Only the known missing historical artifact |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q` | 2111 passed, 1 failed | 7.37 s | Same known failure only |
 | Lifecycle v5 and verified-observation v1 schema loaders | passed | <0.1 s | Lifecycle checksum `664416d7d81830b159a395ca4f00de5689b0180037ae5386cee75bfc1132a4db`; observation checksum `a6935b5cbe328b03bcd4b34142e606fdc0210a0f5f03f1c1f39ba69c695ef71c` |
 | `git diff --check` | passed | <0.1 s | No whitespace errors |
 
@@ -111,13 +111,38 @@ is absent. The exact test reproduces identically on clean base SHA
 `a0409a49e8f8f3ef9dce352c22b039ce4387faab` (one failure in 0.02 seconds).
 There are no new failures.
 
-## Remediation Canary
+## First Remediation Canary and Material Correction
 
-Pending. Exactly one full-universe `publish=false` canary will be dispatched
-after the reviewed implementation and this pre-canary evidence are committed
-and pushed. This section will be replaced with the run, artifact, independent
-baseline, EA/NSA/TMHC, changed-fileset, publish-skip, and unchanged
-`market-data` evidence from that run.
+Full-universe `publish=false` run
+[`31319120331`](https://github.com/sclaessens/market-scanner/actions/runs/31319120331)
+executed commit `be8430828541077fd283baa0771434e13531c77c`. It failed closed
+after 4 minutes 13 seconds with four active recent-listing completeness
+failures (`FDXF`, `HONA`, `Q`, and `SOLS`). No publication bundle was uploaded,
+the publish job was skipped, and `market-data` remained at
+`95c88276763b1762cbbfbccc402ec8535268127b`.
+
+The run nevertheless proved the three review targets in isolated staging:
+
+- EA reconciled all eight expected sessions, added eight rows, and reported
+  `2026-07-23` -> `2026-08-04` with row counts 389 -> 397.
+- NSA remained an unchanged July 21 retained history.
+- TMHC retained the formal July 24 cutoff, the canonical July 23 endpoint, and
+  the precise checksum-bound terminal daily-OHLCV exception.
+
+The new failure was a material implementation defect: guarded provider
+completeness calculated active recent-listing required sessions from the broad
+provider request start instead of from the session following the existing
+canonical endpoint. The final manifest calculation already used the correct
+bounded interval. The correction makes both paths start at
+`previous_last_observation + 1 exchange session` and adds an active
+recent-listing regression. This is not an ordinary retry; the first run is
+insufficient canary evidence because its full-universe status was degraded.
+The contract permits one second canary only after this material correction and
+its full local validation.
+
+## Corrected Remediation Canary
+
+Pending after the material correction is committed and pushed.
 
 ## Remaining Risks and Rollback
 

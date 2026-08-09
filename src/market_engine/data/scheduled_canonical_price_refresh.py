@@ -1054,7 +1054,7 @@ def _refresh_instrument(
             required_sessions = (
                 _expected_sessions_between(
                     profile,
-                    date.fromisoformat(start),
+                    date.fromisoformat(previous_end) + timedelta(days=1),
                     expected,
                 )
                 if isinstance(previous_end, str)

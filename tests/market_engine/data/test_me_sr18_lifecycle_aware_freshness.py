@@ -2009,6 +2009,40 @@ def test_inactive_backfill_requires_every_expected_exchange_session(
     assert staged["Date"].tolist()[-2:] == ["2026-07-13", "2026-07-14"]
 
 
+def test_active_recent_listing_completeness_starts_after_canonical_end(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("NEW")
+    record = _record(
+        instrument,
+        lifecycle_status="active",
+        status_effective_date="2026-07-01",
+        listing_start_date="2026-07-01",
+        regular_way_listing_date="2026-07-02",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"NEW": ("2026-07-01", "2026-07-10")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(
+            ["2026-07-13", "2026-07-14"]
+        ),
+    )["tickers"][0]
+
+    assert row["freshness_status"] == "already_current"
+    assert row["previous_last_observation"] == "2026-07-10"
+    assert row["resulting_last_observation"] == "2026-07-14"
+    assert row["expected_backfill_sessions"] == [
+        "2026-07-13",
+        "2026-07-14",
+    ]
+
+
 @pytest.mark.parametrize(
     "received",
     [["2026-07-14"], ["2026-07-13"]],
