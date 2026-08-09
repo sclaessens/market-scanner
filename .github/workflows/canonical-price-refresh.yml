@@ -184,7 +184,7 @@ jobs:
             git -C publication switch --orphan market-data
             git -C publication rm -r --ignore-unmatch .
           fi
-          mkdir -p publication/data/processed publication/manifests
+          mkdir -p publication/data/processed publication/manifests publication/evidence/market_price
 
       - name: Revalidate bundle against data-branch baseline using trusted main code
         run: |
@@ -199,6 +199,7 @@ jobs:
         run: |
           rsync --archive --delete publication-bundle/data/processed/ publication/data/processed/
           rsync --archive --delete publication-bundle/manifests/ publication/manifests/
+          rsync --archive --delete publication-bundle/evidence/market_price/ publication/evidence/market_price/
 
       - name: Revalidate exact publication tree
         run: |
@@ -214,7 +215,7 @@ jobs:
         run: |
           git -C publication config user.name "github-actions[bot]"
           git -C publication config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git -C publication add data/processed manifests/canonical_price_freshness_latest.json
+          git -C publication add --all data/processed manifests/canonical_price_freshness_latest.json evidence/market_price
           if git -C publication diff --cached --quiet; then
             echo "No validated data change; no market-data commit created."
             exit 0

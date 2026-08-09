@@ -65,7 +65,14 @@ def test_market_data_branch_is_data_only_and_bootstraps_without_main_history() -
     publish_job = _publish_job_block(workflow)
     assert "switch --orphan market-data" in workflow
     assert "rsync --archive --delete publication-bundle/manifests/ publication/manifests/" in workflow
-    assert "add data/processed manifests/canonical_price_freshness_latest.json" in workflow
+    assert (
+        "rsync --archive --delete publication-bundle/evidence/market_price/ "
+        "publication/evidence/market_price/"
+    ) in workflow
+    assert (
+        "add --all data/processed manifests/canonical_price_freshness_latest.json "
+        "evidence/market_price"
+    ) in workflow
     assert "push origin HEAD:market-data" in workflow
     assert "No validated data change; no market-data commit created." in workflow
     assert publish_job.count("validate-publication") == 2

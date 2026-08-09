@@ -237,6 +237,81 @@ def record_provenance_checksum(record: Mapping[str, Any]) -> str:
     return canonical_checksum(payload)
 
 
+def resolve_semantic_alias(
+    record: Mapping[str, Any],
+    *,
+    canonical_field: str,
+    legacy_field: str,
+    normalizer: Any,
+    ticker: str,
+    contract_version: str,
+) -> Any:
+    canonical_raw = record.get(canonical_field)
+    legacy_raw = record.get(legacy_field)
+    canonical_present = canonical_field in record and canonical_raw is not None
+    legacy_present = legacy_field in record and legacy_raw is not None
+    canonical: Any = None
+    legacy: Any = None
+    canonical_error: Exception | None = None
+    legacy_error: Exception | None = None
+    if canonical_present:
+        try:
+            canonical = normalizer(canonical_raw)
+        except (TypeError, ValueError) as exc:
+            canonical_error = exc
+    if legacy_present:
+        try:
+            legacy = normalizer(legacy_raw)
+        except (TypeError, ValueError) as exc:
+            legacy_error = exc
+    if canonical_error is not None or legacy_error is not None:
+        raise InstrumentLifecycleError(
+            "lifecycle semantic alias invalid for "
+            f"{ticker}: canonical_field={canonical_field}, "
+            f"legacy_field={legacy_field}, canonical_raw={canonical_raw!r}, "
+            f"legacy_raw={legacy_raw!r}, canonical_normalized={canonical!r}, "
+            f"legacy_normalized={legacy!r}, contract_version={contract_version}"
+        ) from (canonical_error or legacy_error)
+    if canonical_present and legacy_present and canonical != legacy:
+        raise InstrumentLifecycleError(
+            "lifecycle semantic alias conflict for "
+            f"{ticker}: canonical_field={canonical_field}, "
+            f"legacy_field={legacy_field}, canonical_raw={canonical_raw!r}, "
+            f"legacy_raw={legacy_raw!r}, canonical_normalized={canonical!r}, "
+            f"legacy_normalized={legacy!r}, contract_version={contract_version}"
+        )
+    return canonical if canonical_present else legacy
+
+
+def _normalize_session_alias(value: Any) -> date:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("session alias must be text")
+    text = value.strip()
+    try:
+        return date.fromisoformat(text)
+    except ValueError:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        if parsed.timetz().replace(tzinfo=None) != datetime.min.time():
+            raise ValueError("session timestamp must be at midnight")
+        return parsed.date()
+
+
+def _normalize_observation_status_alias(value: Any) -> str:
+    mapping = {
+        "observed": "observed_daily_ohlcv",
+        "observed_daily_ohlcv": "observed_daily_ohlcv",
+        "no_valid_price_observation": (
+            "no_valid_daily_ohlcv_bar_from_provider_as_of"
+        ),
+        "no_valid_daily_ohlcv_bar_from_provider_as_of": (
+            "no_valid_daily_ohlcv_bar_from_provider_as_of"
+        ),
+    }
+    if not isinstance(value, str) or value not in mapping:
+        raise ValueError("unknown observation status alias")
+    return mapping[value]
+
+
 def _validate_record(
     value: Mapping[str, Any],
     *,
@@ -258,41 +333,36 @@ def _validate_record(
     regular_way_listing_date = _optional_date(
         record, "regular_way_listing_date"
     )
-    delisting_end_date = _optional_date(record, "delisting_end_date")
-    last_trading_session = _optional_date(record, "last_trading_session")
-    if (
-        delisting_end_date is not None
-        and last_trading_session is not None
-        and delisting_end_date != last_trading_session
-    ):
-        raise InstrumentLifecycleError(
-            "lifecycle alias conflict for "
-            f"{ticker}: delisting_end_date={delisting_end_date.isoformat()} "
-            "does not equal "
-            f"last_trading_session={last_trading_session.isoformat()}"
-        )
+    last_trading_session = resolve_semantic_alias(
+        record,
+        canonical_field="last_trading_session",
+        legacy_field="delisting_end_date",
+        normalizer=_normalize_session_alias,
+        ticker=ticker,
+        contract_version=input_schema_version,
+    )
+    delisting_end_date = last_trading_session
     transaction_closing_date = _optional_date(record, "transaction_closing_date")
     trading_suspension_effective_date = _optional_date(
         record, "trading_suspension_effective_date"
     )
     inactive_effective_date = _optional_date(record, "inactive_effective_date")
-    canonical_ohlcv_last_observed_session = _optional_date(
-        record, "canonical_ohlcv_last_observed_session"
+    canonical_ohlcv_last_observed_session = resolve_semantic_alias(
+        record,
+        canonical_field="canonical_ohlcv_last_observed_session",
+        legacy_field="price_observation_end_session",
+        normalizer=_normalize_session_alias,
+        ticker=ticker,
+        contract_version=input_schema_version,
     )
-    if canonical_ohlcv_last_observed_session is None:
-        canonical_ohlcv_last_observed_session = _optional_date(
-            record, "price_observation_end_session"
-        )
-    terminal_session_daily_ohlcv_status = record.get(
-        "terminal_session_daily_ohlcv_status",
-        record.get("final_session_observation_status"),
+    terminal_session_daily_ohlcv_status = resolve_semantic_alias(
+        record,
+        canonical_field="terminal_session_daily_ohlcv_status",
+        legacy_field="final_session_observation_status",
+        normalizer=_normalize_observation_status_alias,
+        ticker=ticker,
+        contract_version=input_schema_version,
     )
-    if terminal_session_daily_ohlcv_status == "observed":
-        terminal_session_daily_ohlcv_status = "observed_daily_ohlcv"
-    elif terminal_session_daily_ohlcv_status == "no_valid_price_observation":
-        terminal_session_daily_ohlcv_status = (
-            "no_valid_daily_ohlcv_bar_from_provider_as_of"
-        )
     observation_status_as_of = record.get("observation_status_as_of")
     observation_evidence = record.get("observation_evidence")
     suspension_effective_timing = record.get(
@@ -593,6 +663,8 @@ def _validate_record(
         or "last_trading_session" not in record
         or "delisting_end_date" not in record
         or "canonical_ohlcv_last_observed_session" not in record
+        or "price_observation_end_session" in record
+        or "final_session_observation_status" in record
     )
     if not isinstance(checksum, str) or checksum not in {
         normalized_checksum,
