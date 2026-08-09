@@ -1118,9 +1118,18 @@ def _refresh_instrument(
                     accumulated,
                     required_sessions=required_sessions,
                 )
+                primary_explained = set(
+                    _explained_missing_daily_ohlcv_sessions(
+                        instrument,
+                        missing_sessions=primary_missing,
+                        expected_session=expected,
+                    )
+                )
                 terminal_fallback_required_sessions.clear()
                 terminal_fallback_required_sessions.update(
-                    session.isoformat() for session in primary_missing
+                    session.isoformat()
+                    for session in primary_missing
+                    if session.isoformat() not in primary_explained
                 )
                 supplemented = _supplement_observation_receipts(
                     accumulated,
@@ -1139,11 +1148,19 @@ def _refresh_instrument(
                     supplemented,
                     required_sessions=required_sessions,
                 )
-                if not missing or _explained_missing_daily_ohlcv_sessions(
-                    instrument,
-                    missing_sessions=missing,
-                    expected_session=expected,
-                ):
+                explained = set(
+                    _explained_missing_daily_ohlcv_sessions(
+                        instrument,
+                        missing_sessions=missing,
+                        expected_session=expected,
+                    )
+                )
+                unexplained = [
+                    session
+                    for session in missing
+                    if session.isoformat() not in explained
+                ]
+                if not unexplained:
                     return supplemented
                 if completeness_attempt < max_attempts:
                     sleeper(float(2 ** (completeness_attempt - 1)))
@@ -1161,7 +1178,9 @@ def _refresh_instrument(
                             supplemented.get("Date", pd.Series(dtype=str))
                         ).dt.date
                     ),
-                    "missing_sessions": [day.isoformat() for day in missing],
+                    "missing_sessions": [
+                        day.isoformat() for day in unexplained
+                    ],
                     "attempts": max_attempts,
                     "disposition": "blocked_not_persisted",
                 },

@@ -1,6 +1,6 @@
 # ME-SR23 Corporate-Action Lifecycle Cutoff Remediation Audit
 
-Status: `implementation_complete_canary_pending`
+Status: `completed_with_blockers`
 
 ## Third Review Findings
 
@@ -148,10 +148,10 @@ unknown status, and singleton/batch behavior.
 
 | Command | Result | Duration |
 |---|---:|---:|
-| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/data/test_observation_receipts.py tests/market_engine/data/test_me_sr18_lifecycle_aware_freshness.py tests/market_engine/data/test_scheduled_canonical_price_refresh.py tests/market_engine/data/test_scheduled_canonical_price_refresh_workflow.py -q --tb=short` | 193 passed, 0 failed, 0 skipped | 3.05 s |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/data/test_observation_receipts.py tests/market_engine/data/test_me_sr18_lifecycle_aware_freshness.py tests/market_engine/data/test_scheduled_canonical_price_refresh.py tests/market_engine/data/test_scheduled_canonical_price_refresh_workflow.py -q --tb=short` | 194 passed, 0 failed, 0 skipped | 3.11 s |
 | `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/run -q --tb=short` | 197 passed, 0 failed, 0 skipped | 2.51 s |
-| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine -q --tb=short` | 1487 passed, 1 failed, 0 skipped | 7.31 s |
-| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q --tb=short` | 2154 passed, 1 failed, 0 skipped | 8.70 s |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine -q --tb=short` | 1488 passed, 1 failed, 0 skipped | 7.37 s |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q --tb=short` | 2155 passed, 1 failed, 0 skipped | 8.53 s |
 | Lifecycle v5 and market-price source-policy v1 loaders | passed | <0.1 s |
 | `git diff --check` | passed | <0.1 s |
 
@@ -172,15 +172,62 @@ parsing and transaction logging under `scripts/portfolio`; the current diff
 does not touch those files. The `tradeable` grep is empty. No Decision Engine,
 allocation, or reporting semantics changed in this remediation.
 
-The new canary identity and result are recorded after the single authorized
-post-remediation canary.
+## Final Non-Publishing Canary
+
+Exactly one post-remediation workflow was dispatched with `publish=false`:
+
+| Evidence | Result |
+|---|---|
+| Workflow | [31323447253](https://github.com/sclaessens/market-scanner/actions/runs/31323447253) |
+| Branch / canary head | `me-sr23-corporate-action-lifecycle-cutoff-remediation` / `43a5b646253fca1833d2882e41252cfaaa145203` |
+| Run identity | `me-sr23-canonical-price-refresh-20260809T161908Z` |
+| Input / job duration | `publish=false` / 5 minutes 48 seconds |
+| Trusted source main | `a0409a49e8f8f3ef9dce352c22b039ce4387faab` |
+| Universe | 952 total; 946 active; 6 retained inactive; 0 pending |
+| Status | 942 updated; 4 already current; 5 not expected; 1 failed; 0 stale or unsupported |
+| Coverage | 942 sufficient; 4 limited; 5 retained inactive; 1 not applicable; 0 insufficient unexplained |
+| Source policy | v1; checksum `55cd77a75c9e45c699d02e075b7c3ddf33bfb96d6ea5147ba9b7ad612c908d61`; 0 approved fallbacks |
+| Freshness artifact | `canonical-price-freshness-me-sr23-canonical-price-refresh-20260809T161908Z`; GitHub digest `8486953b76eece07306348187fa6e10f5d812f75f8ac255ab7017399a6fd130e` |
+| Extracted report SHA-256 | `772a5ababbe6d06ed35d67008abdcf8941d54a525caa257c5338a6b8892a7cae` |
+| Manifest | v7; checksum `99331b0cb70bba7d7a747e167c9e329b2cdcf25b6ef34707adab66f11f3634ce` |
+| Changed files | 946 declared and 946 unique; EA not included |
+| Receipts / roots | 0 / 0, because no fallback is approved or used |
+| Publication | required `false`; set valid `false`; publication artifact skipped |
+| Publish job | skipped |
+| `market-data` before / after | `95c88276763b1762cbbfbccc402ec8535268127b` / unchanged |
+
+EA is the sole failed instrument. Its trusted baseline remains 389 rows through
+July 23 with checksum
+`758b5bd8ed67403eebc2ba1673e500ea8cc219ad708f4b0653ca0a180fb867a0`.
+The primary provider returned only August 4. The required interval contains
+July 24, 27, 28, 29, 30, and 31 and August 3 and 4. The seven internal sessions
+were classified as fallback-required, but the empty production policy yielded
+no receipts, raw artifacts, or receipt root. The pipeline preserved the
+baseline unchanged: `previous_last_observation=2026-07-23`,
+`resulting_last_observation=2026-07-23`, and `rows_added=0`. It did not reuse
+the former Investing.com values.
+
+TMHC retained `last_trading_session=2026-07-24`, canonical observation end
+July 23, and the precise temporary
+`no_valid_daily_ohlcv_bar_from_provider_as_of` status. No legacy observation
+aliases were emitted. Local regressions prove that a later complete July 24
+bar remains admissible and a July 25 bar remains quarantined.
+
+Artifact review found that the canary journal classified TMHC's already
+explained July 24 no-bar session as fallback-required even though it added no
+canonical row. The final implementation now excludes explicitly explained
+no-observation sessions from gap-fill receipt requirements and requires every
+remaining missing session to be explained before accepting the provider
+result. A new local regression is green. Per the one-canary constraint, this
+post-canary correction was not dispatched again and is not represented by a
+second workflow run.
 
 ## Remaining Blocker and Rollback
 
 The current production policy contains no approved canonical daily-OHLCV
 fallback. EA therefore remains incomplete and the final status cannot be
-`READY FOR RE-REVIEW`. The one non-publishing canary is expected to demonstrate
-this fail-closed condition without modifying `market-data`.
+`READY FOR RE-REVIEW`. The one non-publishing canary demonstrated this
+fail-closed condition without modifying `market-data`.
 
 Rollback is a normal revert of the reviewed ME-SR23 commits. Do not rewrite
 branch history, manually edit `market-data`, restore the deleted hand-authored

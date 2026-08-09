@@ -2542,6 +2542,38 @@ def test_trusted_publisher_rejects_unbound_raw_artifact(tmp_path: Path) -> None:
     ]
 
 
+def test_explained_terminal_absence_does_not_require_gap_fill_receipt(
+    tmp_path: Path,
+) -> None:
+    universe = scheduled.load_authoritative_universe(
+        scheduled.DEFAULT_UNIVERSE_SNAPSHOT
+    )
+    instrument = next(
+        row for row in universe["instruments"] if row["symbol"] == "TMHC"
+    )
+    registry = load_lifecycle_registry(DEFAULT_LIFECYCLE_REGISTRY)
+    record = next(row for row in registry["records"] if row["ticker"] == "TMHC")
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"TMHC": ("2025-07-01", "2026-07-23")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: pd.DataFrame(),
+        run_at=datetime(2026, 8, 9, 18, 0, tzinfo=UTC),
+    )["tickers"][0]
+
+    assert row["expected_backfill_sessions"] == ["2026-07-24"]
+    assert row["explained_missing_sessions"] == ["2026-07-24"]
+    assert row["fallback_required_sessions"] == []
+    assert row["observation_receipts"] == []
+    assert row["observation_receipt_root"] is None
+    assert row["freshness_status"] == "not_expected"
+
+
 def test_later_terminal_daily_ohlcv_replaces_temporary_absence_status(
     tmp_path: Path,
 ) -> None:
