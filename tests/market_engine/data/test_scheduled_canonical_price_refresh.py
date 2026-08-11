@@ -11,6 +11,7 @@ import pytest
 
 from market_engine.data import scheduled_canonical_price_refresh as scheduled
 from market_engine.data import observation_receipts as receipt_contract
+from market_engine.data.provider_artifact_adapter import capture_provider_artifact
 
 
 SOURCE_SHA = "8" * 40
@@ -53,8 +54,58 @@ def test_normal_update_adds_one_valid_completed_session(tmp_path: Path) -> None:
     assert report["run_status"] == "completed"
     assert report["publication"]["publication_set_valid"] is True
     assert report["publication"]["publication_required"] is True
+    diagnostic = report["mutation_diagnostic_artifact"]
+    diagnostic_path = fixture["report"].with_name(diagnostic["artifact_name"])
+    assert diagnostic_path.is_file()
+    assert scheduled._sha256_file(diagnostic_path) == diagnostic["artifact_sha256"]
+    assert report["mutation_evidence_summary"]["added_row_count"] == 1
+    assert report["mutation_evidence_summary"]["modified_row_count"] == 0
     assert (fixture["stage"] / scheduled.LATEST_MANIFEST).is_file()
     assert calls == [("AAA", "2026-07-14", "2026-07-15")]
+
+
+def test_missing_artifact_blocks_without_erasing_publisher_mutations(tmp_path: Path) -> None:
+    instrument = _instrument("AAA")
+    fixture = _fixture(tmp_path, [instrument], end="2026-07-13")
+    scheduled._prepare_staging_root(fixture["published"], fixture["stage"])
+    staged_path = fixture["stage"] / "data/processed/AAA.csv"
+    staged = pd.read_csv(staged_path)
+    staged = pd.concat([staged, _frame([("2026-07-14", 500)])], ignore_index=True)
+    staged.to_csv(staged_path, index=False)
+    entry = {
+        "instrument_id": instrument["instrument_id"],
+        "ticker": "AAA",
+        "exchange": "US",
+        "persisted_file_path": "data/processed/AAA.csv",
+        "expected_backfill_sessions": ["2026-07-14"],
+        "provider_artifacts": [
+            {
+                "schema_version": receipt_contract.PROVIDER_ARTIFACT_REFERENCE_SCHEMA_VERSION,
+                "artifact_locator": f"evidence/market_price/approved-test-primary/{'a' * 64}.json",
+                "artifact_sha256": "a" * 64,
+                "envelope_sha256": "b" * 64,
+            }
+        ],
+        "absence_attestations": [],
+        "rejected_bar_diagnostics": [],
+    }
+    summary = scheduled._bind_mutation_and_session_ledgers(
+        [entry],
+        instruments_by_id={instrument["instrument_id"]: instrument},
+        baseline_root=fixture["published"],
+        staging_root=fixture["stage"],
+        source_policy=receipt_contract.load_source_policy(fixture["policy"]),
+    )
+
+    assert entry["mutation_evidence_status"] == "invalid"
+    assert [row["session_date"] for row in entry["canonical_mutations"]] == [
+        "2026-07-14"
+    ]
+    assert entry["canonical_mutations"][0]["mutation_type"] == "row_added"
+    assert entry["mutation_diagnostics"]["added_row_count"] == 1
+    assert entry["mutation_diagnostics"]["artifact_replay_failure_count"] == 1
+    assert entry["mutation_diagnostics"]["mutations_without_receipt_count"] == 1
+    assert summary["added_row_count"] == 1
 
 
 def test_multiple_missing_sessions_are_appended(tmp_path: Path) -> None:
@@ -716,17 +767,19 @@ def test_default_publication_validation_rejects_degraded_manifest(
     assert "PUBLISHED_DATASET_STALE" in publication["reason_codes"]
 
 
-def test_historical_rewrite_is_restored_byte_for_byte(tmp_path: Path) -> None:
+def test_out_of_window_historical_rewrite_is_restored_byte_for_byte(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path, [_instrument("AAA")], end="2026-07-13")
     source = fixture["published"] / "data/processed/AAA.csv"
     original = source.read_bytes()
     report = _run(
         fixture,
         provider=lambda *_args: _frame([("2026-07-13", 999), ("2026-07-14", 500)]),
+        overlap_calendar_days=1,
     )
     row = report["tickers"][0]
     assert row["freshness_status"] == "failed"
-    assert row["reason_code"] == "HISTORICAL_VALUE_REWRITE_BLOCKED"
+    assert row["reason_code"] == "PROVIDER_ARTIFACT_INVALID"
+    assert row["mutation_diagnostics"]["artifact_replay_failure_count"] == 1
     assert (fixture["stage"] / "data/processed/AAA.csv").read_bytes() == original
 
 
@@ -1053,8 +1106,12 @@ def _fixture(
                         "provider_id": "approved-test-primary",
                         "approval_id": "approved-test-primary-v1",
                         "data_type": "daily_ohlcv",
+                        "adapter_id": "scheduled-test-adapter",
+                        "adapter_version": "v1",
+                        "parser_name": receipt_contract.PARSER_NAME,
+                        "parser_version": receipt_contract.PARSER_VERSION,
                         "approved_for_acquisition": True,
-                        "approved_for_raw_storage": True,
+                        "approved_for_retention": True,
                         "approved_for_replay": True,
                         "approved_for_canonical_publication": True,
                         "acquisition_routes": ["primary", "primary_replay"],
@@ -1084,8 +1141,9 @@ def _run(
     run_at: datetime = RUN_AT,
     sleeper: Any = lambda _seconds: None,
     max_attempts: int = 3,
+    overlap_calendar_days: int = 0,
 ) -> dict[str, Any]:
-    observation_receipts: dict[str, list[dict[str, Any]]] = {
+    provider_artifacts: dict[str, list[dict[str, Any]]] = {
         row["instrument_id"]: []
         for row in json.loads(fixture["universe"].read_text(encoding="utf-8"))[
             "instruments"
@@ -1108,64 +1166,42 @@ def _run(
             required = {"Date", "Open", "High", "Low", "Close", "Adj Close", "Volume"}
             if not isinstance(frame, pd.DataFrame) or not required.issubset(frame.columns):
                 return frame
-            bounded = frame[
-                (pd.to_datetime(frame["Date"]) >= pd.Timestamp(start))
-                & (pd.to_datetime(frame["Date"]) < pd.Timestamp(end))
-            ]
-            if bounded.empty:
+            raw_response = frame.attrs.get("adapter_raw_response")
+            if not isinstance(raw_response, bytes):
                 return frame
-            payload = json.dumps(
-                {
-                    "bars": [
-                        {
-                            "session_date": str(row["Date"]),
-                            "open": str(row["Open"]),
-                            "high": str(row["High"]),
-                            "low": str(row["Low"]),
-                            "close": str(row["Close"]),
-                            "adj_close": str(row["Adj Close"]),
-                            "volume": int(row["Volume"]),
-                        }
-                        for _, row in bounded.iterrows()
-                    ]
-                },
-                sort_keys=True,
-                separators=(",", ":"),
-            ).encode()
             try:
-                artifact = receipt_contract.preserve_raw_artifact(
-                    payload,
+                artifact = capture_provider_artifact(
+                    raw_response,
                     artifact_root=fixture["stage"],
-                    provider_id="approved-test-primary",
-                    content_type="application/json",
-                )
-                built = receipt_contract.build_observation_receipts(
-                    payload,
                     policy=policy,
                     provider_id="approved-test-primary",
-                    provider_symbol=symbol,
-                    acquisition_route="primary",
+                    adapter_id="scheduled-test-adapter",
+                    adapter_version="v1",
                     instrument_id=instrument["instrument_id"],
-                    ticker=instrument["symbol"],
+                    canonical_ticker=instrument["symbol"],
+                    provider_symbol=symbol,
                     exchange=instrument["exchange"],
                     currency=instrument["currency"],
-                    retrieved_at="2026-07-15T10:00:00Z",
+                    acquisition_route="primary",
+                    request_method_id="scheduled-test-daily-bars",
+                    request_parameters={"symbol": symbol, "start": start, "end": end},
                     request_start=start,
                     request_end_exclusive=end,
-                    raw_artifact_locator=artifact["raw_artifact_locator"],
-                    raw_artifact_sha256=artifact["raw_artifact_sha256"],
+                    timezone="America/New_York",
+                    pagination={"page": 1, "terminal": True},
+                    retrieved_at="2026-07-15T10:00:00Z",
                     response_status=200,
-                    content_type="application/json",
+                    response_content_type="application/json",
                 )
             except (ValueError, receipt_contract.ObservationReceiptError):
                 return frame
-            by_session = {
-                row["session_date"]: row
-                for row in observation_receipts[instrument["instrument_id"]]
+            by_digest = {
+                row["artifact_sha256"]: row
+                for row in provider_artifacts[instrument["instrument_id"]]
             }
-            by_session.update({row["session_date"]: row for row in built})
-            observation_receipts[instrument["instrument_id"]][:] = [
-                by_session[session] for session in sorted(by_session)
+            by_digest[artifact["artifact_sha256"]] = artifact
+            provider_artifacts[instrument["instrument_id"]][:] = [
+                by_digest[digest] for digest in sorted(by_digest)
             ]
             return frame
 
@@ -1181,9 +1217,10 @@ def _run(
         workflow_run_id="123",
         provider=selected_provider,
         max_attempts=max_attempts,
+        overlap_calendar_days=overlap_calendar_days,
         sleeper=sleeper,
         source_policy_path=fixture["policy"],
-        observation_receipts=observation_receipts,
+        provider_artifacts=provider_artifacts,
     )
 
 
@@ -1202,17 +1239,33 @@ def _frame(
     *,
     high: float | None = None,
 ) -> pd.DataFrame:
-    return pd.DataFrame(
-        [
+    raw_bars = [
             {
-                "Date": day,
-                "Adj Close": close,
-                "Close": close,
-                "High": close + 1 if high is None else high,
-                "Low": close - 1,
-                "Open": close - 0.5,
-                "Volume": 1000,
+                "session_date": day,
+                "adj_close": close,
+                "close": close,
+                "high": close + 1 if high is None else high,
+                "low": close - 1,
+                "open": close - 0.5,
+                "volume": 1000,
             }
             for day, close in rows
         ]
+    frame = pd.DataFrame(
+        [
+            {
+                "Date": row["session_date"],
+                "Adj Close": row["adj_close"],
+                "Close": row["close"],
+                "High": row["high"],
+                "Low": row["low"],
+                "Open": row["open"],
+                "Volume": row["volume"],
+            }
+            for row in raw_bars
+        ]
     )
+    frame.attrs["adapter_raw_response"] = json.dumps(
+        {"bars": raw_bars}, sort_keys=True, separators=(",", ":")
+    ).encode()
+    return frame

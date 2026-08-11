@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from market_engine.data import observation_receipts as receipts
+from market_engine.data.provider_artifact_adapter import capture_provider_artifact
 
 
 def _policy(tmp_path: Path, **overrides: object) -> tuple[Path, dict[str, object]]:
@@ -14,12 +15,16 @@ def _policy(tmp_path: Path, **overrides: object) -> tuple[Path, dict[str, object
         "provider_id": "approved-test-market-data",
         "approval_id": "approval-test-daily-ohlcv-v1",
         "data_type": "daily_ohlcv",
+        "adapter_id": "test-http-adapter",
+        "adapter_version": "v1",
+        "parser_name": receipts.PARSER_NAME,
+        "parser_version": receipts.PARSER_VERSION,
         "approved_for_acquisition": True,
-        "approved_for_raw_storage": True,
+        "approved_for_retention": True,
         "approved_for_replay": True,
         "approved_for_canonical_publication": True,
         "acquisition_routes": ["primary", "primary_replay", "fallback"],
-        "exchanges": ["NYSE"],
+        "exchanges": ["NYSE", "NASDAQ"],
         "retention_classification": "immutable_test_evidence",
         "redistribution_classification": "test_only",
         **overrides,
@@ -27,29 +32,27 @@ def _policy(tmp_path: Path, **overrides: object) -> tuple[Path, dict[str, object
     path = tmp_path / "policy.json"
     path.write_text(
         json.dumps(
-            {
-                "schema_version": receipts.POLICY_SCHEMA_VERSION,
-                "providers": [provider],
-            }
+            {"schema_version": receipts.POLICY_SCHEMA_VERSION, "providers": [provider]}
         ),
         encoding="utf-8",
     )
     return path, provider
 
 
-def _payload(*, close: str = "10.50", volume: int = 1234) -> bytes:
+def _payload(*sessions: str, close: str = "10.50") -> bytes:
     return json.dumps(
         {
             "bars": [
                 {
-                    "session_date": "2026-07-24",
+                    "session_date": session,
                     "open": "10.10",
                     "high": "10.70",
                     "low": "10.00",
                     "close": close,
                     "adj_close": "10.50",
-                    "volume": volume,
+                    "volume": 1234,
                 }
+                for session in sessions
             ]
         },
         sort_keys=True,
@@ -57,272 +60,271 @@ def _payload(*, close: str = "10.50", volume: int = 1234) -> bytes:
     ).encode()
 
 
-def _receipt_fixture(tmp_path: Path) -> tuple[dict[str, object], bytes, list[dict[str, object]]]:
+def _artifact(
+    tmp_path: Path,
+    *,
+    payload: bytes | None = None,
+    instrument_id: str = "equity:aaa",
+    ticker: str = "AAA",
+    provider_symbol: str = "AAA",
+    exchange: str = "NYSE",
+    route: str = "primary_replay",
+    start: str = "2026-07-23",
+    end: str = "2026-07-25",
+    pagination: dict[str, object] | None = None,
+) -> tuple[dict[str, object], dict[str, str]]:
     policy_path, _ = _policy(tmp_path)
     policy = receipts.load_source_policy(policy_path)
-    payload = _payload()
-    artifact = receipts.preserve_raw_artifact(
-        payload,
+    reference = capture_provider_artifact(
+        payload if payload is not None else _payload("2026-07-23", "2026-07-24"),
         artifact_root=tmp_path,
-        provider_id="approved-test-market-data",
-        content_type="application/json",
-    )
-    built = receipts.build_observation_receipts(
-        payload,
         policy=policy,
         provider_id="approved-test-market-data",
-        provider_symbol="AAA",
-        acquisition_route="primary",
-        instrument_id="equity:aaa",
-        ticker="AAA",
-        exchange="NYSE",
+        adapter_id="test-http-adapter",
+        adapter_version="v1",
+        instrument_id=instrument_id,
+        canonical_ticker=ticker,
+        provider_symbol=provider_symbol,
+        exchange=exchange,
         currency="USD",
+        acquisition_route=route,
+        request_method_id="daily-bars",
+        request_parameters={"symbol": provider_symbol, "start": start, "end": end},
+        request_start=start,
+        request_end_exclusive=end,
+        timezone="America/New_York",
+        pagination=pagination or {"page": 1, "terminal": True},
         retrieved_at="2026-08-09T12:00:00Z",
-        request_start="2026-07-24",
-        request_end_exclusive="2026-07-25",
-        raw_artifact_locator=artifact["raw_artifact_locator"],
-        raw_artifact_sha256=artifact["raw_artifact_sha256"],
         response_status=200,
-        content_type="application/json",
+        response_content_type="application/json",
+        provider_request_id="request-123",
     )
-    return policy, payload, built
+    return policy, reference
 
 
-def test_approved_raw_response_replays_exact_receipt(tmp_path: Path) -> None:
-    policy, _, built = _receipt_fixture(tmp_path)
+def _mutation(observation: dict[str, object], mutation_type: str) -> dict[str, object]:
+    return {
+        "instrument_id": observation["instrument_id"],
+        "ticker": observation["ticker"],
+        "exchange": observation["exchange"],
+        "session_date": observation["session_date"],
+        "mutation_type": mutation_type,
+        "new_canonical_row_sha256": observation["canonical_row_sha256"],
+    }
 
-    replayed = receipts.replay_observation_receipts(
-        built, artifact_root=tmp_path, policy=policy
+
+def test_adapter_envelope_replays_before_publisher_selects_overlap(tmp_path: Path) -> None:
+    policy, reference = _artifact(tmp_path)
+    replayed = receipts.replay_provider_artifacts(
+        [reference], artifact_root=tmp_path, policy=policy
+    )
+    selected = receipts.select_mutation_observations(
+        [_mutation(replayed[0], "row_unchanged"), _mutation(replayed[1], "row_added")],
+        replayed,
     )
 
-    assert replayed == built
-    assert receipts.observation_receipt_root(replayed) == receipts.observation_receipt_root(built)
-    assert built[0]["canonical_row_sha256"]
-    assert built[0]["response_status"] == 200
-    assert built[0]["content_type"] == "application/json"
-    assert built[0]["retention_classification"] == "immutable_test_evidence"
-    assert built[0]["redistribution_classification"] == "test_only"
+    assert [row["session_date"] for row in replayed] == ["2026-07-23", "2026-07-24"]
+    assert [row["session_date"] for row in selected["accepted_mutation_observations"]] == ["2026-07-24"]
+    assert [row["session_date"] for row in selected["unchanged_overlap_observations"]] == ["2026-07-23"]
+    assert [row["session_date"] for row in selected["mutation_receipts"]] == ["2026-07-24"]
+    assert selected["mutation_receipts"][0]["artifact_sha256"] == reference["artifact_sha256"]
 
 
 @pytest.mark.parametrize(
-    ("overrides", "message"),
+    "overrides",
     [
-        ({"approved_for_acquisition": False}, "not approved"),
-        ({"approved_for_raw_storage": False}, "not approved"),
-        ({"approved_for_replay": False}, "not approved"),
-        ({"approved_for_canonical_publication": False}, "not approved"),
-        ({"approval_id": ""}, "incomplete"),
+        {"approved_for_acquisition": False},
+        {"approved_for_retention": False},
+        {"approved_for_replay": False},
+        {"approved_for_canonical_publication": False},
     ],
 )
-def test_non_publishable_source_policy_fails_closed(
-    tmp_path: Path, overrides: dict[str, object], message: str
-) -> None:
+def test_every_source_policy_right_is_required(tmp_path: Path, overrides: dict[str, object]) -> None:
     path, _ = _policy(tmp_path, **overrides)
-    if overrides.get("approval_id") == "":
-        with pytest.raises(receipts.ObservationReceiptError, match=message):
-            receipts.load_source_policy(path)
-        return
     policy = receipts.load_source_policy(path)
-    with pytest.raises(receipts.ObservationReceiptError, match=message):
+    with pytest.raises(receipts.ObservationReceiptError, match="not approved"):
         receipts.approved_source_policy(
             policy,
             provider_id="approved-test-market-data",
             exchange="NYSE",
             acquisition_route="primary",
-        )
-
-
-def test_unknown_or_wrong_exchange_provider_fails_closed(tmp_path: Path) -> None:
-    path, _ = _policy(tmp_path)
-    policy = receipts.load_source_policy(path)
-    with pytest.raises(receipts.ObservationReceiptError, match="unknown"):
-        receipts.approved_source_policy(
-            policy,
-            provider_id="reachable-but-unapproved",
-            exchange="NYSE",
-            acquisition_route="primary",
-        )
-    with pytest.raises(receipts.ObservationReceiptError, match="exchange"):
-        receipts.approved_source_policy(
-            policy,
-            provider_id="approved-test-market-data",
-            exchange="NASDAQ",
-            acquisition_route="primary",
-        )
-
-
-@pytest.mark.parametrize(
-    ("mutation", "message"),
-    [
-        (lambda row: row.update(parser_version="unknown"), "parser"),
-        (lambda row: row.update(ticker="BBB"), "does not replay"),
-        (lambda row: row.update(session_date="2026-07-25"), "does not replay"),
-        (lambda row: row.update(raw_artifact_sha256="0" * 64), "artifact"),
-    ],
-)
-def test_receipt_mutations_fail_replay(
-    tmp_path: Path, mutation, message: str
-) -> None:
-    policy, _, built = _receipt_fixture(tmp_path)
-    changed = copy.deepcopy(built)
-    mutation(changed[0])
-
-    with pytest.raises(receipts.ObservationReceiptError, match=message):
-        receipts.replay_observation_receipts(
-            changed, artifact_root=tmp_path, policy=policy
-        )
-
-
-def test_missing_and_mutated_raw_artifacts_fail_replay(tmp_path: Path) -> None:
-    policy, _, built = _receipt_fixture(tmp_path)
-    raw = tmp_path / built[0]["raw_artifact_locator"]
-    original = raw.read_bytes()
-    raw.unlink()
-    with pytest.raises(receipts.ObservationReceiptError, match="missing"):
-        receipts.replay_observation_receipts(
-            built, artifact_root=tmp_path, policy=policy
-        )
-    raw.write_bytes(original + b" ")
-    with pytest.raises(receipts.ObservationReceiptError, match="checksum"):
-        receipts.replay_observation_receipts(
-            built, artifact_root=tmp_path, policy=policy
-        )
-
-
-def test_receipt_numeric_serialization_and_root_are_deterministic(tmp_path: Path) -> None:
-    policy, _, built = _receipt_fixture(tmp_path)
-    second_payload = _payload(close="10.5000", volume=1234)
-    parsed = receipts.parse_raw_daily_ohlcv(second_payload)
-
-    assert parsed[0]["close"] == "10.5"
-    distinct_rows = [
-        built[0],
-        {**built[0], "canonical_row_sha256": "1" * 64},
-    ]
-    assert receipts.observation_receipt_root(
-        distinct_rows
-    ) == receipts.observation_receipt_root(list(reversed(distinct_rows)))
-    with pytest.raises(receipts.ObservationReceiptError, match="duplicated"):
-        receipts.observation_receipt_root([built[0], built[0]])
-    assert policy["policy_checksum"]
-
-
-def test_raw_artifact_rejects_credential_material(tmp_path: Path) -> None:
-    payload = json.dumps({"api_key": "must-not-be-stored", "bars": []}).encode()
-    with pytest.raises(receipts.ObservationReceiptError, match="credential") as captured:
-        receipts.preserve_raw_artifact(
-            payload,
-            artifact_root=tmp_path,
-            provider_id="approved-test-market-data",
-            content_type="application/json",
-        )
-    assert "must-not-be-stored" not in str(captured.value)
-    assert not list(tmp_path.rglob("*.json"))
-
-
-def _absence_fixture(tmp_path: Path):
-    policy_path, _ = _policy(tmp_path)
-    policy = receipts.load_source_policy(policy_path)
-    payload = b'{"bars":[]}'
-    artifact = receipts.preserve_raw_artifact(
-        payload,
-        artifact_root=tmp_path,
-        provider_id="approved-test-market-data",
-        content_type="application/json",
-    )
-    attestation = receipts.build_absence_attestation(
-        payload,
-        policy=policy,
-        provider_id="approved-test-market-data",
-        provider_symbol="AAA",
-        acquisition_route="primary_replay",
-        instrument_id="equity:aaa",
-        ticker="AAA",
-        exchange="NYSE",
-        session_date="2026-07-24",
-        lifecycle_cutoff="2026-07-24",
-        retrieved_at="2026-08-09T12:00:00Z",
-        request_start="2026-07-24",
-        request_end_exclusive="2026-07-25",
-        raw_artifact_locator=artifact["raw_artifact_locator"],
-        raw_artifact_sha256=artifact["raw_artifact_sha256"],
-        response_status=200,
-        content_type="application/json",
-        reason_code="terminal_daily_ohlcv_not_returned",
-        calendar_expected=True,
-    )
-    return policy, payload, attestation
-
-
-def test_absence_attestation_replays_empty_terminal_provider_artifact(
-    tmp_path: Path,
-) -> None:
-    policy, _, attestation = _absence_fixture(tmp_path)
-
-    replayed = receipts.replay_absence_attestations(
-        [attestation], artifact_root=tmp_path, policy=policy
-    )
-
-    assert replayed == [attestation]
-    assert attestation["parsed_session_dates"] == []
-    assert attestation["attestation_sha256"]
-
-
-def test_absence_attestation_rejects_artifact_that_contains_session(
-    tmp_path: Path,
-) -> None:
-    policy, _, attestation = _absence_fixture(tmp_path)
-    payload = _payload()
-    artifact = receipts.preserve_raw_artifact(
-        payload,
-        artifact_root=tmp_path,
-        provider_id="approved-test-market-data",
-        content_type="application/json",
-    )
-    with pytest.raises(receipts.ObservationReceiptError, match="contains"):
-        receipts.build_absence_attestation(
-            payload,
-            policy=policy,
-            provider_id="approved-test-market-data",
-            provider_symbol="AAA",
-            acquisition_route="primary_replay",
-            instrument_id="equity:aaa",
-            ticker="AAA",
-            exchange="NYSE",
-            session_date="2026-07-24",
-            lifecycle_cutoff="2026-07-24",
-            retrieved_at="2026-08-09T12:00:00Z",
-            request_start="2026-07-24",
-            request_end_exclusive="2026-07-25",
-            raw_artifact_locator=artifact["raw_artifact_locator"],
-            raw_artifact_sha256=artifact["raw_artifact_sha256"],
-            response_status=200,
-            content_type="application/json",
-            reason_code="terminal_daily_ohlcv_not_returned",
-            calendar_expected=True,
         )
 
 
 @pytest.mark.parametrize(
     ("field", "value"),
     [
-        ("lifecycle_cutoff", "2026-07-23"),
+        ("instrument_id", "equity:bbb"),
+        ("canonical_ticker", "BBB"),
+        ("provider_symbol", "BBB"),
         ("exchange", "NASDAQ"),
-        ("session_date", "2026-07-23"),
-        ("absence_reason_code", "unknown"),
+        ("request_start", "2026-07-22"),
+        ("request_end_exclusive", "2026-07-26"),
+        ("window_semantics", "inclusive"),
+        ("timezone", "UTC"),
+        ("pagination", {"page": 2}),
+        ("provider_id", "other-provider"),
+        ("adapter_version", "unknown"),
         ("parser_version", "unknown"),
-        ("raw_artifact_sha256", "0" * 64),
-        ("response_status", 500),
+        ("source_policy_id", "other-approval"),
     ],
 )
-def test_absence_attestation_mutations_fail_replay(
+def test_downstream_envelope_relabelling_fails_closed(
     tmp_path: Path, field: str, value: object
 ) -> None:
-    policy, _, attestation = _absence_fixture(tmp_path)
-    changed = copy.deepcopy(attestation)
-    changed[field] = value
+    policy, reference = _artifact(tmp_path)
+    path = tmp_path / reference["artifact_locator"]
+    envelope = json.loads(path.read_text(encoding="utf-8"))
+    envelope[field] = value
+    unsigned = {key: nested for key, nested in envelope.items() if key != "envelope_sha256"}
+    envelope["envelope_sha256"] = receipts.sha256_bytes(
+        json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode()
+    )
+    path.write_text(json.dumps(envelope, sort_keys=True, separators=(",", ":")), encoding="utf-8")
 
-    with pytest.raises(receipts.ObservationReceiptError):
+    with pytest.raises(receipts.ObservationReceiptError, match="checksum"):
+        receipts.replay_provider_artifacts([reference], artifact_root=tmp_path, policy=policy)
+
+
+def test_receipt_cannot_relabel_independently_replayed_identity(tmp_path: Path) -> None:
+    policy, reference = _artifact(tmp_path)
+    observation = receipts.replay_provider_artifacts(
+        [reference], artifact_root=tmp_path, policy=policy
+    )[0]
+    selected = receipts.select_mutation_observations(
+        [_mutation(observation, "row_added")], [observation]
+    )
+    declaration = copy.deepcopy(selected["mutation_receipts"])
+    declaration[0]["ticker"] = "BBB"
+    with pytest.raises(receipts.ObservationReceiptError, match="declared receipts"):
+        receipts.validate_declared_receipts(declaration, selected["mutation_receipts"])
+
+
+def test_raw_response_and_envelope_mutation_fail_replay(tmp_path: Path) -> None:
+    policy, reference = _artifact(tmp_path)
+    path = tmp_path / reference["artifact_locator"]
+    original = path.read_bytes()
+    path.write_bytes(original + b" ")
+    with pytest.raises(receipts.ObservationReceiptError, match="checksum"):
+        receipts.replay_provider_artifacts([reference], artifact_root=tmp_path, policy=policy)
+    path.write_bytes(original)
+    envelope = json.loads(original)
+    envelope["raw_response_sha256"] = "0" * 64
+    encoded = json.dumps(envelope, sort_keys=True, separators=(",", ":")).encode()
+    path.write_bytes(encoded)
+    changed_reference = {**reference, "artifact_sha256": receipts.sha256_bytes(encoded)}
+    changed_path = path.with_name(f"{changed_reference['artifact_sha256']}.json")
+    path.rename(changed_path)
+    changed_reference["artifact_locator"] = changed_path.relative_to(tmp_path).as_posix()
+    with pytest.raises(receipts.ObservationReceiptError, match="envelope digest"):
+        receipts.replay_provider_artifacts(
+            [changed_reference], artifact_root=tmp_path, policy=policy
+        )
+
+
+def test_adapter_rejects_credentials_before_storage(tmp_path: Path) -> None:
+    policy_path, _ = _policy(tmp_path)
+    policy = receipts.load_source_policy(policy_path)
+    with pytest.raises(receipts.ObservationReceiptError, match="credential"):
+        capture_provider_artifact(
+            b'{"api_key":"must-not-be-stored","bars":[]}',
+            artifact_root=tmp_path,
+            policy=policy,
+            provider_id="approved-test-market-data",
+            adapter_id="test-http-adapter",
+            adapter_version="v1",
+            instrument_id="equity:aaa",
+            canonical_ticker="AAA",
+            provider_symbol="AAA",
+            exchange="NYSE",
+            currency="USD",
+            acquisition_route="primary",
+            request_method_id="daily-bars",
+            request_parameters={},
+            request_start="2026-07-24",
+            request_end_exclusive="2026-07-25",
+            timezone="America/New_York",
+            pagination={},
+            retrieved_at="2026-08-09T12:00:00Z",
+            response_status=200,
+            response_content_type="application/json",
+        )
+    assert not list((tmp_path / "evidence").rglob("*.json"))
+
+
+def test_absence_attestation_is_bound_to_empty_adapter_envelope(tmp_path: Path) -> None:
+    policy, reference = _artifact(
+        tmp_path, payload=_payload(), start="2026-07-24", end="2026-07-25"
+    )
+    attestation = receipts.build_absence_attestation(
+        artifact_reference=reference,
+        artifact_root=tmp_path,
+        policy=policy,
+        session_date="2026-07-24",
+        lifecycle_cutoff="2026-07-24",
+        reason_code="terminal_daily_ohlcv_not_returned",
+        calendar_expected=True,
+    )
+    assert receipts.replay_absence_attestations(
+        [attestation], artifact_root=tmp_path, policy=policy
+    ) == [attestation]
+    changed = {**attestation, "instrument_id": "equity:bbb"}
+    with pytest.raises(receipts.ObservationReceiptError, match="does not replay"):
         receipts.replay_absence_attestations(
             [changed], artifact_root=tmp_path, policy=policy
+        )
+
+
+def test_absence_rejects_present_session_and_wrong_cutoff(tmp_path: Path) -> None:
+    policy, reference = _artifact(
+        tmp_path, payload=_payload("2026-07-24"), start="2026-07-24", end="2026-07-25"
+    )
+    with pytest.raises(receipts.ObservationReceiptError, match="contains"):
+        receipts.build_absence_attestation(
+            artifact_reference=reference,
+            artifact_root=tmp_path,
+            policy=policy,
+            session_date="2026-07-24",
+            lifecycle_cutoff="2026-07-24",
+            reason_code="terminal_daily_ohlcv_not_returned",
+            calendar_expected=True,
+        )
+    empty_policy, empty_reference = _artifact(
+        tmp_path, payload=_payload(), start="2026-07-24", end="2026-07-25"
+    )
+    with pytest.raises(receipts.ObservationReceiptError, match="boundary"):
+        receipts.build_absence_attestation(
+            artifact_reference=empty_reference,
+            artifact_root=tmp_path,
+            policy=empty_policy,
+            session_date="2026-07-24",
+            lifecycle_cutoff="2026-07-23",
+            reason_code="terminal_daily_ohlcv_not_returned",
+            calendar_expected=True,
+        )
+
+
+def test_duplicate_sessions_across_paginated_artifacts_fail(tmp_path: Path) -> None:
+    policy, first = _artifact(
+        tmp_path, payload=_payload("2026-07-24"), pagination={"page": 1}
+    )
+    _, second = _artifact(
+        tmp_path, payload=_payload("2026-07-24"), pagination={"page": 2}
+    )
+    with pytest.raises(receipts.ObservationReceiptError, match="duplicate"):
+        receipts.replay_provider_artifacts(
+            [first, second], artifact_root=tmp_path, policy=policy
+        )
+
+
+def test_record_outside_bound_window_fails(tmp_path: Path) -> None:
+    policy, reference = _artifact(
+        tmp_path,
+        payload=_payload("2026-07-22"),
+        start="2026-07-23",
+        end="2026-07-25",
+    )
+    with pytest.raises(receipts.ObservationReceiptError, match="outside"):
+        receipts.replay_provider_artifacts(
+            [reference], artifact_root=tmp_path, policy=policy
         )

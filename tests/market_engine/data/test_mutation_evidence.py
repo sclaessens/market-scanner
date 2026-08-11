@@ -8,6 +8,7 @@ from market_engine.data.mutation_evidence import (
     MutationEvidenceError,
     derive_canonical_mutations,
     derive_session_resolution,
+    mutation_evidence_diagnostics,
     mutation_root,
     reconcile_mutation_evidence,
 )
@@ -114,6 +115,57 @@ def test_modified_and_deleted_rows_block_while_unchanged_requires_no_receipt(
     deleted = _mutations(tmp_path, [row], [])
     with pytest.raises(MutationEvidenceError, match="deletion"):
         reconcile_mutation_evidence(deleted, [])
+
+
+def test_failed_reconciliation_retains_exact_mutation_diagnostics(tmp_path: Path) -> None:
+    baseline = [
+        ("2026-07-22", "10", "11", "9", "10", "10", "100"),
+        ("2026-07-23", "20", "21", "19", "20", "20", "200"),
+    ]
+    staged = [
+        ("2026-07-22", "10", "11", "9", "10.5", "10", "101"),
+        ("2026-07-23", "20", "21", "19", "20.5", "20", "200"),
+        ("2026-07-24", "30", "31", "29", "30", "30", "300"),
+    ]
+    mutations = _mutations(tmp_path, baseline, staged)
+    diagnostics = mutation_evidence_diagnostics(
+        mutations,
+        [],
+        artifact_replay_failures=["ObservationReceiptError: artifact is missing"],
+    )
+
+    assert diagnostics["status"] == "invalid"
+    assert diagnostics["modified_instrument_count"] == 1
+    assert diagnostics["modified_row_count"] == 2
+    assert diagnostics["added_row_count"] == 1
+    assert diagnostics["mutations_without_receipt_count"] == 3
+    assert diagnostics["artifact_replay_failure_count"] == 1
+    assert [row["session_date"] for row in diagnostics["diagnostic_rows"]] == [
+        "2026-07-22", "2026-07-23", "2026-07-24"
+    ]
+    assert diagnostics["diagnostic_rows"][0]["field_diff"] == {
+        "Close": {"previous": "10", "current": "10.5"},
+        "Volume": {"previous": "100", "current": "101"},
+    }
+    assert diagnostics["diagnostic_rows"][0]["previous_values"]["Close"] == "10"
+    assert diagnostics["diagnostic_rows"][0]["new_values"]["Close"] == "10.5"
+    assert diagnostics["diagnostic_rows"][0]["previous_canonical_row_sha256"]
+    assert diagnostics["diagnostic_rows"][0]["new_canonical_row_sha256"]
+
+
+def test_mutation_diagnostics_are_input_order_independent(tmp_path: Path) -> None:
+    mutations = _mutations(
+        tmp_path,
+        [],
+        [
+            ("2026-07-24", "11", "12", "10", "11", "11", "200"),
+            ("2026-07-25", "12", "13", "11", "12", "12", "300"),
+        ],
+    )
+    receipts = [_receipt(row) for row in mutations]
+    assert mutation_evidence_diagnostics(mutations, receipts) == mutation_evidence_diagnostics(
+        list(reversed(mutations)), list(reversed(receipts))
+    )
 
 
 def test_row_order_does_not_change_mutations_or_root(tmp_path: Path) -> None:

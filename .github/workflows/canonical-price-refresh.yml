@@ -121,7 +121,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: canonical-price-freshness-${{ steps.identity.outputs.run-id }}
-          path: ${{ steps.identity.outputs.report }}
+          path: ${{ runner.temp }}/freshness/
           if-no-files-found: error
           retention-days: 30
 

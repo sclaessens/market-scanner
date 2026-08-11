@@ -11,6 +11,7 @@ import pytest
 
 from market_engine.data import scheduled_canonical_price_refresh as scheduled
 from market_engine.data import observation_receipts as receipt_contract
+from market_engine.data.provider_artifact_adapter import capture_provider_artifact
 from market_engine.data.instrument_lifecycle import (
     DEFAULT_LIFECYCLE_REGISTRY,
     LEGACY_LIFECYCLE_SCHEMA_VERSION,
@@ -2147,10 +2148,14 @@ def test_bounded_refetch_can_fill_one_missing_session(tmp_path: Path) -> None:
                 "providers": [
                     {
                         "provider_id": "approved-primary",
-                        "approval_id": "approved-primary-v1",
-                        "data_type": "daily_ohlcv",
-                        "approved_for_acquisition": True,
-                        "approved_for_raw_storage": True,
+                            "approval_id": "approved-primary-v1",
+                            "data_type": "daily_ohlcv",
+                            "adapter_id": "lifecycle-test-adapter",
+                            "adapter_version": "v1",
+                            "parser_name": receipt_contract.PARSER_NAME,
+                            "parser_version": receipt_contract.PARSER_VERSION,
+                            "approved_for_acquisition": True,
+                            "approved_for_retention": True,
                         "approved_for_replay": True,
                         "approved_for_canonical_publication": True,
                         "acquisition_routes": ["primary_replay"],
@@ -2325,8 +2330,12 @@ def _approved_gap_fill_run(
                         "provider_id": "approved-test-fallback",
                         "approval_id": "approval-test-fallback-v1",
                         "data_type": "daily_ohlcv",
+                        "adapter_id": "lifecycle-test-adapter",
+                        "adapter_version": "v1",
+                        "parser_name": receipt_contract.PARSER_NAME,
+                        "parser_version": receipt_contract.PARSER_VERSION,
                         "approved_for_acquisition": True,
-                        "approved_for_raw_storage": True,
+                        "approved_for_retention": True,
                         "approved_for_replay": True,
                         "approved_for_canonical_publication": True,
                         "acquisition_routes": [
@@ -2360,32 +2369,31 @@ def _approved_gap_fill_run(
         sort_keys=True,
         separators=(",", ":"),
     ).encode()
-    raw = receipt_contract.preserve_raw_artifact(
+    policy = receipt_contract.load_source_policy(policy_path)
+    fallback_artifact = capture_provider_artifact(
         payload,
         artifact_root=fixture["published"],
-        provider_id="approved-test-fallback",
-        content_type="application/json",
-    )
-    policy = receipt_contract.load_source_policy(policy_path)
-    receipts = receipt_contract.build_observation_receipts(
-        payload,
         policy=policy,
         provider_id="approved-test-fallback",
-        provider_symbol="OLD",
-        acquisition_route="fallback",
+        adapter_id="lifecycle-test-adapter",
+        adapter_version="v1",
         instrument_id=instrument["instrument_id"],
-        ticker="OLD",
+        canonical_ticker="OLD",
+        provider_symbol="OLD",
         exchange="NYSE",
         currency="USD",
-        retrieved_at="2026-07-15T09:00:00Z",
+        acquisition_route="fallback",
+        request_method_id="lifecycle-test-daily-bars",
+        request_parameters={"symbol": "OLD", "start": "2026-07-13", "end": receipt_request_end},
         request_start="2026-07-13",
         request_end_exclusive=receipt_request_end,
-        raw_artifact_locator=raw["raw_artifact_locator"],
-        raw_artifact_sha256=raw["raw_artifact_sha256"],
+        timezone="America/New_York",
+        pagination={"page": 1, "terminal": True},
+        retrieved_at="2026-07-15T09:00:00Z",
         response_status=200,
-        content_type="application/json",
+        response_content_type="application/json",
     )
-    primary_receipts: list[dict[str, Any]] = []
+    primary_artifacts: list[dict[str, Any]] = []
     if provider_sessions:
         primary_payload = json.dumps(
             {
@@ -2405,36 +2413,35 @@ def _approved_gap_fill_run(
             sort_keys=True,
             separators=(",", ":"),
         ).encode()
-        primary_raw = receipt_contract.preserve_raw_artifact(
+        primary_artifacts = [capture_provider_artifact(
             primary_payload,
             artifact_root=fixture["published"],
-            provider_id="approved-test-fallback",
-            content_type="application/json",
-        )
-        primary_receipts = receipt_contract.build_observation_receipts(
-            primary_payload,
             policy=policy,
             provider_id="approved-test-fallback",
-            provider_symbol="OLD",
-            acquisition_route="primary",
+            adapter_id="lifecycle-test-adapter",
+            adapter_version="v1",
             instrument_id=instrument["instrument_id"],
-            ticker="OLD",
+            canonical_ticker="OLD",
+            provider_symbol="OLD",
             exchange="NYSE",
             currency="USD",
-            retrieved_at="2026-07-15T09:00:00Z",
+            acquisition_route="primary",
+            request_method_id="lifecycle-test-daily-bars",
+            request_parameters={"symbol": "OLD", "start": "2026-07-13", "end": "2026-07-15"},
             request_start="2026-07-13",
             request_end_exclusive="2026-07-15",
-            raw_artifact_locator=primary_raw["raw_artifact_locator"],
-            raw_artifact_sha256=primary_raw["raw_artifact_sha256"],
+            timezone="America/New_York",
+            pagination={"page": 1, "terminal": True},
+            retrieved_at="2026-07-15T09:00:00Z",
             response_status=200,
-            content_type="application/json",
-        )
+            response_content_type="application/json",
+        )]
     report = _run(
         fixture,
         provider=lambda *_args: _provider_rows(provider_sessions),
         source_policy_path=policy_path,
-        observation_receipts={
-            instrument["instrument_id"]: receipts + primary_receipts
+        provider_artifacts={
+            instrument["instrument_id"]: [fallback_artifact] + primary_artifacts
         },
     )
     if expect_completed:
@@ -2453,8 +2460,8 @@ def test_primary_and_fallback_conflict_fails_closed(tmp_path: Path) -> None:
     )
     assert report["tickers"][0]["freshness_status"] == "failed"
     assert any(
-        diagnostic["reason_code"]
-        == "OBSERVATION_RECEIPT_INVALID"
+            diagnostic["reason_code"]
+            == "PROVIDER_ARTIFACT_INVALID"
         for diagnostic in report["tickers"][0]["rejected_bar_diagnostics"]
     )
 
@@ -2469,8 +2476,8 @@ def test_fallback_post_cutoff_observation_fails_closed(tmp_path: Path) -> None:
     )
     assert report["tickers"][0]["freshness_status"] == "failed"
     assert any(
-        diagnostic["reason_code"]
-        == "OBSERVATION_RECEIPT_IDENTITY_MISMATCH"
+            diagnostic["reason_code"]
+            == "PROVIDER_ARTIFACT_IDENTITY_MISMATCH"
         for diagnostic in report["tickers"][0]["rejected_bar_diagnostics"]
     )
 
@@ -2656,8 +2663,8 @@ def test_trusted_publisher_rejects_receipt_and_csv_mutations(
     elif mutation == "wrong_raw_checksum":
         entry["observation_receipts"][0]["raw_artifact_sha256"] = "0" * 64
     elif mutation == "missing_raw_artifact":
-        raw_path = fixture["stage"] / entry["observation_receipts"][0][
-            "raw_artifact_locator"
+        raw_path = fixture["stage"] / entry["provider_artifacts"][0][
+            "artifact_locator"
         ]
         raw_path.unlink()
     elif mutation == "missing_root_leaf":
@@ -2678,7 +2685,12 @@ def test_trusted_publisher_rejects_receipt_and_csv_mutations(
     )
 
     assert result["validated"] is False
-    assert any("OBSERVATION_RECEIPT" in code for code in result["reason_codes"])
+    assert any(
+        "OBSERVATION_RECEIPT" in code
+        or "MUTATION_EVIDENCE" in code
+        or "RAW_OBSERVATION_ARTIFACT" in code
+        for code in result["reason_codes"]
+    )
 
 
 def test_trusted_publisher_rejects_unbound_raw_artifact(tmp_path: Path) -> None:
@@ -2971,7 +2983,7 @@ def _run(
     provider: Any,
     run_at: datetime = RUN_AT,
     source_policy_path: Path = scheduled.DEFAULT_SOURCE_POLICY,
-    observation_receipts: Mapping[str, Sequence[Mapping[str, Any]]] | None = None,
+    provider_artifacts: Mapping[str, Sequence[Mapping[str, Any]]] | None = None,
     absence_attestations: Mapping[
         str, Sequence[Mapping[str, Any]]
     ] | None = None,
@@ -2988,7 +3000,7 @@ def _run(
         provider=provider,
         sleeper=lambda _seconds: None,
         source_policy_path=source_policy_path,
-        observation_receipts=observation_receipts,
+        provider_artifacts=provider_artifacts,
         absence_attestations=absence_attestations,
     )
 

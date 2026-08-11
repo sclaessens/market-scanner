@@ -10,7 +10,7 @@ from typing import Any, Mapping, Sequence
 from market_engine.data.observation_receipts import canonical_row_sha256
 
 
-MUTATION_SCHEMA_VERSION = "market-engine-canonical-mutation-ledger-v1"
+MUTATION_SCHEMA_VERSION = "market-engine-canonical-mutation-ledger-v2"
 SESSION_LEDGER_SCHEMA_VERSION = "market-engine-session-resolution-ledger-v1"
 MUTATION_TYPES = frozenset(
     {"row_added", "row_modified", "row_deleted", "row_unchanged"}
@@ -85,66 +85,198 @@ def derive_canonical_mutations(
                 "previous_canonical_row_sha256": previous_digest,
                 "new_canonical_row_sha256": current_digest,
                 "field_diff": field_diff,
+                "previous_values": _diagnostic_values(previous),
+                "new_values": _diagnostic_values(current),
             }
         )
     return mutations
+
+
+def mutation_evidence_diagnostics(
+    mutations: Sequence[Mapping[str, Any]],
+    receipts: Sequence[Mapping[str, Any]],
+    *,
+    artifact_replay_failures: Sequence[str] = (),
+) -> dict[str, Any]:
+    """Return deterministic reconciliation diagnostics without discarding mutations."""
+    mutation_rows = sorted(
+        [dict(row) for row in mutations],
+        key=lambda row: (
+            str(row.get("instrument_id")),
+            str(row.get("session_date")),
+            str(row.get("mutation_type")),
+        ),
+    )
+    receipt_rows = sorted(
+        [dict(row) for row in receipts],
+        key=lambda row: (
+            str(row.get("instrument_id")), str(row.get("session_date"))
+        ),
+    )
+    required_rows = [
+        row
+        for row in mutation_rows
+        if row.get("mutation_type") in {"row_added", "row_modified"}
+    ]
+    required = {
+        (str(row.get("instrument_id")), str(row.get("session_date"))): row
+        for row in required_rows
+    }
+    provided = {
+        (str(row.get("instrument_id")), str(row.get("session_date"))): row
+        for row in receipt_rows
+    }
+    duplicate_mutation_count = len(required_rows) - len(required)
+    duplicate_receipt_count = len(receipt_rows) - len(provided)
+    missing = sorted(set(required) - set(provided))
+    excess = sorted(set(provided) - set(required))
+    identity_mismatches: list[tuple[str, str]] = []
+    digest_mismatches: list[tuple[str, str]] = []
+    for identity in sorted(set(required).intersection(provided)):
+        mutation = required[identity]
+        receipt = provided[identity]
+        if (
+            mutation.get("ticker") != receipt.get("ticker")
+            or mutation.get("exchange") != receipt.get("exchange")
+        ):
+            identity_mismatches.append(identity)
+        if mutation.get("new_canonical_row_sha256") != receipt.get(
+            "canonical_row_sha256"
+        ):
+            digest_mismatches.append(identity)
+    correction_blockers = [
+        row
+        for row in mutation_rows
+        if row.get("mutation_type") in {"row_modified", "row_deleted"}
+    ]
+    failures = sorted(str(value) for value in artifact_replay_failures)
+    diagnostic_rows: list[dict[str, Any]] = []
+    for mutation in mutation_rows:
+        identity = (
+            str(mutation.get("instrument_id")),
+            str(mutation.get("session_date")),
+        )
+        mutation_type = str(mutation.get("mutation_type"))
+        reason = None
+        blocker = None
+        receipt_status = "not_required"
+        if mutation_type in {"row_added", "row_modified"}:
+            receipt_status = "missing" if identity in missing else "present"
+        if identity in identity_mismatches:
+            receipt_status = "identity_mismatch"
+            reason = "receipt_identity_mismatch"
+            blocker = "MUTATION_EVIDENCE_IDENTITY_MISMATCH"
+        elif identity in digest_mismatches:
+            receipt_status = "canonical_digest_mismatch"
+            reason = "receipt_canonical_digest_mismatch"
+            blocker = "MUTATION_EVIDENCE_DIGEST_MISMATCH"
+        elif identity in missing:
+            reason = "mutation_without_receipt"
+            blocker = "MUTATION_EVIDENCE_MISSING"
+        if mutation_type == "row_modified":
+            reason = reason or "correction_contract_not_available"
+            blocker = blocker or "HISTORICAL_MODIFICATION_UNAPPROVED"
+        elif mutation_type == "row_deleted":
+            reason = "canonical_deletion_not_supported"
+            blocker = "CANONICAL_DELETION_UNSUPPORTED"
+        diagnostic_rows.append(
+            {
+                **mutation,
+                "receipt_status": receipt_status,
+                "artifact_status": "replay_failed" if failures else "replayed",
+                "evidence_failure_reason": reason,
+                "correction_policy_status": (
+                    "not_available"
+                    if mutation_type in {"row_modified", "row_deleted"}
+                    else "not_required"
+                ),
+                "publication_blocker_code": blocker,
+            }
+        )
+    modified_instruments = {
+        str(row.get("instrument_id"))
+        for row in mutation_rows
+        if row.get("mutation_type") == "row_modified"
+    }
+    valid = not any(
+        (
+            duplicate_mutation_count,
+            duplicate_receipt_count,
+            missing,
+            excess,
+            identity_mismatches,
+            digest_mismatches,
+            correction_blockers,
+            failures,
+        )
+    )
+    return {
+        "schema_version": MUTATION_SCHEMA_VERSION,
+        "status": "valid" if valid else "invalid",
+        "affected_instrument_count": len(
+            {
+                str(row.get("instrument_id"))
+                for row in mutation_rows
+                if row.get("mutation_type") != "row_unchanged"
+            }
+        ),
+        "added_row_count": sum(row.get("mutation_type") == "row_added" for row in mutation_rows),
+        "modified_instrument_count": len(modified_instruments),
+        "modified_row_count": sum(row.get("mutation_type") == "row_modified" for row in mutation_rows),
+        "deleted_row_count": sum(row.get("mutation_type") == "row_deleted" for row in mutation_rows),
+        "unchanged_overlap_row_count": sum(row.get("mutation_type") == "row_unchanged" for row in mutation_rows),
+        "mutations_without_receipt_count": len(missing),
+        "receipts_without_mutation_count": len(excess),
+        "artifact_replay_failure_count": len(failures),
+        "identity_mismatch_count": len(identity_mismatches),
+        "canonical_digest_mismatch_count": len(digest_mismatches),
+        "correction_contract_blocker_count": len(correction_blockers),
+        "duplicate_mutation_count": duplicate_mutation_count,
+        "duplicate_receipt_count": duplicate_receipt_count,
+        "artifact_replay_failures": failures,
+        "mutations_without_receipt": [list(value) for value in missing],
+        "receipts_without_mutation": [list(value) for value in excess],
+        "identity_mismatches": [list(value) for value in identity_mismatches],
+        "canonical_digest_mismatches": [list(value) for value in digest_mismatches],
+        "diagnostic_rows": diagnostic_rows,
+        "mutation_root": mutation_root(mutation_rows, receipt_rows),
+    }
 
 
 def reconcile_mutation_evidence(
     mutations: Sequence[Mapping[str, Any]],
     receipts: Sequence[Mapping[str, Any]],
 ) -> dict[str, Any]:
-    deleted = [row for row in mutations if row.get("mutation_type") == "row_deleted"]
-    modified = [row for row in mutations if row.get("mutation_type") == "row_modified"]
-    if deleted:
+    diagnostics = mutation_evidence_diagnostics(mutations, receipts)
+    if diagnostics["deleted_row_count"]:
         raise MutationEvidenceError("canonical row deletion is not supported")
-    if modified:
+    if diagnostics["modified_row_count"]:
         raise MutationEvidenceError(
             "canonical historical modification requires an unsupported correction contract"
         )
-    required = {
-        (str(row.get("instrument_id")), str(row.get("session_date"))): row
-        for row in mutations
-        if row.get("mutation_type") in {"row_added", "row_modified"}
-    }
-    if len(required) != sum(
-        row.get("mutation_type") in {"row_added", "row_modified"}
-        for row in mutations
-    ):
+    if diagnostics["duplicate_mutation_count"]:
         raise MutationEvidenceError("mutation ledger contains duplicate sessions")
-    provided: dict[tuple[str, str], Mapping[str, Any]] = {}
-    for receipt in receipts:
-        identity = (
-            str(receipt.get("instrument_id")),
-            str(receipt.get("session_date")),
-        )
-        if identity in provided:
-            raise MutationEvidenceError("observation receipts contain duplicate sessions")
-        provided[identity] = receipt
-    if set(required) != set(provided):
+    if diagnostics["duplicate_receipt_count"]:
+        raise MutationEvidenceError("observation receipts contain duplicate sessions")
+    if diagnostics["mutations_without_receipt_count"] or diagnostics[
+        "receipts_without_mutation_count"
+    ]:
         raise MutationEvidenceError(
             "publisher-derived mutations do not equal replayed observations"
         )
-    for identity, mutation in required.items():
-        receipt = provided[identity]
-        if (
-            mutation.get("ticker") != receipt.get("ticker")
-            or mutation.get("exchange") != receipt.get("exchange")
-            or mutation.get("new_canonical_row_sha256")
-            != receipt.get("canonical_row_sha256")
-        ):
-            raise MutationEvidenceError(
-                "observation receipt does not match publisher-derived mutation"
-            )
+    if diagnostics["identity_mismatch_count"] or diagnostics[
+        "canonical_digest_mismatch_count"
+    ]:
+        raise MutationEvidenceError(
+            "observation receipt does not match publisher-derived mutation"
+        )
     return {
         "schema_version": MUTATION_SCHEMA_VERSION,
-        "evidence_required_mutation_count": len(required),
-        "added_count": sum(
-            row.get("mutation_type") == "row_added" for row in mutations
-        ),
-        "modified_count": len(modified),
-        "deleted_count": len(deleted),
-        "mutation_root": mutation_root(mutations, receipts),
+        "evidence_required_mutation_count": diagnostics["added_row_count"],
+        "added_count": diagnostics["added_row_count"],
+        "modified_count": diagnostics["modified_row_count"],
+        "deleted_count": diagnostics["deleted_row_count"],
+        "mutation_root": diagnostics["mutation_root"],
     }
 
 
@@ -292,6 +424,15 @@ def _row_digest(
         volume=row["Volume"],
         currency=currency,
     )
+
+
+def _diagnostic_values(row: Mapping[str, str] | None) -> dict[str, str] | None:
+    if row is None:
+        return None
+    return {
+        key: str(row[key])
+        for key in ("Date", "Open", "High", "Low", "Close", "Adj Close", "Volume")
+    }
 
 
 def _unique_set(values: Sequence[str], label: str) -> set[str]:

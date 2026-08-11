@@ -44,10 +44,13 @@ from market_engine.data.observation_receipts import (
     POLICY_SCHEMA_VERSION,
     ObservationReceiptError,
     approved_source_policy,
+    load_provider_artifact,
     load_source_policy,
     observation_receipt_root,
     replay_absence_attestations,
-    replay_observation_receipts,
+    replay_provider_artifacts,
+    select_mutation_observations,
+    validate_declared_receipts,
 )
 from market_engine.data.mutation_evidence import (
     MUTATION_SCHEMA_VERSION,
@@ -55,12 +58,13 @@ from market_engine.data.mutation_evidence import (
     MutationEvidenceError,
     derive_canonical_mutations,
     derive_session_resolution,
+    mutation_evidence_diagnostics,
     reconcile_mutation_evidence,
 )
 
 
-SCHEMA_VERSION = "market-engine-me-sr23-canonical-price-freshness-manifest-v8"
-VALIDATION_SCHEMA_VERSION = "market-engine-me-sr23-published-price-dataset-validation-v8"
+SCHEMA_VERSION = "market-engine-me-sr23-canonical-price-freshness-manifest-v9"
+VALIDATION_SCHEMA_VERSION = "market-engine-me-sr23-published-price-dataset-validation-v9"
 DEFAULT_UNIVERSE_SNAPSHOT = Path(
     "artifacts/market_engine/data_runs/"
     "me-data04-complete-dataset-20260713T133000Z-coverage-after/universe_snapshot.json"
@@ -162,7 +166,7 @@ def run_scheduled_refresh(
     overlap_calendar_days: int = DEFAULT_SCHEDULED_OVERLAP_CALENDAR_DAYS,
     sleeper: Sleeper = time.sleep,
     source_policy_path: str | Path = DEFAULT_SOURCE_POLICY,
-    observation_receipts: Mapping[str, Sequence[Mapping[str, Any]]] | None = None,
+    provider_artifacts: Mapping[str, Sequence[Mapping[str, Any]]] | None = None,
     absence_attestations: Mapping[str, Sequence[Mapping[str, Any]]] | None = None,
 ) -> dict[str, Any]:
     if not run_id or not SHA1.fullmatch(source_main_sha):
@@ -212,7 +216,7 @@ def run_scheduled_refresh(
                 max_attempts=max_attempts,
                 overlap_calendar_days=overlap_calendar_days,
                 sleeper=sleeper,
-                observation_receipts=(observation_receipts or {}).get(
+                provider_artifacts=(provider_artifacts or {}).get(
                     instrument["instrument_id"], []
                 ),
                 absence_attestations=(absence_attestations or {}).get(
@@ -259,6 +263,7 @@ def run_scheduled_refresh(
                     "primary_observed_sessions": refreshed.get(
                         "primary_observed_sessions", []
                     ),
+                    "provider_artifacts": refreshed.get("provider_artifacts", []),
                     "observation_receipts": refreshed.get(
                         "observation_receipts", []
                     ),
@@ -335,6 +340,28 @@ def run_scheduled_refresh(
         )
     )
     run_status = "failed" if not publication_set_valid else "degraded" if degraded else "completed"
+    diagnostic_path = Path(report_output).with_name(
+        f"{run_id}-mutation-diagnostics.json"
+    )
+    diagnostic_payload = {
+        "schema_version": "market-engine-mutation-diagnostic-artifact-v1",
+        "run_id": run_id,
+        "generated_at": _utc_text(generated_at),
+        "source_main_sha": source_main_sha,
+        "mutation_evidence_summary": mutation_evidence_summary,
+    }
+    _atomic_write_json(diagnostic_path, diagnostic_payload)
+    diagnostic_artifact = {
+        "schema_version": diagnostic_payload["schema_version"],
+        "artifact_name": diagnostic_path.name,
+        "artifact_sha256": _sha256_file(diagnostic_path),
+    }
+    provider_artifact_summary = _provider_artifact_run_summary(
+        rows,
+        artifact_root=stage_root,
+        source_policy=source_policy,
+        mutation_evidence_summary=mutation_evidence_summary,
+    )
     report = {
         "schema_version": SCHEMA_VERSION,
         "run_id": run_id,
@@ -355,6 +382,8 @@ def run_scheduled_refresh(
             ABSENCE_ATTESTATION_SCHEMA_VERSION
         ),
         "mutation_evidence_summary": mutation_evidence_summary,
+        "mutation_diagnostic_artifact": diagnostic_artifact,
+        "provider_artifact_summary": provider_artifact_summary,
         "active_universe_checksum": governed["active_universe_checksum"],
         "governed_universe_checksum": governed["governed_universe_checksum"],
         "active_universe_size": governed["active_universe_size"],
@@ -624,13 +653,13 @@ def validate_published_dataset(
     if actual_files != bound_files:
         issues.append(_validation_issue("PUBLISHED_UNBOUND_PRICE_FILE_SET", "data/processed"))
     declared_raw_artifacts = {
-        str(evidence.get("raw_artifact_locator"))
+        str(evidence.get("artifact_locator"))
         for entry in entries
         if isinstance(entry, Mapping)
         for evidence in (
             (
-                entry.get("observation_receipts", [])
-                if isinstance(entry.get("observation_receipts"), list)
+                entry.get("provider_artifacts", [])
+                if isinstance(entry.get("provider_artifacts"), list)
                 else []
             )
             + (
@@ -640,7 +669,7 @@ def validate_published_dataset(
             )
         )
         if isinstance(evidence, Mapping)
-        and isinstance(evidence.get("raw_artifact_locator"), str)
+        and isinstance(evidence.get("artifact_locator"), str)
     }
     evidence_root = root / "evidence" / "market_price"
     actual_raw_artifacts = {
@@ -984,6 +1013,23 @@ def validate_published_dataset(
         and entry["observation_receipts"]
         and isinstance(entry.get("observation_receipt_root"), str)
     ]
+    instrument_diagnostics = [
+        {
+            "instrument_id": str(entry.get("instrument_id")),
+            "ticker": str(entry.get("ticker")),
+            "exchange": str(entry.get("exchange")),
+            **dict(entry.get("mutation_diagnostics", {})),
+        }
+        for entry in entries
+        if isinstance(entry, Mapping)
+        and isinstance(entry.get("mutation_diagnostics"), Mapping)
+    ]
+    aggregate_keys = (
+        "added_row_count", "modified_row_count", "deleted_row_count",
+        "unchanged_overlap_row_count", "mutations_without_receipt_count",
+        "receipts_without_mutation_count", "artifact_replay_failure_count",
+        "identity_mismatch_count", "correction_contract_blocker_count",
+    )
     expected_mutation_evidence_summary = {
         "schema_version": MUTATION_SCHEMA_VERSION,
         "publication_mutation_root": _canonical_checksum(
@@ -993,6 +1039,19 @@ def validate_published_dataset(
             sorted(receipt_roots)
         ),
         "invalid_instruments": [],
+        "affected_instrument_count": sum(
+            row.get("affected_instrument_count", 0) > 0
+            for row in instrument_diagnostics
+        ),
+        "modified_instrument_count": sum(
+            row.get("modified_row_count", 0) > 0
+            for row in instrument_diagnostics
+        ),
+        **{
+            key: sum(int(row.get(key, 0)) for row in instrument_diagnostics)
+            for key in aggregate_keys
+        },
+        "diagnostic_rows": instrument_diagnostics,
     }
     if manifest.get("mutation_evidence_summary") != expected_mutation_evidence_summary:
         issues.append(
@@ -1102,7 +1161,7 @@ def _refresh_instrument(
     max_attempts: int,
     overlap_calendar_days: int,
     sleeper: Sleeper,
-    observation_receipts: Sequence[Mapping[str, Any]] = (),
+    provider_artifacts: Sequence[Mapping[str, Any]] = (),
     absence_attestations: Sequence[Mapping[str, Any]] = (),
     source_policy: Mapping[str, Any],
     artifact_root: Path,
@@ -1139,6 +1198,7 @@ def _refresh_instrument(
         "freshness_status": "unsupported",
         "reason_code": "UNSUPPORTED_EXCHANGE" if profile is None else "PROVIDER_MAPPING_MISSING",
         "primary_observed_sessions": [],
+        "provider_artifacts": [dict(row) for row in provider_artifacts],
         "absence_attestations": [dict(row) for row in absence_attestations],
         "observation_receipts": [],
         "observation_receipt_root": None,
@@ -1167,7 +1227,7 @@ def _refresh_instrument(
     previous_end = before_validation.get("end_date")
     error: dict[str, str] = {}
     terminal_rejected_bar_diagnostics: list[dict[str, Any]] = []
-    terminal_observation_receipts: list[dict[str, Any]] = []
+    terminal_replayed_observations: list[dict[str, Any]] = []
     terminal_primary_observed_sessions: set[str] = set()
 
     def guarded_provider(symbol: str, start: str, end: str) -> pd.DataFrame:
@@ -1209,9 +1269,9 @@ def _refresh_instrument(
                     accumulated,
                     required_sessions=required_sessions,
                 )
-                supplemented = _reconcile_observation_receipts(
+                supplemented = _reconcile_provider_artifacts(
                     accumulated,
-                    receipts=observation_receipts,
+                    provider_artifacts=provider_artifacts,
                     instrument=instrument,
                     requested_start=start,
                     requested_end=end,
@@ -1219,8 +1279,8 @@ def _refresh_instrument(
                     artifact_root=artifact_root,
                     source_policy=source_policy,
                 )
-                terminal_observation_receipts.extend(
-                    supplemented.attrs.get("observation_receipts", [])
+                terminal_replayed_observations.extend(
+                    supplemented.attrs.get("replayed_observations", [])
                 )
                 missing = _missing_provider_sessions(
                     supplemented,
@@ -1281,16 +1341,16 @@ def _refresh_instrument(
                 },
             )
         except ObservationReceiptError as exc:
-            error["reason_code"] = "OBSERVATION_RECEIPT_INVALID"
+            error["reason_code"] = "PROVIDER_ARTIFACT_INVALID"
             terminal_rejected_bar_diagnostics.append(
                 {
-                    "reason_code": "OBSERVATION_RECEIPT_INVALID",
+                    "reason_code": "PROVIDER_ARTIFACT_INVALID",
                     "message": str(exc),
                     "disposition": "blocked_not_persisted",
                 }
             )
             raise ProviderBoundaryError(
-                "OBSERVATION_RECEIPT_INVALID", str(exc)
+                "PROVIDER_ARTIFACT_INVALID", str(exc)
             ) from exc
         except ProviderBoundaryError as exc:
             error["reason_code"] = exc.reason_code
@@ -1394,13 +1454,6 @@ def _refresh_instrument(
         rejected_bar_diagnostics.extend(
             provider.rejected_diagnostics_for(source_symbol)
         )
-    unique_receipts = sorted(
-        {
-            str(row["receipt_sha256"]): dict(row)
-            for row in terminal_observation_receipts
-        }.values(),
-        key=lambda row: (row["instrument_id"], row["session_date"]),
-    )
     return {
         **base,
         "previous_last_observation": previous_end,
@@ -1423,12 +1476,15 @@ def _refresh_instrument(
         "primary_observed_sessions": sorted(
             terminal_primary_observed_sessions
         ),
-        "observation_receipts": unique_receipts,
-        "observation_receipt_root": (
-            observation_receipt_root(unique_receipts)
-            if unique_receipts
-            else None
+        "provider_artifacts": [dict(row) for row in provider_artifacts],
+        "replayed_observation_count": len(
+            {
+                (str(row["instrument_id"]), str(row["session_date"]))
+                for row in terminal_replayed_observations
+            }
         ),
+        "observation_receipts": [],
+        "observation_receipt_root": None,
         "absence_attestations": [dict(row) for row in absence_attestations],
         **history_coverage,
         **_retained_history_boundary(
@@ -1514,6 +1570,7 @@ def _non_refreshable_lifecycle_row(
         "freshness_status": status,
         "reason_code": reason,
         "primary_observed_sessions": [],
+        "provider_artifacts": [],
         "observation_receipts": [],
         "observation_receipt_root": None,
         "absence_attestations": [],
@@ -1575,28 +1632,85 @@ def _bind_mutation_and_session_ledgers(
     mutation_roots: list[str] = []
     receipt_roots: list[str] = []
     invalid_instruments: list[str] = []
+    instrument_diagnostics: list[dict[str, Any]] = []
     for entry in rows:
         instrument_id = str(entry["instrument_id"])
         instrument = instruments_by_id[instrument_id]
         relative = Path(str(entry["persisted_file_path"]))
         staged_path = staging_root / relative
         baseline_path = baseline_root / relative
-        receipts = entry.get("observation_receipts", [])
+        provider_artifacts = entry.get("provider_artifacts", [])
         attestations = entry.get("absence_attestations", [])
+        all_mutations: list[dict[str, Any]] = []
+        mutations: list[dict[str, Any]] = []
+        replayed_observations: list[dict[str, Any]] = []
+        replayed_receipts: list[dict[str, Any]] = []
+        replay_failures: list[str] = []
+        failure: Exception | None = None
         try:
-            mutations = derive_canonical_mutations(
+            all_mutations = derive_canonical_mutations(
                 baseline_path=(baseline_path if baseline_path.is_file() else None),
                 staged_path=staged_path,
                 instrument_id=instrument_id,
                 ticker=str(entry["ticker"]),
                 exchange=str(instrument.get("exchange")),
                 currency=str(instrument.get("currency")),
+                include_unchanged=True,
             ) if staged_path.is_file() else []
-            replayed_receipts = replay_observation_receipts(
-                receipts,
+        except (MutationEvidenceError, OSError, ValueError) as exc:
+            failure = exc
+        try:
+            replayed_observations = replay_provider_artifacts(
+                provider_artifacts,
                 artifact_root=staging_root,
                 policy=source_policy,
             )
+        except (ObservationReceiptError, OSError, ValueError) as exc:
+            replay_failures.append(f"{type(exc).__name__}: {exc}")
+            failure = failure or exc
+        replayed_identities = {
+            (str(row.get("instrument_id")), str(row.get("session_date")))
+            for row in replayed_observations
+        }
+        mutations = [
+            row
+            for row in all_mutations
+            if row.get("mutation_type") != "row_unchanged"
+            or (str(row.get("instrument_id")), str(row.get("session_date")))
+            in replayed_identities
+        ]
+        if failure is None:
+            try:
+                selected = select_mutation_observations(
+                    mutations, replayed_observations
+                )
+                replayed_receipts = selected["mutation_receipts"]
+                entry["replayed_observation_count"] = len(replayed_observations)
+                entry["accepted_mutation_observation_count"] = len(
+                    selected["accepted_mutation_observations"]
+                )
+                entry["unchanged_overlap_observation_count"] = len(
+                    selected["unchanged_overlap_observations"]
+                )
+            except (ObservationReceiptError, ValueError) as exc:
+                replay_failures.append(f"{type(exc).__name__}: {exc}")
+                failure = exc
+        diagnostics = mutation_evidence_diagnostics(
+            mutations,
+            replayed_receipts,
+            artifact_replay_failures=replay_failures,
+        )
+        entry["canonical_mutations"] = mutations
+        entry["mutation_diagnostics"] = diagnostics
+        entry["observation_receipts"] = replayed_receipts
+        entry["observation_receipt_root"] = (
+            observation_receipt_root(replayed_receipts)
+            if replayed_receipts
+            else None
+        )
+        try:
+            if failure is not None:
+                raise failure
             replayed_absences = replay_absence_attestations(
                 attestations,
                 artifact_root=staging_root,
@@ -1632,11 +1746,11 @@ def _bind_mutation_and_session_ledgers(
             OSError,
             ValueError,
         ) as exc:
-            entry["canonical_mutations"] = []
             entry["mutation_evidence"] = {
                 "schema_version": MUTATION_SCHEMA_VERSION,
                 "reason_code": type(exc).__name__,
                 "message": str(exc),
+                "mutation_root": diagnostics["mutation_root"],
             }
             entry["mutation_evidence_status"] = "invalid"
             entry["session_resolution"] = {
@@ -1656,6 +1770,35 @@ def _bind_mutation_and_session_ledgers(
                 entry.get("expected_backfill_sessions", [])
             )
             invalid_instruments.append(instrument_id)
+        instrument_diagnostics.append(
+            {
+                "instrument_id": instrument_id,
+                "ticker": str(entry["ticker"]),
+                "exchange": str(entry["exchange"]),
+                **diagnostics,
+            }
+        )
+    aggregate_keys = (
+        "added_row_count",
+        "modified_row_count",
+        "deleted_row_count",
+        "unchanged_overlap_row_count",
+        "mutations_without_receipt_count",
+        "receipts_without_mutation_count",
+        "artifact_replay_failure_count",
+        "identity_mismatch_count",
+        "correction_contract_blocker_count",
+    )
+    modified_instruments = {
+        row["instrument_id"]
+        for row in instrument_diagnostics
+        if row["modified_row_count"] > 0
+    }
+    affected_instruments = {
+        row["instrument_id"]
+        for row in instrument_diagnostics
+        if row["affected_instrument_count"] > 0
+    }
     return {
         "schema_version": MUTATION_SCHEMA_VERSION,
         "publication_mutation_root": _canonical_checksum(
@@ -1665,6 +1808,71 @@ def _bind_mutation_and_session_ledgers(
             sorted(receipt_roots)
         ),
         "invalid_instruments": sorted(invalid_instruments),
+        "affected_instrument_count": len(affected_instruments),
+        "modified_instrument_count": len(modified_instruments),
+        **{
+            key: sum(int(row[key]) for row in instrument_diagnostics)
+            for key in aggregate_keys
+        },
+        "identity_mismatch_count": sum(
+            int(row["identity_mismatch_count"])
+            for row in instrument_diagnostics
+        )
+        + sum(
+            diagnostic.get("reason_code")
+            == "PROVIDER_ARTIFACT_IDENTITY_MISMATCH"
+            for entry in rows
+            for diagnostic in entry.get("rejected_bar_diagnostics", [])
+            if isinstance(diagnostic, Mapping)
+        ),
+        "diagnostic_rows": instrument_diagnostics,
+    }
+
+
+def _provider_artifact_run_summary(
+    rows: Sequence[Mapping[str, Any]],
+    *,
+    artifact_root: Path,
+    source_policy: Mapping[str, Any],
+    mutation_evidence_summary: Mapping[str, Any],
+) -> dict[str, Any]:
+    references = [
+        reference
+        for row in rows
+        for reference in row.get("provider_artifacts", [])
+        if isinstance(reference, Mapping)
+    ]
+    valid_count = 0
+    parser_failures = 0
+    policy_ids: set[str] = set()
+    for reference in references:
+        try:
+            loaded = load_provider_artifact(
+                reference,
+                artifact_root=artifact_root,
+                policy=source_policy,
+            )
+        except (ObservationReceiptError, OSError, ValueError) as exc:
+            parser_failures += "parser" in str(exc).lower()
+            continue
+        valid_count += 1
+        policy_ids.add(str(loaded["envelope"]["source_policy_id"]))
+    return {
+        "adapter_envelope_count": len(references),
+        "valid_envelope_digest_count": valid_count,
+        "replayed_artifact_count": valid_count,
+        "artifact_replay_failure_count": int(
+            mutation_evidence_summary["artifact_replay_failure_count"]
+        ),
+        "identity_mismatch_count": int(
+            mutation_evidence_summary["identity_mismatch_count"]
+        ),
+        "parser_failure_count": parser_failures,
+        "approved_source_policy_ids": sorted(policy_ids),
+        "accepted_mutation_receipt_count": sum(
+            len(row.get("observation_receipts", [])) for row in rows
+        ),
+        "secret_scan_status": "enforced_fail_closed",
     }
 
 
@@ -1681,10 +1889,12 @@ def _validate_published_observation_receipts(
     expected_sessions: Sequence[str],
 ) -> str | None:
     receipts = entry.get("observation_receipts")
+    provider_artifacts = entry.get("provider_artifacts")
     attestations = entry.get("absence_attestations")
     root = entry.get("observation_receipt_root")
     if (
         not isinstance(receipts, list)
+        or not isinstance(provider_artifacts, list)
         or not isinstance(attestations, list)
     ):
         return "PUBLISHED_OBSERVATION_RECEIPT_CONTRACT_INVALID"
@@ -1693,8 +1903,8 @@ def _validate_published_observation_receipts(
     except (OSError, ValueError):
         return "PUBLISHED_OBSERVATION_BASELINE_INVALID"
     try:
-        replayed = replay_observation_receipts(
-            receipts,
+        replayed_observations = replay_provider_artifacts(
+            provider_artifacts,
             artifact_root=publication_root,
             policy=source_policy,
         )
@@ -1706,21 +1916,18 @@ def _validate_published_observation_receipts(
     except (OSError, ValueError, ObservationReceiptError):
         return "PUBLISHED_OBSERVATION_RECEIPT_REPLAY_INVALID"
     staged_by_date = {str(row["Date"]): row for _, row in staged.iterrows()}
-    expected_root = observation_receipt_root(replayed) if replayed else None
-    if root != expected_root:
-        return "PUBLISHED_OBSERVATION_RECEIPT_ROOT_INVALID"
-    for receipt in replayed:
-        session = str(receipt["session_date"])
+    for observation in replayed_observations:
+        session = str(observation["session_date"])
         if (
-            receipt.get("instrument_id") != entry.get("instrument_id")
-            or receipt.get("ticker") != entry.get("ticker")
-            or receipt.get("exchange") != instrument_exchange
+            observation.get("instrument_id") != entry.get("instrument_id")
+            or observation.get("ticker") != entry.get("ticker")
+            or observation.get("exchange") != instrument_exchange
             or session not in staged_by_date
             or (
                 isinstance(lifecycle_cutoff, str)
                 and session > lifecycle_cutoff
             )
-            or not _receipt_matches_csv_row(receipt, staged_by_date[session])
+            or not _receipt_matches_csv_row(observation, staged_by_date[session])
         ):
             return "PUBLISHED_OBSERVATION_RECEIPT_CANONICAL_MISMATCH"
     for attestation in replayed_absences:
@@ -1736,14 +1943,32 @@ def _validate_published_observation_receipts(
     if baseline_path is None:
         return None
     try:
-        mutations = derive_canonical_mutations(
+        all_mutations = derive_canonical_mutations(
             baseline_path=(baseline_path if baseline_path.is_file() else None),
             staged_path=staged_path,
             instrument_id=str(entry.get("instrument_id")),
             ticker=str(entry.get("ticker")),
             exchange=instrument_exchange,
             currency=instrument_currency,
+            include_unchanged=True,
         )
+        replayed_identities = {
+            (str(row["instrument_id"]), str(row["session_date"]))
+            for row in replayed_observations
+        }
+        mutations = [
+            row
+            for row in all_mutations
+            if row["mutation_type"] != "row_unchanged"
+            or (str(row["instrument_id"]), str(row["session_date"]))
+            in replayed_identities
+        ]
+        selected = select_mutation_observations(mutations, replayed_observations)
+        replayed = selected["mutation_receipts"]
+        validate_declared_receipts(receipts, replayed)
+        expected_root = observation_receipt_root(replayed) if replayed else None
+        if root != expected_root:
+            return "PUBLISHED_OBSERVATION_RECEIPT_ROOT_INVALID"
         mutation_summary = reconcile_mutation_evidence(mutations, replayed)
         mutation_sessions = [
             str(row["session_date"])
@@ -1806,10 +2031,10 @@ def _canonical_csv_rows_equal(left: Mapping[str, Any], right: Mapping[str, Any])
     )
 
 
-def _reconcile_observation_receipts(
+def _reconcile_provider_artifacts(
     frame: pd.DataFrame,
     *,
-    receipts: Sequence[Mapping[str, Any]],
+    provider_artifacts: Sequence[Mapping[str, Any]],
     instrument: Mapping[str, Any],
     requested_start: str,
     requested_end: str,
@@ -1817,10 +2042,10 @@ def _reconcile_observation_receipts(
     artifact_root: Path,
     source_policy: Mapping[str, Any],
 ) -> pd.DataFrame:
-    if not receipts:
+    if not provider_artifacts:
         return frame
-    replayed = replay_observation_receipts(
-        receipts,
+    replayed = replay_provider_artifacts(
+        provider_artifacts,
         artifact_root=artifact_root,
         policy=source_policy,
     )
@@ -1832,21 +2057,19 @@ def _reconcile_observation_receipts(
         and row.get("exchange") == instrument.get("exchange")
         and requested_start <= str(row.get("session_date")) < requested_end
     ]
-    if len(eligible_rows) != len(receipts):
+    if len(eligible_rows) != len(replayed):
         raise ProviderBoundaryError(
-            "OBSERVATION_RECEIPT_IDENTITY_MISMATCH",
-            "fallback receipts do not exactly match the requested instrument window",
+            "PROVIDER_ARTIFACT_IDENTITY_MISMATCH",
+            "provider artifacts do not exactly match the requested instrument window",
             diagnostic={
-                "reason_code": (
-                    "OBSERVATION_RECEIPT_IDENTITY_MISMATCH"
-                ),
+                "reason_code": "PROVIDER_ARTIFACT_IDENTITY_MISMATCH",
                 "ticker": instrument.get("symbol"),
                 "request_start": requested_start,
                 "request_end_exclusive": requested_end,
-                "declared_receipt_sessions": sorted(
-                    str(row.get("session_date")) for row in receipts
+                "replayed_artifact_sessions": sorted(
+                    str(row.get("session_date")) for row in replayed
                 ),
-                "eligible_receipt_sessions": sorted(
+                "eligible_artifact_sessions": sorted(
                     str(row.get("session_date")) for row in eligible_rows
                 ),
                 "disposition": "blocked_not_persisted",
@@ -1863,25 +2086,25 @@ def _reconcile_observation_receipts(
         )
     }
     additions: list[dict[str, Any]] = []
-    for receipt in eligible_rows:
-        session = str(receipt["session_date"])
+    for observation in eligible_rows:
+        session = str(observation["session_date"])
         existing = frame_by_session.get(session)
         if existing is not None:
-            if not _receipt_matches_csv_row(receipt, existing):
+            if not _receipt_matches_csv_row(observation, existing):
                 raise ProviderBoundaryError(
-                    "OBSERVATION_RECEIPT_PROVIDER_CONFLICT",
-                    "provider observation conflicts with replayed receipt",
+                    "PROVIDER_ARTIFACT_OBSERVATION_CONFLICT",
+                    "provider observation conflicts with the primary response",
                 )
             continue
         additions.append(
             {
                 "Date": session,
-                "Open": receipt["open"],
-                "High": receipt["high"],
-                "Low": receipt["low"],
-                "Close": receipt["close"],
-                "Adj Close": receipt["adj_close"],
-                "Volume": receipt["volume"],
+                "Open": observation["open"],
+                "High": observation["high"],
+                "Low": observation["low"],
+                "Close": observation["close"],
+                "Adj Close": observation["adj_close"],
+                "Volume": observation["volume"],
             }
         )
     additions_frame = pd.DataFrame(additions)
@@ -1896,7 +2119,7 @@ def _reconcile_observation_receipts(
         provider_symbol=str(instrument["source_symbol"]),
         lifecycle_context=instrument,
     )
-    validated.attrs["observation_receipts"] = [dict(row) for row in receipts]
+    validated.attrs["replayed_observations"] = [dict(row) for row in replayed]
     return validated
 
 
