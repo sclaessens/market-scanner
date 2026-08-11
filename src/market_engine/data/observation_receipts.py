@@ -11,10 +11,9 @@ from typing import Any, Mapping, Sequence
 
 
 POLICY_SCHEMA_VERSION = "market-engine-market-price-source-policy-v3"
-PROVIDER_ARTIFACT_REFERENCE_SCHEMA_VERSION = (
-    "market-engine-provider-artifact-reference-v1"
-)
-ADAPTER_ENVELOPE_SCHEMA_VERSION = "market-engine-provider-artifact-envelope-v1"
+PROVIDER_ARTIFACT_REFERENCE_SCHEMA_VERSION = "market-engine-provider-artifact-reference-v2"
+ADAPTER_ENVELOPE_SCHEMA_VERSION = "market-engine-provider-artifact-envelope-v2"
+ACQUISITION_RUN_MANIFEST_SCHEMA_VERSION = "market-engine-market-price-acquisition-run-v1"
 REPLAYED_OBSERVATION_SCHEMA_VERSION = "market-engine-replayed-observation-v1"
 RECEIPT_SCHEMA_VERSION = "market-engine-observation-receipt-v3"
 ABSENCE_ATTESTATION_SCHEMA_VERSION = (
@@ -228,6 +227,9 @@ def load_provider_artifact(
 ) -> dict[str, Any]:
     if not isinstance(reference, Mapping) or set(reference) != {
         "schema_version",
+        "acquisition_run_id",
+        "acquisition_manifest_locator",
+        "acquisition_manifest_sha256",
         "artifact_locator",
         "artifact_sha256",
         "envelope_sha256",
@@ -236,13 +238,17 @@ def load_provider_artifact(
     if reference.get("schema_version") != PROVIDER_ARTIFACT_REFERENCE_SCHEMA_VERSION:
         raise ObservationReceiptError("provider artifact reference schema is unsupported")
     locator = reference.get("artifact_locator")
+    run_id = reference.get("acquisition_run_id")
+    manifest_locator = reference.get("acquisition_manifest_locator")
+    manifest_sha = reference.get("acquisition_manifest_sha256")
     artifact_sha = reference.get("artifact_sha256")
     envelope_sha = reference.get("envelope_sha256")
     if not all(
-        isinstance(value, str) for value in (locator, artifact_sha, envelope_sha)
+        isinstance(value, str)
+        for value in (locator, artifact_sha, envelope_sha, run_id, manifest_locator, manifest_sha)
     ) or not SHA256.fullmatch(str(artifact_sha)) or not SHA256.fullmatch(
         str(envelope_sha)
-    ):
+    ) or not SHA256.fullmatch(str(manifest_sha)):
         raise ObservationReceiptError("provider artifact reference digest is invalid")
     relative = Path(str(locator))
     if (
@@ -253,6 +259,26 @@ def load_provider_artifact(
         or relative.name != f"{artifact_sha}.json"
     ):
         raise ObservationReceiptError("provider artifact locator is invalid")
+    manifest_relative = Path(str(manifest_locator))
+    if (
+        manifest_relative.is_absolute()
+        or ".." in manifest_relative.parts
+        or manifest_relative.parts[:3] != ("evidence", "market_price", "acquisition_runs")
+        or len(manifest_relative.parts) != 5
+        or manifest_relative.parts[3] != run_id
+        or manifest_relative.name != f"{manifest_sha}.json"
+    ):
+        raise ObservationReceiptError("trusted acquisition run reference is invalid")
+    manifest_path = Path(artifact_root) / manifest_relative
+    if not manifest_path.is_file():
+        raise ObservationReceiptError("provider artifact is absent from trusted acquisition run metadata")
+    manifest_encoded = manifest_path.read_bytes()
+    if sha256_bytes(manifest_encoded) != manifest_sha:
+        raise ObservationReceiptError("trusted acquisition run manifest checksum mismatch")
+    try:
+        manifest = json.loads(manifest_encoded.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError, json.JSONDecodeError) as exc:
+        raise ObservationReceiptError("trusted acquisition run manifest is malformed") from exc
     path = Path(artifact_root) / relative
     if not path.is_file():
         raise ObservationReceiptError("provider artifact is missing")
@@ -266,14 +292,14 @@ def load_provider_artifact(
     if not isinstance(envelope, Mapping):
         raise ObservationReceiptError("provider artifact envelope must be an object")
     required_envelope_fields = {
-        "schema_version", "provider_id", "adapter_id", "adapter_version",
+        "schema_version", "acquisition_run_id", "provider_id", "adapter_id", "adapter_version",
         "parser_name", "parser_version", "instrument_id", "canonical_ticker",
         "provider_symbol", "exchange", "currency", "acquisition_route",
         "request_method_id", "request_parameters", "request_start",
         "request_end_exclusive", "window_semantics", "timezone", "pagination",
         "retrieved_at", "response_status", "response_content_type",
         "provider_request_id", "raw_response_base64", "raw_response_sha256",
-        "source_policy_id", "envelope_sha256",
+        "source_policy_id", "request_sha256", "producer_component_id", "envelope_sha256",
     }
     if set(envelope) != required_envelope_fields:
         raise ObservationReceiptError("provider artifact envelope fields are invalid")
@@ -305,12 +331,42 @@ def load_provider_artifact(
         or envelope.get("window_semantics") != WINDOW_SEMANTICS
     ):
         raise ObservationReceiptError("provider artifact policy or parser binding mismatch")
+    request_identity = {
+        key: envelope[key]
+        for key in (
+            "request_method_id", "request_parameters", "request_start",
+            "request_end_exclusive", "window_semantics", "timezone", "pagination",
+        )
+    }
+    if sha256_bytes(_canonical_json(request_identity)) != envelope.get("request_sha256"):
+        raise ObservationReceiptError("provider artifact request digest mismatch")
+    expected_manifest = {
+        "schema_version": ACQUISITION_RUN_MANIFEST_SCHEMA_VERSION,
+        "acquisition_run_id": envelope["acquisition_run_id"],
+        "adapter_id": envelope["adapter_id"],
+        "adapter_version": envelope["adapter_version"],
+        "provider_id": envelope["provider_id"],
+        "acquisition_route": envelope["acquisition_route"],
+        "instrument_id": envelope["instrument_id"],
+        "canonical_ticker": envelope["canonical_ticker"],
+        "provider_symbol": envelope["provider_symbol"],
+        "exchange": envelope["exchange"],
+        "request_sha256": envelope["request_sha256"],
+        "artifact_sha256": artifact_sha,
+        "raw_response_sha256": envelope["raw_response_sha256"],
+        "retrieved_at": envelope["retrieved_at"],
+        "source_policy_id": envelope["source_policy_id"],
+        "artifact_locator": locator,
+        "producer_component_id": envelope["producer_component_id"],
+    }
+    if manifest != expected_manifest or run_id != envelope["acquisition_run_id"]:
+        raise ObservationReceiptError("provider artifact trusted acquisition identity mismatch")
     text_fields = (
         "provider_id", "adapter_id", "adapter_version", "instrument_id",
         "canonical_ticker", "provider_symbol", "exchange", "currency",
         "acquisition_route", "request_method_id", "timezone",
         "response_content_type", "raw_response_base64", "raw_response_sha256",
-        "source_policy_id",
+        "source_policy_id", "request_sha256", "producer_component_id", "acquisition_run_id",
     )
     if any(
         not isinstance(envelope.get(key), str) or not envelope[key]
@@ -321,6 +377,13 @@ def load_provider_artifact(
         envelope.get("pagination"), Mapping
     ):
         raise ObservationReceiptError("provider artifact request metadata is invalid")
+    if (
+        envelope["request_parameters"].get("symbol") != envelope["provider_symbol"]
+        or envelope["request_parameters"].get("start") != envelope["request_start"]
+        or envelope["request_parameters"].get("end")
+        != envelope["request_end_exclusive"]
+    ):
+        raise ObservationReceiptError("provider artifact request identity mismatch")
     response_status = envelope.get("response_status")
     if (
         not isinstance(response_status, int)
@@ -499,6 +562,9 @@ def build_absence_attestation(
         "response_status": envelope["response_status"],
         "response_content_type": envelope["response_content_type"],
         "provider_request_id": envelope["provider_request_id"],
+        "acquisition_run_id": artifact_reference["acquisition_run_id"],
+        "acquisition_manifest_locator": artifact_reference["acquisition_manifest_locator"],
+        "acquisition_manifest_sha256": artifact_reference["acquisition_manifest_sha256"],
         "artifact_locator": artifact_reference["artifact_locator"],
         "artifact_sha256": artifact_reference["artifact_sha256"],
         "envelope_sha256": artifact_reference["envelope_sha256"],
@@ -521,6 +587,9 @@ def replay_absence_attestations(
     for declared in attestations:
         reference = {
             "schema_version": PROVIDER_ARTIFACT_REFERENCE_SCHEMA_VERSION,
+            "acquisition_run_id": declared.get("acquisition_run_id"),
+            "acquisition_manifest_locator": declared.get("acquisition_manifest_locator"),
+            "acquisition_manifest_sha256": declared.get("acquisition_manifest_sha256"),
             "artifact_locator": declared.get("artifact_locator"),
             "artifact_sha256": declared.get("artifact_sha256"),
             "envelope_sha256": declared.get("envelope_sha256"),
@@ -544,6 +613,52 @@ def replay_absence_attestations(
     if len(identities) != len(set(identities)):
         raise ObservationReceiptError("absence attestations contain duplicates")
     return replayed
+
+
+def bind_absence_evidence_to_consumer(
+    attestations: Sequence[Mapping[str, Any]],
+    *,
+    consumer_identity: Mapping[str, Any],
+    expected_sessions: Sequence[str],
+    lifecycle_cutoff: str | None,
+) -> list[dict[str, Any]]:
+    """Validate self-consistent absence evidence against its actual consumer."""
+    expected = set(expected_sessions)
+    identity_fields = (
+        ("instrument_id", "instrument_id"),
+        ("ticker", "symbol"),
+        ("provider_id", "provider_id"),
+        ("provider_symbol", "source_symbol"),
+        ("exchange", "exchange"),
+        ("source_policy_id", "source_policy_id"),
+        ("acquisition_route", "acquisition_route"),
+        ("timezone", "timezone"),
+    )
+    validated: list[dict[str, Any]] = []
+    for attestation in attestations:
+        if any(
+            attestation.get(evidence_key) != consumer_identity.get(consumer_key)
+            for evidence_key, consumer_key in identity_fields
+        ):
+            raise ObservationReceiptError(
+                "ABSENCE_EVIDENCE_CONSUMER_IDENTITY_MISMATCH"
+            )
+        session = str(attestation.get("session_date"))
+        if (
+            session not in expected
+            or attestation.get("lifecycle_cutoff") != lifecycle_cutoff
+            or attestation.get("absence_reason_code")
+            != "terminal_daily_ohlcv_not_returned"
+            or attestation.get("calendar_expected") is not True
+            or not str(attestation.get("request_start")) <= session
+            < str(attestation.get("request_end_exclusive"))
+            or attestation.get("window_semantics") != WINDOW_SEMANTICS
+        ):
+            raise ObservationReceiptError(
+                "ABSENCE_EVIDENCE_CONSUMER_LIFECYCLE_MISMATCH"
+            )
+        validated.append(dict(attestation))
+    return validated
 
 
 def observation_receipt_root(receipts: Sequence[Mapping[str, Any]]) -> str:
@@ -641,6 +756,9 @@ def _replay_envelope_observations(
             "response_status": envelope["response_status"],
             "response_content_type": envelope["response_content_type"],
             "provider_request_id": envelope["provider_request_id"],
+            "acquisition_run_id": reference["acquisition_run_id"],
+            "acquisition_manifest_locator": reference["acquisition_manifest_locator"],
+            "acquisition_manifest_sha256": reference["acquisition_manifest_sha256"],
             "artifact_locator": reference["artifact_locator"],
             "artifact_sha256": reference["artifact_sha256"],
             "envelope_sha256": reference["envelope_sha256"],
@@ -690,6 +808,9 @@ def _observation_receipt(observation: Mapping[str, Any]) -> dict[str, Any]:
         "response_status",
         "response_content_type",
         "provider_request_id",
+        "acquisition_run_id",
+        "acquisition_manifest_locator",
+        "acquisition_manifest_sha256",
         "artifact_locator",
         "artifact_sha256",
         "envelope_sha256",

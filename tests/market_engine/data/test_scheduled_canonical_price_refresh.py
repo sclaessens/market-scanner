@@ -11,7 +11,7 @@ import pytest
 
 from market_engine.data import scheduled_canonical_price_refresh as scheduled
 from market_engine.data import observation_receipts as receipt_contract
-from market_engine.data.provider_artifact_adapter import capture_provider_artifact
+from market_engine.data.provider_artifact_adapter import RegisteredMarketPriceAdapter
 
 
 SOURCE_SHA = "8" * 40
@@ -126,6 +126,70 @@ def test_missing_artifact_blocks_without_erasing_publisher_mutations(tmp_path: P
     assert (
         no_artifact_diagnostics["diagnostic_rows"][0]["artifact_status"]
         == "not_provided"
+    )
+
+
+@pytest.mark.parametrize("consumer_symbol", ["AAA", "TMHC"])
+def test_valid_b_absence_chain_under_another_freshness_entry_fails_closed(
+    tmp_path: Path, consumer_symbol: str
+) -> None:
+    consumer = _instrument(consumer_symbol)
+    provider_instrument = _instrument("BBB")
+    fixture = _fixture(tmp_path, [consumer, provider_instrument], end="2026-07-13")
+    scheduled._prepare_staging_root(fixture["published"], fixture["stage"])
+    policy = receipt_contract.load_source_policy(fixture["policy"])
+    adapter = RegisteredMarketPriceAdapter(
+        policy=policy,
+        instrument=provider_instrument,
+        provider_id="approved-test-primary",
+        acquisition_route="primary_replay",
+    )
+    request = adapter.request(
+        method_id="scheduled-test-daily-bars",
+        start="2026-07-14",
+        end_exclusive="2026-07-15",
+        timezone="America/New_York",
+        pagination={"page": 1, "terminal": True},
+    )
+    reference = adapter.capture_response(
+        b'{"bars":[]}',
+        request=request,
+        artifact_root=fixture["stage"],
+        acquisition_run_id="absence-substitution-run",
+        retrieved_at="2026-07-15T10:00:00Z",
+        response_status=200,
+        response_content_type="application/json",
+    )
+    attestation = receipt_contract.build_absence_attestation(
+        artifact_reference=reference,
+        artifact_root=fixture["stage"],
+        policy=policy,
+        session_date="2026-07-14",
+        lifecycle_cutoff="2026-07-14",
+        reason_code="terminal_daily_ohlcv_not_returned",
+        calendar_expected=True,
+    )
+    entry = {
+        "instrument_id": consumer["instrument_id"],
+        "ticker": consumer["symbol"],
+        "exchange": consumer["exchange"],
+        "persisted_file_path": f"data/processed/{consumer['source_symbol']}.csv",
+        "provider_artifacts": [],
+        "absence_attestations": [attestation],
+        "expected_backfill_sessions": ["2026-07-14"],
+    }
+    scheduled._bind_mutation_and_session_ledgers(
+        [entry],
+        instruments_by_id={consumer["instrument_id"]: consumer},
+        baseline_root=fixture["published"],
+        staging_root=fixture["stage"],
+        source_policy=policy,
+    )
+
+    assert entry["mutation_evidence_status"] == "invalid"
+    assert entry["session_resolution"]["unresolved_sessions"] == ["2026-07-14"]
+    assert entry["mutation_evidence"]["message"] == (
+        "ABSENCE_EVIDENCE_CONSUMER_IDENTITY_MISMATCH"
     )
 
 
@@ -1191,25 +1255,24 @@ def _run(
             if not isinstance(raw_response, bytes):
                 return frame
             try:
-                artifact = capture_provider_artifact(
-                    raw_response,
-                    artifact_root=fixture["stage"],
+                adapter = RegisteredMarketPriceAdapter(
                     policy=policy,
                     provider_id="approved-test-primary",
-                    adapter_id="scheduled-test-adapter",
-                    adapter_version="v1",
-                    instrument_id=instrument["instrument_id"],
-                    canonical_ticker=instrument["symbol"],
-                    provider_symbol=symbol,
-                    exchange=instrument["exchange"],
-                    currency=instrument["currency"],
                     acquisition_route="primary",
-                    request_method_id="scheduled-test-daily-bars",
-                    request_parameters={"symbol": symbol, "start": start, "end": end},
-                    request_start=start,
-                    request_end_exclusive=end,
+                    instrument=instrument,
+                )
+                request = adapter.request(
+                    method_id="scheduled-test-daily-bars",
+                    start=start,
+                    end_exclusive=end,
                     timezone="America/New_York",
                     pagination={"page": 1, "terminal": True},
+                )
+                artifact = adapter.capture_response(
+                    raw_response,
+                    request=request,
+                    artifact_root=fixture["stage"],
+                    acquisition_run_id="me-sr23-scheduled-test-acquisition",
                     retrieved_at="2026-07-15T10:00:00Z",
                     response_status=200,
                     response_content_type="application/json",

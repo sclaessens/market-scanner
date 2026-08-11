@@ -11,7 +11,7 @@ import pytest
 
 from market_engine.data import scheduled_canonical_price_refresh as scheduled
 from market_engine.data import observation_receipts as receipt_contract
-from market_engine.data.provider_artifact_adapter import capture_provider_artifact
+from market_engine.data.provider_artifact_adapter import RegisteredMarketPriceAdapter
 from market_engine.data.instrument_lifecycle import (
     DEFAULT_LIFECYCLE_REGISTRY,
     LEGACY_LIFECYCLE_SCHEMA_VERSION,
@@ -2370,25 +2370,24 @@ def _approved_gap_fill_run(
         separators=(",", ":"),
     ).encode()
     policy = receipt_contract.load_source_policy(policy_path)
-    fallback_artifact = capture_provider_artifact(
-        payload,
-        artifact_root=fixture["published"],
+    fallback_adapter = RegisteredMarketPriceAdapter(
         policy=policy,
+        instrument=instrument,
         provider_id="approved-test-fallback",
-        adapter_id="lifecycle-test-adapter",
-        adapter_version="v1",
-        instrument_id=instrument["instrument_id"],
-        canonical_ticker="OLD",
-        provider_symbol="OLD",
-        exchange="NYSE",
-        currency="USD",
         acquisition_route="fallback",
-        request_method_id="lifecycle-test-daily-bars",
-        request_parameters={"symbol": "OLD", "start": "2026-07-13", "end": receipt_request_end},
-        request_start="2026-07-13",
-        request_end_exclusive=receipt_request_end,
+    )
+    fallback_request = fallback_adapter.request(
+        method_id="lifecycle-test-daily-bars",
+        start="2026-07-13",
+        end_exclusive=receipt_request_end,
         timezone="America/New_York",
         pagination={"page": 1, "terminal": True},
+    )
+    fallback_artifact = fallback_adapter.capture_response(
+        payload,
+        request=fallback_request,
+        artifact_root=fixture["published"],
+        acquisition_run_id="lifecycle-fallback-run",
         retrieved_at="2026-07-15T09:00:00Z",
         response_status=200,
         response_content_type="application/json",
@@ -2413,25 +2412,22 @@ def _approved_gap_fill_run(
             sort_keys=True,
             separators=(",", ":"),
         ).encode()
-        primary_artifacts = [capture_provider_artifact(
-            primary_payload,
-            artifact_root=fixture["published"],
+        primary_adapter = RegisteredMarketPriceAdapter(
             policy=policy,
+            instrument=instrument,
             provider_id="approved-test-fallback",
-            adapter_id="lifecycle-test-adapter",
-            adapter_version="v1",
-            instrument_id=instrument["instrument_id"],
-            canonical_ticker="OLD",
-            provider_symbol="OLD",
-            exchange="NYSE",
-            currency="USD",
             acquisition_route="primary",
-            request_method_id="lifecycle-test-daily-bars",
-            request_parameters={"symbol": "OLD", "start": "2026-07-13", "end": "2026-07-15"},
-            request_start="2026-07-13",
-            request_end_exclusive="2026-07-15",
-            timezone="America/New_York",
+        )
+        primary_request = primary_adapter.request(
+            method_id="lifecycle-test-daily-bars", start="2026-07-13",
+            end_exclusive="2026-07-15", timezone="America/New_York",
             pagination={"page": 1, "terminal": True},
+        )
+        primary_artifacts = [primary_adapter.capture_response(
+            primary_payload,
+            request=primary_request,
+            artifact_root=fixture["published"],
+            acquisition_run_id="lifecycle-primary-run",
             retrieved_at="2026-07-15T09:00:00Z",
             response_status=200,
             response_content_type="application/json",

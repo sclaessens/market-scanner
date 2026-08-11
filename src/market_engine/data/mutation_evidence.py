@@ -327,6 +327,7 @@ def derive_session_resolution(
     canonical_mutation_sessions: Sequence[str],
     fallback_exhausted_sessions: Sequence[str] = (),
     not_expected_sessions: Sequence[str] = (),
+    consumer_instrument_id: str | None = None,
 ) -> dict[str, Any]:
     expected = _unique_set(expected_sessions, "expected sessions")
     not_expected = _unique_set(not_expected_sessions, "not-expected sessions")
@@ -356,6 +357,17 @@ def derive_session_resolution(
         if state is None or session in observed:
             raise MutationEvidenceError("observed session route is invalid or duplicate")
         observed[session] = state
+    if absence_attestations and not consumer_instrument_id:
+        raise MutationEvidenceError(
+            "absence evidence requires an identity-bound consumer"
+        )
+    if any(
+        row.get("instrument_id") != consumer_instrument_id
+        for row in absence_attestations
+    ):
+        raise MutationEvidenceError(
+            "ABSENCE_EVIDENCE_CONSUMER_IDENTITY_MISMATCH"
+        )
     absent = _unique_set(
         [str(row.get("session_date")) for row in absence_attestations],
         "absence attestations",

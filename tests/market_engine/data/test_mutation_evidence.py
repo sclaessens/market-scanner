@@ -213,13 +213,17 @@ def test_session_partition_is_rederived_from_final_evidence(
         {"session_date": session, "acquisition_route": "primary_replay"}
         for session in receipt_sessions
     ]
-    attestations = [{"session_date": session} for session in absence_sessions]
+    attestations = [
+        {"session_date": session, "instrument_id": "equity:aaa"}
+        for session in absence_sessions
+    ]
 
     ledger = derive_session_resolution(
         expected_sessions=list(reversed(expected)),
         receipts=list(reversed(receipts)),
         absence_attestations=attestations,
         canonical_mutation_sessions=receipt_sessions,
+        consumer_instrument_id="equity:aaa",
     )
 
     assert ledger["unresolved_sessions"] == expected_unresolved
@@ -234,8 +238,9 @@ def test_mixed_gap_and_terminal_absence_reconciles_disjointly() -> None:
             {"session_date": "2026-07-22", "acquisition_route": "fallback"},
             {"session_date": "2026-07-23", "acquisition_route": "primary_replay"},
         ],
-        absence_attestations=[{"session_date": "2026-07-24"}],
+        absence_attestations=[{"session_date": "2026-07-24", "instrument_id": "equity:aaa"}],
         canonical_mutation_sessions=["2026-07-23", "2026-07-22"],
+        consumer_instrument_id="equity:aaa",
     )
     assert ledger["partition"] == [
         {"session_date": "2026-07-22", "state": "observed_fallback"},

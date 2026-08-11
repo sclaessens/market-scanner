@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from market_engine.data import observation_receipts as receipts
-from market_engine.data.provider_artifact_adapter import capture_provider_artifact
+from market_engine.data.provider_artifact_adapter import RegisteredMarketPriceAdapter
 
 
 def _policy(tmp_path: Path, **overrides: object) -> tuple[Path, dict[str, object]]:
@@ -75,25 +75,31 @@ def _artifact(
 ) -> tuple[dict[str, object], dict[str, str]]:
     policy_path, _ = _policy(tmp_path)
     policy = receipts.load_source_policy(policy_path)
-    reference = capture_provider_artifact(
-        payload if payload is not None else _payload("2026-07-23", "2026-07-24"),
-        artifact_root=tmp_path,
+    adapter = RegisteredMarketPriceAdapter(
         policy=policy,
         provider_id="approved-test-market-data",
-        adapter_id="test-http-adapter",
-        adapter_version="v1",
-        instrument_id=instrument_id,
-        canonical_ticker=ticker,
-        provider_symbol=provider_symbol,
-        exchange=exchange,
-        currency="USD",
         acquisition_route=route,
-        request_method_id="daily-bars",
-        request_parameters={"symbol": provider_symbol, "start": start, "end": end},
-        request_start=start,
-        request_end_exclusive=end,
+        instrument={
+            "instrument_id": instrument_id,
+            "symbol": ticker,
+            "source_symbol": provider_symbol,
+            "exchange": exchange,
+            "currency": "USD",
+            "source_mapping_status": "mapped",
+        },
+    )
+    request = adapter.request(
+        method_id="daily-bars",
+        start=start,
+        end_exclusive=end,
         timezone="America/New_York",
         pagination=pagination or {"page": 1, "terminal": True},
+    )
+    reference = adapter.capture_response(
+        payload if payload is not None else _payload("2026-07-23", "2026-07-24"),
+        request=request,
+        artifact_root=tmp_path,
+        acquisition_run_id="test-acquisition-run",
         retrieved_at="2026-08-09T12:00:00Z",
         response_status=200,
         response_content_type="application/json",
@@ -186,6 +192,68 @@ def test_downstream_envelope_relabelling_fails_closed(
         receipts.replay_provider_artifacts([reference], artifact_root=tmp_path, policy=policy)
 
 
+def test_complete_downstream_relabelling_cannot_replace_trusted_acquisition_identity(
+    tmp_path: Path,
+) -> None:
+    policy, reference = _artifact(tmp_path)
+    original = tmp_path / reference["artifact_locator"]
+    envelope = json.loads(original.read_text(encoding="utf-8"))
+    envelope["instrument_id"] = "equity:bbb"
+    envelope["canonical_ticker"] = "BBB"
+    envelope["provider_symbol"] = "BBB"
+    envelope["request_parameters"]["symbol"] = "BBB"
+    request_identity = {
+        key: envelope[key]
+        for key in (
+            "request_method_id", "request_parameters", "request_start",
+            "request_end_exclusive", "window_semantics", "timezone", "pagination",
+        )
+    }
+    envelope["request_sha256"] = receipts.sha256_bytes(
+        json.dumps(request_identity, sort_keys=True, separators=(",", ":")).encode()
+    )
+    unsigned = {key: value for key, value in envelope.items() if key != "envelope_sha256"}
+    envelope["envelope_sha256"] = receipts.sha256_bytes(
+        json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode()
+    )
+    encoded = json.dumps(envelope, sort_keys=True, separators=(",", ":")).encode()
+    artifact_sha = receipts.sha256_bytes(encoded)
+    relabelled = original.with_name(f"{artifact_sha}.json")
+    relabelled.write_bytes(encoded)
+    rebuilt_reference = {
+        **reference,
+        "artifact_locator": relabelled.relative_to(tmp_path).as_posix(),
+        "artifact_sha256": artifact_sha,
+        "envelope_sha256": envelope["envelope_sha256"],
+    }
+
+    with pytest.raises(
+        receipts.ObservationReceiptError,
+        match="trusted acquisition identity mismatch",
+    ):
+        receipts.replay_provider_artifacts(
+            [rebuilt_reference], artifact_root=tmp_path, policy=policy
+        )
+
+
+def test_artifact_without_trusted_acquisition_run_metadata_is_rejected(
+    tmp_path: Path,
+) -> None:
+    policy, reference = _artifact(tmp_path)
+    unregistered = {
+        **reference,
+        "acquisition_manifest_locator": (
+            "evidence/market_price/acquisition_runs/test-acquisition-run/"
+            f"{'0' * 64}.json"
+        ),
+        "acquisition_manifest_sha256": "0" * 64,
+    }
+    with pytest.raises(receipts.ObservationReceiptError, match="absent from trusted"):
+        receipts.replay_provider_artifacts(
+            [unregistered], artifact_root=tmp_path, policy=policy
+        )
+
+
 def test_receipt_cannot_relabel_independently_replayed_identity(tmp_path: Path) -> None:
     policy, reference = _artifact(tmp_path)
     observation = receipts.replay_provider_artifacts(
@@ -226,30 +294,64 @@ def test_adapter_rejects_credentials_before_storage(tmp_path: Path) -> None:
     policy_path, _ = _policy(tmp_path)
     policy = receipts.load_source_policy(policy_path)
     with pytest.raises(receipts.ObservationReceiptError, match="credential"):
-        capture_provider_artifact(
-            b'{"api_key":"must-not-be-stored","bars":[]}',
-            artifact_root=tmp_path,
+        adapter = RegisteredMarketPriceAdapter(
             policy=policy,
             provider_id="approved-test-market-data",
-            adapter_id="test-http-adapter",
-            adapter_version="v1",
-            instrument_id="equity:aaa",
-            canonical_ticker="AAA",
-            provider_symbol="AAA",
-            exchange="NYSE",
-            currency="USD",
             acquisition_route="primary",
-            request_method_id="daily-bars",
-            request_parameters={},
-            request_start="2026-07-24",
-            request_end_exclusive="2026-07-25",
+            instrument={"instrument_id": "equity:aaa", "symbol": "AAA", "source_symbol": "AAA", "exchange": "NYSE", "currency": "USD", "source_mapping_status": "mapped"},
+        )
+        request = adapter.request(
+            method_id="daily-bars", start="2026-07-24", end_exclusive="2026-07-25",
             timezone="America/New_York",
             pagination={},
+        )
+        adapter.capture_response(
+            b'{"api_key":"must-not-be-stored","bars":[]}',
+            request=request,
+            artifact_root=tmp_path,
+            acquisition_run_id="credential-test-run",
             retrieved_at="2026-08-09T12:00:00Z",
             response_status=200,
             response_content_type="application/json",
         )
     assert not list((tmp_path / "evidence").rglob("*.json"))
+
+
+def test_registered_adapter_rejects_unapproved_alias_and_request_symbol_override(
+    tmp_path: Path,
+) -> None:
+    policy_path, _ = _policy(tmp_path)
+    policy = receipts.load_source_policy(policy_path)
+    with pytest.raises(receipts.ObservationReceiptError, match="mapping is not approved"):
+        RegisteredMarketPriceAdapter(
+            policy=policy,
+            provider_id="approved-test-market-data",
+            acquisition_route="primary",
+            instrument={
+                "instrument_id": "equity:legacy", "symbol": "LEGACY",
+                "source_symbol": "LEGACY-A", "exchange": "NYSE",
+                "currency": "USD", "source_mapping_status": "unsupported",
+            },
+        )
+    adapter = RegisteredMarketPriceAdapter(
+        policy=policy,
+        provider_id="approved-test-market-data",
+        acquisition_route="primary",
+        instrument={
+            "instrument_id": "equity:aaa", "symbol": "AAA",
+            "source_symbol": "AAA", "exchange": "NYSE", "currency": "USD",
+            "source_mapping_status": "mapped",
+        },
+    )
+    with pytest.raises(receipts.ObservationReceiptError, match="registered mapping"):
+        adapter.request(
+            method_id="daily-bars",
+            start="2026-07-24",
+            end_exclusive="2026-07-25",
+            timezone="America/New_York",
+            pagination={"page": 1},
+            extra_parameters={"symbol": "BBB"},
+        )
 
 
 def test_absence_attestation_is_bound_to_empty_adapter_envelope(tmp_path: Path) -> None:
@@ -272,6 +374,134 @@ def test_absence_attestation_is_bound_to_empty_adapter_envelope(tmp_path: Path) 
     with pytest.raises(receipts.ObservationReceiptError, match="does not replay"):
         receipts.replay_absence_attestations(
             [changed], artifact_root=tmp_path, policy=policy
+        )
+
+
+@pytest.mark.parametrize("consumer_ticker", ["AAA", "TMHC"])
+def test_valid_b_absence_evidence_cannot_explain_another_consumer(
+    tmp_path: Path, consumer_ticker: str
+) -> None:
+    policy, reference = _artifact(
+        tmp_path,
+        payload=_payload(),
+        instrument_id="equity:bbb",
+        ticker="BBB",
+        provider_symbol="BBB",
+        start="2026-07-24",
+        end="2026-07-25",
+    )
+    attestation = receipts.build_absence_attestation(
+        artifact_reference=reference,
+        artifact_root=tmp_path,
+        policy=policy,
+        session_date="2026-07-24",
+        lifecycle_cutoff="2026-07-24",
+        reason_code="terminal_daily_ohlcv_not_returned",
+        calendar_expected=True,
+    )
+    replayed = receipts.replay_absence_attestations(
+        [attestation], artifact_root=tmp_path, policy=policy
+    )
+    with pytest.raises(
+        receipts.ObservationReceiptError,
+        match="ABSENCE_EVIDENCE_CONSUMER_IDENTITY_MISMATCH",
+    ):
+        receipts.bind_absence_evidence_to_consumer(
+            replayed,
+            consumer_identity={
+                "instrument_id": f"equity:{consumer_ticker.lower()}",
+                "symbol": consumer_ticker,
+                "source_symbol": consumer_ticker,
+                "exchange": "NYSE",
+                "provider_id": "approved-test-market-data",
+                "source_policy_id": "approval-test-daily-ohlcv-v1",
+                "acquisition_route": "primary_replay",
+                "timezone": "America/New_York",
+            },
+            expected_sessions=["2026-07-24"],
+            lifecycle_cutoff="2026-07-24",
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "reason"),
+    [
+        ("symbol", "LEGACY", "IDENTITY"),
+        ("source_symbol", "BBB-A", "IDENTITY"),
+        ("exchange", "NASDAQ", "IDENTITY"),
+        ("provider_id", "other-provider", "IDENTITY"),
+        ("source_policy_id", "other-policy", "IDENTITY"),
+        ("acquisition_route", "fallback", "IDENTITY"),
+        ("timezone", "UTC", "IDENTITY"),
+    ],
+)
+def test_absence_consumer_route_fields_are_independently_bound(
+    tmp_path: Path, field: str, value: str, reason: str
+) -> None:
+    policy, reference = _artifact(
+        tmp_path, payload=_payload(), start="2026-07-24", end="2026-07-25"
+    )
+    attestation = receipts.build_absence_attestation(
+        artifact_reference=reference,
+        artifact_root=tmp_path,
+        policy=policy,
+        session_date="2026-07-24",
+        lifecycle_cutoff="2026-07-24",
+        reason_code="terminal_daily_ohlcv_not_returned",
+        calendar_expected=True,
+    )
+    consumer = {
+        "instrument_id": "equity:aaa",
+        "symbol": "AAA",
+        "source_symbol": "AAA",
+        "exchange": "NYSE",
+        "provider_id": "approved-test-market-data",
+        "source_policy_id": "approval-test-daily-ohlcv-v1",
+        "acquisition_route": "primary_replay",
+        "timezone": "America/New_York",
+        field: value,
+    }
+    with pytest.raises(receipts.ObservationReceiptError, match=f"CONSUMER_{reason}_MISMATCH"):
+        receipts.bind_absence_evidence_to_consumer(
+            [attestation],
+            consumer_identity=consumer,
+            expected_sessions=["2026-07-24"],
+            lifecycle_cutoff="2026-07-24",
+        )
+
+
+@pytest.mark.parametrize(
+    ("expected_sessions", "cutoff"),
+    [([], "2026-07-24"), (["2026-07-24"], "2026-07-23")],
+)
+def test_absence_consumer_session_and_cutoff_are_bound(
+    tmp_path: Path, expected_sessions: list[str], cutoff: str
+) -> None:
+    policy, reference = _artifact(
+        tmp_path, payload=_payload(), start="2026-07-24", end="2026-07-25"
+    )
+    attestation = receipts.build_absence_attestation(
+        artifact_reference=reference,
+        artifact_root=tmp_path,
+        policy=policy,
+        session_date="2026-07-24",
+        lifecycle_cutoff="2026-07-24",
+        reason_code="terminal_daily_ohlcv_not_returned",
+        calendar_expected=True,
+    )
+    with pytest.raises(receipts.ObservationReceiptError, match="CONSUMER_LIFECYCLE_MISMATCH"):
+        receipts.bind_absence_evidence_to_consumer(
+            [attestation],
+            consumer_identity={
+                "instrument_id": "equity:aaa", "symbol": "AAA",
+                "source_symbol": "AAA", "exchange": "NYSE",
+                "provider_id": "approved-test-market-data",
+                "source_policy_id": "approval-test-daily-ohlcv-v1",
+                "acquisition_route": "primary_replay",
+                "timezone": "America/New_York",
+            },
+            expected_sessions=expected_sessions,
+            lifecycle_cutoff=cutoff,
         )
 
 

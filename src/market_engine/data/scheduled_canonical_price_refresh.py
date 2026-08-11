@@ -44,6 +44,7 @@ from market_engine.data.observation_receipts import (
     POLICY_SCHEMA_VERSION,
     ObservationReceiptError,
     approved_source_policy,
+    bind_absence_evidence_to_consumer,
     load_provider_artifact,
     load_source_policy,
     observation_receipt_root,
@@ -63,8 +64,8 @@ from market_engine.data.mutation_evidence import (
 )
 
 
-SCHEMA_VERSION = "market-engine-me-sr23-canonical-price-freshness-manifest-v9"
-VALIDATION_SCHEMA_VERSION = "market-engine-me-sr23-published-price-dataset-validation-v9"
+SCHEMA_VERSION = "market-engine-me-sr23-canonical-price-freshness-manifest-v10"
+VALIDATION_SCHEMA_VERSION = "market-engine-me-sr23-published-price-dataset-validation-v10"
 DEFAULT_UNIVERSE_SNAPSHOT = Path(
     "artifacts/market_engine/data_runs/"
     "me-data04-complete-dataset-20260713T133000Z-coverage-after/universe_snapshot.json"
@@ -653,7 +654,7 @@ def validate_published_dataset(
     if actual_files != bound_files:
         issues.append(_validation_issue("PUBLISHED_UNBOUND_PRICE_FILE_SET", "data/processed"))
     declared_raw_artifacts = {
-        str(evidence.get("artifact_locator"))
+        str(locator)
         for entry in entries
         if isinstance(entry, Mapping)
         for evidence in (
@@ -669,7 +670,11 @@ def validate_published_dataset(
             )
         )
         if isinstance(evidence, Mapping)
-        and isinstance(evidence.get("artifact_locator"), str)
+        for locator in (
+            evidence.get("artifact_locator"),
+            evidence.get("acquisition_manifest_locator"),
+        )
+        if isinstance(locator, str)
     }
     evidence_root = root / "evidence" / "market_price"
     actual_raw_artifacts = {
@@ -1183,6 +1188,7 @@ def _refresh_instrument(
     )
     base = {
         "ticker": ticker,
+        "source_symbol": source_symbol,
         "instrument_id": str(instrument["instrument_id"]),
         "exchange": profile.market if profile else str(instrument.get("exchange") or "UNKNOWN"),
         "market_timezone": profile.timezone if profile else None,
@@ -1726,6 +1732,15 @@ def _bind_mutation_and_session_ledgers(
                 artifact_root=staging_root,
                 policy=source_policy,
             )
+            if replayed_absences:
+                replayed_absences = bind_absence_evidence_to_consumer(
+                    replayed_absences,
+                    consumer_identity=_absence_consumer_identity(
+                        instrument, source_policy=source_policy
+                    ),
+                    expected_sessions=entry.get("expected_backfill_sessions", []),
+                    lifecycle_cutoff=instrument.get("last_trading_session"),
+                )
             mutation_summary = reconcile_mutation_evidence(
                 mutations, replayed_receipts
             )
@@ -1739,6 +1754,7 @@ def _bind_mutation_and_session_ledgers(
                 receipts=replayed_receipts,
                 absence_attestations=replayed_absences,
                 canonical_mutation_sessions=mutation_sessions,
+                consumer_instrument_id=instrument_id,
             )
             entry["canonical_mutations"] = mutations
             entry["mutation_evidence"] = mutation_summary
@@ -1843,6 +1859,38 @@ def _bind_mutation_and_session_ledgers(
     }
 
 
+def _absence_consumer_identity(
+    instrument: Mapping[str, Any], *, source_policy: Mapping[str, Any]
+) -> dict[str, Any]:
+    exchange = str(instrument.get("exchange"))
+    candidates = [
+        provider
+        for provider in source_policy.get("providers", [])
+        if exchange in provider.get("exchanges", [])
+        and provider.get("approved_for_acquisition") is True
+        and provider.get("approved_for_retention") is True
+        and provider.get("approved_for_replay") is True
+        and provider.get("approved_for_canonical_publication") is True
+        and "primary_replay" in provider.get("acquisition_routes", [])
+    ]
+    if len(candidates) != 1:
+        raise ObservationReceiptError(
+            "absence evidence consumer route is missing or ambiguous"
+        )
+    provider = candidates[0]
+    profile = MARKET_PROFILES.get(EXCHANGE_ALIASES.get(exchange, exchange))
+    return {
+        "instrument_id": instrument.get("instrument_id"),
+        "symbol": instrument.get("symbol") or instrument.get("ticker"),
+        "source_symbol": instrument.get("source_symbol"),
+        "exchange": exchange,
+        "provider_id": provider["provider_id"],
+        "source_policy_id": provider["approval_id"],
+        "acquisition_route": "primary_replay",
+        "timezone": profile.timezone if profile else None,
+    }
+
+
 def _provider_artifact_run_summary(
     rows: Sequence[Mapping[str, Any]],
     *,
@@ -1927,6 +1975,21 @@ def _validate_published_observation_receipts(
             artifact_root=publication_root,
             policy=source_policy,
         )
+        instrument_identity = {
+            "instrument_id": entry.get("instrument_id"),
+            "symbol": entry.get("ticker"),
+            "source_symbol": entry.get("source_symbol") or entry.get("ticker"),
+            "exchange": instrument_exchange,
+        }
+        if replayed_absences:
+            replayed_absences = bind_absence_evidence_to_consumer(
+                replayed_absences,
+                consumer_identity=_absence_consumer_identity(
+                    instrument_identity, source_policy=source_policy
+                ),
+                expected_sessions=expected_sessions,
+                lifecycle_cutoff=(str(lifecycle_cutoff) if lifecycle_cutoff else None),
+            )
     except (OSError, ValueError, ObservationReceiptError):
         return "PUBLISHED_OBSERVATION_RECEIPT_REPLAY_INVALID"
     staged_by_date = {str(row["Date"]): row for _, row in staged.iterrows()}
@@ -1935,7 +1998,11 @@ def _validate_published_observation_receipts(
         if (
             observation.get("instrument_id") != entry.get("instrument_id")
             or observation.get("ticker") != entry.get("ticker")
+            or observation.get("provider_symbol")
+            != (entry.get("source_symbol") or entry.get("ticker"))
             or observation.get("exchange") != instrument_exchange
+            or observation.get("request_parameters", {}).get("symbol")
+            != observation.get("provider_symbol")
             or session not in staged_by_date
             or (
                 isinstance(lifecycle_cutoff, str)
@@ -1994,6 +2061,7 @@ def _validate_published_observation_receipts(
             receipts=replayed,
             absence_attestations=replayed_absences,
             canonical_mutation_sessions=mutation_sessions,
+            consumer_instrument_id=str(entry.get("instrument_id")),
         )
     except (MutationEvidenceError, ObservationReceiptError, ValueError):
         return "PUBLISHED_MUTATION_EVIDENCE_RECONCILIATION_INVALID"
@@ -2068,7 +2136,14 @@ def _reconcile_provider_artifacts(
         for row in replayed
         if row.get("instrument_id") == instrument.get("instrument_id")
         and row.get("ticker") == instrument.get("symbol")
+        and row.get("provider_symbol") == instrument.get("source_symbol")
         and row.get("exchange") == instrument.get("exchange")
+        and row.get("request_parameters", {}).get("symbol")
+        == instrument.get("source_symbol")
+        and row.get("timezone")
+        == MARKET_PROFILES[
+            EXCHANGE_ALIASES.get(str(instrument.get("exchange")), str(instrument.get("exchange")))
+        ].timezone
         and requested_start <= str(row.get("session_date")) < requested_end
     ]
     if len(eligible_rows) != len(replayed):
@@ -3337,8 +3412,8 @@ def _contains_executable_content(root: Path) -> bool:
             return True
         is_price_file = relative.parent == DATA_RELATIVE_ROOT and relative.suffix.lower() == ".csv"
         is_raw_market_price_evidence = (
-            len(relative.parts) == 4
-            and relative.parts[:2] == ("evidence", "market_price")
+            relative.parts[:2] == ("evidence", "market_price")
+            and len(relative.parts) in {4, 5}
             and relative.suffix.lower() == ".json"
         )
         if (
