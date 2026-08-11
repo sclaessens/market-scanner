@@ -384,6 +384,10 @@ trusted adapter-produced provider envelopes for every canonical mutation.
 Run `31483637994` failed closed with no approved envelopes or receipts, 11,352
 unproven added rows, 6,569 blocked precision-level historical modifications,
 and unresolved EA and TMHC sessions. Trusted publication is not authorized.
+The subsequent security remediation adds registered adapter-derived identity,
+content-addressed acquisition-run binding, and identity-aware absence consumer
+reconciliation. Its final code head still requires explicit approval for one
+new `publish=false` canary; no provider or publication has been authorized.
 
 ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot —
 remains planned and has not started. It must reuse the generic ME-DATA10

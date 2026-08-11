@@ -617,7 +617,7 @@ data change is authorized.
 
 ### ME-SR23 — Corporate-action lifecycle cutoff remediation and safe republish
 
-Status: COMPLETED WITH BLOCKERS / PUBLISH=FALSE CANARY FAILED CLOSED
+Status: CODE REMEDIATED / NEW PUBLISH=FALSE CANARY APPROVAL REQUIRED
 
 ME-SR23 separates transaction closing, last trading session, suspension and
 inactive dates in lifecycle registry v3. It adds primary-source records for
@@ -631,6 +631,12 @@ diagnostics and failed closed: 11,352 added rows had no approved artifact-bound
 receipts and 6,569 micro-precision historical modifications across 520
 instruments had no correction contract. EA and TMHC remain unresolved.
 `market-data` stayed unchanged and no trusted publication is authorized.
+The final security remediation replaces free envelope identity fields with a
+registered adapter request/response boundary, binds every artifact to a
+content-addressed acquisition-run manifest, and binds absence evidence to the
+actual freshness consumer before session resolution. The resulting code head
+has not been canaried. Production source approval, EA, TMHC, additions, and
+precision-rewrite blockers remain unchanged.
 
 ## Current ChatGPT Advisory Artifact Chain
 

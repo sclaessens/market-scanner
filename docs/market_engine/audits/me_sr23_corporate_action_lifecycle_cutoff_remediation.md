@@ -2,6 +2,94 @@
 
 Status: `completed_with_blockers`
 
+## Acquisition Identity and Absence Consumer Binding Remediation
+
+This section is the current security-review conclusion. It supersedes the
+earlier statement that an internally self-consistent provider envelope alone
+was an adequate code-path identity boundary.
+
+The remaining acquisition bypass existed because the former capture helper
+accepted provider, adapter, instrument, ticker, provider symbol, exchange, and
+request identity as independent caller strings. The scheduled production
+acquisition path returns `yfinance` DataFrames and did not invoke that helper.
+A downstream actor could therefore relabel the generic bars payload and rebuild
+every artifact, reference, receipt, and publication checksum.
+
+Envelope v2 removes the free production builder. A
+`RegisteredMarketPriceAdapter` is constructed from the selected source-policy
+route and authoritative instrument record. It derives adapter identity,
+instrument ID, canonical ticker, provider symbol, exchange, currency, parser,
+and source-policy identity. Its request object binds the registered provider
+symbol, inclusive/exclusive window, timezone, endpoint method, parameters, and
+pagination before response bytes are accepted. Unmapped aliases and symbol
+overrides fail before storage.
+
+Freshness manifest v10 records these contracts. Every capture now writes both
+a content-addressed response envelope and a
+content-addressed acquisition-run manifest. The run manifest binds run ID,
+adapter and provider route, instrument identity, provider symbol, exchange,
+request digest, artifact and raw-response digests, retrieval time, policy ID,
+locator, producer component, and schema. Artifact references carry the
+independent run-manifest locator and digest. Replay reloads and hashes both
+objects and requires exact manifest/envelope/reference equality. Publication
+also requires the exact declared artifact and acquisition-manifest fileset.
+Consequently, rebuilding all downstream envelopes, digests, filenames,
+locators, receipts, and publication checksums cannot replace the original
+acquisition-run identity.
+
+This is not a cryptographic provider attestation. The trusted components are
+the repository-governed instrument and source-policy registries, the registered
+adapter request/response boundary, trusted acquisition-run storage, and trusted
+publisher code. An actor able to rewrite all of those components, their
+storage, and the executing code is not cryptographically stopped. The
+repository has no signing-key, HMAC-secret, remote-attestation, or external
+append-only-ledger architecture, and this remediation does not invent one.
+Downstream publication and receipt code cannot create acquisition identity;
+only the registered adapter boundary writes acquisition-run records.
+
+The absence root cause was independent: self-valid attestations were reduced
+to session dates before they were reconciled with the freshness consumer. A
+fully valid B chain placed under A could therefore explain A when both used the
+same date. Session resolution now requires an identity-bound consumer and
+retains the validated evidence object until consumer reconciliation completes.
+Instrument ID, ticker, provider, provider symbol, exchange, policy, route,
+timezone, request window, window semantics, expected session, lifecycle cutoff,
+calendar expectation, and terminal-only reason must all match. Observation and
+absence evidence for one identity/session remain mutually exclusive.
+
+Negative tests now cover complete downstream relabelling with newly calculated
+request, envelope, artifact, filename, locator, reference, receipt-facing, and
+publication-facing values; missing trusted runmetadata; unapproved aliases;
+request-symbol override; provider-symbol, exchange, provider, policy, route,
+timezone, expected-session, and cutoff substitution; and a fully valid B
+absence chain placed beneath both A and TMHC. The latter consumers remain
+unresolved with `ABSENCE_EVIDENCE_CONSUMER_IDENTITY_MISMATCH`. The positive path
+captures and replays bytes through the registered adapter itself.
+
+The production source policy remains empty. The existing `yfinance` DataFrame
+route is not silently promoted to trusted raw-response acquisition, and no new
+provider is approved. EA and TMHC therefore remain unresolved; additions still
+lack approved adapter evidence; historical precision rewrites still lack a
+correction contract. No new canary has been executed, and the final code head
+from this remediation is not yet canaried.
+
+### Current local validation
+
+| Command | Result | Duration |
+|---|---:|---:|
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/data/test_mutation_evidence.py tests/market_engine/data/test_observation_receipts.py tests/market_engine/data/test_me_sr18_lifecycle_aware_freshness.py tests/market_engine/data/test_scheduled_canonical_price_refresh.py tests/market_engine/data/test_scheduled_canonical_price_refresh_workflow.py -q --tb=short` | 257 passed, 0 failed, 0 skipped | 3.93 s |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/run -q --tb=short` | 197 passed, 0 failed, 0 skipped | 3.02 s |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine -q --tb=short` | 1,551 passed, 1 failed, 0 skipped | 9.01 s |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q --tb=short` | 2,218 passed, 1 failed, 0 skipped | 9.98 s |
+
+The sole broad-suite failure is the unchanged missing historical compact
+evidence artifact
+`artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data09-aapl-20260719T155116Z/manifest.json`.
+The exact failure was previously reproduced on PR base
+`a0409a49e8f8f3ef9dce352c22b039ce4387faab`; this remediation does not touch
+that contract or artifact path.
+
+
 ## Trusted Provider Identity and Diagnostic Retention Remediation
 
 This section is the current conclusion for review remediation implemented in
