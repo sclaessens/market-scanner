@@ -2,6 +2,148 @@
 
 Status: `completed_with_blockers`
 
+## Trusted Provider Identity and Diagnostic Retention Remediation
+
+This section is the current conclusion for review remediation implemented in
+code commit `ed2e2964566a7c5b9b3599ecad732b600c91cd27`. It supersedes the v8
+receipt interpretation below while retaining the earlier history as an audit
+record.
+
+The review identified three generic defects. The former raw artifact was only
+`{"bars":[...]}` and replay injected provider, instrument, symbol, exchange,
+and request-window identity from the receipt. A downstream producer could
+therefore relabel a payload and recalculate every non-trusted checksum. The
+publisher also built receipts for every row in an overlapping response while
+mutation equality accepted only added or modified rows. Finally, a failed
+reconciliation cleared `canonical_mutations`, losing row counts, sessions,
+digests, and field differences.
+
+Source policy v3 and manifest v9 now use a content-addressed adapter envelope.
+The envelope binds provider and adapter identity, adapter and parser versions,
+instrument, canonical ticker, provider symbol, exchange, currency, route,
+credential-free request method and parameters, inclusive/exclusive window
+semantics, timezone, pagination, retrieval time, HTTP status and content type,
+optional safe provider request ID, raw response bytes and digest, policy ID,
+and envelope digest. Acquisition, retention, replay, and canonical-publication
+rights are independent booleans and all are required. The production policy
+remains empty; no provider or route was approved by this remediation.
+
+The code-level trust boundary is explicit rather than cryptographically
+overstated. Only the adapter API creates envelopes, artifacts are immutable and
+content-addressed, and the publisher reloads the artifact and independently
+validates artifact, envelope, and raw-response digests, source policy, adapter,
+parser, identity, request context, credential scan, and parser output. The
+repository has no signing key or remote attestation, so this proves integrity
+and code-path binding inside the repository, not cryptographic provider
+authorship.
+
+Replay is now deliberately two-stage. The publisher first replays every bar in
+every trusted artifact, including unchanged overlap bars. It then derives the
+baseline/staged mutation ledger and selects the exact replayed observations
+that prove added or permitted modified mutations. Receipts are emitted only
+for that publisher-selected subset. An unchanged overlap row remains in the
+immutable artifact and replay set but requires no mutation receipt. Duplicate
+or conflicting sessions within or across paginated artifacts, observations
+outside the bound window, missing staged rows, unexplained staged additions,
+and any identity or canonical-digest mismatch fail closed. Historical
+modifications and deletions remain blocked because no correction or deletion
+contract exists.
+
+Absence attestations use the same envelope identity. The publisher reconstructs
+the attestation from the referenced envelope and proves instrument, symbol,
+exchange, request window, cutoff, calendar expectation, terminal-only reason,
+and actual absence after full replay. A status string, internal gap, wrong
+instrument, wrong exchange, wrong cutoff, mutated artifact, or response that
+contains the session cannot explain absence.
+
+Mutation ledger v2 is retained before evidence equality is evaluated. Every
+diagnostic row includes previous and new canonical digests, previous and new
+values, field-level differences, receipt status, artifact status, evidence
+failure, correction-policy status, and publication blocker. The report binds a
+separate deterministic diagnostic artifact by file name and SHA-256. Failures
+block publication but no longer erase the ledger or imply that no mutations
+were detected.
+
+### Local validation
+
+| Command | Result | Duration |
+|---|---:|---:|
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/data/test_mutation_evidence.py tests/market_engine/data/test_observation_receipts.py tests/market_engine/data/test_me_sr18_lifecycle_aware_freshness.py tests/market_engine/data/test_scheduled_canonical_price_refresh.py tests/market_engine/data/test_scheduled_canonical_price_refresh_workflow.py -q --tb=short` | 241 passed, 0 failed, 0 skipped | 3.62 s |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine/run -q --tb=short` | 197 passed, 0 failed, 0 skipped | 2.56 s |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest tests/market_engine -q --tb=short` | 1535 passed, 1 failed, 0 skipped | 7.76 s |
+| `PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src .venv/bin/python -m pytest -q --tb=short` | 2202 passed, 1 failed, 0 skipped | 8.94 s |
+| Exact failing test on PR base `a0409a49e8f8f3ef9dce352c22b039ce4387faab` | 0 passed, 1 identical failure | 0.02 s |
+| Mandatory BUY, SELL, and tradeable greps | only pre-existing portfolio command parsing; no tradeable result | <0.1 s |
+| `git diff --check` | passed | <0.1 s |
+
+The sole broad-suite failure is still the pre-existing missing compact-evidence
+artifact documented below and was reproduced identically on the PR base.
+
+### Single non-publishing canary
+
+Exactly one workflow was dispatched after pushing the tested code commit:
+
+| Evidence | Result |
+|---|---|
+| Workflow | [31483637994](https://github.com/sclaessens/market-scanner/actions/runs/31483637994) |
+| Input / conclusion | `publish=false` / expected fail-closed failure |
+| Code head | `ed2e2964566a7c5b9b3599ecad732b600c91cd27` |
+| Run identity | `me-sr23-canonical-price-refresh-20260811T104611Z` |
+| Duration | 6 minutes 9 seconds |
+| Universe / status | 952 instruments; 942 updated, 4 already current, 5 not expected, 1 failed |
+| Provider artifacts | 0 envelopes, 0 valid envelope digests, 0 replayed artifacts, 0 accepted receipts, 0 approved policy IDs |
+| Mutations | 946 affected instruments; 11,352 added rows; 6,569 modified rows across 520 instruments; 0 deleted rows |
+| Reconciliation | 17,921 mutations without receipts; 0 receipts without mutations; 0 identity mismatches; 6,569 correction-contract blockers |
+| Receipt roots | mutation `3f8dda447bbd1d833d3a91f0edbea18aa12898d3bf043ba0b112a832c623a95e`; receipt `4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945` |
+| Diagnostic artifact | `me-sr23-canonical-price-refresh-20260811T104611Z-mutation-diagnostics.json`; SHA-256 `29bb11990b8b8af57606dc0233845a6d15b9462fec1b0638a5b0f8dd0002740f` |
+| Report | SHA-256 `3ae7c6fc63febfe47f0ddbe6a2b7b03438f087626b38b18ac0cc0d06a4658ade`; manifest checksum `cef8f8877d700bca3bd55368d345238e38d20c54a1ac665ad161c7bfe1b738c7` |
+| GitHub artifact | `canonical-price-freshness-me-sr23-canonical-price-refresh-20260811T104611Z`; digest `0259a3275a0c72ec9ca5ffc9cd02016173a40ba8ab6fa7f3c7d43850a7e8df74` |
+| Publication | publication set invalid; publication bundle skipped; publish job skipped |
+| `market-data` before / after | `95c88276763b1762cbbfbccc402ec8535268127b` / unchanged |
+
+The canary artifact labelled 946 missing-evidence selection failures as
+`artifact_replay_failure_count=946`, even though it also correctly reported
+zero envelopes. This was a diagnostic classification defect, not an accepted
+publication. The post-canary fix separates artifact replay from evidence
+selection: the correct interpretation is zero artifact replay failures and 946
+evidence-reconciliation failures. The post-canary fix also materializes every
+unresolved expected session in the failed session partition instead of keeping
+only the unresolved list. No second canary was dispatched. Consequently the
+canary code head and final audit/runtime head are intentionally reported
+separately, and the final post-canary runtime head is not claimed as canaried.
+
+### Historical mutation analysis
+
+The retained diagnostics establish 6,569 modified rows across 520 instruments,
+covering 389 distinct sessions from 2025-01-02 through 2026-07-23. There are
+8,063 field-string differences: Close 1,702; Low 1,602; High 1,587; Open 1,561;
+Adjusted Close 1,469; and Volume 142. Of the rows, 5,315 change one field and
+1,254 change multiple fields.
+
+Every non-volume numeric delta is at most `1e-13` relative and absolute; the
+largest examples change a final binary-float decimal digit such as
+`963.5999755859375` to `963.5999755859376`. All 142 Volume string differences
+are numerically equal and co-occur with a price-field microdifference. The
+diagnostics therefore classify all 6,569 rows as float/CSV round-trip
+normalization candidates. They provide no positive evidence of corporate
+action adjustment, adjusted/unadjusted source switching, provider-history
+revision, timezone/session drift, symbol/exchange substitution, parser change,
+or erroneous merge. Those categories each have zero supported rows in this
+run; they are not silently accepted or ruled out beyond the available
+evidence. All 6,569 rows remain blocked pending an explicit correction and
+numeric-normalization contract.
+
+EA remains at July 23 with eight unresolved sessions through the formal August
+4 cutoff. TMHC remains at July 23 with July 24 unresolved. Both have zero
+envelopes, receipts, or absence attestations. No manual price, synthetic
+production artifact, new provider approval, cutoff change, retry, merge, or
+publication occurred.
+
+The final status remains `COMPLETED WITH BLOCKERS`: EA lacks an approved raw
+adapter route, TMHC lacks replayable absence evidence, 11,352 added rows lack
+approved receipts, 6,569 historical micro-rewrites lack a correction contract,
+and the final post-canary diagnostic fix has not itself been canaried.
+
 ## Final Generic Evidence and Session Reconciliation Remediation
 
 This section is the current audit conclusion for commit

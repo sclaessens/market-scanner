@@ -97,6 +97,8 @@ def mutation_evidence_diagnostics(
     receipts: Sequence[Mapping[str, Any]],
     *,
     artifact_replay_failures: Sequence[str] = (),
+    evidence_reconciliation_failures: Sequence[str] = (),
+    artifact_status: str = "not_provided",
 ) -> dict[str, Any]:
     """Return deterministic reconciliation diagnostics without discarding mutations."""
     mutation_rows = sorted(
@@ -150,6 +152,9 @@ def mutation_evidence_diagnostics(
         if row.get("mutation_type") in {"row_modified", "row_deleted"}
     ]
     failures = sorted(str(value) for value in artifact_replay_failures)
+    reconciliation_failures = sorted(
+        str(value) for value in evidence_reconciliation_failures
+    )
     diagnostic_rows: list[dict[str, Any]] = []
     for mutation in mutation_rows:
         identity = (
@@ -183,7 +188,7 @@ def mutation_evidence_diagnostics(
             {
                 **mutation,
                 "receipt_status": receipt_status,
-                "artifact_status": "replay_failed" if failures else "replayed",
+                "artifact_status": artifact_status,
                 "evidence_failure_reason": reason,
                 "correction_policy_status": (
                     "not_available"
@@ -208,6 +213,7 @@ def mutation_evidence_diagnostics(
             digest_mismatches,
             correction_blockers,
             failures,
+            reconciliation_failures,
         )
     )
     return {
@@ -228,12 +234,14 @@ def mutation_evidence_diagnostics(
         "mutations_without_receipt_count": len(missing),
         "receipts_without_mutation_count": len(excess),
         "artifact_replay_failure_count": len(failures),
+        "evidence_reconciliation_failure_count": len(reconciliation_failures),
         "identity_mismatch_count": len(identity_mismatches),
         "canonical_digest_mismatch_count": len(digest_mismatches),
         "correction_contract_blocker_count": len(correction_blockers),
         "duplicate_mutation_count": duplicate_mutation_count,
         "duplicate_receipt_count": duplicate_receipt_count,
         "artifact_replay_failures": failures,
+        "evidence_reconciliation_failures": reconciliation_failures,
         "mutations_without_receipt": [list(value) for value in missing],
         "receipts_without_mutation": [list(value) for value in excess],
         "identity_mismatches": [list(value) for value in identity_mismatches],

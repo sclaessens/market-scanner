@@ -107,6 +107,27 @@ def test_missing_artifact_blocks_without_erasing_publisher_mutations(tmp_path: P
     assert entry["mutation_diagnostics"]["mutations_without_receipt_count"] == 1
     assert summary["added_row_count"] == 1
 
+    no_artifact_entry = {
+        **entry,
+        "provider_artifacts": [],
+        "observation_receipts": [],
+        "absence_attestations": [],
+    }
+    scheduled._bind_mutation_and_session_ledgers(
+        [no_artifact_entry],
+        instruments_by_id={instrument["instrument_id"]: instrument},
+        baseline_root=fixture["published"],
+        staging_root=fixture["stage"],
+        source_policy=receipt_contract.load_source_policy(fixture["policy"]),
+    )
+    no_artifact_diagnostics = no_artifact_entry["mutation_diagnostics"]
+    assert no_artifact_diagnostics["artifact_replay_failure_count"] == 0
+    assert no_artifact_diagnostics["evidence_reconciliation_failure_count"] == 1
+    assert (
+        no_artifact_diagnostics["diagnostic_rows"][0]["artifact_status"]
+        == "not_provided"
+    )
+
 
 def test_multiple_missing_sessions_are_appended(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path, [_instrument("AAA")], end="2026-07-09")

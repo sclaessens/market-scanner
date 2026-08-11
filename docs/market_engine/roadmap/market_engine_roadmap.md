@@ -379,11 +379,11 @@ revalidation. ME-SR21 adds bounded empty/partial batch retry, deterministic
 split, and single-ticker fallback. ME-SR22 recorded TMHC's transaction closing
 date as a final-session requirement and remained blocked by an unavailable
 provider row. ME-SR23 supersedes that overloaded date interpretation with
-separate closing, last-trading, suspension and inactive dates; it also adds EA
-and NSA lifecycle records and generic post-cutoff quarantine. A successful
-publish=false full-universe canary passed in run `31276951551`, with no
-degraded tickers and a valid 942-file update set. Trusted publication remains
-the next post-review, post-merge operation from `main` only.
+separate closing, last-trading, suspension and inactive dates and now requires
+trusted adapter-produced provider envelopes for every canonical mutation.
+Run `31483637994` failed closed with no approved envelopes or receipts, 11,352
+unproven added rows, 6,569 blocked precision-level historical modifications,
+and unresolved EA and TMHC sessions. Trusted publication is not authorized.
 
 ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot —
 remains planned and has not started. It must reuse the generic ME-DATA10

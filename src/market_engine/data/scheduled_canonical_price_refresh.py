@@ -1028,6 +1028,7 @@ def validate_published_dataset(
         "added_row_count", "modified_row_count", "deleted_row_count",
         "unchanged_overlap_row_count", "mutations_without_receipt_count",
         "receipts_without_mutation_count", "artifact_replay_failure_count",
+        "evidence_reconciliation_failure_count",
         "identity_mismatch_count", "correction_contract_blocker_count",
     )
     expected_mutation_evidence_summary = {
@@ -1646,6 +1647,7 @@ def _bind_mutation_and_session_ledgers(
         replayed_observations: list[dict[str, Any]] = []
         replayed_receipts: list[dict[str, Any]] = []
         replay_failures: list[str] = []
+        reconciliation_failures: list[str] = []
         failure: Exception | None = None
         try:
             all_mutations = derive_canonical_mutations(
@@ -1693,12 +1695,20 @@ def _bind_mutation_and_session_ledgers(
                     selected["unchanged_overlap_observations"]
                 )
             except (ObservationReceiptError, ValueError) as exc:
-                replay_failures.append(f"{type(exc).__name__}: {exc}")
+                reconciliation_failures.append(f"{type(exc).__name__}: {exc}")
                 failure = exc
         diagnostics = mutation_evidence_diagnostics(
             mutations,
             replayed_receipts,
             artifact_replay_failures=replay_failures,
+            evidence_reconciliation_failures=reconciliation_failures,
+            artifact_status=(
+                "not_provided"
+                if not provider_artifacts
+                else "replay_failed"
+                if replay_failures
+                else "replayed"
+            ),
         )
         entry["canonical_mutations"] = mutations
         entry["mutation_diagnostics"] = diagnostics
@@ -1746,6 +1756,12 @@ def _bind_mutation_and_session_ledgers(
             OSError,
             ValueError,
         ) as exc:
+            unresolved_sessions = sorted(
+                set(
+                    str(value)
+                    for value in entry.get("expected_backfill_sessions", [])
+                )
+            )
             entry["mutation_evidence"] = {
                 "schema_version": MUTATION_SCHEMA_VERSION,
                 "reason_code": type(exc).__name__,
@@ -1755,20 +1771,17 @@ def _bind_mutation_and_session_ledgers(
             entry["mutation_evidence_status"] = "invalid"
             entry["session_resolution"] = {
                 "schema_version": SESSION_LEDGER_SCHEMA_VERSION,
-                "partition": [],
+                "partition": [
+                    {"session_date": session, "state": "unresolved"}
+                    for session in unresolved_sessions
+                ],
                 "observed_sessions": [],
                 "explained_absence_sessions": [],
-                "unresolved_sessions": list(
-                    entry.get("expected_backfill_sessions", [])
-                ),
-                "fallback_candidates": list(
-                    entry.get("expected_backfill_sessions", [])
-                ),
+                "unresolved_sessions": unresolved_sessions,
+                "fallback_candidates": unresolved_sessions,
                 "not_expected_sessions": [],
             }
-            entry["fallback_candidate_sessions"] = list(
-                entry.get("expected_backfill_sessions", [])
-            )
+            entry["fallback_candidate_sessions"] = unresolved_sessions
             invalid_instruments.append(instrument_id)
         instrument_diagnostics.append(
             {
@@ -1786,6 +1799,7 @@ def _bind_mutation_and_session_ledgers(
         "mutations_without_receipt_count",
         "receipts_without_mutation_count",
         "artifact_replay_failure_count",
+        "evidence_reconciliation_failure_count",
         "identity_mismatch_count",
         "correction_contract_blocker_count",
     )
