@@ -78,6 +78,45 @@ The implementation does not import or call legacy `scripts/portfolio/` code.
 Legacy tracked portfolio files remain untouched and are not promoted as
 authority.
 
+## PR #477 review remediation
+
+Reviewed head: `2b221e000270424591771f6e436a595118199cdb`.
+
+| Finding | Original cause | Remediation and guarantee | Regression evidence |
+|---|---|---|---|
+| P1: stored ledger semantics | Loader validated only shape/version/event type before projection | One canonical validator now covers preview, confirmation, append, load, and rebuild; exact header/event fields, event semantics, canonical finite decimals, fees, currencies, identities, timestamps, references, append order, and portfolio ownership fail closed before projection | Negative/zero/float/NaN/Infinity/exponent quantity, negative price/fee, invalid type/source/currency/fee state, malformed/future timestamps, economic reversal, incomplete correction, bad portfolio/reference, header, and extra-field cases |
+| P1: derived projection authority | Public context adapter accepted an arbitrary projection mapping | Public adapter accepts only a ledger path, loads and rebuilds it itself, and derives digest/references/position values from that rebuild; projection mappings are rejected | Forged quantity `999999`, forged digest, modified derived export, instrument/ticker mismatch, portfolio/account mismatch, real ledger context, and all state mappings |
+| P1: private path depends on `cwd` | Repository discovery began at the process working directory | Resolved target path drives enclosing-worktree discovery; `.git` directory/file, Git repository identity, ignore and tracked checks, other repositories, symlinks, and Git errors are all fail closed; caller repository-root override was removed | External `cwd`, tracked target/parent, unignored target, allowed ignored target, second repository, external non-Git location, linked worktree, unsafe symlink, and Git failure |
+| P2: future execution time | Execution time was checked only for timezone and trade date | Recorded time cannot be future; execution must be UTC-normalizable, on the trade date, and no later than recorded time; confirmation and load repeat the check | Later same-day, exact equality, historical offset, future recorded time, future-after-UTC-normalization, changed preview, and corrupted stored relationship |
+| P2: reopened cost basis | Unknown old purchase fee permanently set the position's cost-basis flag to unknown | Exact zero quantity closes the old cost-basis cycle at exact zero; a new fully known purchase starts a known cycle while historical fee and realized-result uncertainty remains independent | Unavailable-fee purchase, full sale, known-fee repurchase, plus partial-sale control case |
+
+The event and projection schemas parse as JSON and runtime transaction,
+correction, reversal, and projection payloads are validated against their
+actual constraints. Invalid event and forged projection instances are rejected
+by the same schema tests.
+
+| Remediation command | Passed | Failed | Skipped | Duration | Result |
+|---|---:|---:|---:|---:|---|
+| Focused manual-ledger tests | 72 | 0 | 0 | 0.70 s | Passed |
+| Relevant portfolio, recommendation, handoff, contract, and legacy portfolio tests | 151 | 0 | 0 | 1.06 s | Passed |
+| Market Engine tests | 1,625 | 1 | 0 | 9.20 s | Known base failure only |
+| Full repository tests | 2,292 | 1 | 0 | 10.48 s | Same known base failure only |
+| Exact failing test on base `4342c354` | 0 | 1 | 0 | 0.03 s | Identical assertion and missing path |
+
+The broad-suite failure remains
+`test_compact_checksums_match_committed_files_and_local_full_runs` at
+`tests/market_engine/data/test_operator_pilot_compact_evidence.py:70`. The
+missing path remains
+`artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-after-me-data09-aapl-20260719T155116Z/manifest.json`.
+No test was removed, skipped, or weakened, and the historical fixture remains
+outside ME-PR03 scope.
+
+No residual review-remediation limitation can reintroduce a derived projection
+as authority or permit repository safety to depend on `cwd`. The unchanged
+product limitations remain private local file authority without broker,
+provider, live price, FX, tax, corporate-action, exposure, notification,
+workflow, publication, or Decision Engine behavior.
+
 ## Cross-job changes
 
 The only Portfolio Review contract change adds the descriptive `closed`

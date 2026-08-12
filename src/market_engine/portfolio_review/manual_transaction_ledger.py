@@ -34,7 +34,9 @@ SUPPORTED_CURRENCIES = frozenset(
     {"AUD", "CAD", "CHF", "DKK", "EUR", "GBP", "HKD", "JPY", "NOK", "SEK", "USD"}
 )
 IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$")
+CANDIDATE_TICKER = re.compile(r"^[A-Z0-9][A-Z0-9._^:-]{0,49}$")
 CURRENCY = re.compile(r"^[A-Z]{3}$")
+LEDGER_HEADER_FIELDS = frozenset({"schema_version", "record_type", "portfolio_id", "source_type"})
 EVENT_FIELDS = frozenset(
     {
         "schema_version", "event_type", "transaction_id", "portfolio_id",
@@ -204,7 +206,13 @@ def normalize_transaction_preview(
     registry: AuthoritativeInstrumentRegistry,
     recorded_at: str | None = None,
 ) -> dict[str, Any]:
-    now = _utc_timestamp(recorded_at or datetime.now(UTC).isoformat())
+    trusted_now = datetime.now(UTC)
+    now = _utc_timestamp(recorded_at or trusted_now.isoformat())
+    if now > trusted_now:
+        raise LedgerValidationError(
+            LedgerIssueCode.INVALID_TIMESTAMP,
+            "recorded_at cannot be in the future",
+        )
     event_type = str(raw.get("event_type") or "transaction").lower().strip()
     if event_type not in {"transaction", "correction", "reversal"}:
         raise LedgerValidationError(
@@ -233,7 +241,7 @@ def normalize_transaction_preview(
         target = _required_identifier(raw, "corrects_transaction_id")
     elif event_type == "reversal":
         target = _required_identifier(raw, "reverses_transaction_id")
-    reason = _optional_text(raw.get("reason"))
+    reason = _optional_text(raw.get("reason")) if event_type in {"correction", "reversal"} else None
     if event_type in {"correction", "reversal"} and not reason:
         raise LedgerValidationError(
             LedgerIssueCode.MISSING_REQUIRED_VALUE,
@@ -257,7 +265,7 @@ def normalize_transaction_preview(
             )
         trade_date = _trade_date(raw.get("trade_date"), now=now)
         execution_timestamp = _optional_execution_timestamp(
-            raw.get("execution_timestamp"), trade_date=trade_date
+            raw.get("execution_timestamp"), trade_date=trade_date, recorded_at=now
         )
         quantity = _positive_decimal(raw.get("quantity"), field="quantity")
         unit_price = _nonnegative_decimal(raw.get("unit_price"), field="unit_price")
@@ -294,6 +302,11 @@ def normalize_transaction_preview(
         "reverses_transaction_id": target if event_type == "reversal" else None,
         "reason": reason,
     }
+    _validate_event_semantics(
+        event,
+        error_code=LedgerIssueCode.CONFIRMED_PREVIEW_MISMATCH,
+        trusted_now=trusted_now,
+    )
     digest = _sha256(_canonical_json(event))
     return {
         "preview_schema_version": PREVIEW_SCHEMA_VERSION,
@@ -310,7 +323,6 @@ def confirm_and_append(
     confirmation_token: str | None,
     ledger_path: str | Path,
     registry: AuthoritativeInstrumentRegistry,
-    repository_root: str | Path | None = None,
 ) -> dict[str, Any]:
     if not confirmation_token:
         raise LedgerValidationError(
@@ -339,7 +351,7 @@ def confirm_and_append(
             "confirmation does not bind the exact normalized preview",
         )
     _validate_normalized_event(dict(event), registry=registry)
-    path = validate_private_ledger_path(ledger_path, repository_root=repository_root)
+    path = validate_private_ledger_path(ledger_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
         _append_existing(path, dict(event))
@@ -368,48 +380,37 @@ def load_ledger(path: str | Path) -> dict[str, Any]:
     rows: list[Any] = []
     for index, line in enumerate(lines, start=1):
         try:
-            rows.append(json.loads(line))
+            rows.append(_json_loads(line))
         except (TypeError, ValueError, json.JSONDecodeError) as exc:
             raise LedgerValidationError(
                 LedgerIssueCode.LEDGER_CORRUPT,
                 f"private ledger line {index} is malformed",
             ) from exc
     header = rows[0]
-    if not isinstance(header, Mapping) or header.get("schema_version") != LEDGER_HEADER_SCHEMA_VERSION:
-        raise LedgerValidationError(
-            LedgerIssueCode.LEDGER_INCOMPATIBLE,
-            "private ledger header contract is unsupported",
-        )
+    _validate_ledger_header(header)
     events = rows[1:]
     if any(not isinstance(row, Mapping) for row in events):
         raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "ledger event is not an object")
+    if not events:
+        raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "ledger contains no events")
     for row in events:
-        _validate_loaded_event_shape(row)
-    ids = [str(row.get("transaction_id") or "") for row in events]
-    if not ids or any(not value for value in ids):
-        raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "ledger contains an invalid event")
-    if len(ids) != len(set(ids)):
-        raise LedgerValidationError(
-            LedgerIssueCode.DUPLICATE_REPLAY,
-            "ledger contains a duplicate transaction ID",
-        )
-    if any(row.get("schema_version") != LEDGER_SCHEMA_VERSION for row in events):
+        _validate_event_semantics(row, error_code=LedgerIssueCode.LEDGER_CORRUPT)
+    loaded = {"header": dict(header), "events": [dict(row) for row in events]}
+    _validate_loaded_ledger(loaded)
+    return loaded
+
+
+def rebuild_positions(ledger: str | Path) -> dict[str, Any]:
+    if isinstance(ledger, Mapping):
         raise LedgerValidationError(
             LedgerIssueCode.LEDGER_INCOMPATIBLE,
-            "ledger contains an incompatible event contract",
+            "derived positions require an authoritative private ledger path",
         )
-    if any(row.get("portfolio_id") != header.get("portfolio_id") for row in events):
-        raise LedgerValidationError(
-            LedgerIssueCode.LEDGER_PORTFOLIO_MISMATCH,
-            "ledger contains an event for another portfolio",
-        )
-    return {"header": dict(header), "events": [dict(row) for row in events]}
+    return _rebuild_loaded_ledger(load_ledger(ledger))
 
 
-def rebuild_positions(
-    ledger: Mapping[str, Any] | str | Path,
-) -> dict[str, Any]:
-    loaded = load_ledger(ledger) if isinstance(ledger, (str, Path)) else ledger
+def _rebuild_loaded_ledger(loaded: Mapping[str, Any]) -> dict[str, Any]:
+    _validate_loaded_ledger(loaded)
     header = dict(loaded.get("header") or {})
     events = [dict(row) for row in loaded.get("events") or []]
     if header.get("schema_version") != LEDGER_HEADER_SCHEMA_VERSION:
@@ -463,19 +464,19 @@ def rebuild_positions(
 
 
 def build_transaction_derived_portfolio_context(
-    projection: Mapping[str, Any],
+    ledger: str | Path,
     *,
     portfolio_id: str,
     account_id: str,
     instrument: InstrumentIdentity,
     context_run_id: str,
 ) -> MarketEnginePortfolioContext:
-    if projection.get("schema_version") != PROJECTION_SCHEMA_VERSION:
-        return _unknown_context(
-            instrument=instrument,
-            context_run_id=context_run_id,
-            blockers=("PROJECTION_CONTRACT_INVALID",),
+    if isinstance(ledger, Mapping):
+        raise LedgerValidationError(
+            LedgerIssueCode.LEDGER_INCOMPATIBLE,
+            "portfolio context cannot use caller-supplied derived positions",
         )
+    projection = rebuild_positions(ledger)
     if projection.get("portfolio_id") != portfolio_id or account_id not in projection.get("portfolio_accounts", []):
         return _unknown_context(
             instrument=instrument,
@@ -492,6 +493,11 @@ def build_transaction_derived_portfolio_context(
         ),
         None,
     )
+    if match is not None and match.get("canonical_ticker") != instrument.canonical_ticker:
+        raise LedgerValidationError(
+            LedgerIssueCode.INSTRUMENT_IDENTITY_MISMATCH,
+            "ledger-derived instrument identity does not match the requested instrument",
+        )
     if match is None:
         position_state = MarketEnginePortfolioPositionState.NOT_HELD
         quantity = "0"
@@ -596,39 +602,32 @@ def build_non_actionable_candidate_context(
     }
 
 
-def validate_private_ledger_path(
-    ledger_path: str | Path,
-    *,
-    repository_root: str | Path | None = None,
-) -> Path:
+def validate_private_ledger_path(ledger_path: str | Path) -> Path:
     path = Path(ledger_path).expanduser().resolve()
-    repo = Path(repository_root).resolve() if repository_root is not None else _discover_repository_root()
+    repo = _find_enclosing_git_worktree(path)
     if repo is None:
         return path
-    try:
-        relative = path.relative_to(repo)
-    except ValueError:
-        return path
+    if not _is_market_scanner_repository(repo):
+        raise LedgerValidationError(
+            LedgerIssueCode.PRIVATE_STORAGE_REQUIRED,
+            "live private ledgers are not allowed inside another Git repository",
+        )
+    relative = path.relative_to(repo)
     allowed = PRIVATE_REPOSITORY_LEDGER_ROOT
     if relative != allowed and allowed not in relative.parents:
         raise LedgerValidationError(
             LedgerIssueCode.PRIVATE_STORAGE_REQUIRED,
             "repository-local live ledgers are allowed only below data/portfolio/private",
         )
-    ignore_path = repo / ".gitignore"
-    try:
-        ignored = "/data/portfolio/private/" in ignore_path.read_text(encoding="utf-8").splitlines()
-    except OSError:
-        ignored = False
-    if not ignored:
+    if not _git_ignores(repo, relative):
         raise LedgerValidationError(
             LedgerIssueCode.TRACKED_PRIVATE_DATA_PATH,
-            "repository-local private ledger root is not protected by .gitignore",
+            "repository-local private ledger path is not protected by Git ignore rules",
         )
-    if _git_tracks(repo, relative):
+    if _git_tracks(repo, relative) or _tracked_parent_conflict(repo, relative):
         raise LedgerValidationError(
             LedgerIssueCode.TRACKED_PRIVATE_DATA_PATH,
-            "refusing to write a private ledger to a Git-tracked path",
+            "refusing to write a private ledger to a Git-tracked path or parent",
         )
     return path
 
@@ -682,20 +681,22 @@ def _load_ledger_text(text: str) -> dict[str, Any]:
     if not temporary:
         raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "private ledger is empty")
     try:
-        rows = [json.loads(line) for line in temporary]
+        rows = [_json_loads(line) for line in temporary]
     except (ValueError, json.JSONDecodeError) as exc:
         raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "private ledger is malformed") from exc
     header, events = rows[0], rows[1:]
-    if not isinstance(header, Mapping) or header.get("schema_version") != LEDGER_HEADER_SCHEMA_VERSION:
-        raise LedgerValidationError(LedgerIssueCode.LEDGER_INCOMPATIBLE, "ledger header is unsupported")
+    _validate_ledger_header(header)
     if any(not isinstance(row, Mapping) for row in events):
         raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "ledger event is malformed")
     for row in events:
-        _validate_loaded_event_shape(row)
-    return {"header": dict(header), "events": [dict(row) for row in events]}
+        _validate_event_semantics(row, error_code=LedgerIssueCode.LEDGER_CORRUPT)
+    loaded = {"header": dict(header), "events": [dict(row) for row in events]}
+    _validate_loaded_ledger(loaded)
+    return loaded
 
 
 def _validate_candidate_events(events: list[dict[str, Any]], event: dict[str, Any], *, portfolio_id: str) -> None:
+    _validate_event_semantics(event, error_code=LedgerIssueCode.CONFIRMED_PREVIEW_MISMATCH)
     if event["portfolio_id"] != portfolio_id:
         raise LedgerValidationError(
             LedgerIssueCode.LEDGER_PORTFOLIO_MISMATCH,
@@ -731,11 +732,13 @@ def _validate_candidate_events(events: list[dict[str, Any]], event: dict[str, An
     candidate = {
         "header": {
             "schema_version": LEDGER_HEADER_SCHEMA_VERSION,
+            "record_type": "ledger_header",
             "portfolio_id": portfolio_id,
+            "source_type": SOURCE_TYPE,
         },
         "events": [*events, event],
     }
-    rebuild_positions(candidate)
+    _rebuild_loaded_ledger(candidate)
 
 
 def _active_economic_events(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -863,8 +866,9 @@ def _apply_economic_event(state: dict[str, Any], event: Mapping[str, Any]) -> No
         else:
             state["realized_known"] = False
         state["quantity"] -= quantity
-        if state["quantity"] == 0 and state["cost_basis_known"]:
+        if state["quantity"] == 0:
             state["remaining_cost_basis"] = Decimal("0")
+            state["cost_basis_known"] = True
         if not fee_known:
             state["fees_known"] = False
     if fee_known and state["fees_known"]:
@@ -939,11 +943,19 @@ def _unknown_context(*, instrument: InstrumentIdentity, context_run_id: str, blo
 
 
 def _validate_normalized_event(event: dict[str, Any], *, registry: AuthoritativeInstrumentRegistry) -> None:
-    if set(event) != EVENT_FIELDS or event.get("schema_version") != LEDGER_SCHEMA_VERSION:
-        raise LedgerValidationError(LedgerIssueCode.CONFIRMED_PREVIEW_MISMATCH, "normalized event fields are invalid")
-    identity = registry.resolve(instrument_id=event.get("instrument_id"), ticker=event.get("canonical_ticker"))
+    _validate_event_semantics(
+        event,
+        error_code=LedgerIssueCode.CONFIRMED_PREVIEW_MISMATCH,
+    )
+    identity = registry.resolve(
+        instrument_id=event.get("instrument_id"),
+        ticker=event.get("canonical_ticker"),
+    )
     if identity.instrument_id != event["instrument_id"] or identity.canonical_ticker != event["canonical_ticker"]:
-        raise LedgerValidationError(LedgerIssueCode.INSTRUMENT_IDENTITY_MISMATCH, "normalized identity no longer matches registry")
+        raise LedgerValidationError(
+            LedgerIssueCode.INSTRUMENT_IDENTITY_MISMATCH,
+            "normalized identity no longer matches registry",
+        )
     if event.get("source_type") != SOURCE_TYPE:
         raise LedgerValidationError(LedgerIssueCode.CONFIRMED_PREVIEW_MISMATCH, "source type is not manual_user_input")
     normalized = normalize_transaction_preview(
@@ -958,22 +970,228 @@ def _validate_normalized_event(event: dict[str, Any], *, registry: Authoritative
         )
 
 
-def _validate_loaded_event_shape(event: Mapping[str, Any]) -> None:
+def _validate_event_semantics(
+    event: Mapping[str, Any],
+    *,
+    error_code: LedgerIssueCode,
+    trusted_now: datetime | None = None,
+) -> None:
+    """Validate the one canonical normalized event representation."""
     if set(event) != EVENT_FIELDS:
+        raise LedgerValidationError(error_code, "ledger event fields are incomplete or unexpected")
+    if event.get("schema_version") != LEDGER_SCHEMA_VERSION:
+        code = (
+            LedgerIssueCode.LEDGER_INCOMPATIBLE
+            if error_code == LedgerIssueCode.LEDGER_CORRUPT
+            else error_code
+        )
+        raise LedgerValidationError(code, "ledger event contract is unsupported")
+
+    event_type = event.get("event_type")
+    if event_type not in {"transaction", "correction", "reversal"}:
+        raise LedgerValidationError(error_code, "ledger event type is unsupported")
+    for field in ("transaction_id", "portfolio_id", "account_id", "instrument_id"):
+        _validate_stored_identifier(event.get(field), field=field, error_code=error_code)
+    ticker = event.get("canonical_ticker")
+    if not isinstance(ticker, str) or not CANDIDATE_TICKER.fullmatch(ticker):
+        raise LedgerValidationError(error_code, "canonical_ticker is not a safe canonical symbol")
+    if event.get("source_type") != SOURCE_TYPE:
+        raise LedgerValidationError(error_code, "source_type must be manual_user_input")
+    for field in ("broker_account_label", "note", "external_reference", "reason"):
+        _validate_optional_stored_text(event.get(field), field=field, error_code=error_code)
+
+    recorded = _validate_stored_timestamp(
+        event.get("recorded_at"),
+        field="recorded_at",
+        error_code=error_code,
+    )
+    if recorded > (trusted_now or datetime.now(UTC)):
+        raise LedgerValidationError(error_code, "recorded_at cannot be in the future")
+
+    corrects = event.get("corrects_transaction_id")
+    reverses = event.get("reverses_transaction_id")
+    if event_type == "transaction":
+        if corrects is not None or reverses is not None or event.get("reason") is not None:
+            raise LedgerValidationError(error_code, "transaction events cannot carry correction metadata")
+    elif event_type == "correction":
+        _validate_stored_identifier(corrects, field="corrects_transaction_id", error_code=error_code)
+        if reverses is not None or not event.get("reason"):
+            raise LedgerValidationError(error_code, "corrections require one target and a reason")
+    else:
+        _validate_stored_identifier(reverses, field="reverses_transaction_id", error_code=error_code)
+        if corrects is not None or not event.get("reason"):
+            raise LedgerValidationError(error_code, "reversals require one target and a reason")
+        economic_fields = (
+            "transaction_type",
+            "trade_date",
+            "execution_timestamp",
+            "quantity",
+            "unit_price",
+            "trade_currency",
+        )
+        if any(event.get(field) is not None for field in economic_fields):
+            raise LedgerValidationError(error_code, "reversals cannot carry economic values")
+        if event.get("fee") != {"availability": "unavailable", "amount": None, "currency": None}:
+            raise LedgerValidationError(error_code, "reversal fee fields must be unavailable")
+        return
+
+    if event.get("transaction_type") not in {"BUY", "SELL"}:
+        raise LedgerValidationError(error_code, "transaction_type must be BUY or SELL")
+    quantity = _validate_stored_decimal(
+        event.get("quantity"), field="quantity", error_code=error_code
+    )
+    if quantity <= 0:
+        raise LedgerValidationError(error_code, "quantity must be strictly positive")
+    price = _validate_stored_decimal(
+        event.get("unit_price"), field="unit_price", error_code=error_code
+    )
+    if price < 0:
+        raise LedgerValidationError(error_code, "unit_price cannot be negative")
+    currency = event.get("trade_currency")
+    if not isinstance(currency, str):
+        raise LedgerValidationError(error_code, "trade_currency must be a supported string")
+    try:
+        _validate_currency(currency)
+    except LedgerValidationError as exc:
+        raise LedgerValidationError(error_code, "trade_currency is unsupported") from exc
+    _validate_stored_fee(event.get("fee"), trade_currency=currency, error_code=error_code)
+
+    trade_date = event.get("trade_date")
+    if not isinstance(trade_date, str):
+        raise LedgerValidationError(error_code, "trade_date must be ISO YYYY-MM-DD")
+    try:
+        parsed_trade_date = date.fromisoformat(trade_date)
+    except ValueError as exc:
+        raise LedgerValidationError(error_code, "trade_date must be ISO YYYY-MM-DD") from exc
+    if parsed_trade_date.isoformat() != trade_date or parsed_trade_date > recorded.date():
+        raise LedgerValidationError(error_code, "trade_date cannot follow recorded_at")
+    execution_value = event.get("execution_timestamp")
+    if execution_value is not None:
+        execution = _validate_stored_timestamp(
+            execution_value,
+            field="execution_timestamp",
+            error_code=error_code,
+        )
+        if execution.date() != parsed_trade_date:
+            raise LedgerValidationError(error_code, "execution timestamp must belong to trade_date in UTC")
+        if execution > recorded:
+            raise LedgerValidationError(error_code, "execution timestamp cannot follow recorded_at")
+
+
+def _validate_ledger_header(header: Any) -> None:
+    if not isinstance(header, Mapping):
+        raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "ledger header is not an object")
+    if header.get("schema_version") != LEDGER_HEADER_SCHEMA_VERSION:
+        raise LedgerValidationError(LedgerIssueCode.LEDGER_INCOMPATIBLE, "ledger header contract is unsupported")
+    if set(header) != LEDGER_HEADER_FIELDS:
+        raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "ledger header fields are incomplete or unexpected")
+    if header.get("record_type") != "ledger_header" or header.get("source_type") != SOURCE_TYPE:
+        raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "ledger header authority fields are invalid")
+    _validate_stored_identifier(
+        header.get("portfolio_id"),
+        field="portfolio_id",
+        error_code=LedgerIssueCode.LEDGER_CORRUPT,
+    )
+
+
+def _validate_loaded_ledger(loaded: Mapping[str, Any]) -> None:
+    if set(loaded) != {"header", "events"}:
+        raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "loaded ledger boundary is invalid")
+    header = loaded.get("header")
+    events = loaded.get("events")
+    _validate_ledger_header(header)
+    if not isinstance(events, list) or not events:
+        raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "ledger must contain events")
+    portfolio_id = header["portfolio_id"]
+    ids: set[str] = set()
+    prior: dict[str, Mapping[str, Any]] = {}
+    for event in events:
+        if not isinstance(event, Mapping):
+            raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "ledger event is not an object")
+        _validate_event_semantics(event, error_code=LedgerIssueCode.LEDGER_CORRUPT)
+        transaction_id = event["transaction_id"]
+        if transaction_id in ids:
+            raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "ledger transaction IDs are not unique")
+        ids.add(transaction_id)
+        if event["portfolio_id"] != portfolio_id:
+            raise LedgerValidationError(LedgerIssueCode.LEDGER_CORRUPT, "event portfolio differs from ledger header")
+        reference = event.get("corrects_transaction_id") or event.get("reverses_transaction_id")
+        if reference:
+            target = prior.get(reference)
+            if target is None or target.get("event_type") == "reversal":
+                raise LedgerValidationError(
+                    LedgerIssueCode.LEDGER_CORRUPT,
+                    "event reference is unknown or non-economic",
+                )
+            identity_fields = (
+                "portfolio_id",
+                "account_id",
+                "instrument_id",
+                "canonical_ticker",
+            )
+            if any(event[field] != target.get(field) for field in identity_fields):
+                raise LedgerValidationError(
+                    LedgerIssueCode.LEDGER_CORRUPT,
+                    "event reference crosses an identity boundary",
+                )
+        prior[transaction_id] = event
+    try:
+        _active_economic_events([dict(event) for event in events])
+    except LedgerValidationError as exc:
         raise LedgerValidationError(
             LedgerIssueCode.LEDGER_CORRUPT,
-            "ledger event fields are incomplete or unexpected",
-        )
-    if event.get("schema_version") != LEDGER_SCHEMA_VERSION:
-        raise LedgerValidationError(
-            LedgerIssueCode.LEDGER_INCOMPATIBLE,
-            "ledger contains an incompatible event contract",
-        )
-    if event.get("event_type") not in {"transaction", "correction", "reversal"}:
-        raise LedgerValidationError(
-            LedgerIssueCode.LEDGER_INCOMPATIBLE,
-            "ledger contains an unsupported event type",
-        )
+            "ledger references or append order are invalid",
+        ) from exc
+
+
+def _validate_stored_identifier(value: Any, *, field: str, error_code: LedgerIssueCode) -> None:
+    if not isinstance(value, str) or not IDENTIFIER.fullmatch(value):
+        raise LedgerValidationError(error_code, f"{field} must be a safe non-empty identifier")
+
+
+def _validate_optional_stored_text(value: Any, *, field: str, error_code: LedgerIssueCode) -> None:
+    if value is None:
+        return
+    if not isinstance(value, str) or not value.strip() or len(value) > 2000 or "\x00" in value:
+        raise LedgerValidationError(error_code, f"{field} must be a bounded non-empty string or null")
+
+
+def _validate_stored_decimal(value: Any, *, field: str, error_code: LedgerIssueCode) -> Decimal:
+    if not isinstance(value, str) or not re.fullmatch(r"(?:0|[1-9][0-9]*)(?:\.[0-9]+)?", value):
+        raise LedgerValidationError(error_code, f"{field} must be a canonical non-negative decimal string")
+    try:
+        parsed = Decimal(value)
+    except InvalidOperation as exc:
+        raise LedgerValidationError(error_code, f"{field} is malformed") from exc
+    if not parsed.is_finite() or _decimal_text(parsed) != value:
+        raise LedgerValidationError(error_code, f"{field} is not a lossless canonical decimal")
+    return parsed
+
+
+def _validate_stored_fee(value: Any, *, trade_currency: str, error_code: LedgerIssueCode) -> None:
+    if not isinstance(value, Mapping) or set(value) != {"availability", "amount", "currency"}:
+        raise LedgerValidationError(error_code, "fee fields are incomplete or unexpected")
+    if value.get("availability") == "unavailable":
+        if value.get("amount") is not None or value.get("currency") is not None:
+            raise LedgerValidationError(error_code, "unavailable fee cannot carry amount or currency")
+        return
+    if value.get("availability") != "available":
+        raise LedgerValidationError(error_code, "fee availability is invalid")
+    amount = _validate_stored_decimal(value.get("amount"), field="fee.amount", error_code=error_code)
+    if amount < 0 or value.get("currency") != trade_currency:
+        raise LedgerValidationError(error_code, "available fee must be non-negative and use trade currency")
+
+
+def _validate_stored_timestamp(value: Any, *, field: str, error_code: LedgerIssueCode) -> datetime:
+    if not isinstance(value, str):
+        raise LedgerValidationError(error_code, f"{field} must be a canonical UTC timestamp")
+    try:
+        parsed = _utc_timestamp(value)
+    except LedgerValidationError as exc:
+        raise LedgerValidationError(error_code, f"{field} is invalid") from exc
+    if _utc_text(parsed) != value:
+        raise LedgerValidationError(error_code, f"{field} must be normalized to UTC")
+    return parsed
 
 
 def _normalize_fee(value: Any, *, trade_currency: str) -> dict[str, Any]:
@@ -1024,7 +1242,7 @@ def _nonnegative_decimal(value: Any, *, field: str) -> str:
     parsed = _parse_decimal(value, field=field)
     if parsed < 0:
         raise LedgerValidationError(LedgerIssueCode.INVALID_PRICE, f"{field} cannot be negative")
-    return _decimal_text(parsed)
+    return "0" if parsed == 0 else _decimal_text(parsed)
 
 
 def _parse_decimal(value: Any, *, field: str) -> Decimal:
@@ -1064,12 +1282,19 @@ def _trade_date(value: Any, *, now: datetime) -> str:
     return parsed.isoformat()
 
 
-def _optional_execution_timestamp(value: Any, *, trade_date: str) -> str | None:
+def _optional_execution_timestamp(
+    value: Any,
+    *,
+    trade_date: str,
+    recorded_at: datetime,
+) -> str | None:
     if value in (None, ""):
         return None
     parsed = _utc_timestamp(str(value))
     if parsed.date().isoformat() != trade_date:
         raise LedgerValidationError(LedgerIssueCode.INVALID_TIMESTAMP, "execution timestamp date must equal trade date")
+    if parsed > recorded_at:
+        raise LedgerValidationError(LedgerIssueCode.INVALID_TIMESTAMP, "execution timestamp cannot follow recorded_at")
     return _utc_text(parsed)
 
 
@@ -1107,26 +1332,98 @@ def _sha256(value: bytes) -> str:
     return hashlib.sha256(value).hexdigest()
 
 
-def _discover_repository_root() -> Path | None:
-    current = Path.cwd().resolve()
-    for candidate in (current, *current.parents):
-        if (candidate / ".git").exists():
-            return candidate
+def _json_loads(value: str) -> Any:
+    def reject_constant(constant: str) -> None:
+        raise ValueError(f"non-standard JSON numeric constant: {constant}")
+
+    return json.loads(value, parse_constant=reject_constant)
+
+
+def _find_enclosing_git_worktree(path: Path) -> Path | None:
+    existing = (
+        path
+        if path.exists()
+        else next((parent for parent in path.parents if parent.exists()), None)
+    )
+    if existing is None:
+        return None
+    start = existing if existing.is_dir() else existing.parent
+    for candidate in (start, *start.parents):
+        marker = candidate / ".git"
+        if not marker.exists():
+            continue
+        result = _run_git(candidate, ["rev-parse", "--show-toplevel"])
+        if result.returncode != 0:
+            raise LedgerValidationError(
+                LedgerIssueCode.PRIVATE_STORAGE_REQUIRED,
+                "Git worktree detection failed closed",
+            )
+        try:
+            return Path(result.stdout.strip()).resolve(strict=True)
+        except (OSError, RuntimeError) as exc:
+            raise LedgerValidationError(
+                LedgerIssueCode.PRIVATE_STORAGE_REQUIRED,
+                "Git worktree root could not be resolved safely",
+            ) from exc
     return None
 
 
+def _is_market_scanner_repository(repo: Path) -> bool:
+    result = _run_git(repo, ["remote", "get-url", "origin"])
+    if result.returncode != 0:
+        raise LedgerValidationError(
+            LedgerIssueCode.PRIVATE_STORAGE_REQUIRED,
+            "Git repository identity could not be verified",
+        )
+    remote = result.stdout.strip().removesuffix(".git").rstrip("/")
+    return bool(
+        re.fullmatch(
+            r"(?:git@github\.com:|ssh://git@github\.com/|https://github\.com/)"
+            r"sclaessens/market-scanner",
+            remote,
+        )
+    )
+
+
+def _git_ignores(repo: Path, relative: Path) -> bool:
+    result = _run_git(repo, ["check-ignore", "--quiet", "--", relative.as_posix()])
+    if result.returncode not in {0, 1}:
+        raise LedgerValidationError(
+            LedgerIssueCode.TRACKED_PRIVATE_DATA_PATH,
+            "Git ignore verification failed closed",
+        )
+    return result.returncode == 0
+
+
 def _git_tracks(repo: Path, relative: Path) -> bool:
+    result = _run_git(repo, ["ls-files", "--error-unmatch", "--", relative.as_posix()])
+    if result.returncode not in {0, 1}:
+        raise LedgerValidationError(
+            LedgerIssueCode.TRACKED_PRIVATE_DATA_PATH,
+            "Git tracked-path verification failed closed",
+        )
+    return result.returncode == 0
+
+
+def _tracked_parent_conflict(repo: Path, relative: Path) -> bool:
+    return any(_git_tracks(repo, parent) for parent in relative.parents if parent != Path("."))
+
+
+def _run_git(repo: Path, arguments: list[str]) -> subprocess.CompletedProcess[str]:
     try:
-        result = subprocess.run(
-            ["git", "ls-files", "--error-unmatch", relative.as_posix()],
+        return subprocess.run(
+            ["git", *arguments],
             cwd=repo,
-            stdout=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
+            text=True,
             check=False,
         )
-    except OSError:
-        return True
-    return result.returncode == 0
+    except OSError as exc:
+        raise LedgerValidationError(
+            LedgerIssueCode.PRIVATE_STORAGE_REQUIRED,
+            "Git safety verification failed closed",
+        ) from exc
 
 
 def _redacted_path(path: Path) -> str:

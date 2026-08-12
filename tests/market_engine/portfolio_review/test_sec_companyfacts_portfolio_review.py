@@ -22,7 +22,6 @@ from market_engine.portfolio_review.manual_transaction_ledger import (
     build_transaction_derived_portfolio_context,
     confirm_and_append,
     normalize_transaction_preview,
-    rebuild_positions,
 )
 from market_engine.recommendation_review.sec_companyfacts_recommendation_review import (
     NON_ACTIONABLE_RECOMMENDATION_REVIEW_BOUNDARY,
@@ -284,7 +283,7 @@ def test_confirmed_ledger_projection_is_accepted_by_portfolio_review(
         registry=registry,
     )
     context = build_transaction_derived_portfolio_context(
-        rebuild_positions(ledger),
+        ledger,
         portfolio_id="synthetic-portfolio",
         account_id="synthetic-account",
         instrument=registry.resolve(instrument_id="equity:nvda"),

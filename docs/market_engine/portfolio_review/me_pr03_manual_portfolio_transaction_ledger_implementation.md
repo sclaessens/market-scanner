@@ -180,6 +180,97 @@ storage paths, tracked private paths, and portfolio mismatch.
 
 Any error occurs before append or leaves the existing file byte-identical.
 
+## PR #477 review remediation
+
+The review of head `2b221e000270424591771f6e436a595118199cdb`
+identified five authority, privacy, and correctness gaps. They were remediated
+without changing the ME-PR03 product boundary.
+
+### Canonical stored-event validation
+
+The original loader checked field names and version markers but did not apply
+the complete normalized-event semantics before projection. A single canonical
+semantic validator now governs normalized previews, confirmation, append
+validation, ledger load, and rebuild. It checks exact fields and versions,
+safe identities, event-specific economic and reference rules, fixed manual
+source authority, canonical finite decimal strings, currencies and fees,
+canonical UTC timestamps, append time relationships, portfolio consistency,
+and unexpected data. JSON `NaN` and `Infinity`, numeric floats, exponent
+representations, negative or zero quantities, negative prices or fees, and
+future recorded or execution timestamps fail closed. Stored-data failures are
+reported as `LEDGER_CORRUPT` or `LEDGER_INCOMPATIBLE` and cannot produce a
+position.
+
+The event schema now expresses safe identifier and ticker patterns, supported
+currencies, strict positive quantities, bounded optional text, fee
+availability rules, and transaction/correction/reversal conditionals. The
+projection schema now closes position objects to unexpected properties and
+specifies every projected field. Tests validate real runtime payloads against
+these machine-readable constraints, including valid correction and reversal
+events and deliberately invalid payloads.
+
+### Ledger-backed context authority
+
+The original public adapter accepted an arbitrary derived-position mapping.
+The public adapter now accepts only an authoritative private ledger path and
+performs `load_ledger()` followed by a deterministic `rebuild_positions()` in
+the same call. The projection-only formatter remains an internal detail.
+`rebuild_positions()` also rejects mappings, so derived JSON exports are
+write-only convenience outputs for this authority chain. Portfolio, account,
+instrument ID, and canonical ticker are checked fail closed. Quantity, cost,
+profit/loss, digest, references, and state therefore originate only from the
+just-completed ledger rebuild. Candidate context remains descriptive and
+non-actionable.
+
+### Target-derived private path safety
+
+The original path check discovered a repository from the process working
+directory and accepted a target outside that repository as external. Path
+safety now resolves the target first, discovers an enclosing worktree from the
+target and its existing parents, supports `.git` directories and worktree
+`.git` files, and verifies repository identity through Git. The market-scanner
+repository permits only Git-ignored `data/portfolio/private/` targets and uses
+`git check-ignore` plus `git ls-files` for ignore, tracked-file, and tracked
+parent checks. Other Git repositories are rejected. Resolved symlink targets
+are subjected to the same checks. Git detection and verification errors fail
+closed. The production API no longer accepts a caller-supplied repository
+root.
+
+### Execution time boundary
+
+The original preview validator required a timezone but did not compare an
+execution timestamp with the preview/recorded moment. The normalized execution
+timestamp must now belong to the trade date in UTC and be no later than the
+trusted recorded moment. The recorded moment itself cannot be in the future
+relative to the runtime clock. Confirmation and ledger load repeat these
+checks, including after timezone normalization, so changing a preview or
+supplying a future recorded timestamp cannot bypass them.
+
+### Position-cycle cost basis
+
+The original calculation left `cost_basis_known` false after a position with
+an unavailable purchase fee was fully sold. Reaching exactly zero quantity now
+sets remaining cost basis to exact zero and ends the uncertainty for that
+closed position cycle. A later purchase with known price and fee can establish
+a new known remaining cost basis and moving average. Historical cumulative
+fees and realized profit/loss remain unavailable independently; a partial sale
+does not clear the old unknown cost basis.
+
+Regression coverage includes corrupt stored values and event shapes, complete
+correction/reversal semantics, header and portfolio mismatch, timestamp and
+reference failures, forged projections and digests, ledger-backed state
+mapping, modified derived exports, target-based Git and symlink cases, future
+execution relationships, and full versus partial unknown-cost cycles. The
+focused ledger suite passes 72 tests and the full relevant portfolio boundary
+passes 151 tests. The Market Engine and repository suites pass 1,625 and 2,292
+tests respectively, with only the unchanged missing historical ME-DATA06
+fixture failure that reproduces on base `4342c354`.
+
+Remaining limitations are unchanged: the ledger is local private file
+authority rather than a signed tamper-evident service, and ME-PR03 still has no
+broker source, market-price source, FX source, tax model, corporate-action
+model, exposure intelligence, or allocation authority.
+
 ## Explicit non-goals
 
 ME-PR03 adds no broker connection, scraping, order placement, automatic
