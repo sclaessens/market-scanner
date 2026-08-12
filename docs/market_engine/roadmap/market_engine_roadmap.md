@@ -386,8 +386,27 @@ unproven added rows, 6,569 blocked precision-level historical modifications,
 and unresolved EA and TMHC sessions. Trusted publication is not authorized.
 The subsequent security remediation adds registered adapter-derived identity,
 content-addressed acquisition-run binding, and identity-aware absence consumer
-reconciliation. Its final code head still requires explicit approval for one
-new `publish=false` canary; no provider or publication has been authorized.
+reconciliation. Its final code head was exercised once by authorized
+`publish=false` run `31580777980`; the run failed closed with no approved
+adapter envelope, replayed artifact, or receipt. No provider or publication was
+authorized and `market-data` remained unchanged.
+
+ME-SR24 inspected the first-production-route prerequisite and completed with
+blockers. The active market-price source-policy registry is empty, and no
+existing repository policy grants automated production acquisition,
+raw-response retention, replay, mutation/publication evidence use, exchange and
+instrument scope, provider-symbol mapping, or request-frequency authority.
+Yahoo Finance through `yfinance` remains an untrusted DataFrame acquisition
+path and was not promoted. No runtime or provider configuration was changed.
+
+The roadmap cannot advance to a production adapter or bounded canary until a
+human-approved source contract is committed with the complete legal,
+retention, replay, evidence, coverage, frequency, and redaction boundary. Once
+that prerequisite exists, the next implementation must capture the real raw
+response inside the registered request/response flow, add trusted execution
+provenance, replay from immutable storage, issue artifact-bound receipts only
+for safe new terminal sessions, and keep automatic publication disabled until
+separately reviewed.
 
 ME-RUN32 completed the post-PR472 non-publishing operational audit. One
 `publish=false` canonical refresh recovered 68 of the original 70 blockers;

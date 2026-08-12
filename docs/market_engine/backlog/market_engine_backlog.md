@@ -628,7 +628,7 @@ data change is authorized.
 
 ### ME-SR23 — Corporate-action lifecycle cutoff remediation and safe republish
 
-Status: CODE REMEDIATED / NEW PUBLISH=FALSE CANARY APPROVAL REQUIRED
+Status: MERGED / POST-MERGE PUBLISH=FALSE CANARY FAILED CLOSED
 
 ME-SR23 separates transaction closing, last trading session, suspension and
 inactive dates in lifecycle registry v3. It adds primary-source records for
@@ -646,8 +646,41 @@ The final security remediation replaces free envelope identity fields with a
 registered adapter request/response boundary, binds every artifact to a
 content-addressed acquisition-run manifest, and binds absence evidence to the
 actual freshness consumer before session resolution. The resulting code head
-has not been canaried. Production source approval, EA, TMHC, additions, and
-precision-rewrite blockers remain unchanged.
+was canaried once with `publish=false` in run `31580777980`. The run failed
+closed with 11,388 unproven additions, 6,296 blocked precision/serialization
+rewrites, no adapter envelopes, no replayed artifacts, and no accepted
+receipts. Production source approval, EA, TMHC, additions, and
+precision-rewrite blockers remain unchanged. `market-data` was unchanged.
+
+### ME-SR24 — Activate the first approved production price-evidence route
+
+Status: COMPLETED WITH BLOCKERS / SOURCE APPROVAL ABSENT
+
+Repository inspection found that the only active machine-readable market-price
+source policy has an empty provider registry. No existing policy proves legal
+and technical permission for automated production acquisition, raw-response
+retention, replay, mutation evidence, canonical publication evidence, exchange
+coverage, symbol mappings, or request frequency. Archived provider-governance
+material explicitly leaves raw-payload retention unapproved.
+
+ME-SR24 therefore did not select or activate a provider, did not promote
+Yahoo Finance or `yfinance`, and did not add a production transport, envelope,
+receipt, credential, or publication path. The existing ME-SR23 infrastructure
+continues to fail closed. The 11,388 additions and 6,296 precision rewrites
+remain blocked; EA and TMHC remain unresolved without approved evidence.
+
+Next prerequisite:
+
+```text
+Human source-policy approval covering license, automated acquisition, raw
+response retention duration, replay, mutation/publication evidence, supported
+instruments and exchanges/MICs, provider-symbol mappings, request frequency,
+and response-metadata redaction.
+```
+
+Only after that prerequisite is committed may a follow-up story implement and
+test the real adapter transport and request one bounded `publish=false` canary.
+Automatic ticker publication is not complete or authorized.
 
 ## Current ChatGPT Advisory Artifact Chain
 
