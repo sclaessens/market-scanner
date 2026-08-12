@@ -443,7 +443,7 @@ Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Dev
 
 Job family: ME-SA / Pipeline continuation contract
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-SA07
+Status: HISTORICAL NEXT CANDIDATE AFTER ME-SA07 / SUPERSEDED
 
 Goal: define how descriptive Analysis Review context may continue toward reportability without creating recommendation or allocation authority.
 
