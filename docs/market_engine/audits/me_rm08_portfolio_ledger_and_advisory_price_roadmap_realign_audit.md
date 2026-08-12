@@ -72,7 +72,9 @@ This sprint changes documentation only:
 
 Documentation validation consists of:
 
-- exact story-ID collision checks for ME-RM08, ME-PR03, and ME-SR25;
+- story-ID review: ME-RM08 and ME-SR25 were unused; ME-PR03 was an existing
+  deferred, unexecuted candidate explicitly reserved by ME-PR02 and is refined
+  here without reusing a completed sprint ID;
 - cross-document active-sequence reconciliation;
 - English-only review;
 - Markdown structure review;
