@@ -70,8 +70,9 @@ The production source policy remains empty. The existing `yfinance` DataFrame
 route is not silently promoted to trusted raw-response acquisition, and no new
 provider is approved. EA and TMHC therefore remain unresolved; additions still
 lack approved adapter evidence; historical precision rewrites still lack a
-correction contract. No new canary has been executed, and the final code head
-from this remediation is not yet canaried.
+correction contract. The single post-remediation `publish=false` canary on
+head `448e460a57d31f470fd0a542fc97eb1a15edd72a` subsequently confirmed this
+safe fail-closed state; it did not establish publication readiness.
 
 ### Current local validation
 
@@ -89,6 +90,65 @@ The exact failure was previously reproduced on PR base
 `a0409a49e8f8f3ef9dce352c22b039ce4387faab`; this remediation does not touch
 that contract or artifact path.
 
+### Post-remediation non-publishing canary
+
+Exactly one authorized post-remediation canary ran with `publish=false`:
+
+| Evidence | Result |
+|---|---|
+| Workflow | [31580777980](https://github.com/sclaessens/market-scanner/actions/runs/31580777980) |
+| Run attempt | 1 |
+| Branch / executable head | `me-sr23-corporate-action-lifecycle-cutoff-remediation` / `448e460a57d31f470fd0a542fc97eb1a15edd72a` |
+| Run identity | `me-sr23-canonical-price-refresh-20260812T085847Z` |
+| Input | `publish=false` |
+| Workflow result | expected fail-closed `failure`; refresh step succeeded and the explicit degraded/failed gate failed |
+| Universe result | 952 total; 873 updated; 3 already current; 5 not expected; 71 failed |
+| Coverage | 942 sufficient; 3 limited history; 5 retained inactive; 1 not applicable; 1 insufficient unexplained (`FDXF`) |
+| Mutation evidence | 876 instruments; 17,684 mutations without receipts; 876 `MUTATION_EVIDENCE_MISSING` failures |
+| Additions | 11,388 unproven additions; no approved artifact-bound receipts |
+| Precision rewrites | 6,296 rows across 484 instruments; 7,712 field changes; maximum absolute delta about `1.14e-13`; no correction contract |
+| Session reconciliation | 948 instruments; 12,307 unresolved instrument sessions |
+| Freshness | 70 `EXPECTED_SESSION_COVERAGE_INCOMPLETE`; EA also `RETAINED_HISTORY_ENDS_BEFORE_EXPECTED_SESSION` |
+| Adapter envelopes / replayed artifacts / accepted receipts | 0 / 0 / 0 |
+| Identity mismatches / replay failures | 0 / 0 |
+| Publish job | skipped |
+| Publication bundle | not produced |
+| Freshness artifact | `canonical-price-freshness-me-sr23-canonical-price-refresh-20260812T085847Z` |
+| Artifact ID / size | `9135168244` / 9,749,555 bytes |
+| Artifact digest | `sha256:ecabdc5306ce598ff3d74c48a4e07ee28171a3db5ae5135c83f9556c6f62abda` |
+| Freshness manifest | 76,655,347 bytes; SHA-256 `2c61d58aa7bcac0cc024f89eed658fe38d5cc0750267725edd7a7f3a377a76ca` |
+| Mutation diagnostics | 26,014,677 bytes; SHA-256 `8b9d84d35e08b3e5adf8f01b60e65469940ebf4adec107a844a45d19de12af53` |
+| `market-data` before / after | `95c88276763b1762cbbfbccc402ec8535268127b` / unchanged |
+
+EA remains at 389 canonical rows through July 23, 2026. Its eight expected
+sessions through the August 4 lifecycle cutoff remain unresolved because no
+artifact, receipt, or absence attestation was produced. TMHC remains
+`not_expected` after its completed corporate action, but its July 24 session
+remains unresolved because the lifecycle state is not accepted as a replayable
+absence attestation.
+
+The canary proved that missing trusted evidence is rejected, lifecycle state is
+not substituted for absence evidence, unresolved sessions remain blocked, and
+publication is skipped. It did not exercise the positive production adapter
+path: zero adapter envelopes, replayed artifacts, and accepted receipts were
+available. Therefore the registered-adapter capture, full relabelling, and
+cross-consumer protections remain operationally demonstrated by local tests,
+not by this production canary. Counts of zero identity mismatches do not prove
+that a positive production identity chain was reconciled.
+
+The freshness manifest records `source_main_sha =
+a0409a49e8f8f3ef9dce352c22b039ce4387faab`, which identifies the trusted
+`main` baseline rather than the executable branch head. GitHub workflow and
+artifact metadata independently bind this run to `448e460a...`. A future
+contract should record an explicit `executing_code_sha` or
+`workflow_head_sha` so a detached manifest can identify both values without
+external workflow metadata.
+
+No retry, second canary, runtime change, merge, publication, or `market-data`
+mutation occurred. The result is safe fail-closed but not publication-ready.
+Another full-universe canary is not useful until a governed production provider
+route emits trusted raw-response envelopes and artifact-bound receipts.
+Historical precision rewrites, EA, and TMHC must remain separately blocked.
 
 ## Trusted Provider Identity and Diagnostic Retention Remediation
 
