@@ -36,8 +36,9 @@ Engine work. It is not an exhaustive file inventory.
 
 - `data/market_engine/`: generated Market Engine data and run outputs subject
   to each contract.
-- `data/portfolio/`: local portfolio paths; live personal data must be ignored
-  and must not be committed.
+- `data/portfolio/private/`: optional ignored repository-local boundary for
+  private ME-PR03 ledgers and projections; live personal data must not be
+  committed. Other `data/portfolio/` files are legacy/reference state.
 - `artifacts/market_engine/`: run artifacts and compact evidence where
   explicitly approved.
 - `market-data` branch: canonical price dataset; separate from planned

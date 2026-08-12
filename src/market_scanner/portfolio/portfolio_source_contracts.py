@@ -55,7 +55,6 @@ REPORTING_DISPLAY_DATASET_ROLES: tuple[PortfolioSourceDatasetRole, ...] = (
 
 PORTFOLIO_SOURCE_OF_TRUTH_ROLES: tuple[PortfolioSourceDatasetRole, ...] = (
     PortfolioSourceDatasetRole.MANUAL_SOURCE_TRANSACTIONS,
-    PortfolioSourceDatasetRole.MANUAL_SOURCE_POSITIONS,
 )
 
 REQUIRED_MANUAL_POSITION_SOURCE_FIELDS: tuple[str, ...] = (

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "market-engine-derived-positions-v1",
+  "title": "Transaction-derived portfolio positions",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "portfolio_id",
+    "projection_timestamp",
+    "ledger_digest",
+    "ledger_event_count",
+    "active_transaction_count",
+    "cost_basis_method",
+    "positions",
+    "portfolio_accounts",
+    "calculation_status"
+  ],
+  "properties": {
+    "schema_version": {"const": "market-engine-derived-positions-v1"},
+    "portfolio_id": {"type": "string"},
+    "projection_timestamp": {"type": ["string", "null"]},
+    "ledger_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "ledger_event_count": {"type": "integer", "minimum": 0},
+    "active_transaction_count": {"type": "integer", "minimum": 0},
+    "cost_basis_method": {"const": "moving_weighted_average_v1"},
+    "portfolio_accounts": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "calculation_status": {"enum": ["complete", "partial"]},
+    "positions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "portfolio_id",
+          "account_id",
+          "instrument_id",
+          "canonical_ticker",
+          "quantity",
+          "position_status",
+          "weighted_average_cost",
+          "cumulative_fees",
+          "remaining_cost_basis",
+          "realized_profit_loss",
+          "transaction_currency",
+          "first_transaction_date",
+          "last_transaction_date",
+          "last_confirmed_transaction_id",
+          "transaction_count",
+          "projection_timestamp",
+          "ledger_digest",
+          "transaction_references",
+          "calculation_status",
+          "calculation_blockers"
+        ]
+      }
+    }
+  }
+}

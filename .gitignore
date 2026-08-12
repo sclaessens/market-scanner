@@ -87,7 +87,9 @@ artifacts/market_engine/me-gv06-governor-explanation-*/
 # ========================
 # Portfolio data (state = preserved)
 # ========================
-# Do not ignore: belongs to system state
+# Legacy portfolio files remain historical compatibility state. New live
+# ME-PR03 ledgers and derived projections are private and must never be tracked.
+/data/portfolio/private/
 
 # ========================
 # Reports (generated)
