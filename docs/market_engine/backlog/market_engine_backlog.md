@@ -529,11 +529,13 @@ publication to a data-only `market-data` branch, and a fail-closed analysis
 consumption boundary. Featurebranch runs cannot publish and no fundamental
 operator approval is automated.
 
-The sequence is now:
+The historical sequence at ME-SR17 planning time was:
 
 ```text
 ME-DATA10 -> ME-SR17 -> ME-SR18 -> failed post-merge canary -> ME-SR19 -> ME-DATA11
 ```
+
+ME-RM08 supersedes this as the active product sequence.
 
 The first ME-SR17 production canary proved provider refresh, normal
 `market-data` publication, exact-fileset validation, and downloadable
@@ -3646,7 +3648,7 @@ docs/market_engine/backlog/me_uni09_professional_swing_universe_expansion_from_c
 docs/market_engine/roadmap/me_uni09_professional_swing_universe_expansion_from_candidates_roadmap_entry.md
 ```
 
-## Active Next Direction
+## Historical Next Direction After ME-SA07
 
 ### ME-SA08 - Define safe descriptive Analysis Review continuation beyond the Recommendation Review boundary
 
@@ -3654,7 +3656,7 @@ Owner roles: Product Owner / Operator / Data Steward / Technical Architect / Dev
 
 Job family: ME-SA / Pipeline continuation contract
 
-Status: NEXT ACTIVE CANDIDATE AFTER ME-SA07
+Status: HISTORICAL NEXT CANDIDATE AFTER ME-SA07 / SUPERSEDED
 
 Goal: define how descriptive Analysis Review context may continue toward reportability without creating recommendation or allocation authority.
 
@@ -3671,7 +3673,6 @@ These sprints are not rejected and not blocked. They remain valid later-candidat
 * ME-CANDIDATE03 - Candidate classification QA/review contract.
 * ME-OUT03 - Operator report readability/polish improvements.
 * ME-DL03 - Non-production delivery preview, only after expanded-universe report usefulness is proven.
-* ME-PR03 - Approved portfolio context source/persistence contract, only if larger runs show repeated portfolio-context friction.
 * ME-DE03 - Decision Engine handoff review hardening, only if expanded candidate/report outputs expose a concrete downstream handoff gap.
 * ME-QAxx / ME-GOVxx - Additional governance or QA only when concrete evidence justifies it.
 
