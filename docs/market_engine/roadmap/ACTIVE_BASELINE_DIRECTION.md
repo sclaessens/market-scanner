@@ -314,7 +314,8 @@ Not:
 ```text
 ME-GH03 - Deterministic ranking and review queue
 ME-DATA06 - Another data-only infrastructure sprint without an operational blocker
-ME-RUN32 - Another broad ranking layer before evidence coverage improves
+Rejected future concept (formerly mislabeled ME-RUN32) - Another broad ranking
+layer before evidence coverage improves
 ```
 
 Remaining data gaps are now the operational blocker to full-advice readiness:
@@ -706,6 +707,14 @@ separate resolution of the remaining 44 `PROVIDER_OHLC_INVALID` and 26
 `EXPECTED_SESSION_NOT_AVAILABLE` results. ME-DATA11 must reuse the generic
 ME-DATA10 runtime and must not introduce automatic approval, estimates, hidden
 formula fallbacks, advice authority, or unrelated operational side effects.
+
+ME-RUN32 now unambiguously names the completed post-PR472 non-publishing
+canonical price refresh audit. Its single `publish=false` run recovered 68 of
+the original 70 blockers without an invalid-OHLC recurrence. NSA, TMHC, and 12
+new provider/session freshness blockers remain fail-closed. The publish job was
+skipped and the `market-data` SHA did not change. The next baseline action is
+evidence review of those 14 current blockers; neither a retry nor a publication
+canary is authorized.
 
 ME-SR20 and ME-SR21 now provide the reviewable generic diagnostics and bounded
 provider-completeness path for those failures. ME-SR22 proves and implements
