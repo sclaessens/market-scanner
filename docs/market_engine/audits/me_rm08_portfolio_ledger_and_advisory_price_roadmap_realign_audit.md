@@ -78,4 +78,7 @@ Documentation validation consists of:
 - Markdown structure review;
 - final branch diff inspection.
 
-Draft PR: pending creation at the time of this initial audit commit.
+Draft PR: [#476](https://github.com/sclaessens/market-scanner/pull/476).
+
+Initial PR head before this audit-finalization commit:
+`73ce8dfe2fa10aca68301dab7ac1c9bbf8af902e`.
