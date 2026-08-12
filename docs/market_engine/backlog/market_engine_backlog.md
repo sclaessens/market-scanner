@@ -38,35 +38,32 @@ Backlog items do not authorize implementation unless the sprint scope explicitly
 * Cross-job work must be explicitly labeled as governance, QA, data governance, or integration contract work.
 * Analysis, recommendation, portfolio review, and delivery authority must remain separated.
 
-## Active Results-first Advice Baseline Chain
+## Active Product Roadmap After ME-SR24
 
-The active baseline chain for 500-ticker progress is now:
+ME-RM08 supersedes stale active-next pointers while preserving their historical
+meaning. The current product sequence is:
 
 ```text
-ME-GH02 - Batch artifact discovery and ticker status index (completed)
-  -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
-  -> ME-ADV02 - 500-ticker advice batch output (completed)
-  -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
-  -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
-  -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots (completed)
-  -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes (implementation complete / coverage partial)
-  -> ME-BOOT03 - Bootstrap authoritative universe and local price-history coverage (implementation complete / coverage partial)
-  -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
-  -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
-  -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
-  -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
-  -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
-  -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
-  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
-  -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
-  -> ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot (completed / two AAPL margins derived / downstream measured)
-  -> ME-SR17 — Implement scheduled canonical price refresh and freshness publication (completed / production publication canary exposed lifecycle gap)
-  -> ME-SR18 — Add corporate-action-aware lifecycle and listing-age freshness (implemented / first post-merge canary failed closed)
-  -> ME-SR19 — BLD/JHG retained-history boundary remediation (implemented / draft review required)
-  -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / not started)
+ME-RUN30/31 and ME-DATA06-10 - broad analysis and evidence baseline
+  -> ME-SR17-24 and ME-RUN32 - canonical refresh hardening and blocker evidence
+  -> ME-RM08 - portfolio/advisory-price roadmap realignment (docs-only)
+  -> ME-PR03 - manual transaction ledger and portfolio-aware candidate context (NEXT)
+  -> ME-SR25 - scheduled advisory price refresh and freshness artifacts
+  -> ME-PI01 - portfolio exposure and concentration intelligence
+  -> ME-CI12 - batch grounded advisory consumption after upstream inputs stabilize
+  -> ME-PS01 - position-sizing decision contract
+  -> ME-NL01/02/03 - notification sequence
 ```
 
-ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
+ME-DATA11 and ME-CI11D remain planned but are deferred. The canonical
+publication route remains blocked by ME-SR24 and is not a prerequisite for the
+advisory-only ME-SR25 path.
+
+Historical sections below retain the state and `Next` labels that applied when
+each sprint closed. They do not override
+`docs/market_engine/roadmap/ACTIVE_BASELINE_DIRECTION.md`.
+
+ME-ADV01 implemented the first minimal deterministic advice engine.ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
 the ME-GH02 `ticker_status_index.json` and linked dry-run artifacts, writes
 `manifest.json`, `advice_index.json`, `advice_index.md`,
 `advice_summary.json`, and `unable_to_advise.json` under
@@ -680,7 +677,50 @@ and response-metadata redaction.
 
 Only after that prerequisite is committed may a follow-up story implement and
 test the real adapter transport and request one bounded `publish=false` canary.
-Automatic ticker publication is not complete or authorized.
+Automatic canonical ticker publication is not complete or authorized. This
+does not block ME-SR25's separate advisory-only price artifact, which must not
+write `market-data` or claim canonical evidence.
+
+### ME-RM08 — Portfolio ledger and advisory price roadmap realignment
+
+Status: COMPLETED DOCS-ONLY ROADMAP REALIGNMENT
+
+ME-RM08 makes the current product order explicit, records ME-PR03 as the next
+implementation story, places ME-SR25 directly after it, and separates advisory
+price freshness from the blocked canonical publication line.
+
+### ME-PR03 — Manual portfolio transaction ledger and portfolio-aware candidate context
+
+Status: PLANNED / NEXT IMPLEMENTATION STORY
+
+Goal: implement a private append-only ledger for user-confirmed BUY and SELL
+transactions, rebuild positions deterministically, and adapt those positions
+into non-actionable Portfolio Review/candidate context.
+
+The ledger is authoritative; position snapshots are derived. Real transactions
+must not be committed to this public repository. No broker integration, order
+execution, inferred transaction, price acquisition, allocation, sizing, hidden
+ranking, or Decision Engine change is allowed.
+
+Detailed story:
+
+```text
+docs/market_engine/backlog/me_pr03_manual_portfolio_transaction_ledger.md
+```
+
+### ME-SR25 — Scheduled advisory price refresh and freshness artifacts
+
+Status: PLANNED / DIRECTLY AFTER ME-PR03
+
+Goal: produce a daily retrievable, versioned, best-effort advisory price and
+freshness artifact for analysis without changing `market-data` or claiming
+canonical publication evidence.
+
+Detailed story:
+
+```text
+docs/market_engine/backlog/me_sr25_advisory_price_refresh.md
+```
 
 ## Current ChatGPT Advisory Artifact Chain
 
@@ -700,7 +740,7 @@ ME-CI01 - Structured Decision Output contract (completed)
   -> ME-CI11 - First real grounded advisory output flow (implemented with invocation blocked by local configuration)
   -> ME-CI11B - Execute configured real grounded advisory model invocation (blocked by missing local OPENAI_API_KEY)
   -> ME-CI11C - Run configured provider invocation with local API key (blocked by Codex command process env propagation)
-  -> ME-CI11D - Fix Codex command process provider environment propagation (next)
+  -> ME-CI11D - Fix Codex command process provider environment propagation (deferred by ME-RM08)
 ```
 
 ME-CI08 implements the first local deterministic dry-run and grounding
@@ -749,7 +789,7 @@ invocation requests prove the model was included, but the Codex command process
 did not contain a non-empty `OPENAI_API_KEY`. NVDA and AMD therefore failed
 closed before provider invocation with `blocked_invocation_not_configured`.
 
-ME-CI11D is the next advisory sprint. It must fix only the process-environment
+ME-CI11D remains a deferred advisory sprint after ME-RM08. It must fix only the process-environment
 propagation issue so the exact command process used by Codex sees a non-empty
 `OPENAI_API_KEY`, then rerun the same universal CI11 command path before any
 batch or report-quality expansion.
