@@ -1,739 +1,148 @@
 # Active Baseline Direction
 
-Status: ACTIVE RESULTS-FIRST BASELINE POINTER
+Status: ACTIVE PRODUCT ROADMAP POINTER
+
+Effective date: 2026-08-12
+
+Roadmap decision: ME-RM08
+
+Base state verified at `main` commit
+`8e71af5935db5e4bc0cd5261035497115df0573d`, the merge commit for PR #475.
 
 ## Active product objective
 
-The active Market Engine baseline is now:
+The Market Engine should help the user make better self-directed investment
+decisions:
+
+1. analyse the supported ticker universe and surface review candidates;
+2. let the user decide whether to buy, sell, or do nothing;
+3. record only user-confirmed portfolio transactions;
+4. rebuild current positions deterministically from those transactions;
+5. add proven position context to candidate analysis;
+6. refresh non-canonical advisory price data daily so analysis can use recent
+   market context.
+
+The system does not place orders, connect to a broker, infer unreported
+transactions, or move allocation authority outside the Decision Engine.
+
+## Current verified state
+
+| Area | Current state |
+|---|---|
+| Canonical universe | 952 instruments |
+| Broad technical analysis | Operational with explicit blockers |
+| Fundamental coverage | Partial; ME-DATA11 remains planned |
+| Scheduled canonical price refresh | Workflow exists, but automatic canonical publication is blocked |
+| Latest canonical evidence result | ME-SR24 completed with blockers because no approved production price-evidence provider route exists |
+| Canonical `market-data` publication | Not operational for daily automatic updates |
+| Portfolio Review | ME-PR01 contract and ME-PR02 in-memory implementation completed |
+| Portfolio source contracts | Shape metadata exists, but no approved authoritative transaction-ledger runtime exists |
+| Legacy portfolio scripts | Reference-only; not canonical runtime |
+| ChatGPT advisory contracts | CI01-CI10 completed; later model-invocation work is not the active priority |
+| Broker/order execution | Not implemented and not planned in this sequence |
+
+## Active sequence
 
 ```text
-Process a broad ticker universe, such as 500 tickers,
-produce deterministic advice labels,
-then evaluate which advice rules work and which do not.
+ME-RM08 - Realign roadmap around portfolio authority and advisory price freshness
+  -> ME-PR03 - Implement the manual portfolio transaction ledger and
+               transaction-derived portfolio-aware candidate context (NEXT)
+  -> ME-SR25 - Implement scheduled advisory price refresh and freshness artifacts
+  -> ME-PI01 - Define portfolio exposure and concentration intelligence from
+               transaction-derived positions plus advisory price enrichment
+  -> ME-CI12 - Batch grounded advisory consumption, only after the preceding
+               portfolio and price inputs are stable
+  -> ME-PS01 - Define downstream position-sizing decision contract
+  -> ME-NL01/02/03 - Channel-neutral notification sequence
 ```
 
-The baseline is not allowed to drift into additional standalone preparation layers before advice output unless a concrete blocker makes the advice path technically impossible.
+ME-PR03 is the next implementation story. ME-SR25 is already planned directly
+after it and must not be silently replaced by canonical-publication work.
 
-## Canonical roadmap lock
+## Why ME-PR03 is next
+
+The user needs portfolio-aware analysis based on actual holdings. Existing
+ME-PR02 accepts explicitly supplied `market-engine-portfolio-context-v1`, but
+the repository has no approved runtime that turns user-confirmed transactions
+into that context.
+
+ME-PR03 closes that gap with one append-only transaction ledger and a
+deterministic derived-position projection. A position snapshot is derived
+state, not a second source of truth.
+
+The live ledger contains personal financial data. Because this repository is
+public, live transactions and position snapshots must remain outside Git and
+must be ignored by default. Only schemas, code, documentation, and synthetic
+fixtures belong in the repository.
+
+## ME-PR03 authority model
 
 ```text
-docs/market_engine/roadmap/me_rm07_results_first_advice_roadmap_lock.md
+user states a transaction
+  -> normalized transaction preview
+  -> explicit user confirmation
+  -> append-only private ledger event
+  -> deterministic position rebuild
+  -> validated portfolio-context adapter
+  -> non-actionable portfolio-aware candidate review
+  -> Decision Engine remains the only allocation authority
 ```
 
-## Canonical backlog lock
+No purchase or sale may be inferred from an analysis result. Corrections and
+cancellations are new ledger events; historical records are not silently
+rewritten.
+
+## Why ME-SR25 is separate from ME-SR24
+
+ME-SR24 concerns canonical market-data publication evidence. That line remains
+blocked by the absence of an approved production evidence route.
+
+ME-SR25 serves a different purpose: best-effort, clearly labelled, advisory
+market context for analysis. It may reuse the existing supported acquisition
+path without claiming canonical or publication evidence. Its output must carry
+source, observation date, retrieval time, freshness state, and per-ticker
+failures. Stale or missing data remains explicit.
+
+ME-SR25 must not:
+
+- change the `market-data` branch;
+- satisfy or bypass ME-SR24 publication gates;
+- create mutation receipts for canonical publication;
+- become a transaction or position source of truth;
+- place orders or trigger automatic portfolio changes;
+- require a new commercial data-provider contract as a roadmap prerequisite.
+
+## Deferred but preserved work
+
+The following work remains valid but is not the active next step:
+
+- ME-DATA11: diversified US-GAAP/IFRS derivation pilot;
+- ME-CI11D and the provider-invocation troubleshooting line;
+- canonical publication activation after a future approved source policy;
+- remaining EA, TMHC, historical-addition, and precision-rewrite remediation;
+- notification-channel implementation.
+
+Historical documents may contain a local `Next` label that was correct when
+that sprint closed. Those labels are historical evidence only. This file and
+ME-RM08 define the current active order.
+
+## Governing documents
+
+- `AGENTS.md`
+- `docs/active/governance_v2.md`
+- `docs/active/architecture_current_state.md`
+- `docs/market_engine/governance/me_gov01_job_scoped_sprint_naming_convention.md`
+- `docs/market_engine/roadmap/me_rm08_portfolio_ledger_and_advisory_price_roadmap_realign.md`
+- `docs/market_engine/backlog/me_pr03_manual_portfolio_transaction_ledger.md`
+- `docs/market_engine/backlog/me_sr25_advisory_price_refresh.md`
+
+## Next implementation
 
 ```text
-docs/market_engine/backlog/me_rm07_results_first_advice_backlog.md
+ME-PR03 - Implement a manual portfolio transaction ledger as the authoritative
+source for positions and portfolio-aware candidate analysis
 ```
 
-## Supporting no-API guardrail
-
-```text
-docs/market_engine/governance/me_gh01_github_first_no_api_baseline_guardrail.md
-```
-
-The no-API guardrail remains active: the baseline must not require paid OpenAI API usage or provider invocation.
-
-## Current baseline sequence
-
-```text
-ME-GH02 - Batch artifact discovery and ticker status index
-  -> ME-ADV01 - Minimal deterministic advice engine v1 (completed)
-  -> ME-ADV02 - 500-ticker advice batch output (completed)
-  -> ME-DATA01 - Close highest-impact advice data coverage gaps (completed)
-  -> ME-EVAL01 - Advice outcome tracking and feedback loop (completed)
-  -> ME-EVAL02 - Scheduled/future outcome refresh using local snapshots (completed)
-  -> ME-DATA02 - Import missing and forward local price snapshots for unresolved outcomes (implementation complete / coverage partial)
-  -> ME-BOOT03 - Bootstrap authoritative universe and local price-history coverage (implementation complete / coverage partial)
-  -> ME-DATA04 - Build complete canonical local market dataset (operational dataset partial)
-  -> ME-DATA05 - Incremental market data refresh and forward evaluation (completed / incremental_refresh_operational)
-  -> ME-RUN30 - Full canonical-universe analysis and candidate ranking (completed / completed_with_blockers)
-  -> ME-RUN31 - Add broader non-price evidence to canonical-universe ranking (completed / completed_with_blockers)
-  -> ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources (implemented / local_coverage_improved_with_remaining_blockers)
-  -> ME-DATA07 - Expand validated MVP fundamental metric sourcing for remaining canonical-universe blockers (implemented / operator_import_operational / pilot_blocked_missing_operator_evidence)
-  -> ME-DATA08 - Prepare and validate a governance-approved operator fundamental metric package (implemented / structural_package_validation_operational / source_approval_pending)
-  -> ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot (implemented / AAPL partial package imported / downstream measured)
-  -> ME-DATA10 — Implement a generic governed primary-source fundamental metric derivation engine and execute a bounded pilot (completed / two AAPL margins derived / downstream measured)
-  -> ME-SR17 — Implement scheduled canonical price refresh and freshness publication (completed / production publication canary exposed lifecycle gap)
-  -> ME-SR18 — Add corporate-action-aware lifecycle and listing-age freshness (implemented / first post-merge canary failed closed)
-  -> ME-SR19 — BLD/JHG retained-history boundary remediation (implemented / draft review required)
-  -> ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot (planned / not started)
-```
-
-## Superseded baseline pointers
-
-Any older roadmap text that points to provider invocation, API-key propagation, paid OpenAI API advisory generation, ME-CI11D, ME-CI12 provider batch output, or a standalone ME-GH03 ranking/review queue as the next baseline step is superseded for baseline planning.
-
-Review-priority logic may be implemented inside ME-ADV01 if it directly supports advice label production, but it must not become a standalone detour before advice output.
-
-## No-deviation rule
-
-Every future baseline sprint must directly support at least one of these outcomes:
-
-```text
-1. process more tickers;
-2. make more tickers advice-ready;
-3. produce advice labels;
-4. evaluate advice quality.
-```
-
-If a sprint does not directly support one of those outcomes, it is not part of the baseline roadmap.
-
-## Current completed baseline implementation
-
-ME-ADV01 produced deterministic advice labels from the ME-GH02 ticker status
-index and linked dry-run artifacts. The sample run produced concrete
-`watchlist` labels for the 12 ME-GH02 sample tickers and did not require
-OpenAI API, provider invocation, source acquisition, live data refresh, broker
-orders, portfolio/watchlist mutation, Telegram, or delivery side effects.
-
-## Current completed ME-ADV02 result
-
-ME-ADV02 produced deterministic advice batch output under:
-
-```text
-artifacts/market_engine/advice_batches/me-adv02-advice-batch-20260711T130000Z/
-```
-
-The sample batch consumed the widest available ME-GH02 status index:
-
-```text
-artifacts/market_engine/batch_status/me-gh02-sample-status-index-20260711T120000Z/ticker_status_index.json
-```
-
-It reported coverage against a 500-ticker target:
-
-```text
-tickers in status index: 12
-tickers with advice labels: 12
-tickers missing artifact/status: 488
-coverage percentage: 2.40%
-```
-
-Advice distribution:
-
-```text
-buy_candidate: 0
-wait_for_price: 0
-watchlist: 12
-avoid_for_now: 0
-hold_existing: 0
-take_loss_review: 0
-unable_to_advise: 0
-```
-
-Top missing inputs for buy-candidate diversity:
-
-```text
-portfolio_context: 12
-setup_price_market_context: 12
-```
-
-ME-ADV02 therefore produced visible batch advice output, but it also proved
-that outcome tracking was not yet useful because only `watchlist` labels were
-produced.
-
-## Current completed ME-DATA01 result
-
-ME-DATA01 added deterministic setup/price/market context extraction from
-existing local artifacts and local price-history CSVs. It did not perform live
-source acquisition, provider invocation, broker/order execution,
-portfolio/watchlist mutation, Telegram, or delivery side effects.
-
-The ME-DATA01 sample batch reused:
-
-```text
-artifacts/market_engine/batch_status/me-gh02-sample-status-index-20260711T120000Z/ticker_status_index.json
-```
-
-and produced:
-
-```text
-run_id: me-data01-setup-price-market-context-20260711T140000Z
-tickers with advice labels: 12
-coverage percentage: 2.40%
-buy_candidate: 4
-wait_for_price: 2
-watchlist: 5
-avoid_for_now: 1
-hold_existing: 0
-take_loss_review: 0
-unable_to_advise: 0
-```
-
-Setup/price/market context distribution:
-
-```text
-partial: 8
-missing: 4
-available: 0
-invalid: 0
-```
-
-ME-DATA01 therefore broke the watchlist-only output and made outcome tracking
-useful.
-
-## Current completed ME-EVAL01 result
-
-ME-EVAL01 added deterministic advice outcome tracking under:
-
-```text
-src/market_engine/evaluation/
-```
-
-It consumes an advice batch `advice_index.json`, reads existing local
-`data/processed` price-history CSVs only, computes 5/21/63 trading-day horizon
-returns where enough local forward data exists, and writes an evaluation run
-under:
-
-```text
-artifacts/market_engine/evaluation_runs/<run_id>/
-```
-
-The sample run used:
-
-```text
-input advice_index: artifacts/market_engine/advice_batches/me-data01-setup-price-market-context-20260711T140000Z/advice_index.json
-run_id: me-eval01-advice-outcomes-20260712T120000Z
-price_data_root: data/processed
-```
-
-and produced:
-
-```text
-tickers_total: 12
-resolved_outcomes: 0
-unresolved_outcomes: 12
-resolved_by_horizon:
-  1w: 0
-  1m: 0
-  3m: 0
-unresolved_reasons:
-  insufficient_forward_data: 8
-  missing_price_history: 4
-label_counts:
-  buy_candidate: 4
-  wait_for_price: 2
-  watchlist: 5
-  avoid_for_now: 1
-```
-
-ME-EVAL01 therefore created the feedback loop, but current local data cannot
-yet resolve sample outcomes. The dominant blocker is insufficient local forward
-history after the recent advice date. Four tickers also lack local
-price-history CSVs.
-
-## Current completed ME-EVAL02 result
-
-ME-EVAL02 added a manual local refresh flow for existing unresolved advice
-outcomes. It does not implement a scheduler. It can be rerun later when newer
-local price-history snapshots are available.
-
-The sample refresh run used:
-
-```text
-input evaluation artifact: artifacts/market_engine/evaluation_runs/me-eval01-advice-outcomes-20260712T120000Z/advice_outcome_index.json
-run_id: me-eval02-refresh-local-snapshots-20260712T130000Z
-price_history_root: data/processed
-```
-
-and produced:
-
-```text
-selected_outcomes: 12
-resolved: 0
-still_unresolved: 12
-insufficient_forward_data: 8
-missing_price_history: 4
-missing_price_history_tickers: CLS, CRDO, IREN, VRT
-other_blockers: 0
-```
-
-ME-EVAL02 proves unresolved advice outcomes can be deterministically retried
-against local snapshots. Current local data still cannot resolve any sample
-outcome because the local price histories stop before the advice date and four
-tickers have no local price-history CSV.
-
-## Current completed ME-DATA02 result
-
-ME-DATA02 added a canonical local market-data universe configuration and a
-deterministic local coverage/import command:
-
-```text
-config/market_engine/universes/canonical_universe.json
-src/market_engine/data/local_market_data_universe.py
-src/market_engine/data/supported_universe_price_history_command.py
-```
-
-The full report-only data run used:
-
-```text
-run_id: me-data02-full-coverage-report-only-20260712T142000Z
-price_history_root: data/processed
-```
-
-and produced:
-
-```text
-total_canonical_instruments: 308
-unique_equities: 299
-etf_count: 9
-context_count: 3
-valid: 0
-imported: 0
-refreshed: 0
-missing: 12
-insufficient: 293
-invalid: 1
-unsupported: 2
-completion_status: completed_with_blockers
-```
-
-ME-DATA02 did not claim full S&P 500, Nasdaq-100, S&P MidCap 400, or STOXX
-Europe coverage because no reproducible local membership source was present in
-the repository. Those layers are explicitly blocked in the universe
-configuration.
-
-The post-ME-DATA02 ME-EVAL02 refresh check remained:
-
-```text
-resolved: 0
-insufficient_forward_data: 8
-missing_price_history: 4
-missing_price_history_tickers: CLS, CRDO, IREN, VRT
-```
-
-## Next baseline sprint
-
-```text
-ME-DATA06 - Expand canonical fundamental evidence coverage from local approved evidence sources
-```
-
-Not:
-
-```text
-ME-GH03 - Deterministic ranking and review queue
-ME-DATA06 - Another data-only infrastructure sprint without an operational blocker
-Rejected future concept (formerly mislabeled ME-RUN32) - Another broad ranking
-layer before evidence coverage improves
-```
-
-Remaining data gaps are now the operational blocker to full-advice readiness:
-
-```text
-missing_fundamental_context: 931
-partial_fundamental_context: 17
-canonical_advice_input_ready: 4 of 952
-full_advice_ready: 0 of 952
-```
-
-## Current completed ME-DATA04 result
-
-ME-DATA04 built the complete canonical local market dataset under:
-
-```text
-data/processed
-```
-
-The completed run established:
-
-```text
-total_canonical_instruments: 952
-valid_histories: 946
-insufficient_histories: 6
-missing_histories: 0
-invalid_histories: 0
-unsupported_mappings: 0
-completion_status: completed_with_blockers
-```
-
-ME-DATA04 proved the canonical universe, local price-history storage,
-validation, coverage reporting, and ME-EVAL02 local-history consumption.
-
-## Current completed ME-DATA05 result
-
-ME-DATA05 added the incremental refresh command:
-
-```text
-src/market_engine/data/incremental_market_data_refresh.py
-```
-
-The sample operational run used:
-
-```text
-run_id: me-data05-incremental-refresh-20260713T140000Z
-cutoff_date: 2026-07-10
-overlap_calendar_days: 7
-provider: Yahoo Finance via yfinance
-price_history_root: data/processed
-```
-
-and produced:
-
-```text
-histories_checked: 952
-already_current: 946
-incrementally_updated: 0
-new_snapshot_created: 0
-full_rebuild_completed: 0
-stale_after_update: 2
-insufficient_history: 4
-download_failed: 0
-merge_failed: 0
-validation_failed: 0
-rows_downloaded: 12
-rows_added: 0
-files_rewritten: 0
-files_unchanged: 952
-```
-
-The second same-cutoff idempotency run
-`me-data05-idempotency-refresh-20260713T141000Z` reproduced those metrics with
-`files_rewritten: 0`. Coverage stayed at 946 valid histories and 6
-insufficient histories. ME-EVAL02 executed before and after refresh and
-remained:
-
-```text
-selected_outcomes: 12
-resolved: 0
-still_unresolved: 12
-newly_resolved: 0
-blocker_counts:
-  insufficient_forward_data: 12
-```
-
-ME-DATA05 therefore answers the operational question: the local market dataset
-can now be refreshed safely and efficiently without full re-downloads for
-already current histories, and coverage plus evaluation are refreshed
-automatically. The absence of newly resolved outcomes is a real-data timing
-constraint, not a refresh failure.
-
-PR review follow-up clarified two operational boundaries:
-
-```text
-refresh_universe_requested: supported as an explicit request flag
-refresh_universe_performed: always false unless a supported implementation actually runs
-refresh_universe_status: not_requested for normal runs
-```
-
-If `--refresh-universe` is requested today, ME-DATA05 fails closed with a clear
-error instead of silently pretending that canonical membership changed. The
-persisted artifact structure is also compact: `per_ticker_status.json` is the
-only complete per-ticker record list, `refresh_summary.json` contains aggregate
-metrics only, and duplicate `already_current.json` artifacts are no longer
-written.
-
-## Current completed ME-RUN30 result
-
-ME-RUN30 added the broad canonical-universe analysis command:
-
-```text
-src/market_engine/run/full_canonical_universe_analysis.py
-```
-
-The corrected replacement run used:
-
-```text
-run_id: me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z
-cutoff_date: 2026-07-10
-price_history_root: data/processed
-ranking_scope: technical_setup_screening
-```
-
-and produced:
-
-```text
-total_canonical_instruments: 952
-attempted_instruments: 952
-eligible_analyzed: 946
-blocked_insufficient_history: 4
-blocked_stale_history: 2
-failed: 0
-ranked_candidates: 330
-technical_setup_candidate: 105
-technical_wait_for_entry: 257
-technical_watch: 407
-technical_risk_exclusion: 177
-unable_to_analyse: 6
-```
-
-The PR review fix replaced the original canonical-looking advice labels with
-explicit technical screening labels because full canonical advice requires
-dry-run artifacts and complete fundamental context that are not yet available
-across the broad universe. The determinism rerun matched final statuses,
-technical labels, candidate scores, blockers, and candidate ranking order.
-Ranking is traceable to canonical setup/price/market context payloads derived
-from local price histories and includes a missing-evidence penalty for absent
-fundamental, portfolio, and market context. All ranked candidates remain
-`full_advice_ready: false`.
-
-## Current completed ME-RUN31 result
-
-ME-RUN31 added the broad non-price evidence advice-readiness command:
-
-```text
-src/market_engine/run/broad_non_price_evidence_advice_readiness.py
-```
-
-The full run used:
-
-```text
-run_id: me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z
-technical_screening_artifact: artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/
-freshness_reference_date: 2026-07-10
-price_history_root: data/processed
-fundamental_evidence_path: data/processed/fundamental_quality.csv
-market_context_path: data/processed/market_regime.csv
-compact_evidence_package: artifacts/market_engine/run_evidence/me-run31-broad-non-price-evidence-full-advice-readiness-20260715T154103Z/
-```
-
-and produced:
-
-```text
-attempted_instruments: 952
-technical_analysed: 946
-technical_ranking_eligible: 330
-canonical_advice_input_ready: 4
-advice_generation_attempted: 952
-advice_engine_completed: 952
-non_unable_advice_outputs: 4
-failed: 0
-wait_for_price: 4
-unable_to_advise: 948
-full_advice_ready: 0
-full_advice_ranking_eligible: 0
-missing_fundamental_context: 931
-partial_fundamental_context: 17
-full_artifact_file_count: 971
-full_artifact_total_size_bytes: 25901313
-full_artifact_tree_digest: 8c0c6c05a8ab560f9571c9614ca77b8fb6cb9772a62f873d33eedd6f9a7d8117
-```
-
-ME-RUN31 proves the broad evidence adapter and deterministic advice handoff
-work. The PR review fix removed hardcoded freshness, made technical input
-explicit, validates source dates and duplicate rows fail-closed, and commits a
-compact evidence package instead of the full per-ticker artifact tree. Another
-ranking layer is not the next bottleneck: full-advice readiness is blocked
-primarily by missing local fundamental evidence coverage.
-
-## Current completed ME-DATA06 result
-
-ME-DATA06 added the local fundamental evidence coverage expansion command:
-
-```text
-src/market_engine/data/fundamental_evidence_coverage.py
-```
-
-The full run used:
-
-```text
-run_id: me-data06-fundamental-evidence-coverage-expansion-20260715T163629Z
-as_of_date: 2026-07-10
-normalized_fundamental_quality: artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-expansion-20260715T163629Z/normalized_fundamental_quality.csv
-downstream_me_run31_run_id: me-run31-after-me-data06-fundamental-evidence-coverage-20260715T163629Z
-```
-
-Evidence inventory:
-
-```text
-sources_discovered: 5
-sources_consumed: 3
-sources_rejected: 2
-manual_mvp_fundamentals: 36 canonical matches
-sec_companyfacts_source_context: 12 canonical matches
-company_profile: rejected for fundamental quality
-intake_placeholder_fundamentals: rejected as source-required placeholders
-```
-
-Before and after:
-
-```text
-fundamental_complete: 4 -> 6
-fundamental_partial: 17 -> 39
-fundamental_missing: 931 -> 907
-invalid_stale_conflicting: 0 -> 0
-canonical_advice_input_ready: 4 -> 6
-full_advice_ready: 0 -> 0
-unable_to_advise: 948 -> 946
-```
-
-Newly advice-input-ready:
-
-```text
-ENPH
-FTNT
-```
-
-PR #462 review follow-up reran ME-DATA06 as
-`me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z` against an
-explicit checksum-validated 952-ticker ME-RUN31 baseline. The aggregate result
-remained unchanged, no regressions were detected, and the corrected comparison
-identified 22 `missing_to_partial` transitions, including `CLS`, `CRDO`,
-`IREN`, and `VRT`, which the earlier CSV-based comparison omitted. Inventory
-freshness now reports three current sources, one unknown source, and one
-not-assessed source.
-
-ME-DATA06 proves that local evidence inventory, normalization, validation, and
-ME-RUN31 consumption work. The remaining baseline blocker is still fundamental
-coverage breadth: 907 canonical instruments have missing fundamental context.
-
-## Current implemented ME-DATA07 result
-
-ME-DATA07 added the validated sourcing command:
-
-```text
-src/market_engine/data/validated_fundamental_metric_sourcing.py
-```
-
-The actual pilot run was:
-
-```text
-run_id: me-data07-validated-mvp-fundamental-metric-sourcing-20260718T122028Z
-source_mode: operator_import
-batch: pilot
-selected: 12
-provider_calls: 0
-imported: 0
-normalized: 0
-status: blocked_external_source_requirement
-reason: operator_import_package_missing
-```
-
-The runtime reconciled 952 canonical tickers and classified 322 Tier 1, 22
-Tier 2, and 593 Tier 3 eligible sourcing targets. It implemented route-level source-mode
-approval, explicit symbol mapping, operator package validation, immutable raw
-snapshot persistence after validation, per-metric lineage, deterministic
-normalization, and an explicit downstream ME-DATA06 gate. It does not
-authenticate or governance-approve free-text operator evidence.
-
-No approved full-contract provider adapter exists in the repository and no
-operator package was present. Expanded/full sourcing and downstream ME-DATA06
-and ME-RUN31 runs therefore remained gated. Coverage was not mutated and stays
-at 6 complete, 39 partial, 907 missing, 6 canonical advice-input-ready, 0
-full-advice-ready, and 946 unable-to-advise. No improvement or regression was
-claimed without a measured downstream run.
-
-PR #463 review follow-up reran the blocked pilot as
-`me-data07-validated-mvp-fundamental-metric-sourcing-review-fix-20260718T141045Z`.
-Canonical per-ticker status reconciliation now reports 12 selected, 0
-successful, 12 blocked, 0 failed, 0 pending, and 940 not selected. The missing
-input records one presence check and zero parser/import attempts. Coverage,
-readiness, and the recommended architecture direction are unchanged.
-
-## Current implemented ME-DATA08 result
-
-ME-DATA08 added the deterministic operator package preparation and structural
-validation command:
-
-```text
-src/market_engine/data/operator_fundamental_metric_package.py
-src/market_engine/data/operator_fundamental_metric_package_command.py
-```
-
-The flow validates the existing five-metric ME-DATA06/07 allowlist, company
-and ticker identity, reporting and fiscal context, units, finite values,
-structurally complete provenance, duplicates, conflicts, and forbidden
-authority-bearing fields. It emits a deterministic ME-DATA07-compatible
-package plus a machine-readable validation report. Raw percent values and
-units are retained for deferred ME-DATA07 ratio normalization.
-
-ME-DATA08 acceptance means only
-`structurally_valid_for_explicit_source_approval_review`. It does not prove
-source authenticity, primary-source status, permitted use, or governance
-approval, and it does not authorize ME-DATA07 import. No provider, downstream,
-recommendation, portfolio, delivery, broker, or Decision Engine action is
-performed.
-
-The completed baseline sprint was:
-
-```text
-ME-DATA09 - Source-approve evidence and execute a bounded operator fundamental metric pilot
-```
-
-ME-DATA09 must bind an explicit source-approval decision to the checksum of a
-concrete ME-DATA08-accepted package. Only an approved package may enter the
-existing ME-DATA07 pilot. Any coverage change must be measured through the
-existing explicit ME-DATA06/ME-RUN31 downstream gate; unverifiable evidence
-must stop fail-closed without an improvement claim.
-
-ME-DATA09 completed this boundary for AAPL on 2026-07-19. The approved package
-contained only directly reported FY2026 Q2 revenue and diluted EPS growth.
-ME-DATA07 imported one partial AAPL record, blocked the other eleven selected
-pilot tickers, made zero provider/network calls, and reconciled all 952 universe
-members. DATA06/RUN31 measurement retained 6 complete, 39 partial, 907 missing,
-6 advice-input-ready, 0 full-advice-ready, and 946 unable-to-advise. AAPL stayed
-partial and not advice-input-ready.
-
-ME-DATA10 — Implement a generic governed primary-source fundamental metric
-derivation engine and execute a bounded pilot — completed the next boundary.
-It added ticker-independent fact, formula, derived-evidence, approval, and
-DATA07-v2 contracts without changing DATA08-v1 or DATA07-v1 semantics. The
-bounded AAPL run derived gross margin and operating margin while keeping
-debt-to-equity blocked for missing approved components. DATA07, DATA06, and
-RUN31 completed with zero provider/network calls, no regressions, and no
-aggregate status delta from 6 complete / 39 partial / 907 missing.
-
-ME-SR17 — Implement scheduled canonical price refresh and freshness
-publication — provided the missing
-application-owned daily price-refresh, `market-data` publication, freshness
-manifest, and validated analysis handoff. It does not automate DATA09/DATA10
-approvals or change recommendation, ranking, allocation, or Decision Engine
-authority. Its first production canary successfully refreshed and published
-the complete validated dataset, then correctly withheld Daily Market Scan
-because the combined status model remained degraded.
-
-ME-SR18 adds the missing checksum-bound lifecycle projection and separates
-price freshness from analytical history coverage. Completed listings leave
-the active refresh and analysis universe only after their evidence-bound
-effective date while their price files remain retained and validated. Recent
-listings may be current and `limited_history`; unexplained short history and
-real stale/provider/validation failures remain degraded.
-
-Its first post-merge canary failed closed on inherited BLD and JHG price tails.
-ME-SR19 proves the existing lifecycle boundaries from primary SEC evidence and
-removes only the zero-volume July 1 and July 2 carry-forward rows through a
-reviewable data-only pull request. No runtime or lifecycle configuration
-change is required. The other 70 provider/session blockers remain separate.
-
-The locked sequence is:
-
-```text
-ME-DATA10 -> ME-SR17 -> ME-SR18 -> ME-SR19 -> ME-DATA11
-```
-
-ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot —
-remains planned and has not started. A green publication canary first requires
-separate resolution of the remaining 44 `PROVIDER_OHLC_INVALID` and 26
-`EXPECTED_SESSION_NOT_AVAILABLE` results. ME-DATA11 must reuse the generic
-ME-DATA10 runtime and must not introduce automatic approval, estimates, hidden
-formula fallbacks, advice authority, or unrelated operational side effects.
-
-ME-RUN32 now unambiguously names the completed post-PR472 non-publishing
-canonical price refresh audit. Its single `publish=false` run recovered 68 of
-the original 70 blockers without an invalid-OHLC recurrence. NSA, TMHC, and 12
-new provider/session freshness blockers remain fail-closed. The publish job was
-skipped and the `market-data` SHA did not change. The next baseline action is
-evidence review of those 14 current blockers; neither a retry nor a publication
-canary is authorized.
-
-ME-SR20 and ME-SR21 now provide the reviewable generic diagnostics and bounded
-provider-completeness path for those failures. ME-SR22 proves and implements
-TMHC's lifecycle boundary, but TMHC's final provider bar and NSA's
-three-session data gap remain fail-closed. A publication canary is not
-authorized by these changes.
-
-## Completed ME-ADV01 result
-
-ME-ADV01 produces deterministic advice output with labels:
-
-```text
-buy_candidate
-wait_for_price
-watchlist
-avoid_for_now
-hold_existing
-take_loss_review
-unable_to_advise
-```
-
-The first target is visible advice output, not another abstract readiness layer.
+No runtime implementation, canary, provider activation, canonical publication,
+portfolio data write, broker connection, or order execution is authorized by
+this roadmap-only change.
