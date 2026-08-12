@@ -45,8 +45,17 @@
           "investors.qxo.com"
         ]
       },
-      "provenance_checksum": "667383922f27cd75b9c135ae2991b72a54b4e73204fa37622cf8df085444105c",
+      "provenance_checksum": "74fe2cba7ed83aebe7a846a59f4f6a132809814ff4a5e242e248a8fd48d15739",
       "regular_way_listing_date": null,
+      "inactive_effective_date": "2026-07-01",
+      "last_trading_session": "2026-06-30",
+      "canonical_ohlcv_last_observed_session": "2026-06-30",
+      "terminal_session_daily_ohlcv_status": "observed_daily_ohlcv",
+      "observation_status_as_of": null,
+      "observation_evidence": null,
+      "transaction_closing_date": "2026-07-01",
+      "trading_suspension_effective_date": "2026-07-01",
+      "trading_suspension_effective_timing": "before_open",
       "status_effective_date": "2026-07-01",
       "successor_or_acquirer": {
         "name": "QXO, Inc.",
@@ -99,8 +108,17 @@
           "investors.fedex.com"
         ]
       },
-      "provenance_checksum": "d76c2a9b360f426e1fb15142411608cc9bafd5d69886c2a234b6b45c1537b9a6",
+      "provenance_checksum": "27545dfec42329cf0d4690802ab9ece12e244e3deaa84101fe59cc243a395db4",
       "regular_way_listing_date": "2026-06-01",
+      "inactive_effective_date": null,
+      "last_trading_session": null,
+      "canonical_ohlcv_last_observed_session": null,
+      "terminal_session_daily_ohlcv_status": null,
+      "observation_status_as_of": null,
+      "observation_evidence": null,
+      "transaction_closing_date": null,
+      "trading_suspension_effective_date": null,
+      "trading_suspension_effective_timing": null,
       "status_effective_date": "2026-05-27",
       "successor_or_acquirer": null,
       "ticker": "FDXF"
@@ -150,8 +168,17 @@
           "investors.bakerhughes.com"
         ]
       },
-      "provenance_checksum": "a9eec4306695a858067054f90a7eafd247a09cde931913bd2c6ccbce9be67fb3",
+      "provenance_checksum": "06cf4d91e5dc0b8900fa03f642794bd5414c097351317d8deeff062c9d391f3c",
       "regular_way_listing_date": null,
+      "inactive_effective_date": "2026-07-17",
+      "last_trading_session": "2026-07-16",
+      "canonical_ohlcv_last_observed_session": "2026-07-16",
+      "terminal_session_daily_ohlcv_status": "observed_daily_ohlcv",
+      "observation_status_as_of": null,
+      "observation_evidence": null,
+      "transaction_closing_date": "2026-07-17",
+      "trading_suspension_effective_date": "2026-07-17",
+      "trading_suspension_effective_timing": "before_open",
       "status_effective_date": "2026-07-17",
       "successor_or_acquirer": {
         "name": "Baker Hughes Company",
@@ -203,8 +230,17 @@
           "www.honeywell.com"
         ]
       },
-      "provenance_checksum": "5b0976cd87ed68e17de6430352abc688b2bea59267469824ffa21f70a7305b4b",
+      "provenance_checksum": "4968ebf9352c05de472d2b3202d8d5946419368e8940377bdb32ea4f803b058a",
       "regular_way_listing_date": "2026-06-29",
+      "inactive_effective_date": null,
+      "last_trading_session": null,
+      "canonical_ohlcv_last_observed_session": null,
+      "terminal_session_daily_ohlcv_status": null,
+      "observation_status_as_of": null,
+      "observation_evidence": null,
+      "transaction_closing_date": null,
+      "trading_suspension_effective_date": null,
+      "trading_suspension_effective_timing": null,
       "status_effective_date": "2026-06-15",
       "successor_or_acquirer": null,
       "ticker": "HONA"
@@ -236,8 +272,17 @@
       "lifecycle_status": "inactive",
       "listing_start_date": null,
       "official_source_hosts": {},
-      "provenance_checksum": "21ab30331c93eba1ab66f4ffa77205e3ba1322f5ec431f6b9d426d438ca73e26",
+      "provenance_checksum": "922e3161e32ad4a77d89e5d787e914aa1950c1e008a757e2a5ba57b1f69c25c5",
       "regular_way_listing_date": null,
+      "inactive_effective_date": "2026-07-01",
+      "last_trading_session": "2026-06-30",
+      "canonical_ohlcv_last_observed_session": "2026-06-30",
+      "terminal_session_daily_ohlcv_status": "observed_daily_ohlcv",
+      "observation_status_as_of": null,
+      "observation_evidence": null,
+      "transaction_closing_date": "2026-06-30",
+      "trading_suspension_effective_date": "2026-07-01",
+      "trading_suspension_effective_timing": "before_open",
       "status_effective_date": "2026-07-01",
       "successor_or_acquirer": {
         "name": "Jupiter Company Limited",
@@ -289,8 +334,17 @@
           "www.investors.dupont.com"
         ]
       },
-      "provenance_checksum": "952a60b96c95497f62c62c1b6bb60d996416cbd1eb56a49b310cede24bff1a16",
+      "provenance_checksum": "0b1247c5c1cd300f04c8f69ec21aa46eec4295bd9f61677e274b0a41f4d6a7d1",
       "regular_way_listing_date": "2025-11-03",
+      "inactive_effective_date": null,
+      "last_trading_session": null,
+      "canonical_ohlcv_last_observed_session": null,
+      "terminal_session_daily_ohlcv_status": null,
+      "observation_status_as_of": null,
+      "observation_evidence": null,
+      "transaction_closing_date": null,
+      "trading_suspension_effective_date": null,
+      "trading_suspension_effective_timing": null,
       "status_effective_date": "2025-10-27",
       "successor_or_acquirer": null,
       "ticker": "Q"
@@ -339,11 +393,129 @@
           "www.honeywell.com"
         ]
       },
-      "provenance_checksum": "c5755e6a6a40e4c2c12c4db1315c351e144234e69c3fff3ff018c60433e1175b",
+      "provenance_checksum": "7feff260b30e08ff9510d9ab9e42d9d8aae196c97c3c12b645506481d0b7cc80",
       "regular_way_listing_date": "2025-10-30",
+      "inactive_effective_date": null,
+      "last_trading_session": null,
+      "canonical_ohlcv_last_observed_session": null,
+      "terminal_session_daily_ohlcv_status": null,
+      "observation_status_as_of": null,
+      "observation_evidence": null,
+      "transaction_closing_date": null,
+      "trading_suspension_effective_date": null,
+      "trading_suspension_effective_timing": null,
       "status_effective_date": "2025-10-20",
       "successor_or_acquirer": null,
       "ticker": "SOLS"
+    },
+    {
+      "corporate_action_type": "take_private_acquisition",
+      "delisting_end_date": "2026-08-04",
+      "evidence": [
+        {
+          "evidence_retrieved_at": "2026-08-08T12:00:00Z",
+          "source_authority": "sec",
+          "source_host": "www.sec.gov",
+          "source_publication_date": "2026-08-04",
+          "source_type": "form_8_k",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/712515/000114036126031157/ef20079099_8k.htm",
+          "subject_exchange": "NASDAQ",
+          "subject_instrument_id": "equity:ea",
+          "subject_ticker": "EA",
+          "transition_support": [
+            "corporate_action_completion",
+            "trading_termination"
+          ]
+        },
+        {
+          "evidence_retrieved_at": "2026-08-08T12:00:00Z",
+          "source_authority": "issuer",
+          "source_host": "www.ea.com",
+          "source_publication_date": "2026-08-04",
+          "source_type": "completion_release",
+          "source_url": "https://www.ea.com/news/ea-announces-completion-of-acquisition",
+          "subject_exchange": "NASDAQ",
+          "subject_instrument_id": "equity:ea",
+          "subject_ticker": "EA",
+          "transition_support": [
+            "corporate_action_completion",
+            "trading_termination"
+          ]
+        }
+      ],
+      "exchange": "NASDAQ",
+      "inactive_effective_date": "2026-08-05",
+      "instrument_id": "equity:ea",
+      "issuer_name": "Electronic Arts Inc.",
+      "last_trading_session": "2026-08-04",
+      "canonical_ohlcv_last_observed_session": "2026-08-04",
+      "terminal_session_daily_ohlcv_status": "observed_daily_ohlcv",
+      "observation_status_as_of": null,
+      "observation_evidence": null,
+      "lifecycle_reason": "inactive_after_completed_corporate_action",
+      "lifecycle_status": "inactive",
+      "listing_start_date": null,
+      "official_source_hosts": {
+        "issuer": [
+          "www.ea.com"
+        ]
+      },
+      "provenance_checksum": "02a980f49a9d6a38385b57087148fd3db18665341b2366dd72239b7de42ed2a6",
+      "regular_way_listing_date": null,
+      "status_effective_date": "2026-08-05",
+      "successor_or_acquirer": {
+        "name": "PIF, Silver Lake, and Affinity Partners consortium",
+        "ticker": null
+      },
+      "ticker": "EA",
+      "trading_suspension_effective_date": "2026-08-05",
+      "trading_suspension_effective_timing": "before_open",
+      "transaction_closing_date": "2026-08-04"
+    },
+    {
+      "corporate_action_type": "cash_and_stock_acquisition",
+      "delisting_end_date": "2026-07-21",
+      "evidence": [
+        {
+          "evidence_retrieved_at": "2026-08-08T12:00:00Z",
+          "source_authority": "sec",
+          "source_host": "www.sec.gov",
+          "source_publication_date": "2026-07-22",
+          "source_type": "form_8_k",
+          "source_url": "https://www.sec.gov/Archives/edgar/data/1618563/000110465926085888/tm2620871d8_8k.htm",
+          "subject_exchange": "NYSE",
+          "subject_instrument_id": "equity:nsa",
+          "subject_ticker": "NSA",
+          "transition_support": [
+            "corporate_action_completion",
+            "trading_termination"
+          ]
+        }
+      ],
+      "exchange": "NYSE",
+      "inactive_effective_date": "2026-07-22",
+      "instrument_id": "equity:nsa",
+      "issuer_name": "National Storage Affiliates Trust",
+      "last_trading_session": "2026-07-21",
+      "canonical_ohlcv_last_observed_session": "2026-07-21",
+      "terminal_session_daily_ohlcv_status": "observed_daily_ohlcv",
+      "observation_status_as_of": null,
+      "observation_evidence": null,
+      "lifecycle_reason": "inactive_after_completed_corporate_action",
+      "lifecycle_status": "inactive",
+      "listing_start_date": null,
+      "official_source_hosts": {},
+      "provenance_checksum": "8f9435c1249061c16993169cc1051d6f1fefa1197a70d1fe3572399bf1d3995e",
+      "regular_way_listing_date": null,
+      "status_effective_date": "2026-07-22",
+      "successor_or_acquirer": {
+        "name": "Public Storage",
+        "ticker": "PSA"
+      },
+      "ticker": "NSA",
+      "trading_suspension_effective_date": "2026-07-22",
+      "trading_suspension_effective_timing": "before_open",
+      "transaction_closing_date": "2026-07-22"
     },
     {
       "corporate_action_type": "cash_acquisition",
@@ -372,8 +544,28 @@
       "lifecycle_status": "inactive",
       "listing_start_date": null,
       "official_source_hosts": {},
-      "provenance_checksum": "773b27d5882292fdf4fb98d1ce8e39cd1de5a00db096829c947f07212d3db173",
+      "provenance_checksum": "752e435f895badbadd70c41cca58e8a9f289696cbda8b6c3ec8e7c95c177b782",
       "regular_way_listing_date": null,
+      "inactive_effective_date": "2026-07-25",
+      "last_trading_session": "2026-07-24",
+      "canonical_ohlcv_last_observed_session": "2026-07-23",
+      "terminal_session_daily_ohlcv_status": "no_valid_daily_ohlcv_bar_from_provider_as_of",
+      "observation_status_as_of": "2026-08-09T14:34:08.615413Z",
+      "observation_evidence": {
+        "provider_identity": "Yahoo Finance via yfinance",
+        "retrieved_at": "2026-08-09T14:34:08.615413Z",
+        "as_of_date": "2026-08-09",
+        "request_start": "2026-07-24",
+        "request_end_exclusive": "2026-07-25",
+        "response_outcome": "empty_provider_response",
+        "relevant_session": "2026-07-24",
+        "daily_ohlcv_validation_status": "no_valid_daily_ohlcv_bar_returned",
+        "evidence_locator": "provider-request:yahoo-finance-via-yfinance:TMHC:2026-07-24:2026-07-25",
+        "response_checksum": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "transaction_closing_date": "2026-07-24",
+      "trading_suspension_effective_date": "2026-07-24",
+      "trading_suspension_effective_timing": "after_close",
       "status_effective_date": "2026-07-25",
       "successor_or_acquirer": {
         "name": "Berkshire Hathaway Inc.",
@@ -382,5 +574,5 @@
       "ticker": "TMHC"
     }
   ],
-  "schema_version": "market-engine-instrument-lifecycle-registry-v2"
+  "schema_version": "market-engine-instrument-lifecycle-registry-v5"
 }

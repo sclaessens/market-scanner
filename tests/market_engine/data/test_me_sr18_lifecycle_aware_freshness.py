@@ -1,24 +1,26 @@
 from __future__ import annotations
 
+import copy
 import json
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping, Sequence
 
 import pandas as pd
 import pytest
 
 from market_engine.data import scheduled_canonical_price_refresh as scheduled
+from market_engine.data import observation_receipts as receipt_contract
+from market_engine.data.provider_artifact_adapter import RegisteredMarketPriceAdapter
 from market_engine.data.instrument_lifecycle import (
     DEFAULT_LIFECYCLE_REGISTRY,
+    LEGACY_LIFECYCLE_SCHEMA_VERSION,
     LIFECYCLE_SCHEMA_VERSION,
     InstrumentLifecycleError,
     apply_lifecycle_registry,
     load_lifecycle_registry,
     record_provenance_checksum,
 )
-
-
 RUN_AT = datetime(2026, 7, 15, 10, 0, tzinfo=UTC)
 SOURCE_SHA = "8" * 40
 
@@ -35,6 +37,8 @@ def test_governed_canary_records_reconcile_to_official_dates() -> None:
         "HONA",
         "Q",
         "SOLS",
+        "EA",
+        "NSA",
         "TMHC",
     }
     assert {
@@ -42,11 +46,13 @@ def test_governed_canary_records_reconcile_to_official_dates() -> None:
             by_ticker[ticker]["delisting_end_date"],
             by_ticker[ticker]["status_effective_date"],
         )
-        for ticker in ("BLD", "JHG", "GTLS", "TMHC")
+        for ticker in ("BLD", "JHG", "GTLS", "EA", "NSA", "TMHC")
     } == {
         "BLD": ("2026-06-30", "2026-07-01"),
         "JHG": ("2026-06-30", "2026-07-01"),
         "GTLS": ("2026-07-16", "2026-07-17"),
+        "EA": ("2026-08-04", "2026-08-05"),
+        "NSA": ("2026-07-21", "2026-07-22"),
         "TMHC": ("2026-07-24", "2026-07-25"),
     }
     assert {
@@ -75,14 +81,14 @@ def test_repository_universe_becomes_949_active_and_retains_three_inactive() -> 
     governed = apply_lifecycle_registry(
         universe["instruments"],
         load_lifecycle_registry(DEFAULT_LIFECYCLE_REGISTRY),
-        as_of=date(2026, 7, 23),
+        as_of=date(2026, 7, 24),
     )
 
-    assert governed["active_universe_size"] == 949
-    assert governed["inactive_retained_instrument_count"] == 3
+    assert governed["active_universe_size"] == 948
+    assert governed["inactive_retained_instrument_count"] == 4
     assert {
         row["symbol"] for row in governed["inactive_instruments"]
-    } == {"BLD", "JHG", "GTLS"}
+    } == {"BLD", "JHG", "GTLS", "NSA"}
 
 
 def test_tmhc_becomes_inactive_after_proven_final_regular_way_session() -> None:
@@ -109,8 +115,47 @@ def test_tmhc_becomes_inactive_after_proven_final_regular_way_session() -> None:
         for row in after_final_session["inactive_instruments"]
         if row["symbol"] == "TMHC"
     )
-    assert tmhc["delisting_end_date"] == "2026-07-24"
+    assert tmhc["last_trading_session"] == "2026-07-24"
+    assert tmhc["canonical_ohlcv_last_observed_session"] == "2026-07-23"
+    assert (
+        tmhc["terminal_session_daily_ohlcv_status"]
+        == "no_valid_daily_ohlcv_bar_from_provider_as_of"
+    )
+    assert tmhc["observation_evidence"]["provider_identity"] == (
+        "Yahoo Finance via yfinance"
+    )
+    assert tmhc["transaction_closing_date"] == "2026-07-24"
     assert tmhc["lifecycle_status_effective_date"] == "2026-07-25"
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda row: row.update(observation_evidence=None),
+        lambda row: row["observation_evidence"].update(
+            relevant_session="2026-07-23"
+        ),
+    ],
+    ids=["missing", "contradictory"],
+)
+def test_tmhc_observation_provenance_fails_closed(
+    tmp_path: Path,
+    mutation: Any,
+) -> None:
+    registry = json.loads(
+        Path(DEFAULT_LIFECYCLE_REGISTRY).read_text(encoding="utf-8")
+    )
+    record = next(row for row in registry["records"] if row["ticker"] == "TMHC")
+    mutation(record)
+    record["provenance_checksum"] = record_provenance_checksum(record)
+    path = tmp_path / "tmhc-observation.json"
+    path.write_text(
+        json.dumps({"schema_version": LIFECYCLE_SCHEMA_VERSION, "records": [record]}),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(InstrumentLifecycleError, match="observation evidence"):
+        load_lifecycle_registry(path)
 
 
 def test_inactive_effective_date_is_not_applied_early_and_checksum_changes() -> None:
@@ -159,7 +204,7 @@ def test_future_listing_is_pending_and_not_refreshable(tmp_path: Path) -> None:
     assert row["lifecycle_status"] == "pending"
     assert row["freshness_status"] == "not_expected"
     assert row["reason_code"] == "PRE_LISTING_NOT_EXPECTED"
-    assert report["run_status"] == "completed"
+    assert report["run_status"] == "completed", report["tickers"]
 
 
 def test_scheduled_listing_requires_completion_before_later_active_projection(
@@ -829,7 +874,8 @@ def test_stale_freshness_remains_independent_from_listing_coverage(
 
     row = _run(fixture, provider=lambda *_args: pd.DataFrame())["tickers"][0]
 
-    assert row["freshness_status"] == "stale"
+    assert row["freshness_status"] == "failed"
+    assert row["reason_code"] == "EXPECTED_SESSION_COVERAGE_INCOMPLETE"
     assert row["history_coverage_status"] == "insufficient_unexplained"
     assert row["history_coverage_reason_code"] == (
         "HISTORY_END_BEFORE_EXPECTED_SESSION"
@@ -885,8 +931,11 @@ def test_governed_official_issuer_and_acquirer_hosts_are_accepted() -> None:
             "identity mismatch",
         ),
         (
-            lambda row: row.update(delisting_end_date=None),
-            "requires a delisting end date",
+            lambda row: row.update(
+                delisting_end_date=None,
+                last_trading_session=None,
+            ),
+            "requires a last trading session",
         ),
     ],
 )
@@ -1313,6 +1362,7 @@ def _instrument(symbol: str) -> dict[str, Any]:
         "analysis_eligible": True,
         "asset_type": "equity",
         "country": "US",
+        "currency": "USD",
         "exchange": "NYSE",
         "instrument_id": f"equity:{symbol.lower()}",
         "source_mapping_status": "mapped",
@@ -1342,6 +1392,1428 @@ def _set_active_listing_evidence(
         transition_support=["listing_completion"],
     )
     row["evidence"] = [schedule, completion]
+
+
+def test_transaction_closing_date_never_extends_freshness_cutoff() -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    record["transaction_closing_date"] = "2026-07-15"
+    record["provenance_checksum"] = record_provenance_checksum(record)
+    governed = apply_lifecycle_registry(
+        [instrument],
+        _normalized_registry([record]),
+        as_of=date(2026, 7, 15),
+    )
+
+    _profile, expected = scheduled.expected_completed_session(
+        governed["inactive_instruments"][0],
+        datetime(2026, 7, 16, 10, 0, tzinfo=UTC),
+    )
+
+    assert expected == date(2026, 7, 14)
+
+
+def test_inactive_backfill_quarantines_post_cutoff_bar_but_blocks_without_evidence(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-13")},
+    )
+
+    def provider(_symbol: str, _start: str, _end: str) -> pd.DataFrame:
+        return pd.DataFrame(
+            [
+                {
+                    "Date": day,
+                    "Open": 100.0,
+                    "High": 101.0,
+                    "Low": 99.0,
+                    "Close": 100.0,
+                    "Adj Close": 100.0,
+                    "Volume": 1000,
+                }
+                for day in ("2026-07-14", "2026-07-15")
+            ]
+        )
+
+    report = _run(fixture, provider=provider)
+    row = report["tickers"][0]
+    staged = pd.read_csv(fixture["stage"] / "data/processed/OLD.csv")
+
+    assert row["freshness_status"] == "not_expected"
+    assert row["validation_status"] == "valid"
+    assert row["resulting_last_observation"] == "2026-07-14"
+    assert staged["Date"].max() == "2026-07-14"
+    assert row["rejected_bar_diagnostics"] == [
+        {
+            "ticker": "OLD",
+            "session_date": "2026-07-15",
+            "cutoff_date": "2026-07-14",
+            "last_trading_session": "2026-07-14",
+                "canonical_ohlcv_last_observed_session": "2026-07-14",
+            "lifecycle_event": "inactive_after_completed_corporate_action",
+            "lifecycle_provenance_checksum": record["provenance_checksum"],
+            "provider": scheduled.PROVIDER_IDENTITY,
+            "retry_number": 1,
+            "final_reason_code": "PROVIDER_BAR_AFTER_LIFECYCLE_CUTOFF",
+            "disposition": "quarantined_not_persisted",
+        }
+    ]
+    assert row["mutation_evidence_status"] == "invalid"
+    assert report["run_status"] == "failed"
+
+
+def test_contradictory_inactive_effective_date_fails_closed(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    record["inactive_effective_date"] = "2026-07-16"
+    record["provenance_checksum"] = record_provenance_checksum(record)
+
+    with pytest.raises(
+        InstrumentLifecycleError,
+        match="inactive status and inactive effective dates must match",
+    ):
+        load_lifecycle_registry(_write_registry(tmp_path, [record]))
+
+
+@pytest.mark.parametrize("present_field", ["legacy", "canonical", "both"])
+def test_lifecycle_alias_compatibility_inputs_normalize(
+    tmp_path: Path,
+    present_field: str,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    if present_field == "legacy":
+        record.pop("last_trading_session")
+    elif present_field == "canonical":
+        record.pop("delisting_end_date")
+    record["provenance_checksum"] = record_provenance_checksum(record)
+
+    loaded = load_lifecycle_registry(_write_registry(tmp_path, [record]))
+    normalized = loaded["records"][0]
+
+    assert normalized["delisting_end_date"] == "2026-07-14"
+    assert normalized["last_trading_session"] == "2026-07-14"
+
+
+def test_lifecycle_alias_conflict_fails_closed_with_values(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    record["last_trading_session"] = "2026-07-13"
+    record["provenance_checksum"] = record_provenance_checksum(record)
+
+    with pytest.raises(
+        InstrumentLifecycleError,
+        match="semantic alias conflict.*OLD.*last_trading_session.*delisting_end_date",
+    ):
+        load_lifecycle_registry(_write_registry(tmp_path, [record]))
+
+
+@pytest.mark.parametrize("present_field", ["legacy", "canonical", "both"])
+def test_observation_alias_boundary_projects_to_canonical_model(
+    tmp_path: Path,
+    present_field: str,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    if present_field in {"legacy", "both"}:
+        record["price_observation_end_session"] = "2026-07-14T00:00:00Z"
+        record["final_session_observation_status"] = "observed"
+    if present_field == "legacy":
+        record.pop("canonical_ohlcv_last_observed_session")
+        record.pop("terminal_session_daily_ohlcv_status")
+    record["provenance_checksum"] = record_provenance_checksum(record)
+
+    normalized = load_lifecycle_registry(
+        _write_registry(tmp_path, [record])
+    )["records"][0]
+
+    assert normalized["canonical_ohlcv_last_observed_session"] == "2026-07-14"
+    assert normalized["terminal_session_daily_ohlcv_status"] == "observed_daily_ohlcv"
+    assert "price_observation_end_session" not in normalized
+    assert "final_session_observation_status" not in normalized
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("price_observation_end_session", "2026-07-13"),
+        ("final_session_observation_status", "no_valid_price_observation"),
+    ],
+)
+@pytest.mark.parametrize("include_batch_peer", [False, True])
+def test_observation_alias_conflicts_fail_closed_with_diagnostics(
+    tmp_path: Path,
+    field: str,
+    value: str,
+    include_batch_peer: bool,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    record[field] = value
+    record["provenance_checksum"] = record_provenance_checksum(record)
+    records = [record]
+    if include_batch_peer:
+        peer = _record(
+            _instrument("PEER"),
+            lifecycle_status="inactive",
+            status_effective_date="2026-07-15",
+            delisting_end_date="2026-07-14",
+        )
+        records.insert(0, peer)
+
+    with pytest.raises(InstrumentLifecycleError) as captured:
+        load_lifecycle_registry(_write_registry(tmp_path, records))
+
+    message = str(captured.value)
+    assert "OLD" in message
+    assert field in message
+    assert "contract_version" in message
+    assert "canonical_raw" in message
+    assert "legacy_raw" in message
+    assert "canonical_normalized" in message
+    assert "legacy_normalized" in message
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("price_observation_end_session", "not-a-date"),
+        ("final_session_observation_status", "unknown-status"),
+    ],
+)
+def test_invalid_observation_alias_values_fail_closed(
+    tmp_path: Path,
+    field: str,
+    value: str,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    record[field] = value
+    record["provenance_checksum"] = record_provenance_checksum(record)
+
+    with pytest.raises(InstrumentLifecycleError) as captured:
+        load_lifecycle_registry(_write_registry(tmp_path, [record]))
+
+    message = str(captured.value)
+    assert "semantic alias invalid" in message
+    assert "OLD" in message
+    assert field in message
+    assert repr(value) in message
+    assert "canonical_normalized" in message
+    assert "legacy_normalized" in message
+
+
+def test_v2_lifecycle_record_remains_compatible(tmp_path: Path) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    for field in (
+        "last_trading_session",
+        "transaction_closing_date",
+        "trading_suspension_effective_date",
+        "inactive_effective_date",
+            "canonical_ohlcv_last_observed_session",
+            "terminal_session_daily_ohlcv_status",
+            "observation_status_as_of",
+            "observation_evidence",
+        "trading_suspension_effective_timing",
+    ):
+        record.pop(field)
+    record["provenance_checksum"] = record_provenance_checksum(record)
+    path = tmp_path / "v2-registry.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema_version": LEGACY_LIFECYCLE_SCHEMA_VERSION,
+                "records": [record],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    normalized = load_lifecycle_registry(path)["records"][0]
+
+    assert normalized["last_trading_session"] == "2026-07-14"
+    assert normalized["canonical_ohlcv_last_observed_session"] == "2026-07-14"
+    assert normalized["terminal_session_daily_ohlcv_status"] == (
+        "observed_daily_ohlcv"
+    )
+
+
+@pytest.mark.parametrize(
+    ("updates", "message"),
+    [
+        (
+            {"transaction_closing_date": "2026-07-13"},
+            "transaction closing cannot precede",
+        ),
+        (
+            {
+                "trading_suspension_effective_date": "2026-07-14",
+                "trading_suspension_effective_timing": "before_open",
+            },
+            "trading suspension chronology",
+        ),
+        (
+            {"canonical_ohlcv_last_observed_session": "2026-07-15"},
+            "price observation end cannot follow",
+        ),
+    ],
+)
+def test_invalid_lifecycle_chronology_fails_closed(
+    tmp_path: Path,
+    updates: dict[str, str],
+    message: str,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    record.update(updates)
+    record["provenance_checksum"] = record_provenance_checksum(record)
+
+    with pytest.raises(InstrumentLifecycleError, match=message):
+        load_lifecycle_registry(_write_registry(tmp_path, [record]))
+
+
+def test_after_close_suspension_on_final_session_is_valid(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-14",
+        delisting_end_date="2026-07-14",
+    )
+    record.update(
+        transaction_closing_date="2026-07-14",
+        trading_suspension_effective_date="2026-07-14",
+        trading_suspension_effective_timing="after_close",
+        inactive_effective_date="2026-07-14",
+    )
+    record["provenance_checksum"] = record_provenance_checksum(record)
+
+    normalized = load_lifecycle_registry(_write_registry(tmp_path, [record]))[
+        "records"
+    ][0]
+
+    assert normalized["trading_suspension_effective_timing"] == "after_close"
+
+
+def test_changed_price_files_include_inactive_bounded_backfill(
+    tmp_path: Path,
+) -> None:
+    active = _instrument("ACTIVE")
+    inactive = _instrument("INACTIVE")
+    record = _record(
+        inactive,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [active, inactive],
+        [record],
+        histories={
+            "ACTIVE": ("2025-07-01", "2026-07-13"),
+            "INACTIVE": ("2025-07-01", "2026-07-13"),
+        },
+    )
+
+    report = _run(
+        fixture,
+        provider=lambda *_args: pd.DataFrame(
+            [
+                {
+                    "Date": "2026-07-14",
+                    "Open": 100.0,
+                    "High": 101.0,
+                    "Low": 99.0,
+                    "Close": 100.0,
+                    "Adj Close": 100.0,
+                    "Volume": 1000,
+                }
+            ]
+        ),
+    )
+    by_ticker = {row["ticker"]: row for row in report["tickers"]}
+
+    assert by_ticker["ACTIVE"]["freshness_status"] == "updated"
+    assert by_ticker["INACTIVE"]["freshness_status"] == "not_expected"
+    assert report["publication"]["changed_price_file_count"] == 2
+    assert report["publication"]["changed_price_files"] == [
+        "data/processed/ACTIVE.csv",
+        "data/processed/INACTIVE.csv",
+    ]
+
+
+def test_aligned_inactive_history_is_not_a_changed_file(
+    tmp_path: Path,
+) -> None:
+    inactive = _instrument("INACTIVE")
+    record = _record(
+        inactive,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [inactive],
+        [record],
+        histories={"INACTIVE": ("2025-07-01", "2026-07-14")},
+    )
+
+    report = _run(
+        fixture,
+        provider=lambda *_args: (_ for _ in ()).throw(
+            AssertionError("aligned inactive history must not call provider")
+        ),
+    )
+
+    assert report["publication"]["changed_price_file_count"] == 0
+    assert report["publication"]["changed_price_files"] == []
+
+
+def test_changed_price_manifest_mismatch_is_rejected(
+    tmp_path: Path,
+) -> None:
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
+    manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["publication"]["changed_price_file_count"] = 0
+    manifest["publication"]["changed_price_files"] = []
+    manifest["manifest_checksum"] = scheduled._manifest_checksum(manifest)
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    validation = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        run_at=RUN_AT,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
+    )
+
+    assert validation["validated"] is False
+    assert "PUBLISHED_CHANGED_PRICE_FILE_SET_MISMATCH" in validation[
+        "reason_codes"
+    ]
+
+
+def test_changed_price_manifest_cannot_forge_unchanged_baseline(
+    tmp_path: Path,
+) -> None:
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
+    manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["tickers"][0]["previous_file_checksum"] = manifest["tickers"][0][
+        "persisted_file_checksum"
+    ]
+    manifest["publication"]["changed_price_file_count"] = 0
+    manifest["publication"]["changed_price_files"] = []
+    manifest["manifest_checksum"] = scheduled._manifest_checksum(manifest)
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    validation = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        run_at=RUN_AT,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
+    )
+
+    assert validation["validated"] is False
+    assert "PUBLISHED_CHANGED_PRICE_BASELINE_MISMATCH" in validation[
+        "reason_codes"
+    ]
+
+
+def test_manifest_cannot_forge_previous_observation_metadata(
+    tmp_path: Path,
+) -> None:
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
+    manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["tickers"][0]["previous_last_observation"] = "2026-07-14"
+    manifest["manifest_checksum"] = scheduled._manifest_checksum(manifest)
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    validation = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        run_at=RUN_AT,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
+    )
+
+    assert validation["validated"] is False
+    assert "PUBLISHED_OBSERVATION_MUTATION_METADATA_INVALID" in validation[
+        "reason_codes"
+    ]
+    assert "PUBLISHED_OBSERVATION_BASELINE_MISMATCH" in validation[
+        "reason_codes"
+    ]
+
+
+def test_singleton_revalidation_preserves_lifecycle_quarantine(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    inactive = _instrument("INACTIVE")
+    record = _record(
+        inactive,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [inactive],
+        [record],
+        histories={"INACTIVE": ("2025-07-01", "2026-07-13")},
+    )
+    singleton_frame = pd.DataFrame(
+        [
+            {
+                "Date": day,
+                "Open": 100.0,
+                "High": 101.0,
+                "Low": 99.0,
+                "Close": 100.0,
+                "Adj Close": 100.0,
+                "Volume": 1000,
+            }
+            for day in ("2026-07-14", "2026-07-15")
+        ]
+    )
+    monkeypatch.setattr(
+        scheduled,
+        "download_yfinance_batch",
+        lambda symbols, _start, _end: {
+            symbol: pd.DataFrame(
+                [
+                    {
+                        "Date": "2026-07-14",
+                        "Open": 100.0,
+                        "High": 90.0,
+                        "Low": 99.0,
+                        "Close": 100.0,
+                        "Adj Close": 100.0,
+                        "Volume": 1000,
+                    }
+                ]
+            )
+            for symbol in symbols
+        },
+    )
+    monkeypatch.setattr(
+        scheduled,
+        "_download_yfinance_history",
+        lambda *_args: singleton_frame.copy(),
+    )
+
+    report = _run(fixture, provider=None)
+    row = report["tickers"][0]
+    staged = pd.read_csv(fixture["stage"] / "data/processed/INACTIVE.csv")
+    quarantine = [
+        item
+        for item in row["rejected_bar_diagnostics"]
+        if item.get("final_reason_code")
+        == "PROVIDER_BAR_AFTER_LIFECYCLE_CUTOFF"
+    ]
+    lifecycle_context = apply_lifecycle_registry(
+        [inactive],
+        _normalized_registry([record]),
+        as_of=date(2026, 7, 15),
+    )["inactive_instruments"][0]
+    batch_validated = scheduled._validate_provider_frame(
+        singleton_frame,
+        date(2026, 7, 14),
+        provider_symbol="INACTIVE",
+        retry_number=1,
+        lifecycle_context=lifecycle_context,
+    )
+    batch_quarantine = batch_validated.attrs["rejected_bar_diagnostics"]
+
+    assert row["freshness_status"] == "not_expected"
+    assert row["resulting_last_observation"] == "2026-07-14"
+    assert staged["Date"].max() == "2026-07-14"
+    assert quarantine[0]["session_date"] == "2026-07-15"
+    assert quarantine[0]["canonical_ohlcv_last_observed_session"] == (
+        "2026-07-14"
+    )
+    assert quarantine[0]["disposition"] == batch_quarantine[0]["disposition"]
+    assert quarantine[0]["final_reason_code"] == batch_quarantine[0][
+        "final_reason_code"
+    ]
+    assert pd.to_datetime(batch_validated["Date"]).dt.date.max() == date(
+        2026, 7, 14
+    )
+    assert row["provider_retrieval"][-1]["classification"] == (
+        "single_ticker_refetch_valid"
+    )
+
+
+def test_inactive_backfill_requires_every_expected_exchange_session(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-10")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(
+            ["2026-07-13", "2026-07-14"]
+        ),
+    )["tickers"][0]
+    staged = pd.read_csv(fixture["stage"] / "data/processed/OLD.csv")
+
+    assert row["freshness_status"] == "not_expected"
+    assert row["expected_backfill_sessions"] == ["2026-07-13", "2026-07-14"]
+    assert row["observed_backfill_sessions"] == ["2026-07-13", "2026-07-14"]
+    assert staged["Date"].tolist()[-2:] == ["2026-07-13", "2026-07-14"]
+
+
+def test_active_recent_listing_completeness_starts_after_canonical_end(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("NEW")
+    record = _record(
+        instrument,
+        lifecycle_status="active",
+        status_effective_date="2026-07-01",
+        listing_start_date="2026-07-01",
+        regular_way_listing_date="2026-07-02",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"NEW": ("2026-07-01", "2026-07-10")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(
+            ["2026-07-13", "2026-07-14"]
+        ),
+    )["tickers"][0]
+
+    assert row["freshness_status"] == "already_current"
+    assert row["previous_last_observation"] == "2026-07-10"
+    assert row["resulting_last_observation"] == "2026-07-14"
+    assert row["expected_backfill_sessions"] == [
+        "2026-07-13",
+        "2026-07-14",
+    ]
+
+
+@pytest.mark.parametrize(
+    "received",
+    [["2026-07-14"], ["2026-07-13"]],
+    ids=["terminal-only", "internal-session-only"],
+)
+def test_incomplete_inactive_backfill_fails_closed(
+    tmp_path: Path,
+    received: list[str],
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-10")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(received),
+    )["tickers"][0]
+
+    assert row["freshness_status"] == "failed"
+    assert row["rows_added"] == 0
+    assert pd.read_csv(fixture["stage"] / "data/processed/OLD.csv")[
+        "Date"
+    ].max() == "2026-07-10"
+
+
+def test_bounded_refetch_can_fill_one_missing_session(tmp_path: Path) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-10")},
+    )
+    responses = iter(
+        [_provider_rows(["2026-07-14"]), _provider_rows(["2026-07-13"])]
+    )
+    requests: list[tuple[str, str]] = []
+
+    def approved_provider(_symbol: str, start: str, end: str) -> pd.DataFrame:
+        requests.append((start, end))
+        return next(responses)
+
+    approved_provider.provider_id = "approved-primary"
+    policy_path = tmp_path / "market-price-policy.json"
+    policy_path.write_text(
+        json.dumps(
+            {
+                "schema_version": receipt_contract.POLICY_SCHEMA_VERSION,
+                "providers": [
+                    {
+                        "provider_id": "approved-primary",
+                            "approval_id": "approved-primary-v1",
+                            "data_type": "daily_ohlcv",
+                            "adapter_id": "lifecycle-test-adapter",
+                            "adapter_version": "v1",
+                            "parser_name": receipt_contract.PARSER_NAME,
+                            "parser_version": receipt_contract.PARSER_VERSION,
+                            "approved_for_acquisition": True,
+                            "approved_for_retention": True,
+                        "approved_for_replay": True,
+                        "approved_for_canonical_publication": True,
+                        "acquisition_routes": ["primary_replay"],
+                        "exchanges": ["NYSE"],
+                        "retention_classification": "immutable_test_evidence",
+                        "redistribution_classification": "test_only",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    row = _run(
+        fixture,
+        provider=approved_provider,
+        source_policy_path=policy_path,
+    )["tickers"][0]
+
+    assert row["freshness_status"] == "not_expected"
+    assert row["rows_added"] == 2
+    assert row["previous_last_observation"] == "2026-07-10"
+    assert row["resulting_last_observation"] == "2026-07-14"
+    assert requests == [
+        ("2026-07-11", "2026-07-15"),
+        ("2026-07-12", "2026-07-15"),
+    ]
+
+
+def test_gap_directed_replay_window_is_bounded_and_order_independent() -> None:
+    expected = ("2026-07-12", "2026-07-16")
+    assert scheduled.gap_directed_replay_window(
+        [date(2026, 7, 15), date(2026, 7, 13)],
+        request_start="2026-07-12",
+        request_end_exclusive="2026-07-16",
+    ) == expected
+    assert scheduled.gap_directed_replay_window(
+        [date(2026, 7, 13), date(2026, 7, 15)],
+        request_start="2026-07-12",
+        request_end_exclusive="2026-07-16",
+    ) == expected
+
+
+@pytest.mark.parametrize(
+    "missing,start,end",
+    [
+        ([], "2026-07-12", "2026-07-16"),
+        ([date(2026, 7, 11)], "2026-07-12", "2026-07-16"),
+        ([date(2026, 7, 16)], "2026-07-12", "2026-07-16"),
+    ],
+)
+def test_gap_directed_replay_window_rejects_unbounded_inputs(
+    missing: list[date], start: str, end: str
+) -> None:
+    with pytest.raises(ValueError, match="gap-directed replay"):
+        scheduled.gap_directed_replay_window(
+            missing,
+            request_start=start,
+            request_end_exclusive=end,
+        )
+
+
+def test_exchange_holiday_is_not_an_expected_missing_session(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-07",
+        delisting_end_date="2026-07-06",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-02")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(["2026-07-06"]),
+        run_at=datetime(2026, 7, 7, 21, 0, tzinfo=UTC),
+    )["tickers"][0]
+
+    assert row["expected_backfill_sessions"] == ["2026-07-06"]
+    assert row["freshness_status"] == "not_expected"
+
+
+def test_ea_terminal_only_primary_blocks_without_approved_gap_fill(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("EA")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-08-05",
+        delisting_end_date="2026-08-04",
+    )
+    record["evidence"][0]["evidence_retrieved_at"] = "2026-08-05T09:00:00Z"
+    record["provenance_checksum"] = record_provenance_checksum(record)
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"EA": ("2025-07-01", "2026-07-23")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(["2026-08-04"]),
+        run_at=datetime(2026, 8, 5, 21, 0, tzinfo=UTC),
+    )["tickers"][0]
+
+    assert row["previous_last_observation"] == "2026-07-23"
+    assert row["freshness_status"] == "failed"
+    assert row["reason_code"] == "RETAINED_HISTORY_ENDS_BEFORE_EXPECTED_SESSION"
+    assert row["resulting_last_observation"] == "2026-07-23"
+    assert row["rows_added"] == 0
+    assert row["previous_row_count"] == row["resulting_row_count"]
+    assert row["expected_backfill_sessions"] == [
+        "2026-07-24",
+        "2026-07-27",
+        "2026-07-28",
+        "2026-07-29",
+        "2026-07-30",
+        "2026-07-31",
+        "2026-08-03",
+        "2026-08-04",
+    ]
+    assert row["observation_receipts"] == []
+    assert row["fallback_candidate_sessions"] == [
+        "2026-07-24",
+        "2026-07-27",
+        "2026-07-28",
+        "2026-07-29",
+        "2026-07-30",
+        "2026-07-31",
+        "2026-08-03",
+        "2026-08-04",
+    ]
+
+
+def _approved_gap_fill_run(
+    tmp_path: Path,
+    *,
+    receipt_session: str = "2026-07-13",
+    provider_sessions: Sequence[str] = ("2026-07-14",),
+    receipt_request_end: str = "2026-07-15",
+    expect_completed: bool = True,
+) -> tuple[dict[str, Path], Path, dict[str, Any]]:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-15",
+        delisting_end_date="2026-07-14",
+    )
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-10")},
+    )
+    policy_path = tmp_path / "market-price-policy.json"
+    policy_path.write_text(
+        json.dumps(
+            {
+                "schema_version": receipt_contract.POLICY_SCHEMA_VERSION,
+                "providers": [
+                    {
+                        "provider_id": "approved-test-fallback",
+                        "approval_id": "approval-test-fallback-v1",
+                        "data_type": "daily_ohlcv",
+                        "adapter_id": "lifecycle-test-adapter",
+                        "adapter_version": "v1",
+                        "parser_name": receipt_contract.PARSER_NAME,
+                        "parser_version": receipt_contract.PARSER_VERSION,
+                        "approved_for_acquisition": True,
+                        "approved_for_retention": True,
+                        "approved_for_replay": True,
+                        "approved_for_canonical_publication": True,
+                        "acquisition_routes": [
+                            "primary",
+                            "primary_replay",
+                            "fallback",
+                        ],
+                        "exchanges": ["NYSE"],
+                        "retention_classification": "immutable_test_evidence",
+                        "redistribution_classification": "test_only",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    payload = json.dumps(
+        {
+            "bars": [
+                {
+                    "session_date": receipt_session,
+                    "open": "100",
+                    "high": "101",
+                    "low": "99",
+                    "close": "100",
+                    "adj_close": "100",
+                    "volume": 1000,
+                }
+            ]
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode()
+    policy = receipt_contract.load_source_policy(policy_path)
+    fallback_adapter = RegisteredMarketPriceAdapter(
+        policy=policy,
+        instrument=instrument,
+        provider_id="approved-test-fallback",
+        acquisition_route="fallback",
+    )
+    fallback_request = fallback_adapter.request(
+        method_id="lifecycle-test-daily-bars",
+        start="2026-07-13",
+        end_exclusive=receipt_request_end,
+        timezone="America/New_York",
+        pagination={"page": 1, "terminal": True},
+    )
+    fallback_artifact = fallback_adapter.capture_response(
+        payload,
+        request=fallback_request,
+        artifact_root=fixture["published"],
+        acquisition_run_id="lifecycle-fallback-run",
+        retrieved_at="2026-07-15T09:00:00Z",
+        response_status=200,
+        response_content_type="application/json",
+    )
+    primary_artifacts: list[dict[str, Any]] = []
+    if provider_sessions:
+        primary_payload = json.dumps(
+            {
+                "bars": [
+                    {
+                        "session_date": session,
+                        "open": "100",
+                        "high": "101",
+                        "low": "99",
+                        "close": "100",
+                        "adj_close": "100",
+                        "volume": 1000,
+                    }
+                    for session in provider_sessions
+                ]
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode()
+        primary_adapter = RegisteredMarketPriceAdapter(
+            policy=policy,
+            instrument=instrument,
+            provider_id="approved-test-fallback",
+            acquisition_route="primary",
+        )
+        primary_request = primary_adapter.request(
+            method_id="lifecycle-test-daily-bars", start="2026-07-13",
+            end_exclusive="2026-07-15", timezone="America/New_York",
+            pagination={"page": 1, "terminal": True},
+        )
+        primary_artifacts = [primary_adapter.capture_response(
+            primary_payload,
+            request=primary_request,
+            artifact_root=fixture["published"],
+            acquisition_run_id="lifecycle-primary-run",
+            retrieved_at="2026-07-15T09:00:00Z",
+            response_status=200,
+            response_content_type="application/json",
+        )]
+    report = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(provider_sessions),
+        source_policy_path=policy_path,
+        provider_artifacts={
+            instrument["instrument_id"]: [fallback_artifact] + primary_artifacts
+        },
+    )
+    if expect_completed:
+        assert report["run_status"] == "completed", report["tickers"]
+    else:
+        assert report["run_status"] == "failed", report["tickers"]
+    return fixture, policy_path, report
+
+
+def test_primary_and_fallback_conflict_fails_closed(tmp_path: Path) -> None:
+    _, _, report = _approved_gap_fill_run(
+        tmp_path,
+        receipt_session="2026-07-14",
+        provider_sessions=("2026-07-13", "2026-07-14"),
+        expect_completed=False,
+    )
+    assert report["tickers"][0]["freshness_status"] == "failed"
+    assert any(
+            diagnostic["reason_code"]
+            == "PROVIDER_ARTIFACT_INVALID"
+        for diagnostic in report["tickers"][0]["rejected_bar_diagnostics"]
+    )
+
+
+def test_fallback_post_cutoff_observation_fails_closed(tmp_path: Path) -> None:
+    _, _, report = _approved_gap_fill_run(
+        tmp_path,
+        receipt_session="2026-07-15",
+        provider_sessions=("2026-07-13", "2026-07-14"),
+        receipt_request_end="2026-07-16",
+        expect_completed=False,
+    )
+    assert report["tickers"][0]["freshness_status"] == "failed"
+    assert any(
+            diagnostic["reason_code"]
+            == "PROVIDER_ARTIFACT_IDENTITY_MISMATCH"
+        for diagnostic in report["tickers"][0]["rejected_bar_diagnostics"]
+    )
+
+
+def test_trusted_publisher_replays_raw_receipt_to_canonical_row(
+    tmp_path: Path,
+) -> None:
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
+
+    result = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        expected_source_main_sha=SOURCE_SHA,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
+        run_at=RUN_AT,
+    )
+
+    assert result["validated"] is True, result
+
+    installed_snapshot_result = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        expected_source_main_sha=SOURCE_SHA,
+        source_policy_path=policy_path,
+        run_at=RUN_AT,
+    )
+
+    assert installed_snapshot_result["validated"] is True, (
+        installed_snapshot_result
+    )
+
+
+def test_primary_observed_label_cannot_replace_replayable_receipt(
+    tmp_path: Path,
+) -> None:
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
+    manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    entry = manifest["tickers"][0]
+    entry["primary_observed_sessions"] = ["2026-07-14"]
+    entry["observation_receipts"] = [
+        receipt
+        for receipt in entry["observation_receipts"]
+        if receipt["session_date"] != "2026-07-14"
+    ]
+    entry["observation_receipt_root"] = receipt_contract.observation_receipt_root(
+        entry["observation_receipts"]
+    )
+    manifest["manifest_checksum"] = scheduled._manifest_checksum(manifest)
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    result = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        expected_source_main_sha=SOURCE_SHA,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
+        run_at=RUN_AT,
+    )
+
+    assert result["validated"] is False
+    assert "PUBLISHED_MUTATION_EVIDENCE_RECONCILIATION_INVALID" in result[
+        "reason_codes"
+    ]
+
+
+def test_primary_observed_diagnostic_relabel_does_not_change_evidence(
+    tmp_path: Path,
+) -> None:
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
+    manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["tickers"][0]["primary_observed_sessions"] = [
+        "2026-07-13",
+        "2026-07-14",
+    ]
+    manifest["manifest_checksum"] = scheduled._manifest_checksum(manifest)
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    result = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        expected_source_main_sha=SOURCE_SHA,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
+        run_at=RUN_AT,
+    )
+
+    assert result["validated"] is True, result
+
+
+def test_publisher_rejects_forged_publication_mutation_root(
+    tmp_path: Path,
+) -> None:
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
+    manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["mutation_evidence_summary"]["publication_mutation_root"] = "f" * 64
+    manifest["manifest_checksum"] = scheduled._manifest_checksum(manifest)
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    result = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        expected_source_main_sha=SOURCE_SHA,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
+        run_at=RUN_AT,
+    )
+
+    assert result["validated"] is False
+    assert "PUBLISHED_MUTATION_EVIDENCE_ROOT_MISMATCH" in result["reason_codes"]
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "close",
+        "volume",
+        "adj_close",
+        "missing_receipt",
+        "duplicate_receipt",
+        "extra_receipt_without_row",
+        "wrong_ticker",
+        "wrong_exchange",
+        "wrong_session",
+        "post_cutoff_session",
+        "unknown_provider",
+        "wrong_approval_id",
+        "unknown_parser",
+        "unsuccessful_response",
+        "wrong_raw_checksum",
+        "missing_raw_artifact",
+        "missing_root_leaf",
+        "extra_root_leaf",
+    ],
+)
+def test_trusted_publisher_rejects_receipt_and_csv_mutations(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
+    manifest_path = fixture["stage"] / scheduled.LATEST_MANIFEST
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    entry = manifest["tickers"][0]
+    if mutation in {"close", "volume", "adj_close"}:
+        csv_path = fixture["stage"] / entry["persisted_file_path"]
+        frame = pd.read_csv(csv_path)
+        column = {"close": "Close", "volume": "Volume", "adj_close": "Adj Close"}[mutation]
+        frame.loc[frame["Date"] == "2026-07-13", column] += 1
+        frame.to_csv(csv_path, index=False)
+        entry["persisted_file_checksum"] = scheduled._sha256_file(csv_path)
+    elif mutation == "missing_receipt":
+        entry["observation_receipts"] = []
+    elif mutation == "duplicate_receipt":
+        entry["observation_receipts"].append(copy.deepcopy(entry["observation_receipts"][0]))
+    elif mutation == "extra_receipt_without_row":
+        extra = copy.deepcopy(entry["observation_receipts"][0])
+        extra["session_date"] = "2026-07-12"
+        entry["observation_receipts"].append(extra)
+    elif mutation == "wrong_ticker":
+        entry["observation_receipts"][0]["ticker"] = "OTHER"
+    elif mutation == "wrong_exchange":
+        entry["observation_receipts"][0]["exchange"] = "NASDAQ"
+    elif mutation == "wrong_session":
+        entry["observation_receipts"][0]["session_date"] = "2026-07-14"
+    elif mutation == "post_cutoff_session":
+        entry["observation_receipts"][0]["session_date"] = "2026-07-15"
+    elif mutation == "unknown_provider":
+        entry["observation_receipts"][0]["provider_id"] = "reachable-unapproved"
+    elif mutation == "wrong_approval_id":
+        entry["observation_receipts"][0]["source_approval_id"] = "not-approved"
+    elif mutation == "unknown_parser":
+        entry["observation_receipts"][0]["parser_version"] = "unknown"
+    elif mutation == "unsuccessful_response":
+        entry["observation_receipts"][0]["response_status"] = 500
+    elif mutation == "wrong_raw_checksum":
+        entry["observation_receipts"][0]["raw_artifact_sha256"] = "0" * 64
+    elif mutation == "missing_raw_artifact":
+        raw_path = fixture["stage"] / entry["provider_artifacts"][0][
+            "artifact_locator"
+        ]
+        raw_path.unlink()
+    elif mutation == "missing_root_leaf":
+        entry["observation_receipt_root"] = receipt_contract.observation_receipt_root([])
+    else:
+        entry["observation_receipt_root"] = "f" * 64
+    manifest["manifest_checksum"] = scheduled._manifest_checksum(manifest)
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    result = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        expected_source_main_sha=SOURCE_SHA,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
+        run_at=RUN_AT,
+    )
+
+    assert result["validated"] is False
+    assert any(
+        "OBSERVATION_RECEIPT" in code
+        or "MUTATION_EVIDENCE" in code
+        or "RAW_OBSERVATION_ARTIFACT" in code
+        for code in result["reason_codes"]
+    )
+
+
+def test_trusted_publisher_rejects_unbound_raw_artifact(tmp_path: Path) -> None:
+    fixture, policy_path, _ = _approved_gap_fill_run(tmp_path)
+    extra = fixture["stage"] / "evidence/market_price/unbound/extra.json"
+    extra.parent.mkdir(parents=True, exist_ok=True)
+    extra.write_text('{"bars": []}', encoding="utf-8")
+
+    result = scheduled.validate_published_dataset(
+        fixture["stage"],
+        universe_snapshot_path=fixture["universe"],
+        lifecycle_registry_path=fixture["registry"],
+        expected_source_main_sha=SOURCE_SHA,
+        baseline_publication_root=fixture["published"],
+        source_policy_path=policy_path,
+        run_at=RUN_AT,
+    )
+
+    assert result["validated"] is False
+    assert "PUBLISHED_RAW_OBSERVATION_ARTIFACT_SET_MISMATCH" in result[
+        "reason_codes"
+    ]
+
+
+def test_terminal_status_without_replayable_attestation_remains_unresolved(
+    tmp_path: Path,
+) -> None:
+    universe = scheduled.load_authoritative_universe(
+        scheduled.DEFAULT_UNIVERSE_SNAPSHOT
+    )
+    instrument = next(
+        row for row in universe["instruments"] if row["symbol"] == "TMHC"
+    )
+    registry = load_lifecycle_registry(DEFAULT_LIFECYCLE_REGISTRY)
+    record = next(row for row in registry["records"] if row["ticker"] == "TMHC")
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"TMHC": ("2025-07-01", "2026-07-23")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: pd.DataFrame(),
+        run_at=datetime(2026, 8, 9, 18, 0, tzinfo=UTC),
+    )["tickers"][0]
+
+    assert row["expected_backfill_sessions"] == ["2026-07-24"]
+    assert row["explained_missing_sessions"] == ["2026-07-24"]
+    assert row["fallback_candidate_sessions"] == ["2026-07-24"]
+    assert row["observation_receipts"] == []
+    assert row["observation_receipt_root"] is None
+    assert row["session_resolution"]["unresolved_sessions"] == ["2026-07-24"]
+
+
+def test_later_terminal_daily_ohlcv_replaces_temporary_absence_status(
+    tmp_path: Path,
+) -> None:
+    instrument = _instrument("OLD")
+    record = _record(
+        instrument,
+        lifecycle_status="inactive",
+        status_effective_date="2026-07-25",
+        delisting_end_date="2026-07-24",
+    )
+    record.update(
+        canonical_ohlcv_last_observed_session="2026-07-23",
+        terminal_session_daily_ohlcv_status=(
+            "no_valid_daily_ohlcv_bar_from_provider_as_of"
+        ),
+        observation_status_as_of="2026-08-09T00:00:00Z",
+        observation_evidence={
+            "provider_identity": scheduled.PROVIDER_IDENTITY,
+            "retrieved_at": "2026-08-09T00:00:00Z",
+            "as_of_date": "2026-08-09",
+            "request_start": "2026-07-24",
+            "request_end_exclusive": "2026-07-25",
+            "response_outcome": "empty_provider_response",
+            "relevant_session": "2026-07-24",
+            "daily_ohlcv_validation_status": "no_valid_daily_ohlcv_bar_returned",
+            "evidence_locator": "provider-request:test:OLD",
+            "response_checksum": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        },
+        transaction_closing_date="2026-07-24",
+        trading_suspension_effective_date="2026-07-24",
+        trading_suspension_effective_timing="after_close",
+    )
+    record["evidence"][0]["evidence_retrieved_at"] = "2026-07-25T09:00:00Z"
+    record["provenance_checksum"] = record_provenance_checksum(record)
+    fixture = _fixture(
+        tmp_path,
+        [instrument],
+        [record],
+        histories={"OLD": ("2025-07-01", "2026-07-23")},
+    )
+
+    row = _run(
+        fixture,
+        provider=lambda *_args: _provider_rows(
+            ["2026-07-24", "2026-07-25"]
+        ),
+        run_at=datetime(2026, 7, 25, 21, 0, tzinfo=UTC),
+    )["tickers"][0]
+
+    assert row["resulting_last_observation"] == "2026-07-24"
+    assert row["terminal_session_daily_ohlcv_status"] == "observed_daily_ohlcv"
+    assert row["observation_status_as_of"] is None
+    assert row["observation_evidence"] is None
+    assert row["rejected_bar_diagnostics"][0]["session_date"] == "2026-07-25"
+
+
+def _provider_rows(sessions: list[str]) -> pd.DataFrame:
+    return pd.DataFrame(
+        [
+            {
+                "Date": session,
+                "Open": 100.0,
+                "High": 101.0,
+                "Low": 99.0,
+                "Close": 100.0,
+                "Adj Close": 100.0,
+                "Volume": 1000,
+            }
+            for session in sessions
+        ]
+    )
 
 
 def _record(
@@ -1379,6 +2851,27 @@ def _record(
             else "cash_acquisition"
         ),
         "delisting_end_date": delisting_end_date,
+        "last_trading_session": delisting_end_date,
+        "transaction_closing_date": (
+            status_effective_date if lifecycle_status == "inactive" else None
+        ),
+        "trading_suspension_effective_date": (
+            status_effective_date if lifecycle_status == "inactive" else None
+        ),
+        "inactive_effective_date": (
+            status_effective_date if lifecycle_status == "inactive" else None
+        ),
+        "canonical_ohlcv_last_observed_session": (
+            delisting_end_date if lifecycle_status == "inactive" else None
+        ),
+        "terminal_session_daily_ohlcv_status": (
+            "observed_daily_ohlcv" if lifecycle_status == "inactive" else None
+        ),
+        "observation_status_as_of": None,
+        "observation_evidence": None,
+        "trading_suspension_effective_timing": (
+            "before_open" if lifecycle_status == "inactive" else None
+        ),
         "evidence": [
             {
                 "evidence_retrieved_at": "2026-07-15T09:00:00Z",
@@ -1480,7 +2973,17 @@ def _fixture(
     }
 
 
-def _run(fixture: dict[str, Path], *, provider: Any) -> dict[str, Any]:
+def _run(
+    fixture: dict[str, Path],
+    *,
+    provider: Any,
+    run_at: datetime = RUN_AT,
+    source_policy_path: Path = scheduled.DEFAULT_SOURCE_POLICY,
+    provider_artifacts: Mapping[str, Sequence[Mapping[str, Any]]] | None = None,
+    absence_attestations: Mapping[
+        str, Sequence[Mapping[str, Any]]
+    ] | None = None,
+) -> dict[str, Any]:
     return scheduled.run_scheduled_refresh(
         run_id="me-sr18-test-20260715T100000Z",
         source_main_sha=SOURCE_SHA,
@@ -1489,9 +2992,12 @@ def _run(fixture: dict[str, Path], *, provider: Any) -> dict[str, Any]:
         published_root=fixture["published"],
         staging_root=fixture["stage"],
         report_output=fixture["report"],
-        run_at=RUN_AT,
+        run_at=run_at,
         provider=provider,
         sleeper=lambda _seconds: None,
+        source_policy_path=source_policy_path,
+        provider_artifacts=provider_artifacts,
+        absence_attestations=absence_attestations,
     )
 
 

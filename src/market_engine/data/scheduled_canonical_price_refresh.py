@@ -13,6 +13,7 @@ import time
 from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, time as wall_time, timedelta
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence, TextIO
 from zoneinfo import ZoneInfo
@@ -37,10 +38,34 @@ from market_engine.data.local_market_data_universe import (
     UNIVERSE_SNAPSHOT_SCHEMA_VERSION,
     validate_price_history_csv,
 )
+from market_engine.data.observation_receipts import (
+    ABSENCE_ATTESTATION_SCHEMA_VERSION,
+    DEFAULT_SOURCE_POLICY,
+    POLICY_SCHEMA_VERSION,
+    ObservationReceiptError,
+    approved_source_policy,
+    bind_absence_evidence_to_consumer,
+    load_provider_artifact,
+    load_source_policy,
+    observation_receipt_root,
+    replay_absence_attestations,
+    replay_provider_artifacts,
+    select_mutation_observations,
+    validate_declared_receipts,
+)
+from market_engine.data.mutation_evidence import (
+    MUTATION_SCHEMA_VERSION,
+    SESSION_LEDGER_SCHEMA_VERSION,
+    MutationEvidenceError,
+    derive_canonical_mutations,
+    derive_session_resolution,
+    mutation_evidence_diagnostics,
+    reconcile_mutation_evidence,
+)
 
 
-SCHEMA_VERSION = "market-engine-me-sr18-canonical-price-freshness-manifest-v3"
-VALIDATION_SCHEMA_VERSION = "market-engine-me-sr18-published-price-dataset-validation-v3"
+SCHEMA_VERSION = "market-engine-me-sr23-canonical-price-freshness-manifest-v10"
+VALIDATION_SCHEMA_VERSION = "market-engine-me-sr23-published-price-dataset-validation-v10"
 DEFAULT_UNIVERSE_SNAPSHOT = Path(
     "artifacts/market_engine/data_runs/"
     "me-data04-complete-dataset-20260713T133000Z-coverage-after/universe_snapshot.json"
@@ -141,6 +166,9 @@ def run_scheduled_refresh(
     max_attempts: int = DEFAULT_MAX_ATTEMPTS,
     overlap_calendar_days: int = DEFAULT_SCHEDULED_OVERLAP_CALENDAR_DAYS,
     sleeper: Sleeper = time.sleep,
+    source_policy_path: str | Path = DEFAULT_SOURCE_POLICY,
+    provider_artifacts: Mapping[str, Sequence[Mapping[str, Any]]] | None = None,
+    absence_attestations: Mapping[str, Sequence[Mapping[str, Any]]] | None = None,
 ) -> dict[str, Any]:
     if not run_id or not SHA1.fullmatch(source_main_sha):
         raise ScheduledPriceRefreshError("run ID and full source main SHA are required")
@@ -157,7 +185,7 @@ def run_scheduled_refresh(
         lifecycle_registry,
         as_of=generated_at.date(),
     )
-    instruments = governed["active_instruments"]
+    source_policy = load_source_policy(source_policy_path)
     source_root = Path(published_root)
     stage_root = Path(staging_root)
     _prepare_staging_root(source_root, stage_root)
@@ -165,6 +193,12 @@ def run_scheduled_refresh(
     price_root.mkdir(parents=True, exist_ok=True)
 
     rows: list[dict[str, Any]] = []
+    refreshable_inactive = [
+        instrument
+        for instrument in governed["inactive_instruments"]
+        if _inactive_history_needs_backfill(instrument, price_root=price_root)
+    ]
+    instruments = governed["active_instruments"] + refreshable_inactive
     for offset in range(0, len(instruments), batch_size):
         batch = instruments[offset : offset + batch_size]
         selected_provider = provider or _prefetch_batch_provider(
@@ -175,31 +209,109 @@ def run_scheduled_refresh(
             sleeper=sleeper,
         )
         for instrument in batch:
-            rows.append(
-                _refresh_instrument(
-                    instrument,
-                    price_root=price_root,
-                    run_at=generated_at,
-                    provider=selected_provider,
-                    max_attempts=max_attempts,
-                    overlap_calendar_days=overlap_calendar_days,
-                    sleeper=sleeper,
-                )
+            refreshed = _refresh_instrument(
+                instrument,
+                price_root=price_root,
+                run_at=generated_at,
+                provider=selected_provider,
+                max_attempts=max_attempts,
+                overlap_calendar_days=overlap_calendar_days,
+                sleeper=sleeper,
+                provider_artifacts=(provider_artifacts or {}).get(
+                    instrument["instrument_id"], []
+                ),
+                absence_attestations=(absence_attestations or {}).get(
+                    instrument["instrument_id"], []
+                ),
+                source_policy=source_policy,
+                artifact_root=stage_root,
             )
-    for instrument in (
-        governed["inactive_instruments"] + governed["pending_instruments"]
-    ):
+            if instrument["lifecycle_status"] == "inactive":
+                retained = _non_refreshable_lifecycle_row(
+                    instrument, price_root=price_root
+                )
+                refreshed = {
+                    **retained,
+                    "rows_added": refreshed["rows_added"],
+                    "previous_file_checksum": refreshed[
+                        "previous_file_checksum"
+                    ],
+                    "persisted_file_checksum": refreshed[
+                        "persisted_file_checksum"
+                    ],
+                    "previous_last_observation": refreshed[
+                        "previous_last_observation"
+                    ],
+                    "resulting_last_observation": refreshed[
+                        "resulting_last_observation"
+                    ],
+                    "previous_row_count": refreshed["previous_row_count"],
+                    "resulting_row_count": refreshed["resulting_row_count"],
+                    "expected_backfill_sessions": refreshed.get(
+                        "expected_backfill_sessions", []
+                    ),
+                    "observed_backfill_sessions": refreshed.get(
+                        "observed_backfill_sessions", []
+                    ),
+                    "explained_missing_sessions": refreshed.get(
+                        "explained_missing_sessions", []
+                    ),
+                    "provider_identity": refreshed["provider_identity"],
+                    "provider_retrieval": refreshed.get("provider_retrieval", []),
+                    "rejected_bar_diagnostics": refreshed.get(
+                        "rejected_bar_diagnostics", []
+                    ),
+                    "primary_observed_sessions": refreshed.get(
+                        "primary_observed_sessions", []
+                    ),
+                    "provider_artifacts": refreshed.get("provider_artifacts", []),
+                    "observation_receipts": refreshed.get(
+                        "observation_receipts", []
+                    ),
+                    "observation_receipt_root": refreshed.get(
+                        "observation_receipt_root"
+                    ),
+                    "absence_attestations": refreshed.get(
+                        "absence_attestations", []
+                    ),
+                }
+            rows.append(refreshed)
+    refreshed_inactive_ids = {
+        row["instrument_id"] for row in refreshable_inactive
+    }
+    for instrument in governed["inactive_instruments"] + governed["pending_instruments"]:
+        if instrument["instrument_id"] in refreshed_inactive_ids:
+            continue
         rows.append(_non_refreshable_lifecycle_row(instrument, price_root=price_root))
 
     rows.sort(key=lambda row: (row["instrument_id"], row["ticker"]))
+    instruments_by_id = {
+        row["instrument_id"]: row for row in governed["instruments"]
+    }
+    mutation_evidence_summary = _bind_mutation_and_session_ledgers(
+        rows,
+        instruments_by_id=instruments_by_id,
+        baseline_root=source_root,
+        staging_root=stage_root,
+        source_policy=source_policy,
+    )
     counts = Counter(row["freshness_status"] for row in rows)
     history_counts = Counter(row["history_coverage_status"] for row in rows)
-    updated_count = counts.get("updated", 0)
+    changed_price_files = sorted(
+        str(row["persisted_file_path"])
+        for row in rows
+        if isinstance(row.get("persisted_file_checksum"), str)
+        and row.get("previous_file_checksum")
+        != row.get("persisted_file_checksum")
+    )
+    changed_price_file_count = len(changed_price_files)
     bound_rows = [
         row for row in rows if row["lifecycle_status"] != "pending"
     ]
     publication_set_valid = all(
         row["validation_status"] == "valid"
+        and row.get("mutation_evidence_status") == "valid"
+        and not row.get("session_resolution", {}).get("unresolved_sessions")
         and isinstance(row.get("persisted_file_checksum"), str)
         for row in bound_rows
     ) and all(
@@ -218,6 +330,8 @@ def run_scheduled_refresh(
         != governed["active_universe_checksum"]
         or previous_manifest.get("governed_universe_checksum")
         != governed["governed_universe_checksum"]
+        or previous_manifest.get("market_price_source_policy_checksum")
+        != source_policy["policy_checksum"]
     )
     degraded = (
         any(counts.get(status, 0) for status in DEGRADED_STATUSES)
@@ -227,6 +341,28 @@ def run_scheduled_refresh(
         )
     )
     run_status = "failed" if not publication_set_valid else "degraded" if degraded else "completed"
+    diagnostic_path = Path(report_output).with_name(
+        f"{run_id}-mutation-diagnostics.json"
+    )
+    diagnostic_payload = {
+        "schema_version": "market-engine-mutation-diagnostic-artifact-v1",
+        "run_id": run_id,
+        "generated_at": _utc_text(generated_at),
+        "source_main_sha": source_main_sha,
+        "mutation_evidence_summary": mutation_evidence_summary,
+    }
+    _atomic_write_json(diagnostic_path, diagnostic_payload)
+    diagnostic_artifact = {
+        "schema_version": diagnostic_payload["schema_version"],
+        "artifact_name": diagnostic_path.name,
+        "artifact_sha256": _sha256_file(diagnostic_path),
+    }
+    provider_artifact_summary = _provider_artifact_run_summary(
+        rows,
+        artifact_root=stage_root,
+        source_policy=source_policy,
+        mutation_evidence_summary=mutation_evidence_summary,
+    )
     report = {
         "schema_version": SCHEMA_VERSION,
         "run_id": run_id,
@@ -239,6 +375,16 @@ def run_scheduled_refresh(
         "canonical_universe_size": len(universe["instruments"]),
         "lifecycle_schema_version": LIFECYCLE_SCHEMA_VERSION,
         "lifecycle_registry_checksum": governed["registry_checksum"],
+        "market_price_source_policy_schema_version": POLICY_SCHEMA_VERSION,
+        "market_price_source_policy_checksum": source_policy["policy_checksum"],
+        "canonical_mutation_schema_version": MUTATION_SCHEMA_VERSION,
+        "session_resolution_schema_version": SESSION_LEDGER_SCHEMA_VERSION,
+        "absence_attestation_schema_version": (
+            ABSENCE_ATTESTATION_SCHEMA_VERSION
+        ),
+        "mutation_evidence_summary": mutation_evidence_summary,
+        "mutation_diagnostic_artifact": diagnostic_artifact,
+        "provider_artifact_summary": provider_artifact_summary,
         "active_universe_checksum": governed["active_universe_checksum"],
         "governed_universe_checksum": governed["governed_universe_checksum"],
         "active_universe_size": governed["active_universe_size"],
@@ -267,8 +413,9 @@ def run_scheduled_refresh(
             "publication_set_valid": publication_set_valid,
             "publication_required": run_status == "completed"
             and publication_set_valid
-            and (updated_count > 0 or manifest_change_required),
-            "changed_price_file_count": updated_count,
+            and (changed_price_file_count > 0 or manifest_change_required),
+            "changed_price_file_count": changed_price_file_count,
+            "changed_price_files": changed_price_files,
             "manifest_change_required": manifest_change_required,
             "empty_commit_required": False,
         },
@@ -330,6 +477,11 @@ def expected_completed_session(instrument: Mapping[str, Any], run_at: datetime) 
         candidate -= timedelta(days=1)
     while not _is_trading_session(candidate, profile.holiday_calendar):
         candidate -= timedelta(days=1)
+    last_trading_session = instrument.get("last_trading_session")
+    if isinstance(last_trading_session, str):
+        lifecycle_cutoff = date.fromisoformat(last_trading_session)
+        if lifecycle_cutoff <= candidate:
+            candidate = lifecycle_cutoff
     return profile, candidate
 
 
@@ -341,6 +493,8 @@ def validate_published_dataset(
     run_at: datetime | None = None,
     allow_degraded: bool = False,
     expected_source_main_sha: str | None = None,
+    baseline_publication_root: str | Path | None = None,
+    source_policy_path: str | Path = DEFAULT_SOURCE_POLICY,
 ) -> dict[str, Any]:
     root = Path(publication_root)
     issues: list[dict[str, str]] = []
@@ -360,7 +514,12 @@ def validate_published_dataset(
             lifecycle_registry,
             as_of=_as_utc(run_at or datetime.now(UTC)).date(),
         )
-    except (ScheduledPriceRefreshError, InstrumentLifecycleError):
+        source_policy = load_source_policy(source_policy_path)
+    except (
+        ScheduledPriceRefreshError,
+        InstrumentLifecycleError,
+        ObservationReceiptError,
+    ):
         return _validation_result(issues=[_validation_issue("AUTHORITATIVE_UNIVERSE_INVALID", "universe")])
 
     if manifest.get("schema_version") != SCHEMA_VERSION:
@@ -394,6 +553,16 @@ def validate_published_dataset(
         != governed["inactive_retained_instrument_count"]
         or manifest.get("pending_instrument_count")
         != governed["pending_instrument_count"]
+        or manifest.get("market_price_source_policy_schema_version")
+        != POLICY_SCHEMA_VERSION
+        or manifest.get("market_price_source_policy_checksum")
+        != source_policy["policy_checksum"]
+        or manifest.get("canonical_mutation_schema_version")
+        != MUTATION_SCHEMA_VERSION
+        or manifest.get("session_resolution_schema_version")
+        != SESSION_LEDGER_SCHEMA_VERSION
+        or manifest.get("absence_attestation_schema_version")
+        != ABSENCE_ATTESTATION_SCHEMA_VERSION
     ):
         issues.append(_validation_issue("PUBLISHED_UNIVERSE_BINDING_MISMATCH", "universe"))
     if _contains_executable_content(root):
@@ -401,9 +570,6 @@ def validate_published_dataset(
 
     publication = manifest.get("publication")
     manifest_status_counts = manifest.get("status_counts")
-    manifest_updated_count = (
-        manifest_status_counts.get("updated", 0) if isinstance(manifest_status_counts, Mapping) else 0
-    )
     manifest_change_required = (
         publication.get("manifest_change_required")
         if isinstance(publication, Mapping)
@@ -413,9 +579,12 @@ def validate_published_dataset(
         publication.get("publication_set_valid") is True
         and publication.get("publication_required") is True
         and isinstance(publication.get("changed_price_file_count"), int)
-        and publication["changed_price_file_count"] == manifest_updated_count
+        and isinstance(publication.get("changed_price_files"), list)
         and isinstance(manifest_change_required, bool)
-        and (manifest_updated_count > 0 or manifest_change_required)
+        and (
+            publication["changed_price_file_count"] > 0
+            or manifest_change_required
+        )
         and publication.get("empty_commit_required") is False
     ):
         issues.append(_validation_issue("PUBLISHED_PUBLICATION_DECISION_INVALID", "publication"))
@@ -484,6 +653,109 @@ def validate_published_dataset(
     }
     if actual_files != bound_files:
         issues.append(_validation_issue("PUBLISHED_UNBOUND_PRICE_FILE_SET", "data/processed"))
+    declared_raw_artifacts = {
+        str(locator)
+        for entry in entries
+        if isinstance(entry, Mapping)
+        for evidence in (
+            (
+                entry.get("provider_artifacts", [])
+                if isinstance(entry.get("provider_artifacts"), list)
+                else []
+            )
+            + (
+                entry.get("absence_attestations", [])
+                if isinstance(entry.get("absence_attestations"), list)
+                else []
+            )
+        )
+        if isinstance(evidence, Mapping)
+        for locator in (
+            evidence.get("artifact_locator"),
+            evidence.get("acquisition_manifest_locator"),
+        )
+        if isinstance(locator, str)
+    }
+    evidence_root = root / "evidence" / "market_price"
+    actual_raw_artifacts = {
+        path.relative_to(root).as_posix()
+        for path in evidence_root.rglob("*.json")
+        if path.is_file()
+    } if evidence_root.is_dir() else set()
+    if actual_raw_artifacts != declared_raw_artifacts:
+        issues.append(
+            _validation_issue(
+                "PUBLISHED_RAW_OBSERVATION_ARTIFACT_SET_MISMATCH",
+                "evidence/market_price",
+            )
+        )
+    declared_changed_files = (
+        publication.get("changed_price_files", [])
+        if isinstance(publication, Mapping)
+        else []
+    )
+    reconciled_changed_files = sorted(
+        str(row.get("persisted_file_path"))
+        for row in entries
+        if isinstance(row, Mapping)
+        and isinstance(row.get("persisted_file_checksum"), str)
+        and row.get("previous_file_checksum")
+        != row.get("persisted_file_checksum")
+    )
+    previous_checksums_valid = all(
+        row.get("previous_file_checksum") is None
+        or (
+            isinstance(row.get("previous_file_checksum"), str)
+            and re.fullmatch(r"[0-9a-f]{64}", row["previous_file_checksum"])
+        )
+        for row in entries
+        if isinstance(row, Mapping)
+    )
+    if (
+        not previous_checksums_valid
+        or declared_changed_files != sorted(set(declared_changed_files))
+        or declared_changed_files != reconciled_changed_files
+        or publication.get("changed_price_file_count")
+        != len(reconciled_changed_files)
+        or not set(reconciled_changed_files).issubset(actual_files)
+    ):
+        issues.append(
+            _validation_issue(
+                "PUBLISHED_CHANGED_PRICE_FILE_SET_MISMATCH",
+                "publication.changed_price_files",
+            )
+        )
+    if baseline_publication_root is not None:
+        baseline_root = Path(baseline_publication_root)
+        baseline_changed_files: list[str] = []
+        baseline_previous_mismatch = False
+        for entry in entries:
+            if not isinstance(entry, Mapping):
+                continue
+            relative = entry.get("persisted_file_path")
+            persisted_checksum = entry.get("persisted_file_checksum")
+            if not isinstance(relative, str) or not isinstance(
+                persisted_checksum, str
+            ):
+                continue
+            baseline_path = baseline_root / relative
+            baseline_checksum = (
+                _sha256_file(baseline_path) if baseline_path.is_file() else None
+            )
+            if entry.get("previous_file_checksum") != baseline_checksum:
+                baseline_previous_mismatch = True
+            if baseline_checksum != persisted_checksum:
+                baseline_changed_files.append(relative)
+        if (
+            baseline_previous_mismatch
+            or sorted(baseline_changed_files) != reconciled_changed_files
+        ):
+            issues.append(
+                _validation_issue(
+                    "PUBLISHED_CHANGED_PRICE_BASELINE_MISMATCH",
+                    "publication.changed_price_files",
+                )
+            )
 
     validation_at = _as_utc(run_at or datetime.now(UTC))
     stale: list[str] = []
@@ -532,6 +804,130 @@ def validate_published_dataset(
         resulting = entry.get("resulting_last_observation")
         if resulting != validation.get("end_date"):
             issues.append(_validation_issue("PUBLISHED_LAST_OBSERVATION_MISMATCH", f"tickers[{index}]"))
+        previous = entry.get("previous_last_observation")
+        previous_row_count = entry.get("previous_row_count")
+        resulting_row_count = entry.get("resulting_row_count")
+        rows_added = entry.get("rows_added")
+        observation_metadata_valid = (
+            (previous is None or isinstance(previous, str))
+            and isinstance(resulting, str)
+            and isinstance(previous_row_count, int)
+            and isinstance(resulting_row_count, int)
+            and isinstance(rows_added, int)
+            and resulting_row_count == int(validation.get("row_count") or 0)
+            and resulting_row_count - previous_row_count == rows_added
+            and (previous is None or previous <= resulting)
+            and (
+                rows_added == 0
+                or previous is None
+                or previous < resulting
+            )
+        )
+        if not observation_metadata_valid:
+            issues.append(
+                _validation_issue(
+                    "PUBLISHED_OBSERVATION_MUTATION_METADATA_INVALID",
+                    f"tickers[{index}]",
+                )
+            )
+        if baseline_publication_root is not None:
+            baseline_path = Path(baseline_publication_root) / str(relative)
+            baseline_validation = (
+                _validate_price_history(baseline_path)
+                if baseline_path.is_file()
+                else {"status": "missing"}
+            )
+            if (
+                entry.get("previous_file_checksum")
+                != baseline_validation.get("checksum")
+                or previous != baseline_validation.get("end_date")
+                or previous_row_count
+                != int(baseline_validation.get("row_count") or 0)
+            ):
+                issues.append(
+                    _validation_issue(
+                        "PUBLISHED_OBSERVATION_BASELINE_MISMATCH",
+                        f"tickers[{index}]",
+                    )
+                )
+        runtime_observation = _runtime_observation_fields(
+            expected_instrument,
+            validation=validation,
+        )
+        if not _row_fields_match(entry, runtime_observation):
+            issues.append(
+                _validation_issue(
+                    "PUBLISHED_DAILY_OHLCV_OBSERVATION_STATUS_INVALID",
+                    f"tickers[{index}]",
+                )
+            )
+        profile, required_session = expected_completed_session(
+            expected_instrument,
+            validation_at,
+        )
+        expected_backfill = (
+            _expected_sessions_between(
+                profile,
+                date.fromisoformat(previous) + timedelta(days=1),
+                required_session,
+            )
+            if profile is not None
+            and required_session is not None
+            and isinstance(previous, str)
+            else []
+        )
+        observed_dates = set(validation.get("observation_dates") or ())
+        expected_observed = [
+            session for session in expected_backfill if session in observed_dates
+        ]
+        expected_missing = [
+            session for session in expected_backfill if session not in observed_dates
+        ]
+        expected_explained = (
+            _explained_missing_daily_ohlcv_sessions(
+                expected_instrument,
+                missing_sessions=expected_missing,
+                expected_session=required_session,
+            )
+            if required_session is not None
+            else []
+        )
+        if (
+            entry.get("expected_backfill_sessions", [])
+            != [session.isoformat() for session in expected_backfill]
+            or entry.get("observed_backfill_sessions", [])
+            != [session.isoformat() for session in expected_observed]
+            or entry.get("explained_missing_sessions", [])
+            != expected_explained
+            or len(expected_missing) != len(expected_explained)
+        ):
+            issues.append(
+                _validation_issue(
+                    "PUBLISHED_EXPECTED_SESSION_COMPLETENESS_INVALID",
+                    f"tickers[{index}]",
+                )
+            )
+        receipt_issue = _validate_published_observation_receipts(
+            entry,
+            staged_path=path,
+            baseline_path=(
+                Path(baseline_publication_root) / str(relative)
+                if baseline_publication_root is not None
+                else None
+            ),
+            publication_root=root,
+            source_policy=source_policy,
+            lifecycle_cutoff=expected_instrument.get("last_trading_session"),
+            instrument_exchange=str(expected_instrument.get("exchange")),
+            instrument_currency=str(expected_instrument.get("currency")),
+            expected_sessions=[
+                session.isoformat() for session in expected_backfill
+            ],
+        )
+        if receipt_issue is not None:
+            issues.append(
+                _validation_issue(receipt_issue, f"tickers[{index}]")
+            )
         if expected_instrument["lifecycle_status"] == "inactive":
             retained_boundary = _retained_history_boundary(
                 expected_instrument,
@@ -560,10 +956,7 @@ def validate_published_dataset(
                     )
                 )
             continue
-        profile, required = expected_completed_session(
-            expected_instrument,
-            validation_at,
-        )
+        required = required_session
         expected_history = _history_coverage(
             expected_instrument,
             validation=validation,
@@ -609,6 +1002,70 @@ def validate_published_dataset(
             )
         if actual_is_stale:
             stale.append(str(entry.get("ticker") or entry.get("instrument_id") or index))
+    valid_mutation_roots = [
+        str(entry["mutation_evidence"]["mutation_root"])
+        for entry in entries
+        if isinstance(entry, Mapping)
+        and entry.get("mutation_evidence_status") == "valid"
+        and isinstance(entry.get("mutation_evidence"), Mapping)
+        and isinstance(entry["mutation_evidence"].get("mutation_root"), str)
+    ]
+    receipt_roots = [
+        str(entry["observation_receipt_root"])
+        for entry in entries
+        if isinstance(entry, Mapping)
+        and isinstance(entry.get("observation_receipts"), list)
+        and entry["observation_receipts"]
+        and isinstance(entry.get("observation_receipt_root"), str)
+    ]
+    instrument_diagnostics = [
+        {
+            "instrument_id": str(entry.get("instrument_id")),
+            "ticker": str(entry.get("ticker")),
+            "exchange": str(entry.get("exchange")),
+            **dict(entry.get("mutation_diagnostics", {})),
+        }
+        for entry in entries
+        if isinstance(entry, Mapping)
+        and isinstance(entry.get("mutation_diagnostics"), Mapping)
+    ]
+    aggregate_keys = (
+        "added_row_count", "modified_row_count", "deleted_row_count",
+        "unchanged_overlap_row_count", "mutations_without_receipt_count",
+        "receipts_without_mutation_count", "artifact_replay_failure_count",
+        "evidence_reconciliation_failure_count",
+        "identity_mismatch_count", "correction_contract_blocker_count",
+    )
+    expected_mutation_evidence_summary = {
+        "schema_version": MUTATION_SCHEMA_VERSION,
+        "publication_mutation_root": _canonical_checksum(
+            sorted(valid_mutation_roots)
+        ),
+        "publication_receipt_root": _canonical_checksum(
+            sorted(receipt_roots)
+        ),
+        "invalid_instruments": [],
+        "affected_instrument_count": sum(
+            row.get("affected_instrument_count", 0) > 0
+            for row in instrument_diagnostics
+        ),
+        "modified_instrument_count": sum(
+            row.get("modified_row_count", 0) > 0
+            for row in instrument_diagnostics
+        ),
+        **{
+            key: sum(int(row.get(key, 0)) for row in instrument_diagnostics)
+            for key in aggregate_keys
+        },
+        "diagnostic_rows": instrument_diagnostics,
+    }
+    if manifest.get("mutation_evidence_summary") != expected_mutation_evidence_summary:
+        issues.append(
+            _validation_issue(
+                "PUBLISHED_MUTATION_EVIDENCE_ROOT_MISMATCH",
+                "mutation_evidence_summary",
+            )
+        )
     if stale and not allow_degraded:
         issues.append(_validation_issue("PUBLISHED_DATASET_STALE", "tickers", ",".join(sorted(stale))))
     run_status = manifest.get("run_status")
@@ -639,6 +1096,7 @@ def run_validated_analysis(
     universe_snapshot_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
     lifecycle_registry_path: str | Path | None = None,
     run_at: datetime | None = None,
+    source_policy_path: str | Path = DEFAULT_SOURCE_POLICY,
     analysis_runner: Callable[..., Any],
     analysis_kwargs: Mapping[str, Any],
 ) -> dict[str, Any]:
@@ -647,6 +1105,7 @@ def run_validated_analysis(
         universe_snapshot_path=universe_snapshot_path,
         lifecycle_registry_path=lifecycle_registry_path,
         run_at=run_at,
+        source_policy_path=source_policy_path,
     )
     if not validation["validated"]:
         return {"status": "blocked", "analysis_executed": False, "validation": validation}
@@ -708,6 +1167,10 @@ def _refresh_instrument(
     max_attempts: int,
     overlap_calendar_days: int,
     sleeper: Sleeper,
+    provider_artifacts: Sequence[Mapping[str, Any]] = (),
+    absence_attestations: Sequence[Mapping[str, Any]] = (),
+    source_policy: Mapping[str, Any],
+    artifact_root: Path,
 ) -> dict[str, Any]:
     ticker = str(instrument["symbol"])
     source_symbol = str(instrument["source_symbol"])
@@ -725,6 +1188,7 @@ def _refresh_instrument(
     )
     base = {
         "ticker": ticker,
+        "source_symbol": source_symbol,
         "instrument_id": str(instrument["instrument_id"]),
         "exchange": profile.market if profile else str(instrument.get("exchange") or "UNKNOWN"),
         "market_timezone": profile.timezone if profile else None,
@@ -733,12 +1197,24 @@ def _refresh_instrument(
         "resulting_last_observation": initial_validation.get("end_date"),
         "expected_completed_session": expected.isoformat() if expected else None,
         "rows_added": 0,
+        "previous_row_count": int(initial_validation.get("row_count") or 0),
+        "resulting_row_count": int(initial_validation.get("row_count") or 0),
         "validation_status": (
             "valid" if initial_validation.get("status") == "valid" else "blocked"
         ),
         "freshness_status": "unsupported",
         "reason_code": "UNSUPPORTED_EXCHANGE" if profile is None else "PROVIDER_MAPPING_MISSING",
+        "primary_observed_sessions": [],
+        "provider_artifacts": [dict(row) for row in provider_artifacts],
+        "absence_attestations": [dict(row) for row in absence_attestations],
+        "observation_receipts": [],
+        "observation_receipt_root": None,
         "persisted_file_path": (DATA_RELATIVE_ROOT / f"{source_symbol}.csv").as_posix(),
+        "previous_file_checksum": (
+            initial_validation.get("checksum")
+            if initial_validation.get("status") == "valid"
+            else None
+        ),
         "persisted_file_checksum": _sha256_file(path) if path.is_file() else None,
         **_lifecycle_fields(instrument),
         **initial_history,
@@ -758,18 +1234,131 @@ def _refresh_instrument(
     previous_end = before_validation.get("end_date")
     error: dict[str, str] = {}
     terminal_rejected_bar_diagnostics: list[dict[str, Any]] = []
+    terminal_replayed_observations: list[dict[str, Any]] = []
+    terminal_primary_observed_sessions: set[str] = set()
 
     def guarded_provider(symbol: str, start: str, end: str) -> pd.DataFrame:
         try:
-            return _provider_with_retries(
-                provider,
-                symbol,
-                start,
-                end,
-                expected_session=expected,
-                max_attempts=max_attempts,
-                sleeper=sleeper,
+            accumulated = pd.DataFrame()
+            attempt_start = start
+            attempt_end = end
+            required_sessions = (
+                _expected_sessions_between(
+                    profile,
+                    date.fromisoformat(previous_end) + timedelta(days=1),
+                    expected,
+                )
+                if isinstance(previous_end, str)
+                else []
             )
+            for completeness_attempt in range(1, max_attempts + 1):
+                validated = _provider_with_retries(
+                    provider,
+                    symbol,
+                    attempt_start,
+                    attempt_end,
+                    expected_session=expected,
+                    max_attempts=(max_attempts if completeness_attempt == 1 else 1),
+                    sleeper=sleeper,
+                    lifecycle_context=instrument,
+                )
+                terminal_rejected_bar_diagnostics.extend(
+                    validated.attrs.get("rejected_bar_diagnostics", [])
+                )
+                accumulated = _merge_provider_attempts(accumulated, validated)
+                terminal_primary_observed_sessions.update(
+                    value.isoformat()
+                    for value in pd.to_datetime(
+                        accumulated.get("Date", pd.Series(dtype=str))
+                    ).dt.date
+                )
+                primary_missing = _missing_provider_sessions(
+                    accumulated,
+                    required_sessions=required_sessions,
+                )
+                supplemented = _reconcile_provider_artifacts(
+                    accumulated,
+                    provider_artifacts=provider_artifacts,
+                    instrument=instrument,
+                    requested_start=start,
+                    requested_end=end,
+                    expected_session=expected,
+                    artifact_root=artifact_root,
+                    source_policy=source_policy,
+                )
+                terminal_replayed_observations.extend(
+                    supplemented.attrs.get("replayed_observations", [])
+                )
+                missing = _missing_provider_sessions(
+                    supplemented,
+                    required_sessions=required_sessions,
+                )
+                explained = set(
+                    _explained_missing_daily_ohlcv_sessions(
+                        instrument,
+                        missing_sessions=missing,
+                        expected_session=expected,
+                    )
+                )
+                unexplained = [
+                    session
+                    for session in missing
+                    if session.isoformat() not in explained
+                ]
+                if not unexplained:
+                    return supplemented
+                if completeness_attempt < max_attempts:
+                    provider_id = getattr(provider, "provider_id", None)
+                    if not isinstance(provider_id, str):
+                        break
+                    try:
+                        approved_source_policy(
+                            source_policy,
+                            provider_id=provider_id,
+                            exchange=str(instrument.get("exchange")),
+                            acquisition_route="primary_replay",
+                        )
+                    except ObservationReceiptError:
+                        break
+                    attempt_start, attempt_end = gap_directed_replay_window(
+                        unexplained,
+                        request_start=start,
+                        request_end_exclusive=end,
+                    )
+                    sleeper(float(2 ** (completeness_attempt - 1)))
+            raise ProviderBoundaryError(
+                "EXPECTED_SESSION_COVERAGE_INCOMPLETE",
+                "provider did not return every expected exchange session",
+                diagnostic={
+                    "ticker": ticker,
+                    "request_start": start,
+                    "request_end_exclusive": end,
+                    "expected_sessions": [day.isoformat() for day in required_sessions],
+                    "observed_sessions": sorted(
+                        value.isoformat()
+                        for value in pd.to_datetime(
+                            supplemented.get("Date", pd.Series(dtype=str))
+                        ).dt.date
+                    ),
+                    "missing_sessions": [
+                        day.isoformat() for day in unexplained
+                    ],
+                    "attempts": max_attempts,
+                    "disposition": "blocked_not_persisted",
+                },
+            )
+        except ObservationReceiptError as exc:
+            error["reason_code"] = "PROVIDER_ARTIFACT_INVALID"
+            terminal_rejected_bar_diagnostics.append(
+                {
+                    "reason_code": "PROVIDER_ARTIFACT_INVALID",
+                    "message": str(exc),
+                    "disposition": "blocked_not_persisted",
+                }
+            )
+            raise ProviderBoundaryError(
+                "PROVIDER_ARTIFACT_INVALID", str(exc)
+            ) from exc
         except ProviderBoundaryError as exc:
             error["reason_code"] = exc.reason_code
             if exc.diagnostic:
@@ -798,6 +1387,49 @@ def _refresh_instrument(
         if path.is_file()
         else {"status": "missing"}
     )
+    expected_backfill_sessions = _expected_sessions_between(
+        profile,
+        (
+            date.fromisoformat(previous_end) + timedelta(days=1)
+            if isinstance(previous_end, str)
+            else None
+        ),
+        expected,
+    )
+    observed_dates = set(final_validation.get("observation_dates") or ())
+    observed_backfill_sessions = [
+        session for session in expected_backfill_sessions if session in observed_dates
+    ]
+    missing_sessions = [
+        session for session in expected_backfill_sessions if session not in observed_dates
+    ]
+    explained_missing_sessions = _explained_missing_daily_ohlcv_sessions(
+        instrument,
+        missing_sessions=missing_sessions,
+        expected_session=expected,
+    )
+    unexplained_missing_sessions = [
+        session
+        for session in missing_sessions
+        if session.isoformat() not in explained_missing_sessions
+    ]
+    if unexplained_missing_sessions and not error:
+        if before_bytes is not None:
+            _atomic_write_bytes(path, before_bytes)
+        result = {
+            **result,
+            "status": "incomplete_expected_sessions",
+            "file_changed": False,
+            "rows_added": 0,
+        }
+        error["reason_code"] = "EXPECTED_SESSION_COVERAGE_INCOMPLETE"
+        final_validation = before_validation
+        observed_dates = set(final_validation.get("observation_dates") or ())
+        observed_backfill_sessions = [
+            session
+            for session in expected_backfill_sessions
+            if session in observed_dates
+        ]
     resulting_end = final_validation.get("end_date")
     status, reason = _normalize_status(
         result,
@@ -824,26 +1456,49 @@ def _refresh_instrument(
         if hasattr(provider, "diagnostics_for")
         else []
     )
-    rejected_bar_diagnostics = (
-        provider.rejected_diagnostics_for(source_symbol)
-        if hasattr(provider, "rejected_diagnostics_for")
-        else terminal_rejected_bar_diagnostics
-    )
+    rejected_bar_diagnostics = list(terminal_rejected_bar_diagnostics)
+    if hasattr(provider, "rejected_diagnostics_for"):
+        rejected_bar_diagnostics.extend(
+            provider.rejected_diagnostics_for(source_symbol)
+        )
     return {
         **base,
         "previous_last_observation": previous_end,
         "resulting_last_observation": resulting_end,
         "rows_added": int(result.get("rows_added") or 0),
+        "previous_row_count": int(before_validation.get("row_count") or 0),
+        "resulting_row_count": int(final_validation.get("row_count") or 0),
+        "expected_backfill_sessions": [
+            session.isoformat() for session in expected_backfill_sessions
+        ],
+        "observed_backfill_sessions": [
+            session.isoformat() for session in observed_backfill_sessions
+        ],
+        "explained_missing_sessions": explained_missing_sessions,
         "validation_status": "valid" if final_validation.get("status") == "valid" else "blocked",
         "freshness_status": status,
         "reason_code": reason,
         "provider_retrieval": provider_retrieval,
         "rejected_bar_diagnostics": rejected_bar_diagnostics,
+        "primary_observed_sessions": sorted(
+            terminal_primary_observed_sessions
+        ),
+        "provider_artifacts": [dict(row) for row in provider_artifacts],
+        "replayed_observation_count": len(
+            {
+                (str(row["instrument_id"]), str(row["session_date"]))
+                for row in terminal_replayed_observations
+            }
+        ),
+        "observation_receipts": [],
+        "observation_receipt_root": None,
+        "absence_attestations": [dict(row) for row in absence_attestations],
         **history_coverage,
         **_retained_history_boundary(
             instrument,
             validation=final_validation,
         ),
+        **_runtime_observation_fields(instrument, validation=final_validation),
         "persisted_file_checksum": final_validation.get("checksum"),
     }
 
@@ -905,6 +1560,8 @@ def _non_refreshable_lifecycle_row(
         "resulting_last_observation": validation.get("end_date"),
         "expected_completed_session": instrument.get("delisting_end_date"),
         "rows_added": 0,
+        "previous_row_count": int(validation.get("row_count") or 0),
+        "resulting_row_count": int(validation.get("row_count") or 0),
         "validation_status": (
             "valid"
             if valid
@@ -919,15 +1576,701 @@ def _non_refreshable_lifecycle_row(
         ),
         "freshness_status": status,
         "reason_code": reason,
+        "primary_observed_sessions": [],
+        "provider_artifacts": [],
+        "observation_receipts": [],
+        "observation_receipt_root": None,
+        "absence_attestations": [],
         "history_coverage_status": history_status,
         "history_coverage_reason_code": history_reason,
         "persisted_file_path": (
             DATA_RELATIVE_ROOT / f"{source_symbol}.csv"
         ).as_posix(),
+        "previous_file_checksum": validation.get("checksum"),
         "persisted_file_checksum": validation.get("checksum"),
         **_lifecycle_fields(instrument),
         **retained_boundary,
+        **_runtime_observation_fields(instrument, validation=validation),
     }
+
+
+def _inactive_history_needs_backfill(
+    instrument: Mapping[str, Any],
+    *,
+    price_root: Path,
+) -> bool:
+    path = price_root / f"{instrument['source_symbol']}.csv"
+    validation = _validate_price_history(path) if path.is_file() else {"status": "missing"}
+    cutoff = instrument.get("last_trading_session")
+    return (
+        isinstance(cutoff, str)
+        and (
+            validation.get("status") != "valid"
+            or not isinstance(validation.get("end_date"), str)
+            or validation["end_date"] < cutoff
+        )
+    )
+
+
+def _expected_sessions_between(
+    profile: MarketProfile,
+    start: date | None,
+    end: date,
+) -> list[date]:
+    if start is None or start > end:
+        return []
+    sessions: list[date] = []
+    cursor = start
+    while cursor <= end:
+        if _is_trading_session(cursor, profile.holiday_calendar):
+            sessions.append(cursor)
+        cursor += timedelta(days=1)
+    return sessions
+
+
+def _bind_mutation_and_session_ledgers(
+    rows: Sequence[dict[str, Any]],
+    *,
+    instruments_by_id: Mapping[str, Mapping[str, Any]],
+    baseline_root: Path,
+    staging_root: Path,
+    source_policy: Mapping[str, Any],
+) -> dict[str, Any]:
+    mutation_roots: list[str] = []
+    receipt_roots: list[str] = []
+    invalid_instruments: list[str] = []
+    instrument_diagnostics: list[dict[str, Any]] = []
+    for entry in rows:
+        instrument_id = str(entry["instrument_id"])
+        instrument = instruments_by_id[instrument_id]
+        relative = Path(str(entry["persisted_file_path"]))
+        staged_path = staging_root / relative
+        baseline_path = baseline_root / relative
+        provider_artifacts = entry.get("provider_artifacts", [])
+        attestations = entry.get("absence_attestations", [])
+        all_mutations: list[dict[str, Any]] = []
+        mutations: list[dict[str, Any]] = []
+        replayed_observations: list[dict[str, Any]] = []
+        replayed_receipts: list[dict[str, Any]] = []
+        replay_failures: list[str] = []
+        reconciliation_failures: list[str] = []
+        failure: Exception | None = None
+        try:
+            all_mutations = derive_canonical_mutations(
+                baseline_path=(baseline_path if baseline_path.is_file() else None),
+                staged_path=staged_path,
+                instrument_id=instrument_id,
+                ticker=str(entry["ticker"]),
+                exchange=str(instrument.get("exchange")),
+                currency=str(instrument.get("currency")),
+                include_unchanged=True,
+            ) if staged_path.is_file() else []
+        except (MutationEvidenceError, OSError, ValueError) as exc:
+            failure = exc
+        try:
+            replayed_observations = replay_provider_artifacts(
+                provider_artifacts,
+                artifact_root=staging_root,
+                policy=source_policy,
+            )
+        except (ObservationReceiptError, OSError, ValueError) as exc:
+            replay_failures.append(f"{type(exc).__name__}: {exc}")
+            failure = failure or exc
+        replayed_identities = {
+            (str(row.get("instrument_id")), str(row.get("session_date")))
+            for row in replayed_observations
+        }
+        mutations = [
+            row
+            for row in all_mutations
+            if row.get("mutation_type") != "row_unchanged"
+            or (str(row.get("instrument_id")), str(row.get("session_date")))
+            in replayed_identities
+        ]
+        if failure is None:
+            try:
+                selected = select_mutation_observations(
+                    mutations, replayed_observations
+                )
+                replayed_receipts = selected["mutation_receipts"]
+                entry["replayed_observation_count"] = len(replayed_observations)
+                entry["accepted_mutation_observation_count"] = len(
+                    selected["accepted_mutation_observations"]
+                )
+                entry["unchanged_overlap_observation_count"] = len(
+                    selected["unchanged_overlap_observations"]
+                )
+            except (ObservationReceiptError, ValueError) as exc:
+                reconciliation_failures.append(f"{type(exc).__name__}: {exc}")
+                failure = exc
+        diagnostics = mutation_evidence_diagnostics(
+            mutations,
+            replayed_receipts,
+            artifact_replay_failures=replay_failures,
+            evidence_reconciliation_failures=reconciliation_failures,
+            artifact_status=(
+                "not_provided"
+                if not provider_artifacts
+                else "replay_failed"
+                if replay_failures
+                else "replayed"
+            ),
+        )
+        entry["canonical_mutations"] = mutations
+        entry["mutation_diagnostics"] = diagnostics
+        entry["observation_receipts"] = replayed_receipts
+        entry["observation_receipt_root"] = (
+            observation_receipt_root(replayed_receipts)
+            if replayed_receipts
+            else None
+        )
+        try:
+            if failure is not None:
+                raise failure
+            replayed_absences = replay_absence_attestations(
+                attestations,
+                artifact_root=staging_root,
+                policy=source_policy,
+            )
+            if replayed_absences:
+                replayed_absences = bind_absence_evidence_to_consumer(
+                    replayed_absences,
+                    consumer_identity=_absence_consumer_identity(
+                        instrument, source_policy=source_policy
+                    ),
+                    expected_sessions=entry.get("expected_backfill_sessions", []),
+                    lifecycle_cutoff=instrument.get("last_trading_session"),
+                )
+            mutation_summary = reconcile_mutation_evidence(
+                mutations, replayed_receipts
+            )
+            mutation_sessions = [
+                str(row["session_date"])
+                for row in mutations
+                if row["mutation_type"] in {"row_added", "row_modified"}
+            ]
+            session_resolution = derive_session_resolution(
+                expected_sessions=entry.get("expected_backfill_sessions", []),
+                receipts=replayed_receipts,
+                absence_attestations=replayed_absences,
+                canonical_mutation_sessions=mutation_sessions,
+                consumer_instrument_id=instrument_id,
+            )
+            entry["canonical_mutations"] = mutations
+            entry["mutation_evidence"] = mutation_summary
+            entry["mutation_evidence_status"] = "valid"
+            entry["session_resolution"] = session_resolution
+            entry["fallback_candidate_sessions"] = session_resolution[
+                "fallback_candidates"
+            ]
+            mutation_roots.append(str(mutation_summary["mutation_root"]))
+            if replayed_receipts:
+                receipt_roots.append(observation_receipt_root(replayed_receipts))
+        except (
+            MutationEvidenceError,
+            ObservationReceiptError,
+            OSError,
+            ValueError,
+        ) as exc:
+            unresolved_sessions = sorted(
+                set(
+                    str(value)
+                    for value in entry.get("expected_backfill_sessions", [])
+                )
+            )
+            entry["mutation_evidence"] = {
+                "schema_version": MUTATION_SCHEMA_VERSION,
+                "reason_code": type(exc).__name__,
+                "message": str(exc),
+                "mutation_root": diagnostics["mutation_root"],
+            }
+            entry["mutation_evidence_status"] = "invalid"
+            entry["session_resolution"] = {
+                "schema_version": SESSION_LEDGER_SCHEMA_VERSION,
+                "partition": [
+                    {"session_date": session, "state": "unresolved"}
+                    for session in unresolved_sessions
+                ],
+                "observed_sessions": [],
+                "explained_absence_sessions": [],
+                "unresolved_sessions": unresolved_sessions,
+                "fallback_candidates": unresolved_sessions,
+                "not_expected_sessions": [],
+            }
+            entry["fallback_candidate_sessions"] = unresolved_sessions
+            invalid_instruments.append(instrument_id)
+        instrument_diagnostics.append(
+            {
+                "instrument_id": instrument_id,
+                "ticker": str(entry["ticker"]),
+                "exchange": str(entry["exchange"]),
+                **diagnostics,
+            }
+        )
+    aggregate_keys = (
+        "added_row_count",
+        "modified_row_count",
+        "deleted_row_count",
+        "unchanged_overlap_row_count",
+        "mutations_without_receipt_count",
+        "receipts_without_mutation_count",
+        "artifact_replay_failure_count",
+        "evidence_reconciliation_failure_count",
+        "identity_mismatch_count",
+        "correction_contract_blocker_count",
+    )
+    modified_instruments = {
+        row["instrument_id"]
+        for row in instrument_diagnostics
+        if row["modified_row_count"] > 0
+    }
+    affected_instruments = {
+        row["instrument_id"]
+        for row in instrument_diagnostics
+        if row["affected_instrument_count"] > 0
+    }
+    return {
+        "schema_version": MUTATION_SCHEMA_VERSION,
+        "publication_mutation_root": _canonical_checksum(
+            sorted(mutation_roots)
+        ),
+        "publication_receipt_root": _canonical_checksum(
+            sorted(receipt_roots)
+        ),
+        "invalid_instruments": sorted(invalid_instruments),
+        "affected_instrument_count": len(affected_instruments),
+        "modified_instrument_count": len(modified_instruments),
+        **{
+            key: sum(int(row[key]) for row in instrument_diagnostics)
+            for key in aggregate_keys
+        },
+        "identity_mismatch_count": sum(
+            int(row["identity_mismatch_count"])
+            for row in instrument_diagnostics
+        )
+        + sum(
+            diagnostic.get("reason_code")
+            == "PROVIDER_ARTIFACT_IDENTITY_MISMATCH"
+            for entry in rows
+            for diagnostic in entry.get("rejected_bar_diagnostics", [])
+            if isinstance(diagnostic, Mapping)
+        ),
+        "diagnostic_rows": instrument_diagnostics,
+    }
+
+
+def _absence_consumer_identity(
+    instrument: Mapping[str, Any], *, source_policy: Mapping[str, Any]
+) -> dict[str, Any]:
+    exchange = str(instrument.get("exchange"))
+    candidates = [
+        provider
+        for provider in source_policy.get("providers", [])
+        if exchange in provider.get("exchanges", [])
+        and provider.get("approved_for_acquisition") is True
+        and provider.get("approved_for_retention") is True
+        and provider.get("approved_for_replay") is True
+        and provider.get("approved_for_canonical_publication") is True
+        and "primary_replay" in provider.get("acquisition_routes", [])
+    ]
+    if len(candidates) != 1:
+        raise ObservationReceiptError(
+            "absence evidence consumer route is missing or ambiguous"
+        )
+    provider = candidates[0]
+    profile = MARKET_PROFILES.get(EXCHANGE_ALIASES.get(exchange, exchange))
+    return {
+        "instrument_id": instrument.get("instrument_id"),
+        "symbol": instrument.get("symbol") or instrument.get("ticker"),
+        "source_symbol": instrument.get("source_symbol"),
+        "exchange": exchange,
+        "provider_id": provider["provider_id"],
+        "source_policy_id": provider["approval_id"],
+        "acquisition_route": "primary_replay",
+        "timezone": profile.timezone if profile else None,
+    }
+
+
+def _provider_artifact_run_summary(
+    rows: Sequence[Mapping[str, Any]],
+    *,
+    artifact_root: Path,
+    source_policy: Mapping[str, Any],
+    mutation_evidence_summary: Mapping[str, Any],
+) -> dict[str, Any]:
+    references = [
+        reference
+        for row in rows
+        for reference in row.get("provider_artifacts", [])
+        if isinstance(reference, Mapping)
+    ]
+    valid_count = 0
+    parser_failures = 0
+    policy_ids: set[str] = set()
+    for reference in references:
+        try:
+            loaded = load_provider_artifact(
+                reference,
+                artifact_root=artifact_root,
+                policy=source_policy,
+            )
+        except (ObservationReceiptError, OSError, ValueError) as exc:
+            parser_failures += "parser" in str(exc).lower()
+            continue
+        valid_count += 1
+        policy_ids.add(str(loaded["envelope"]["source_policy_id"]))
+    return {
+        "adapter_envelope_count": len(references),
+        "valid_envelope_digest_count": valid_count,
+        "replayed_artifact_count": valid_count,
+        "artifact_replay_failure_count": int(
+            mutation_evidence_summary["artifact_replay_failure_count"]
+        ),
+        "identity_mismatch_count": int(
+            mutation_evidence_summary["identity_mismatch_count"]
+        ),
+        "parser_failure_count": parser_failures,
+        "approved_source_policy_ids": sorted(policy_ids),
+        "accepted_mutation_receipt_count": sum(
+            len(row.get("observation_receipts", [])) for row in rows
+        ),
+        "secret_scan_status": "enforced_fail_closed",
+    }
+
+
+def _validate_published_observation_receipts(
+    entry: Mapping[str, Any],
+    *,
+    staged_path: Path,
+    baseline_path: Path | None,
+    publication_root: Path,
+    source_policy: Mapping[str, Any],
+    lifecycle_cutoff: Any,
+    instrument_exchange: str,
+    instrument_currency: str,
+    expected_sessions: Sequence[str],
+) -> str | None:
+    receipts = entry.get("observation_receipts")
+    provider_artifacts = entry.get("provider_artifacts")
+    attestations = entry.get("absence_attestations")
+    root = entry.get("observation_receipt_root")
+    if (
+        not isinstance(receipts, list)
+        or not isinstance(provider_artifacts, list)
+        or not isinstance(attestations, list)
+    ):
+        return "PUBLISHED_OBSERVATION_RECEIPT_CONTRACT_INVALID"
+    try:
+        staged = pd.read_csv(staged_path, dtype={"Date": str})
+    except (OSError, ValueError):
+        return "PUBLISHED_OBSERVATION_BASELINE_INVALID"
+    try:
+        replayed_observations = replay_provider_artifacts(
+            provider_artifacts,
+            artifact_root=publication_root,
+            policy=source_policy,
+        )
+        replayed_absences = replay_absence_attestations(
+            attestations,
+            artifact_root=publication_root,
+            policy=source_policy,
+        )
+        instrument_identity = {
+            "instrument_id": entry.get("instrument_id"),
+            "symbol": entry.get("ticker"),
+            "source_symbol": entry.get("source_symbol") or entry.get("ticker"),
+            "exchange": instrument_exchange,
+        }
+        if replayed_absences:
+            replayed_absences = bind_absence_evidence_to_consumer(
+                replayed_absences,
+                consumer_identity=_absence_consumer_identity(
+                    instrument_identity, source_policy=source_policy
+                ),
+                expected_sessions=expected_sessions,
+                lifecycle_cutoff=(str(lifecycle_cutoff) if lifecycle_cutoff else None),
+            )
+    except (OSError, ValueError, ObservationReceiptError):
+        return "PUBLISHED_OBSERVATION_RECEIPT_REPLAY_INVALID"
+    staged_by_date = {str(row["Date"]): row for _, row in staged.iterrows()}
+    for observation in replayed_observations:
+        session = str(observation["session_date"])
+        if (
+            observation.get("instrument_id") != entry.get("instrument_id")
+            or observation.get("ticker") != entry.get("ticker")
+            or observation.get("provider_symbol")
+            != (entry.get("source_symbol") or entry.get("ticker"))
+            or observation.get("exchange") != instrument_exchange
+            or observation.get("request_parameters", {}).get("symbol")
+            != observation.get("provider_symbol")
+            or session not in staged_by_date
+            or (
+                isinstance(lifecycle_cutoff, str)
+                and session > lifecycle_cutoff
+            )
+            or not _receipt_matches_csv_row(observation, staged_by_date[session])
+        ):
+            return "PUBLISHED_OBSERVATION_RECEIPT_CANONICAL_MISMATCH"
+    for attestation in replayed_absences:
+        session = str(attestation["session_date"])
+        if (
+            attestation.get("instrument_id") != entry.get("instrument_id")
+            or attestation.get("ticker") != entry.get("ticker")
+            or attestation.get("exchange") != instrument_exchange
+            or attestation.get("lifecycle_cutoff") != lifecycle_cutoff
+            or session in staged_by_date
+        ):
+            return "PUBLISHED_ABSENCE_ATTESTATION_CANONICAL_MISMATCH"
+    if baseline_path is None:
+        return None
+    try:
+        all_mutations = derive_canonical_mutations(
+            baseline_path=(baseline_path if baseline_path.is_file() else None),
+            staged_path=staged_path,
+            instrument_id=str(entry.get("instrument_id")),
+            ticker=str(entry.get("ticker")),
+            exchange=instrument_exchange,
+            currency=instrument_currency,
+            include_unchanged=True,
+        )
+        replayed_identities = {
+            (str(row["instrument_id"]), str(row["session_date"]))
+            for row in replayed_observations
+        }
+        mutations = [
+            row
+            for row in all_mutations
+            if row["mutation_type"] != "row_unchanged"
+            or (str(row["instrument_id"]), str(row["session_date"]))
+            in replayed_identities
+        ]
+        selected = select_mutation_observations(mutations, replayed_observations)
+        replayed = selected["mutation_receipts"]
+        validate_declared_receipts(receipts, replayed)
+        expected_root = observation_receipt_root(replayed) if replayed else None
+        if root != expected_root:
+            return "PUBLISHED_OBSERVATION_RECEIPT_ROOT_INVALID"
+        mutation_summary = reconcile_mutation_evidence(mutations, replayed)
+        mutation_sessions = [
+            str(row["session_date"])
+            for row in mutations
+            if row["mutation_type"] in {"row_added", "row_modified"}
+        ]
+        session_resolution = derive_session_resolution(
+            expected_sessions=expected_sessions,
+            receipts=replayed,
+            absence_attestations=replayed_absences,
+            canonical_mutation_sessions=mutation_sessions,
+            consumer_instrument_id=str(entry.get("instrument_id")),
+        )
+    except (MutationEvidenceError, ObservationReceiptError, ValueError):
+        return "PUBLISHED_MUTATION_EVIDENCE_RECONCILIATION_INVALID"
+    if (
+        entry.get("canonical_mutations") != mutations
+        or entry.get("mutation_evidence") != mutation_summary
+        or entry.get("mutation_evidence_status") != "valid"
+        or entry.get("session_resolution") != session_resolution
+        or entry.get("fallback_candidate_sessions")
+        != session_resolution["fallback_candidates"]
+    ):
+        return "PUBLISHED_MUTATION_EVIDENCE_DECLARATION_MISMATCH"
+    if session_resolution["unresolved_sessions"]:
+        return "PUBLISHED_SESSION_RESOLUTION_INCOMPLETE"
+    return None
+
+
+def _receipt_matches_csv_row(
+    receipt: Mapping[str, Any], row: Mapping[str, Any]
+) -> bool:
+    try:
+        return all(
+            Decimal(str(receipt[receipt_key]))
+            == Decimal(str(row[csv_key]))
+            for receipt_key, csv_key in (
+                ("open", "Open"),
+                ("high", "High"),
+                ("low", "Low"),
+                ("close", "Close"),
+                ("adj_close", "Adj Close"),
+                ("volume", "Volume"),
+            )
+        )
+    except (KeyError, InvalidOperation, ValueError):
+        return False
+
+
+def _canonical_csv_rows_equal(left: Mapping[str, Any], right: Mapping[str, Any]) -> bool:
+    return _receipt_matches_csv_row(
+        {
+            "open": left.get("Open"),
+            "high": left.get("High"),
+            "low": left.get("Low"),
+            "close": left.get("Close"),
+            "adj_close": left.get("Adj Close"),
+            "volume": left.get("Volume"),
+        },
+        right,
+    )
+
+
+def _reconcile_provider_artifacts(
+    frame: pd.DataFrame,
+    *,
+    provider_artifacts: Sequence[Mapping[str, Any]],
+    instrument: Mapping[str, Any],
+    requested_start: str,
+    requested_end: str,
+    expected_session: date,
+    artifact_root: Path,
+    source_policy: Mapping[str, Any],
+) -> pd.DataFrame:
+    if not provider_artifacts:
+        return frame
+    replayed = replay_provider_artifacts(
+        provider_artifacts,
+        artifact_root=artifact_root,
+        policy=source_policy,
+    )
+    eligible_rows = [
+        row
+        for row in replayed
+        if row.get("instrument_id") == instrument.get("instrument_id")
+        and row.get("ticker") == instrument.get("symbol")
+        and row.get("provider_symbol") == instrument.get("source_symbol")
+        and row.get("exchange") == instrument.get("exchange")
+        and row.get("request_parameters", {}).get("symbol")
+        == instrument.get("source_symbol")
+        and row.get("timezone")
+        == MARKET_PROFILES[
+            EXCHANGE_ALIASES.get(str(instrument.get("exchange")), str(instrument.get("exchange")))
+        ].timezone
+        and requested_start <= str(row.get("session_date")) < requested_end
+    ]
+    if len(eligible_rows) != len(replayed):
+        raise ProviderBoundaryError(
+            "PROVIDER_ARTIFACT_IDENTITY_MISMATCH",
+            "provider artifacts do not exactly match the requested instrument window",
+            diagnostic={
+                "reason_code": "PROVIDER_ARTIFACT_IDENTITY_MISMATCH",
+                "ticker": instrument.get("symbol"),
+                "request_start": requested_start,
+                "request_end_exclusive": requested_end,
+                "replayed_artifact_sessions": sorted(
+                    str(row.get("session_date")) for row in replayed
+                ),
+                "eligible_artifact_sessions": sorted(
+                    str(row.get("session_date")) for row in eligible_rows
+                ),
+                "disposition": "blocked_not_persisted",
+            },
+        )
+    if not eligible_rows:
+        return frame
+    frame_by_session = {
+        value.date().isoformat(): row
+        for value, (_, row) in zip(
+            pd.to_datetime(frame.get("Date", pd.Series(dtype=str))),
+            frame.iterrows(),
+            strict=True,
+        )
+    }
+    additions: list[dict[str, Any]] = []
+    for observation in eligible_rows:
+        session = str(observation["session_date"])
+        existing = frame_by_session.get(session)
+        if existing is not None:
+            if not _receipt_matches_csv_row(observation, existing):
+                raise ProviderBoundaryError(
+                    "PROVIDER_ARTIFACT_OBSERVATION_CONFLICT",
+                    "provider observation conflicts with the primary response",
+                )
+            continue
+        additions.append(
+            {
+                "Date": session,
+                "Open": observation["open"],
+                "High": observation["high"],
+                "Low": observation["low"],
+                "Close": observation["close"],
+                "Adj Close": observation["adj_close"],
+                "Volume": observation["volume"],
+            }
+        )
+    additions_frame = pd.DataFrame(additions)
+    combined = (
+        pd.concat([frame, additions_frame], ignore_index=True).sort_values("Date")
+        if not additions_frame.empty
+        else frame.copy()
+    )
+    validated = _validate_provider_frame(
+        combined,
+        expected_session,
+        provider_symbol=str(instrument["source_symbol"]),
+        lifecycle_context=instrument,
+    )
+    validated.attrs["replayed_observations"] = [dict(row) for row in replayed]
+    return validated
+
+
+def _merge_provider_attempts(
+    current: pd.DataFrame,
+    received: pd.DataFrame,
+) -> pd.DataFrame:
+    if current.empty:
+        return received.copy()
+    if received.empty:
+        return current.copy()
+    return (
+        pd.concat([current, received], ignore_index=True)
+        .drop_duplicates(subset=["Date"], keep="last")
+        .sort_values("Date")
+        .reset_index(drop=True)
+    )
+
+
+def _missing_provider_sessions(
+    frame: pd.DataFrame,
+    *,
+    required_sessions: Sequence[date],
+) -> list[date]:
+    observed = set(
+        pd.to_datetime(frame.get("Date", pd.Series(dtype=str))).dt.date
+    )
+    return [session for session in required_sessions if session not in observed]
+
+
+def _explained_missing_daily_ohlcv_sessions(
+    instrument: Mapping[str, Any],
+    *,
+    missing_sessions: Sequence[date],
+    expected_session: date,
+) -> list[str]:
+    if missing_sessions != [expected_session]:
+        return []
+    last_observed_text = instrument.get(
+        "canonical_ohlcv_last_observed_session"
+    )
+    try:
+        last_observed = (
+            date.fromisoformat(last_observed_text)
+            if isinstance(last_observed_text, str)
+            else None
+        )
+    except ValueError:
+        last_observed = None
+    if (
+        instrument.get("terminal_session_daily_ohlcv_status")
+        != "no_valid_daily_ohlcv_bar_from_provider_as_of"
+        or last_observed is None
+        or last_observed >= expected_session
+    ):
+        return []
+    evidence = instrument.get("observation_evidence")
+    if not isinstance(evidence, Mapping) or evidence.get(
+        "relevant_session"
+    ) != expected_session.isoformat():
+        return []
+    return [expected_session.isoformat()]
 
 
 def _history_coverage(
@@ -1114,7 +2457,7 @@ def _retained_history_boundary(
     validation: Mapping[str, Any],
 ) -> dict[str, Any]:
     lifecycle_status = str(instrument.get("lifecycle_status") or "")
-    expected_end = instrument.get("delisting_end_date")
+    expected_end = instrument.get("last_trading_session")
     actual_end = validation.get("end_date")
     base = {
         "retained_history_boundary_status": "not_applicable",
@@ -1143,6 +2486,22 @@ def _retained_history_boundary(
             ),
         }
     if actual_end < expected_end:
+        if (
+            instrument.get("terminal_session_daily_ohlcv_status")
+            == "no_valid_daily_ohlcv_bar_from_provider_as_of"
+            and instrument.get("canonical_ohlcv_last_observed_session")
+            == actual_end
+            and isinstance(instrument.get("observation_evidence"), Mapping)
+            and instrument["observation_evidence"].get("relevant_session")
+            == expected_end
+        ):
+            return {
+                **base,
+                "retained_history_boundary_status": "aligned",
+                "retained_history_boundary_reason_code": (
+                    "RETAINED_HISTORY_TERMINAL_DAILY_OHLCV_NOT_RETURNED_AS_OF"
+                ),
+            }
         return {
             **base,
             "retained_history_boundary_status": "ends_before",
@@ -1211,11 +2570,54 @@ def _lifecycle_fields(instrument: Mapping[str, Any]) -> dict[str, Any]:
         "listing_start_date": instrument["listing_start_date"],
         "regular_way_listing_date": instrument["regular_way_listing_date"],
         "delisting_end_date": instrument["delisting_end_date"],
+        "last_trading_session": instrument["last_trading_session"],
+        "transaction_closing_date": instrument["transaction_closing_date"],
+        "trading_suspension_effective_date": instrument[
+            "trading_suspension_effective_date"
+        ],
+        "inactive_effective_date": instrument["inactive_effective_date"],
+        "canonical_ohlcv_last_observed_session": instrument[
+            "canonical_ohlcv_last_observed_session"
+        ],
+        "terminal_session_daily_ohlcv_status": instrument[
+            "terminal_session_daily_ohlcv_status"
+        ],
+        "observation_status_as_of": instrument["observation_status_as_of"],
+        "observation_evidence": instrument["observation_evidence"],
+        "trading_suspension_effective_timing": instrument[
+            "trading_suspension_effective_timing"
+        ],
         "lifecycle_reason": instrument["lifecycle_reason"],
         "corporate_action_type": instrument["corporate_action_type"],
         "lifecycle_provenance_checksum": instrument[
             "lifecycle_provenance_checksum"
         ],
+    }
+
+
+def _runtime_observation_fields(
+    instrument: Mapping[str, Any],
+    *,
+    validation: Mapping[str, Any],
+) -> dict[str, Any]:
+    actual_end = validation.get("end_date")
+    formal_end = instrument.get("last_trading_session")
+    if isinstance(actual_end, str) and actual_end == formal_end:
+        return {
+            "canonical_ohlcv_last_observed_session": actual_end,
+            "terminal_session_daily_ohlcv_status": "observed_daily_ohlcv",
+            "observation_status_as_of": None,
+            "observation_evidence": None,
+        }
+    return {
+        "canonical_ohlcv_last_observed_session": instrument.get(
+            "canonical_ohlcv_last_observed_session"
+        ),
+        "terminal_session_daily_ohlcv_status": instrument.get(
+            "terminal_session_daily_ohlcv_status"
+        ),
+        "observation_status_as_of": instrument.get("observation_status_as_of"),
+        "observation_evidence": instrument.get("observation_evidence"),
     }
 
 
@@ -1228,6 +2630,7 @@ def _provider_with_retries(
     expected_session: date,
     max_attempts: int,
     sleeper: Sleeper,
+    lifecycle_context: Mapping[str, Any] | None = None,
 ) -> pd.DataFrame:
     last_error: ProviderBoundaryError | None = None
     for attempt in range(1, max_attempts + 1):
@@ -1239,6 +2642,7 @@ def _provider_with_retries(
                     expected_session,
                     provider_symbol=symbol,
                     retry_number=attempt,
+                    lifecycle_context=lifecycle_context,
                 )
             except ProviderBoundaryError as exc:
                 if (
@@ -1253,6 +2657,7 @@ def _provider_with_retries(
                         expected_session=expected_session,
                         max_attempts=max_attempts,
                         sleeper=sleeper,
+                        lifecycle_context=lifecycle_context,
                     )
                 raise
         except ProviderBoundaryError:
@@ -1471,6 +2876,7 @@ def _prefetch_batch_provider(
         expected_session: date,
         max_attempts: int,
         sleeper: Sleeper,
+        lifecycle_context: Mapping[str, Any] | None = None,
     ) -> pd.DataFrame:
         provider_symbol = _to_yfinance_symbol(str(symbol))
         terminal_error: ProviderBoundaryError | None = None
@@ -1514,6 +2920,7 @@ def _prefetch_batch_provider(
                         expected_session,
                         provider_symbol=provider_symbol,
                         retry_number=attempt,
+                        lifecycle_context=lifecycle_context,
                     )
                 except ProviderBoundaryError as exc:
                     terminal_error = exc
@@ -1565,7 +2972,32 @@ def _prefetch_batch_provider(
     )
     cached_provider.record_original_invalid_bar = record_original_invalid_bar
     cached_provider.revalidate_single_ticker = revalidate_single_ticker
+    cached_provider.provider_id = "yahoo-finance-yfinance"
     return cached_provider
+
+
+def gap_directed_replay_window(
+    missing_sessions: Sequence[date],
+    *,
+    request_start: str,
+    request_end_exclusive: str,
+    buffer_calendar_days: int = 1,
+) -> tuple[str, str]:
+    if not missing_sessions or buffer_calendar_days < 0:
+        raise ValueError("gap-directed replay requires missing sessions and a valid buffer")
+    lower = date.fromisoformat(request_start)
+    upper = date.fromisoformat(request_end_exclusive)
+    if lower >= upper:
+        raise ValueError("gap-directed replay request window is empty")
+    sessions = sorted(set(missing_sessions))
+    if sessions[0] < lower or sessions[-1] >= upper:
+        raise ValueError("gap-directed replay session is outside the request window")
+    replay_start = max(lower, sessions[0] - timedelta(days=buffer_calendar_days))
+    replay_end = min(
+        upper,
+        sessions[-1] + timedelta(days=buffer_calendar_days + 1),
+    )
+    return replay_start.isoformat(), replay_end.isoformat()
 
 
 def _validate_provider_frame(
@@ -1574,6 +3006,7 @@ def _validate_provider_frame(
     *,
     provider_symbol: str | None = None,
     retry_number: int | None = None,
+    lifecycle_context: Mapping[str, Any] | None = None,
 ) -> pd.DataFrame:
     if frame is None or frame.empty:
         return pd.DataFrame()
@@ -1588,8 +3021,40 @@ def _validate_provider_frame(
         raise ProviderBoundaryError("PROVIDER_DUPLICATE_TIMESTAMP", "provider dates are duplicated")
     if list(dates) != sorted(dates):
         raise ProviderBoundaryError("PROVIDER_PAYLOAD_NOT_CHRONOLOGICAL", "provider dates are not ordered")
-    if any(day > expected_session for day in dates):
-        raise ProviderBoundaryError("PROVIDER_FUTURE_DATED_BAR", "provider returned a future or incomplete bar")
+    post_cutoff = [day for day in dates if day > expected_session]
+    if post_cutoff:
+        if not lifecycle_context or not lifecycle_context.get("last_trading_session"):
+            raise ProviderBoundaryError(
+                "PROVIDER_FUTURE_DATED_BAR",
+                "provider returned a future or incomplete bar",
+            )
+        diagnostics = [
+            {
+                "ticker": str(lifecycle_context["symbol"]),
+                "session_date": day.isoformat(),
+                "cutoff_date": expected_session.isoformat(),
+                "last_trading_session": lifecycle_context[
+                    "last_trading_session"
+                ],
+                "canonical_ohlcv_last_observed_session": lifecycle_context[
+                    "canonical_ohlcv_last_observed_session"
+                ],
+                "lifecycle_event": str(lifecycle_context["lifecycle_reason"]),
+                "lifecycle_provenance_checksum": lifecycle_context[
+                    "lifecycle_provenance_checksum"
+                ],
+                "provider": PROVIDER_IDENTITY,
+                "retry_number": retry_number,
+                "final_reason_code": "PROVIDER_BAR_AFTER_LIFECYCLE_CUTOFF",
+                "disposition": "quarantined_not_persisted",
+            }
+            for day in post_cutoff
+        ]
+        frame = frame.loc[
+            [day <= expected_session for day in dates]
+        ].copy()
+        frame.attrs["rejected_bar_diagnostics"] = diagnostics
+        dates = pd.to_datetime(frame["Date"], errors="raise").dt.date
     for column in ("Open", "High", "Low", "Close", "Adj Close", "Volume"):
         values = pd.to_numeric(frame[column], errors="coerce")
         if values.isna().any() or any(not math.isfinite(float(value)) for value in values):
@@ -1868,6 +3333,15 @@ def _prepare_staging_root(source: Path, destination: Path) -> None:
     source_data = source / DATA_RELATIVE_ROOT
     if source_data.is_dir():
         shutil.copytree(source_data, destination / DATA_RELATIVE_ROOT, dirs_exist_ok=True)
+    source_evidence = source / "evidence" / "market_price"
+    destination_evidence = destination / "evidence" / "market_price"
+    destination_evidence.mkdir(parents=True, exist_ok=True)
+    if source_evidence.is_dir():
+        shutil.copytree(
+            source_evidence,
+            destination_evidence,
+            dirs_exist_ok=True,
+        )
 
 
 def _expected_session_summary(rows: Sequence[Mapping[str, Any]]) -> dict[str, str]:
@@ -1884,7 +3358,17 @@ def _entry_lifecycle_matches(
     entry: Mapping[str, Any],
     instrument: Mapping[str, Any],
 ) -> bool:
-    expected = _lifecycle_fields(instrument)
+    expected = {
+        key: value
+        for key, value in _lifecycle_fields(instrument).items()
+        if key
+        not in {
+            "canonical_ohlcv_last_observed_session",
+            "terminal_session_daily_ohlcv_status",
+            "observation_status_as_of",
+            "observation_evidence",
+        }
+    }
     return all(entry.get(key) == value for key, value in expected.items())
 
 
@@ -1927,7 +3411,16 @@ def _contains_executable_content(root: Path) -> bool:
         except ValueError:
             return True
         is_price_file = relative.parent == DATA_RELATIVE_ROOT and relative.suffix.lower() == ".csv"
-        if relative != LATEST_MANIFEST and not is_price_file:
+        is_raw_market_price_evidence = (
+            relative.parts[:2] == ("evidence", "market_price")
+            and len(relative.parts) in {4, 5}
+            and relative.suffix.lower() == ".json"
+        )
+        if (
+            relative != LATEST_MANIFEST
+            and not is_price_file
+            and not is_raw_market_price_evidence
+        ):
             return True
     return False
 
@@ -2065,6 +3558,11 @@ def _argument_parser() -> argparse.ArgumentParser:
     )
     validate.add_argument("--allow-degraded", action="store_true")
     validate.add_argument("--expected-source-main-sha")
+    validate.add_argument("--baseline-publication-root")
+    validate.add_argument(
+        "--source-policy",
+        default=DEFAULT_SOURCE_POLICY.as_posix(),
+    )
     consume = subparsers.add_parser("consume-analysis")
     consume.add_argument("--publication-root", required=True)
     consume.add_argument("--universe-snapshot", default=DEFAULT_UNIVERSE_SNAPSHOT.as_posix())
@@ -2130,6 +3628,8 @@ def run_command(argv: Sequence[str] | None, *, stdout: TextIO, stderr: TextIO) -
             lifecycle_registry_path=args.lifecycle_registry,
             allow_degraded=args.allow_degraded,
             expected_source_main_sha=args.expected_source_main_sha,
+            baseline_publication_root=args.baseline_publication_root,
+            source_policy_path=args.source_policy,
         )
         print(json.dumps(validation, sort_keys=True), file=stdout if validation["validated"] else stderr)
         return 0 if validation["validated"] else 2

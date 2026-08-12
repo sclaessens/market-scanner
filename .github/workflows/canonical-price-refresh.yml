@@ -47,7 +47,7 @@ jobs:
       - name: Establish run identity
         id: identity
         run: |
-          run_id="me-sr18-canonical-price-refresh-$(date -u +%Y%m%dT%H%M%SZ)"
+          run_id="me-sr23-canonical-price-refresh-$(date -u +%Y%m%dT%H%M%SZ)"
           echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
           echo "report=$RUNNER_TEMP/freshness/$run_id.json" >> "$GITHUB_OUTPUT"
           echo "published-root=$RUNNER_TEMP/published-market-data" >> "$GITHUB_OUTPUT"
@@ -121,7 +121,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: canonical-price-freshness-${{ steps.identity.outputs.run-id }}
-          path: ${{ steps.identity.outputs.report }}
+          path: ${{ runner.temp }}/freshness/
           if-no-files-found: error
           retention-days: 30
 
@@ -173,14 +173,6 @@ jobs:
           name: canonical-price-publication-${{ needs.refresh-and-validate.outputs.run-id }}
           path: publication-bundle
 
-      - name: Revalidate bundle using trusted main code
-        run: |
-          source_main_sha="$(git rev-parse HEAD)"
-          PYTHONPATH=src python -m market_engine.data.scheduled_canonical_price_refresh \
-            validate-publication \
-            --publication-root publication-bundle \
-            --expected-source-main-sha "$source_main_sha"
-
       - name: Materialize data-only branch
         run: |
           if git ls-remote --exit-code --heads origin market-data >/dev/null 2>&1; then
@@ -192,9 +184,22 @@ jobs:
             git -C publication switch --orphan market-data
             git -C publication rm -r --ignore-unmatch .
           fi
-          mkdir -p publication/data/processed publication/manifests
+          mkdir -p publication/data/processed publication/manifests publication/evidence/market_price
+
+      - name: Revalidate bundle against data-branch baseline using trusted main code
+        run: |
+          source_main_sha="$(git rev-parse HEAD)"
+          PYTHONPATH=src python -m market_engine.data.scheduled_canonical_price_refresh \
+            validate-publication \
+            --publication-root publication-bundle \
+            --baseline-publication-root publication \
+            --expected-source-main-sha "$source_main_sha"
+
+      - name: Install validated publication bundle
+        run: |
           rsync --archive --delete publication-bundle/data/processed/ publication/data/processed/
           rsync --archive --delete publication-bundle/manifests/ publication/manifests/
+          rsync --archive --delete publication-bundle/evidence/market_price/ publication/evidence/market_price/
 
       - name: Revalidate exact publication tree
         run: |
@@ -210,7 +215,7 @@ jobs:
         run: |
           git -C publication config user.name "github-actions[bot]"
           git -C publication config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git -C publication add data/processed manifests/canonical_price_freshness_latest.json
+          git -C publication add --all data/processed manifests/canonical_price_freshness_latest.json evidence/market_price
           if git -C publication diff --cached --quiet; then
             echo "No validated data change; no market-data commit created."
             exit 0

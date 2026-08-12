@@ -2,18 +2,31 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 from urllib.parse import urlsplit
 
 
-LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v2"
+LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v5"
+LEGACY_LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v2"
+PREVIOUS_LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v3"
+SECOND_PREVIOUS_LIFECYCLE_SCHEMA_VERSION = "market-engine-instrument-lifecycle-registry-v4"
 DEFAULT_LIFECYCLE_REGISTRY = Path(
     "config/market_engine/universes/instrument_lifecycle.json"
 )
 LIFECYCLE_STATUSES = frozenset({"active", "inactive"})
 EFFECTIVE_LIFECYCLE_STATUSES = frozenset({"active", "inactive", "pending"})
+TERMINAL_SESSION_DAILY_OHLCV_STATUSES = frozenset(
+    {
+        "observed_daily_ohlcv",
+        "no_valid_daily_ohlcv_bar_from_provider_as_of",
+    }
+)
+SUSPENSION_EFFECTIVE_TIMINGS = frozenset(
+    {"before_open", "after_close", "effective_time"}
+)
 SOURCE_AUTHORITIES = frozenset({"sec", "issuer", "acquirer", "exchange"})
 LIFECYCLE_REASONS = frozenset(
     {
@@ -90,7 +103,13 @@ def load_lifecycle_registry(path: str | Path) -> dict[str, Any]:
         ) from exc
     if not isinstance(payload, dict):
         raise InstrumentLifecycleError("lifecycle registry must be a JSON object")
-    if payload.get("schema_version") != LIFECYCLE_SCHEMA_VERSION:
+    input_schema_version = payload.get("schema_version")
+    if input_schema_version not in {
+        LIFECYCLE_SCHEMA_VERSION,
+        LEGACY_LIFECYCLE_SCHEMA_VERSION,
+        PREVIOUS_LIFECYCLE_SCHEMA_VERSION,
+        SECOND_PREVIOUS_LIFECYCLE_SCHEMA_VERSION,
+    }:
         raise InstrumentLifecycleError("lifecycle registry schema is unsupported")
     records = payload.get("records")
     if not isinstance(records, list):
@@ -103,7 +122,11 @@ def load_lifecycle_registry(path: str | Path) -> dict[str, Any]:
             raise InstrumentLifecycleError(
                 f"lifecycle record {index} must be an object"
             )
-        record = _validate_record(value, index=index)
+        record = _validate_record(
+            value,
+            index=index,
+            input_schema_version=str(input_schema_version),
+        )
         instrument_id = record["instrument_id"]
         if instrument_id in seen_instrument_ids:
             raise InstrumentLifecycleError(
@@ -214,7 +237,87 @@ def record_provenance_checksum(record: Mapping[str, Any]) -> str:
     return canonical_checksum(payload)
 
 
-def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
+def resolve_semantic_alias(
+    record: Mapping[str, Any],
+    *,
+    canonical_field: str,
+    legacy_field: str,
+    normalizer: Any,
+    ticker: str,
+    contract_version: str,
+) -> Any:
+    canonical_raw = record.get(canonical_field)
+    legacy_raw = record.get(legacy_field)
+    canonical_present = canonical_field in record and canonical_raw is not None
+    legacy_present = legacy_field in record and legacy_raw is not None
+    canonical: Any = None
+    legacy: Any = None
+    canonical_error: Exception | None = None
+    legacy_error: Exception | None = None
+    if canonical_present:
+        try:
+            canonical = normalizer(canonical_raw)
+        except (TypeError, ValueError) as exc:
+            canonical_error = exc
+    if legacy_present:
+        try:
+            legacy = normalizer(legacy_raw)
+        except (TypeError, ValueError) as exc:
+            legacy_error = exc
+    if canonical_error is not None or legacy_error is not None:
+        raise InstrumentLifecycleError(
+            "lifecycle semantic alias invalid for "
+            f"{ticker}: canonical_field={canonical_field}, "
+            f"legacy_field={legacy_field}, canonical_raw={canonical_raw!r}, "
+            f"legacy_raw={legacy_raw!r}, canonical_normalized={canonical!r}, "
+            f"legacy_normalized={legacy!r}, contract_version={contract_version}"
+        ) from (canonical_error or legacy_error)
+    if canonical_present and legacy_present and canonical != legacy:
+        raise InstrumentLifecycleError(
+            "lifecycle semantic alias conflict for "
+            f"{ticker}: canonical_field={canonical_field}, "
+            f"legacy_field={legacy_field}, canonical_raw={canonical_raw!r}, "
+            f"legacy_raw={legacy_raw!r}, canonical_normalized={canonical!r}, "
+            f"legacy_normalized={legacy!r}, contract_version={contract_version}"
+        )
+    return canonical if canonical_present else legacy
+
+
+def _normalize_session_alias(value: Any) -> date:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("session alias must be text")
+    text = value.strip()
+    try:
+        return date.fromisoformat(text)
+    except ValueError:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+        if parsed.timetz().replace(tzinfo=None) != datetime.min.time():
+            raise ValueError("session timestamp must be at midnight")
+        return parsed.date()
+
+
+def _normalize_observation_status_alias(value: Any) -> str:
+    mapping = {
+        "observed": "observed_daily_ohlcv",
+        "observed_daily_ohlcv": "observed_daily_ohlcv",
+        "no_valid_price_observation": (
+            "no_valid_daily_ohlcv_bar_from_provider_as_of"
+        ),
+        "no_valid_daily_ohlcv_bar_from_provider_as_of": (
+            "no_valid_daily_ohlcv_bar_from_provider_as_of"
+        ),
+    }
+    if not isinstance(value, str) or value not in mapping:
+        raise ValueError("unknown observation status alias")
+    return mapping[value]
+
+
+def _validate_record(
+    value: Mapping[str, Any],
+    *,
+    index: int,
+    input_schema_version: str = LIFECYCLE_SCHEMA_VERSION,
+) -> dict[str, Any]:
     record = dict(value)
     instrument_id = _required_text(record, "instrument_id")
     ticker = _required_text(record, "ticker").upper()
@@ -230,7 +333,41 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
     regular_way_listing_date = _optional_date(
         record, "regular_way_listing_date"
     )
-    delisting_end_date = _optional_date(record, "delisting_end_date")
+    last_trading_session = resolve_semantic_alias(
+        record,
+        canonical_field="last_trading_session",
+        legacy_field="delisting_end_date",
+        normalizer=_normalize_session_alias,
+        ticker=ticker,
+        contract_version=input_schema_version,
+    )
+    delisting_end_date = last_trading_session
+    transaction_closing_date = _optional_date(record, "transaction_closing_date")
+    trading_suspension_effective_date = _optional_date(
+        record, "trading_suspension_effective_date"
+    )
+    inactive_effective_date = _optional_date(record, "inactive_effective_date")
+    canonical_ohlcv_last_observed_session = resolve_semantic_alias(
+        record,
+        canonical_field="canonical_ohlcv_last_observed_session",
+        legacy_field="price_observation_end_session",
+        normalizer=_normalize_session_alias,
+        ticker=ticker,
+        contract_version=input_schema_version,
+    )
+    terminal_session_daily_ohlcv_status = resolve_semantic_alias(
+        record,
+        canonical_field="terminal_session_daily_ohlcv_status",
+        legacy_field="final_session_observation_status",
+        normalizer=_normalize_observation_status_alias,
+        ticker=ticker,
+        contract_version=input_schema_version,
+    )
+    observation_status_as_of = record.get("observation_status_as_of")
+    observation_evidence = record.get("observation_evidence")
+    suspension_effective_timing = record.get(
+        "trading_suspension_effective_timing"
+    )
     lifecycle_reason = _required_text(record, "lifecycle_reason")
     if lifecycle_reason not in LIFECYCLE_REASONS:
         raise InstrumentLifecycleError(
@@ -338,6 +475,22 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
             raise InstrumentLifecycleError(
                 f"active lifecycle record cannot have a delisting date for {instrument_id}"
             )
+        if any(
+            value is not None
+            for value in (
+                last_trading_session,
+                transaction_closing_date,
+                trading_suspension_effective_date,
+                inactive_effective_date,
+                canonical_ohlcv_last_observed_session,
+                terminal_session_daily_ohlcv_status,
+                observation_status_as_of,
+                observation_evidence,
+            )
+        ):
+            raise InstrumentLifecycleError(
+                f"active lifecycle record cannot have termination dates for {instrument_id}"
+            )
         if successor_or_acquirer is not None:
             raise InstrumentLifecycleError(
                 f"active listing cannot declare an acquirer for {instrument_id}"
@@ -352,19 +505,101 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
             raise InstrumentLifecycleError(
                 f"inactive acquisition requires an acquirer for {instrument_id}"
             )
-        if delisting_end_date is None:
+        if last_trading_session is None:
+            # Compatibility is limited to the established v2 meaning: this field
+            # was an explicit final trading boundary, never a closing-date alias.
+            last_trading_session = delisting_end_date
+        if last_trading_session is None:
             raise InstrumentLifecycleError(
-                f"inactive lifecycle record requires a delisting end date for {instrument_id}"
+                f"inactive lifecycle record requires a last trading session for {instrument_id}"
             )
-        if status_effective_date <= delisting_end_date:
+        if inactive_effective_date is None:
+            inactive_effective_date = status_effective_date
+        if status_effective_date != inactive_effective_date:
             raise InstrumentLifecycleError(
-                f"inactive effective date must follow the final trading date for {instrument_id}"
+                f"inactive status and inactive effective dates must match for {instrument_id}"
+            )
+        if inactive_effective_date < last_trading_session:
+            raise InstrumentLifecycleError(
+                f"inactive effective date cannot precede the final trading date for {instrument_id}"
+            )
+        if transaction_closing_date is not None and transaction_closing_date < last_trading_session:
+            raise InstrumentLifecycleError(
+                f"transaction closing cannot precede the final trading session for {instrument_id}"
+            )
+        if trading_suspension_effective_date is None:
+            trading_suspension_effective_date = inactive_effective_date
+        if suspension_effective_timing is None:
+            suspension_effective_timing = "before_open"
+        if suspension_effective_timing not in SUSPENSION_EFFECTIVE_TIMINGS:
+            raise InstrumentLifecycleError(
+                f"trading suspension timing is invalid for {instrument_id}"
+            )
+        if (
+            suspension_effective_timing == "before_open"
+            and trading_suspension_effective_date <= last_trading_session
+        ) or (
+            suspension_effective_timing in {"after_close", "effective_time"}
+            and trading_suspension_effective_date < last_trading_session
+        ):
+            raise InstrumentLifecycleError(
+                f"trading suspension chronology is invalid for {instrument_id}"
+            )
+        if canonical_ohlcv_last_observed_session is None:
+            canonical_ohlcv_last_observed_session = last_trading_session
+        if not canonical_ohlcv_last_observed_session <= last_trading_session:
+            raise InstrumentLifecycleError(
+                f"price observation end cannot follow the final trading session for {instrument_id}"
+            )
+        if terminal_session_daily_ohlcv_status is None:
+            terminal_session_daily_ohlcv_status = (
+                "observed_daily_ohlcv"
+                if canonical_ohlcv_last_observed_session == last_trading_session
+                else "no_valid_daily_ohlcv_bar_from_provider_as_of"
+            )
+        if terminal_session_daily_ohlcv_status not in TERMINAL_SESSION_DAILY_OHLCV_STATUSES:
+            raise InstrumentLifecycleError(
+                f"final-session observation status is invalid for {instrument_id}"
+            )
+        if (
+            terminal_session_daily_ohlcv_status == "observed_daily_ohlcv"
+            and canonical_ohlcv_last_observed_session != last_trading_session
+        ) or (
+            terminal_session_daily_ohlcv_status
+            == "no_valid_daily_ohlcv_bar_from_provider_as_of"
+            and canonical_ohlcv_last_observed_session >= last_trading_session
+        ):
+            raise InstrumentLifecycleError(
+                f"final-session observation semantics are contradictory for {instrument_id}"
+            )
+        if (
+            terminal_session_daily_ohlcv_status
+            == "no_valid_daily_ohlcv_bar_from_provider_as_of"
+        ):
+            if not isinstance(observation_status_as_of, str):
+                raise InstrumentLifecycleError(
+                    f"observation status timestamp is required for {instrument_id}"
+                )
+            status_as_of = _required_timestamp(
+                {"observation_status_as_of": observation_status_as_of},
+                "observation_status_as_of",
+            )
+            observation_status_as_of = _utc_text(status_as_of)
+            observation_evidence = _validate_observation_evidence(
+                observation_evidence,
+                instrument_id=instrument_id,
+                last_trading_session=last_trading_session,
+                status_as_of=status_as_of,
+            )
+        elif observation_status_as_of is not None or observation_evidence is not None:
+            raise InstrumentLifecycleError(
+                f"observed daily OHLCV cannot carry contradictory absence evidence for {instrument_id}"
             )
         _validate_inactive_evidence(
             normalized_evidence,
             instrument_id=instrument_id,
-            delisting_end_date=delisting_end_date,
-            status_effective_date=status_effective_date,
+            last_trading_session=last_trading_session,
+            inactive_effective_date=inactive_effective_date,
         )
 
     normalized = {
@@ -383,8 +618,31 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
             else None
         ),
         "delisting_end_date": (
-            delisting_end_date.isoformat() if delisting_end_date else None
+            last_trading_session.isoformat() if last_trading_session else None
         ),
+        "last_trading_session": (
+            last_trading_session.isoformat() if last_trading_session else None
+        ),
+        "transaction_closing_date": (
+            transaction_closing_date.isoformat() if transaction_closing_date else None
+        ),
+        "trading_suspension_effective_date": (
+            trading_suspension_effective_date.isoformat()
+            if trading_suspension_effective_date
+            else None
+        ),
+        "inactive_effective_date": (
+            inactive_effective_date.isoformat() if inactive_effective_date else None
+        ),
+        "canonical_ohlcv_last_observed_session": (
+            canonical_ohlcv_last_observed_session.isoformat()
+            if canonical_ohlcv_last_observed_session
+            else None
+        ),
+        "terminal_session_daily_ohlcv_status": terminal_session_daily_ohlcv_status,
+        "observation_status_as_of": observation_status_as_of,
+        "observation_evidence": observation_evidence,
+        "trading_suspension_effective_timing": suspension_effective_timing,
         "lifecycle_reason": lifecycle_reason,
         "corporate_action_type": corporate_action_type,
         "successor_or_acquirer": successor_or_acquirer,
@@ -393,12 +651,29 @@ def _validate_record(value: Mapping[str, Any], *, index: int) -> dict[str, Any]:
         "provenance_checksum": record.get("provenance_checksum"),
     }
     checksum = normalized.get("provenance_checksum")
-    if not isinstance(checksum, str) or checksum != record_provenance_checksum(
-        normalized
-    ):
+    normalized_checksum = record_provenance_checksum(normalized)
+    legacy_checksum = record_provenance_checksum(record)
+    legacy_compatible = (
+        input_schema_version
+        in {
+            LEGACY_LIFECYCLE_SCHEMA_VERSION,
+            PREVIOUS_LIFECYCLE_SCHEMA_VERSION,
+            SECOND_PREVIOUS_LIFECYCLE_SCHEMA_VERSION,
+        }
+        or "last_trading_session" not in record
+        or "delisting_end_date" not in record
+        or "canonical_ohlcv_last_observed_session" not in record
+        or "price_observation_end_session" in record
+        or "final_session_observation_status" in record
+    )
+    if not isinstance(checksum, str) or checksum not in {
+        normalized_checksum,
+        legacy_checksum if legacy_compatible else normalized_checksum,
+    }:
         raise InstrumentLifecycleError(
             f"lifecycle provenance checksum mismatch for {instrument_id}"
         )
+    normalized["provenance_checksum"] = normalized_checksum
     return normalized
 
 
@@ -607,8 +882,8 @@ def _validate_inactive_evidence(
     evidence: Sequence[Mapping[str, Any]],
     *,
     instrument_id: str,
-    delisting_end_date: date,
-    status_effective_date: date,
+    last_trading_session: date,
+    inactive_effective_date: date,
 ) -> None:
     support = {
         item
@@ -625,7 +900,7 @@ def _validate_inactive_evidence(
         if not relevant:
             continue
         publication = date.fromisoformat(entry["source_publication_date"])
-        if not delisting_end_date <= publication <= status_effective_date:
+        if not last_trading_session <= publication <= inactive_effective_date:
             raise InstrumentLifecycleError(
                 f"inactive transition evidence date is invalid for {instrument_id}"
             )
@@ -650,6 +925,15 @@ def _apply_record(
             "listing_start_date": None,
             "regular_way_listing_date": None,
             "delisting_end_date": None,
+            "last_trading_session": None,
+            "transaction_closing_date": None,
+            "trading_suspension_effective_date": None,
+            "inactive_effective_date": None,
+            "canonical_ohlcv_last_observed_session": None,
+            "terminal_session_daily_ohlcv_status": None,
+            "observation_status_as_of": None,
+            "observation_evidence": None,
+            "trading_suspension_effective_timing": None,
             "lifecycle_reason": "canonical_universe_active"
             if lifecycle_status == "active"
             else "canonical_universe_inactive",
@@ -706,6 +990,25 @@ def _apply_record(
         "listing_start_date": record["listing_start_date"],
         "regular_way_listing_date": record["regular_way_listing_date"],
         "delisting_end_date": record["delisting_end_date"],
+        "last_trading_session": record["last_trading_session"],
+        "transaction_closing_date": record["transaction_closing_date"],
+        "trading_suspension_effective_date": record[
+            "trading_suspension_effective_date"
+        ],
+        "inactive_effective_date": record["inactive_effective_date"],
+        "canonical_ohlcv_last_observed_session": record.get(
+            "canonical_ohlcv_last_observed_session",
+            record.get("price_observation_end_session"),
+        ),
+        "terminal_session_daily_ohlcv_status": record.get(
+            "terminal_session_daily_ohlcv_status",
+            record.get("final_session_observation_status"),
+        ),
+        "observation_status_as_of": record.get("observation_status_as_of"),
+        "observation_evidence": record.get("observation_evidence"),
+        "trading_suspension_effective_timing": record[
+            "trading_suspension_effective_timing"
+        ],
         "lifecycle_reason": current_reason,
         "corporate_action_type": record["corporate_action_type"],
         "successor_or_acquirer": record["successor_or_acquirer"],
@@ -731,6 +1034,23 @@ def _instrument_binding(instrument: Mapping[str, Any]) -> dict[str, Any]:
         "listing_start_date": instrument["listing_start_date"],
         "regular_way_listing_date": instrument["regular_way_listing_date"],
         "delisting_end_date": instrument["delisting_end_date"],
+        "last_trading_session": instrument["last_trading_session"],
+        "transaction_closing_date": instrument["transaction_closing_date"],
+        "trading_suspension_effective_date": instrument[
+            "trading_suspension_effective_date"
+        ],
+        "inactive_effective_date": instrument["inactive_effective_date"],
+        "canonical_ohlcv_last_observed_session": instrument[
+            "canonical_ohlcv_last_observed_session"
+        ],
+        "terminal_session_daily_ohlcv_status": instrument[
+            "terminal_session_daily_ohlcv_status"
+        ],
+        "observation_status_as_of": instrument["observation_status_as_of"],
+        "observation_evidence": instrument["observation_evidence"],
+        "trading_suspension_effective_timing": instrument[
+            "trading_suspension_effective_timing"
+        ],
         "lifecycle_provenance_checksum": instrument[
             "lifecycle_provenance_checksum"
         ],
@@ -783,10 +1103,70 @@ def _required_timestamp(value: Mapping[str, Any], key: str) -> datetime:
     return parsed.astimezone(UTC)
 
 
+def _validate_observation_evidence(
+    value: Any,
+    *,
+    instrument_id: str,
+    last_trading_session: date,
+    status_as_of: datetime,
+) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise InstrumentLifecycleError(
+            f"observation evidence is required for {instrument_id}"
+        )
+    required_text = {
+        key: _required_text(value, key)
+        for key in (
+            "provider_identity",
+            "response_outcome",
+            "daily_ohlcv_validation_status",
+            "evidence_locator",
+            "response_checksum",
+        )
+    }
+    retrieved_at = _required_timestamp(value, "retrieved_at")
+    as_of_date = _required_date(value, "as_of_date")
+    request_start = _required_date(value, "request_start")
+    request_end = _required_date(value, "request_end_exclusive")
+    relevant_session = _required_date(value, "relevant_session")
+    if retrieved_at != status_as_of or as_of_date != status_as_of.date():
+        raise InstrumentLifecycleError(
+            f"observation evidence timestamp is inconsistent for {instrument_id}"
+        )
+    if relevant_session != last_trading_session or not (
+        request_start <= relevant_session < request_end
+    ):
+        raise InstrumentLifecycleError(
+            f"observation evidence request window is inconsistent for {instrument_id}"
+        )
+    if required_text["response_outcome"] != "empty_provider_response" or required_text[
+        "daily_ohlcv_validation_status"
+    ] != "no_valid_daily_ohlcv_bar_returned":
+        raise InstrumentLifecycleError(
+            f"observation evidence outcome is contradictory for {instrument_id}"
+        )
+    if not re.fullmatch(r"[0-9a-f]{64}", required_text["response_checksum"]):
+        raise InstrumentLifecycleError(
+            f"observation response checksum is invalid for {instrument_id}"
+        )
+    return {
+        "provider_identity": required_text["provider_identity"],
+        "retrieved_at": _utc_text(retrieved_at),
+        "as_of_date": as_of_date.isoformat(),
+        "request_start": request_start.isoformat(),
+        "request_end_exclusive": request_end.isoformat(),
+        "response_outcome": required_text["response_outcome"],
+        "relevant_session": relevant_session.isoformat(),
+        "daily_ohlcv_validation_status": required_text[
+            "daily_ohlcv_validation_status"
+        ],
+        "evidence_locator": required_text["evidence_locator"],
+        "response_checksum": required_text["response_checksum"],
+    }
+
+
 def _utc_text(value: datetime) -> str:
-    return value.astimezone(UTC).replace(microsecond=0).isoformat().replace(
-        "+00:00", "Z"
-    )
+    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _normalized_exchange(value: str) -> str:

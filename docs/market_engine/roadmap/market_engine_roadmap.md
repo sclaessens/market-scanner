@@ -376,10 +376,18 @@ ME-SR19 and must be remediated separately before a green publication canary.
 
 ME-SR20 adds rejected-provider-bar diagnostics and unchanged-contract
 revalidation. ME-SR21 adds bounded empty/partial batch retry, deterministic
-split, and single-ticker fallback. ME-SR22 proves and records TMHC's July 24
-final regular-way session and July 25 inactive boundary. NSA and TMHC's
-unavailable provider sessions remain visible blockers; these stories do not
-authorize a publication canary.
+split, and single-ticker fallback. ME-SR22 recorded TMHC's transaction closing
+date as a final-session requirement and remained blocked by an unavailable
+provider row. ME-SR23 supersedes that overloaded date interpretation with
+separate closing, last-trading, suspension and inactive dates and now requires
+trusted adapter-produced provider envelopes for every canonical mutation.
+Run `31483637994` failed closed with no approved envelopes or receipts, 11,352
+unproven added rows, 6,569 blocked precision-level historical modifications,
+and unresolved EA and TMHC sessions. Trusted publication is not authorized.
+The subsequent security remediation adds registered adapter-derived identity,
+content-addressed acquisition-run binding, and identity-aware absence consumer
+reconciliation. Its final code head still requires explicit approval for one
+new `publish=false` canary; no provider or publication has been authorized.
 
 ME-RUN32 completed the post-PR472 non-publishing operational audit. One
 `publish=false` canonical refresh recovered 68 of the original 70 blockers;
