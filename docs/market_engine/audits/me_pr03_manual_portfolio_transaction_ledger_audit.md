@@ -103,6 +103,36 @@ by the same schema tests.
 | Full repository tests | 2,292 | 1 | 0 | 10.48 s | Same known base failure only |
 | Exact failing test on base `4342c354` | 0 | 1 | 0 | 0.03 s | Identical assertion and missing path |
 
+### Remaining P1 private-path false-positive remediation
+
+Reviewed head `1d9b068628e65cae386c8f4321bdc919154981d5` still used
+`git ls-files --error-unmatch` for every parent path. Git treats a directory
+pathspec such as `data` as a match when any tracked descendant exists, so the
+real repository's tracked `data/processed/` and `data/local/` content
+incorrectly blocked the valid ignored target
+`data/portfolio/private/ledger.jsonl`.
+
+Tracked-target validation now asks Git for matching tracked paths and compares
+the normalized returned names with the exact ledger target. Parent safety is a
+separate filesystem check: every existing parent component must be a directory,
+and an existing target must be a regular file. A tracked or untracked file used
+as a required parent therefore remains fail closed, while an ordinary
+directory with unrelated tracked descendants does not create a false
+conflict. Ignore verification, repository identity, target resolution,
+worktree `.git` files, other-repository rejection, symlink resolution, exact
+tracked-target rejection, and Git-error fail-closed behavior are unchanged.
+
+The realistic regression repository tracks and commits both `.gitignore` and
+`data/processed/reference.csv`, then proves that the ignored private ledger
+target is allowed. Negative coverage proves that an exact tracked ledger,
+tracked and untracked file parents, an unignored target, a path outside the
+private root, another repository, an unsafe symlink, and Git verification
+errors remain rejected. The targeted path set passes 9 tests; the complete
+ledger suite passes 73 tests; and the relevant portfolio boundary passes 152
+tests. Market Engine passes 1,626 tests and the complete repository passes
+2,293 tests, with the same single missing historical ME-DATA06 fixture failure
+documented below.
+
 The broad-suite failure remains
 `test_compact_checksums_match_committed_files_and_local_full_runs` at
 `tests/market_engine/data/test_operator_pilot_compact_evidence.py:70`. The

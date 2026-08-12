@@ -917,6 +917,22 @@ def test_repository_local_live_data_requires_ignored_private_path(tmp_path: Path
     )
 
 
+def test_tracked_descendants_under_data_do_not_block_ignored_private_ledger(
+    tmp_path: Path,
+) -> None:
+    repo = _market_scanner_git_repo(tmp_path / "repo")
+    reference = repo / "data/processed/reference.csv"
+    reference.parent.mkdir(parents=True)
+    reference.write_text("symbol,value\nSYNTHETIC,1\n", encoding="utf-8")
+    _git(repo, "config", "user.email", "synthetic@example.invalid")
+    _git(repo, "config", "user.name", "Synthetic Test")
+    _git(repo, "add", ".gitignore", reference.relative_to(repo).as_posix())
+    _git(repo, "commit", "-q", "-m", "synthetic tracked data")
+
+    allowed = repo / "data/portfolio/private/ledger.jsonl"
+    assert validate_private_ledger_path(allowed) == allowed.resolve()
+
+
 def test_repository_local_private_path_fails_without_ignore_rule(tmp_path: Path) -> None:
     repo = _market_scanner_git_repo(tmp_path / "repo", ignored=False)
     _assert_code(
@@ -943,7 +959,7 @@ def test_private_path_detection_is_target_based_when_cwd_is_external(
     )
 
 
-def test_tracked_private_path_and_tracked_parent_conflict_fail_closed(tmp_path: Path) -> None:
+def test_tracked_private_path_and_file_parent_conflicts_fail_closed(tmp_path: Path) -> None:
     repo = _market_scanner_git_repo(tmp_path / "repo")
     tracked = repo / "data/portfolio/private/tracked.jsonl"
     tracked.parent.mkdir(parents=True)
@@ -958,6 +974,14 @@ def test_tracked_private_path_and_tracked_parent_conflict_fail_closed(tmp_path: 
         LedgerIssueCode.TRACKED_PRIVATE_DATA_PATH,
         validate_private_ledger_path,
         parent_file / "ledger.jsonl",
+    )
+
+    untracked_parent_file = repo / "data/portfolio/private/untracked-conflict"
+    untracked_parent_file.write_text("synthetic", encoding="utf-8")
+    _assert_code(
+        LedgerIssueCode.TRACKED_PRIVATE_DATA_PATH,
+        validate_private_ledger_path,
+        untracked_parent_file / "ledger.jsonl",
     )
 
 

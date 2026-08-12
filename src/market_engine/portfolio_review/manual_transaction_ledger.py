@@ -624,10 +624,10 @@ def validate_private_ledger_path(ledger_path: str | Path) -> Path:
             LedgerIssueCode.TRACKED_PRIVATE_DATA_PATH,
             "repository-local private ledger path is not protected by Git ignore rules",
         )
-    if _git_tracks(repo, relative) or _tracked_parent_conflict(repo, relative):
+    if _git_tracks_exact_path(repo, relative) or _path_component_conflict(repo, relative):
         raise LedgerValidationError(
             LedgerIssueCode.TRACKED_PRIVATE_DATA_PATH,
-            "refusing to write a private ledger to a Git-tracked path or parent",
+            "refusing to write a private ledger to a tracked target or unusable path",
         )
     return path
 
@@ -1395,18 +1395,29 @@ def _git_ignores(repo: Path, relative: Path) -> bool:
     return result.returncode == 0
 
 
-def _git_tracks(repo: Path, relative: Path) -> bool:
-    result = _run_git(repo, ["ls-files", "--error-unmatch", "--", relative.as_posix()])
-    if result.returncode not in {0, 1}:
+def _git_tracks_exact_path(repo: Path, relative: Path) -> bool:
+    normalized = relative.as_posix()
+    result = _run_git(repo, ["ls-files", "--full-name", "--", normalized])
+    if result.returncode != 0:
         raise LedgerValidationError(
             LedgerIssueCode.TRACKED_PRIVATE_DATA_PATH,
             "Git tracked-path verification failed closed",
         )
-    return result.returncode == 0
+    tracked_paths = {line.strip() for line in result.stdout.splitlines() if line.strip()}
+    return normalized in tracked_paths
 
 
-def _tracked_parent_conflict(repo: Path, relative: Path) -> bool:
-    return any(_git_tracks(repo, parent) for parent in relative.parents if parent != Path("."))
+def _path_component_conflict(repo: Path, relative: Path) -> bool:
+    target = repo / relative
+    if target.exists() and not target.is_file():
+        return True
+    for parent in relative.parents:
+        if parent == Path("."):
+            continue
+        candidate = repo / parent
+        if candidate.exists() and not candidate.is_dir():
+            return True
+    return False
 
 
 def _run_git(repo: Path, arguments: list[str]) -> subprocess.CompletedProcess[str]:
