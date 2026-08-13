@@ -62,15 +62,40 @@ Every canonical instrument is present as `fresh`, `stale`, `missing`, or
 `invalid`. The manifest reconciles attempted and per-state totals. Duplicate,
 missing, and extra identities fail closed.
 
+All internally generated clock values pass through one canonical UTC helper
+and are serialized with a trailing `Z`. Build, load, consume, and their CLI
+paths use that same helper when no timestamp is supplied. Explicit timestamps
+remain subject to the strict timezone-aware canonical-UTC and trusted-future
+checks; naive input is not normalized into acceptance.
+
+Freshness has two deliberately separate layers:
+
+- artifact freshness is the immutable acquisition-time classification stored
+  in each observation and reconciled by manifest totals. The loader recomputes
+  it against `generated_at` to detect manipulation;
+- effective freshness is a non-persisted load/consume view recomputed against
+  `trusted_now` with the same completed-session resolver and freshness helper.
+
+Retention does not grant freshness. When a newer market session has completed,
+a previously fresh close becomes effectively stale even though its stored
+artifact status remains fresh. A weekend or pre-close interval retains the
+previous close as fresh when the authoritative resolver reports no newer
+completed session. Unavailable effective-session resolution fails closed as
+`invalid` and never exposes a current price.
+
 ## Consumer contract
 
 `consume_advisory_price_context` accepts an artifact directory, not a
 caller-supplied price object. It reloads and validates both documents against
 the current authoritative universe and policy, then requires the exact
-instrument-ID/ticker pair. Only a validated `fresh`/`succeeded` observation
-exposes `current_price` and `currency`. Other states retain their provenance,
-observation semantic, timestamps, freshness, and diagnostics with no current
-price.
+instrument-ID/ticker pair. Consumer contract v2 reports
+`artifact_freshness_status`, `artifact_observation_age_completed_sessions`,
+`effective_freshness_status`,
+`effective_observation_age_completed_sessions`, and canonical `evaluated_at`.
+`price_context_status` is always the effective status. Only a validated
+effectively `fresh`/`succeeded` observation exposes `current_price`; other
+states retain provenance, acquisition-time evidence, and diagnostics with no
+current price.
 
 ## Schedule and retention
 

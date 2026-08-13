@@ -179,7 +179,10 @@ consumer trust boundaries. Prices are exact positive canonical decimal
 strings. Identity, source, observation type, currency, timestamps, freshness,
 full-universe membership, ordering, counts, policy, and digests fail closed.
 The public consumer accepts an artifact path rather than caller-supplied price
-objects and exposes a current price only for a validated fresh observation.
+objects. It preserves the immutable generation-time freshness evidence while
+recomputing an effective freshness view at each trusted load or consumption
+time, and exposes a current price only for a validated effectively fresh
+observation. Retention never substitutes for this freshness decision.
 
 The separate `Advisory Price Evidence` workflow runs at 05:30 UTC, uploads only
 a 14-day GitHub Actions artifact, and has read-only repository permissions. It

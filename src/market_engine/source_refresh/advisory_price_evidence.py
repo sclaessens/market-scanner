@@ -28,7 +28,7 @@ ARTIFACT_VERSION = "me-sr25-advisory-price-evidence-v1"
 OBSERVATION_SCHEMA_VERSION = "market-engine-advisory-price-observation-v1"
 OBSERVATIONS_SCHEMA_VERSION = "market-engine-advisory-price-observations-v1"
 MANIFEST_SCHEMA_VERSION = "market-engine-advisory-price-manifest-v1"
-CONSUMER_SCHEMA_VERSION = "market-engine-advisory-price-context-v1"
+CONSUMER_SCHEMA_VERSION = "market-engine-advisory-price-context-v2"
 POLICY_SCHEMA_VERSION = "market-engine-advisory-price-freshness-policy-v1"
 ARTIFACT_TYPE = "advisory_price_evidence"
 OBSERVATION_TYPE = "provider_reported_daily_close"
@@ -65,8 +65,9 @@ def build_advisory_price_artifact(
     _safe_identifier(run_id, "run_id")
     if not re.fullmatch(r"[0-9a-f]{40}", source_main_sha):
         raise AdvisoryPriceIssue("SOURCE_MAIN_SHA_INVALID", "source_main_sha must be a full Git SHA")
-    retrieval = _timestamp(retrieval_timestamp or datetime.now(UTC).isoformat(), "retrieval_timestamp")
-    if retrieval > datetime.now(UTC):
+    trusted_now = _resolve_trusted_now(None)
+    retrieval = _timestamp(retrieval_timestamp or _utc_text(trusted_now), "retrieval_timestamp")
+    if retrieval > trusted_now:
         raise AdvisoryPriceIssue("FUTURE_RETRIEVAL_TIMESTAMP", "retrieval timestamp cannot be in the future")
     universe_source = Path(universe_path)
     universe = load_authoritative_universe(universe_source)
@@ -108,7 +109,7 @@ def build_advisory_price_artifact(
         "run_id": run_id,
         "records": records,
     }
-    validate_observations_payload(observations, trusted_now=datetime.now(UTC))
+    validate_observations_payload(observations, trusted_now=trusted_now)
     observations_bytes = _canonical_json(observations) + b"\n"
     counts = Counter(row["freshness_status"] for row in records)
     status_counts = {
@@ -165,7 +166,7 @@ def load_advisory_price_artifact(
     manifest = _load_json(root / MANIFEST_FILE)
     observations = _load_json(root / OBSERVATIONS_FILE)
     validate_manifest_payload(manifest)
-    now = _timestamp(trusted_now or datetime.now(UTC).isoformat(), "trusted_now")
+    now = _resolve_trusted_now(trusted_now)
     validate_observations_payload(observations, trusted_now=now)
     if manifest["observations_sha256"] != _sha256_file(root / OBSERVATIONS_FILE):
         raise AdvisoryPriceIssue("ARTIFACT_INTEGRITY_INVALID", "observations file checksum differs from manifest")
@@ -211,7 +212,20 @@ def load_advisory_price_artifact(
         raise AdvisoryPriceIssue("ARTIFACT_RECONCILIATION_INVALID", "manifest totals do not reconcile")
     if manifest["expected_instrument_count"] != len(universe["instruments"]):
         raise AdvisoryPriceIssue("ARTIFACT_RECONCILIATION_INVALID", "expected instrument total is invalid")
-    return {"manifest": manifest, "observations": observations, "policy": policy}
+    effective_freshness = _effective_freshness(
+        observations["records"],
+        universe["instruments"],
+        policy=policy,
+        trusted_now=now,
+    )
+    return {
+        "manifest": manifest,
+        "observations": observations,
+        "policy": policy,
+        "trusted_now": now,
+        "universe": universe,
+        "effective_freshness": effective_freshness,
+    }
 
 
 def consume_advisory_price_context(
@@ -225,11 +239,12 @@ def consume_advisory_price_context(
 ) -> dict[str, Any]:
     if isinstance(artifact_root, Mapping):
         raise AdvisoryPriceIssue("FORGED_CALLER_CONTEXT", "consumer requires a validated artifact path")
+    now = _resolve_trusted_now(trusted_now)
     loaded = load_advisory_price_artifact(
         artifact_root,
         universe_path=universe_path,
         policy_path=policy_path,
-        trusted_now=trusted_now,
+        trusted_now=_utc_text(now),
     )
     matches = [
         row for row in loaded["observations"]["records"]
@@ -238,13 +253,22 @@ def consume_advisory_price_context(
     if len(matches) != 1:
         raise AdvisoryPriceIssue("INSTRUMENT_IDENTITY_MISMATCH", "requested instrument identity is absent or mismatched")
     row = matches[0]
-    usable = row["freshness_status"] == "fresh" and row["acquisition_status"] == "succeeded"
+    effective = loaded["effective_freshness"][instrument_id]
+    effective_status = effective["status"]
+    effective_age = effective["observation_age_completed_sessions"]
+    usable = effective_status == "fresh" and row["acquisition_status"] == "succeeded"
     return {
         "schema_version": CONSUMER_SCHEMA_VERSION,
         "artifact_version": ARTIFACT_VERSION,
         "instrument_id": instrument_id,
         "canonical_ticker": canonical_ticker,
-        "price_context_status": row["freshness_status"],
+        "price_context_status": effective_status,
+        "artifact_freshness_status": row["freshness_status"],
+        "artifact_observation_age_completed_sessions": row["observation_age_completed_sessions"],
+        "effective_freshness_status": effective_status,
+        "effective_observation_age_completed_sessions": effective_age,
+        "effective_freshness_error_code": effective["error_code"],
+        "evaluated_at": _utc_text(now),
         "current_price": row["price"] if usable else None,
         "currency": row["currency"],
         "observation_type": row["observation_type"],
@@ -364,7 +388,7 @@ def _record_from_acquisition(
                "freshness_status": "invalid", "observation_age_completed_sessions": None,
                "acquisition_status": "failed", "error_code": code,
                "error_detail": detail}
-        _validate_record(row, run_id=run_id, trusted_now=datetime.now(UTC))
+        _validate_record(row, run_id=run_id, trusted_now=retrieval)
         return row
     try:
         if acquired.get("instrument_id") != instrument["instrument_id"] or acquired.get("canonical_ticker") != instrument["symbol"]:
@@ -380,13 +404,7 @@ def _record_from_acquisition(
         observed = _timestamp(acquired.get("observation_timestamp"), "observation_timestamp")
         if observed > retrieval:
             raise AdvisoryPriceIssue("OBSERVATION_AFTER_RETRIEVAL", "observation timestamp follows retrieval")
-        _profile, expected = expected_completed_session(instrument, retrieval)
-        if expected is None:
-            raise AdvisoryPriceIssue("EXPECTED_SESSION_UNAVAILABLE", "completed session cannot be resolved")
-        age = _weekday_session_lag(observed.date(), expected)
-        if age < 0:
-            raise AdvisoryPriceIssue("FUTURE_OBSERVATION", "observation follows expected completed session")
-        freshness = "fresh" if age <= policy["max_completed_session_lag"] else "stale"
+        freshness, age = _freshness_at(instrument, observed, reference=retrieval, policy=policy)
         row = {**base, "price": price, "currency": currency,
                "observation_type": OBSERVATION_TYPE, "observation_timestamp": _utc_text(observed),
                "source_id": SOURCE_ID, "freshness_status": freshness,
@@ -398,7 +416,7 @@ def _record_from_acquisition(
                "freshness_status": "invalid", "observation_age_completed_sessions": None,
                "acquisition_status": "failed", "error_code": exc.code,
                "error_detail": str(exc).split(": ", 1)[-1][:500]}
-    _validate_record(row, run_id=run_id, trusted_now=datetime.now(UTC))
+    _validate_record(row, run_id=run_id, trusted_now=retrieval)
     return row
 
 
@@ -477,13 +495,64 @@ def _validate_loaded_freshness(
         if row["acquisition_status"] != "succeeded":
             continue
         observed = _timestamp(row["observation_timestamp"], "observation_timestamp")
-        _profile, expected_session = expected_completed_session(instrument, generated_at)
-        if expected_session is None:
-            raise AdvisoryPriceIssue("EXPECTED_SESSION_UNAVAILABLE", "completed session cannot be resolved")
-        expected_age = _weekday_session_lag(observed.date(), expected_session)
-        expected_status = "fresh" if expected_age <= policy["max_completed_session_lag"] else "stale"
-        if expected_age < 0 or row["observation_age_completed_sessions"] != expected_age or row["freshness_status"] != expected_status:
+        expected_status, expected_age = _freshness_at(
+            instrument,
+            observed,
+            reference=generated_at,
+            policy=policy,
+        )
+        if row["observation_age_completed_sessions"] != expected_age or row["freshness_status"] != expected_status:
             raise AdvisoryPriceIssue("FRESHNESS_INVALID", "artifact freshness evidence does not match trusted policy")
+
+
+def _freshness_at(
+    instrument: Mapping[str, Any],
+    observed: datetime,
+    *,
+    reference: datetime,
+    policy: Mapping[str, Any],
+) -> tuple[str, int]:
+    _profile, expected_session = expected_completed_session(instrument, reference)
+    if expected_session is None:
+        raise AdvisoryPriceIssue("EXPECTED_SESSION_UNAVAILABLE", "completed session cannot be resolved")
+    age = _weekday_session_lag(observed.date(), expected_session)
+    if age < 0:
+        raise AdvisoryPriceIssue("FUTURE_OBSERVATION", "observation follows expected completed session")
+    status = "fresh" if age <= policy["max_completed_session_lag"] else "stale"
+    return status, age
+
+
+def _effective_freshness(
+    records: Sequence[Mapping[str, Any]],
+    instruments: Sequence[Mapping[str, Any]],
+    *,
+    policy: Mapping[str, Any],
+    trusted_now: datetime,
+) -> dict[str, dict[str, Any]]:
+    instruments_by_id = {str(row["instrument_id"]): row for row in instruments}
+    result: dict[str, dict[str, Any]] = {}
+    for row in records:
+        status = row["freshness_status"]
+        age = row["observation_age_completed_sessions"]
+        error_code = None
+        if row["acquisition_status"] == "succeeded":
+            try:
+                status, age = _freshness_at(
+                    instruments_by_id[row["instrument_id"]],
+                    _timestamp(row["observation_timestamp"], "observation_timestamp"),
+                    reference=trusted_now,
+                    policy=policy,
+                )
+            except AdvisoryPriceIssue as exc:
+                status = "invalid"
+                age = None
+                error_code = exc.code
+        result[row["instrument_id"]] = {
+            "status": status,
+            "observation_age_completed_sessions": age,
+            "error_code": error_code,
+        }
+    return result
 
 
 def _acquire_with_existing_adapter(instruments: Sequence[Mapping[str, Any]], retrieval: datetime) -> Mapping[str, Mapping[str, Any]]:
@@ -652,6 +721,14 @@ def _timestamp(value: Any, field: str) -> datetime:
 
 def _utc_text(value: datetime) -> str:
     return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
+
+
+def _canonical_now() -> str:
+    return _utc_text(datetime.now(UTC))
+
+
+def _resolve_trusted_now(value: str | None) -> datetime:
+    return _timestamp(value or _canonical_now(), "trusted_now")
 
 
 def _canonical_json(value: Any) -> bytes:

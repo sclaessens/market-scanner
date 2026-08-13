@@ -29,9 +29,51 @@ partial failure preservation, bounded fallback, manifest and observation
 integrity, recomputed freshness, schema versions, JSON Schema enforcement, and
 forged caller-context rejection.
 
-The consumer exposes current price context only for validated fresh evidence.
-Stale, missing, and invalid states remain explicit and cannot masquerade as a
-current price.
+The consumer exposes current price context only for validated effectively
+fresh evidence. Stale, missing, and invalid states remain explicit and cannot
+masquerade as a current price.
+
+## P1 review remediation
+
+The two P1 review blockers were remediated on the same branch and draft pull
+request:
+
+1. one canonical clock helper now generates trailing-`Z` UTC defaults for the
+   builder, loader, consumer, CLI, and exact workflow command path. Default
+   execution no longer produces the rejected `+00:00` representation;
+2. artifact freshness remains immutable acquisition-time evidence, while the
+   loader creates a separate effective freshness view at every trusted load.
+   Consumer contract v2 uses that effective status to gate `current_price` and
+   retains the original status and session age for audit.
+
+Regression coverage exercises default API and CLI clocks, the exact workflow
+build arguments without acquisition or network access, canonical timestamp
+roundtrip, fresh-to-stale transition after a completed session, weekend
+continuity, missing and invalid preservation, unavailable session resolution,
+trusted time before generation, immutable files and manifest totals, and the
+existing rehashed-forgery rejection. Artifact retention is explicitly not a
+freshness decision.
+
+Review-remediation validation produced these results:
+
+- timestamp and consumption-freshness regression selection: 10 passed;
+- complete ME-SR25 suite: 50 passed;
+- relevant data, ticker-universe, and source-refresh suite: one baseline-only
+  failure and 706 passed;
+- recommendation, handoff, advisory, and advice suite: 228 passed;
+- complete Market Engine suite: one baseline-only failure and 1,676 passed;
+- complete repository suite: one baseline-only failure and 2,343 passed;
+- changed-file Python compilation: passed;
+- policy and JSON Schema parsing: passed;
+- representative valid/invalid Draft 2020-12 payload validation: passed;
+- `git diff --check`: passed;
+- governance and changed-boundary side-effect searches: no new violation.
+
+The sole broad failure was reproduced again at exact base SHA
+`4753c94c0ab572d619fbb7b82496ba2864797a9f`: the same
+`test_compact_checksums_match_committed_files_and_local_full_runs` test fails
+at the same `path.is_file()` assertion for the absent historical DATA06
+manifest. No other broad failure occurred.
 
 ## Regression evidence
 

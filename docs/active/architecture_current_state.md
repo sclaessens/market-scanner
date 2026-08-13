@@ -68,7 +68,9 @@ See:
 
 - Transaction ledger: source of truth for confirmed portfolio transactions.
 - Derived positions: rebuildable projection only.
-- Advisory price artifact: descriptive market enrichment only.
+- Advisory price artifact: immutable acquisition-time freshness evidence;
+  current-price use requires a separate effective freshness calculation at
+  each trusted load or consumption time.
 - Portfolio Review: non-actionable position/exposure interpretation.
 - Decision Engine: only allocation authority.
 - ChatGPT: explanation and user interaction, not calculation or execution

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from copy import deepcopy
+from io import StringIO
 from pathlib import Path
 
 import pandas as pd
@@ -90,6 +91,29 @@ def _build(inputs: dict[str, Path], *, provider=None, run_id: str = "me-sr25-syn
     )
 
 
+def _build_at(
+    inputs: dict[str, Path],
+    *,
+    retrieval_timestamp: str,
+    observation_timestamp: str,
+    run_id: str,
+):
+    return build_advisory_price_artifact(
+        run_id=run_id,
+        source_main_sha=SOURCE_MAIN_SHA,
+        output_root=inputs["output"],
+        universe_path=inputs["universe"],
+        policy_path=inputs["policy"],
+        retrieval_timestamp=retrieval_timestamp,
+        provider=_provider(
+            {
+                "equity:aaa": {"observation_timestamp": observation_timestamp},
+                "equity:bbb": {"observation_timestamp": observation_timestamp},
+            }
+        ),
+    )
+
+
 def _assert_code(code: str, function, *args, **kwargs) -> None:
     with pytest.raises(AdvisoryPriceIssue) as caught:
         function(*args, **kwargs)
@@ -122,6 +146,108 @@ def test_valid_price_observation_roundtrip_and_exact_decimal(inputs: dict[str, P
     assert loaded["observations"]["records"][0]["price"] == "123.4500"
     assert manifest["status_counts"] == {"attempted": 2, "fresh": 2, "stale": 0, "missing": 0, "invalid": 0}
     assert manifest["canonical_publication_status"] == "not_authorized_advisory_only"
+
+
+def test_default_build_timestamp_is_canonical_utc_and_validated(
+    inputs: dict[str, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(advisory, "_canonical_now", lambda: RETRIEVED_AT)
+    manifest, root = build_advisory_price_artifact(
+        run_id="default-build-time",
+        source_main_sha=SOURCE_MAIN_SHA,
+        output_root=inputs["output"],
+        universe_path=inputs["universe"],
+        policy_path=inputs["policy"],
+        provider=_provider(),
+    )
+    assert manifest["generated_at"] == RETRIEVED_AT
+    assert manifest["generated_at"].endswith("Z")
+    records = json.loads((root / advisory.OBSERVATIONS_FILE).read_text(encoding="utf-8"))["records"]
+    assert {row["retrieval_timestamp"] for row in records} == {RETRIEVED_AT}
+    assert advisory._timestamp(manifest["generated_at"], "generated_at").tzinfo is not None
+
+
+def test_default_load_and_consume_times_are_canonical_and_safe(
+    inputs: dict[str, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _manifest, root = _build(inputs)
+    monkeypatch.setattr(advisory, "_canonical_now", lambda: TRUSTED_NOW)
+    loaded = load_advisory_price_artifact(
+        root,
+        universe_path=inputs["universe"],
+        policy_path=inputs["policy"],
+    )
+    assert advisory._utc_text(loaded["trusted_now"]) == TRUSTED_NOW
+    context = consume_advisory_price_context(
+        root,
+        instrument_id="equity:aaa",
+        canonical_ticker="AAA",
+        universe_path=inputs["universe"],
+        policy_path=inputs["policy"],
+    )
+    assert context["evaluated_at"] == TRUSTED_NOW
+    assert context["current_price"] == "123.4500"
+
+
+def test_cli_build_and_consume_use_default_canonical_times(
+    inputs: dict[str, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(advisory, "_canonical_now", lambda: RETRIEVED_AT)
+    monkeypatch.setattr(advisory, "_acquire_with_existing_adapter", _provider())
+    build_stdout = StringIO()
+    assert advisory.run_command(
+        [
+            "build",
+            "--run-id", "cli-default-time",
+            "--source-main-sha", SOURCE_MAIN_SHA,
+            "--output-root", inputs["output"].as_posix(),
+            "--universe", inputs["universe"].as_posix(),
+            "--policy", inputs["policy"].as_posix(),
+        ],
+        stdout=build_stdout,
+        stderr=StringIO(),
+    ) == 0
+    build_result = json.loads(build_stdout.getvalue())
+    assert build_result["manifest"]["generated_at"] == RETRIEVED_AT
+
+    monkeypatch.setattr(advisory, "_canonical_now", lambda: TRUSTED_NOW)
+    consume_stdout = StringIO()
+    assert advisory.run_command(
+        [
+            "consume",
+            "--artifact-root", build_result["artifact_path"],
+            "--instrument-id", "equity:aaa",
+            "--ticker", "AAA",
+            "--universe", inputs["universe"].as_posix(),
+            "--policy", inputs["policy"].as_posix(),
+        ],
+        stdout=consume_stdout,
+        stderr=StringIO(),
+    ) == 0
+    context = json.loads(consume_stdout.getvalue())
+    assert context["evaluated_at"] == TRUSTED_NOW
+    assert context["current_price"] == "123.4500"
+
+
+def test_exact_workflow_build_command_path_needs_no_timestamp_or_network(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(advisory, "_canonical_now", lambda: RETRIEVED_AT)
+    monkeypatch.setattr(advisory, "_acquire_with_existing_adapter", _provider())
+    stdout = StringIO()
+    assert advisory.run_command(
+        [
+            "build",
+            "--run-id", "me-sr25-advisory-price-workflow-test",
+            "--source-main-sha", SOURCE_MAIN_SHA,
+            "--output-root", tmp_path.as_posix(),
+        ],
+        stdout=stdout,
+        stderr=StringIO(),
+    ) == 0
+    result = json.loads(stdout.getvalue())
+    assert result["manifest"]["generated_at"] == RETRIEVED_AT
+    assert result["manifest"]["expected_instrument_count"] == 952
 
 
 @pytest.mark.parametrize("price", ["0", "0.0", "-1", 1.25, True, "NaN", "Infinity", "1e2"])
@@ -457,11 +583,141 @@ def test_consumer_preserves_fresh_stale_missing_and_invalid_states(inputs: dict[
             universe_path=inputs["universe"], policy_path=inputs["policy"], trusted_now=TRUSTED_NOW,
         )
         assert context["price_context_status"] == expected
+        assert context["schema_version"] == "market-engine-advisory-price-context-v2"
+        assert context["artifact_freshness_status"] == expected
+        assert context["effective_freshness_status"] == expected
         assert (context["current_price"] is not None) is (expected == "fresh")
         assert context["currency"] == "USD"
         assert context["source_id"] == advisory.SOURCE_ID
         assert context["observation_type"] == advisory.OBSERVATION_TYPE
         assert context["advisory_only"] is True
+
+
+def test_consumption_freshness_changes_without_mutating_artifact(
+    inputs: dict[str, Path],
+) -> None:
+    manifest, root = _build(inputs)
+    manifest_bytes = (root / advisory.MANIFEST_FILE).read_bytes()
+    observations_bytes = (root / advisory.OBSERVATIONS_FILE).read_bytes()
+
+    still_fresh = consume_advisory_price_context(
+        root,
+        instrument_id="equity:aaa",
+        canonical_ticker="AAA",
+        universe_path=inputs["universe"],
+        policy_path=inputs["policy"],
+        trusted_now="2026-08-13T19:00:00Z",
+    )
+    assert still_fresh["price_context_status"] == "fresh"
+    assert still_fresh["effective_freshness_status"] == "fresh"
+    assert still_fresh["effective_observation_age_completed_sessions"] == 0
+    assert still_fresh["artifact_freshness_status"] == "fresh"
+    assert still_fresh["artifact_observation_age_completed_sessions"] == 0
+    assert still_fresh["current_price"] == "123.4500"
+
+    loaded_after_next_session = load_advisory_price_artifact(
+        root,
+        universe_path=inputs["universe"],
+        policy_path=inputs["policy"],
+        trusted_now="2026-08-13T22:00:00Z",
+    )
+    assert loaded_after_next_session["effective_freshness"]["equity:aaa"] == {
+        "status": "stale",
+        "observation_age_completed_sessions": 1,
+        "error_code": None,
+    }
+    assert loaded_after_next_session["manifest"]["status_counts"] == manifest["status_counts"]
+
+    after_next_session = consume_advisory_price_context(
+        root,
+        instrument_id="equity:aaa",
+        canonical_ticker="AAA",
+        universe_path=inputs["universe"],
+        policy_path=inputs["policy"],
+        trusted_now="2026-08-13T22:00:00Z",
+    )
+    assert after_next_session["price_context_status"] == "stale"
+    assert after_next_session["effective_freshness_status"] == "stale"
+    assert after_next_session["effective_observation_age_completed_sessions"] == 1
+    assert after_next_session["artifact_freshness_status"] == "fresh"
+    assert after_next_session["artifact_observation_age_completed_sessions"] == 0
+    assert after_next_session["current_price"] is None
+    assert manifest["status_counts"] == {
+        "attempted": 2,
+        "fresh": 2,
+        "stale": 0,
+        "missing": 0,
+        "invalid": 0,
+    }
+    assert (root / advisory.MANIFEST_FILE).read_bytes() == manifest_bytes
+    assert (root / advisory.OBSERVATIONS_FILE).read_bytes() == observations_bytes
+
+
+def test_weekend_without_new_completed_session_preserves_fresh_close(
+    inputs: dict[str, Path],
+) -> None:
+    _manifest, root = _build_at(
+        inputs,
+        retrieval_timestamp="2026-08-07T22:00:00Z",
+        observation_timestamp="2026-08-07T20:00:00Z",
+        run_id="friday-close",
+    )
+    context = consume_advisory_price_context(
+        root,
+        instrument_id="equity:aaa",
+        canonical_ticker="AAA",
+        universe_path=inputs["universe"],
+        policy_path=inputs["policy"],
+        trusted_now="2026-08-09T12:00:00Z",
+    )
+    assert context["artifact_freshness_status"] == "fresh"
+    assert context["effective_freshness_status"] == "fresh"
+    assert context["effective_observation_age_completed_sessions"] == 0
+    assert context["current_price"] == "123.4500"
+
+
+def test_unavailable_effective_session_resolution_never_exposes_current_price(
+    inputs: dict[str, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _manifest, root = _build(inputs)
+    original_resolver = advisory.expected_completed_session
+
+    def resolver(instrument, reference):
+        if reference == advisory._timestamp(RETRIEVED_AT, "retrieval_timestamp"):
+            return original_resolver(instrument, reference)
+        return None, None
+
+    monkeypatch.setattr(advisory, "expected_completed_session", resolver)
+    context = consume_advisory_price_context(
+        root,
+        instrument_id="equity:aaa",
+        canonical_ticker="AAA",
+        universe_path=inputs["universe"],
+        policy_path=inputs["policy"],
+        trusted_now=TRUSTED_NOW,
+    )
+    assert context["artifact_freshness_status"] == "fresh"
+    assert context["effective_freshness_status"] == "invalid"
+    assert context["price_context_status"] == "invalid"
+    assert context["effective_observation_age_completed_sessions"] is None
+    assert context["effective_freshness_error_code"] == "EXPECTED_SESSION_UNAVAILABLE"
+    assert context["current_price"] is None
+
+
+def test_consumer_rejects_trusted_time_before_artifact_generation(
+    inputs: dict[str, Path],
+) -> None:
+    _manifest, root = _build(inputs)
+    _assert_code(
+        "FUTURE_RETRIEVAL_TIMESTAMP",
+        consume_advisory_price_context,
+        root,
+        instrument_id="equity:aaa",
+        canonical_ticker="AAA",
+        universe_path=inputs["universe"],
+        policy_path=inputs["policy"],
+        trusted_now="2026-08-13T05:29:59Z",
+    )
 
 
 def test_wrong_consumer_identity_fails_closed(inputs: dict[str, Path]) -> None:
