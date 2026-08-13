@@ -28,6 +28,9 @@ Engine work. It is not an exhaustive file inventory.
 - `src/market_engine/`: current Market Engine job-family runtime.
 - `src/market_engine/source_refresh/advisory_price_evidence.py`: ME-SR25
   advisory-only price acquisition, artifact validation, and consumer boundary.
+- `src/market_engine/data/targeted_diversified_fundamental_derivation.py`:
+  ME-DATA11 top-25 funnel binding, bounded SEC acquisition, generic DATA10
+  derivation orchestration, and comparison evidence.
 - `src/market_scanner/portfolio/`: portfolio source and contract metadata.
 - `scripts/portfolio/`: legacy/reference portfolio utilities unless a sprint
   explicitly promotes or replaces a narrow surface.

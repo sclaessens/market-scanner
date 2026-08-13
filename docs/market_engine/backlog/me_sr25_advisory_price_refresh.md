@@ -2,7 +2,7 @@
 
 Sprint ID: ME-SR25
 
-Status: IMPLEMENTED BY ME-SR25 / POST-MERGE OPERATIONAL VALIDATION NOT EXECUTED
+Status: COMPLETED / MERGED BY PR #478
 
 Job family: ME-SR / Source Refresh
 
@@ -190,10 +190,14 @@ contains no publication job or `market-data` write. No workflow run or canary
 was executed by this sprint; operational status still requires separately
 approved post-merge validation.
 
-The accelerated product route after implementation is:
+PR #478 merged ME-SR25 into `main` at
+`9169420427d33864851d36f2b183e35b8bd0c089`.
+
+The accelerated product route after ME-DATA11 is:
 
 ```text
-ME-SR25 -> ME-DATA11 -> ME-RUN33 -> ME-CI12
+ME-SR25 (COMPLETED) -> ME-DATA11 (COMPLETED WITH BLOCKERS)
+  -> ME-RUN33 (NEXT) -> ME-CI12 (PLANNED)
 ```
 
 ME-RUN33 is the first unreserved RUN identifier found in the authoritative

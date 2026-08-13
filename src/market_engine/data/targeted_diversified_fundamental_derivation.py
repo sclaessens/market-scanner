@@ -1,0 +1,922 @@
+from __future__ import annotations
+
+import argparse
+import csv
+import hashlib
+import json
+from collections import Counter
+from datetime import UTC, date, datetime
+from pathlib import Path
+from typing import Any, Callable, Mapping, Sequence
+from urllib.request import Request, urlopen
+
+from market_engine.data.primary_source_metric_derivation import (
+    FACT_PACKAGE_SCHEMA_VERSION,
+    derive_primary_source_metrics,
+    load_strict_json,
+)
+from market_engine.source_refresh.sec_companyfacts_snapshots import (
+    persist_sec_companyfacts_provider_error,
+    persist_sec_companyfacts_raw_snapshot,
+)
+
+
+SCHEMA_VERSION = "market-engine-data11-targeted-diversified-fundamental-derivation-v1"
+FUNNEL_SCHEMA_VERSION = "market-engine-data11-technical-candidate-funnel-v1"
+INVENTORY_SCHEMA_VERSION = "market-engine-data11-source-inventory-v1"
+COHORT_SCHEMA_VERSION = "market-engine-data11-pilot-cohort-v1"
+RESULTS_SCHEMA_VERSION = "market-engine-data11-derivation-results-v1"
+COMPARISON_SCHEMA_VERSION = "market-engine-data11-metric-comparison-v1"
+DOWNSTREAM_SCHEMA_VERSION = "market-engine-data11-downstream-run-index-v1"
+DEFAULT_RANKING = Path(
+    "artifacts/market_engine/universe_analysis_runs/"
+    "me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json"
+)
+DEFAULT_MANIFEST = DEFAULT_RANKING.with_name("manifest.json")
+DEFAULT_UNIVERSE = Path("config/market_engine/universes/canonical_universe.json")
+DEFAULT_FORMULA_CATALOG = Path("config/market_engine/data10_fundamental_metric_formula_catalog.json")
+DEFAULT_OUTPUT_ROOT = Path("artifacts/market_engine/run_evidence")
+DEFAULT_SOURCE_ROOT = Path("data/market_engine/source_snapshots/sec_companyfacts")
+SEC_TICKER_INDEX_URL = "https://www.sec.gov/files/company_tickers.json"
+SEC_COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
+USER_AGENT = "market-scanner-data11-pilot governance@example.com"
+TOP_LIMIT = 25
+MIN_COHORT = 8
+MAX_COHORT = 12
+FUNDAMENTAL_FRESHNESS_MAX_AGE_DAYS = 120
+
+_CONCEPT_TAGS: Mapping[str, tuple[str, ...]] = {
+    "revenue": (
+        "RevenueFromContractWithCustomerExcludingAssessedTax",
+        "Revenues",
+        "SalesRevenueNet",
+        "SalesRevenueGoodsNet",
+    ),
+    "gross_profit": ("GrossProfit",),
+    "operating_income": ("OperatingIncomeLoss",),
+}
+
+JsonFetcher = Callable[[str], Mapping[str, Any]]
+
+
+class TargetedDerivationError(ValueError):
+    pass
+
+
+def run_targeted_derivation(
+    *,
+    run_id: str,
+    generated_at: str,
+    ranking_path: str | Path = DEFAULT_RANKING,
+    ranking_manifest_path: str | Path = DEFAULT_MANIFEST,
+    universe_path: str | Path = DEFAULT_UNIVERSE,
+    formula_catalog_path: str | Path = DEFAULT_FORMULA_CATALOG,
+    output_root: str | Path = DEFAULT_OUTPUT_ROOT,
+    source_root: str | Path = DEFAULT_SOURCE_ROOT,
+    cohort_size: int = 10,
+    fetch_json: JsonFetcher | None = None,
+) -> tuple[dict[str, Any], Path]:
+    if not MIN_COHORT <= cohort_size <= MAX_COHORT:
+        raise TargetedDerivationError(f"cohort_size must be between {MIN_COHORT} and {MAX_COHORT}")
+    ranking_path = Path(ranking_path)
+    ranking_manifest_path = Path(ranking_manifest_path)
+    universe_path = Path(universe_path)
+    formula_catalog_path = Path(formula_catalog_path)
+    output_dir = Path(output_root) / run_id
+    if output_dir.exists():
+        raise FileExistsError(f"refusing to overwrite DATA11 evidence: {output_dir}")
+
+    ranking = load_strict_json(ranking_path)
+    ranking_manifest = load_strict_json(ranking_manifest_path)
+    universe = load_strict_json(universe_path)
+    formula_catalog = load_strict_json(formula_catalog_path)
+    funnel = build_candidate_funnel(
+        ranking,
+        ranking_manifest,
+        universe,
+        ranking_path=ranking_path,
+        ranking_manifest_path=ranking_manifest_path,
+        universe_path=universe_path,
+    )
+    cohort = select_pilot_cohort(funnel, cohort_size=cohort_size)
+    fetcher = fetch_json or _fetch_json
+    ticker_index = _ticker_index(fetcher(SEC_TICKER_INDEX_URL))
+    source_inventory, fact_packages = acquire_and_extract(
+        cohort,
+        ticker_index=ticker_index,
+        fetch_json=fetcher,
+        source_root=Path(source_root),
+        run_id=run_id,
+        generated_at=generated_at,
+    )
+    derivation_results = derive_cohort_metrics(
+        cohort,
+        fact_packages=fact_packages,
+        formula_catalog=formula_catalog,
+        generated_at=generated_at,
+    )
+    comparison = build_metric_comparison(funnel, cohort, source_inventory, derivation_results)
+    downstream = build_downstream_index(cohort, derivation_results)
+    summary = build_summary(cohort, source_inventory, derivation_results, downstream)
+    derivation_results["pilot_summary"] = summary
+
+    artifacts: dict[str, Any] = {
+        "candidate_funnel.json": funnel,
+        "source_inventory.json": source_inventory,
+        "cohort_selection.json": cohort,
+        "derivation_summary.json": derivation_results,
+        "fundamental_comparison_matrix.json": comparison,
+        "downstream_readiness_delta.json": downstream,
+    }
+    output_dir.mkdir(parents=True)
+    for name, payload in artifacts.items():
+        _write_json(output_dir / name, payload)
+    report = render_report(summary, comparison)
+    (output_dir / "report.md").write_text(report, encoding="utf-8")
+    manifest = build_manifest(
+        run_id=run_id,
+        generated_at=generated_at,
+        ranking_path=ranking_path,
+        ranking_manifest_path=ranking_manifest_path,
+        universe_path=universe_path,
+        formula_catalog_path=formula_catalog_path,
+        source_root=Path(source_root),
+        output_dir=output_dir,
+        summary=summary,
+    )
+    _write_json(output_dir / "manifest.json", manifest)
+    checksum_index = {
+        "schema_version": "market-engine-data11-checksum-index-v1",
+        "run_id": run_id,
+        "files": {
+            path.name: _sha256(path)
+            for path in sorted(output_dir.iterdir())
+            if path.is_file()
+        },
+    }
+    _write_json(output_dir / "checksum_index.json", checksum_index)
+    artifacts["report.md"] = report
+    artifacts["manifest.json"] = manifest
+    artifacts["checksum_index.json"] = checksum_index
+    return artifacts, output_dir
+
+
+def build_candidate_funnel(
+    ranking: Mapping[str, Any],
+    manifest: Mapping[str, Any],
+    universe: Mapping[str, Any],
+    *,
+    ranking_path: Path,
+    ranking_manifest_path: Path,
+    universe_path: Path,
+) -> dict[str, Any]:
+    if ranking.get("schema_version") != "market-engine-run30-candidate-ranking-v1":
+        raise TargetedDerivationError("authoritative ranking schema is invalid")
+    if manifest.get("schema_version") != "market-engine-run30-full-canonical-universe-analysis-v1":
+        raise TargetedDerivationError("authoritative ranking manifest schema is invalid")
+    if ranking.get("run_id") != manifest.get("run_id"):
+        raise TargetedDerivationError("ranking and manifest run identities do not match")
+    policy = ranking.get("ranking_policy")
+    if not isinstance(policy, Mapping) or policy.get("ranking_scope") != "technical_setup_screening":
+        raise TargetedDerivationError("ranking is not the authoritative technical screening funnel")
+    candidates = ranking.get("candidates")
+    if not isinstance(candidates, list) or len(candidates) < TOP_LIMIT:
+        raise TargetedDerivationError("authoritative ranking contains fewer than 25 candidates")
+    if manifest.get("input", {}).get("universe_version") != universe.get("universe_version"):
+        raise TargetedDerivationError("ranking manifest and canonical universe versions do not match")
+    machine_rows = [row for row in candidates if isinstance(row, Mapping)]
+    if len(machine_rows) != len(candidates):
+        raise TargetedDerivationError("candidate ranking contains a non-object row")
+    ordered = sorted(machine_rows, key=lambda row: (int(row.get("rank", 10**9)), str(row.get("symbol")), str(row.get("instrument_id"))))
+    if ordered != machine_rows:
+        raise TargetedDerivationError("candidate ranking order is not deterministic")
+    eligible = [row for row in ordered if row.get("ranking_eligible") is True]
+    top = eligible[:TOP_LIMIT]
+    if len(top) != TOP_LIMIT:
+        raise TargetedDerivationError("authoritative ranking contains fewer than 25 ranking-eligible candidates")
+    instrument_ids = [str(row.get("instrument_id") or "") for row in top]
+    if len(instrument_ids) != len(set(instrument_ids)):
+        raise TargetedDerivationError("top-25 funnel contains duplicate instrument identities")
+    price_root = Path(str(manifest.get("input", {}).get("price_history_root") or "data/processed"))
+    for candidate in top:
+        instrument_id = str(candidate.get("instrument_id") or "")
+        ticker = str(candidate.get("symbol") or "")
+        if not instrument_id.endswith(f":{ticker.lower()}"):
+            raise TargetedDerivationError("candidate ticker and instrument identity do not match")
+        expected_history = (price_root / f"{candidate.get('source_symbol', ticker)}.csv").as_posix()
+        if candidate.get("traceability", {}).get("price_history_path") != expected_history:
+            raise TargetedDerivationError("candidate is not traceable to the canonical local universe input")
+    rows = [
+        {
+            "rank": row["rank"],
+            "ticker": row["symbol"],
+            "instrument_id": row["instrument_id"],
+            "asset_type": str(row["instrument_id"]).split(":", 1)[0],
+            "candidate_score": row["candidate_score"],
+            "ranking_scope": row["ranking_scope"],
+            "full_advice_ready": row["full_advice_ready"],
+            "missing_evidence": row.get("missing_evidence") or [],
+        }
+        for row in top
+    ]
+    return {
+        "schema_version": FUNNEL_SCHEMA_VERSION,
+        "source_run_id": ranking["run_id"],
+        "source_status": manifest.get("status"),
+        "top_limit": TOP_LIMIT,
+        "candidate_count": len(rows),
+        "accounting_framework_inventory": {
+            "us_gaap_equity_candidates": sum(row["asset_type"] == "equity" for row in rows),
+            "ifrs_candidates": 0,
+            "non_equity_candidates": sum(row["asset_type"] != "equity" for row in rows),
+            "note": "The authoritative top-25 contains no IFRS candidate; framework diversity is not forced.",
+        },
+        "source_bindings": {
+            "ranking_path": ranking_path.as_posix(),
+            "ranking_sha256": _sha256(ranking_path),
+            "manifest_path": ranking_manifest_path.as_posix(),
+            "manifest_sha256": _sha256(ranking_manifest_path),
+            "canonical_universe_path": universe_path.as_posix(),
+            "canonical_universe_sha256": _sha256(universe_path),
+            "canonical_universe_version": universe.get("universe_version"),
+            "cutoff_date": manifest.get("input", {}).get("cutoff_date"),
+        },
+        "candidates": rows,
+    }
+
+
+def select_pilot_cohort(funnel: Mapping[str, Any], *, cohort_size: int) -> dict[str, Any]:
+    eligible = [row for row in funnel["candidates"] if row["asset_type"] == "equity"]
+    selected = eligible[:cohort_size]
+    selected_ids = {row["instrument_id"] for row in selected}
+    rows = []
+    for row in funnel["candidates"]:
+        chosen = row["instrument_id"] in selected_ids
+        reason = "SELECTED_RANK_PRIORITY" if chosen else (
+            "BLOCKED_APPLICABILITY_UNPROVEN" if row["asset_type"] != "equity" else "NOT_SELECTED_COHORT_LIMIT"
+        )
+        rows.append({**row, "selected": chosen, "selection_reason": reason})
+    return {
+        "schema_version": COHORT_SCHEMA_VERSION,
+        "source_run_id": funnel["source_run_id"],
+        "cohort_size": len(selected),
+        "minimum_safe_processing_target": 6,
+        "selection_policy": {
+            "primary_order": "authoritative candidate rank ascending",
+            "supported_scope": "equity candidates with official SEC CompanyFacts identity",
+            "framework_diversity": "not forced because the authoritative top-25 contains no IFRS candidate",
+            "ticker_specific_runtime_branches": False,
+        },
+        "selected_tickers": [row["ticker"] for row in selected],
+        "candidates": rows,
+    }
+
+
+def acquire_and_extract(
+    cohort: Mapping[str, Any],
+    *,
+    ticker_index: Mapping[str, Mapping[str, str]],
+    fetch_json: JsonFetcher,
+    source_root: Path,
+    run_id: str,
+    generated_at: str,
+) -> tuple[dict[str, Any], dict[str, Mapping[str, Any]]]:
+    inventory: list[dict[str, Any]] = []
+    fact_packages: dict[str, Mapping[str, Any]] = {}
+    for candidate in (row for row in cohort["candidates"] if row["selected"]):
+        ticker = candidate["ticker"]
+        identity = ticker_index.get(ticker)
+        if identity is None:
+            inventory.append(_blocked_inventory(candidate, "SEC_TICKER_IDENTITY_NOT_FOUND"))
+            continue
+        cik = identity["cik"]
+        source_url = SEC_COMPANYFACTS_URL.format(cik=cik)
+        try:
+            payload = dict(fetch_json(source_url))
+            snapshot_path = persist_sec_companyfacts_raw_snapshot(
+                raw_payload=payload,
+                ticker=ticker,
+                cik=cik,
+                run_id=run_id,
+                fetched_at=generated_at,
+                root_dir=source_root,
+            )
+            checksum = _sha256(snapshot_path)
+            fact_package, extraction = build_fact_package(
+                candidate,
+                payload=payload,
+                source_url=source_url,
+                source_checksum=checksum,
+                generated_at=generated_at,
+                run_id=run_id,
+            )
+            if fact_package is not None:
+                fact_packages[ticker] = fact_package
+            inventory.append({
+                "rank": candidate["rank"],
+                "ticker": ticker,
+                "instrument_id": candidate["instrument_id"],
+                "company_identity": payload.get("entityName") or identity["title"],
+                "accounting_framework": "us_gaap",
+                "cik": cik,
+                "source_family": "official_sec_companyfacts",
+                "source_url": source_url,
+                "source_snapshot_path": snapshot_path.as_posix(),
+                "source_snapshot_sha256": checksum,
+                "source_acquisition_status": "acquired",
+                "acquired_at": generated_at,
+                **extraction,
+            })
+        except Exception as exc:
+            persist_sec_companyfacts_provider_error(
+                ticker=ticker,
+                cik=cik,
+                run_id=run_id,
+                error_type=type(exc).__name__,
+                error_message=str(exc),
+                root_dir=source_root,
+            )
+            inventory.append(_blocked_inventory(candidate, f"SOURCE_ACQUISITION_FAILED:{type(exc).__name__}", cik=cik))
+    return {
+        "schema_version": INVENTORY_SCHEMA_VERSION,
+        "run_id": run_id,
+        "provider": "official_sec_companyfacts",
+        "provider_calls_performed": len([row for row in inventory if row.get("cik")]),
+        "raw_sources_committed": False,
+        "raw_source_retention": "local checksum-bound snapshots under the declared source root",
+        "status_counts": dict(sorted(Counter(row["source_acquisition_status"] for row in inventory).items())),
+        "instruments": inventory,
+    }, fact_packages
+
+
+def build_fact_package(
+    candidate: Mapping[str, Any],
+    *,
+    payload: Mapping[str, Any],
+    source_url: str,
+    source_checksum: str,
+    generated_at: str,
+    run_id: str,
+) -> tuple[dict[str, Any] | None, dict[str, Any]]:
+    ticker = candidate["ticker"]
+    company = str(payload.get("entityName") or ticker)
+    facts_root = payload.get("facts", {}).get("us-gaap", {})
+    if not isinstance(facts_root, Mapping):
+        return None, {"fact_extraction_status": "blocked", "fact_count": 0, "reason_codes": ["US_GAAP_FACTS_MISSING"]}
+    observations: dict[str, list[tuple[str, Mapping[str, Any]]]] = {}
+    for concept, tags in _CONCEPT_TAGS.items():
+        entries: list[tuple[str, Mapping[str, Any]]] = []
+        for tag in tags:
+            tag_payload = facts_root.get(tag)
+            if not isinstance(tag_payload, Mapping):
+                continue
+            units = tag_payload.get("units")
+            for row in units.get("USD", []) if isinstance(units, Mapping) else []:
+                if _eligible_duration_fact(row):
+                    entries.append((tag, row))
+        observations[concept] = entries
+    aligned = _latest_aligned_observations(observations)
+    if "revenue" not in aligned:
+        return None, {"fact_extraction_status": "blocked", "fact_count": 0, "reason_codes": ["ALIGNED_REVENUE_FACT_MISSING"]}
+    facts = [
+        _canonical_fact(
+            candidate,
+            company=company,
+            concept=concept,
+            raw_tag=tag,
+            observation=row,
+            source_url=source_url,
+            source_checksum=source_checksum,
+            generated_at=generated_at,
+            run_id=run_id,
+        )
+        for concept, (tag, row) in sorted(aligned.items())
+    ]
+    revenue_id = next(row["fact_id"] for row in facts if row["canonical_concept"] == "revenue")
+    period = next(row for row in facts if row["canonical_concept"] == "revenue")
+    requests = []
+    for metric, numerator_concept in (("gross_margin", "gross_profit"), ("operating_margin", "operating_income")):
+        numerator = next((row["fact_id"] for row in facts if row["canonical_concept"] == numerator_concept), None)
+        requests.append({
+            "request_id": f"{ticker.lower()}-{period['fiscal_year']}-{period['fiscal_period'].lower()}-{metric.replace('_', '-')}",
+            "ticker": ticker,
+            "canonical_metric": metric,
+            "formula_id": metric,
+            "formula_version": "2.0.0",
+            "fiscal_year": period["fiscal_year"],
+            "fiscal_period": period["fiscal_period"],
+            "numerator_fact_ids": [numerator] if numerator else [f"missing-{numerator_concept}"],
+            "denominator_fact_ids": [revenue_id],
+            "component_fact_ids": [],
+            "applicability": {
+                "status": "applicable" if numerator else "not_applicable",
+                "approval_reference": f"{run_id}-{ticker.lower()}-mapping-review-candidate",
+            },
+        })
+    package = {
+        "schema_version": FACT_PACKAGE_SCHEMA_VERSION,
+        "package_id": f"{run_id}-{ticker.lower()}-primary-facts",
+        "derivation_timestamp": generated_at,
+        "derivation_approval_reference": f"{run_id}-{ticker.lower()}-derivation-approval-candidate",
+        "facts": facts,
+        "derivation_requests": requests,
+    }
+    return package, {
+        "fact_extraction_status": "candidate_ready",
+        "fact_count": len(facts),
+        "reporting_period": f"{period['fiscal_year']}-{period['fiscal_period']}",
+        "source_publication_date": period["source_publication_date"],
+        "raw_source_tags": sorted(row["raw_source_concept"] for row in facts),
+        "reason_codes": ["SEPARATE_OPERATOR_APPROVAL_REQUIRED"],
+    }
+
+
+def derive_cohort_metrics(
+    cohort: Mapping[str, Any],
+    *,
+    fact_packages: Mapping[str, Mapping[str, Any]],
+    formula_catalog: Mapping[str, Any],
+    generated_at: str,
+) -> dict[str, Any]:
+    instruments = []
+    for candidate in (row for row in cohort["candidates"] if row["selected"]):
+        ticker = candidate["ticker"]
+        package = fact_packages.get(ticker)
+        if package is None:
+            instruments.append({
+                "rank": candidate["rank"], "ticker": ticker, "instrument_id": candidate["instrument_id"],
+                "status": "blocked", "reason_codes": ["PRIMARY_FACT_PACKAGE_UNAVAILABLE"], "derivations": [],
+            })
+            continue
+        derived, validation = derive_primary_source_metrics(package, formula_catalog)
+        if derived is None:
+            instruments.append({
+                "rank": candidate["rank"], "ticker": ticker, "instrument_id": candidate["instrument_id"],
+                "status": "failed", "reason_codes": sorted({row["code"] for row in validation.get("issues", [])}),
+                "derivations": [],
+            })
+            continue
+        rows = derived["derivations"]
+        successful = [row for row in rows if row["status"] == "derived"]
+        status = "pending_approval" if successful else "blocked"
+        reason_codes = ["CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"] if successful else sorted({code for row in rows for code in row.get("reason_codes", [])})
+        instruments.append({
+            "rank": candidate["rank"],
+            "ticker": ticker,
+            "instrument_id": candidate["instrument_id"],
+            "status": status,
+            "reason_codes": reason_codes,
+            "fact_package_checksum": derived["fact_package_checksum"],
+            "formula_catalog_checksum": derived["formula_catalog_checksum"],
+            "approval_decision_reference": derived["approval_decision_reference"],
+            "approval_state": "pending_no_authority",
+            "successful_metric_count": len(successful),
+            "blocked_metric_count": len(rows) - len(successful),
+            "derivations": rows,
+        })
+    counts = Counter(row["status"] for row in instruments)
+    return {
+        "schema_version": RESULTS_SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "engine": "market-engine-data10-primary-source-metric-derivation-engine-v2",
+        "approval_boundary": "Pending derivation candidates grant no DATA07, DATA06, or RUN31 authority.",
+        "status_counts": dict(sorted(counts.items())),
+        "instruments": instruments,
+    }
+
+
+def build_metric_comparison(
+    funnel: Mapping[str, Any],
+    cohort: Mapping[str, Any],
+    source_inventory: Mapping[str, Any],
+    derivation_results: Mapping[str, Any],
+) -> dict[str, Any]:
+    selected = set(cohort["selected_tickers"])
+    inventory = {row["ticker"]: row for row in source_inventory["instruments"]}
+    results = {row["ticker"]: row for row in derivation_results["instruments"]}
+    rows = []
+    for candidate in funnel["candidates"]:
+        ticker = candidate["ticker"]
+        result = results.get(ticker)
+        derived = {
+            row["canonical_metric"]: row
+            for row in (result or {}).get("derivations", [])
+            if row.get("status") == "derived"
+        }
+        inventory_row = inventory.get(ticker) or {}
+        period = inventory_row.get("reporting_period")
+        publication_date = inventory_row.get("source_publication_date")
+        freshness = _freshness_status(publication_date, inventory_row.get("acquired_at"))
+        rows.append({
+            "rank": candidate["rank"],
+            "ticker": ticker,
+            "instrument_id": candidate["instrument_id"],
+            "selected_for_pilot": ticker in selected,
+            "cohort_selection_reason_codes": [
+                next(row["selection_reason"] for row in cohort["candidates"] if row["ticker"] == ticker)
+            ],
+            "technical_artifact_reference": funnel["source_bindings"]["ranking_path"],
+            "technical_as_of_date": funnel["source_bindings"]["cutoff_date"],
+            "issuer": inventory_row.get("company_identity"),
+            "accounting_framework": inventory_row.get("accounting_framework"),
+            "fiscal_period": period,
+            "evidence_freshness": freshness,
+            "fundamental_context_status": (
+                "stale" if freshness == "stale" else ("partial" if derived else ("blocked" if ticker in selected else "missing"))
+            ),
+            "metrics": {
+                "revenue_growth_yoy": _missing_metric("direct", "DIRECT_APPROVED_EVIDENCE_MISSING"),
+                "eps_growth_yoy": _missing_metric("direct", "DIRECT_APPROVED_EVIDENCE_MISSING"),
+                **{
+                    metric: {
+                        "value": format(row["calculation_result"], ".12f"),
+                        "status": "pending_approval",
+                        "evidence_type": "derived",
+                        "formula_id": row["formula_id"],
+                        "formula_version": row["formula_version"],
+                        "reporting_period": row["reporting_period"],
+                        "source_date": publication_date,
+                        "source_reference": inventory_row.get("source_url"),
+                        "lineage_checksum": row["calculation_checksum"],
+                        "comparability_status": "comparable_with_framework_caveat",
+                        "comparability_blockers": ["PENDING_OPERATOR_APPROVAL"],
+                    }
+                    for metric, row in sorted(derived.items())
+                },
+            },
+            "missing_metrics": sorted({"revenue_growth_yoy", "eps_growth_yoy", "gross_margin", "operating_margin", "debt_to_equity"} - set(derived)),
+            "blocked_metrics": sorted(
+                row.get("canonical_metric")
+                for row in (result or {}).get("derivations", [])
+                if row.get("status") == "blocked"
+            ),
+            "approval_status": (result or {}).get("approval_state", "not_applicable"),
+            "downstream_eligible": False,
+            "downstream_blockers": (
+                (result or {}).get("reason_codes")
+                if ticker in selected else ["NOT_SELECTED_FOR_BOUNDED_PILOT"]
+            ),
+        })
+    return {
+        "schema_version": COMPARISON_SCHEMA_VERSION,
+        "candidate_count": len(rows),
+        "boundary": "Comparison is evidence inventory only and is not ranking, advice, allocation, or execution logic.",
+        "candidates": rows,
+    }
+
+
+def build_downstream_index(cohort: Mapping[str, Any], derivation_results: Mapping[str, Any]) -> dict[str, Any]:
+    rows = []
+    for result in derivation_results["instruments"]:
+        rows.append({
+            "ticker": result["ticker"],
+            "instrument_id": result["instrument_id"],
+            "data07_status": "blocked",
+            "data06_status": "not_executed",
+            "run31_status": "not_executed",
+            "reason_codes": result["reason_codes"],
+            "transition": "missing_to_partial_candidate_only" if result["status"] == "pending_approval" else "missing_unchanged",
+        })
+    return {
+        "schema_version": DOWNSTREAM_SCHEMA_VERSION,
+        "cohort_size": cohort["cohort_size"],
+        "data07_executed_count": 0,
+        "data06_executed": False,
+        "run31_executed": False,
+        "before": {
+            "fundamental_complete": 0,
+            "fundamental_partial": 0,
+            "fundamental_missing": cohort["cohort_size"],
+            "advice_input_ready": 0,
+            "full_advice_ready": 0,
+            "unable_to_advise": cohort["cohort_size"],
+        },
+        "after_authoritative": {
+            "fundamental_complete": 0,
+            "fundamental_partial": 0,
+            "fundamental_missing": cohort["cohort_size"],
+            "advice_input_ready": 0,
+            "full_advice_ready": 0,
+            "unable_to_advise": cohort["cohort_size"],
+        },
+        "candidate_only_non_authoritative": {
+            "fundamental_partial": sum(row["status"] == "pending_approval" for row in derivation_results["instruments"]),
+        },
+        "regressions_outside_selected_cohort": 0,
+        "rows": rows,
+        "boundary": "Only separately approved checksum-bound evidence may execute DATA07 -> DATA06 -> RUN31.",
+    }
+
+
+def build_summary(
+    cohort: Mapping[str, Any],
+    inventory: Mapping[str, Any],
+    results: Mapping[str, Any],
+    downstream: Mapping[str, Any],
+) -> dict[str, Any]:
+    acquired = sum(row["source_acquisition_status"] == "acquired" for row in inventory["instruments"])
+    pending = sum(row["status"] == "pending_approval" for row in results["instruments"])
+    blocked = sum(row["status"] == "blocked" for row in results["instruments"])
+    failed = sum(row["status"] == "failed" for row in results["instruments"])
+    successful_metrics = sum(row.get("successful_metric_count", 0) for row in results["instruments"])
+    framework_counts = Counter(row.get("accounting_framework") for row in inventory["instruments"])
+    reason_counts = Counter(code for row in results["instruments"] for code in row["reason_codes"])
+    status = "completed" if pending >= cohort["minimum_safe_processing_target"] and not blocked and not failed else "completed_with_blockers"
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "run_status": status,
+        "cohort_size": cohort["cohort_size"],
+        "attempted_count": len(results["instruments"]),
+        "source_acquired_count": acquired,
+        "safely_processed_candidate_count": pending,
+        "minimum_safe_processing_target": cohort["minimum_safe_processing_target"],
+        "minimum_safe_processing_target_met": pending >= cohort["minimum_safe_processing_target"],
+        "approved_import_count": downstream["data07_executed_count"],
+        "derived_success_count": pending,
+        "partial_count": pending,
+        "pending_approval_count": pending,
+        "blocked_instrument_count": blocked,
+        "failed_instrument_count": failed,
+        "derived_candidate_metric_count": successful_metrics,
+        "direct_metric_count": 0,
+        "us_gaap_count": framework_counts.get("us_gaap", 0),
+        "ifrs_count": framework_counts.get("ifrs", 0),
+        "blockers_by_category": dict(sorted(reason_counts.items())),
+        "downstream_status": {
+            "data07": "not_executed_no_approved_evidence",
+            "data06": "not_executed",
+            "run31": "not_executed",
+        },
+        "guardrails": {
+            "decision_engine_changed": False,
+            "allocation_logic_added": False,
+            "broker_execution_performed": False,
+            "portfolio_or_watchlist_mutation_performed": False,
+            "publication_performed": False,
+            "market_data_mutation_performed": False,
+        },
+    }
+
+
+def render_report(summary: Mapping[str, Any], comparison: Mapping[str, Any]) -> str:
+    rows = [
+        "# ME-DATA11 Targeted Diversified Fundamental Derivation Pilot",
+        "",
+        f"Run status: `{summary['run_status']}`",
+        "",
+        "## Outcome",
+        "",
+        f"- Cohort: {summary['cohort_size']}",
+        f"- Official primary sources acquired: {summary['source_acquired_count']}",
+        f"- Safely processed derivation candidates: {summary['safely_processed_candidate_count']}",
+        f"- Derived metric candidates: {summary['derived_candidate_metric_count']}",
+        f"- Approved downstream imports: {summary['approved_import_count']}",
+        "",
+        "All derived results remain pending, checksum-bound candidates with no downstream authority. "
+        "No DATA07, DATA06, or RUN31 execution occurred because no separate operator approval was supplied.",
+        "",
+        "## Top-25 comparison",
+        "",
+        "| Rank | Ticker | Pilot | Derived candidates | Downstream eligible |",
+        "|---:|---|---|---:|---|",
+    ]
+    for row in comparison["candidates"]:
+        rows.append(
+            f"| {row['rank']} | {row['ticker']} | {'yes' if row['selected_for_pilot'] else 'no'} | "
+            f"{sum(metric['evidence_type'] == 'derived' for metric in row['metrics'].values())} | no |"
+        )
+    rows.extend([
+        "",
+        "This artifact is evidence inventory only. It does not rank fundamentals, recommend instruments, "
+        "determine tradeability, allocate capital, or authorize execution.",
+        "",
+    ])
+    return "\n".join(rows)
+
+
+def build_manifest(
+    *,
+    run_id: str,
+    generated_at: str,
+    ranking_path: Path,
+    ranking_manifest_path: Path,
+    universe_path: Path,
+    formula_catalog_path: Path,
+    source_root: Path,
+    output_dir: Path,
+    summary: Mapping[str, Any],
+) -> dict[str, Any]:
+    outputs = sorted(path.name for path in output_dir.iterdir() if path.is_file())
+    checksums = {name: _sha256(output_dir / name) for name in outputs}
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "run_id": run_id,
+        "generated_at": generated_at,
+        "status": summary["run_status"],
+        "inputs": {
+            "candidate_ranking": {"path": ranking_path.as_posix(), "sha256": _sha256(ranking_path)},
+            "ranking_manifest": {"path": ranking_manifest_path.as_posix(), "sha256": _sha256(ranking_manifest_path)},
+            "canonical_universe": {"path": universe_path.as_posix(), "sha256": _sha256(universe_path)},
+            "formula_catalog": {"path": formula_catalog_path.as_posix(), "sha256": _sha256(formula_catalog_path)},
+        },
+        "source_snapshot_root": source_root.as_posix(),
+        "outputs": {name.removesuffix(".json").removesuffix(".md"): name for name in outputs},
+        "output_checksums": checksums,
+        "raw_sources_committed": False,
+        "guardrails": summary["guardrails"],
+    }
+
+
+def _ticker_index(payload: Mapping[str, Any]) -> dict[str, dict[str, str]]:
+    rows = payload.values() if isinstance(payload, Mapping) else []
+    result = {}
+    for row in rows:
+        if not isinstance(row, Mapping):
+            continue
+        ticker = str(row.get("ticker") or "").strip().upper()
+        cik = str(row.get("cik_str") or "")
+        if ticker and cik.isdigit():
+            result[ticker] = {"cik": cik.zfill(10), "title": str(row.get("title") or ticker)}
+    if not result:
+        raise TargetedDerivationError("official SEC ticker index is empty or malformed")
+    return result
+
+
+def _eligible_duration_fact(row: Any) -> bool:
+    return (
+        isinstance(row, Mapping)
+        and isinstance(row.get("val"), (int, float))
+        and not isinstance(row.get("val"), bool)
+        and row.get("form") in {"10-Q", "10-K", "10-Q/A", "10-K/A"}
+        and row.get("fp") in {"Q1", "Q2", "Q3", "Q4", "FY"}
+        and all(isinstance(row.get(key), str) and row.get(key) for key in ("start", "end", "filed", "accn"))
+    )
+
+
+def _latest_aligned_observations(
+    observations: Mapping[str, list[tuple[str, Mapping[str, Any]]]],
+) -> dict[str, tuple[str, Mapping[str, Any]]]:
+    revenue = sorted(observations.get("revenue", []), key=lambda item: _fact_sort_key(item[1]), reverse=True)
+    if not revenue:
+        return {}
+    revenue_fact = revenue[0]
+    key = _alignment_key(revenue_fact[1])
+    aligned = {"revenue": revenue_fact}
+    for concept in ("gross_profit", "operating_income"):
+        match = next((item for item in observations.get(concept, []) if _alignment_key(item[1]) == key), None)
+        if match is not None:
+            aligned[concept] = match
+    return aligned
+
+
+def _alignment_key(row: Mapping[str, Any]) -> tuple[Any, ...]:
+    return row.get("start"), row.get("end"), row.get("fy"), row.get("fp"), row.get("accn")
+
+
+def _fact_sort_key(row: Mapping[str, Any]) -> tuple[str, str, str]:
+    return str(row.get("filed")), str(row.get("end")), str(row.get("accn"))
+
+
+def _canonical_fact(
+    candidate: Mapping[str, Any],
+    *,
+    company: str,
+    concept: str,
+    raw_tag: str,
+    observation: Mapping[str, Any],
+    source_url: str,
+    source_checksum: str,
+    generated_at: str,
+    run_id: str,
+) -> dict[str, Any]:
+    ticker = candidate["ticker"]
+    fiscal_year = int(observation["fy"])
+    fiscal_period = str(observation["fp"])
+    return {
+        "fact_id": f"{ticker.lower()}-{concept.replace('_', '-')}-{fiscal_year}-{fiscal_period.lower()}-{observation['end']}",
+        "ticker": ticker,
+        "instrument_id": candidate["instrument_id"],
+        "company_identity": company,
+        "accounting_framework": "us_gaap",
+        "canonical_concept": concept,
+        "raw_source_concept": f"us-gaap:{raw_tag}",
+        "value": observation["val"],
+        "unit": "USD",
+        "currency": "USD",
+        "scale": 0,
+        "period_type": "duration",
+        "period_start": observation["start"],
+        "period_end": observation["end"],
+        "fiscal_year": fiscal_year,
+        "fiscal_period": fiscal_period,
+        "source_name": "SEC CompanyFacts",
+        "source_reference": source_url,
+        "source_document_checksum": source_checksum,
+        "source_publication_date": observation["filed"],
+        "observed_at": generated_at,
+        "acquired_at": generated_at,
+        "parser_version": "market-engine-data11-sec-companyfacts-canonical-extraction-v1",
+        "source_approval_reference": f"{run_id}-{ticker.lower()}-source-approval-candidate",
+        "canonical_mapping_approval_reference": f"{run_id}-{ticker.lower()}-mapping-review-candidate",
+    }
+
+
+def _blocked_inventory(candidate: Mapping[str, Any], reason: str, *, cik: str | None = None) -> dict[str, Any]:
+    return {
+        "rank": candidate["rank"],
+        "ticker": candidate["ticker"],
+        "instrument_id": candidate["instrument_id"],
+        "accounting_framework": "us_gaap",
+        "cik": cik,
+        "source_family": "official_sec_companyfacts",
+        "source_acquisition_status": "blocked",
+        "fact_extraction_status": "blocked",
+        "fact_count": 0,
+        "reason_codes": [reason],
+    }
+
+
+def _missing_metric(evidence_type: str, reason: str) -> dict[str, Any]:
+    return {
+        "value": None,
+        "status": "missing",
+        "evidence_type": evidence_type,
+        "formula_id": None,
+        "formula_version": None,
+        "reporting_period": None,
+        "source_date": None,
+        "source_reference": None,
+        "lineage_checksum": None,
+        "comparability_status": "not_comparable_missing_evidence",
+        "comparability_blockers": [reason],
+    }
+
+
+def _freshness_status(source_date: Any, acquired_at: Any) -> str:
+    if not isinstance(source_date, str) or not isinstance(acquired_at, str):
+        return "missing"
+    try:
+        source = date.fromisoformat(source_date)
+        acquisition = datetime.fromisoformat(acquired_at.replace("Z", "+00:00")).date()
+    except ValueError:
+        return "invalid"
+    age = (acquisition - source).days
+    if age < 0:
+        return "invalid"
+    return "stale" if age > FUNDAMENTAL_FRESHNESS_MAX_AGE_DAYS else "current"
+
+
+def _fetch_json(url: str) -> Mapping[str, Any]:
+    request = Request(url, headers={"Accept": "application/json", "User-Agent": USER_AGENT})
+    with urlopen(request, timeout=30) as response:
+        payload = json.loads(response.read().decode("utf-8"))
+    if not isinstance(payload, Mapping):
+        raise TargetedDerivationError(f"official JSON response is not an object: {url}")
+    return payload
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Run the bounded ME-DATA11 targeted derivation pilot.")
+    parser.add_argument("--run-id", required=True)
+    parser.add_argument("--generated-at", default=datetime.now(UTC).isoformat().replace("+00:00", "Z"))
+    parser.add_argument("--ranking", type=Path, default=DEFAULT_RANKING)
+    parser.add_argument("--ranking-manifest", type=Path, default=DEFAULT_MANIFEST)
+    parser.add_argument("--canonical-universe", type=Path, default=DEFAULT_UNIVERSE)
+    parser.add_argument("--formula-catalog", type=Path, default=DEFAULT_FORMULA_CATALOG)
+    parser.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
+    parser.add_argument("--source-root", type=Path, default=DEFAULT_SOURCE_ROOT)
+    parser.add_argument("--cohort-size", type=int, default=10)
+    args = parser.parse_args(argv)
+    _, output_dir = run_targeted_derivation(
+        run_id=args.run_id,
+        generated_at=args.generated_at,
+        ranking_path=args.ranking,
+        ranking_manifest_path=args.ranking_manifest,
+        universe_path=args.canonical_universe,
+        formula_catalog_path=args.formula_catalog,
+        output_root=args.output_root,
+        source_root=args.source_root,
+        cohort_size=args.cohort_size,
+    )
+    with (output_dir / "manifest.json").open(encoding="utf-8") as handle:
+        summary = {"run_status": json.load(handle)["status"]}
+    writer = csv.writer(__import__("sys").stdout)
+    writer.writerow(("run_status", summary["run_status"]))
+    writer.writerow(("evidence_path", output_dir.as_posix()))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

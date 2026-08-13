@@ -1,0 +1,152 @@
+{
+  "after_authoritative": {
+    "advice_input_ready": 0,
+    "full_advice_ready": 0,
+    "fundamental_complete": 0,
+    "fundamental_missing": 10,
+    "fundamental_partial": 0,
+    "unable_to_advise": 10
+  },
+  "before": {
+    "advice_input_ready": 0,
+    "full_advice_ready": 0,
+    "fundamental_complete": 0,
+    "fundamental_missing": 10,
+    "fundamental_partial": 0,
+    "unable_to_advise": 10
+  },
+  "boundary": "Only separately approved checksum-bound evidence may execute DATA07 -> DATA06 -> RUN31.",
+  "candidate_only_non_authoritative": {
+    "fundamental_partial": 7
+  },
+  "cohort_size": 10,
+  "data06_executed": false,
+  "data07_executed_count": 0,
+  "regressions_outside_selected_cohort": 0,
+  "rows": [
+    {
+      "data06_status": "not_executed",
+      "data07_status": "blocked",
+      "instrument_id": "equity:asb",
+      "reason_codes": [
+        "FORMULA_INPUT_CARDINALITY_INVALID",
+        "FORMULA_NOT_APPLICABLE",
+        "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
+        "FORMULA_OPERAND_SET_INVALID",
+        "NUMERATOR_MISSING"
+      ],
+      "run31_status": "not_executed",
+      "ticker": "ASB",
+      "transition": "missing_unchanged"
+    },
+    {
+      "data06_status": "not_executed",
+      "data07_status": "blocked",
+      "instrument_id": "equity:ash",
+      "reason_codes": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "run31_status": "not_executed",
+      "ticker": "ASH",
+      "transition": "missing_to_partial_candidate_only"
+    },
+    {
+      "data06_status": "not_executed",
+      "data07_status": "blocked",
+      "instrument_id": "equity:atr",
+      "reason_codes": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "run31_status": "not_executed",
+      "ticker": "ATR",
+      "transition": "missing_to_partial_candidate_only"
+    },
+    {
+      "data06_status": "not_executed",
+      "data07_status": "blocked",
+      "instrument_id": "equity:axp",
+      "reason_codes": [
+        "FORMULA_INPUT_CARDINALITY_INVALID",
+        "FORMULA_NOT_APPLICABLE",
+        "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
+        "FORMULA_OPERAND_SET_INVALID",
+        "NUMERATOR_MISSING"
+      ],
+      "run31_status": "not_executed",
+      "ticker": "AXP",
+      "transition": "missing_unchanged"
+    },
+    {
+      "data06_status": "not_executed",
+      "data07_status": "blocked",
+      "instrument_id": "equity:bio",
+      "reason_codes": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "run31_status": "not_executed",
+      "ticker": "BIO",
+      "transition": "missing_to_partial_candidate_only"
+    },
+    {
+      "data06_status": "not_executed",
+      "data07_status": "blocked",
+      "instrument_id": "equity:bkh",
+      "reason_codes": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "run31_status": "not_executed",
+      "ticker": "BKH",
+      "transition": "missing_to_partial_candidate_only"
+    },
+    {
+      "data06_status": "not_executed",
+      "data07_status": "blocked",
+      "instrument_id": "equity:bmrn",
+      "reason_codes": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "run31_status": "not_executed",
+      "ticker": "BMRN",
+      "transition": "missing_to_partial_candidate_only"
+    },
+    {
+      "data06_status": "not_executed",
+      "data07_status": "blocked",
+      "instrument_id": "equity:bmy",
+      "reason_codes": [
+        "FORMULA_INPUT_CARDINALITY_INVALID",
+        "FORMULA_NOT_APPLICABLE",
+        "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
+        "FORMULA_OPERAND_SET_INVALID",
+        "NUMERATOR_MISSING"
+      ],
+      "run31_status": "not_executed",
+      "ticker": "BMY",
+      "transition": "missing_unchanged"
+    },
+    {
+      "data06_status": "not_executed",
+      "data07_status": "blocked",
+      "instrument_id": "equity:chrw",
+      "reason_codes": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "run31_status": "not_executed",
+      "ticker": "CHRW",
+      "transition": "missing_to_partial_candidate_only"
+    },
+    {
+      "data06_status": "not_executed",
+      "data07_status": "blocked",
+      "instrument_id": "equity:ci",
+      "reason_codes": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "run31_status": "not_executed",
+      "ticker": "CI",
+      "transition": "missing_to_partial_candidate_only"
+    }
+  ],
+  "run31_executed": false,
+  "schema_version": "market-engine-data11-downstream-run-index-v1"
+}

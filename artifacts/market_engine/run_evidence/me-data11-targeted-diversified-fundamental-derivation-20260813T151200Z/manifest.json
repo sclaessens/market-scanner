@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-08-13T15:12:00Z",
+  "guardrails": {
+    "allocation_logic_added": false,
+    "broker_execution_performed": false,
+    "decision_engine_changed": false,
+    "market_data_mutation_performed": false,
+    "portfolio_or_watchlist_mutation_performed": false,
+    "publication_performed": false
+  },
+  "inputs": {
+    "candidate_ranking": {
+      "path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "sha256": "15b933748a1b12f5957798ebd6636a609e72f97eb8fb19af6d0259ad201f5530"
+    },
+    "canonical_universe": {
+      "path": "config/market_engine/universes/canonical_universe.json",
+      "sha256": "c0e2c466af51ee3f34202148b5275f46248c893ce4b3851352d0fbded87148be"
+    },
+    "formula_catalog": {
+      "path": "config/market_engine/data10_fundamental_metric_formula_catalog.json",
+      "sha256": "7ae5ca07ad9b45eaed54fccd9e77de254616da6f598d42cd44ff78dcd80673d1"
+    },
+    "ranking_manifest": {
+      "path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/manifest.json",
+      "sha256": "1361c3d16aad412025d0dbd9612dfacfca0eeeff762fbd31bd73f0ad04a2ebae"
+    }
+  },
+  "output_checksums": {
+    "candidate_funnel.json": "8be853f54a92659b4b148c58d5aed03251b49e26d33e3d552f444ff66ecfbe8c",
+    "cohort_selection.json": "b16421f78f169a07d325d54fe9b2a717eb11a969e838a50924fef12f7a92c688",
+    "derivation_summary.json": "761e6ce94c57a3394bbc6d2d0548c6d0a920f51fa9a1b9b874cc67bc99572ffa",
+    "downstream_readiness_delta.json": "8598fc69f19a2273e111a290b574651e6a84b784869b29a145c79396d8451dad",
+    "fundamental_comparison_matrix.json": "f771284119179021be478998f3a56ba5c37b847013dd16fb6eec57cbb92f7fe4",
+    "report.md": "21c94045036cef69b929c099b42e88e87b5e7116c55091fa8406d1b5d6c91851",
+    "source_inventory.json": "e7c3d034da28df1bb878305dd0101c16bd21ca799079296837759eaa699584a1"
+  },
+  "outputs": {
+    "candidate_funnel": "candidate_funnel.json",
+    "cohort_selection": "cohort_selection.json",
+    "derivation_summary": "derivation_summary.json",
+    "downstream_readiness_delta": "downstream_readiness_delta.json",
+    "fundamental_comparison_matrix": "fundamental_comparison_matrix.json",
+    "report": "report.md",
+    "source_inventory": "source_inventory.json"
+  },
+  "raw_sources_committed": false,
+  "run_id": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z",
+  "schema_version": "market-engine-data11-targeted-diversified-fundamental-derivation-v1",
+  "source_snapshot_root": "data/market_engine/source_snapshots/sec_companyfacts",
+  "status": "completed_with_blockers"
+}

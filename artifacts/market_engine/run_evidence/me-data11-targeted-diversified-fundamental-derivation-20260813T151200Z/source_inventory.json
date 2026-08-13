@@ -1,0 +1,262 @@
+{
+  "instruments": [
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "cik": "0000007789",
+      "company_identity": "Associated Banc-Corp",
+      "fact_count": 1,
+      "fact_extraction_status": "candidate_ready",
+      "instrument_id": "equity:asb",
+      "rank": 1,
+      "raw_source_tags": [
+        "us-gaap:Revenues"
+      ],
+      "reason_codes": [
+        "SEPARATE_OPERATOR_APPROVAL_REQUIRED"
+      ],
+      "reporting_period": "2024-Q3",
+      "source_acquisition_status": "acquired",
+      "source_family": "official_sec_companyfacts",
+      "source_publication_date": "2024-10-29",
+      "source_snapshot_path": "data/market_engine/source_snapshots/sec_companyfacts/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/raw/ASB_companyfacts.json",
+      "source_snapshot_sha256": "3f3988c2f6127aba1b200790181f1cb42259888ab5e1f2764a74ad0345a362f9",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000007789.json",
+      "ticker": "ASB"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "cik": "0001674862",
+      "company_identity": "ASHLAND INC.",
+      "fact_count": 3,
+      "fact_extraction_status": "candidate_ready",
+      "instrument_id": "equity:ash",
+      "rank": 2,
+      "raw_source_tags": [
+        "us-gaap:GrossProfit",
+        "us-gaap:OperatingIncomeLoss",
+        "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+      ],
+      "reason_codes": [
+        "SEPARATE_OPERATOR_APPROVAL_REQUIRED"
+      ],
+      "reporting_period": "2026-Q3",
+      "source_acquisition_status": "acquired",
+      "source_family": "official_sec_companyfacts",
+      "source_publication_date": "2026-07-29",
+      "source_snapshot_path": "data/market_engine/source_snapshots/sec_companyfacts/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/raw/ASH_companyfacts.json",
+      "source_snapshot_sha256": "0094bc2645de945082b146e3708c39a077ccead331460b73af8663ef448a5797",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001674862.json",
+      "ticker": "ASH"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "cik": "0000896622",
+      "company_identity": "AptarGroup,\u00a0Inc",
+      "fact_count": 2,
+      "fact_extraction_status": "candidate_ready",
+      "instrument_id": "equity:atr",
+      "rank": 3,
+      "raw_source_tags": [
+        "us-gaap:OperatingIncomeLoss",
+        "us-gaap:Revenues"
+      ],
+      "reason_codes": [
+        "SEPARATE_OPERATOR_APPROVAL_REQUIRED"
+      ],
+      "reporting_period": "2026-Q2",
+      "source_acquisition_status": "acquired",
+      "source_family": "official_sec_companyfacts",
+      "source_publication_date": "2026-07-31",
+      "source_snapshot_path": "data/market_engine/source_snapshots/sec_companyfacts/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/raw/ATR_companyfacts.json",
+      "source_snapshot_sha256": "3f81db998ebe94c65dfd6a0cd79ef6ede437bb5536ddb5b9338d71debed7c01a",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000896622.json",
+      "ticker": "ATR"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "cik": "0000004962",
+      "company_identity": "AMERICAN EXPRESS CO",
+      "fact_count": 1,
+      "fact_extraction_status": "candidate_ready",
+      "instrument_id": "equity:axp",
+      "rank": 4,
+      "raw_source_tags": [
+        "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+      ],
+      "reason_codes": [
+        "SEPARATE_OPERATOR_APPROVAL_REQUIRED"
+      ],
+      "reporting_period": "2026-Q2",
+      "source_acquisition_status": "acquired",
+      "source_family": "official_sec_companyfacts",
+      "source_publication_date": "2026-07-24",
+      "source_snapshot_path": "data/market_engine/source_snapshots/sec_companyfacts/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/raw/AXP_companyfacts.json",
+      "source_snapshot_sha256": "65fe4e60ce5a21750cdc4d81e6e0b90d6e12c1361ac84c71e53646b11caccf96",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000004962.json",
+      "ticker": "AXP"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "cik": "0000012208",
+      "company_identity": "BIO-RAD LABORATORIES, INC.",
+      "fact_count": 3,
+      "fact_extraction_status": "candidate_ready",
+      "instrument_id": "equity:bio",
+      "rank": 5,
+      "raw_source_tags": [
+        "us-gaap:GrossProfit",
+        "us-gaap:OperatingIncomeLoss",
+        "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+      ],
+      "reason_codes": [
+        "SEPARATE_OPERATOR_APPROVAL_REQUIRED"
+      ],
+      "reporting_period": "2026-Q2",
+      "source_acquisition_status": "acquired",
+      "source_family": "official_sec_companyfacts",
+      "source_publication_date": "2026-08-04",
+      "source_snapshot_path": "data/market_engine/source_snapshots/sec_companyfacts/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/raw/BIO_companyfacts.json",
+      "source_snapshot_sha256": "2c99b66683ce190018ea48c36ff106fbdc7adc20156f39a6d4053884061cc47f",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000012208.json",
+      "ticker": "BIO"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "cik": "0001130464",
+      "company_identity": "Black Hills Corporation",
+      "fact_count": 2,
+      "fact_extraction_status": "candidate_ready",
+      "instrument_id": "equity:bkh",
+      "rank": 6,
+      "raw_source_tags": [
+        "us-gaap:OperatingIncomeLoss",
+        "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+      ],
+      "reason_codes": [
+        "SEPARATE_OPERATOR_APPROVAL_REQUIRED"
+      ],
+      "reporting_period": "2026-Q2",
+      "source_acquisition_status": "acquired",
+      "source_family": "official_sec_companyfacts",
+      "source_publication_date": "2026-08-06",
+      "source_snapshot_path": "data/market_engine/source_snapshots/sec_companyfacts/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/raw/BKH_companyfacts.json",
+      "source_snapshot_sha256": "28c3d1a77a13f2a7c062809f6dbed5cf6687bfb4e0524c0670780c632f035158",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001130464.json",
+      "ticker": "BKH"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "cik": "0001048477",
+      "company_identity": "BIOMARIN PHARMACEUTICAL INC",
+      "fact_count": 2,
+      "fact_extraction_status": "candidate_ready",
+      "instrument_id": "equity:bmrn",
+      "rank": 7,
+      "raw_source_tags": [
+        "us-gaap:OperatingIncomeLoss",
+        "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+      ],
+      "reason_codes": [
+        "SEPARATE_OPERATOR_APPROVAL_REQUIRED"
+      ],
+      "reporting_period": "2026-Q2",
+      "source_acquisition_status": "acquired",
+      "source_family": "official_sec_companyfacts",
+      "source_publication_date": "2026-08-06",
+      "source_snapshot_path": "data/market_engine/source_snapshots/sec_companyfacts/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/raw/BMRN_companyfacts.json",
+      "source_snapshot_sha256": "6c08bf6045ea63ca29848e19e84e591d5b58e82b42d910cf3db54c378f5e8f7c",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001048477.json",
+      "ticker": "BMRN"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "cik": "0000014272",
+      "company_identity": "BRISTOL-MYERS SQUIBB COMPANY",
+      "fact_count": 1,
+      "fact_extraction_status": "candidate_ready",
+      "instrument_id": "equity:bmy",
+      "rank": 8,
+      "raw_source_tags": [
+        "us-gaap:Revenues"
+      ],
+      "reason_codes": [
+        "SEPARATE_OPERATOR_APPROVAL_REQUIRED"
+      ],
+      "reporting_period": "2026-Q2",
+      "source_acquisition_status": "acquired",
+      "source_family": "official_sec_companyfacts",
+      "source_publication_date": "2026-07-30",
+      "source_snapshot_path": "data/market_engine/source_snapshots/sec_companyfacts/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/raw/BMY_companyfacts.json",
+      "source_snapshot_sha256": "dd743bf4f3e8eb03002fb42ce2f7c8de6892b4eac3dfceca34a28c670e4eb77a",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000014272.json",
+      "ticker": "BMY"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "cik": "0001043277",
+      "company_identity": "C. H. ROBINSON WORLDWIDE, INC.",
+      "fact_count": 2,
+      "fact_extraction_status": "candidate_ready",
+      "instrument_id": "equity:chrw",
+      "rank": 9,
+      "raw_source_tags": [
+        "us-gaap:OperatingIncomeLoss",
+        "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+      ],
+      "reason_codes": [
+        "SEPARATE_OPERATOR_APPROVAL_REQUIRED"
+      ],
+      "reporting_period": "2026-Q2",
+      "source_acquisition_status": "acquired",
+      "source_family": "official_sec_companyfacts",
+      "source_publication_date": "2026-07-31",
+      "source_snapshot_path": "data/market_engine/source_snapshots/sec_companyfacts/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/raw/CHRW_companyfacts.json",
+      "source_snapshot_sha256": "82e2cfb7f114d0a6a3efd71fccfeb7b69e75f367a5447b9a9cc65161e6522929",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001043277.json",
+      "ticker": "CHRW"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "cik": "0001739940",
+      "company_identity": "The Cigna Group",
+      "fact_count": 2,
+      "fact_extraction_status": "candidate_ready",
+      "instrument_id": "equity:ci",
+      "rank": 10,
+      "raw_source_tags": [
+        "us-gaap:OperatingIncomeLoss",
+        "us-gaap:Revenues"
+      ],
+      "reason_codes": [
+        "SEPARATE_OPERATOR_APPROVAL_REQUIRED"
+      ],
+      "reporting_period": "2026-Q2",
+      "source_acquisition_status": "acquired",
+      "source_family": "official_sec_companyfacts",
+      "source_publication_date": "2026-07-30",
+      "source_snapshot_path": "data/market_engine/source_snapshots/sec_companyfacts/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/raw/CI_companyfacts.json",
+      "source_snapshot_sha256": "4ebc243944fe570eeaade38acd4fb93df843cf53e1e7262560f17f3b6ab3c6ef",
+      "source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001739940.json",
+      "ticker": "CI"
+    }
+  ],
+  "provider": "official_sec_companyfacts",
+  "provider_calls_performed": 10,
+  "raw_source_retention": "local checksum-bound snapshots under the declared source root",
+  "raw_sources_committed": false,
+  "run_id": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z",
+  "schema_version": "market-engine-data11-source-inventory-v1",
+  "status_counts": {
+    "acquired": 10
+  }
+}

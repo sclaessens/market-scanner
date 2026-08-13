@@ -1,0 +1,14 @@
+{
+  "files": {
+    "candidate_funnel.json": "8be853f54a92659b4b148c58d5aed03251b49e26d33e3d552f444ff66ecfbe8c",
+    "cohort_selection.json": "b16421f78f169a07d325d54fe9b2a717eb11a969e838a50924fef12f7a92c688",
+    "derivation_summary.json": "761e6ce94c57a3394bbc6d2d0548c6d0a920f51fa9a1b9b874cc67bc99572ffa",
+    "downstream_readiness_delta.json": "8598fc69f19a2273e111a290b574651e6a84b784869b29a145c79396d8451dad",
+    "fundamental_comparison_matrix.json": "f771284119179021be478998f3a56ba5c37b847013dd16fb6eec57cbb92f7fe4",
+    "manifest.json": "1261170502fb039decd1ac457b68463f7a6a2a38ee999eac9b65321d66c7dcf1",
+    "report.md": "21c94045036cef69b929c099b42e88e87b5e7116c55091fa8406d1b5d6c91851",
+    "source_inventory.json": "e7c3d034da28df1bb878305dd0101c16bd21ca799079296837759eaa699584a1"
+  },
+  "run_id": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z",
+  "schema_version": "market-engine-data11-checksum-index-v1"
+}

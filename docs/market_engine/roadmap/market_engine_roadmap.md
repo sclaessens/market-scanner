@@ -107,10 +107,10 @@ ME-RM08 defines the active sequence:
 ME-RM08 - Portfolio ledger and advisory price roadmap realignment
   -> ME-PR03 - Manual portfolio transaction ledger and portfolio-aware
                candidate context (COMPLETED)
-  -> ME-SR25 - Advisory price evidence artifact (IMPLEMENTED)
-  -> ME-DATA11 - Targeted fundamental derivation for the technical candidate funnel (NEXT)
-  -> ME-RUN33 - Accelerated full-universe candidate release
-  -> ME-CI12 - Batch grounded advisory consumption
+  -> ME-SR25 - Advisory price evidence artifact (COMPLETED / MERGED)
+  -> ME-DATA11 - Targeted fundamental derivation for the technical candidate funnel (COMPLETED WITH BLOCKERS)
+  -> ME-RUN33 - First useful end-to-end candidate analysis release (NEXT)
+  -> ME-CI12 - Batch grounded advisory consumption (PLANNED)
   -> ME-PS01 - Position-sizing decision contract
   -> ME-NL01/02/03 - Notification sequence
 ```
@@ -418,10 +418,13 @@ review of the 14 current blockers. That remains parked work, not the active
 product priority after ME-RM08. A publication canary or retry is not
 authorized.
 
-ME-DATA11 — target governed fundamental derivation at the highest-ranked
-technical candidate funnel — remains planned, has not started, and is next
-after ME-SR25. It must reuse the generic ME-DATA10 engine without ticker-
-specific code changes for issuer identity, source tags, or formula selection.
+ME-DATA11 targeted governed fundamental derivation at the highest-ranked
+technical candidate funnel and completed with blockers. It checksum-bound the
+authoritative top 25, acquired official SEC CompanyFacts snapshots for the ten
+highest-ranked supported equities, and reused the generic ME-DATA10 engine.
+Seven issuers produced nine pending derived metric candidates. No approval was
+fabricated, so authoritative downstream coverage remains unchanged and
+ME-RUN33 is next.
 
 Roadmap outcome:
 

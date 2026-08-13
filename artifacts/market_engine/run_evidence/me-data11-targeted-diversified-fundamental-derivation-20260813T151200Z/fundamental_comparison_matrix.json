@@ -1,0 +1,1689 @@
+{
+  "boundary": "Comparison is evidence inventory only and is not ranking, advice, allocation, or execution logic.",
+  "candidate_count": 25,
+  "candidates": [
+    {
+      "accounting_framework": "us_gaap",
+      "approval_status": "pending_no_authority",
+      "blocked_metrics": [
+        "gross_margin",
+        "operating_margin"
+      ],
+      "cohort_selection_reason_codes": [
+        "SELECTED_RANK_PRIORITY"
+      ],
+      "downstream_blockers": [
+        "FORMULA_INPUT_CARDINALITY_INVALID",
+        "FORMULA_NOT_APPLICABLE",
+        "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
+        "FORMULA_OPERAND_SET_INVALID",
+        "NUMERATOR_MISSING"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "stale",
+      "fiscal_period": "2024-Q3",
+      "fundamental_context_status": "stale",
+      "instrument_id": "equity:asb",
+      "issuer": "Associated Banc-Corp",
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 1,
+      "selected_for_pilot": true,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "ASB"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "approval_status": "pending_no_authority",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "SELECTED_RANK_PRIORITY"
+      ],
+      "downstream_blockers": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "current",
+      "fiscal_period": "2026-Q3",
+      "fundamental_context_status": "partial",
+      "instrument_id": "equity:ash",
+      "issuer": "ASHLAND INC.",
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "gross_margin": {
+          "comparability_blockers": [
+            "PENDING_OPERATOR_APPROVAL"
+          ],
+          "comparability_status": "comparable_with_framework_caveat",
+          "evidence_type": "derived",
+          "formula_id": "gross_margin",
+          "formula_version": "2.0.0",
+          "lineage_checksum": "7e7a0039a393457907a2e935576bd242e99c1cc05b09d345bddb4fd9045505f7",
+          "reporting_period": "2026-Q3",
+          "source_date": "2026-07-29",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001674862.json",
+          "status": "pending_approval",
+          "value": "0.309157509158"
+        },
+        "operating_margin": {
+          "comparability_blockers": [
+            "PENDING_OPERATOR_APPROVAL"
+          ],
+          "comparability_status": "comparable_with_framework_caveat",
+          "evidence_type": "derived",
+          "formula_id": "operating_margin",
+          "formula_version": "2.0.0",
+          "lineage_checksum": "d684228bcb7fbdeda6c74b2ac1fdea4b5c245aafff39d254d5978b35526342c5",
+          "reporting_period": "2026-Q3",
+          "source_date": "2026-07-29",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001674862.json",
+          "status": "pending_approval",
+          "value": "0.055677655678"
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "revenue_growth_yoy"
+      ],
+      "rank": 2,
+      "selected_for_pilot": true,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "ASH"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "approval_status": "pending_no_authority",
+      "blocked_metrics": [
+        "gross_margin"
+      ],
+      "cohort_selection_reason_codes": [
+        "SELECTED_RANK_PRIORITY"
+      ],
+      "downstream_blockers": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "current",
+      "fiscal_period": "2026-Q2",
+      "fundamental_context_status": "partial",
+      "instrument_id": "equity:atr",
+      "issuer": "AptarGroup,\u00a0Inc",
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "operating_margin": {
+          "comparability_blockers": [
+            "PENDING_OPERATOR_APPROVAL"
+          ],
+          "comparability_status": "comparable_with_framework_caveat",
+          "evidence_type": "derived",
+          "formula_id": "operating_margin",
+          "formula_version": "2.0.0",
+          "lineage_checksum": "b76a9bfa77d977ca4c1ee2cb40685908923c83712e33eaafe33b81b85a0a4382",
+          "reporting_period": "2026-Q2",
+          "source_date": "2026-07-31",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000896622.json",
+          "status": "pending_approval",
+          "value": "0.116562554743"
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 3,
+      "selected_for_pilot": true,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "ATR"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "approval_status": "pending_no_authority",
+      "blocked_metrics": [
+        "gross_margin",
+        "operating_margin"
+      ],
+      "cohort_selection_reason_codes": [
+        "SELECTED_RANK_PRIORITY"
+      ],
+      "downstream_blockers": [
+        "FORMULA_INPUT_CARDINALITY_INVALID",
+        "FORMULA_NOT_APPLICABLE",
+        "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
+        "FORMULA_OPERAND_SET_INVALID",
+        "NUMERATOR_MISSING"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "current",
+      "fiscal_period": "2026-Q2",
+      "fundamental_context_status": "blocked",
+      "instrument_id": "equity:axp",
+      "issuer": "AMERICAN EXPRESS CO",
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 4,
+      "selected_for_pilot": true,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "AXP"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "approval_status": "pending_no_authority",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "SELECTED_RANK_PRIORITY"
+      ],
+      "downstream_blockers": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "current",
+      "fiscal_period": "2026-Q2",
+      "fundamental_context_status": "partial",
+      "instrument_id": "equity:bio",
+      "issuer": "BIO-RAD LABORATORIES, INC.",
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "gross_margin": {
+          "comparability_blockers": [
+            "PENDING_OPERATOR_APPROVAL"
+          ],
+          "comparability_status": "comparable_with_framework_caveat",
+          "evidence_type": "derived",
+          "formula_id": "gross_margin",
+          "formula_version": "2.0.0",
+          "lineage_checksum": "549c06271bba61942483797da337835e6dc77fb90aaddaf852eaff6eb889be36",
+          "reporting_period": "2026-Q2",
+          "source_date": "2026-08-04",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000012208.json",
+          "status": "pending_approval",
+          "value": "0.527069423216"
+        },
+        "operating_margin": {
+          "comparability_blockers": [
+            "PENDING_OPERATOR_APPROVAL"
+          ],
+          "comparability_status": "comparable_with_framework_caveat",
+          "evidence_type": "derived",
+          "formula_id": "operating_margin",
+          "formula_version": "2.0.0",
+          "lineage_checksum": "d1a38f5265ce1e92a25181b1e2e6dae682133890a26d05d4db91d4518b8647c4",
+          "reporting_period": "2026-Q2",
+          "source_date": "2026-08-04",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000012208.json",
+          "status": "pending_approval",
+          "value": "0.085833802590"
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "revenue_growth_yoy"
+      ],
+      "rank": 5,
+      "selected_for_pilot": true,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "BIO"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "approval_status": "pending_no_authority",
+      "blocked_metrics": [
+        "gross_margin"
+      ],
+      "cohort_selection_reason_codes": [
+        "SELECTED_RANK_PRIORITY"
+      ],
+      "downstream_blockers": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "current",
+      "fiscal_period": "2026-Q2",
+      "fundamental_context_status": "partial",
+      "instrument_id": "equity:bkh",
+      "issuer": "Black Hills Corporation",
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "operating_margin": {
+          "comparability_blockers": [
+            "PENDING_OPERATOR_APPROVAL"
+          ],
+          "comparability_status": "comparable_with_framework_caveat",
+          "evidence_type": "derived",
+          "formula_id": "operating_margin",
+          "formula_version": "2.0.0",
+          "lineage_checksum": "dfe6eab1fa260e280dafc9f5c0afc28e56f4dadeaf358d78c78736a5a46075d5",
+          "reporting_period": "2026-Q2",
+          "source_date": "2026-08-06",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001130464.json",
+          "status": "pending_approval",
+          "value": "0.249042145594"
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 6,
+      "selected_for_pilot": true,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "BKH"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "approval_status": "pending_no_authority",
+      "blocked_metrics": [
+        "gross_margin"
+      ],
+      "cohort_selection_reason_codes": [
+        "SELECTED_RANK_PRIORITY"
+      ],
+      "downstream_blockers": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "current",
+      "fiscal_period": "2026-Q2",
+      "fundamental_context_status": "partial",
+      "instrument_id": "equity:bmrn",
+      "issuer": "BIOMARIN PHARMACEUTICAL INC",
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "operating_margin": {
+          "comparability_blockers": [
+            "PENDING_OPERATOR_APPROVAL"
+          ],
+          "comparability_status": "comparable_with_framework_caveat",
+          "evidence_type": "derived",
+          "formula_id": "operating_margin",
+          "formula_version": "2.0.0",
+          "lineage_checksum": "0ff831545fc6feb8f82f8d1071f87a431b6f8ad53afe762a10f3340acb916942",
+          "reporting_period": "2026-Q2",
+          "source_date": "2026-08-06",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001048477.json",
+          "status": "pending_approval",
+          "value": "0.136999719804"
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 7,
+      "selected_for_pilot": true,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "BMRN"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "approval_status": "pending_no_authority",
+      "blocked_metrics": [
+        "gross_margin",
+        "operating_margin"
+      ],
+      "cohort_selection_reason_codes": [
+        "SELECTED_RANK_PRIORITY"
+      ],
+      "downstream_blockers": [
+        "FORMULA_INPUT_CARDINALITY_INVALID",
+        "FORMULA_NOT_APPLICABLE",
+        "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
+        "FORMULA_OPERAND_SET_INVALID",
+        "NUMERATOR_MISSING"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "current",
+      "fiscal_period": "2026-Q2",
+      "fundamental_context_status": "blocked",
+      "instrument_id": "equity:bmy",
+      "issuer": "BRISTOL-MYERS SQUIBB COMPANY",
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 8,
+      "selected_for_pilot": true,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "BMY"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "approval_status": "pending_no_authority",
+      "blocked_metrics": [
+        "gross_margin"
+      ],
+      "cohort_selection_reason_codes": [
+        "SELECTED_RANK_PRIORITY"
+      ],
+      "downstream_blockers": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "current",
+      "fiscal_period": "2026-Q2",
+      "fundamental_context_status": "partial",
+      "instrument_id": "equity:chrw",
+      "issuer": "C. H. ROBINSON WORLDWIDE, INC.",
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "operating_margin": {
+          "comparability_blockers": [
+            "PENDING_OPERATOR_APPROVAL"
+          ],
+          "comparability_status": "comparable_with_framework_caveat",
+          "evidence_type": "derived",
+          "formula_id": "operating_margin",
+          "formula_version": "2.0.0",
+          "lineage_checksum": "429a6b946597904061dc6a41deb59bd552769d3e503b678ad2ba1c9c26660075",
+          "reporting_period": "2026-Q2",
+          "source_date": "2026-07-31",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001043277.json",
+          "status": "pending_approval",
+          "value": "0.048220348379"
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 9,
+      "selected_for_pilot": true,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "CHRW"
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "approval_status": "pending_no_authority",
+      "blocked_metrics": [
+        "gross_margin"
+      ],
+      "cohort_selection_reason_codes": [
+        "SELECTED_RANK_PRIORITY"
+      ],
+      "downstream_blockers": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "current",
+      "fiscal_period": "2026-Q2",
+      "fundamental_context_status": "partial",
+      "instrument_id": "equity:ci",
+      "issuer": "The Cigna Group",
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "operating_margin": {
+          "comparability_blockers": [
+            "PENDING_OPERATOR_APPROVAL"
+          ],
+          "comparability_status": "comparable_with_framework_caveat",
+          "evidence_type": "derived",
+          "formula_id": "operating_margin",
+          "formula_version": "2.0.0",
+          "lineage_checksum": "c46a2f897c0a957e18192a24c8d7967adb6dd436f5ec4c11826c07f721c13ab1",
+          "reporting_period": "2026-Q2",
+          "source_date": "2026-07-30",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001739940.json",
+          "status": "pending_approval",
+          "value": "0.035915583396"
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 10,
+      "selected_for_pilot": true,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "CI"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:cnc",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 11,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "CNC"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:cno",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 12,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "CNO"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:colb",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 13,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "COLB"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:csco",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 14,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "CSCO"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:cvs",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 15,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "CVS"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:d",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 16,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "D"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "BLOCKED_APPLICABILITY_UNPROVEN"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "etf:dia",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 17,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "DIA"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:eix",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 18,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "EIX"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:epr",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 19,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "EPR"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:etr",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 20,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "ETR"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:fe",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 21,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "FE"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:fhi",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 22,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "FHI"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:fhn",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 23,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "FHN"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:flg",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 24,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "FLG"
+    },
+    {
+      "accounting_framework": null,
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
+      "cohort_selection_reason_codes": [
+        "NOT_SELECTED_COHORT_LIMIT"
+      ],
+      "downstream_blockers": [
+        "NOT_SELECTED_FOR_BOUNDED_PILOT"
+      ],
+      "downstream_eligible": false,
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "missing",
+      "instrument_id": "equity:gatx",
+      "issuer": null,
+      "metrics": {
+        "eps_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        },
+        "revenue_growth_yoy": {
+          "comparability_blockers": [
+            "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_status": "not_comparable_missing_evidence",
+          "evidence_type": "direct",
+          "formula_id": null,
+          "formula_version": null,
+          "lineage_checksum": null,
+          "reporting_period": null,
+          "source_date": null,
+          "source_reference": null,
+          "status": "missing",
+          "value": null
+        }
+      },
+      "missing_metrics": [
+        "debt_to_equity",
+        "eps_growth_yoy",
+        "gross_margin",
+        "operating_margin",
+        "revenue_growth_yoy"
+      ],
+      "rank": 25,
+      "selected_for_pilot": false,
+      "technical_artifact_reference": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "technical_as_of_date": "2026-07-10",
+      "ticker": "GATX"
+    }
+  ],
+  "schema_version": "market-engine-data11-metric-comparison-v1"
+}
