@@ -2,7 +2,7 @@
 
 Sprint ID: ME-PR03
 
-Status: PLANNED / NEXT IMPLEMENTATION STORY
+Status: COMPLETED BY ME-PR03
 
 Job family: ME-PR / Portfolio Review
 

@@ -6,15 +6,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from market_engine.recommendation_review.sec_companyfacts_recommendation_review import (
-    SEC_COMPANYFACTS_RECOMMENDATION_REVIEW_FORMAT_VERSION,
-    SecCompanyFactsRecommendationReview,
-    SecCompanyFactsRecommendationReviewCategory,
-    SecCompanyFactsRecommendationReviewItem,
-    SecCompanyFactsRecommendationReviewState,
-)
-
-
 SEC_COMPANYFACTS_PORTFOLIO_REVIEW_FORMAT_VERSION = (
     "sec-companyfacts-portfolio-review-v1"
 )
@@ -53,6 +44,7 @@ FORBIDDEN_PORTFOLIO_REVIEW_ACTIONS = (
 class MarketEnginePortfolioPositionState(str, Enum):
     NOT_HELD = "not_held"
     HELD = "held"
+    CLOSED = "closed"
     PARTIALLY_KNOWN = "partially_known"
     UNKNOWN = "unknown"
     STALE = "stale"
@@ -99,7 +91,7 @@ class MarketEnginePortfolioContext:
     portfolio_base_currency: str
     ticker: str
     position_state: MarketEnginePortfolioPositionState | str
-    current_quantity: float | int | None
+    current_quantity: str | float | int | None
     current_market_value: float | int | None
     portfolio_total_value: float | int | None
     current_ticker_exposure_pct: float | int | None
@@ -152,6 +144,18 @@ class SecCompanyFactsPortfolioReview:
     forbidden_actions: tuple[str, ...] = FORBIDDEN_PORTFOLIO_REVIEW_ACTIONS
     non_actionable_boundary: str = NON_ACTIONABLE_PORTFOLIO_REVIEW_BOUNDARY
     warnings: tuple[str, ...] = field(default_factory=tuple)
+
+
+# Import after the Portfolio Review contracts are defined. Recommendation
+# Review loads Analysis Review, whose package exposes the downstream handoff;
+# that handoff imports these contract types during module initialization.
+from market_engine.recommendation_review.sec_companyfacts_recommendation_review import (  # noqa: E402
+    SEC_COMPANYFACTS_RECOMMENDATION_REVIEW_FORMAT_VERSION,
+    SecCompanyFactsRecommendationReview,
+    SecCompanyFactsRecommendationReviewCategory,
+    SecCompanyFactsRecommendationReviewItem,
+    SecCompanyFactsRecommendationReviewState,
+)
 
 
 def build_sec_companyfacts_portfolio_review(
@@ -368,9 +372,16 @@ def _position_context_review(
     if position_state == MarketEnginePortfolioPositionState.HELD.value:
         state = SecCompanyFactsPortfolioReviewState.POSITION_ALREADY_HELD
         message = "The ticker is already held according to approved portfolio context."
-    elif position_state == MarketEnginePortfolioPositionState.NOT_HELD.value:
+    elif position_state in {
+        MarketEnginePortfolioPositionState.NOT_HELD.value,
+        MarketEnginePortfolioPositionState.CLOSED.value,
+    }:
         state = SecCompanyFactsPortfolioReviewState.POSITION_NOT_HELD
-        message = "The ticker is not held according to approved portfolio context."
+        message = (
+            "The transaction-derived position is closed according to approved portfolio context."
+            if position_state == MarketEnginePortfolioPositionState.CLOSED.value
+            else "The ticker is not held according to approved portfolio context."
+        )
     elif position_state == MarketEnginePortfolioPositionState.STALE.value:
         state = SecCompanyFactsPortfolioReviewState.PORTFOLIO_CONTEXT_STALE
         message = "Position context is stale according to approved portfolio context."

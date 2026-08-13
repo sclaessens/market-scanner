@@ -36,7 +36,7 @@ transactions, or move allocation authority outside the Decision Engine.
 | Latest canonical evidence result | ME-SR24 completed with blockers because no approved production price-evidence provider route exists |
 | Canonical `market-data` publication | Not operational for daily automatic updates |
 | Portfolio Review | ME-PR01 contract and ME-PR02 in-memory implementation completed |
-| Portfolio source contracts | Shape metadata exists, but no approved authoritative transaction-ledger runtime exists |
+| Portfolio source contracts | Private confirmed-event ledger and deterministic position projection implemented by ME-PR03 |
 | Legacy portfolio scripts | Reference-only; not canonical runtime |
 | ChatGPT advisory contracts | CI01-CI10 completed; later model-invocation work is not the active priority |
 | Broker/order execution | Not implemented and not planned in this sequence |
@@ -45,9 +45,9 @@ transactions, or move allocation authority outside the Decision Engine.
 
 ```text
 ME-RM08 - Realign roadmap around portfolio authority and advisory price freshness
-  -> ME-PR03 - Implement the manual portfolio transaction ledger and
-               transaction-derived portfolio-aware candidate context (NEXT)
-  -> ME-SR25 - Implement scheduled advisory price refresh and freshness artifacts
+  -> ME-PR03 - Manual portfolio transaction ledger and transaction-derived
+               portfolio-aware candidate context (COMPLETED)
+  -> ME-SR25 - Implement scheduled advisory price refresh and freshness artifacts (NEXT)
   -> ME-PI01 - Define portfolio exposure and concentration intelligence from
                transaction-derived positions plus advisory price enrichment
   -> ME-CI12 - Batch grounded advisory consumption, only after the preceding
@@ -56,14 +56,14 @@ ME-RM08 - Realign roadmap around portfolio authority and advisory price freshnes
   -> ME-NL01/02/03 - Channel-neutral notification sequence
 ```
 
-ME-PR03 is the next implementation story. ME-SR25 is already planned directly
-after it and must not be silently replaced by canonical-publication work.
+ME-PR03 is complete. ME-SR25 is the next implementation story and must not be
+silently replaced by canonical-publication work.
 
-## Why ME-PR03 is next
+## What ME-PR03 completed
 
 The user needs portfolio-aware analysis based on actual holdings. Existing
-ME-PR02 accepts explicitly supplied `market-engine-portfolio-context-v1`, but
-the repository has no approved runtime that turns user-confirmed transactions
+ME-PR02 accepted explicitly supplied `market-engine-portfolio-context-v1`, but
+the repository had no approved runtime that turned user-confirmed transactions
 into that context.
 
 ME-PR03 closes that gap with one append-only transaction ledger and a
@@ -139,8 +139,7 @@ ME-RM08 define the current active order.
 ## Next implementation
 
 ```text
-ME-PR03 - Implement a manual portfolio transaction ledger as the authoritative
-source for positions and portfolio-aware candidate analysis
+ME-SR25 - Implement scheduled advisory price refresh and freshness artifacts
 ```
 
 No runtime implementation, canary, provider activation, canonical publication,

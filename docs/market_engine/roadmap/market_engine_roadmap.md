@@ -106,8 +106,8 @@ ME-RM08 defines the active sequence:
 ```text
 ME-RM08 - Portfolio ledger and advisory price roadmap realignment
   -> ME-PR03 - Manual portfolio transaction ledger and portfolio-aware
-               candidate context (NEXT)
-  -> ME-SR25 - Scheduled advisory price refresh and freshness artifacts
+               candidate context (COMPLETED)
+  -> ME-SR25 - Scheduled advisory price refresh and freshness artifacts (NEXT)
   -> ME-PI01 - Portfolio exposure and concentration intelligence
   -> ME-CI12 - Batch grounded advisory consumption after upstream inputs stabilize
   -> ME-PS01 - Position-sizing decision contract
@@ -471,12 +471,17 @@ portfolio, broker, or Decision Engine behavior.
 
 ### ME-PR03 — Manual portfolio transaction ledger and portfolio-aware candidate context
 
-Status: PLANNED / NEXT IMPLEMENTATION STORY
+Status: COMPLETED BY ME-PR03
 
 ME-PR03 implements the missing authoritative source beneath ME-PR02. Only
 user-confirmed transactions enter a private append-only ledger. Positions are
 rebuilt deterministically and adapted into non-actionable candidate context.
 Real portfolio data remains outside Git.
+
+ME-PR03 now provides the confirmed-preview boundary, private append-only ledger,
+append-only corrections and reversals, exact-decimal moving-weighted-average
+projection, and transaction-derived Portfolio Review/candidate adapter. Legacy
+position files are not equal authority and no real portfolio data was migrated.
 
 Detailed scope:
 
@@ -486,7 +491,7 @@ docs/market_engine/backlog/me_pr03_manual_portfolio_transaction_ledger.md
 
 ### ME-SR25 — Scheduled advisory price refresh and freshness artifacts
 
-Status: PLANNED / DIRECTLY AFTER ME-PR03
+Status: PLANNED / NEXT IMPLEMENTATION STORY
 
 ME-SR25 creates a separate, retrievable advisory price artifact for recent
 analysis context. It does not write `market-data`, bypass ME-SR24, create

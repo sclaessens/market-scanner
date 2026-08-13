@@ -39,13 +39,12 @@ user confirmation
   blockers;
 - partial governed fundamental evidence coverage;
 - scheduled canonical refresh infrastructure with fail-closed publication;
-- Portfolio Review contract and in-memory implementation;
+- private manual transaction ledger, deterministic derived positions, and
+  transaction-derived Portfolio Review context;
 - structured ChatGPT advisory contracts and local grounding validation.
 
 ## Current gaps
 
-- no authoritative manual transaction-ledger runtime;
-- no stable transaction-derived portfolio-context assembler;
 - no operational advisory-only daily price artifact;
 - automatic canonical `market-data` publication remains blocked;
 - fundamental evidence coverage remains partial;
@@ -54,7 +53,7 @@ user confirmation
 ## Active implementation sequence
 
 ```text
-ME-PR03 -> ME-SR25 -> ME-PI01 -> ME-CI12 -> ME-PS01 -> ME-NL01/02/03
+ME-SR25 -> ME-PI01 -> ME-CI12 -> ME-PS01 -> ME-NL01/02/03
 ```
 
 See:

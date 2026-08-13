@@ -17,6 +17,12 @@ from market_engine.portfolio_review.sec_companyfacts_portfolio_review import (
     build_sec_companyfacts_portfolio_review,
     persist_sec_companyfacts_portfolio_review,
 )
+from market_engine.portfolio_review.manual_transaction_ledger import (
+    AuthoritativeInstrumentRegistry,
+    build_transaction_derived_portfolio_context,
+    confirm_and_append,
+    normalize_transaction_preview,
+)
 from market_engine.recommendation_review.sec_companyfacts_recommendation_review import (
     NON_ACTIONABLE_RECOMMENDATION_REVIEW_BOUNDARY,
     SEC_COMPANYFACTS_RECOMMENDATION_REVIEW_FORMAT_VERSION,
@@ -212,6 +218,90 @@ def test_ticker_not_held_is_identified_without_action_advice() -> None:
         SecCompanyFactsPortfolioReviewCategory.POSITION_CONTEXT_REVIEW
     ]
     assert position_item.state == SecCompanyFactsPortfolioReviewState.POSITION_NOT_HELD
+
+
+def test_transaction_derived_closed_position_is_non_actionable_not_held_context() -> None:
+    portfolio_review = build_sec_companyfacts_portfolio_review(
+        _recommendation_review(),
+        replace(
+            _portfolio_context(
+                position_state=MarketEnginePortfolioPositionState.CLOSED,
+                current_quantity="0",
+                current_market_value=None,
+                current_ticker_exposure_pct=None,
+            ),
+            missing_portfolio_context_fields=(
+                "current_market_value",
+                "current_ticker_exposure_pct",
+            ),
+        ),
+        portfolio_review_run_id="portfolio-review-run",
+    )
+
+    position_item = _portfolio_item_by_category(portfolio_review)[
+        SecCompanyFactsPortfolioReviewCategory.POSITION_CONTEXT_REVIEW
+    ]
+    assert position_item.state == SecCompanyFactsPortfolioReviewState.POSITION_NOT_HELD
+    assert "closed" in position_item.message
+
+
+def test_confirmed_ledger_projection_is_accepted_by_portfolio_review(
+    tmp_path: Path,
+) -> None:
+    registry = AuthoritativeInstrumentRegistry(
+        [
+            {
+                "instrument_id": "equity:nvda",
+                "symbol": "NVDA",
+                "currency": "USD",
+                "exchange": "XNAS",
+            }
+        ]
+    )
+    preview = normalize_transaction_preview(
+        {
+            "transaction_id": "synthetic-nvda-001",
+            "portfolio_id": "synthetic-portfolio",
+            "account_id": "synthetic-account",
+            "instrument_id": "equity:nvda",
+            "ticker": "NVDA",
+            "transaction_type": "BUY",
+            "trade_date": "2026-06-15",
+            "quantity": "1.25",
+            "unit_price": "100",
+            "trade_currency": "USD",
+            "fee": {"availability": "available", "amount": "0", "currency": "USD"},
+        },
+        registry=registry,
+        recorded_at="2026-06-16T12:00:00Z",
+    )
+    ledger = tmp_path / "synthetic-ledger.jsonl"
+    confirm_and_append(
+        preview,
+        confirmation_token=preview["confirmation_token"],
+        ledger_path=ledger,
+        registry=registry,
+    )
+    context = build_transaction_derived_portfolio_context(
+        ledger,
+        portfolio_id="synthetic-portfolio",
+        account_id="synthetic-account",
+        instrument=registry.resolve(instrument_id="equity:nvda"),
+        context_run_id="synthetic-derived-context",
+    )
+
+    review = build_sec_companyfacts_portfolio_review(
+        _recommendation_review(),
+        context,
+        portfolio_review_run_id="portfolio-review-run",
+    )
+
+    position_item = _portfolio_item_by_category(review)[
+        SecCompanyFactsPortfolioReviewCategory.POSITION_CONTEXT_REVIEW
+    ]
+    assert position_item.state == SecCompanyFactsPortfolioReviewState.POSITION_ALREADY_HELD
+    assert review.portfolio_context_provenance["current_quantity"] == "1.25"
+    assert review.portfolio_context_provenance["context_provenance"]["ledger_digest"]
 
 
 def test_unknown_holding_state_is_identified() -> None:

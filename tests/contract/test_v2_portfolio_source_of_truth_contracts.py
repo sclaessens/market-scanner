@@ -76,11 +76,11 @@ def test_portfolio_dataset_roles_are_explicit_and_complete():
     )
 
 
-def test_manual_source_positions_are_source_of_truth_for_holdings():
+def test_legacy_manual_positions_are_migration_input_not_ledger_truth():
     assert PortfolioSourceDatasetRole.MANUAL_SOURCE_POSITIONS in (
         manual_source_dataset_roles()
     )
-    assert is_portfolio_source_of_truth(
+    assert not is_portfolio_source_of_truth(
         PortfolioSourceDatasetRole.MANUAL_SOURCE_POSITIONS
     )
     assert validate_manual_position_source_shape(_manual_position()) == ()

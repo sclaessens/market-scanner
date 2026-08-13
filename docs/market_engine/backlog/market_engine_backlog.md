@@ -47,8 +47,8 @@ meaning. The current product sequence is:
 ME-RUN30/31 and ME-DATA06-10 - broad analysis and evidence baseline
   -> ME-SR17-24 and ME-RUN32 - canonical refresh hardening and blocker evidence
   -> ME-RM08 - portfolio/advisory-price roadmap realignment (docs-only)
-  -> ME-PR03 - manual transaction ledger and portfolio-aware candidate context (NEXT)
-  -> ME-SR25 - scheduled advisory price refresh and freshness artifacts
+  -> ME-PR03 - manual transaction ledger and portfolio-aware candidate context (COMPLETED)
+  -> ME-SR25 - scheduled advisory price refresh and freshness artifacts (NEXT)
   -> ME-PI01 - portfolio exposure and concentration intelligence
   -> ME-CI12 - batch grounded advisory consumption after upstream inputs stabilize
   -> ME-PS01 - position-sizing decision contract
@@ -693,7 +693,7 @@ price freshness from the blocked canonical publication line.
 
 ### ME-PR03 — Manual portfolio transaction ledger and portfolio-aware candidate context
 
-Status: PLANNED / NEXT IMPLEMENTATION STORY
+Status: COMPLETED BY ME-PR03
 
 Goal: implement a private append-only ledger for user-confirmed BUY and SELL
 transactions, rebuild positions deterministically, and adapt those positions
@@ -704,6 +704,13 @@ must not be committed to this public repository. No broker integration, order
 execution, inferred transaction, price acquisition, allocation, sizing, hidden
 ranking, or Decision Engine change is allowed.
 
+Implemented contracts are `manual-portfolio-transaction-ledger-v1`,
+`market-engine-derived-positions-v1`, and
+`market-engine-portfolio-aware-candidate-context-v1`. The confirmed preview
+digest, private append-only storage, correction/reversal events, exact-decimal
+moving-average projection, and Portfolio Review adapter are operational. Only
+synthetic tests were added; no live portfolio data was migrated or committed.
+
 Detailed story:
 
 ```text
@@ -712,7 +719,7 @@ docs/market_engine/backlog/me_pr03_manual_portfolio_transaction_ledger.md
 
 ### ME-SR25 — Scheduled advisory price refresh and freshness artifacts
 
-Status: PLANNED / DIRECTLY AFTER ME-PR03
+Status: PLANNED / NEXT IMPLEMENTATION STORY
 
 Goal: produce a daily retrievable, versioned, best-effort advisory price and
 freshness artifact for analysis without changing `market-data` or claiming
