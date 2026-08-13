@@ -14,6 +14,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": true,
       "selection_reason": "SELECTED_RANK_PRIORITY",
+      "source_symbol": "ASB",
       "ticker": "ASB"
     },
     {
@@ -30,6 +31,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": true,
       "selection_reason": "SELECTED_RANK_PRIORITY",
+      "source_symbol": "ASH",
       "ticker": "ASH"
     },
     {
@@ -46,6 +48,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": true,
       "selection_reason": "SELECTED_RANK_PRIORITY",
+      "source_symbol": "ATR",
       "ticker": "ATR"
     },
     {
@@ -62,6 +65,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": true,
       "selection_reason": "SELECTED_RANK_PRIORITY",
+      "source_symbol": "AXP",
       "ticker": "AXP"
     },
     {
@@ -78,6 +82,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": true,
       "selection_reason": "SELECTED_RANK_PRIORITY",
+      "source_symbol": "BIO",
       "ticker": "BIO"
     },
     {
@@ -94,6 +99,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": true,
       "selection_reason": "SELECTED_RANK_PRIORITY",
+      "source_symbol": "BKH",
       "ticker": "BKH"
     },
     {
@@ -110,6 +116,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": true,
       "selection_reason": "SELECTED_RANK_PRIORITY",
+      "source_symbol": "BMRN",
       "ticker": "BMRN"
     },
     {
@@ -126,6 +133,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": true,
       "selection_reason": "SELECTED_RANK_PRIORITY",
+      "source_symbol": "BMY",
       "ticker": "BMY"
     },
     {
@@ -142,6 +150,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": true,
       "selection_reason": "SELECTED_RANK_PRIORITY",
+      "source_symbol": "CHRW",
       "ticker": "CHRW"
     },
     {
@@ -158,6 +167,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": true,
       "selection_reason": "SELECTED_RANK_PRIORITY",
+      "source_symbol": "CI",
       "ticker": "CI"
     },
     {
@@ -174,6 +184,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "CNC",
       "ticker": "CNC"
     },
     {
@@ -190,6 +201,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "CNO",
       "ticker": "CNO"
     },
     {
@@ -206,6 +218,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "COLB",
       "ticker": "COLB"
     },
     {
@@ -222,6 +235,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "CSCO",
       "ticker": "CSCO"
     },
     {
@@ -238,6 +252,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "CVS",
       "ticker": "CVS"
     },
     {
@@ -254,6 +269,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "D",
       "ticker": "D"
     },
     {
@@ -270,6 +286,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "BLOCKED_APPLICABILITY_UNPROVEN",
+      "source_symbol": "DIA",
       "ticker": "DIA"
     },
     {
@@ -286,6 +303,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "EIX",
       "ticker": "EIX"
     },
     {
@@ -302,6 +320,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "EPR",
       "ticker": "EPR"
     },
     {
@@ -318,6 +337,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "ETR",
       "ticker": "ETR"
     },
     {
@@ -334,6 +354,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "FE",
       "ticker": "FE"
     },
     {
@@ -350,6 +371,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "FHI",
       "ticker": "FHI"
     },
     {
@@ -366,6 +388,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "FHN",
       "ticker": "FHN"
     },
     {
@@ -382,6 +405,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "FLG",
       "ticker": "FLG"
     },
     {
@@ -398,6 +422,7 @@
       "ranking_scope": "technical_setup_screening",
       "selected": false,
       "selection_reason": "NOT_SELECTED_COHORT_LIMIT",
+      "source_symbol": "GATX",
       "ticker": "GATX"
     }
   ],

@@ -57,7 +57,7 @@
           "ticker": "ASB"
         }
       ],
-      "fact_package_checksum": "b4564b86350b4aa08d8c9053066176eaf7aade8cd9529b820ae8ca6bb52ad9e9",
+      "fact_package_checksum": "e153ea1ca9faa75a2d6b48c8c4ecf60a3999159dcd9d66d665d25e7aed907098",
       "formula_catalog_checksum": "7051c9b28ee8c3dc5a4617585384f991826e819f485b31ce5b3091199a66490e",
       "instrument_id": "equity:asb",
       "rank": 1,
@@ -79,8 +79,8 @@
       "derivations": [
         {
           "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-derivation-approval-candidate",
-          "calculation_checksum": "7e7a0039a393457907a2e935576bd242e99c1cc05b09d345bddb4fd9045505f7",
-          "calculation_result": 0.309157509158,
+          "calculation_checksum": "ca34778c17b698f77af3dc2c4bfeefa8ba050144a9f9bfb87ecb8e1585f2f71e",
+          "calculation_result": 0.342052313883,
           "canonical_metric": "gross_margin",
           "company_identity": "ASHLAND INC.",
           "component_fact_ids": [],
@@ -133,10 +133,10 @@
               "currency": "USD",
               "fact_id": "ash-gross-profit-2026-q3-2026-06-30",
               "input_unit": "USD",
-              "input_value": 422000000,
-              "normalized_value": "422000000",
+              "input_value": 170000000,
+              "normalized_value": "170000000",
               "period_end": "2026-06-30",
-              "period_start": "2025-10-01",
+              "period_start": "2026-04-01",
               "period_type": "duration",
               "raw_source_concept": "us-gaap:GrossProfit",
               "scale": 0,
@@ -150,10 +150,10 @@
               "currency": "USD",
               "fact_id": "ash-revenue-2026-q3-2026-06-30",
               "input_unit": "USD",
-              "input_value": 1365000000,
-              "normalized_value": "1365000000",
+              "input_value": 497000000,
+              "normalized_value": "497000000",
               "period_end": "2026-06-30",
-              "period_start": "2025-10-01",
+              "period_start": "2026-04-01",
               "period_type": "duration",
               "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
               "scale": 0,
@@ -167,8 +167,8 @@
             "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
             "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
           ],
-          "normalized_denominator": "1365000000",
-          "normalized_numerator": "422000000",
+          "normalized_denominator": "497000000",
+          "normalized_numerator": "170000000",
           "numerator_fact_ids": [
             "ash-gross-profit-2026-q3-2026-06-30"
           ],
@@ -176,7 +176,7 @@
             "fiscal_period": "Q3",
             "fiscal_year": 2026,
             "period_end": "2026-06-30",
-            "period_start": "2025-10-01",
+            "period_start": "2026-04-01",
             "period_type": "duration"
           },
           "reporting_period": "2026-Q3",
@@ -200,8 +200,8 @@
         },
         {
           "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-derivation-approval-candidate",
-          "calculation_checksum": "d684228bcb7fbdeda6c74b2ac1fdea4b5c245aafff39d254d5978b35526342c5",
-          "calculation_result": 0.055677655678,
+          "calculation_checksum": "d6fcde2d3b05569520404f01c1dd59a0a82d2054936bf4885754a95616fad69b",
+          "calculation_result": 0.086519114688,
           "canonical_metric": "operating_margin",
           "company_identity": "ASHLAND INC.",
           "component_fact_ids": [],
@@ -254,10 +254,10 @@
               "currency": "USD",
               "fact_id": "ash-operating-income-2026-q3-2026-06-30",
               "input_unit": "USD",
-              "input_value": 76000000,
-              "normalized_value": "76000000",
+              "input_value": 43000000,
+              "normalized_value": "43000000",
               "period_end": "2026-06-30",
-              "period_start": "2025-10-01",
+              "period_start": "2026-04-01",
               "period_type": "duration",
               "raw_source_concept": "us-gaap:OperatingIncomeLoss",
               "scale": 0,
@@ -271,10 +271,10 @@
               "currency": "USD",
               "fact_id": "ash-revenue-2026-q3-2026-06-30",
               "input_unit": "USD",
-              "input_value": 1365000000,
-              "normalized_value": "1365000000",
+              "input_value": 497000000,
+              "normalized_value": "497000000",
               "period_end": "2026-06-30",
-              "period_start": "2025-10-01",
+              "period_start": "2026-04-01",
               "period_type": "duration",
               "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
               "scale": 0,
@@ -288,8 +288,8 @@
             "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
             "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
           ],
-          "normalized_denominator": "1365000000",
-          "normalized_numerator": "76000000",
+          "normalized_denominator": "497000000",
+          "normalized_numerator": "43000000",
           "numerator_fact_ids": [
             "ash-operating-income-2026-q3-2026-06-30"
           ],
@@ -297,7 +297,7 @@
             "fiscal_period": "Q3",
             "fiscal_year": 2026,
             "period_end": "2026-06-30",
-            "period_start": "2025-10-01",
+            "period_start": "2026-04-01",
             "period_type": "duration"
           },
           "reporting_period": "2026-Q3",
@@ -320,7 +320,7 @@
           }
         }
       ],
-      "fact_package_checksum": "d6fb1750266affaf58fd8927a8fdcfdbe0bdb7b8348d9d4137315aa889118444",
+      "fact_package_checksum": "c999b0c9051c8aead84db9bb26e18cd787e6ca48fbfb7dec5a723c4ca31ee50e",
       "formula_catalog_checksum": "7051c9b28ee8c3dc5a4617585384f991826e819f485b31ce5b3091199a66490e",
       "instrument_id": "equity:ash",
       "rank": 2,
@@ -332,165 +332,13 @@
       "ticker": "ASH"
     },
     {
-      "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-atr-derivation-approval-candidate",
-      "approval_state": "pending_no_authority",
-      "blocked_metric_count": 1,
-      "derivations": [
-        {
-          "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-atr-derivation-approval-candidate",
-          "canonical_metric": "gross_margin",
-          "component_fact_ids": [],
-          "denominator_fact_ids": [
-            "atr-revenue-2026-q2-2026-06-30"
-          ],
-          "formula_id": "gross_margin",
-          "formula_version": "2.0.0",
-          "numerator_fact_ids": [
-            "missing-gross_profit"
-          ],
-          "reason_codes": [
-            "FORMULA_INPUT_CARDINALITY_INVALID",
-            "FORMULA_NOT_APPLICABLE",
-            "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
-            "FORMULA_OPERAND_SET_INVALID",
-            "NUMERATOR_MISSING"
-          ],
-          "reporting_period": "2026-Q2",
-          "request_id": "atr-2026-q2-gross-margin",
-          "status": "blocked",
-          "ticker": "ATR"
-        },
-        {
-          "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-atr-derivation-approval-candidate",
-          "calculation_checksum": "b76a9bfa77d977ca4c1ee2cb40685908923c83712e33eaafe33b81b85a0a4382",
-          "calculation_result": 0.116562554743,
-          "canonical_metric": "operating_margin",
-          "company_identity": "AptarGroup,\u00a0Inc",
-          "component_fact_ids": [],
-          "denominator_fact_ids": [
-            "atr-revenue-2026-q2-2026-06-30"
-          ],
-          "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v2",
-          "derivation_timestamp": "2026-08-13T15:12:00Z",
-          "evidence_type": "derived",
-          "fiscal_period": "Q2",
-          "fiscal_year": 2026,
-          "formula": {
-            "canonical_expression": "operating_income / revenue",
-            "formula_id": "operating_margin",
-            "operand_contract": {
-              "applicability_policy": "explicit_approved",
-              "components": {
-                "aggregation_policy": "forbidden",
-                "allowed_canonical_concepts": [],
-                "overlap_policy": "not_applicable",
-                "role": "numerator_components"
-              },
-              "denominator": {
-                "cardinality": "exactly_one",
-                "required_canonical_concepts": [
-                  "revenue"
-                ],
-                "role": "denominator"
-              },
-              "denominator_safety_policy": "strictly_positive",
-              "numerator": {
-                "cardinality": "exactly_one",
-                "required_canonical_concepts": [
-                  "operating_income"
-                ],
-                "role": "numerator"
-              },
-              "period_alignment_policy": "exact_start_end_and_fiscal_period",
-              "unit_currency_scale_policy": "exact_match"
-            },
-            "operation": "ratio",
-            "version": "2.0.0"
-          },
-          "formula_id": "operating_margin",
-          "formula_version": "2.0.0",
-          "input_facts": [
-            {
-              "canonical_concept": "operating_income",
-              "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-atr-mapping-review-candidate",
-              "currency": "USD",
-              "fact_id": "atr-operating-income-2026-q2-2026-06-30",
-              "input_unit": "USD",
-              "input_value": 234218000,
-              "normalized_value": "234218000",
-              "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
-              "period_type": "duration",
-              "raw_source_concept": "us-gaap:OperatingIncomeLoss",
-              "scale": 0,
-              "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-atr-source-approval-candidate",
-              "source_document_checksum": "3f81db998ebe94c65dfd6a0cd79ef6ede437bb5536ddb5b9338d71debed7c01a",
-              "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000896622.json"
-            },
-            {
-              "canonical_concept": "revenue",
-              "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-atr-mapping-review-candidate",
-              "currency": "USD",
-              "fact_id": "atr-revenue-2026-q2-2026-06-30",
-              "input_unit": "USD",
-              "input_value": 2009376000,
-              "normalized_value": "2009376000",
-              "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
-              "period_type": "duration",
-              "raw_source_concept": "us-gaap:Revenues",
-              "scale": 0,
-              "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-atr-source-approval-candidate",
-              "source_document_checksum": "3f81db998ebe94c65dfd6a0cd79ef6ede437bb5536ddb5b9338d71debed7c01a",
-              "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000896622.json"
-            }
-          ],
-          "instrument_id": "equity:atr",
-          "limitations": [
-            "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
-            "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
-          ],
-          "normalized_denominator": "2009376000",
-          "normalized_numerator": "234218000",
-          "numerator_fact_ids": [
-            "atr-operating-income-2026-q2-2026-06-30"
-          ],
-          "period": {
-            "fiscal_period": "Q2",
-            "fiscal_year": 2026,
-            "period_end": "2026-06-30",
-            "period_start": "2026-01-01",
-            "period_type": "duration"
-          },
-          "reporting_period": "2026-Q2",
-          "request_id": "atr-2026-q2-operating-margin",
-          "result_unit": "ratio",
-          "source_document_checksums": [
-            "3f81db998ebe94c65dfd6a0cd79ef6ede437bb5536ddb5b9338d71debed7c01a"
-          ],
-          "source_publication_dates": [
-            "2026-07-31"
-          ],
-          "status": "derived",
-          "ticker": "ATR",
-          "validation": {
-            "currency_compatibility": "passed",
-            "denominator_safety": "passed",
-            "period_alignment": "passed",
-            "scale_compatibility": "passed",
-            "unit_compatibility": "passed"
-          }
-        }
-      ],
-      "fact_package_checksum": "7faca9ac2d1f8527a8780480f5273e5d7090f6cf61f43a21e6ee734eafb6025f",
-      "formula_catalog_checksum": "7051c9b28ee8c3dc5a4617585384f991826e819f485b31ce5b3091199a66490e",
+      "derivations": [],
       "instrument_id": "equity:atr",
       "rank": 3,
       "reason_codes": [
-        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
       ],
-      "status": "pending_approval",
-      "successful_metric_count": 1,
+      "status": "blocked",
       "ticker": "ATR"
     },
     {
@@ -547,7 +395,7 @@
           "ticker": "AXP"
         }
       ],
-      "fact_package_checksum": "48e4fe0b620e4784ea095ec281e32caa1f525662e7f370eac47def12af1c695c",
+      "fact_package_checksum": "323ee93a2d70b6c186cd74f661fc3f62559b9fa90052f9266df5f3452bc64ea2",
       "formula_catalog_checksum": "7051c9b28ee8c3dc5a4617585384f991826e819f485b31ce5b3091199a66490e",
       "instrument_id": "equity:axp",
       "rank": 4,
@@ -569,8 +417,8 @@
       "derivations": [
         {
           "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-derivation-approval-candidate",
-          "calculation_checksum": "549c06271bba61942483797da337835e6dc77fb90aaddaf852eaff6eb889be36",
-          "calculation_result": 0.527069423216,
+          "calculation_checksum": "7fe5388a6bcda01e837a80233851147f18399c4af112ac8e49cda05c72b52566",
+          "calculation_result": 0.531182795699,
           "canonical_metric": "gross_margin",
           "company_identity": "BIO-RAD LABORATORIES, INC.",
           "component_fact_ids": [],
@@ -623,10 +471,10 @@
               "currency": "USD",
               "fact_id": "bio-gross-profit-2026-q2-2026-06-30",
               "input_unit": "USD",
-              "input_value": 655200000,
-              "normalized_value": "655200000",
+              "input_value": 345800000,
+              "normalized_value": "345800000",
               "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
+              "period_start": "2026-04-01",
               "period_type": "duration",
               "raw_source_concept": "us-gaap:GrossProfit",
               "scale": 0,
@@ -640,10 +488,10 @@
               "currency": "USD",
               "fact_id": "bio-revenue-2026-q2-2026-06-30",
               "input_unit": "USD",
-              "input_value": 1243100000,
-              "normalized_value": "1243100000",
+              "input_value": 651000000,
+              "normalized_value": "651000000",
               "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
+              "period_start": "2026-04-01",
               "period_type": "duration",
               "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
               "scale": 0,
@@ -657,8 +505,8 @@
             "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
             "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
           ],
-          "normalized_denominator": "1243100000",
-          "normalized_numerator": "655200000",
+          "normalized_denominator": "651000000",
+          "normalized_numerator": "345800000",
           "numerator_fact_ids": [
             "bio-gross-profit-2026-q2-2026-06-30"
           ],
@@ -666,7 +514,7 @@
             "fiscal_period": "Q2",
             "fiscal_year": 2026,
             "period_end": "2026-06-30",
-            "period_start": "2026-01-01",
+            "period_start": "2026-04-01",
             "period_type": "duration"
           },
           "reporting_period": "2026-Q2",
@@ -690,8 +538,8 @@
         },
         {
           "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-derivation-approval-candidate",
-          "calculation_checksum": "d1a38f5265ce1e92a25181b1e2e6dae682133890a26d05d4db91d4518b8647c4",
-          "calculation_result": 0.08583380259,
+          "calculation_checksum": "3f7492543aaf16ef03acfb294bf1e508d7a7c36a3ccbbd91be2ae07814a7d4e5",
+          "calculation_result": 0.111520737327,
           "canonical_metric": "operating_margin",
           "company_identity": "BIO-RAD LABORATORIES, INC.",
           "component_fact_ids": [],
@@ -744,10 +592,10 @@
               "currency": "USD",
               "fact_id": "bio-operating-income-2026-q2-2026-06-30",
               "input_unit": "USD",
-              "input_value": 106700000,
-              "normalized_value": "106700000",
+              "input_value": 72600000,
+              "normalized_value": "72600000",
               "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
+              "period_start": "2026-04-01",
               "period_type": "duration",
               "raw_source_concept": "us-gaap:OperatingIncomeLoss",
               "scale": 0,
@@ -761,10 +609,10 @@
               "currency": "USD",
               "fact_id": "bio-revenue-2026-q2-2026-06-30",
               "input_unit": "USD",
-              "input_value": 1243100000,
-              "normalized_value": "1243100000",
+              "input_value": 651000000,
+              "normalized_value": "651000000",
               "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
+              "period_start": "2026-04-01",
               "period_type": "duration",
               "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
               "scale": 0,
@@ -778,8 +626,8 @@
             "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
             "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
           ],
-          "normalized_denominator": "1243100000",
-          "normalized_numerator": "106700000",
+          "normalized_denominator": "651000000",
+          "normalized_numerator": "72600000",
           "numerator_fact_ids": [
             "bio-operating-income-2026-q2-2026-06-30"
           ],
@@ -787,7 +635,7 @@
             "fiscal_period": "Q2",
             "fiscal_year": 2026,
             "period_end": "2026-06-30",
-            "period_start": "2026-01-01",
+            "period_start": "2026-04-01",
             "period_type": "duration"
           },
           "reporting_period": "2026-Q2",
@@ -810,7 +658,7 @@
           }
         }
       ],
-      "fact_package_checksum": "81f915200270a3390d18f38e039c4f9a7ecc097597ccde1fe31fde5fb0e1ae68",
+      "fact_package_checksum": "fdc59b52ee47589c4354fe7b8872f1d1be7eccb42aa085a903e1fcdf681818df",
       "formula_catalog_checksum": "7051c9b28ee8c3dc5a4617585384f991826e819f485b31ce5b3091199a66490e",
       "instrument_id": "equity:bio",
       "rank": 5,
@@ -822,558 +670,43 @@
       "ticker": "BIO"
     },
     {
-      "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bkh-derivation-approval-candidate",
-      "approval_state": "pending_no_authority",
-      "blocked_metric_count": 1,
-      "derivations": [
-        {
-          "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bkh-derivation-approval-candidate",
-          "canonical_metric": "gross_margin",
-          "component_fact_ids": [],
-          "denominator_fact_ids": [
-            "bkh-revenue-2026-q2-2026-06-30"
-          ],
-          "formula_id": "gross_margin",
-          "formula_version": "2.0.0",
-          "numerator_fact_ids": [
-            "missing-gross_profit"
-          ],
-          "reason_codes": [
-            "FORMULA_INPUT_CARDINALITY_INVALID",
-            "FORMULA_NOT_APPLICABLE",
-            "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
-            "FORMULA_OPERAND_SET_INVALID",
-            "NUMERATOR_MISSING"
-          ],
-          "reporting_period": "2026-Q2",
-          "request_id": "bkh-2026-q2-gross-margin",
-          "status": "blocked",
-          "ticker": "BKH"
-        },
-        {
-          "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bkh-derivation-approval-candidate",
-          "calculation_checksum": "dfe6eab1fa260e280dafc9f5c0afc28e56f4dadeaf358d78c78736a5a46075d5",
-          "calculation_result": 0.249042145594,
-          "canonical_metric": "operating_margin",
-          "company_identity": "Black Hills Corporation",
-          "component_fact_ids": [],
-          "denominator_fact_ids": [
-            "bkh-revenue-2026-q2-2026-06-30"
-          ],
-          "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v2",
-          "derivation_timestamp": "2026-08-13T15:12:00Z",
-          "evidence_type": "derived",
-          "fiscal_period": "Q2",
-          "fiscal_year": 2026,
-          "formula": {
-            "canonical_expression": "operating_income / revenue",
-            "formula_id": "operating_margin",
-            "operand_contract": {
-              "applicability_policy": "explicit_approved",
-              "components": {
-                "aggregation_policy": "forbidden",
-                "allowed_canonical_concepts": [],
-                "overlap_policy": "not_applicable",
-                "role": "numerator_components"
-              },
-              "denominator": {
-                "cardinality": "exactly_one",
-                "required_canonical_concepts": [
-                  "revenue"
-                ],
-                "role": "denominator"
-              },
-              "denominator_safety_policy": "strictly_positive",
-              "numerator": {
-                "cardinality": "exactly_one",
-                "required_canonical_concepts": [
-                  "operating_income"
-                ],
-                "role": "numerator"
-              },
-              "period_alignment_policy": "exact_start_end_and_fiscal_period",
-              "unit_currency_scale_policy": "exact_match"
-            },
-            "operation": "ratio",
-            "version": "2.0.0"
-          },
-          "formula_id": "operating_margin",
-          "formula_version": "2.0.0",
-          "input_facts": [
-            {
-              "canonical_concept": "operating_income",
-              "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bkh-mapping-review-candidate",
-              "currency": "USD",
-              "fact_id": "bkh-operating-income-2026-q2-2026-06-30",
-              "input_unit": "USD",
-              "input_value": 299000000,
-              "normalized_value": "299000000",
-              "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
-              "period_type": "duration",
-              "raw_source_concept": "us-gaap:OperatingIncomeLoss",
-              "scale": 0,
-              "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bkh-source-approval-candidate",
-              "source_document_checksum": "28c3d1a77a13f2a7c062809f6dbed5cf6687bfb4e0524c0670780c632f035158",
-              "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001130464.json"
-            },
-            {
-              "canonical_concept": "revenue",
-              "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bkh-mapping-review-candidate",
-              "currency": "USD",
-              "fact_id": "bkh-revenue-2026-q2-2026-06-30",
-              "input_unit": "USD",
-              "input_value": 1200600000,
-              "normalized_value": "1200600000",
-              "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
-              "period_type": "duration",
-              "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
-              "scale": 0,
-              "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bkh-source-approval-candidate",
-              "source_document_checksum": "28c3d1a77a13f2a7c062809f6dbed5cf6687bfb4e0524c0670780c632f035158",
-              "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001130464.json"
-            }
-          ],
-          "instrument_id": "equity:bkh",
-          "limitations": [
-            "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
-            "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
-          ],
-          "normalized_denominator": "1200600000",
-          "normalized_numerator": "299000000",
-          "numerator_fact_ids": [
-            "bkh-operating-income-2026-q2-2026-06-30"
-          ],
-          "period": {
-            "fiscal_period": "Q2",
-            "fiscal_year": 2026,
-            "period_end": "2026-06-30",
-            "period_start": "2026-01-01",
-            "period_type": "duration"
-          },
-          "reporting_period": "2026-Q2",
-          "request_id": "bkh-2026-q2-operating-margin",
-          "result_unit": "ratio",
-          "source_document_checksums": [
-            "28c3d1a77a13f2a7c062809f6dbed5cf6687bfb4e0524c0670780c632f035158"
-          ],
-          "source_publication_dates": [
-            "2026-08-06"
-          ],
-          "status": "derived",
-          "ticker": "BKH",
-          "validation": {
-            "currency_compatibility": "passed",
-            "denominator_safety": "passed",
-            "period_alignment": "passed",
-            "scale_compatibility": "passed",
-            "unit_compatibility": "passed"
-          }
-        }
-      ],
-      "fact_package_checksum": "fe5d11b73628d4b6614ccda78dffbf831b154bcfcdb96c0103d05637b79922cf",
-      "formula_catalog_checksum": "7051c9b28ee8c3dc5a4617585384f991826e819f485b31ce5b3091199a66490e",
+      "derivations": [],
       "instrument_id": "equity:bkh",
       "rank": 6,
       "reason_codes": [
-        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
       ],
-      "status": "pending_approval",
-      "successful_metric_count": 1,
+      "status": "blocked",
       "ticker": "BKH"
     },
     {
-      "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bmrn-derivation-approval-candidate",
-      "approval_state": "pending_no_authority",
-      "blocked_metric_count": 1,
-      "derivations": [
-        {
-          "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bmrn-derivation-approval-candidate",
-          "canonical_metric": "gross_margin",
-          "component_fact_ids": [],
-          "denominator_fact_ids": [
-            "bmrn-revenue-2026-q2-2026-06-30"
-          ],
-          "formula_id": "gross_margin",
-          "formula_version": "2.0.0",
-          "numerator_fact_ids": [
-            "missing-gross_profit"
-          ],
-          "reason_codes": [
-            "FORMULA_INPUT_CARDINALITY_INVALID",
-            "FORMULA_NOT_APPLICABLE",
-            "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
-            "FORMULA_OPERAND_SET_INVALID",
-            "NUMERATOR_MISSING"
-          ],
-          "reporting_period": "2026-Q2",
-          "request_id": "bmrn-2026-q2-gross-margin",
-          "status": "blocked",
-          "ticker": "BMRN"
-        },
-        {
-          "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bmrn-derivation-approval-candidate",
-          "calculation_checksum": "0ff831545fc6feb8f82f8d1071f87a431b6f8ad53afe762a10f3340acb916942",
-          "calculation_result": 0.136999719804,
-          "canonical_metric": "operating_margin",
-          "company_identity": "BIOMARIN PHARMACEUTICAL INC",
-          "component_fact_ids": [],
-          "denominator_fact_ids": [
-            "bmrn-revenue-2026-q2-2026-06-30"
-          ],
-          "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v2",
-          "derivation_timestamp": "2026-08-13T15:12:00Z",
-          "evidence_type": "derived",
-          "fiscal_period": "Q2",
-          "fiscal_year": 2026,
-          "formula": {
-            "canonical_expression": "operating_income / revenue",
-            "formula_id": "operating_margin",
-            "operand_contract": {
-              "applicability_policy": "explicit_approved",
-              "components": {
-                "aggregation_policy": "forbidden",
-                "allowed_canonical_concepts": [],
-                "overlap_policy": "not_applicable",
-                "role": "numerator_components"
-              },
-              "denominator": {
-                "cardinality": "exactly_one",
-                "required_canonical_concepts": [
-                  "revenue"
-                ],
-                "role": "denominator"
-              },
-              "denominator_safety_policy": "strictly_positive",
-              "numerator": {
-                "cardinality": "exactly_one",
-                "required_canonical_concepts": [
-                  "operating_income"
-                ],
-                "role": "numerator"
-              },
-              "period_alignment_policy": "exact_start_end_and_fiscal_period",
-              "unit_currency_scale_policy": "exact_match"
-            },
-            "operation": "ratio",
-            "version": "2.0.0"
-          },
-          "formula_id": "operating_margin",
-          "formula_version": "2.0.0",
-          "input_facts": [
-            {
-              "canonical_concept": "operating_income",
-              "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bmrn-mapping-review-candidate",
-              "currency": "USD",
-              "fact_id": "bmrn-operating-income-2026-q2-2026-06-30",
-              "input_unit": "USD",
-              "input_value": 240560000,
-              "normalized_value": "240560000",
-              "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
-              "period_type": "duration",
-              "raw_source_concept": "us-gaap:OperatingIncomeLoss",
-              "scale": 0,
-              "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bmrn-source-approval-candidate",
-              "source_document_checksum": "6c08bf6045ea63ca29848e19e84e591d5b58e82b42d910cf3db54c378f5e8f7c",
-              "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001048477.json"
-            },
-            {
-              "canonical_concept": "revenue",
-              "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bmrn-mapping-review-candidate",
-              "currency": "USD",
-              "fact_id": "bmrn-revenue-2026-q2-2026-06-30",
-              "input_unit": "USD",
-              "input_value": 1755916000,
-              "normalized_value": "1755916000",
-              "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
-              "period_type": "duration",
-              "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
-              "scale": 0,
-              "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bmrn-source-approval-candidate",
-              "source_document_checksum": "6c08bf6045ea63ca29848e19e84e591d5b58e82b42d910cf3db54c378f5e8f7c",
-              "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001048477.json"
-            }
-          ],
-          "instrument_id": "equity:bmrn",
-          "limitations": [
-            "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
-            "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
-          ],
-          "normalized_denominator": "1755916000",
-          "normalized_numerator": "240560000",
-          "numerator_fact_ids": [
-            "bmrn-operating-income-2026-q2-2026-06-30"
-          ],
-          "period": {
-            "fiscal_period": "Q2",
-            "fiscal_year": 2026,
-            "period_end": "2026-06-30",
-            "period_start": "2026-01-01",
-            "period_type": "duration"
-          },
-          "reporting_period": "2026-Q2",
-          "request_id": "bmrn-2026-q2-operating-margin",
-          "result_unit": "ratio",
-          "source_document_checksums": [
-            "6c08bf6045ea63ca29848e19e84e591d5b58e82b42d910cf3db54c378f5e8f7c"
-          ],
-          "source_publication_dates": [
-            "2026-08-06"
-          ],
-          "status": "derived",
-          "ticker": "BMRN",
-          "validation": {
-            "currency_compatibility": "passed",
-            "denominator_safety": "passed",
-            "period_alignment": "passed",
-            "scale_compatibility": "passed",
-            "unit_compatibility": "passed"
-          }
-        }
-      ],
-      "fact_package_checksum": "28208cd4387cf1178d27ccc229a8a8fee490673a4e5275cbef5bf100a1d70876",
-      "formula_catalog_checksum": "7051c9b28ee8c3dc5a4617585384f991826e819f485b31ce5b3091199a66490e",
+      "derivations": [],
       "instrument_id": "equity:bmrn",
       "rank": 7,
       "reason_codes": [
-        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
       ],
-      "status": "pending_approval",
-      "successful_metric_count": 1,
+      "status": "blocked",
       "ticker": "BMRN"
     },
     {
-      "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bmy-derivation-approval-candidate",
-      "approval_state": "pending_no_authority",
-      "blocked_metric_count": 2,
-      "derivations": [
-        {
-          "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bmy-derivation-approval-candidate",
-          "canonical_metric": "gross_margin",
-          "component_fact_ids": [],
-          "denominator_fact_ids": [
-            "bmy-revenue-2026-q2-2026-06-30"
-          ],
-          "formula_id": "gross_margin",
-          "formula_version": "2.0.0",
-          "numerator_fact_ids": [
-            "missing-gross_profit"
-          ],
-          "reason_codes": [
-            "FORMULA_INPUT_CARDINALITY_INVALID",
-            "FORMULA_NOT_APPLICABLE",
-            "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
-            "FORMULA_OPERAND_SET_INVALID",
-            "NUMERATOR_MISSING"
-          ],
-          "reporting_period": "2026-Q2",
-          "request_id": "bmy-2026-q2-gross-margin",
-          "status": "blocked",
-          "ticker": "BMY"
-        },
-        {
-          "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bmy-derivation-approval-candidate",
-          "canonical_metric": "operating_margin",
-          "component_fact_ids": [],
-          "denominator_fact_ids": [
-            "bmy-revenue-2026-q2-2026-06-30"
-          ],
-          "formula_id": "operating_margin",
-          "formula_version": "2.0.0",
-          "numerator_fact_ids": [
-            "missing-operating_income"
-          ],
-          "reason_codes": [
-            "FORMULA_INPUT_CARDINALITY_INVALID",
-            "FORMULA_NOT_APPLICABLE",
-            "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
-            "FORMULA_OPERAND_SET_INVALID",
-            "NUMERATOR_MISSING"
-          ],
-          "reporting_period": "2026-Q2",
-          "request_id": "bmy-2026-q2-operating-margin",
-          "status": "blocked",
-          "ticker": "BMY"
-        }
-      ],
-      "fact_package_checksum": "2666ae3d060bfd01ac7be70d4f6ee9e3427c65e1970108898c5e5ad5df09d0bf",
-      "formula_catalog_checksum": "7051c9b28ee8c3dc5a4617585384f991826e819f485b31ce5b3091199a66490e",
+      "derivations": [],
       "instrument_id": "equity:bmy",
       "rank": 8,
       "reason_codes": [
-        "FORMULA_INPUT_CARDINALITY_INVALID",
-        "FORMULA_NOT_APPLICABLE",
-        "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
-        "FORMULA_OPERAND_SET_INVALID",
-        "NUMERATOR_MISSING"
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
       ],
       "status": "blocked",
-      "successful_metric_count": 0,
       "ticker": "BMY"
     },
     {
-      "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-chrw-derivation-approval-candidate",
-      "approval_state": "pending_no_authority",
-      "blocked_metric_count": 1,
-      "derivations": [
-        {
-          "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-chrw-derivation-approval-candidate",
-          "canonical_metric": "gross_margin",
-          "component_fact_ids": [],
-          "denominator_fact_ids": [
-            "chrw-revenue-2026-q2-2026-06-30"
-          ],
-          "formula_id": "gross_margin",
-          "formula_version": "2.0.0",
-          "numerator_fact_ids": [
-            "missing-gross_profit"
-          ],
-          "reason_codes": [
-            "FORMULA_INPUT_CARDINALITY_INVALID",
-            "FORMULA_NOT_APPLICABLE",
-            "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
-            "FORMULA_OPERAND_SET_INVALID",
-            "NUMERATOR_MISSING"
-          ],
-          "reporting_period": "2026-Q2",
-          "request_id": "chrw-2026-q2-gross-margin",
-          "status": "blocked",
-          "ticker": "CHRW"
-        },
-        {
-          "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-chrw-derivation-approval-candidate",
-          "calculation_checksum": "429a6b946597904061dc6a41deb59bd552769d3e503b678ad2ba1c9c26660075",
-          "calculation_result": 0.048220348379,
-          "canonical_metric": "operating_margin",
-          "company_identity": "C. H. ROBINSON WORLDWIDE, INC.",
-          "component_fact_ids": [],
-          "denominator_fact_ids": [
-            "chrw-revenue-2026-q2-2026-06-30"
-          ],
-          "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v2",
-          "derivation_timestamp": "2026-08-13T15:12:00Z",
-          "evidence_type": "derived",
-          "fiscal_period": "Q2",
-          "fiscal_year": 2026,
-          "formula": {
-            "canonical_expression": "operating_income / revenue",
-            "formula_id": "operating_margin",
-            "operand_contract": {
-              "applicability_policy": "explicit_approved",
-              "components": {
-                "aggregation_policy": "forbidden",
-                "allowed_canonical_concepts": [],
-                "overlap_policy": "not_applicable",
-                "role": "numerator_components"
-              },
-              "denominator": {
-                "cardinality": "exactly_one",
-                "required_canonical_concepts": [
-                  "revenue"
-                ],
-                "role": "denominator"
-              },
-              "denominator_safety_policy": "strictly_positive",
-              "numerator": {
-                "cardinality": "exactly_one",
-                "required_canonical_concepts": [
-                  "operating_income"
-                ],
-                "role": "numerator"
-              },
-              "period_alignment_policy": "exact_start_end_and_fiscal_period",
-              "unit_currency_scale_policy": "exact_match"
-            },
-            "operation": "ratio",
-            "version": "2.0.0"
-          },
-          "formula_id": "operating_margin",
-          "formula_version": "2.0.0",
-          "input_facts": [
-            {
-              "canonical_concept": "operating_income",
-              "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-chrw-mapping-review-candidate",
-              "currency": "USD",
-              "fact_id": "chrw-operating-income-2026-q2-2026-06-30",
-              "input_unit": "USD",
-              "input_value": 431429000,
-              "normalized_value": "431429000",
-              "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
-              "period_type": "duration",
-              "raw_source_concept": "us-gaap:OperatingIncomeLoss",
-              "scale": 0,
-              "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-chrw-source-approval-candidate",
-              "source_document_checksum": "82e2cfb7f114d0a6a3efd71fccfeb7b69e75f367a5447b9a9cc65161e6522929",
-              "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001043277.json"
-            },
-            {
-              "canonical_concept": "revenue",
-              "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-chrw-mapping-review-candidate",
-              "currency": "USD",
-              "fact_id": "chrw-revenue-2026-q2-2026-06-30",
-              "input_unit": "USD",
-              "input_value": 8947032000,
-              "normalized_value": "8947032000",
-              "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
-              "period_type": "duration",
-              "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
-              "scale": 0,
-              "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-chrw-source-approval-candidate",
-              "source_document_checksum": "82e2cfb7f114d0a6a3efd71fccfeb7b69e75f367a5447b9a9cc65161e6522929",
-              "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001043277.json"
-            }
-          ],
-          "instrument_id": "equity:chrw",
-          "limitations": [
-            "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
-            "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
-          ],
-          "normalized_denominator": "8947032000",
-          "normalized_numerator": "431429000",
-          "numerator_fact_ids": [
-            "chrw-operating-income-2026-q2-2026-06-30"
-          ],
-          "period": {
-            "fiscal_period": "Q2",
-            "fiscal_year": 2026,
-            "period_end": "2026-06-30",
-            "period_start": "2026-01-01",
-            "period_type": "duration"
-          },
-          "reporting_period": "2026-Q2",
-          "request_id": "chrw-2026-q2-operating-margin",
-          "result_unit": "ratio",
-          "source_document_checksums": [
-            "82e2cfb7f114d0a6a3efd71fccfeb7b69e75f367a5447b9a9cc65161e6522929"
-          ],
-          "source_publication_dates": [
-            "2026-07-31"
-          ],
-          "status": "derived",
-          "ticker": "CHRW",
-          "validation": {
-            "currency_compatibility": "passed",
-            "denominator_safety": "passed",
-            "period_alignment": "passed",
-            "scale_compatibility": "passed",
-            "unit_compatibility": "passed"
-          }
-        }
-      ],
-      "fact_package_checksum": "0a7376907809a7346c97dd1f0e36ac41e6c34887d3f494726f641ebbea41c0db",
-      "formula_catalog_checksum": "7051c9b28ee8c3dc5a4617585384f991826e819f485b31ce5b3091199a66490e",
+      "derivations": [],
       "instrument_id": "equity:chrw",
       "rank": 9,
       "reason_codes": [
-        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
       ],
-      "status": "pending_approval",
-      "successful_metric_count": 1,
+      "status": "blocked",
       "ticker": "CHRW"
     },
     {
@@ -1407,8 +740,8 @@
         },
         {
           "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ci-derivation-approval-candidate",
-          "calculation_checksum": "c46a2f897c0a957e18192a24c8d7967adb6dd436f5ec4c11826c07f721c13ab1",
-          "calculation_result": 0.035915583396,
+          "calculation_checksum": "eecdfeabdc981474c459585bf35c7d61d870f7da8eb9f8c08043ea19f37671ee",
+          "calculation_result": 0.037338840208,
           "canonical_metric": "operating_margin",
           "company_identity": "The Cigna Group",
           "component_fact_ids": [],
@@ -1461,10 +794,10 @@
               "currency": "USD",
               "fact_id": "ci-operating-income-2026-q2-2026-06-30",
               "input_unit": "USD",
-              "input_value": 5034000000,
-              "normalized_value": "5034000000",
+              "input_value": 2676000000,
+              "normalized_value": "2676000000",
               "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
+              "period_start": "2026-04-01",
               "period_type": "duration",
               "raw_source_concept": "us-gaap:OperatingIncomeLoss",
               "scale": 0,
@@ -1478,10 +811,10 @@
               "currency": "USD",
               "fact_id": "ci-revenue-2026-q2-2026-06-30",
               "input_unit": "USD",
-              "input_value": 140162000000,
-              "normalized_value": "140162000000",
+              "input_value": 71668000000,
+              "normalized_value": "71668000000",
               "period_end": "2026-06-30",
-              "period_start": "2026-01-01",
+              "period_start": "2026-04-01",
               "period_type": "duration",
               "raw_source_concept": "us-gaap:Revenues",
               "scale": 0,
@@ -1495,8 +828,8 @@
             "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
             "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
           ],
-          "normalized_denominator": "140162000000",
-          "normalized_numerator": "5034000000",
+          "normalized_denominator": "71668000000",
+          "normalized_numerator": "2676000000",
           "numerator_fact_ids": [
             "ci-operating-income-2026-q2-2026-06-30"
           ],
@@ -1504,7 +837,7 @@
             "fiscal_period": "Q2",
             "fiscal_year": 2026,
             "period_end": "2026-06-30",
-            "period_start": "2026-01-01",
+            "period_start": "2026-04-01",
             "period_type": "duration"
           },
           "reporting_period": "2026-Q2",
@@ -1527,7 +860,7 @@
           }
         }
       ],
-      "fact_package_checksum": "d99b6884ddf7e86207a0ee13bde3c7605316ac7f984101d5bb62a0bfa898597d",
+      "fact_package_checksum": "49ac5a8f8e53869e9ea7383bd26bb52358a45d59ba1ee455bbb04adbae42305d",
       "formula_catalog_checksum": "7051c9b28ee8c3dc5a4617585384f991826e819f485b31ce5b3091199a66490e",
       "instrument_id": "equity:ci",
       "rank": 10,
@@ -1542,18 +875,20 @@
   "pilot_summary": {
     "approved_import_count": 0,
     "attempted_count": 10,
-    "blocked_instrument_count": 3,
+    "blocked_instrument_count": 7,
     "blockers_by_category": {
-      "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED": 7,
-      "FORMULA_INPUT_CARDINALITY_INVALID": 3,
-      "FORMULA_NOT_APPLICABLE": 3,
-      "FORMULA_NUMERATOR_CONCEPT_MISMATCH": 3,
-      "FORMULA_OPERAND_SET_INVALID": 3,
-      "NUMERATOR_MISSING": 3
+      "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED": 3,
+      "FORMULA_INPUT_CARDINALITY_INVALID": 2,
+      "FORMULA_NOT_APPLICABLE": 2,
+      "FORMULA_NUMERATOR_CONCEPT_MISMATCH": 2,
+      "FORMULA_OPERAND_SET_INVALID": 2,
+      "NUMERATOR_MISSING": 2,
+      "PRIMARY_FACT_PACKAGE_UNAVAILABLE": 5
     },
+    "candidate_partial_pending_approval_count": 3,
     "cohort_size": 10,
-    "derived_candidate_metric_count": 9,
-    "derived_success_count": 7,
+    "derived_candidate_metric_count": 5,
+    "derived_success_count": 3,
     "direct_metric_count": 0,
     "downstream_status": {
       "data06": "not_executed",
@@ -1571,18 +906,17 @@
     },
     "ifrs_count": 0,
     "minimum_safe_processing_target": 6,
-    "minimum_safe_processing_target_met": true,
-    "partial_count": 7,
-    "pending_approval_count": 7,
+    "minimum_safe_processing_target_met": false,
+    "pending_approval_count": 3,
     "run_status": "completed_with_blockers",
-    "safely_processed_candidate_count": 7,
+    "safely_processed_candidate_count": 3,
     "schema_version": "market-engine-data11-targeted-diversified-fundamental-derivation-v1",
     "source_acquired_count": 10,
     "us_gaap_count": 10
   },
   "schema_version": "market-engine-data11-derivation-results-v1",
   "status_counts": {
-    "blocked": 3,
-    "pending_approval": 7
+    "blocked": 7,
+    "pending_approval": 3
   }
 }

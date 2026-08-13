@@ -49,8 +49,9 @@ ME-RUN30/31 and ME-DATA06-10 - broad analysis and evidence baseline
   -> ME-RM08 - portfolio/advisory-price roadmap realignment (docs-only)
   -> ME-PR03 - manual transaction ledger and portfolio-aware candidate context (COMPLETED)
   -> ME-SR25 - advisory price evidence artifact (COMPLETED / MERGED)
-  -> ME-DATA11 - targeted fundamental derivation for the technical candidate funnel (COMPLETED WITH BLOCKERS)
-  -> ME-RUN33 - first useful end-to-end candidate analysis release (NEXT)
+  -> ME-DATA11 - targeted fundamental derivation for the technical candidate funnel (READY FOR HUMAN APPROVAL)
+  -> human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
+  -> ME-RUN33 - first useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - batch grounded advisory consumption (PLANNED)
   -> ME-PS01 - position-sizing decision contract
   -> ME-NL01/02/03 - notification sequence

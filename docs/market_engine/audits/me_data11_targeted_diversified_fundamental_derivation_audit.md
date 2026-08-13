@@ -67,3 +67,39 @@ assertion that the historical
 identical test and assertion fail on the exact clean base
 `9169420427d33864851d36f2b183e35b8bd0c089`; it is therefore classified as the
 documented baseline failure and does not mask a ME-DATA11 regression.
+
+## Review remediation
+
+The remediation adds two versioned authority contracts. The RUN30 contract
+binds the ranking (`15b933...5530`), manifest (`1361c3...8ae`), universe index
+(`175023...5059`), and canonical universe (`c0e2c4...48be`). The downstream
+contract binds the exact DATA06 manifest, summary, per-ticker status, and RUN31
+compact evidence used as the before state.
+
+The order-independent duration policy reduced the defensible pending set to
+ASH, BIO, and CI. Those three have persisted replayable approval bundles; all
+remain pending. Other candidates fail closed where aligned facts are missing,
+formulas are inapplicable, or semantic duplicates conflict. Candidate-only
+status is never authoritative `partial`.
+
+The measured authoritative before state is 6 complete, 39 partial, 907
+missing, 0 invalid/stale/conflicting, 6 advice-input-ready, 0 full-advice-ready,
+and 946 unable-to-advise. No downstream runner executed, so the authoritative
+after state is identical. Zero outside-cohort regressions is proven by the
+unchanged checksum-bound authoritative artifacts.
+
+Status after remediation: **READY FOR HUMAN APPROVAL**. A human must review
+each ASH, BIO, and CI bundle and issue an explicit checksum-bound decision.
+Only a valid approval may activate DATA07; DATA06 and RUN31 follow only after
+that import. ME-RUN33 is conditional on the completed approval/import
+checkpoint. No provider acquisition, approval, downstream run, recommendation,
+allocation, execution, portfolio mutation, or publication occurred.
+
+Remediation validation results:
+
+- focused ME-DATA11 and blocker regression suites: 89 passed;
+- full Market Engine suite: 1,765 passed and the one baseline failure above;
+- full repository suite: 2,432 passed and the same one baseline failure;
+- Python compilation, strict JSON parsing, JSON Schema validation for every
+  new artifact variant, checksum/replay validation, governance greps, and
+  `git diff --check`: passed.

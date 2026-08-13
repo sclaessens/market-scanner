@@ -1,0 +1,112 @@
+{
+  "catalog_id": "market-engine-data10-fundamental-metric-formulas-2026-07-19",
+  "formulas": [
+    {
+      "canonical_expression": "gross_profit / revenue",
+      "canonical_metric": "gross_margin",
+      "formula_id": "gross_margin",
+      "operand_contract": {
+        "applicability_policy": "explicit_approved",
+        "components": {
+          "aggregation_policy": "forbidden",
+          "allowed_canonical_concepts": [],
+          "overlap_policy": "not_applicable",
+          "role": "numerator_components"
+        },
+        "denominator": {
+          "cardinality": "exactly_one",
+          "required_canonical_concepts": [
+            "revenue"
+          ],
+          "role": "denominator"
+        },
+        "denominator_safety_policy": "strictly_positive",
+        "numerator": {
+          "cardinality": "exactly_one",
+          "required_canonical_concepts": [
+            "gross_profit"
+          ],
+          "role": "numerator"
+        },
+        "period_alignment_policy": "exact_start_end_and_fiscal_period",
+        "unit_currency_scale_policy": "exact_match"
+      },
+      "operation": "ratio",
+      "period_type": "duration",
+      "version": "2.0.0"
+    },
+    {
+      "canonical_expression": "operating_income / revenue",
+      "canonical_metric": "operating_margin",
+      "formula_id": "operating_margin",
+      "operand_contract": {
+        "applicability_policy": "explicit_approved",
+        "components": {
+          "aggregation_policy": "forbidden",
+          "allowed_canonical_concepts": [],
+          "overlap_policy": "not_applicable",
+          "role": "numerator_components"
+        },
+        "denominator": {
+          "cardinality": "exactly_one",
+          "required_canonical_concepts": [
+            "revenue"
+          ],
+          "role": "denominator"
+        },
+        "denominator_safety_policy": "strictly_positive",
+        "numerator": {
+          "cardinality": "exactly_one",
+          "required_canonical_concepts": [
+            "operating_income"
+          ],
+          "role": "numerator"
+        },
+        "period_alignment_policy": "exact_start_end_and_fiscal_period",
+        "unit_currency_scale_policy": "exact_match"
+      },
+      "operation": "ratio",
+      "period_type": "duration",
+      "version": "2.0.0"
+    },
+    {
+      "canonical_expression": "sum(explicitly_approved_interest_bearing_debt_components) / total_equity",
+      "canonical_metric": "debt_to_equity",
+      "formula_id": "debt_to_equity",
+      "operand_contract": {
+        "applicability_policy": "explicit_approved",
+        "components": {
+          "aggregation_policy": "explicit_selected_complete_set",
+          "allowed_canonical_concepts": [
+            "commercial_paper",
+            "current_term_debt",
+            "noncurrent_term_debt",
+            "short_term_borrowings",
+            "total_interest_bearing_debt"
+          ],
+          "overlap_policy": "forbid_reported_total_with_components",
+          "role": "numerator_components"
+        },
+        "denominator": {
+          "cardinality": "exactly_one",
+          "required_canonical_concepts": [
+            "total_equity"
+          ],
+          "role": "denominator"
+        },
+        "denominator_safety_policy": "strictly_positive",
+        "numerator": {
+          "cardinality": "forbidden",
+          "required_canonical_concepts": [],
+          "role": "numerator"
+        },
+        "period_alignment_policy": "exact_balance_sheet_date_and_fiscal_period",
+        "unit_currency_scale_policy": "exact_match"
+      },
+      "operation": "component_sum_ratio",
+      "period_type": "instant",
+      "version": "2.0.0"
+    }
+  ],
+  "schema_version": "market-engine-data10-fundamental-metric-formula-catalog-v2"
+}

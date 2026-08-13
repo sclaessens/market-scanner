@@ -1,0 +1,51 @@
+{
+  "accounting_framework": "us_gaap",
+  "boundary": "Minimal checksum-bound review evidence; human source-authenticity approval is still required.",
+  "cik": "0001739940",
+  "full_source_snapshot_sha256": "4ebc243944fe570eeaade38acd4fb93df843cf53e1e7262560f17f3b6ab3c6ef",
+  "instrument_id": "equity:ci",
+  "issuer_identity": "The Cigna Group",
+  "observations": [
+    {
+      "canonical_concept": "operating_income",
+      "currency": "USD",
+      "duration_class": "discrete_quarter",
+      "duration_days": 91,
+      "fact_id": "ci-operating-income-2026-q2-2026-06-30",
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "period_end": "2026-06-30",
+      "period_start": "2026-04-01",
+      "period_type": "duration",
+      "raw_source_concept": "us-gaap:OperatingIncomeLoss",
+      "scale": 0,
+      "source_accession": "0001739940-26-000065",
+      "source_publication_date": "2026-07-30",
+      "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001739940.json",
+      "unit": "USD",
+      "value": 2676000000
+    },
+    {
+      "canonical_concept": "revenue",
+      "currency": "USD",
+      "duration_class": "discrete_quarter",
+      "duration_days": 91,
+      "fact_id": "ci-revenue-2026-q2-2026-06-30",
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "period_end": "2026-06-30",
+      "period_start": "2026-04-01",
+      "period_type": "duration",
+      "raw_source_concept": "us-gaap:Revenues",
+      "scale": 0,
+      "source_accession": "0001739940-26-000065",
+      "source_publication_date": "2026-07-30",
+      "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001739940.json",
+      "unit": "USD",
+      "value": 71668000000
+    }
+  ],
+  "official_source_url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001739940.json",
+  "schema_version": "market-engine-data11-minimal-primary-source-evidence-v1",
+  "ticker": "CI"
+}

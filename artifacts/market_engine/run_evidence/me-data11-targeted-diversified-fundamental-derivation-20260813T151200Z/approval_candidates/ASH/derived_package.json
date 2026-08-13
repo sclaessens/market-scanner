@@ -1,0 +1,258 @@
+{
+  "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-derivation-approval-candidate",
+  "blocked_metric_count": 0,
+  "boundary": "Every emitted metric is derived evidence. The source documents did not publish these ratios; DATA07 consumption requires a separate checksum-bound derivation approval.",
+  "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v2",
+  "derivation_timestamp": "2026-08-13T15:12:00Z",
+  "derivations": [
+    {
+      "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-derivation-approval-candidate",
+      "calculation_checksum": "ca34778c17b698f77af3dc2c4bfeefa8ba050144a9f9bfb87ecb8e1585f2f71e",
+      "calculation_result": 0.342052313883,
+      "canonical_metric": "gross_margin",
+      "company_identity": "ASHLAND INC.",
+      "component_fact_ids": [],
+      "denominator_fact_ids": [
+        "ash-revenue-2026-q3-2026-06-30"
+      ],
+      "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v2",
+      "derivation_timestamp": "2026-08-13T15:12:00Z",
+      "evidence_type": "derived",
+      "fiscal_period": "Q3",
+      "fiscal_year": 2026,
+      "formula": {
+        "canonical_expression": "gross_profit / revenue",
+        "formula_id": "gross_margin",
+        "operand_contract": {
+          "applicability_policy": "explicit_approved",
+          "components": {
+            "aggregation_policy": "forbidden",
+            "allowed_canonical_concepts": [],
+            "overlap_policy": "not_applicable",
+            "role": "numerator_components"
+          },
+          "denominator": {
+            "cardinality": "exactly_one",
+            "required_canonical_concepts": [
+              "revenue"
+            ],
+            "role": "denominator"
+          },
+          "denominator_safety_policy": "strictly_positive",
+          "numerator": {
+            "cardinality": "exactly_one",
+            "required_canonical_concepts": [
+              "gross_profit"
+            ],
+            "role": "numerator"
+          },
+          "period_alignment_policy": "exact_start_end_and_fiscal_period",
+          "unit_currency_scale_policy": "exact_match"
+        },
+        "operation": "ratio",
+        "version": "2.0.0"
+      },
+      "formula_id": "gross_margin",
+      "formula_version": "2.0.0",
+      "input_facts": [
+        {
+          "canonical_concept": "gross_profit",
+          "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-mapping-review-candidate",
+          "currency": "USD",
+          "fact_id": "ash-gross-profit-2026-q3-2026-06-30",
+          "input_unit": "USD",
+          "input_value": 170000000,
+          "normalized_value": "170000000",
+          "period_end": "2026-06-30",
+          "period_start": "2026-04-01",
+          "period_type": "duration",
+          "raw_source_concept": "us-gaap:GrossProfit",
+          "scale": 0,
+          "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-source-approval-candidate",
+          "source_document_checksum": "0094bc2645de945082b146e3708c39a077ccead331460b73af8663ef448a5797",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001674862.json"
+        },
+        {
+          "canonical_concept": "revenue",
+          "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-mapping-review-candidate",
+          "currency": "USD",
+          "fact_id": "ash-revenue-2026-q3-2026-06-30",
+          "input_unit": "USD",
+          "input_value": 497000000,
+          "normalized_value": "497000000",
+          "period_end": "2026-06-30",
+          "period_start": "2026-04-01",
+          "period_type": "duration",
+          "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+          "scale": 0,
+          "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-source-approval-candidate",
+          "source_document_checksum": "0094bc2645de945082b146e3708c39a077ccead331460b73af8663ef448a5797",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001674862.json"
+        }
+      ],
+      "instrument_id": "equity:ash",
+      "limitations": [
+        "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
+        "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
+      ],
+      "normalized_denominator": "497000000",
+      "normalized_numerator": "170000000",
+      "numerator_fact_ids": [
+        "ash-gross-profit-2026-q3-2026-06-30"
+      ],
+      "period": {
+        "fiscal_period": "Q3",
+        "fiscal_year": 2026,
+        "period_end": "2026-06-30",
+        "period_start": "2026-04-01",
+        "period_type": "duration"
+      },
+      "reporting_period": "2026-Q3",
+      "request_id": "ash-2026-q3-gross-margin",
+      "result_unit": "ratio",
+      "source_document_checksums": [
+        "0094bc2645de945082b146e3708c39a077ccead331460b73af8663ef448a5797"
+      ],
+      "source_publication_dates": [
+        "2026-07-29"
+      ],
+      "status": "derived",
+      "ticker": "ASH",
+      "validation": {
+        "currency_compatibility": "passed",
+        "denominator_safety": "passed",
+        "period_alignment": "passed",
+        "scale_compatibility": "passed",
+        "unit_compatibility": "passed"
+      }
+    },
+    {
+      "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-derivation-approval-candidate",
+      "calculation_checksum": "d6fcde2d3b05569520404f01c1dd59a0a82d2054936bf4885754a95616fad69b",
+      "calculation_result": 0.086519114688,
+      "canonical_metric": "operating_margin",
+      "company_identity": "ASHLAND INC.",
+      "component_fact_ids": [],
+      "denominator_fact_ids": [
+        "ash-revenue-2026-q3-2026-06-30"
+      ],
+      "derivation_engine_version": "market-engine-data10-primary-source-metric-derivation-engine-v2",
+      "derivation_timestamp": "2026-08-13T15:12:00Z",
+      "evidence_type": "derived",
+      "fiscal_period": "Q3",
+      "fiscal_year": 2026,
+      "formula": {
+        "canonical_expression": "operating_income / revenue",
+        "formula_id": "operating_margin",
+        "operand_contract": {
+          "applicability_policy": "explicit_approved",
+          "components": {
+            "aggregation_policy": "forbidden",
+            "allowed_canonical_concepts": [],
+            "overlap_policy": "not_applicable",
+            "role": "numerator_components"
+          },
+          "denominator": {
+            "cardinality": "exactly_one",
+            "required_canonical_concepts": [
+              "revenue"
+            ],
+            "role": "denominator"
+          },
+          "denominator_safety_policy": "strictly_positive",
+          "numerator": {
+            "cardinality": "exactly_one",
+            "required_canonical_concepts": [
+              "operating_income"
+            ],
+            "role": "numerator"
+          },
+          "period_alignment_policy": "exact_start_end_and_fiscal_period",
+          "unit_currency_scale_policy": "exact_match"
+        },
+        "operation": "ratio",
+        "version": "2.0.0"
+      },
+      "formula_id": "operating_margin",
+      "formula_version": "2.0.0",
+      "input_facts": [
+        {
+          "canonical_concept": "operating_income",
+          "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-mapping-review-candidate",
+          "currency": "USD",
+          "fact_id": "ash-operating-income-2026-q3-2026-06-30",
+          "input_unit": "USD",
+          "input_value": 43000000,
+          "normalized_value": "43000000",
+          "period_end": "2026-06-30",
+          "period_start": "2026-04-01",
+          "period_type": "duration",
+          "raw_source_concept": "us-gaap:OperatingIncomeLoss",
+          "scale": 0,
+          "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-source-approval-candidate",
+          "source_document_checksum": "0094bc2645de945082b146e3708c39a077ccead331460b73af8663ef448a5797",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001674862.json"
+        },
+        {
+          "canonical_concept": "revenue",
+          "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-mapping-review-candidate",
+          "currency": "USD",
+          "fact_id": "ash-revenue-2026-q3-2026-06-30",
+          "input_unit": "USD",
+          "input_value": 497000000,
+          "normalized_value": "497000000",
+          "period_end": "2026-06-30",
+          "period_start": "2026-04-01",
+          "period_type": "duration",
+          "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+          "scale": 0,
+          "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-source-approval-candidate",
+          "source_document_checksum": "0094bc2645de945082b146e3708c39a077ccead331460b73af8663ef448a5797",
+          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001674862.json"
+        }
+      ],
+      "instrument_id": "equity:ash",
+      "limitations": [
+        "The ratio is calculated from approved canonical primary-source facts; the source did not publish the ratio itself.",
+        "No estimate, interpolation, annualization, fallback metric, or missing-value substitution was used."
+      ],
+      "normalized_denominator": "497000000",
+      "normalized_numerator": "43000000",
+      "numerator_fact_ids": [
+        "ash-operating-income-2026-q3-2026-06-30"
+      ],
+      "period": {
+        "fiscal_period": "Q3",
+        "fiscal_year": 2026,
+        "period_end": "2026-06-30",
+        "period_start": "2026-04-01",
+        "period_type": "duration"
+      },
+      "reporting_period": "2026-Q3",
+      "request_id": "ash-2026-q3-operating-margin",
+      "result_unit": "ratio",
+      "source_document_checksums": [
+        "0094bc2645de945082b146e3708c39a077ccead331460b73af8663ef448a5797"
+      ],
+      "source_publication_dates": [
+        "2026-07-29"
+      ],
+      "status": "derived",
+      "ticker": "ASH",
+      "validation": {
+        "currency_compatibility": "passed",
+        "denominator_safety": "passed",
+        "period_alignment": "passed",
+        "scale_compatibility": "passed",
+        "unit_compatibility": "passed"
+      }
+    }
+  ],
+  "fact_package_checksum": "c999b0c9051c8aead84db9bb26e18cd787e6ca48fbfb7dec5a723c4ca31ee50e",
+  "fact_package_id": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-primary-facts",
+  "formula_catalog_checksum": "7051c9b28ee8c3dc5a4617585384f991826e819f485b31ce5b3091199a66490e",
+  "formula_catalog_id": "market-engine-data10-fundamental-metric-formulas-2026-07-19",
+  "package_id": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-primary-facts-derived",
+  "schema_version": "market-engine-data10-derived-fundamental-metrics-v1",
+  "successful_metric_count": 2
+}

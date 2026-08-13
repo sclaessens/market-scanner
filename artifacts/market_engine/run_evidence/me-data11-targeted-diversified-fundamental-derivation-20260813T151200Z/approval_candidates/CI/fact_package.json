@@ -1,0 +1,110 @@
+{
+  "derivation_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ci-derivation-approval-candidate",
+  "derivation_requests": [
+    {
+      "applicability": {
+        "approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ci-mapping-review-candidate",
+        "status": "not_applicable"
+      },
+      "canonical_metric": "gross_margin",
+      "component_fact_ids": [],
+      "denominator_fact_ids": [
+        "ci-revenue-2026-q2-2026-06-30"
+      ],
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "formula_id": "gross_margin",
+      "formula_version": "2.0.0",
+      "numerator_fact_ids": [
+        "missing-gross_profit"
+      ],
+      "request_id": "ci-2026-q2-gross-margin",
+      "ticker": "CI"
+    },
+    {
+      "applicability": {
+        "approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ci-mapping-review-candidate",
+        "status": "applicable"
+      },
+      "canonical_metric": "operating_margin",
+      "component_fact_ids": [],
+      "denominator_fact_ids": [
+        "ci-revenue-2026-q2-2026-06-30"
+      ],
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "formula_id": "operating_margin",
+      "formula_version": "2.0.0",
+      "numerator_fact_ids": [
+        "ci-operating-income-2026-q2-2026-06-30"
+      ],
+      "request_id": "ci-2026-q2-operating-margin",
+      "ticker": "CI"
+    }
+  ],
+  "derivation_timestamp": "2026-08-13T15:12:00Z",
+  "facts": [
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "canonical_concept": "operating_income",
+      "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ci-mapping-review-candidate",
+      "company_identity": "The Cigna Group",
+      "currency": "USD",
+      "duration_class": "discrete_quarter",
+      "duration_days": 91,
+      "fact_id": "ci-operating-income-2026-q2-2026-06-30",
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "instrument_id": "equity:ci",
+      "observed_at": "2026-08-13T15:12:00Z",
+      "parser_version": "market-engine-data11-sec-companyfacts-canonical-extraction-v1",
+      "period_end": "2026-06-30",
+      "period_start": "2026-04-01",
+      "period_type": "duration",
+      "raw_source_concept": "us-gaap:OperatingIncomeLoss",
+      "scale": 0,
+      "source_accession": "0001739940-26-000065",
+      "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ci-source-approval-candidate",
+      "source_document_checksum": "4ebc243944fe570eeaade38acd4fb93df843cf53e1e7262560f17f3b6ab3c6ef",
+      "source_name": "SEC CompanyFacts",
+      "source_publication_date": "2026-07-30",
+      "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001739940.json",
+      "ticker": "CI",
+      "unit": "USD",
+      "value": 2676000000
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "canonical_concept": "revenue",
+      "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ci-mapping-review-candidate",
+      "company_identity": "The Cigna Group",
+      "currency": "USD",
+      "duration_class": "discrete_quarter",
+      "duration_days": 91,
+      "fact_id": "ci-revenue-2026-q2-2026-06-30",
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "instrument_id": "equity:ci",
+      "observed_at": "2026-08-13T15:12:00Z",
+      "parser_version": "market-engine-data11-sec-companyfacts-canonical-extraction-v1",
+      "period_end": "2026-06-30",
+      "period_start": "2026-04-01",
+      "period_type": "duration",
+      "raw_source_concept": "us-gaap:Revenues",
+      "scale": 0,
+      "source_accession": "0001739940-26-000065",
+      "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ci-source-approval-candidate",
+      "source_document_checksum": "4ebc243944fe570eeaade38acd4fb93df843cf53e1e7262560f17f3b6ab3c6ef",
+      "source_name": "SEC CompanyFacts",
+      "source_publication_date": "2026-07-30",
+      "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001739940.json",
+      "ticker": "CI",
+      "unit": "USD",
+      "value": 71668000000
+    }
+  ],
+  "package_id": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ci-primary-facts",
+  "schema_version": "market-engine-data10-primary-source-fact-package-v1"
+}

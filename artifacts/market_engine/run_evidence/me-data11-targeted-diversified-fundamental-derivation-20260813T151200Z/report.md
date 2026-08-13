@@ -6,8 +6,8 @@ Run status: `completed_with_blockers`
 
 - Cohort: 10
 - Official primary sources acquired: 10
-- Safely processed derivation candidates: 7
-- Derived metric candidates: 9
+- Safely processed derivation candidates: 3
+- Derived metric candidates: 5
 - Approved downstream imports: 0
 
 All derived results remain pending, checksum-bound candidates with no downstream authority. No DATA07, DATA06, or RUN31 execution occurred because no separate operator approval was supplied.
@@ -18,13 +18,13 @@ All derived results remain pending, checksum-bound candidates with no downstream
 |---:|---|---|---:|---|
 | 1 | ASB | yes | 0 | no |
 | 2 | ASH | yes | 2 | no |
-| 3 | ATR | yes | 1 | no |
+| 3 | ATR | yes | 0 | no |
 | 4 | AXP | yes | 0 | no |
 | 5 | BIO | yes | 2 | no |
-| 6 | BKH | yes | 1 | no |
-| 7 | BMRN | yes | 1 | no |
+| 6 | BKH | yes | 0 | no |
+| 7 | BMRN | yes | 0 | no |
 | 8 | BMY | yes | 0 | no |
-| 9 | CHRW | yes | 1 | no |
+| 9 | CHRW | yes | 0 | no |
 | 10 | CI | yes | 1 | no |
 | 11 | CNC | no | 0 | no |
 | 12 | CNO | no | 0 | no |

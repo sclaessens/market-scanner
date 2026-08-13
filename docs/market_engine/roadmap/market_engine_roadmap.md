@@ -108,8 +108,9 @@ ME-RM08 - Portfolio ledger and advisory price roadmap realignment
   -> ME-PR03 - Manual portfolio transaction ledger and portfolio-aware
                candidate context (COMPLETED)
   -> ME-SR25 - Advisory price evidence artifact (COMPLETED / MERGED)
-  -> ME-DATA11 - Targeted fundamental derivation for the technical candidate funnel (COMPLETED WITH BLOCKERS)
-  -> ME-RUN33 - First useful end-to-end candidate analysis release (NEXT)
+  -> ME-DATA11 - Targeted fundamental derivation for the technical candidate funnel (READY FOR HUMAN APPROVAL)
+  -> Human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
+  -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - Batch grounded advisory consumption (PLANNED)
   -> ME-PS01 - Position-sizing decision contract
   -> ME-NL01/02/03 - Notification sequence
@@ -121,10 +122,12 @@ fundamental, model-invocation, or notification work. ME-SR25 then provides
 recent descriptive prices without weakening the blocked canonical
 publication boundary.
 
-ME-RUN33 is the first unreserved run identifier and is reserved for the
-accelerated candidate release. It must produce 5-15 grounded candidates or
-record explicit no-candidate evidence. ME-PI01 and ME-CI11D remain planned but
-deferred. Historical `Next` labels below do not override this section.
+ME-RUN33 is the first unreserved run identifier and remains reserved for the
+accelerated candidate release. It is not executable until checksum-bound human
+approval, DATA07 import, DATA06 refresh, and RUN31 evidence complete
+successfully. It must produce 5-15 grounded candidates or record explicit
+no-candidate evidence. ME-PI01 and ME-CI11D remain planned but deferred.
+Historical `Next` labels below do not override this section.
 
 ME-ADV01 implemented the first minimal deterministic advice engine.ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
 the ME-GH02 `ticker_status_index.json` and linked dry-run artifacts, writes

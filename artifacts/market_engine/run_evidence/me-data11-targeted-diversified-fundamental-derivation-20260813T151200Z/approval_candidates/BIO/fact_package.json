@@ -1,0 +1,140 @@
+{
+  "derivation_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-derivation-approval-candidate",
+  "derivation_requests": [
+    {
+      "applicability": {
+        "approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-mapping-review-candidate",
+        "status": "applicable"
+      },
+      "canonical_metric": "gross_margin",
+      "component_fact_ids": [],
+      "denominator_fact_ids": [
+        "bio-revenue-2026-q2-2026-06-30"
+      ],
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "formula_id": "gross_margin",
+      "formula_version": "2.0.0",
+      "numerator_fact_ids": [
+        "bio-gross-profit-2026-q2-2026-06-30"
+      ],
+      "request_id": "bio-2026-q2-gross-margin",
+      "ticker": "BIO"
+    },
+    {
+      "applicability": {
+        "approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-mapping-review-candidate",
+        "status": "applicable"
+      },
+      "canonical_metric": "operating_margin",
+      "component_fact_ids": [],
+      "denominator_fact_ids": [
+        "bio-revenue-2026-q2-2026-06-30"
+      ],
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "formula_id": "operating_margin",
+      "formula_version": "2.0.0",
+      "numerator_fact_ids": [
+        "bio-operating-income-2026-q2-2026-06-30"
+      ],
+      "request_id": "bio-2026-q2-operating-margin",
+      "ticker": "BIO"
+    }
+  ],
+  "derivation_timestamp": "2026-08-13T15:12:00Z",
+  "facts": [
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "canonical_concept": "gross_profit",
+      "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-mapping-review-candidate",
+      "company_identity": "BIO-RAD LABORATORIES, INC.",
+      "currency": "USD",
+      "duration_class": "discrete_quarter",
+      "duration_days": 91,
+      "fact_id": "bio-gross-profit-2026-q2-2026-06-30",
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "instrument_id": "equity:bio",
+      "observed_at": "2026-08-13T15:12:00Z",
+      "parser_version": "market-engine-data11-sec-companyfacts-canonical-extraction-v1",
+      "period_end": "2026-06-30",
+      "period_start": "2026-04-01",
+      "period_type": "duration",
+      "raw_source_concept": "us-gaap:GrossProfit",
+      "scale": 0,
+      "source_accession": "0000012208-26-000048",
+      "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-source-approval-candidate",
+      "source_document_checksum": "2c99b66683ce190018ea48c36ff106fbdc7adc20156f39a6d4053884061cc47f",
+      "source_name": "SEC CompanyFacts",
+      "source_publication_date": "2026-08-04",
+      "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000012208.json",
+      "ticker": "BIO",
+      "unit": "USD",
+      "value": 345800000
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "canonical_concept": "operating_income",
+      "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-mapping-review-candidate",
+      "company_identity": "BIO-RAD LABORATORIES, INC.",
+      "currency": "USD",
+      "duration_class": "discrete_quarter",
+      "duration_days": 91,
+      "fact_id": "bio-operating-income-2026-q2-2026-06-30",
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "instrument_id": "equity:bio",
+      "observed_at": "2026-08-13T15:12:00Z",
+      "parser_version": "market-engine-data11-sec-companyfacts-canonical-extraction-v1",
+      "period_end": "2026-06-30",
+      "period_start": "2026-04-01",
+      "period_type": "duration",
+      "raw_source_concept": "us-gaap:OperatingIncomeLoss",
+      "scale": 0,
+      "source_accession": "0000012208-26-000048",
+      "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-source-approval-candidate",
+      "source_document_checksum": "2c99b66683ce190018ea48c36ff106fbdc7adc20156f39a6d4053884061cc47f",
+      "source_name": "SEC CompanyFacts",
+      "source_publication_date": "2026-08-04",
+      "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000012208.json",
+      "ticker": "BIO",
+      "unit": "USD",
+      "value": 72600000
+    },
+    {
+      "accounting_framework": "us_gaap",
+      "acquired_at": "2026-08-13T15:12:00Z",
+      "canonical_concept": "revenue",
+      "canonical_mapping_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-mapping-review-candidate",
+      "company_identity": "BIO-RAD LABORATORIES, INC.",
+      "currency": "USD",
+      "duration_class": "discrete_quarter",
+      "duration_days": 91,
+      "fact_id": "bio-revenue-2026-q2-2026-06-30",
+      "fiscal_period": "Q2",
+      "fiscal_year": 2026,
+      "instrument_id": "equity:bio",
+      "observed_at": "2026-08-13T15:12:00Z",
+      "parser_version": "market-engine-data11-sec-companyfacts-canonical-extraction-v1",
+      "period_end": "2026-06-30",
+      "period_start": "2026-04-01",
+      "period_type": "duration",
+      "raw_source_concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "scale": 0,
+      "source_accession": "0000012208-26-000048",
+      "source_approval_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-source-approval-candidate",
+      "source_document_checksum": "2c99b66683ce190018ea48c36ff106fbdc7adc20156f39a6d4053884061cc47f",
+      "source_name": "SEC CompanyFacts",
+      "source_publication_date": "2026-08-04",
+      "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000012208.json",
+      "ticker": "BIO",
+      "unit": "USD",
+      "value": 651000000
+    }
+  ],
+  "package_id": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-primary-facts",
+  "schema_version": "market-engine-data10-primary-source-fact-package-v1"
+}

@@ -84,8 +84,8 @@ def test_valid_authoritative_run30_input_yields_checksum_bound_top_25() -> None:
         (lambda r, m, u: m["input"].update(universe_version="other"), "universe versions"),
         (lambda r, m, u: r["candidates"][1].update(rank=0), "ranking order"),
         (lambda r, m, u: r["candidates"][1].update(instrument_id=r["candidates"][0]["instrument_id"]), "duplicate"),
-        (lambda r, m, u: r["candidates"][0].update(instrument_id="equity:unknown"), "identity"),
-        (lambda r, m, u: r["candidates"][0]["traceability"].update(price_history_path="elsewhere.csv"), "canonical local universe"),
+        (lambda r, m, u: r["candidates"][0].update(instrument_id="equity:unknown"), "tracked authority"),
+        (lambda r, m, u: r["candidates"][0]["traceability"].update(price_history_path="elsewhere.csv"), "tracked authority"),
     ],
 )
 def test_funnel_rejects_invalid_machine_authority(mutation, message: str) -> None:
@@ -95,12 +95,11 @@ def test_funnel_rejects_invalid_machine_authority(mutation, message: str) -> Non
         _funnel(ranking, manifest, universe)
 
 
-def test_non_ranking_eligible_row_is_excluded_without_using_markdown() -> None:
+def test_changed_ranking_eligibility_is_rejected_by_tracked_authority() -> None:
     ranking, manifest, universe = _inputs()
     ranking["candidates"][0]["ranking_eligible"] = False
-    funnel = _funnel(ranking, manifest, universe)
-    assert funnel["candidates"][0]["ticker"] == "ASH"
-    assert all(".md" not in value for value in funnel["source_bindings"].values() if isinstance(value, str))
+    with pytest.raises(TargetedDerivationError, match="tracked authority"):
+        _funnel(ranking, manifest, universe)
 
 
 def test_cohort_is_bounded_rank_first_and_has_explicit_reason_codes() -> None:
@@ -290,12 +289,13 @@ def test_full_bounded_run_writes_required_compact_artifacts_and_no_downstream_au
         "derivation_summary.json", "fundamental_comparison_matrix.json",
         "downstream_readiness_delta.json", "checksum_index.json", "report.md",
     }
-    assert {path.name for path in output.iterdir()} == required
+    assert {path.name for path in output.iterdir()} == required | {"approval_candidates"}
+    assert sorted(path.name for path in (output / "approval_candidates").iterdir()) == tickers
     derivation = json.loads((output / "derivation_summary.json").read_text())
     downstream = json.loads((output / "downstream_readiness_delta.json").read_text())
     assert derivation["pilot_summary"]["minimum_safe_processing_target_met"] is True
     assert derivation["pilot_summary"]["approved_import_count"] == 0
-    assert downstream["data07_executed_count"] == 0
+    assert downstream["downstream_executed"] is False
     assert downstream["after_authoritative"] == downstream["before"]
 
 

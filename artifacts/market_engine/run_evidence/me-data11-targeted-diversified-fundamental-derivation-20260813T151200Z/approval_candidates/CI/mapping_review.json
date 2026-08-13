@@ -1,0 +1,20 @@
+{
+  "decision": "pending",
+  "limitations": [
+    "This pending mapping review grants no canonical mapping authority."
+  ],
+  "mappings": [
+    [
+      "us-gaap:OperatingIncomeLoss",
+      "operating_income",
+      "us_gaap"
+    ],
+    [
+      "us-gaap:Revenues",
+      "revenue",
+      "us_gaap"
+    ]
+  ],
+  "schema_version": "market-engine-data11-canonical-mapping-review-v1",
+  "ticker": "CI"
+}

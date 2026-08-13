@@ -19,6 +19,7 @@
       ],
       "rank": 1,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "ASB",
       "ticker": "ASB"
     },
     {
@@ -33,6 +34,7 @@
       ],
       "rank": 2,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "ASH",
       "ticker": "ASH"
     },
     {
@@ -47,6 +49,7 @@
       ],
       "rank": 3,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "ATR",
       "ticker": "ATR"
     },
     {
@@ -61,6 +64,7 @@
       ],
       "rank": 4,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "AXP",
       "ticker": "AXP"
     },
     {
@@ -75,6 +79,7 @@
       ],
       "rank": 5,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "BIO",
       "ticker": "BIO"
     },
     {
@@ -89,6 +94,7 @@
       ],
       "rank": 6,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "BKH",
       "ticker": "BKH"
     },
     {
@@ -103,6 +109,7 @@
       ],
       "rank": 7,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "BMRN",
       "ticker": "BMRN"
     },
     {
@@ -117,6 +124,7 @@
       ],
       "rank": 8,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "BMY",
       "ticker": "BMY"
     },
     {
@@ -131,6 +139,7 @@
       ],
       "rank": 9,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "CHRW",
       "ticker": "CHRW"
     },
     {
@@ -145,6 +154,7 @@
       ],
       "rank": 10,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "CI",
       "ticker": "CI"
     },
     {
@@ -159,6 +169,7 @@
       ],
       "rank": 11,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "CNC",
       "ticker": "CNC"
     },
     {
@@ -173,6 +184,7 @@
       ],
       "rank": 12,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "CNO",
       "ticker": "CNO"
     },
     {
@@ -187,6 +199,7 @@
       ],
       "rank": 13,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "COLB",
       "ticker": "COLB"
     },
     {
@@ -201,6 +214,7 @@
       ],
       "rank": 14,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "CSCO",
       "ticker": "CSCO"
     },
     {
@@ -215,6 +229,7 @@
       ],
       "rank": 15,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "CVS",
       "ticker": "CVS"
     },
     {
@@ -229,6 +244,7 @@
       ],
       "rank": 16,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "D",
       "ticker": "D"
     },
     {
@@ -243,6 +259,7 @@
       ],
       "rank": 17,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "DIA",
       "ticker": "DIA"
     },
     {
@@ -257,6 +274,7 @@
       ],
       "rank": 18,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "EIX",
       "ticker": "EIX"
     },
     {
@@ -271,6 +289,7 @@
       ],
       "rank": 19,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "EPR",
       "ticker": "EPR"
     },
     {
@@ -285,6 +304,7 @@
       ],
       "rank": 20,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "ETR",
       "ticker": "ETR"
     },
     {
@@ -299,6 +319,7 @@
       ],
       "rank": 21,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "FE",
       "ticker": "FE"
     },
     {
@@ -313,6 +334,7 @@
       ],
       "rank": 22,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "FHI",
       "ticker": "FHI"
     },
     {
@@ -327,6 +349,7 @@
       ],
       "rank": 23,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "FHN",
       "ticker": "FHN"
     },
     {
@@ -341,6 +364,7 @@
       ],
       "rank": 24,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "FLG",
       "ticker": "FLG"
     },
     {
@@ -355,11 +379,14 @@
       ],
       "rank": 25,
       "ranking_scope": "technical_setup_screening",
+      "source_symbol": "GATX",
       "ticker": "GATX"
     }
   ],
   "schema_version": "market-engine-data11-technical-candidate-funnel-v1",
   "source_bindings": {
+    "authority_path": "config/market_engine/data11_run30_input_authority.json",
+    "authority_sha256": "8e6993d1ba52fbc4ca659b04dfdfc92386fb7a4c1233f52b8ed689b2c81d905d",
     "canonical_universe_path": "config/market_engine/universes/canonical_universe.json",
     "canonical_universe_sha256": "c0e2c466af51ee3f34202148b5275f46248c893ce4b3851352d0fbded87148be",
     "canonical_universe_version": "me-data04-complete-canonical-local-market-dataset-v1",
@@ -367,7 +394,9 @@
     "manifest_path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/manifest.json",
     "manifest_sha256": "1361c3d16aad412025d0dbd9612dfacfca0eeeff762fbd31bd73f0ad04a2ebae",
     "ranking_path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
-    "ranking_sha256": "15b933748a1b12f5957798ebd6636a609e72f97eb8fb19af6d0259ad201f5530"
+    "ranking_sha256": "15b933748a1b12f5957798ebd6636a609e72f97eb8fb19af6d0259ad201f5530",
+    "run30_universe_index_path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/universe_analysis_index.json",
+    "run30_universe_index_sha256": "175023d61713ad296faacc64f3259b457497dc45a3b127d2a5e36ef17a7b5059"
   },
   "source_run_id": "me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z",
   "source_status": "completed_with_blockers",

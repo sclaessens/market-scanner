@@ -48,8 +48,8 @@ user confirmation
 
 ## Current gaps
 
-- ME-DATA11 produced seven safely processed, pending derivation candidates but
-  no operator-approved authoritative import;
+- ME-DATA11 review remediation produced three persisted, replayable pending
+  approval candidates but no operator-approved authoritative import;
 - automatic canonical `market-data` publication remains blocked;
 - fundamental evidence coverage remains partial;
 - later model invocation, position sizing, and notification work is deferred.
@@ -57,8 +57,9 @@ user confirmation
 ## Active implementation sequence
 
 ```text
-ME-SR25 (COMPLETED) -> ME-DATA11 (COMPLETED WITH BLOCKERS)
-  -> ME-RUN33 (NEXT) -> ME-CI12 (PLANNED)
+ME-SR25 (COMPLETED) -> ME-DATA11 (READY FOR HUMAN APPROVAL)
+  -> approval / DATA07 / DATA06 / RUN31 checkpoint
+  -> ME-RUN33 (CONDITIONAL) -> ME-CI12 (PLANNED)
 ```
 
 See:

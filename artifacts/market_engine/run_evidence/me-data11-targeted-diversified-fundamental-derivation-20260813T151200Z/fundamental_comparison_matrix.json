@@ -30,6 +30,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -44,6 +47,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -83,13 +89,16 @@
       "downstream_eligible": false,
       "evidence_freshness": "current",
       "fiscal_period": "2026-Q3",
-      "fundamental_context_status": "partial",
+      "fundamental_context_status": "candidate_partial_pending_approval",
       "instrument_id": "equity:ash",
       "issuer": "ASHLAND INC.",
       "metrics": {
         "eps_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -103,38 +112,71 @@
           "value": null
         },
         "gross_margin": {
-          "comparability_blockers": [
-            "PENDING_OPERATOR_APPROVAL"
+          "accounting_framework": "us_gaap",
+          "approval_status": "pending_no_authority",
+          "artifact_freshness_status": "current",
+          "comparability_reason_codes": [
+            "FISCAL_PERIOD_MISMATCH"
           ],
-          "comparability_status": "comparable_with_framework_caveat",
+          "comparability_status": "not_comparable",
+          "duration_class": "discrete_quarter",
+          "duration_days": 91,
           "evidence_type": "derived",
+          "fiscal_period": "Q3",
+          "fiscal_year": 2026,
           "formula_id": "gross_margin",
           "formula_version": "2.0.0",
-          "lineage_checksum": "7e7a0039a393457907a2e935576bd242e99c1cc05b09d345bddb4fd9045505f7",
+          "freshness_status": "current",
+          "lineage_checksum": "ca34778c17b698f77af3dc2c4bfeefa8ba050144a9f9bfb87ecb8e1585f2f71e",
+          "period_end": "2026-06-30",
+          "period_start": "2026-04-01",
           "reporting_period": "2026-Q3",
+          "source_concepts": [
+            "us-gaap:GrossProfit",
+            "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+          ],
           "source_date": "2026-07-29",
+          "source_publication_date": "2026-07-29",
           "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001674862.json",
           "status": "pending_approval",
-          "value": "0.309157509158"
+          "value": "0.342052313883"
         },
         "operating_margin": {
-          "comparability_blockers": [
-            "PENDING_OPERATOR_APPROVAL"
+          "accounting_framework": "us_gaap",
+          "approval_status": "pending_no_authority",
+          "artifact_freshness_status": "current",
+          "comparability_reason_codes": [
+            "FISCAL_PERIOD_MISMATCH"
           ],
-          "comparability_status": "comparable_with_framework_caveat",
+          "comparability_status": "not_comparable",
+          "duration_class": "discrete_quarter",
+          "duration_days": 91,
           "evidence_type": "derived",
+          "fiscal_period": "Q3",
+          "fiscal_year": 2026,
           "formula_id": "operating_margin",
           "formula_version": "2.0.0",
-          "lineage_checksum": "d684228bcb7fbdeda6c74b2ac1fdea4b5c245aafff39d254d5978b35526342c5",
+          "freshness_status": "current",
+          "lineage_checksum": "d6fcde2d3b05569520404f01c1dd59a0a82d2054936bf4885754a95616fad69b",
+          "period_end": "2026-06-30",
+          "period_start": "2026-04-01",
           "reporting_period": "2026-Q3",
+          "source_concepts": [
+            "us-gaap:OperatingIncomeLoss",
+            "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+          ],
           "source_date": "2026-07-29",
+          "source_publication_date": "2026-07-29",
           "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001674862.json",
           "status": "pending_approval",
-          "value": "0.055677655678"
+          "value": "0.086519114688"
         },
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -161,26 +203,27 @@
     },
     {
       "accounting_framework": "us_gaap",
-      "approval_status": "pending_no_authority",
-      "blocked_metrics": [
-        "gross_margin"
-      ],
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
       "cohort_selection_reason_codes": [
         "SELECTED_RANK_PRIORITY"
       ],
       "downstream_blockers": [
-        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
       ],
       "downstream_eligible": false,
-      "evidence_freshness": "current",
-      "fiscal_period": "2026-Q2",
-      "fundamental_context_status": "partial",
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "blocked",
       "instrument_id": "equity:atr",
       "issuer": "AptarGroup,\u00a0Inc",
       "metrics": {
         "eps_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -193,24 +236,12 @@
           "status": "missing",
           "value": null
         },
-        "operating_margin": {
-          "comparability_blockers": [
-            "PENDING_OPERATOR_APPROVAL"
-          ],
-          "comparability_status": "comparable_with_framework_caveat",
-          "evidence_type": "derived",
-          "formula_id": "operating_margin",
-          "formula_version": "2.0.0",
-          "lineage_checksum": "b76a9bfa77d977ca4c1ee2cb40685908923c83712e33eaafe33b81b85a0a4382",
-          "reporting_period": "2026-Q2",
-          "source_date": "2026-07-31",
-          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000896622.json",
-          "status": "pending_approval",
-          "value": "0.116562554743"
-        },
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -228,6 +259,7 @@
         "debt_to_equity",
         "eps_growth_yoy",
         "gross_margin",
+        "operating_margin",
         "revenue_growth_yoy"
       ],
       "rank": 3,
@@ -264,6 +296,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -278,6 +313,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -317,13 +355,16 @@
       "downstream_eligible": false,
       "evidence_freshness": "current",
       "fiscal_period": "2026-Q2",
-      "fundamental_context_status": "partial",
+      "fundamental_context_status": "candidate_partial_pending_approval",
       "instrument_id": "equity:bio",
       "issuer": "BIO-RAD LABORATORIES, INC.",
       "metrics": {
         "eps_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -337,38 +378,71 @@
           "value": null
         },
         "gross_margin": {
-          "comparability_blockers": [
-            "PENDING_OPERATOR_APPROVAL"
+          "accounting_framework": "us_gaap",
+          "approval_status": "pending_no_authority",
+          "artifact_freshness_status": "current",
+          "comparability_reason_codes": [
+            "FISCAL_PERIOD_MISMATCH"
           ],
-          "comparability_status": "comparable_with_framework_caveat",
+          "comparability_status": "not_comparable",
+          "duration_class": "discrete_quarter",
+          "duration_days": 91,
           "evidence_type": "derived",
+          "fiscal_period": "Q2",
+          "fiscal_year": 2026,
           "formula_id": "gross_margin",
           "formula_version": "2.0.0",
-          "lineage_checksum": "549c06271bba61942483797da337835e6dc77fb90aaddaf852eaff6eb889be36",
+          "freshness_status": "current",
+          "lineage_checksum": "7fe5388a6bcda01e837a80233851147f18399c4af112ac8e49cda05c72b52566",
+          "period_end": "2026-06-30",
+          "period_start": "2026-04-01",
           "reporting_period": "2026-Q2",
+          "source_concepts": [
+            "us-gaap:GrossProfit",
+            "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+          ],
           "source_date": "2026-08-04",
+          "source_publication_date": "2026-08-04",
           "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000012208.json",
           "status": "pending_approval",
-          "value": "0.527069423216"
+          "value": "0.531182795699"
         },
         "operating_margin": {
-          "comparability_blockers": [
-            "PENDING_OPERATOR_APPROVAL"
+          "accounting_framework": "us_gaap",
+          "approval_status": "pending_no_authority",
+          "artifact_freshness_status": "current",
+          "comparability_reason_codes": [
+            "MATCHED_DEFINITION_DURATION_PERIOD_FRAMEWORK_AND_FRESHNESS"
           ],
-          "comparability_status": "comparable_with_framework_caveat",
+          "comparability_status": "comparable",
+          "duration_class": "discrete_quarter",
+          "duration_days": 91,
           "evidence_type": "derived",
+          "fiscal_period": "Q2",
+          "fiscal_year": 2026,
           "formula_id": "operating_margin",
           "formula_version": "2.0.0",
-          "lineage_checksum": "d1a38f5265ce1e92a25181b1e2e6dae682133890a26d05d4db91d4518b8647c4",
+          "freshness_status": "current",
+          "lineage_checksum": "3f7492543aaf16ef03acfb294bf1e508d7a7c36a3ccbbd91be2ae07814a7d4e5",
+          "period_end": "2026-06-30",
+          "period_start": "2026-04-01",
           "reporting_period": "2026-Q2",
+          "source_concepts": [
+            "us-gaap:OperatingIncomeLoss",
+            "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax"
+          ],
           "source_date": "2026-08-04",
+          "source_publication_date": "2026-08-04",
           "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0000012208.json",
           "status": "pending_approval",
-          "value": "0.085833802590"
+          "value": "0.111520737327"
         },
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -395,26 +469,27 @@
     },
     {
       "accounting_framework": "us_gaap",
-      "approval_status": "pending_no_authority",
-      "blocked_metrics": [
-        "gross_margin"
-      ],
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
       "cohort_selection_reason_codes": [
         "SELECTED_RANK_PRIORITY"
       ],
       "downstream_blockers": [
-        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
       ],
       "downstream_eligible": false,
-      "evidence_freshness": "current",
-      "fiscal_period": "2026-Q2",
-      "fundamental_context_status": "partial",
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "blocked",
       "instrument_id": "equity:bkh",
       "issuer": "Black Hills Corporation",
       "metrics": {
         "eps_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -427,24 +502,12 @@
           "status": "missing",
           "value": null
         },
-        "operating_margin": {
-          "comparability_blockers": [
-            "PENDING_OPERATOR_APPROVAL"
-          ],
-          "comparability_status": "comparable_with_framework_caveat",
-          "evidence_type": "derived",
-          "formula_id": "operating_margin",
-          "formula_version": "2.0.0",
-          "lineage_checksum": "dfe6eab1fa260e280dafc9f5c0afc28e56f4dadeaf358d78c78736a5a46075d5",
-          "reporting_period": "2026-Q2",
-          "source_date": "2026-08-06",
-          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001130464.json",
-          "status": "pending_approval",
-          "value": "0.249042145594"
-        },
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -462,6 +525,7 @@
         "debt_to_equity",
         "eps_growth_yoy",
         "gross_margin",
+        "operating_margin",
         "revenue_growth_yoy"
       ],
       "rank": 6,
@@ -472,26 +536,27 @@
     },
     {
       "accounting_framework": "us_gaap",
-      "approval_status": "pending_no_authority",
-      "blocked_metrics": [
-        "gross_margin"
-      ],
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
       "cohort_selection_reason_codes": [
         "SELECTED_RANK_PRIORITY"
       ],
       "downstream_blockers": [
-        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
       ],
       "downstream_eligible": false,
-      "evidence_freshness": "current",
-      "fiscal_period": "2026-Q2",
-      "fundamental_context_status": "partial",
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "blocked",
       "instrument_id": "equity:bmrn",
       "issuer": "BIOMARIN PHARMACEUTICAL INC",
       "metrics": {
         "eps_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -504,24 +569,12 @@
           "status": "missing",
           "value": null
         },
-        "operating_margin": {
-          "comparability_blockers": [
-            "PENDING_OPERATOR_APPROVAL"
-          ],
-          "comparability_status": "comparable_with_framework_caveat",
-          "evidence_type": "derived",
-          "formula_id": "operating_margin",
-          "formula_version": "2.0.0",
-          "lineage_checksum": "0ff831545fc6feb8f82f8d1071f87a431b6f8ad53afe762a10f3340acb916942",
-          "reporting_period": "2026-Q2",
-          "source_date": "2026-08-06",
-          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001048477.json",
-          "status": "pending_approval",
-          "value": "0.136999719804"
-        },
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -539,6 +592,7 @@
         "debt_to_equity",
         "eps_growth_yoy",
         "gross_margin",
+        "operating_margin",
         "revenue_growth_yoy"
       ],
       "rank": 7,
@@ -549,24 +603,17 @@
     },
     {
       "accounting_framework": "us_gaap",
-      "approval_status": "pending_no_authority",
-      "blocked_metrics": [
-        "gross_margin",
-        "operating_margin"
-      ],
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
       "cohort_selection_reason_codes": [
         "SELECTED_RANK_PRIORITY"
       ],
       "downstream_blockers": [
-        "FORMULA_INPUT_CARDINALITY_INVALID",
-        "FORMULA_NOT_APPLICABLE",
-        "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
-        "FORMULA_OPERAND_SET_INVALID",
-        "NUMERATOR_MISSING"
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
       ],
       "downstream_eligible": false,
-      "evidence_freshness": "current",
-      "fiscal_period": "2026-Q2",
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
       "fundamental_context_status": "blocked",
       "instrument_id": "equity:bmy",
       "issuer": "BRISTOL-MYERS SQUIBB COMPANY",
@@ -574,6 +621,9 @@
         "eps_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -589,6 +639,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -617,26 +670,27 @@
     },
     {
       "accounting_framework": "us_gaap",
-      "approval_status": "pending_no_authority",
-      "blocked_metrics": [
-        "gross_margin"
-      ],
+      "approval_status": "not_applicable",
+      "blocked_metrics": [],
       "cohort_selection_reason_codes": [
         "SELECTED_RANK_PRIORITY"
       ],
       "downstream_blockers": [
-        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
       ],
       "downstream_eligible": false,
-      "evidence_freshness": "current",
-      "fiscal_period": "2026-Q2",
-      "fundamental_context_status": "partial",
+      "evidence_freshness": "missing",
+      "fiscal_period": null,
+      "fundamental_context_status": "blocked",
       "instrument_id": "equity:chrw",
       "issuer": "C. H. ROBINSON WORLDWIDE, INC.",
       "metrics": {
         "eps_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -649,24 +703,12 @@
           "status": "missing",
           "value": null
         },
-        "operating_margin": {
-          "comparability_blockers": [
-            "PENDING_OPERATOR_APPROVAL"
-          ],
-          "comparability_status": "comparable_with_framework_caveat",
-          "evidence_type": "derived",
-          "formula_id": "operating_margin",
-          "formula_version": "2.0.0",
-          "lineage_checksum": "429a6b946597904061dc6a41deb59bd552769d3e503b678ad2ba1c9c26660075",
-          "reporting_period": "2026-Q2",
-          "source_date": "2026-07-31",
-          "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001043277.json",
-          "status": "pending_approval",
-          "value": "0.048220348379"
-        },
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -684,6 +726,7 @@
         "debt_to_equity",
         "eps_growth_yoy",
         "gross_margin",
+        "operating_margin",
         "revenue_growth_yoy"
       ],
       "rank": 9,
@@ -707,13 +750,16 @@
       "downstream_eligible": false,
       "evidence_freshness": "current",
       "fiscal_period": "2026-Q2",
-      "fundamental_context_status": "partial",
+      "fundamental_context_status": "candidate_partial_pending_approval",
       "instrument_id": "equity:ci",
       "issuer": "The Cigna Group",
       "metrics": {
         "eps_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -727,23 +773,41 @@
           "value": null
         },
         "operating_margin": {
-          "comparability_blockers": [
-            "PENDING_OPERATOR_APPROVAL"
+          "accounting_framework": "us_gaap",
+          "approval_status": "pending_no_authority",
+          "artifact_freshness_status": "current",
+          "comparability_reason_codes": [
+            "MATCHED_DEFINITION_DURATION_PERIOD_FRAMEWORK_AND_FRESHNESS"
           ],
-          "comparability_status": "comparable_with_framework_caveat",
+          "comparability_status": "comparable",
+          "duration_class": "discrete_quarter",
+          "duration_days": 91,
           "evidence_type": "derived",
+          "fiscal_period": "Q2",
+          "fiscal_year": 2026,
           "formula_id": "operating_margin",
           "formula_version": "2.0.0",
-          "lineage_checksum": "c46a2f897c0a957e18192a24c8d7967adb6dd436f5ec4c11826c07f721c13ab1",
+          "freshness_status": "current",
+          "lineage_checksum": "eecdfeabdc981474c459585bf35c7d61d870f7da8eb9f8c08043ea19f37671ee",
+          "period_end": "2026-06-30",
+          "period_start": "2026-04-01",
           "reporting_period": "2026-Q2",
+          "source_concepts": [
+            "us-gaap:OperatingIncomeLoss",
+            "us-gaap:Revenues"
+          ],
           "source_date": "2026-07-30",
+          "source_publication_date": "2026-07-30",
           "source_reference": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001739940.json",
           "status": "pending_approval",
-          "value": "0.035915583396"
+          "value": "0.037338840208"
         },
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -790,6 +854,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -804,6 +871,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -851,6 +921,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -865,6 +938,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -912,6 +988,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -926,6 +1005,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -973,6 +1055,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -987,6 +1072,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -1034,6 +1122,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -1048,6 +1139,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -1095,6 +1189,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -1109,6 +1206,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -1156,6 +1256,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -1170,6 +1273,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -1217,6 +1323,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -1231,6 +1340,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -1278,6 +1390,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -1292,6 +1407,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -1339,6 +1457,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -1353,6 +1474,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -1400,6 +1524,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -1414,6 +1541,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -1461,6 +1591,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -1475,6 +1608,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -1522,6 +1658,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -1536,6 +1675,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -1583,6 +1725,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -1597,6 +1742,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -1644,6 +1792,9 @@
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
           ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
+          ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
           "formula_id": null,
@@ -1658,6 +1809,9 @@
         "revenue_growth_yoy": {
           "comparability_blockers": [
             "DIRECT_APPROVED_EVIDENCE_MISSING"
+          ],
+          "comparability_reason_codes": [
+            "MISSING_METRIC_EVIDENCE"
           ],
           "comparability_status": "not_comparable_missing_evidence",
           "evidence_type": "direct",
@@ -1685,5 +1839,5 @@
       "ticker": "GATX"
     }
   ],
-  "schema_version": "market-engine-data11-metric-comparison-v1"
+  "schema_version": "market-engine-data11-metric-comparison-v2"
 }

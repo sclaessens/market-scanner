@@ -2,7 +2,7 @@
 
 Sprint ID: ME-DATA11
 
-Status: COMPLETED WITH BLOCKERS
+Status: READY FOR HUMAN APPROVAL
 
 Job family: ME-DATA / Fundamental Evidence
 
@@ -32,11 +32,11 @@ Run `me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z`
 selected ASB, ASH, ATR, AXP, BIO, BKH, BMRN, BMY, CHRW, and CI. The top-25
 contained no IFRS issuer, so framework diversity was not forced.
 
-All ten official source snapshots were acquired. Seven issuers produced nine
-pending derived metric candidates. ASB, AXP, and BMY remained blocked because
-the latest aligned period lacked the numerator facts required by the approved
-margin formulas. Missing facts were not treated as zero and older, fuller
-periods were not substituted for fresher evidence.
+The original run acquired ten official source snapshots. Review remediation
+replayed those existing local snapshots without provider acquisition and
+applied the order-independent duration-selection and conflict rules. ASH, BIO,
+and CI now have persisted, replayable pending approval bundles. Remaining
+issuers fail closed on missing, non-applicable, unaligned, or conflicting facts.
 
 No approved direct package or operator derivation decision existed for this
 cohort. Therefore DATA07, DATA06, and RUN31 were not executed. Authoritative
@@ -49,8 +49,11 @@ position sizing, portfolio mutation, notification, publication, broker or
 order behavior. It did not change `market-data` and did not implement
 ME-RUN33.
 
-## Next
+## Approval/import checkpoint
 
-ME-RUN33 remains the next sprint. Its usable authoritative fundamental input
-depends on human review and checksum-bound approval of acceptable ME-DATA11
-candidates; pending artifacts alone grant no consumption authority.
+The next action is not ME-RUN33. A human must review the source evidence,
+mapping, fact, formula, derivation, validation, and governed-package files for
+ASH, BIO, and CI and provide explicit checksum-bound decisions. Valid approved
+bundles may then pass through DATA07, followed by DATA06 and RUN31. ME-RUN33
+remains conditional on that successful checkpoint; pending artifacts alone
+grant no consumption authority.

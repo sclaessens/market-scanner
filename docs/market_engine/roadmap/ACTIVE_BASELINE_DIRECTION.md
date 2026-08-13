@@ -31,7 +31,7 @@ transactions, or move allocation authority outside the Decision Engine.
 |---|---|
 | Canonical universe | 952 instruments |
 | Broad technical analysis | Operational with explicit blockers |
-| Fundamental coverage | ME-DATA11 completed with blockers: 7 pending derivation candidates, 0 approved imports |
+| Fundamental coverage | ME-DATA11 ready for human approval: 3 persisted pending candidates, 0 approved imports |
 | Scheduled canonical price refresh | Workflow exists, but automatic canonical publication is blocked |
 | Latest canonical evidence result | ME-SR24 completed with blockers because no approved production price-evidence provider route exists |
 | Canonical `market-data` publication | Not operational for daily automatic updates |
@@ -49,16 +49,18 @@ ME-RM08 - Realign roadmap around portfolio authority and advisory price freshnes
                portfolio-aware candidate context (COMPLETED)
   -> ME-SR25 - Implement advisory price evidence artifacts (COMPLETED / MERGED)
   -> ME-DATA11 - Target fundamental derivation at the highest-ranked technical
-                 candidate funnel (COMPLETED WITH BLOCKERS)
-  -> ME-RUN33 - First useful end-to-end candidate analysis release (NEXT)
+                 candidate funnel (READY FOR HUMAN APPROVAL)
+  -> Human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
+  -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - ChatGPT consumption without new analysis logic (PLANNED)
 ```
 
 ME-PR03 and ME-SR25 are complete. PR #478 merged ME-SR25 at
 `9169420427d33864851d36f2b183e35b8bd0c089`. ME-DATA11 then acquired official
-SEC evidence for ten ranked issuers and safely produced pending derivation
-candidates for seven. Separate checksum-bound operator approval remains the
-blocker to authoritative DATA07, DATA06, and RUN31 changes.
+SEC evidence for ten ranked issuers. Review remediation persisted replayable
+pending approval candidates for ASH, BIO, and CI. Separate checksum-bound human
+approval remains the blocker to authoritative DATA07, DATA06, and RUN31
+changes; ME-RUN33 is not immediately executable.
 
 ## What ME-PR03 completed
 

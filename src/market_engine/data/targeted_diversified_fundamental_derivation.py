@@ -5,7 +5,7 @@ import csv
 import hashlib
 import json
 from collections import Counter
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 from urllib.request import Request, urlopen
@@ -14,6 +14,21 @@ from market_engine.data.primary_source_metric_derivation import (
     FACT_PACKAGE_SCHEMA_VERSION,
     derive_primary_source_metrics,
     load_strict_json,
+)
+from market_engine.data.data11_governance import (
+    DEFAULT_DOWNSTREAM_AUTHORITY,
+    DEFAULT_RUN30_AUTHORITY,
+    Data11GovernanceError,
+    build_downstream_measurement,
+    canonical_utc_text,
+    duration_metadata,
+    effective_freshness,
+    load_downstream_prestate,
+    metric_comparability,
+    persist_approval_bundle,
+    select_duration_facts,
+    validate_authoritative_run30,
+    validate_temporal_boundary,
 )
 from market_engine.source_refresh.sec_companyfacts_snapshots import (
     persist_sec_companyfacts_provider_error,
@@ -26,8 +41,8 @@ FUNNEL_SCHEMA_VERSION = "market-engine-data11-technical-candidate-funnel-v1"
 INVENTORY_SCHEMA_VERSION = "market-engine-data11-source-inventory-v1"
 COHORT_SCHEMA_VERSION = "market-engine-data11-pilot-cohort-v1"
 RESULTS_SCHEMA_VERSION = "market-engine-data11-derivation-results-v1"
-COMPARISON_SCHEMA_VERSION = "market-engine-data11-metric-comparison-v1"
-DOWNSTREAM_SCHEMA_VERSION = "market-engine-data11-downstream-run-index-v1"
+COMPARISON_SCHEMA_VERSION = "market-engine-data11-metric-comparison-v2"
+DOWNSTREAM_SCHEMA_VERSION = "market-engine-data11-downstream-readiness-delta-v2"
 DEFAULT_RANKING = Path(
     "artifacts/market_engine/universe_analysis_runs/"
     "me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json"
@@ -43,7 +58,6 @@ USER_AGENT = "market-scanner-data11-pilot governance@example.com"
 TOP_LIMIT = 25
 MIN_COHORT = 8
 MAX_COHORT = 12
-FUNDAMENTAL_FRESHNESS_MAX_AGE_DAYS = 120
 
 _CONCEPT_TAGS: Mapping[str, tuple[str, ...]] = {
     "revenue": (
@@ -75,20 +89,31 @@ def run_targeted_derivation(
     source_root: str | Path = DEFAULT_SOURCE_ROOT,
     cohort_size: int = 10,
     fetch_json: JsonFetcher | None = None,
+    trusted_now: str | None = None,
+    run30_authority_path: str | Path = DEFAULT_RUN30_AUTHORITY,
+    downstream_authority_path: str | Path = DEFAULT_DOWNSTREAM_AUTHORITY,
 ) -> tuple[dict[str, Any], Path]:
     if not MIN_COHORT <= cohort_size <= MAX_COHORT:
         raise TargetedDerivationError(f"cohort_size must be between {MIN_COHORT} and {MAX_COHORT}")
-    ranking_path = Path(ranking_path)
-    ranking_manifest_path = Path(ranking_manifest_path)
-    universe_path = Path(universe_path)
+    trusted_now = trusted_now or canonical_utc_text(datetime.now(UTC))
+    validate_temporal_boundary(
+        generated_at=generated_at,
+        acquired_at=generated_at,
+        source_publication_date=generated_at[:10],
+        trusted_now=trusted_now,
+    )
+    authority = validate_authoritative_run30(authority_path=run30_authority_path)
+    ranking_path = Path(authority["artifact_bindings"]["run30_ranking"]["path"])
+    ranking_manifest_path = Path(authority["artifact_bindings"]["run30_manifest"]["path"])
+    universe_path = Path(authority["artifact_bindings"]["canonical_universe"]["path"])
     formula_catalog_path = Path(formula_catalog_path)
     output_dir = Path(output_root) / run_id
     if output_dir.exists():
         raise FileExistsError(f"refusing to overwrite DATA11 evidence: {output_dir}")
 
-    ranking = load_strict_json(ranking_path)
-    ranking_manifest = load_strict_json(ranking_manifest_path)
-    universe = load_strict_json(universe_path)
+    ranking = authority["ranking"]
+    ranking_manifest = authority["manifest"]
+    universe = authority["canonical_universe"]
     formula_catalog = load_strict_json(formula_catalog_path)
     funnel = build_candidate_funnel(
         ranking,
@@ -97,6 +122,7 @@ def run_targeted_derivation(
         ranking_path=ranking_path,
         ranking_manifest_path=ranking_manifest_path,
         universe_path=universe_path,
+        authority=authority,
     )
     cohort = select_pilot_cohort(funnel, cohort_size=cohort_size)
     fetcher = fetch_json or _fetch_json
@@ -108,6 +134,7 @@ def run_targeted_derivation(
         source_root=Path(source_root),
         run_id=run_id,
         generated_at=generated_at,
+        trusted_now=trusted_now,
     )
     derivation_results = derive_cohort_metrics(
         cohort,
@@ -115,8 +142,13 @@ def run_targeted_derivation(
         formula_catalog=formula_catalog,
         generated_at=generated_at,
     )
-    comparison = build_metric_comparison(funnel, cohort, source_inventory, derivation_results)
-    downstream = build_downstream_index(cohort, derivation_results)
+    comparison = build_metric_comparison(
+        funnel, cohort, source_inventory, derivation_results, trusted_now=trusted_now
+    )
+    prestate = load_downstream_prestate(authority_path=downstream_authority_path)
+    downstream = build_downstream_measurement(
+        cohort, derivation_results, prestate, downstream_executed=False
+    )
     summary = build_summary(cohort, source_inventory, derivation_results, downstream)
     derivation_results["pilot_summary"] = summary
 
@@ -131,6 +163,14 @@ def run_targeted_derivation(
     output_dir.mkdir(parents=True)
     for name, payload in artifacts.items():
         _write_json(output_dir / name, payload)
+    approval_bundles = persist_approval_bundles(
+        output_dir=output_dir,
+        run_id=run_id,
+        inventory=source_inventory,
+        fact_packages=fact_packages,
+        formula_catalog=formula_catalog,
+        derivation_results=derivation_results,
+    )
     report = render_report(summary, comparison)
     (output_dir / "report.md").write_text(report, encoding="utf-8")
     manifest = build_manifest(
@@ -143,15 +183,19 @@ def run_targeted_derivation(
         source_root=Path(source_root),
         output_dir=output_dir,
         summary=summary,
+        authority=authority,
+        downstream_prestate=prestate,
+        trusted_now=trusted_now,
+        approval_bundles=approval_bundles,
     )
     _write_json(output_dir / "manifest.json", manifest)
     checksum_index = {
         "schema_version": "market-engine-data11-checksum-index-v1",
         "run_id": run_id,
         "files": {
-            path.name: _sha256(path)
-            for path in sorted(output_dir.iterdir())
-            if path.is_file()
+            path.relative_to(output_dir).as_posix(): _sha256(path)
+            for path in sorted(output_dir.rglob("*"))
+            if path.is_file() and path.name != "checksum_index.json"
         },
     }
     _write_json(output_dir / "checksum_index.json", checksum_index)
@@ -169,6 +213,7 @@ def build_candidate_funnel(
     ranking_path: Path,
     ranking_manifest_path: Path,
     universe_path: Path,
+    authority: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     if ranking.get("schema_version") != "market-engine-run30-candidate-ranking-v1":
         raise TargetedDerivationError("authoritative ranking schema is invalid")
@@ -191,26 +236,33 @@ def build_candidate_funnel(
     if ordered != machine_rows:
         raise TargetedDerivationError("candidate ranking order is not deterministic")
     eligible = [row for row in ordered if row.get("ranking_eligible") is True]
-    top = eligible[:TOP_LIMIT]
-    if len(top) != TOP_LIMIT:
+    caller_top = eligible[:TOP_LIMIT]
+    if len(caller_top) != TOP_LIMIT:
         raise TargetedDerivationError("authoritative ranking contains fewer than 25 ranking-eligible candidates")
-    instrument_ids = [str(row.get("instrument_id") or "") for row in top]
+    instrument_ids = [str(row.get("instrument_id") or "") for row in caller_top]
     if len(instrument_ids) != len(set(instrument_ids)):
         raise TargetedDerivationError("top-25 funnel contains duplicate instrument identities")
-    price_root = Path(str(manifest.get("input", {}).get("price_history_root") or "data/processed"))
-    for candidate in top:
-        instrument_id = str(candidate.get("instrument_id") or "")
-        ticker = str(candidate.get("symbol") or "")
-        if not instrument_id.endswith(f":{ticker.lower()}"):
-            raise TargetedDerivationError("candidate ticker and instrument identity do not match")
-        expected_history = (price_root / f"{candidate.get('source_symbol', ticker)}.csv").as_posix()
-        if candidate.get("traceability", {}).get("price_history_path") != expected_history:
-            raise TargetedDerivationError("candidate is not traceable to the canonical local universe input")
+    try:
+        trusted = authority or validate_authoritative_run30()
+    except Data11GovernanceError as exc:
+        raise TargetedDerivationError(str(exc)) from exc
+    if any(
+        json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        != json.dumps(trusted_value, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        for value, trusted_value in (
+            (ranking, trusted["ranking"]),
+            (manifest, trusted["manifest"]),
+            (universe, trusted["canonical_universe"]),
+        )
+    ):
+        raise TargetedDerivationError("caller-supplied RUN30 input differs from tracked authority")
+    top = trusted["top_candidates"]
     rows = [
         {
             "rank": row["rank"],
             "ticker": row["symbol"],
             "instrument_id": row["instrument_id"],
+            "source_symbol": row["source_symbol"],
             "asset_type": str(row["instrument_id"]).split(":", 1)[0],
             "candidate_score": row["candidate_score"],
             "ranking_scope": row["ranking_scope"],
@@ -240,6 +292,10 @@ def build_candidate_funnel(
             "canonical_universe_sha256": _sha256(universe_path),
             "canonical_universe_version": universe.get("universe_version"),
             "cutoff_date": manifest.get("input", {}).get("cutoff_date"),
+            "authority_path": trusted["authority_path"],
+            "authority_sha256": trusted["authority_sha256"],
+            "run30_universe_index_path": trusted["artifact_bindings"]["run30_universe_index"]["path"],
+            "run30_universe_index_sha256": trusted["artifact_bindings"]["run30_universe_index"]["sha256"],
         },
         "candidates": rows,
     }
@@ -280,6 +336,7 @@ def acquire_and_extract(
     source_root: Path,
     run_id: str,
     generated_at: str,
+    trusted_now: str,
 ) -> tuple[dict[str, Any], dict[str, Mapping[str, Any]]]:
     inventory: list[dict[str, Any]] = []
     fact_packages: dict[str, Mapping[str, Any]] = {}
@@ -309,6 +366,7 @@ def acquire_and_extract(
                 source_checksum=checksum,
                 generated_at=generated_at,
                 run_id=run_id,
+                trusted_now=trusted_now,
             )
             if fact_package is not None:
                 fact_packages[ticker] = fact_package
@@ -357,6 +415,7 @@ def build_fact_package(
     source_checksum: str,
     generated_at: str,
     run_id: str,
+    trusted_now: str | None = None,
 ) -> tuple[dict[str, Any] | None, dict[str, Any]]:
     ticker = candidate["ticker"]
     company = str(payload.get("entityName") or ticker)
@@ -375,7 +434,15 @@ def build_fact_package(
                 if _eligible_duration_fact(row):
                     entries.append((tag, row))
         observations[concept] = entries
-    aligned = _latest_aligned_observations(observations)
+    try:
+        aligned, period_selection = select_duration_facts(observations)
+    except Data11GovernanceError as exc:
+        return None, {
+            "fact_extraction_status": "blocked",
+            "fact_count": 0,
+            "reason_codes": ["CONFLICTING_DURATION_FACTS"],
+            "error": str(exc),
+        }
     if "revenue" not in aligned:
         return None, {"fact_extraction_status": "blocked", "fact_count": 0, "reason_codes": ["ALIGNED_REVENUE_FACT_MISSING"]}
     facts = [
@@ -389,6 +456,7 @@ def build_fact_package(
             source_checksum=source_checksum,
             generated_at=generated_at,
             run_id=run_id,
+            trusted_now=trusted_now or generated_at,
         )
         for concept, (tag, row) in sorted(aligned.items())
     ]
@@ -426,6 +494,14 @@ def build_fact_package(
         "fact_count": len(facts),
         "reporting_period": f"{period['fiscal_year']}-{period['fiscal_period']}",
         "source_publication_date": period["source_publication_date"],
+        "period_start": period["period_start"],
+        "period_end": period["period_end"],
+        "duration_days": period["duration_days"],
+        "duration_class": period["duration_class"],
+        "fiscal_year": period["fiscal_year"],
+        "fiscal_period": period["fiscal_period"],
+        "source_accession": period["source_accession"],
+        "period_selection": period_selection,
         "raw_source_tags": sorted(row["raw_source_concept"] for row in facts),
         "reason_codes": ["SEPARATE_OPERATOR_APPROVAL_REQUIRED"],
     }
@@ -490,6 +566,8 @@ def build_metric_comparison(
     cohort: Mapping[str, Any],
     source_inventory: Mapping[str, Any],
     derivation_results: Mapping[str, Any],
+    *,
+    trusted_now: str | None = None,
 ) -> dict[str, Any]:
     selected = set(cohort["selected_tickers"])
     inventory = {row["ticker"]: row for row in source_inventory["instruments"]}
@@ -506,7 +584,12 @@ def build_metric_comparison(
         inventory_row = inventory.get(ticker) or {}
         period = inventory_row.get("reporting_period")
         publication_date = inventory_row.get("source_publication_date")
-        freshness = _freshness_status(publication_date, inventory_row.get("acquired_at"))
+        freshness_detail = _freshness_detail(
+            publication_date,
+            inventory_row.get("acquired_at"),
+            trusted_now or inventory_row.get("acquired_at"),
+        )
+        freshness = freshness_detail["effective_freshness"]
         rows.append({
             "rank": candidate["rank"],
             "ticker": ticker,
@@ -522,7 +605,9 @@ def build_metric_comparison(
             "fiscal_period": period,
             "evidence_freshness": freshness,
             "fundamental_context_status": (
-                "stale" if freshness == "stale" else ("partial" if derived else ("blocked" if ticker in selected else "missing"))
+                "stale" if freshness == "stale" else (
+                    "candidate_partial_pending_approval" if derived else ("blocked" if ticker in selected else "missing")
+                )
             ),
             "metrics": {
                 "revenue_growth_yoy": _missing_metric("direct", "DIRECT_APPROVED_EVIDENCE_MISSING"),
@@ -535,11 +620,25 @@ def build_metric_comparison(
                         "formula_id": row["formula_id"],
                         "formula_version": row["formula_version"],
                         "reporting_period": row["reporting_period"],
+                        "period_start": (row.get("period") or {}).get("period_start"),
+                        "period_end": (row.get("period") or {}).get("period_end"),
+                        "duration_days": inventory_row.get("duration_days"),
+                        "duration_class": inventory_row.get("duration_class"),
+                        "fiscal_year": row.get("fiscal_year"),
+                        "fiscal_period": row.get("fiscal_period"),
+                        "accounting_framework": inventory_row.get("accounting_framework"),
+                        "source_concepts": sorted(
+                            fact.get("raw_source_concept") for fact in row.get("input_facts") or []
+                        ),
                         "source_date": publication_date,
+                        "source_publication_date": publication_date,
                         "source_reference": inventory_row.get("source_url"),
                         "lineage_checksum": row["calculation_checksum"],
-                        "comparability_status": "comparable_with_framework_caveat",
-                        "comparability_blockers": ["PENDING_OPERATOR_APPROVAL"],
+                        "freshness_status": freshness,
+                        "artifact_freshness_status": freshness_detail["artifact_freshness"],
+                        "approval_status": "pending_no_authority",
+                        "comparability_status": "pending_comparability_evaluation",
+                        "comparability_reason_codes": [],
                     }
                     for metric, row in sorted(derived.items())
                 },
@@ -557,6 +656,12 @@ def build_metric_comparison(
                 if ticker in selected else ["NOT_SELECTED_FOR_BOUNDED_PILOT"]
             ),
         })
+    comparability = metric_comparability(rows)
+    for candidate in rows:
+        for metric, evidence in candidate["metrics"].items():
+            status, reasons = comparability[(candidate["ticker"], metric)]
+            evidence["comparability_status"] = status
+            evidence["comparability_reason_codes"] = reasons
     return {
         "schema_version": COMPARISON_SCHEMA_VERSION,
         "candidate_count": len(rows),
@@ -566,46 +671,50 @@ def build_metric_comparison(
 
 
 def build_downstream_index(cohort: Mapping[str, Any], derivation_results: Mapping[str, Any]) -> dict[str, Any]:
-    rows = []
+    """Compatibility wrapper that now uses the checksum-bound authoritative prestate."""
+    return build_downstream_measurement(
+        cohort,
+        derivation_results,
+        load_downstream_prestate(),
+        downstream_executed=False,
+    )
+
+
+def persist_approval_bundles(
+    *,
+    output_dir: Path,
+    run_id: str,
+    inventory: Mapping[str, Any],
+    fact_packages: Mapping[str, Mapping[str, Any]],
+    formula_catalog: Mapping[str, Any],
+    derivation_results: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    inventory_by_ticker = {row["ticker"]: row for row in inventory["instruments"]}
+    bundles = []
     for result in derivation_results["instruments"]:
-        rows.append({
-            "ticker": result["ticker"],
-            "instrument_id": result["instrument_id"],
-            "data07_status": "blocked",
-            "data06_status": "not_executed",
-            "run31_status": "not_executed",
-            "reason_codes": result["reason_codes"],
-            "transition": "missing_to_partial_candidate_only" if result["status"] == "pending_approval" else "missing_unchanged",
-        })
-    return {
-        "schema_version": DOWNSTREAM_SCHEMA_VERSION,
-        "cohort_size": cohort["cohort_size"],
-        "data07_executed_count": 0,
-        "data06_executed": False,
-        "run31_executed": False,
-        "before": {
-            "fundamental_complete": 0,
-            "fundamental_partial": 0,
-            "fundamental_missing": cohort["cohort_size"],
-            "advice_input_ready": 0,
-            "full_advice_ready": 0,
-            "unable_to_advise": cohort["cohort_size"],
-        },
-        "after_authoritative": {
-            "fundamental_complete": 0,
-            "fundamental_partial": 0,
-            "fundamental_missing": cohort["cohort_size"],
-            "advice_input_ready": 0,
-            "full_advice_ready": 0,
-            "unable_to_advise": cohort["cohort_size"],
-        },
-        "candidate_only_non_authoritative": {
-            "fundamental_partial": sum(row["status"] == "pending_approval" for row in derivation_results["instruments"]),
-        },
-        "regressions_outside_selected_cohort": 0,
-        "rows": rows,
-        "boundary": "Only separately approved checksum-bound evidence may execute DATA07 -> DATA06 -> RUN31.",
-    }
+        if result["status"] != "pending_approval":
+            continue
+        ticker = result["ticker"]
+        fact_package = fact_packages[ticker]
+        derived, validation = derive_primary_source_metrics(fact_package, formula_catalog)
+        if derived is None:
+            raise TargetedDerivationError(f"persisted replay unexpectedly failed for {ticker}")
+        source = inventory_by_ticker[ticker]
+        bundles.append(
+            persist_approval_bundle(
+                bundle_dir=output_dir / "approval_candidates" / ticker,
+                run_id=run_id,
+                ticker=ticker,
+                cik=source["cik"],
+                source_url=source["source_url"],
+                full_source_snapshot_sha256=source["source_snapshot_sha256"],
+                fact_package=fact_package,
+                formula_catalog=formula_catalog,
+                derived_package=derived,
+                derivation_validation=validation,
+            )
+        )
+    return bundles
 
 
 def build_summary(
@@ -631,9 +740,9 @@ def build_summary(
         "safely_processed_candidate_count": pending,
         "minimum_safe_processing_target": cohort["minimum_safe_processing_target"],
         "minimum_safe_processing_target_met": pending >= cohort["minimum_safe_processing_target"],
-        "approved_import_count": downstream["data07_executed_count"],
+        "approved_import_count": 0,
         "derived_success_count": pending,
-        "partial_count": pending,
+        "candidate_partial_pending_approval_count": pending,
         "pending_approval_count": pending,
         "blocked_instrument_count": blocked,
         "failed_instrument_count": failed,
@@ -705,23 +814,41 @@ def build_manifest(
     source_root: Path,
     output_dir: Path,
     summary: Mapping[str, Any],
+    authority: Mapping[str, Any] | None = None,
+    downstream_prestate: Mapping[str, Any] | None = None,
+    trusted_now: str | None = None,
+    approval_bundles: Sequence[Mapping[str, Any]] = (),
 ) -> dict[str, Any]:
-    outputs = sorted(path.name for path in output_dir.iterdir() if path.is_file())
+    outputs = sorted(
+        path.relative_to(output_dir).as_posix()
+        for path in output_dir.rglob("*")
+        if path.is_file()
+    )
     checksums = {name: _sha256(output_dir / name) for name in outputs}
     return {
         "schema_version": SCHEMA_VERSION,
         "run_id": run_id,
         "generated_at": generated_at,
+        "trusted_now": trusted_now or generated_at,
         "status": summary["run_status"],
         "inputs": {
             "candidate_ranking": {"path": ranking_path.as_posix(), "sha256": _sha256(ranking_path)},
             "ranking_manifest": {"path": ranking_manifest_path.as_posix(), "sha256": _sha256(ranking_manifest_path)},
             "canonical_universe": {"path": universe_path.as_posix(), "sha256": _sha256(universe_path)},
             "formula_catalog": {"path": formula_catalog_path.as_posix(), "sha256": _sha256(formula_catalog_path)},
+            "run30_authority": {
+                "path": (authority or {}).get("authority_path"),
+                "sha256": (authority or {}).get("authority_sha256"),
+            },
+            "downstream_prestate_authority": {
+                "path": (downstream_prestate or {}).get("authority_path"),
+                "sha256": (downstream_prestate or {}).get("authority_sha256"),
+            },
         },
         "source_snapshot_root": source_root.as_posix(),
-        "outputs": {name.removesuffix(".json").removesuffix(".md"): name for name in outputs},
+        "outputs": outputs,
         "output_checksums": checksums,
+        "approval_candidates": list(approval_bundles),
         "raw_sources_committed": False,
         "guardrails": summary["guardrails"],
     }
@@ -788,10 +915,18 @@ def _canonical_fact(
     source_checksum: str,
     generated_at: str,
     run_id: str,
+    trusted_now: str,
 ) -> dict[str, Any]:
     ticker = candidate["ticker"]
     fiscal_year = int(observation["fy"])
     fiscal_period = str(observation["fp"])
+    duration = duration_metadata(observation)
+    validate_temporal_boundary(
+        generated_at=generated_at,
+        acquired_at=generated_at,
+        source_publication_date=str(observation["filed"]),
+        trusted_now=trusted_now,
+    )
     return {
         "fact_id": f"{ticker.lower()}-{concept.replace('_', '-')}-{fiscal_year}-{fiscal_period.lower()}-{observation['end']}",
         "ticker": ticker,
@@ -807,10 +942,13 @@ def _canonical_fact(
         "period_type": "duration",
         "period_start": observation["start"],
         "period_end": observation["end"],
+        "duration_days": duration["duration_days"],
+        "duration_class": duration["duration_class"],
         "fiscal_year": fiscal_year,
         "fiscal_period": fiscal_period,
         "source_name": "SEC CompanyFacts",
         "source_reference": source_url,
+        "source_accession": observation["accn"],
         "source_document_checksum": source_checksum,
         "source_publication_date": observation["filed"],
         "observed_at": generated_at,
@@ -852,18 +990,21 @@ def _missing_metric(evidence_type: str, reason: str) -> dict[str, Any]:
     }
 
 
-def _freshness_status(source_date: Any, acquired_at: Any) -> str:
-    if not isinstance(source_date, str) or not isinstance(acquired_at, str):
-        return "missing"
+def _freshness_detail(source_date: Any, acquired_at: Any, trusted_now: Any) -> dict[str, Any]:
+    if not all(isinstance(value, str) for value in (source_date, acquired_at, trusted_now)):
+        return {"artifact_freshness": "missing", "effective_freshness": "missing"}
     try:
-        source = date.fromisoformat(source_date)
-        acquisition = datetime.fromisoformat(acquired_at.replace("Z", "+00:00")).date()
-    except ValueError:
-        return "invalid"
-    age = (acquisition - source).days
-    if age < 0:
-        return "invalid"
-    return "stale" if age > FUNDAMENTAL_FRESHNESS_MAX_AGE_DAYS else "current"
+        return effective_freshness(
+            source_publication_date=source_date,
+            acquired_at=acquired_at,
+            trusted_now=trusted_now,
+        )
+    except Data11GovernanceError:
+        return {"artifact_freshness": "invalid", "effective_freshness": "invalid"}
+
+
+def _freshness_status(source_date: Any, acquired_at: Any) -> str:
+    return _freshness_detail(source_date, acquired_at, acquired_at)["artifact_freshness"]
 
 
 def _fetch_json(url: str) -> Mapping[str, Any]:
@@ -890,7 +1031,8 @@ def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the bounded ME-DATA11 targeted derivation pilot.")
     parser.add_argument("--run-id", required=True)
-    parser.add_argument("--generated-at", default=datetime.now(UTC).isoformat().replace("+00:00", "Z"))
+    parser.add_argument("--generated-at", default=canonical_utc_text(datetime.now(UTC)))
+    parser.add_argument("--trusted-now", default=canonical_utc_text(datetime.now(UTC)))
     parser.add_argument("--ranking", type=Path, default=DEFAULT_RANKING)
     parser.add_argument("--ranking-manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--canonical-universe", type=Path, default=DEFAULT_UNIVERSE)
@@ -909,6 +1051,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         output_root=args.output_root,
         source_root=args.source_root,
         cohort_size=args.cohort_size,
+        trusted_now=args.trusted_now,
     )
     with (output_dir / "manifest.json").open(encoding="utf-8") as handle:
         summary = {"run_status": json.load(handle)["status"]}
