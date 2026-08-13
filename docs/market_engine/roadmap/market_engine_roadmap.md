@@ -107,9 +107,10 @@ ME-RM08 defines the active sequence:
 ME-RM08 - Portfolio ledger and advisory price roadmap realignment
   -> ME-PR03 - Manual portfolio transaction ledger and portfolio-aware
                candidate context (COMPLETED)
-  -> ME-SR25 - Scheduled advisory price refresh and freshness artifacts (NEXT)
-  -> ME-PI01 - Portfolio exposure and concentration intelligence
-  -> ME-CI12 - Batch grounded advisory consumption after upstream inputs stabilize
+  -> ME-SR25 - Advisory price evidence artifact (IMPLEMENTED)
+  -> ME-DATA11 - Targeted fundamental derivation for the technical candidate funnel (NEXT)
+  -> ME-RUN33 - Accelerated full-universe candidate release
+  -> ME-CI12 - Batch grounded advisory consumption
   -> ME-PS01 - Position-sizing decision contract
   -> ME-NL01/02/03 - Notification sequence
 ```
@@ -120,8 +121,10 @@ fundamental, model-invocation, or notification work. ME-SR25 then provides
 recent descriptive prices without weakening the blocked canonical
 publication boundary.
 
-ME-DATA11 and ME-CI11D remain planned but deferred. Historical `Next` labels
-below do not override this section.
+ME-RUN33 is the first unreserved run identifier and is reserved for the
+accelerated candidate release. It must produce 5-15 grounded candidates or
+record explicit no-candidate evidence. ME-PI01 and ME-CI11D remain planned but
+deferred. Historical `Next` labels below do not override this section.
 
 ME-ADV01 implemented the first minimal deterministic advice engine.ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
 the ME-GH02 `ticker_status_index.json` and linked dry-run artifacts, writes
@@ -415,10 +418,10 @@ review of the 14 current blockers. That remains parked work, not the active
 product priority after ME-RM08. A publication canary or retry is not
 authorized.
 
-ME-DATA11 — Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot —
-remains planned, has not started, and is deferred behind ME-PR03 and ME-SR25. It must reuse the generic ME-DATA10
-engine without code changes for issuer identity, source tags, or formula
-selection.
+ME-DATA11 — target governed fundamental derivation at the highest-ranked
+technical candidate funnel — remains planned, has not started, and is next
+after ME-SR25. It must reuse the generic ME-DATA10 engine without ticker-
+specific code changes for issuer identity, source tags, or formula selection.
 
 Roadmap outcome:
 
@@ -489,13 +492,17 @@ Detailed scope:
 docs/market_engine/backlog/me_pr03_manual_portfolio_transaction_ledger.md
 ```
 
-### ME-SR25 — Scheduled advisory price refresh and freshness artifacts
+### ME-SR25 — Advisory Price Evidence Artifact
 
-Status: PLANNED / NEXT IMPLEMENTATION STORY
+Status: IMPLEMENTED / OPERATIONAL VALIDATION REQUIRES SEPARATE APPROVAL
 
 ME-SR25 creates a separate, retrievable advisory price artifact for recent
-analysis context. It does not write `market-data`, bypass ME-SR24, create
-canonical receipts, mutate the portfolio, or add execution authority.
+analysis context across the full authoritative universe. The artifact is
+checksum-bound to its universe, freshness policy, observations, and manifest;
+its consumer revalidates identity, integrity, completeness, and freshness. It
+does not write `market-data`, bypass ME-SR24, create canonical receipts, mutate
+the portfolio, or add execution authority. No production provider run was
+executed as part of implementation.
 
 Detailed scope:
 

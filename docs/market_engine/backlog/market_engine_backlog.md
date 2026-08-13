@@ -48,16 +48,19 @@ ME-RUN30/31 and ME-DATA06-10 - broad analysis and evidence baseline
   -> ME-SR17-24 and ME-RUN32 - canonical refresh hardening and blocker evidence
   -> ME-RM08 - portfolio/advisory-price roadmap realignment (docs-only)
   -> ME-PR03 - manual transaction ledger and portfolio-aware candidate context (COMPLETED)
-  -> ME-SR25 - scheduled advisory price refresh and freshness artifacts (NEXT)
-  -> ME-PI01 - portfolio exposure and concentration intelligence
-  -> ME-CI12 - batch grounded advisory consumption after upstream inputs stabilize
+  -> ME-SR25 - advisory price evidence artifact (IMPLEMENTED)
+  -> ME-DATA11 - targeted fundamental derivation for the technical candidate funnel (NEXT)
+  -> ME-RUN33 - accelerated full-universe candidate release
+  -> ME-CI12 - batch grounded advisory consumption
   -> ME-PS01 - position-sizing decision contract
   -> ME-NL01/02/03 - notification sequence
 ```
 
-ME-DATA11 and ME-CI11D remain planned but are deferred. The canonical
-publication route remains blocked by ME-SR24 and is not a prerequisite for the
-advisory-only ME-SR25 path.
+ME-RUN33 is the first unreserved run identifier and is reserved for the
+accelerated candidate release. It must return 5-15 grounded candidates or
+explicitly preserve a no-candidate result. ME-PI01 and ME-CI11D remain planned
+but deferred. The canonical publication route remains blocked by ME-SR24 and
+is not a prerequisite for the advisory-only ME-SR25 path.
 
 Historical sections below retain the state and `Next` labels that applied when
 each sprint closed. They do not override
@@ -585,8 +588,8 @@ No runtime or lifecycle configuration changes are required.
 The first ME-SR18 canary's other 44 `PROVIDER_OHLC_INVALID` and 26
 `EXPECTED_SESSION_NOT_AVAILABLE` results remain outside this sprint. A later
 green publication canary requires their separate remediation. ME-DATA11 —
-Execute a diversified US-GAAP/IFRS multi-ticker derivation pilot — remains
-planned and has not started.
+target governed fundamental derivation at the highest-ranked technical
+candidate funnel — remains planned and has not started.
 
 ### ME-RUN32 — Post-PR472 non-publishing canonical price refresh audit
 
@@ -717,13 +720,15 @@ Detailed story:
 docs/market_engine/backlog/me_pr03_manual_portfolio_transaction_ledger.md
 ```
 
-### ME-SR25 — Scheduled advisory price refresh and freshness artifacts
+### ME-SR25 — Advisory Price Evidence Artifact
 
-Status: PLANNED / NEXT IMPLEMENTATION STORY
+Status: IMPLEMENTED / OPERATIONAL VALIDATION REQUIRES SEPARATE APPROVAL
 
-Goal: produce a daily retrievable, versioned, best-effort advisory price and
-freshness artifact for analysis without changing `market-data` or claiming
-canonical publication evidence.
+Outcome: a daily retrievable, versioned, best-effort advisory price and
+freshness artifact now covers the authoritative universe and fails closed on
+identity, price-domain, source, temporal, completeness, integrity, or policy
+violations. It remains advisory-only: it does not change `market-data` or claim
+canonical publication evidence. The workflow was implemented but not run.
 
 Detailed story:
 

@@ -1,0 +1,22 @@
+{
+  "schema_version": "market-engine-advisory-price-freshness-policy-v1",
+  "policy_id": "me-sr25-provider-reported-daily-close-v1",
+  "observation_type": "provider_reported_daily_close",
+  "max_completed_session_lag": 0,
+  "age_method": "weekday_completed_session_lag_v1",
+  "artifact_retention_days": 14,
+  "supported_currencies": [
+    "AUD",
+    "CAD",
+    "CHF",
+    "DKK",
+    "EUR",
+    "GBP",
+    "HKD",
+    "JPY",
+    "NOK",
+    "SEK",
+    "USD"
+  ],
+  "limitations": "Weekdays and the existing completed-session resolver are used; no new exchange-calendar framework is introduced."
+}

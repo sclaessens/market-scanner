@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "market-engine-advisory-price-manifest-v1",
+  "title": "ME-SR25 advisory price manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "artifact_version", "artifact_type", "run_id",
+    "generated_at", "source_main_sha", "universe_schema_version",
+    "universe_source_path", "universe_sha256", "universe_snapshot_sha256",
+    "freshness_policy_path", "freshness_policy_sha256", "source_adapter",
+    "source_id", "observation_type", "expected_instrument_count",
+    "status_counts", "observations_file", "observations_sha256",
+    "integrity_algorithm", "artifact_sha256", "retention_days",
+    "canonical_publication_status"
+  ],
+  "properties": {
+    "schema_version": {"const": "market-engine-advisory-price-manifest-v1"},
+    "artifact_version": {"const": "me-sr25-advisory-price-evidence-v1"},
+    "artifact_type": {"const": "advisory_price_evidence"},
+    "run_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "source_main_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "universe_schema_version": {"type": "string"},
+    "universe_source_path": {"type": "string"},
+    "universe_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "universe_snapshot_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "freshness_policy_path": {"type": "string"},
+    "freshness_policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_adapter": {"const": "existing_yfinance_daily_history_adapter"},
+    "source_id": {"const": "yahoo-finance-yfinance"},
+    "observation_type": {"const": "provider_reported_daily_close"},
+    "expected_instrument_count": {"type": "integer", "minimum": 1},
+    "status_counts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["attempted", "fresh", "stale", "missing", "invalid"],
+      "properties": {
+        "attempted": {"type": "integer", "minimum": 1},
+        "fresh": {"type": "integer", "minimum": 0},
+        "stale": {"type": "integer", "minimum": 0},
+        "missing": {"type": "integer", "minimum": 0},
+        "invalid": {"type": "integer", "minimum": 0}
+      }
+    },
+    "observations_file": {"const": "advisory_price_observations.json"},
+    "observations_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "integrity_algorithm": {"const": "sha256-canonical-json-v1"},
+    "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "retention_days": {"type": "integer", "minimum": 1},
+    "canonical_publication_status": {"const": "not_authorized_advisory_only"}
+  }
+}

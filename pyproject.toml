@@ -12,6 +12,7 @@ requires-python = ">=3.11"
 market-engine-dry-run = "market_engine.run.end_to_end_dry_run_command:main"
 market-engine-cached-source-batch-dry-run = "market_engine.run.cached_source_batch_dry_run_command:main"
 market-engine-portfolio-ledger = "market_engine.portfolio_review.manual_transaction_ledger:main"
+market-engine-advisory-price-evidence = "market_engine.source_refresh.advisory_price_evidence:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

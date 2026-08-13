@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "market-engine-advisory-price-observations-v1",
+  "title": "ME-SR25 advisory price observations",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "artifact_type", "run_id", "records"],
+  "properties": {
+    "schema_version": {"const": "market-engine-advisory-price-observations-v1"},
+    "artifact_type": {"const": "advisory_price_evidence"},
+    "run_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$"},
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema_version", "artifact_version", "run_id", "instrument_id",
+          "canonical_ticker", "price", "currency", "observation_type",
+          "observation_timestamp", "retrieval_timestamp", "source_id",
+          "freshness_status", "observation_age_completed_sessions",
+          "acquisition_status", "error_code", "error_detail"
+        ],
+        "properties": {
+          "schema_version": {"const": "market-engine-advisory-price-observation-v1"},
+          "artifact_version": {"const": "me-sr25-advisory-price-evidence-v1"},
+          "run_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$"},
+          "instrument_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,199}$"},
+          "canonical_ticker": {"type": "string", "pattern": "^[A-Z0-9][A-Z0-9.^_-]{0,49}$"},
+          "price": {"type": ["string", "null"], "pattern": "^(0\\.[0-9]*[1-9][0-9]*|[1-9][0-9]*(\\.[0-9]+)?)$"},
+          "currency": {"type": "string", "enum": ["AUD", "CAD", "CHF", "DKK", "EUR", "GBP", "HKD", "JPY", "NOK", "SEK", "USD"]},
+          "observation_type": {"const": "provider_reported_daily_close"},
+          "observation_timestamp": {"type": ["string", "null"], "format": "date-time"},
+          "retrieval_timestamp": {"type": "string", "format": "date-time"},
+          "source_id": {"const": "yahoo-finance-yfinance"},
+          "freshness_status": {"enum": ["fresh", "stale", "missing", "invalid"]},
+          "observation_age_completed_sessions": {"type": ["integer", "null"], "minimum": 0},
+          "acquisition_status": {"enum": ["succeeded", "missing", "failed"]},
+          "error_code": {"type": ["string", "null"], "pattern": "^[A-Z][A-Z0-9_]{2,99}$"},
+          "error_detail": {"type": ["string", "null"], "minLength": 1, "maxLength": 500}
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"acquisition_status": {"const": "succeeded"}}},
+            "then": {"properties": {
+              "price": {"type": "string"}, "currency": {"type": "string"},
+              "observation_type": {"type": "string"}, "observation_timestamp": {"type": "string"},
+              "source_id": {"type": "string"}, "freshness_status": {"enum": ["fresh", "stale"]},
+              "observation_age_completed_sessions": {"type": "integer"},
+              "error_code": {"const": null}, "error_detail": {"const": null}
+            }}
+          },
+          {
+            "if": {"properties": {"acquisition_status": {"enum": ["missing", "failed"]}}},
+            "then": {"properties": {
+              "price": {"const": null}, "observation_timestamp": {"const": null},
+              "observation_age_completed_sessions": {"const": null},
+              "freshness_status": {"enum": ["missing", "invalid"]},
+              "error_code": {"type": "string"}, "error_detail": {"type": "string"}
+            }}
+          }
+        ]
+      }
+    }
+  }
+}
