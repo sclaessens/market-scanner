@@ -7,7 +7,7 @@ Effective date: 2026-08-12
 Roadmap decision: ME-RM08
 
 Base state verified at `main` commit
-`8e71af5935db5e4bc0cd5261035497115df0573d`, the merge commit for PR #475.
+`4753c94c0ab572d619fbb7b82496ba2864797a9f`, the merge commit for PR #477.
 
 ## Active product objective
 
@@ -47,17 +47,16 @@ transactions, or move allocation authority outside the Decision Engine.
 ME-RM08 - Realign roadmap around portfolio authority and advisory price freshness
   -> ME-PR03 - Manual portfolio transaction ledger and transaction-derived
                portfolio-aware candidate context (COMPLETED)
-  -> ME-SR25 - Implement scheduled advisory price refresh and freshness artifacts (NEXT)
-  -> ME-PI01 - Define portfolio exposure and concentration intelligence from
-               transaction-derived positions plus advisory price enrichment
-  -> ME-CI12 - Batch grounded advisory consumption, only after the preceding
-               portfolio and price inputs are stable
-  -> ME-PS01 - Define downstream position-sizing decision contract
-  -> ME-NL01/02/03 - Channel-neutral notification sequence
+  -> ME-SR25 - Implement advisory price evidence artifacts (IMPLEMENTED)
+  -> ME-DATA11 - Target fundamental derivation at the highest-ranked technical
+                 candidate funnel
+  -> ME-RUN33 - First useful end-to-end candidate analysis release
+  -> ME-CI12 - ChatGPT consumption without new analysis logic
 ```
 
-ME-PR03 is complete. ME-SR25 is the next implementation story and must not be
-silently replaced by canonical-publication work.
+ME-PR03 is complete. ME-SR25 is implemented on its review branch and must not
+be silently replaced by canonical-publication work. A post-merge operational
+validation run remains separately approval-gated.
 
 ## What ME-PR03 completed
 
@@ -116,11 +115,12 @@ ME-SR25 must not:
 
 The following work remains valid but is not the active next step:
 
-- ME-DATA11: diversified US-GAAP/IFRS derivation pilot;
 - ME-CI11D and the provider-invocation troubleshooting line;
 - canonical publication activation after a future approved source policy;
 - remaining EA, TMHC, historical-addition, and precision-rewrite remediation;
-- notification-channel implementation.
+- ME-PI01 portfolio exposure and concentration intelligence;
+- further portfolio expansion, position sizing, notification-channel
+  implementation, broker integration, and cloud portfolio storage.
 
 Historical documents may contain a local `Next` label that was correct when
 that sprint closed. Those labels are historical evidence only. This file and
@@ -139,9 +139,10 @@ ME-RM08 define the current active order.
 ## Next implementation
 
 ```text
-ME-SR25 - Implement scheduled advisory price refresh and freshness artifacts
+ME-DATA11 - Target fundamental derivation at the highest-ranked technical
+candidate funnel
 ```
 
-No runtime implementation, canary, provider activation, canonical publication,
-portfolio data write, broker connection, or order execution is authorized by
-this roadmap-only change.
+No canary, production provider activation, canonical publication, portfolio
+data write, broker connection, or order execution was performed by ME-SR25.
+Operational validation remains a separately approved post-merge action.

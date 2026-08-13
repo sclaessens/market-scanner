@@ -26,6 +26,8 @@ Engine work. It is not an exhaustive file inventory.
 ## Runtime areas
 
 - `src/market_engine/`: current Market Engine job-family runtime.
+- `src/market_engine/source_refresh/advisory_price_evidence.py`: ME-SR25
+  advisory-only price acquisition, artifact validation, and consumer boundary.
 - `src/market_scanner/portfolio/`: portfolio source and contract metadata.
 - `scripts/portfolio/`: legacy/reference portfolio utilities unless a sprint
   explicitly promotes or replaces a narrow surface.
@@ -43,6 +45,9 @@ Engine work. It is not an exhaustive file inventory.
   explicitly approved.
 - `market-data` branch: canonical price dataset; separate from planned
   advisory price artifacts.
+- `config/market_engine/advisory_price/` and
+  `config/market_engine/advisory_price_freshness_policy.json`: advisory price
+  schemas and freshness policy.
 
 ## Historical material
 

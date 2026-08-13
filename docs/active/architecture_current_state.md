@@ -4,7 +4,7 @@ Status: ACTIVE
 
 Effective date: 2026-08-12
 
-Verified base: `8e71af5935db5e4bc0cd5261035497115df0573d`
+Verified base: `4753c94c0ab572d619fbb7b82496ba2864797a9f`
 
 ## Product model
 
@@ -39,13 +39,16 @@ user confirmation
   blockers;
 - partial governed fundamental evidence coverage;
 - scheduled canonical refresh infrastructure with fail-closed publication;
+- advisory-only full-universe price evidence, freshness validation, and a
+  validated analysis consumer;
 - private manual transaction ledger, deterministic derived positions, and
   transaction-derived Portfolio Review context;
 - structured ChatGPT advisory contracts and local grounding validation.
 
 ## Current gaps
 
-- no operational advisory-only daily price artifact;
+- advisory-only price artifacts are implemented but require a separately
+  approved post-merge operational validation run;
 - automatic canonical `market-data` publication remains blocked;
 - fundamental evidence coverage remains partial;
 - later model invocation, position sizing, and notification work is deferred.
@@ -53,7 +56,7 @@ user confirmation
 ## Active implementation sequence
 
 ```text
-ME-SR25 -> ME-PI01 -> ME-CI12 -> ME-PS01 -> ME-NL01/02/03
+ME-SR25 -> ME-DATA11 -> ME-RUN33 -> ME-CI12
 ```
 
 See:

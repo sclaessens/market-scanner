@@ -1,8 +1,8 @@
-# ME-SR25 — Scheduled advisory price refresh and freshness artifacts
+# ME-SR25 — Advisory Price Evidence Artifact
 
 Sprint ID: ME-SR25
 
-Status: PLANNED / DIRECTLY AFTER ME-PR03
+Status: IMPLEMENTED BY ME-SR25 / POST-MERGE OPERATIONAL VALIDATION NOT EXECUTED
 
 Job family: ME-SR / Source Refresh
 
@@ -25,11 +25,10 @@ states, per ticker:
 - normalized price observation;
 - source identifier;
 - retrieval timestamp;
-- requested session/window;
 - freshness state;
 - validation state;
 - failure or blocker code;
-- last-known-good reference when current acquisition fails.
+- explicit per-instrument failure evidence when current acquisition fails.
 
 Candidate analysis may use only observations whose freshness and validation
 states permit advisory consumption. Stale or missing data remains explicit.
@@ -39,7 +38,7 @@ states permit advisory consumption. Stale or missing data remains explicit.
 ```text
 scheduled source request
   -> existing supported acquisition path
-  -> OHLCV and identity validation
+  -> close-observation and identity validation
   -> advisory snapshot
   -> freshness manifest
   -> analysis handoff
@@ -131,8 +130,8 @@ Required coverage includes:
 - successful fresh terminal session;
 - pre-market/no-completed-session behavior;
 - mixed success/failure partitioning;
-- stale last-known-good observation;
-- invalid OHLCV;
+- stale close observation;
+- invalid close price;
 - identity and symbol mismatch;
 - bounded retry;
 - deterministic manifest;
@@ -164,3 +163,42 @@ ME-SR25 is complete only when:
 - ME-SR17 through ME-SR24 remain historical and canonical-publication context.
 - ME-PI01 may later combine ME-PR03 positions with ME-SR25 price enrichment for
   exposure and concentration intelligence.
+
+## Implementation outcome
+
+ME-SR25 implements `me-sr25-advisory-price-evidence-v1` as a separate
+non-canonical observations file and checksum-bound run manifest. The builder
+uses the existing yfinance daily-history adapter, canonical instrument IDs,
+canonical tickers, source mappings, currency, and the existing completed-
+session resolver. It emits deterministic per-instrument `fresh`, `stale`,
+`missing`, or `invalid` evidence and reconciled run totals over all 952
+canonical instruments.
+
+One semantic validator protects creation, load, integrity reconciliation, and
+consumer trust boundaries. Prices are exact positive canonical decimal
+strings. Identity, source, observation type, currency, timestamps, freshness,
+full-universe membership, ordering, counts, policy, and digests fail closed.
+The public consumer accepts an artifact path rather than caller-supplied price
+objects and exposes a current price only for a validated fresh observation.
+
+The separate `Advisory Price Evidence` workflow runs at 05:30 UTC, uploads only
+a 14-day GitHub Actions artifact, and has read-only repository permissions. It
+contains no publication job or `market-data` write. No workflow run or canary
+was executed by this sprint; operational status still requires separately
+approved post-merge validation.
+
+The accelerated product route after implementation is:
+
+```text
+ME-SR25 -> ME-DATA11 -> ME-RUN33 -> ME-CI12
+```
+
+ME-RUN33 is the first unreserved RUN identifier found in the authoritative
+documentation and is reserved here for the first useful end-to-end candidate
+analysis release. That release must produce 5–15 comparable candidates with
+current price/freshness, technical setup, entry/stop/target context,
+risk/reward, fundamental quality and gaps, risks and invalidation conditions,
+explicit include/exclude reasons, and directly explainable ChatGPT input.
+ME-PI01, further portfolio expansion, position sizing, notifications, broker
+integration, cloud portfolio storage, and canonical-publication remediation
+are deferred until after that release.

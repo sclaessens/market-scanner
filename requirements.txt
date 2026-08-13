@@ -3,3 +3,4 @@ numpy
 yfinance
 requests
 lxml
+jsonschema>=4.23,<5

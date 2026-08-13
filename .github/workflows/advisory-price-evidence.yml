@@ -1,0 +1,47 @@
+name: Advisory Price Evidence
+
+on:
+  schedule:
+    - cron: "30 5 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: advisory-price-evidence-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-advisory-price-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout executable source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install project dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build non-canonical advisory price evidence
+        env:
+          RUN_ID: me-sr25-advisory-price-${{ github.run_id }}
+        run: |
+          source_main_sha="$(git rev-parse HEAD)"
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_price_evidence build \
+            --run-id "$RUN_ID" \
+            --source-main-sha "$source_main_sha" \
+            --output-root "$RUNNER_TEMP/advisory-price-evidence"
+
+      - name: Upload advisory-only artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-price-evidence-${{ github.run_id }}
+          path: ${{ runner.temp }}/advisory-price-evidence/
+          if-no-files-found: error
+          retention-days: 14
