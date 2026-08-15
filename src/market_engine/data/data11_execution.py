@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping
@@ -15,13 +16,13 @@ DATA07_OUTPUT_SCHEMA = "market-engine-data11-data07-import-output-v1"
 DATA06_OUTPUT_SCHEMA = "market-engine-data11-data06-refresh-output-v1"
 RUN31_OUTPUT_SCHEMA = "market-engine-data11-run31-refresh-output-v1"
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
+_RUN_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 _PROOF_TOKEN = object()
-_BINDING_TOKEN = object()
 
 _OPERATIONAL_ALLOWLISTS = {
-    "data07": frozenset({"run_id", "output_root", "canonical_universe", "price_history_root", "baseline_data06_run", "baseline_run31_evidence", "raw_snapshot_root", "as_of_date"}),
-    "data06": frozenset({"run_id", "output_root", "canonical_universe", "price_history_root", "as_of_date"}),
-    "run31": frozenset({"run_id", "output_root", "compact_evidence_root", "canonical_universe", "price_history_root", "freshness_reference_date"}),
+    "data07": frozenset({"run_id", "output_root", "log_level"}),
+    "data06": frozenset({"run_id", "output_root", "log_level"}),
+    "run31": frozenset({"run_id", "output_root", "log_level"}),
 }
 
 
@@ -30,11 +31,20 @@ class Data11ExecutionError(ValueError):
 
 
 @dataclass(frozen=True)
-class ValidatedApprovalExecutionBinding:
-    _token: object
+class _BundleArtifact:
+    name: str
+    filename: str
+    original_path: str
+    sha256: str
+    content: bytes
+
+
+@dataclass(frozen=True)
+class _ExecutionContext:
     decision_id: str
     decision_path: str
     decision_sha256: str
+    decision_content: bytes
     ticker: str
     instrument_id: str
     governed_package_path: str
@@ -42,10 +52,14 @@ class ValidatedApprovalExecutionBinding:
     governed_package_id: str
     approved_metrics: tuple[str, ...]
     calculation_checksums: tuple[str, ...]
+    artifacts: tuple[_BundleArtifact, ...]
+    approval_validation: Mapping[str, Any]
+    runtime_settings: Mapping[str, Mapping[str, Any]]
+    repository_root: str
 
     def public_payload(self) -> dict[str, Any]:
         return {
-            "schema_version": "market-engine-data11-approved-execution-binding-v1",
+            "schema_version": "market-engine-data11-approved-execution-binding-v2",
             "decision_id": self.decision_id,
             "decision_path": self.decision_path,
             "decision_sha256": self.decision_sha256,
@@ -57,23 +71,14 @@ class ValidatedApprovalExecutionBinding:
             "governed_package_id": self.governed_package_id,
             "approved_metrics": list(self.approved_metrics),
             "calculation_checksums": list(self.calculation_checksums),
+            "approval_artifact_bindings": {
+                artifact.name: {
+                    "path": artifact.original_path,
+                    "sha256": artifact.sha256,
+                }
+                for artifact in self.artifacts
+            },
         }
-
-
-def make_validated_approval_binding(payload: Mapping[str, Any]) -> ValidatedApprovalExecutionBinding:
-    return ValidatedApprovalExecutionBinding(
-        _BINDING_TOKEN,
-        decision_id=str(payload["decision_id"]),
-        decision_path=str(payload["decision_path"]),
-        decision_sha256=str(payload["decision_sha256"]),
-        ticker=str(payload["ticker"]),
-        instrument_id=str(payload["instrument_id"]),
-        governed_package_path=str(payload["governed_package_path"]),
-        governed_package_sha256=str(payload["governed_package_sha256"]),
-        governed_package_id=str(payload["governed_package_id"]),
-        approved_metrics=tuple(payload["approved_metrics"]),
-        calculation_checksums=tuple(payload["calculation_checksums"]),
-    )
 
 
 @dataclass(frozen=True)
@@ -89,10 +94,10 @@ class ValidatedDownstreamAuthorityState:
     payload: Mapping[str, Any]
 
 
-def execute_bound_stage_chain(
+def _execute_bound_stage_chain(
     *,
+    context: _ExecutionContext | None,
     approval_validation: Mapping[str, Any],
-    decision_path: str | Path,
     data07_runner: Callable[..., Any],
     data07_operational_kwargs: Mapping[str, Any] | None = None,
     data06_runner: Callable[..., Any] | None = None,
@@ -101,43 +106,71 @@ def execute_bound_stage_chain(
     run31_operational_kwargs: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     stages = {name: {"status": "not_started", "invocation_count": 0, "input_checksums": {}, "output_checksums": {}} for name in ("data07", "data06", "run31")}
-    public_validation = {
-        key: value for key, value in approval_validation.items()
-        if key != "validated_execution_binding"
-    }
     response: dict[str, Any] = {
         "status": "blocked",
-        "approval_validation": public_validation,
+        "approval_validation": dict(approval_validation),
         "execution_binding": approval_validation.get("execution_binding"),
         "stages": stages,
         "calls": {"data07": 0, "data06": 0, "run31": 0},
         "stop_reason": None,
         "downstream_authority_status": "not_established",
     }
-    validated_binding = approval_validation.get("validated_execution_binding")
-    if (
-        approval_validation.get("validation_status") != "approved"
-        or not isinstance(validated_binding, ValidatedApprovalExecutionBinding)
-        or validated_binding._token is not _BINDING_TOKEN
-    ):
+    if approval_validation.get("validation_status") != "approved" or context is None:
         response["stop_reason"] = "APPROVAL_OR_EXECUTION_BINDING_INVALID"
         return response
-    binding = validated_binding.public_payload()
-    if Path(decision_path).resolve().as_posix() != binding["decision_path"]:
-        response["stop_reason"] = "APPROVAL_DECISION_PATH_SUBSTITUTION_FORBIDDEN"
-        return response
+    binding = context.public_payload()
     try:
         operationals = {
-            "data07": _operational_kwargs("data07", data07_operational_kwargs),
-            "data06": _operational_kwargs("data06", data06_operational_kwargs),
-            "run31": _operational_kwargs("run31", run31_operational_kwargs),
+            "data07": _operational_kwargs("data07", data07_operational_kwargs, context=context),
+            "data06": _operational_kwargs("data06", data06_operational_kwargs, context=context),
+            "run31": _operational_kwargs("run31", run31_operational_kwargs, context=context),
         }
-    except Data11ExecutionError as exc:
+    except (Data11ExecutionError, OSError) as exc:
+        if isinstance(exc, OSError):
+            response["stop_reason"] = "APPROVAL_BUNDLE_REBIND_FAILED"
+            return response
         response["stop_reason"] = str(exc)
         return response
 
+    try:
+        with tempfile.TemporaryDirectory(prefix="me-data11-approved-bundle-") as snapshot_root:
+            snapshot = _materialize_execution_snapshot(context, Path(snapshot_root))
+            return _execute_snapshot_stage_chain(
+                context=context,
+                binding=binding,
+                snapshot=snapshot,
+                operationals=operationals,
+                data07_runner=data07_runner,
+                data06_runner=data06_runner,
+                run31_runner=run31_runner,
+                stages=stages,
+                response=response,
+            )
+    except (Data11ExecutionError, OSError) as exc:
+        if isinstance(exc, OSError):
+            response["stop_reason"] = "APPROVAL_BUNDLE_REBIND_FAILED"
+            return response
+        response["stop_reason"] = str(exc)
+        return response
+
+
+def _execute_snapshot_stage_chain(
+    *,
+    context: _ExecutionContext,
+    binding: Mapping[str, Any],
+    snapshot: Mapping[str, Any],
+    operationals: Mapping[str, Mapping[str, Any]],
+    data07_runner: Callable[..., Any],
+    data06_runner: Callable[..., Any] | None,
+    run31_runner: Callable[..., Any] | None,
+    stages: dict[str, dict[str, Any]],
+    response: dict[str, Any],
+) -> dict[str, Any]:
+    snapshot_bindings = snapshot["artifact_bindings"]
+
     data07_input = {
-        "governed_package_path": binding["governed_package_path"],
+        "decision_sha256": binding["decision_sha256"],
+        "governed_package_path": snapshot["governed_package_path"],
         "governed_package_sha256": binding["governed_package_sha256"],
         "governed_package_id": binding["governed_package_id"],
         "decision_id": binding["decision_id"],
@@ -145,13 +178,16 @@ def execute_bound_stage_chain(
         "instrument_id": binding["instrument_id"],
         "approved_metrics": binding["approved_metrics"],
         "calculation_checksums": binding["calculation_checksums"],
+        "approval_artifact_bindings": snapshot_bindings,
     }
     data07_call = {
+        **dict(context.runtime_settings["data07"]),
         **operationals["data07"],
         "source_mode": "operator_import",
-        "operator_import_path": binding["governed_package_path"],
-        "source_approval_decision_path": binding["decision_path"],
+        "operator_import_path": snapshot["governed_package_path"],
+        "source_approval_decision_path": snapshot["decision_path"],
         "execute_downstream": False,
+        "allow_overwrite": False,
     }
     first = _invoke_stage("data07", data07_runner, data07_call, data07_input, stages, response)
     if first is None:
@@ -168,7 +204,7 @@ def execute_bound_stage_chain(
         "data07_receipt_path": first["receipt_path"],
         "data07_receipt_sha256": first["receipt_sha256"],
     }
-    data06_call = {**operationals["data06"], **data06_input}
+    data06_call = {**dict(context.runtime_settings["data06"]), **operationals["data06"], **data06_input}
     second = _invoke_stage("data06", data06_runner, data06_call, data06_input, stages, response)
     if second is None:
         return response
@@ -184,7 +220,7 @@ def execute_bound_stage_chain(
         "data06_receipt_path": second["receipt_path"],
         "data06_receipt_sha256": second["receipt_sha256"],
     }
-    run31_call = {**operationals["run31"], **run31_input}
+    run31_call = {**dict(context.runtime_settings["run31"]), **operationals["run31"], **run31_input}
     third = _invoke_stage("run31", run31_runner, run31_call, run31_input, stages, response)
     if third is None:
         return response
@@ -198,12 +234,74 @@ def execute_bound_stage_chain(
     return response
 
 
-def _operational_kwargs(stage: str, values: Mapping[str, Any] | None) -> dict[str, Any]:
+def _operational_kwargs(
+    stage: str,
+    values: Mapping[str, Any] | None,
+    *,
+    context: _ExecutionContext,
+) -> dict[str, Any]:
     supplied = dict(values or {})
     forbidden = sorted(set(supplied) - _OPERATIONAL_ALLOWLISTS[stage])
     if forbidden:
         raise Data11ExecutionError(f"{stage.upper()}_AUTHORITY_OR_UNKNOWN_KWARGS_FORBIDDEN:{','.join(forbidden)}")
+    run_id = supplied.get("run_id")
+    if run_id is not None and (not isinstance(run_id, str) or _RUN_ID.fullmatch(run_id) is None):
+        raise Data11ExecutionError(f"{stage.upper()}_RUN_ID_INVALID")
+    if "output_root" in supplied:
+        supplied["output_root"] = _safe_output_root(
+            supplied["output_root"], stage=stage, repository_root=Path(context.repository_root)
+        )
+    if "log_level" in supplied and supplied["log_level"] not in {"DEBUG", "INFO", "WARNING", "ERROR"}:
+        raise Data11ExecutionError(f"{stage.upper()}_LOG_LEVEL_INVALID")
     return supplied
+
+
+def _safe_output_root(value: Any, *, stage: str, repository_root: Path) -> str:
+    candidate = Path(str(value or ""))
+    if not candidate.parts or candidate.is_absolute() or ".." in candidate.parts:
+        raise Data11ExecutionError(f"{stage.upper()}_OUTPUT_ROOT_UNTRUSTED")
+    if candidate.parts[:2] != ("artifacts", "market_engine"):
+        raise Data11ExecutionError(f"{stage.upper()}_OUTPUT_ROOT_OUTSIDE_APPROVED_ROOT")
+    approved = (repository_root / "artifacts" / "market_engine").resolve()
+    resolved = (repository_root / candidate).resolve()
+    try:
+        resolved.relative_to(approved)
+    except ValueError as exc:
+        raise Data11ExecutionError(f"{stage.upper()}_OUTPUT_ROOT_SYMLINK_ESCAPE") from exc
+    if resolved.exists():
+        raise Data11ExecutionError(f"{stage.upper()}_OUTPUT_ROOT_ALREADY_EXISTS")
+    return resolved.as_posix()
+
+
+def _materialize_execution_snapshot(context: _ExecutionContext, root: Path) -> dict[str, Any]:
+    root = root.resolve()
+    if _sha256(Path(context.decision_path)) != context.decision_sha256:
+        raise Data11ExecutionError("APPROVAL_DECISION_CHECKSUM_MISMATCH")
+    for artifact in context.artifacts:
+        if _sha256(Path(artifact.original_path)) != artifact.sha256:
+            code = "GOVERNED_PACKAGE_CHECKSUM_MISMATCH" if artifact.name == "governed_package_candidate" else "APPROVAL_BUNDLE_CHECKSUM_MISMATCH"
+            raise Data11ExecutionError(code)
+    decision_path = (root / Path(context.decision_path).name).resolve()
+    decision_path.write_bytes(context.decision_content)
+    if _sha256(decision_path) != context.decision_sha256:
+        raise Data11ExecutionError("APPROVAL_DECISION_SNAPSHOT_CHECKSUM_MISMATCH")
+    bindings: dict[str, dict[str, str]] = {}
+    governed_path: Path | None = None
+    for artifact in context.artifacts:
+        target = (root / artifact.filename).resolve()
+        target.write_bytes(artifact.content)
+        if _sha256(target) != artifact.sha256:
+            raise Data11ExecutionError("APPROVAL_BUNDLE_SNAPSHOT_CHECKSUM_MISMATCH")
+        bindings[artifact.name] = {"path": target.as_posix(), "sha256": artifact.sha256}
+        if artifact.name == "governed_package_candidate":
+            governed_path = target
+    if governed_path is None:
+        raise Data11ExecutionError("GOVERNED_PACKAGE_SNAPSHOT_MISSING")
+    return {
+        "decision_path": decision_path.as_posix(),
+        "governed_package_path": governed_path.as_posix(),
+        "artifact_bindings": bindings,
+    }
 
 
 def _invoke_stage(
@@ -259,6 +357,13 @@ def validate_stage_result(result: Any, *, stage: str, expected_input: Mapping[st
         raise Data11ExecutionError(f"{stage.upper()}_OUTPUT_CONTRACT_INVALID")
     if receipt.get("schema_version") != STAGE_RECEIPT_SCHEMA or receipt.get("stage") != stage or receipt.get("run_id") != result.get("run_id") or receipt.get("status") != "completed":
         raise Data11ExecutionError(f"{stage.upper()}_RECEIPT_CONTRACT_INVALID")
+    if stage == "data07":
+        for label, payload in (("OUTPUT", output), ("RECEIPT", receipt)):
+            inputs = payload.get("input_bindings")
+            if not isinstance(inputs, Mapping) or inputs.get("decision_sha256") != expected_input.get("decision_sha256"):
+                raise Data11ExecutionError(f"DATA07_{label}_DECISION_CHECKSUM_MISMATCH")
+            if inputs.get("governed_package_sha256") != expected_input.get("governed_package_sha256"):
+                raise Data11ExecutionError(f"DATA07_{label}_GOVERNED_PACKAGE_CHECKSUM_MISMATCH")
     if receipt.get("input_bindings") != dict(expected_input):
         raise Data11ExecutionError(f"{stage.upper()}_RECEIPT_INPUT_BINDING_MISMATCH")
     if receipt.get("output_path") != output_path.as_posix() or receipt.get("output_sha256") != result.get("output_sha256"):

@@ -4,13 +4,15 @@ import hashlib
 import json
 import re
 from collections import Counter
+from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 from market_engine.data.data11_execution import (
-    execute_bound_stage_chain,
-    make_validated_approval_binding,
+    _BundleArtifact,
+    _ExecutionContext,
+    _execute_bound_stage_chain,
     validated_after_payload,
 )
 from market_engine.data.primary_source_metric_derivation import (
@@ -54,6 +56,14 @@ _CANONICAL_UTC = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 
 class Data11GovernanceError(ValueError):
     pass
+
+
+@dataclass(frozen=True)
+class _ValidatedApprovalMaterial:
+    decision_path: str
+    decision_sha256: str
+    decision_content: bytes
+    artifacts: tuple[_BundleArtifact, ...]
 
 
 def canonical_utc(value: Any, *, field: str) -> datetime:
@@ -425,14 +435,27 @@ def validate_approval_decision(
     *,
     repository_root: str | Path = ".",
 ) -> dict[str, Any]:
+    validation, _ = _validate_approval_decision_with_material(
+        decision_path,
+        repository_root=repository_root,
+    )
+    return validation
+
+
+def _validate_approval_decision_with_material(
+    decision_path: str | Path | None,
+    *,
+    repository_root: str | Path = ".",
+) -> tuple[dict[str, Any], _ValidatedApprovalMaterial | None]:
     issues: list[str] = []
-    if decision_path is None or not Path(decision_path).is_file():
-        return _approval_result(["APPROVAL_DECISION_MISSING"], decision_path)
+    if not isinstance(decision_path, (str, Path)) or not Path(decision_path).is_file():
+        return _approval_result(["APPROVAL_DECISION_MISSING"], None), None
     decision_file = Path(decision_path).resolve()
     try:
-        decision = _strict_json(decision_file)
+        decision, decision_content = _strict_json_with_bytes(decision_file)
     except Data11GovernanceError:
-        return _approval_result(["APPROVAL_DECISION_MALFORMED"], decision_path)
+        return _approval_result(["APPROVAL_DECISION_MALFORMED"], decision_path), None
+    decision_sha256 = _bytes_sha256(decision_content)
     if decision.get("schema_version") != APPROVAL_DECISION_SCHEMA:
         issues.append("APPROVAL_SCHEMA_INVALID")
     status = decision.get("decision")
@@ -446,6 +469,7 @@ def validate_approval_decision(
     bindings = decision.get("artifact_bindings") if isinstance(decision.get("artifact_bindings"), Mapping) else {}
     payloads: dict[str, Mapping[str, Any]] = {}
     paths: dict[str, Path] = {}
+    artifact_material: dict[str, _BundleArtifact] = {}
     for name in (
         "source_evidence", "mapping_review", "fact_package", "formula_catalog", "derived_package",
         "derivation_validation", "governed_package_candidate",
@@ -456,10 +480,19 @@ def validate_approval_decision(
             continue
         try:
             path = _decision_bound_path(decision_file.parent, str(binding.get("path") or ""), label=name)
-            if binding.get("sha256") != _sha256(path):
+            payload, content = _strict_json_with_bytes(path)
+            checksum = _bytes_sha256(content)
+            if binding.get("sha256") != checksum:
                 issues.append(f"{name.upper()}_CHECKSUM_MISMATCH")
-            payloads[name] = _strict_json(path)
+            payloads[name] = payload
             paths[name] = path
+            artifact_material[name] = _BundleArtifact(
+                name=name,
+                filename=path.name,
+                original_path=path.as_posix(),
+                sha256=checksum,
+                content=content,
+            )
         except Data11GovernanceError:
             issues.append(f"{name.upper()}_ARTIFACT_INVALID")
     fact = payloads.get("fact_package")
@@ -582,30 +615,42 @@ def validate_approval_decision(
                 ):
                     issues.append("GOVERNED_PACKAGE_CALCULATION_SET_MISMATCH")
     execution_binding = None
-    validated_execution_binding = None
+    material = None
     governed_path = paths.get("governed_package_candidate")
-    if not issues and isinstance(governed, Mapping) and governed_path is not None:
-        validated_execution_binding = make_validated_approval_binding({
+    governed_material = artifact_material.get("governed_package_candidate")
+    if not issues and isinstance(governed, Mapping) and governed_path is not None and governed_material is not None:
+        execution_binding = {
+            "schema_version": "market-engine-data11-approved-execution-binding-v2",
             "decision_id": decision["decision_id"],
             "decision_path": decision_file.as_posix(),
-            "decision_sha256": _sha256(decision_file),
+            "decision_sha256": decision_sha256,
             "ticker": decision["ticker"],
             "instrument_id": decision["instrument_id"],
+            "bundle_root": decision_file.parent.as_posix(),
             "governed_package_path": governed_path.as_posix(),
-            "governed_package_sha256": _sha256(governed_path),
+            "governed_package_sha256": governed_material.sha256,
             "governed_package_id": governed["package_id"],
             "approved_metrics": decision["approved_derived_metrics"],
             "calculation_checksums": decision["approved_calculation_checksums"],
-        })
-        execution_binding = validated_execution_binding.public_payload()
-    return _approval_result(
+            "approval_artifact_bindings": {
+                name: {"path": item.original_path, "sha256": item.sha256}
+                for name, item in sorted(artifact_material.items())
+            },
+        }
+        material = _ValidatedApprovalMaterial(
+            decision_path=decision_file.as_posix(),
+            decision_sha256=decision_sha256,
+            decision_content=decision_content,
+            artifacts=tuple(artifact_material[name] for name in sorted(artifact_material)),
+        )
+    result = _approval_result(
         sorted(set(issues)),
         decision_path,
         decision_id=decision.get("decision_id"),
         ticker=decision.get("ticker"),
         execution_binding=execution_binding,
-        validated_execution_binding=validated_execution_binding,
     )
+    return result, material
 
 
 def execute_approved_candidate(
@@ -619,10 +664,42 @@ def execute_approved_candidate(
     run31_operational_kwargs: Mapping[str, Any] | None = None,
     repository_root: str | Path = ".",
 ) -> dict[str, Any]:
-    validation = validate_approval_decision(decision_path, repository_root=repository_root)
-    return execute_bound_stage_chain(
+    validation, material = _validate_approval_decision_with_material(
+        decision_path,
+        repository_root=repository_root,
+    )
+    context = None
+    if material is not None and validation.get("validation_status") == "approved":
+        try:
+            runtime_settings = _execution_runtime_settings(repository_root)
+            binding = validation["execution_binding"]
+            context = _ExecutionContext(
+                decision_id=binding["decision_id"],
+                decision_path=material.decision_path,
+                decision_sha256=material.decision_sha256,
+                decision_content=material.decision_content,
+                ticker=binding["ticker"],
+                instrument_id=binding["instrument_id"],
+                governed_package_path=binding["governed_package_path"],
+                governed_package_sha256=binding["governed_package_sha256"],
+                governed_package_id=binding["governed_package_id"],
+                approved_metrics=tuple(binding["approved_metrics"]),
+                calculation_checksums=tuple(binding["calculation_checksums"]),
+                artifacts=material.artifacts,
+                approval_validation=validation,
+                runtime_settings=runtime_settings,
+                repository_root=Path(repository_root).resolve().as_posix(),
+            )
+        except (Data11GovernanceError, KeyError, TypeError, ValueError):
+            validation = {
+                **validation,
+                "validation_status": "blocked",
+                "concrete_package_source_approved": False,
+                "reason_codes": sorted(set(validation.get("reason_codes") or []) | {"EXECUTION_RUNTIME_AUTHORITY_INVALID"}),
+            }
+    return _execute_bound_stage_chain(
+        context=context,
         approval_validation=validation,
-        decision_path=Path(decision_path).resolve() if decision_path is not None else "",
         data07_runner=data07_runner,
         data07_operational_kwargs=data07_operational_kwargs,
         data06_runner=data06_runner,
@@ -630,6 +707,43 @@ def execute_approved_candidate(
         run31_runner=run31_runner,
         run31_operational_kwargs=run31_operational_kwargs,
     )
+
+
+def _execution_runtime_settings(repository_root: str | Path) -> dict[str, dict[str, Any]]:
+    root = Path(repository_root).resolve()
+    run30 = validate_authoritative_run30(repository_root=root)
+    prestate = load_downstream_prestate(repository_root=root)
+    if prestate.get("measurement_status") != "measured":
+        raise Data11GovernanceError("downstream prestate authority is invalid")
+    canonical_universe = (root / run30["artifact_bindings"]["canonical_universe"]["path"]).resolve()
+    data06_manifest = (root / prestate["artifact_bindings"]["data06_manifest"]["path"]).resolve()
+    run31_index = (root / prestate["artifact_bindings"]["run31_compact_index"]["path"]).resolve()
+    cutoff_date = run30["manifest"].get("input", {}).get("cutoff_date")
+    if not isinstance(cutoff_date, str):
+        raise Data11GovernanceError("RUN30 cutoff date is missing")
+    price_history_root = (root / "data" / "processed").resolve().as_posix()
+    return {
+        "data07": {
+            "batch_tier": "pilot",
+            "canonical_universe": canonical_universe.as_posix(),
+            "price_history_root": price_history_root,
+            "baseline_data06_run": data06_manifest.parent.as_posix(),
+            "baseline_run31_evidence": run31_index.parent.as_posix(),
+            "raw_snapshot_root": (root / "data/market_engine/source_snapshots/fundamental_metrics").resolve().as_posix(),
+            "as_of_date": cutoff_date,
+        },
+        "data06": {
+            "canonical_universe": canonical_universe.as_posix(),
+            "price_history_root": price_history_root,
+            "as_of_date": cutoff_date,
+        },
+        "run31": {
+            "canonical_universe": canonical_universe.as_posix(),
+            "price_history_root": price_history_root,
+            "compact_evidence_root": run31_index.parent.as_posix(),
+            "freshness_reference_date": cutoff_date,
+        },
+    }
 
 
 def load_downstream_prestate(
@@ -973,13 +1087,19 @@ def _decision_bound_path(bundle_root: Path, value: str | Path, *, label: str) ->
 
 
 def _strict_json(path: Path) -> Mapping[str, Any]:
+    value, _ = _strict_json_with_bytes(path)
+    return value
+
+
+def _strict_json_with_bytes(path: Path) -> tuple[Mapping[str, Any], bytes]:
     try:
-        value = json.loads(path.read_text(encoding="utf-8"), parse_constant=lambda item: (_ for _ in ()).throw(ValueError(item)))
-    except (OSError, json.JSONDecodeError, ValueError) as exc:
+        content = path.read_bytes()
+        value = json.loads(content.decode("utf-8"), parse_constant=lambda item: (_ for _ in ()).throw(ValueError(item)))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
         raise Data11GovernanceError(f"strict JSON is invalid: {path}") from exc
     if not isinstance(value, Mapping):
         raise Data11GovernanceError(f"JSON artifact must be an object: {path}")
-    return value
+    return value, content
 
 
 def _approval_result(issues: Sequence[str], decision_path: str | Path | None, **identity: Any) -> dict[str, Any]:
@@ -1008,6 +1128,10 @@ def _canonical_checksum(value: Mapping[str, Any]) -> str:
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _bytes_sha256(content: bytes) -> str:
+    return hashlib.sha256(content).hexdigest()
 
 
 def _write_json(path: Path, payload: Mapping[str, Any]) -> None:

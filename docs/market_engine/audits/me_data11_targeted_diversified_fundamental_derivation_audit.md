@@ -106,11 +106,20 @@ stage stops the chain. A downstream after-state is accepted only through the
 grants no authority. Production acquisition time comes from the internal UTC
 clock, while historical replay is manifest-bound and read-only.
 
+The final execution-authority remediation removes the public binding factory
+and direct public stage-chain entrypoint. The supported route now starts with
+the decision path, validates and captures the complete approval bundle, and
+executes DATA07 against a temporary immutable byte snapshot. Decision and
+governed-package checksums are reconciled in DATA07 input, output, and receipt.
+Canonical inputs and dates come from tracked internal authority; caller
+operationals cannot replace them. This is an API and dataflow boundary, not a
+claim that an in-process Python token provides security.
+
 Remediation validation results:
 
-- focused ME-DATA11 and blocker regression suites: 128 passed;
-- full Market Engine suite: 1,804 passed and the one baseline failure above;
-- full repository suite: 2,471 passed and the same one baseline failure;
+- focused execution-authority and TOCTOU regression suite: 116 passed;
+- full Market Engine suite: 1,843 passed and the one baseline failure above;
+- full repository suite: 2,510 passed and the same one baseline failure;
 - Python compilation, strict JSON parsing, JSON Schema validation for every
   new artifact variant, checksum/replay validation, governance greps, and
   `git diff --check`: passed.

@@ -43,13 +43,13 @@ candidate. The source and fact extracts, mappings, formulas, calculations, and
 governed package are semantically replayed during validation. Approval remains
 pending until all required human review fields and the mapping decision are
 explicitly approved. Without that decision, DATA07, DATA06, and RUN31 receive
-zero calls. Successful validation creates an immutable execution binding to
-the exact decision and governed package path, checksum, package ID, ticker,
-instrument, approved metrics, and calculation checksums. Callers may supply
-only explicitly allowlisted operational settings. Every stage requires a
-versioned completed result, receipt, exact input binding, and matching artifact
-checksums; a blocked, failed, exceptional, or malformed stage prevents every
-later invocation.
+zero calls. Successful validation captures the exact decision and approval
+bundle bytes and binds their checksums, package ID, ticker, instrument,
+approved metrics, and calculation checksums into a private execution context.
+Callers may supply only explicitly allowlisted operational settings. Every
+stage requires a versioned completed result, receipt, exact input binding, and
+matching artifact checksums; a blocked, failed, exceptional, or malformed
+stage prevents every later invocation.
 
 The downstream prestate is loaded through a separate tracked authority
 contract over the exact DATA06 and RUN31 artifacts. Invalid or unavailable
@@ -90,3 +90,20 @@ The human review checkpoint must inspect, for each persisted ticker,
 and `governed_package_candidate.json`; it must then create an explicit approved
 decision derived from `approval_candidate.json`. ME-RUN33 remains conditional
 on successful approval, DATA07 import, DATA06 refresh, and RUN31 evidence.
+
+The only supported ME-DATA11 production execution route is
+`execute_approved_candidate(decision_path, ...)`. That entrypoint loads and
+validates the decision and every bound approval artifact in one call, captures
+their exact bytes, and gives DATA07 only a temporary checksum-verified snapshot
+of those bytes. DATA07 input, output, and receipt bind both the decision SHA-256
+and governed-package SHA-256. The temporary snapshot is removed after the
+bounded stage chain returns.
+
+Callers cannot submit a prebuilt approval-validation mapping or construct an
+execution binding through a public factory. Caller-controlled operational
+values are limited to a validated run ID, a new non-escaping output root under
+`artifacts/market_engine`, and an optional logging level. Canonical universe,
+price history, baselines, raw snapshot root, and temporal inputs are derived
+internally from tracked authorities. This boundary is enforced by the public
+API and immutable dataflow; a Python object token is not treated as a security
+boundary.

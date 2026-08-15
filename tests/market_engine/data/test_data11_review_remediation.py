@@ -8,7 +8,8 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
-from market_engine.data.data11_execution import execute_bound_stage_chain, load_downstream_after_authority
+import market_engine.data.data11_execution as data11_execution
+from market_engine.data.data11_execution import load_downstream_after_authority
 from market_engine.data.data11_governance import (
     DEFAULT_DOWNSTREAM_AUTHORITY,
     DEFAULT_RUN30_AUTHORITY,
@@ -42,17 +43,27 @@ def _stage_runner(tmp_path: Path, stage: str, calls: list[str], artifact_binding
         calls.append(stage)
         run_id = f"synthetic-{stage}"
         if stage == "data07":
-            governed = json.loads(Path(kwargs["operator_import_path"]).read_text(encoding="utf-8"))
-            decision = json.loads(Path(kwargs["source_approval_decision_path"]).read_text(encoding="utf-8"))
+            governed_path = Path(kwargs["operator_import_path"])
+            decision_path = Path(kwargs["source_approval_decision_path"])
+            governed = json.loads(governed_path.read_text(encoding="utf-8"))
+            decision = json.loads(decision_path.read_text(encoding="utf-8"))
             expected_input = {
-                "governed_package_path": Path(kwargs["operator_import_path"]).resolve().as_posix(),
-                "governed_package_sha256": _sha(Path(kwargs["operator_import_path"])),
+                "decision_sha256": _sha(decision_path),
+                "governed_package_path": governed_path.resolve().as_posix(),
+                "governed_package_sha256": _sha(governed_path),
                 "governed_package_id": governed["package_id"],
                 "decision_id": decision["decision_id"],
                 "ticker": decision["ticker"],
                 "instrument_id": decision["instrument_id"],
                 "approved_metrics": decision["approved_derived_metrics"],
                 "calculation_checksums": decision["approved_calculation_checksums"],
+                "approval_artifact_bindings": {
+                    name: {
+                        "path": (decision_path.parent / Path(binding["path"]).name).resolve().as_posix(),
+                        "sha256": binding["sha256"],
+                    }
+                    for name, binding in decision["artifact_bindings"].items()
+                },
             }
             schema = "market-engine-data11-data07-import-output-v1"
         elif stage == "data06":
@@ -376,6 +387,26 @@ def test_nonapproved_decisions_make_zero_downstream_calls(tmp_path: Path, status
     assert calls == []
 
 
+@pytest.mark.parametrize("ticker", ["ASH", "BIO", "CI"])
+def test_committed_candidates_remain_pending_without_execution_authority(ticker: str) -> None:
+    decision_path = Path(
+        "artifacts/market_engine/run_evidence/"
+        "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/"
+        f"approval_candidates/{ticker}/approval_candidate.json"
+    )
+    decision = json.loads(decision_path.read_text(encoding="utf-8"))
+    calls = []
+    result = execute_approved_candidate(
+        decision_path,
+        data07_runner=lambda **kwargs: calls.append(kwargs),
+    )
+    assert decision["decision"] == "pending"
+    assert result["approval_validation"]["validation_status"] == "blocked"
+    assert "APPROVAL_PENDING" in result["approval_validation"]["reason_codes"]
+    assert result["calls"] == {"data07": 0, "data06": 0, "run31": 0}
+    assert calls == []
+
+
 def test_valid_synthetic_approval_executes_each_bounded_stage_once(tmp_path: Path) -> None:
     decision = _approve(_approval_bundle(tmp_path))
     calls = []
@@ -394,6 +425,10 @@ def test_valid_synthetic_approval_executes_each_bounded_stage_once(tmp_path: Pat
         {"operator_import_path": "BIO/governed_package_candidate.json"}, {"ticker": "BIO"},
         {"instrument_id": "equity:bio"}, {"decision_id": "forged"},
         {"source_approval_decision_path": "forged.json"}, {"execute_downstream": True},
+        {"canonical_universe": "forged.json"}, {"price_history_root": "forged"},
+        {"baseline_data06_run": "forged"}, {"baseline_run31_evidence": "forged"},
+        {"raw_snapshot_root": "forged"}, {"as_of_date": "2099-01-01"},
+        {"freshness_reference_date": "2099-01-01"},
     ],
 )
 def test_authority_carrying_data07_kwargs_are_rejected_before_any_call(tmp_path: Path, override: dict) -> None:
@@ -408,28 +443,256 @@ def test_authority_carrying_data07_kwargs_are_rejected_before_any_call(tmp_path:
     assert calls == []
 
 
-def test_plain_mapping_cannot_forge_a_validated_execution_binding() -> None:
+@pytest.mark.parametrize(
+    ("stage", "override"),
+    [
+        ("data06", {"canonical_universe": "forged.json"}),
+        ("data06", {"price_history_root": "forged"}),
+        ("data06", {"baseline_data06_run": "forged"}),
+        ("data06", {"as_of_date": "2099-01-01"}),
+        ("run31", {"canonical_universe": "forged.json"}),
+        ("run31", {"price_history_root": "forged"}),
+        ("run31", {"baseline_run31_evidence": "forged"}),
+        ("run31", {"compact_evidence_root": "forged"}),
+        ("run31", {"freshness_reference_date": "2099-01-01"}),
+    ],
+)
+def test_downstream_authority_kwargs_are_rejected_before_any_stage_call(
+    tmp_path: Path, stage: str, override: dict
+) -> None:
+    decision = _approve(_approval_bundle(tmp_path))
     calls = []
-    result = execute_bound_stage_chain(
-        approval_validation={"validation_status": "approved", "execution_binding": {"ticker": "BIO"}},
-        decision_path="forged.json", data07_runner=lambda **kwargs: calls.append(kwargs),
+    kwargs = {f"{stage}_operational_kwargs": override}
+    result = execute_approved_candidate(
+        decision,
+        data07_runner=_stage_runner(tmp_path, "data07", calls),
+        data06_runner=_stage_runner(tmp_path, "data06", calls),
+        run31_runner=_stage_runner(tmp_path, "run31", calls),
+        **kwargs,
+    )
+    assert result["calls"] == {"data07": 0, "data06": 0, "run31": 0}
+    assert result["stop_reason"].startswith(f"{stage.upper()}_AUTHORITY_OR_UNKNOWN_KWARGS_FORBIDDEN")
+    assert calls == []
+
+
+def test_public_binding_factory_and_stage_chain_are_not_supported_api() -> None:
+    assert not hasattr(data11_execution, "make_validated_approval_binding")
+    assert not hasattr(data11_execution, "execute_bound_stage_chain")
+
+
+def test_plain_mapping_cannot_be_used_as_an_execution_context() -> None:
+    calls = []
+    result = execute_approved_candidate(
+        {"validation_status": "approved", "execution_binding": {"ticker": "BIO"}},
+        data07_runner=lambda **kwargs: calls.append(kwargs),
     )
     assert result["stop_reason"] == "APPROVAL_OR_EXECUTION_BINDING_INVALID"
     assert result["calls"] == {"data07": 0, "data06": 0, "run31": 0}
     assert calls == []
 
 
-def test_validated_binding_cannot_be_reused_with_another_decision_path(tmp_path: Path) -> None:
+def test_caller_cannot_supply_prebuilt_approval_validation(tmp_path: Path) -> None:
     decision = _approve(_approval_bundle(tmp_path))
     validation = validate_approval_decision(decision)
+    with pytest.raises(TypeError, match="approval_validation"):
+        execute_approved_candidate(
+            decision,
+            approval_validation=validation,
+            data07_runner=lambda **kwargs: None,
+        )
+
+
+@pytest.mark.parametrize("mutated_artifact", ["approval_candidate.json", "governed_package_candidate.json"])
+def test_runner_reads_only_validated_snapshot_when_original_bundle_changes(
+    tmp_path: Path, mutated_artifact: str
+) -> None:
+    decision_path = _approve(_approval_bundle(tmp_path))
+    original_hashes = {
+        name: _sha(decision_path.parent / name)
+        for name in ("approval_candidate.json", "governed_package_candidate.json")
+    }
+    snapshot_paths: list[Path] = []
+    calls: list[str] = []
+    valid = _stage_runner(tmp_path, "data07", calls)
+
+    def mutate_original_then_read_snapshot(**kwargs):
+        original = decision_path.parent / mutated_artifact
+        original.write_bytes(original.read_bytes() + b" ")
+        snapshot_decision = Path(kwargs["source_approval_decision_path"])
+        snapshot_package = Path(kwargs["operator_import_path"])
+        snapshot_paths.extend((snapshot_decision, snapshot_package))
+        assert snapshot_decision.parent == snapshot_package.parent
+        assert snapshot_decision.parent != decision_path.parent
+        assert _sha(snapshot_decision) == original_hashes["approval_candidate.json"]
+        assert _sha(snapshot_package) == original_hashes["governed_package_candidate.json"]
+        return valid(**kwargs)
+
+    result = execute_approved_candidate(decision_path, data07_runner=mutate_original_then_read_snapshot)
+    assert result["status"] == "completed"
+    assert result["calls"] == {"data07": 1, "data06": 0, "run31": 0}
+    assert calls == ["data07"]
+    assert snapshot_paths and all(not path.exists() for path in snapshot_paths)
+
+
+@pytest.mark.parametrize(
+    ("mutated_artifact", "reason"),
+    [
+        ("approval_candidate.json", "APPROVAL_DECISION_CHECKSUM_MISMATCH"),
+        ("governed_package_candidate.json", "GOVERNED_PACKAGE_CHECKSUM_MISMATCH"),
+    ],
+)
+def test_checksum_change_during_snapshot_binding_blocks_data07(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mutated_artifact: str, reason: str
+) -> None:
+    decision_path = _approve(_approval_bundle(tmp_path))
+    original_materialize = data11_execution._materialize_execution_snapshot
     calls = []
-    result = execute_bound_stage_chain(
-        approval_validation=validation, decision_path=tmp_path / "BIO-decision.json",
+
+    def mutate_before_materialize(context, root):
+        artifact = decision_path.parent / mutated_artifact
+        artifact.write_bytes(artifact.read_bytes() + b" ")
+        return original_materialize(context, root)
+
+    monkeypatch.setattr(data11_execution, "_materialize_execution_snapshot", mutate_before_materialize)
+    result = execute_approved_candidate(
+        decision_path,
         data07_runner=lambda **kwargs: calls.append(kwargs),
     )
-    assert result["stop_reason"] == "APPROVAL_DECISION_PATH_SUBSTITUTION_FORBIDDEN"
-    assert result["calls"]["data07"] == 0
+    assert result["stop_reason"] == reason
+    assert result["calls"] == {"data07": 0, "data06": 0, "run31": 0}
     assert calls == []
+
+
+@pytest.mark.parametrize(
+    ("target", "mutation", "reason"),
+    [
+        ("output", "missing", "DATA07_OUTPUT_DECISION_CHECKSUM_MISMATCH"),
+        ("receipt", "missing", "DATA07_RECEIPT_DECISION_CHECKSUM_MISMATCH"),
+        ("output", "wrong", "DATA07_OUTPUT_DECISION_CHECKSUM_MISMATCH"),
+        ("receipt", "wrong", "DATA07_RECEIPT_DECISION_CHECKSUM_MISMATCH"),
+        ("output", "wrong_package", "DATA07_OUTPUT_GOVERNED_PACKAGE_CHECKSUM_MISMATCH"),
+    ],
+)
+def test_data07_decision_and_package_checksum_contract_is_fail_closed(
+    tmp_path: Path, target: str, mutation: str, reason: str
+) -> None:
+    decision_path = _approve(_approval_bundle(tmp_path))
+    calls: list[str] = []
+    valid = _stage_runner(tmp_path, "data07", calls)
+
+    def mutate_stage_evidence(**kwargs):
+        result = valid(**kwargs)
+        output_path = Path(result["output_path"])
+        receipt_path = Path(result["receipt_path"])
+        output = json.loads(output_path.read_text(encoding="utf-8"))
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        payload = output if target == "output" else receipt
+        field = "governed_package_sha256" if mutation == "wrong_package" else "decision_sha256"
+        if mutation == "missing":
+            payload["input_bindings"].pop(field)
+        else:
+            payload["input_bindings"][field] = "0" * 64
+        if target == "output":
+            _write_json(output_path, output)
+            receipt["output_sha256"] = _sha(output_path)
+            _write_json(receipt_path, receipt)
+        else:
+            _write_json(receipt_path, receipt)
+        result.update(output_sha256=_sha(output_path), receipt_sha256=_sha(receipt_path))
+        return result
+
+    result = execute_approved_candidate(decision_path, data07_runner=mutate_stage_evidence)
+    assert result["stop_reason"] == reason
+    assert result["calls"] == {"data07": 1, "data06": 0, "run31": 0}
+
+
+def test_safe_output_root_and_run_id_are_forwarded_as_non_authority_operationals(tmp_path: Path) -> None:
+    decision_path = _approve(_approval_bundle(tmp_path))
+    relative_output = f"artifacts/market_engine/data11-safe-{tmp_path.name}"
+    received = []
+    valid = _stage_runner(tmp_path, "data07", [])
+
+    def capture(**kwargs):
+        received.append(kwargs)
+        return valid(**kwargs)
+
+    result = execute_approved_candidate(
+        decision_path,
+        data07_runner=capture,
+        data07_operational_kwargs={"run_id": "data11-safe-run-1", "output_root": relative_output, "log_level": "INFO"},
+    )
+    assert result["status"] == "completed"
+    assert received[0]["run_id"] == "data11-safe-run-1"
+    assert received[0]["output_root"] == (Path(relative_output).resolve()).as_posix()
+    assert received[0]["log_level"] == "INFO"
+
+
+@pytest.mark.parametrize("run_id", ["", "contains space", "../escape", "x" * 129])
+def test_invalid_run_id_blocks_before_data07(tmp_path: Path, run_id: str) -> None:
+    decision_path = _approve(_approval_bundle(tmp_path))
+    calls = []
+    result = execute_approved_candidate(
+        decision_path,
+        data07_runner=lambda **kwargs: calls.append(kwargs),
+        data07_operational_kwargs={"run_id": run_id},
+    )
+    assert result["stop_reason"] == "DATA07_RUN_ID_INVALID"
+    assert result["calls"] == {"data07": 0, "data06": 0, "run31": 0}
+    assert calls == []
+
+
+def _temporary_execution_root(tmp_path: Path) -> Path:
+    _materialize_authority(tmp_path, DEFAULT_RUN30_AUTHORITY)
+    _materialize_authority(tmp_path, DEFAULT_DOWNSTREAM_AUTHORITY)
+    return tmp_path
+
+
+@pytest.mark.parametrize("output_root", ["../escape", "/tmp/escape", "artifacts/outside"])
+def test_untrusted_output_roots_block_before_data07(tmp_path: Path, output_root: str) -> None:
+    root = _temporary_execution_root(tmp_path)
+    decision_path = _approve(_approval_bundle(root))
+    calls = []
+    result = execute_approved_candidate(
+        decision_path,
+        repository_root=root,
+        data07_runner=lambda **kwargs: calls.append(kwargs),
+        data07_operational_kwargs={"output_root": output_root},
+    )
+    assert result["calls"] == {"data07": 0, "data06": 0, "run31": 0}
+    assert calls == []
+
+
+def test_existing_output_target_blocks_before_data07(tmp_path: Path) -> None:
+    root = _temporary_execution_root(tmp_path)
+    target = root / "artifacts/market_engine/existing"
+    target.mkdir(parents=True)
+    decision_path = _approve(_approval_bundle(root))
+    result = execute_approved_candidate(
+        decision_path,
+        repository_root=root,
+        data07_runner=lambda **kwargs: None,
+        data07_operational_kwargs={"output_root": "artifacts/market_engine/existing"},
+    )
+    assert result["stop_reason"] == "DATA07_OUTPUT_ROOT_ALREADY_EXISTS"
+    assert result["calls"]["data07"] == 0
+
+
+def test_output_root_symlink_escape_blocks_before_data07(tmp_path: Path) -> None:
+    root = _temporary_execution_root(tmp_path)
+    approved_root = root / "artifacts/market_engine"
+    approved_root.mkdir(parents=True, exist_ok=True)
+    outside = root / "outside"
+    outside.mkdir()
+    (approved_root / "escape-link").symlink_to(outside, target_is_directory=True)
+    decision_path = _approve(_approval_bundle(root))
+    result = execute_approved_candidate(
+        decision_path,
+        repository_root=root,
+        data07_runner=lambda **kwargs: None,
+        data07_operational_kwargs={"output_root": "artifacts/market_engine/escape-link/new"},
+    )
+    assert result["stop_reason"] == "DATA07_OUTPUT_ROOT_SYMLINK_ESCAPE"
+    assert result["calls"]["data07"] == 0
 
 
 @pytest.mark.parametrize(

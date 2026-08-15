@@ -59,3 +59,6 @@ ASH, BIO, and CI and provide explicit checksum-bound decisions. Valid approved
 bundles may then pass through DATA07, followed by DATA06 and RUN31. ME-RUN33
 remains conditional on that successful, result- and receipt-bound checkpoint;
 pending artifacts or caller-supplied after-state mappings grant no authority.
+The supported production route begins at the approved decision path and uses a
+checksum-verified immutable approval-bundle snapshot; no caller-created
+validation mapping or binding can start the stage chain.
