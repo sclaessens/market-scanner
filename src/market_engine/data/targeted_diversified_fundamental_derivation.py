@@ -77,10 +77,39 @@ class TargetedDerivationError(ValueError):
     pass
 
 
+def load_read_only_replay_manifest(
+    manifest_path: str | Path,
+    *,
+    _clock: Callable[[], datetime],
+) -> dict[str, Any]:
+    """Validate historical evidence without granting acquisition or mutation authority."""
+    path = Path(manifest_path).resolve()
+    manifest = load_strict_json(path)
+    if manifest.get("schema_version") != SCHEMA_VERSION:
+        raise TargetedDerivationError("replay manifest schema is invalid")
+    trusted_now = canonical_utc_text(_clock())
+    validate_temporal_boundary(
+        generated_at=str(manifest.get("generated_at")),
+        acquired_at=str(manifest.get("trusted_now")),
+        source_publication_date=str(manifest.get("generated_at"))[:10],
+        trusted_now=trusted_now,
+    )
+    return {
+        "mode": "read_only_historical_replay",
+        "manifest_path": path.as_posix(),
+        "manifest_sha256": _sha256(path),
+        "run_id": manifest.get("run_id"),
+        "replay_time": manifest.get("trusted_now"),
+        "provider_acquisition_allowed": False,
+        "approval_allowed": False,
+        "downstream_mutation_allowed": False,
+    }
+
+
 def run_targeted_derivation(
     *,
     run_id: str,
-    generated_at: str,
+    _generated_at: str | None = None,
     ranking_path: str | Path = DEFAULT_RANKING,
     ranking_manifest_path: str | Path = DEFAULT_MANIFEST,
     universe_path: str | Path = DEFAULT_UNIVERSE,
@@ -89,13 +118,14 @@ def run_targeted_derivation(
     source_root: str | Path = DEFAULT_SOURCE_ROOT,
     cohort_size: int = 10,
     fetch_json: JsonFetcher | None = None,
-    trusted_now: str | None = None,
     run30_authority_path: str | Path = DEFAULT_RUN30_AUTHORITY,
     downstream_authority_path: str | Path = DEFAULT_DOWNSTREAM_AUTHORITY,
+    _clock: Callable[[], datetime] | None = None,
 ) -> tuple[dict[str, Any], Path]:
     if not MIN_COHORT <= cohort_size <= MAX_COHORT:
         raise TargetedDerivationError(f"cohort_size must be between {MIN_COHORT} and {MAX_COHORT}")
-    trusted_now = trusted_now or canonical_utc_text(datetime.now(UTC))
+    trusted_now = canonical_utc_text((_clock or (lambda: datetime.now(UTC)))())
+    generated_at = _generated_at or trusted_now
     validate_temporal_boundary(
         generated_at=generated_at,
         acquired_at=generated_at,
@@ -134,6 +164,7 @@ def run_targeted_derivation(
         source_root=Path(source_root),
         run_id=run_id,
         generated_at=generated_at,
+        acquired_at=trusted_now,
         trusted_now=trusted_now,
     )
     derivation_results = derive_cohort_metrics(
@@ -264,6 +295,7 @@ def build_candidate_funnel(
             "instrument_id": row["instrument_id"],
             "source_symbol": row["source_symbol"],
             "asset_type": str(row["instrument_id"]).split(":", 1)[0],
+            "accounting_framework_status": "unknown_not_inspected",
             "candidate_score": row["candidate_score"],
             "ranking_scope": row["ranking_scope"],
             "full_advice_ready": row["full_advice_ready"],
@@ -278,10 +310,12 @@ def build_candidate_funnel(
         "top_limit": TOP_LIMIT,
         "candidate_count": len(rows),
         "accounting_framework_inventory": {
-            "us_gaap_equity_candidates": sum(row["asset_type"] == "equity" for row in rows),
-            "ifrs_candidates": 0,
+            "equities_framework_unknown_not_inspected": sum(row["asset_type"] == "equity" for row in rows),
+            "source_validated_us_gaap": 0,
+            "source_validated_ifrs": 0,
+            "unsupported_or_missing_framework": 0,
             "non_equity_candidates": sum(row["asset_type"] != "equity" for row in rows),
-            "note": "The authoritative top-25 contains no IFRS candidate; framework diversity is not forced.",
+            "note": "Framework is unknown before primary-source namespace inspection and is never inferred from asset type.",
         },
         "source_bindings": {
             "ranking_path": ranking_path.as_posix(),
@@ -320,7 +354,7 @@ def select_pilot_cohort(funnel: Mapping[str, Any], *, cohort_size: int) -> dict[
         "selection_policy": {
             "primary_order": "authoritative candidate rank ascending",
             "supported_scope": "equity candidates with official SEC CompanyFacts identity",
-            "framework_diversity": "not forced because the authoritative top-25 contains no IFRS candidate",
+            "framework_diversity": "reported only for the inspected cohort; top-25 framework remains unknown before source inspection",
             "ticker_specific_runtime_branches": False,
         },
         "selected_tickers": [row["ticker"] for row in selected],
@@ -336,6 +370,7 @@ def acquire_and_extract(
     source_root: Path,
     run_id: str,
     generated_at: str,
+    acquired_at: str,
     trusted_now: str,
 ) -> tuple[dict[str, Any], dict[str, Mapping[str, Any]]]:
     inventory: list[dict[str, Any]] = []
@@ -355,7 +390,7 @@ def acquire_and_extract(
                 ticker=ticker,
                 cik=cik,
                 run_id=run_id,
-                fetched_at=generated_at,
+                fetched_at=acquired_at,
                 root_dir=source_root,
             )
             checksum = _sha256(snapshot_path)
@@ -365,6 +400,7 @@ def acquire_and_extract(
                 source_url=source_url,
                 source_checksum=checksum,
                 generated_at=generated_at,
+                _acquired_at=acquired_at,
                 run_id=run_id,
                 trusted_now=trusted_now,
             )
@@ -375,14 +411,14 @@ def acquire_and_extract(
                 "ticker": ticker,
                 "instrument_id": candidate["instrument_id"],
                 "company_identity": payload.get("entityName") or identity["title"],
-                "accounting_framework": "us_gaap",
+                "accounting_framework": extraction.get("accounting_framework", "unknown_or_unsupported"),
                 "cik": cik,
                 "source_family": "official_sec_companyfacts",
                 "source_url": source_url,
                 "source_snapshot_path": snapshot_path.as_posix(),
                 "source_snapshot_sha256": checksum,
                 "source_acquisition_status": "acquired",
-                "acquired_at": generated_at,
+                "acquired_at": acquired_at,
                 **extraction,
             })
         except Exception as exc:
@@ -400,6 +436,22 @@ def acquire_and_extract(
         "run_id": run_id,
         "provider": "official_sec_companyfacts",
         "provider_calls_performed": len([row for row in inventory if row.get("cik")]),
+        "accounting_framework_inventory": {
+            "equities_framework_unknown_not_inspected": sum(
+                row.get("accounting_framework") == "unknown_not_inspected" for row in inventory
+            ),
+            "source_validated_us_gaap": sum(
+                row.get("accounting_framework") == "us_gaap" for row in inventory
+            ),
+            "source_validated_ifrs": sum(
+                row.get("accounting_framework") == "ifrs" for row in inventory
+            ),
+            "unsupported_or_missing_framework": sum(
+                row.get("accounting_framework") in {"unknown_or_unsupported", "ambiguous"}
+                for row in inventory
+            ),
+            "non_equity_candidates": 0,
+        },
         "raw_sources_committed": False,
         "raw_source_retention": "local checksum-bound snapshots under the declared source root",
         "status_counts": dict(sorted(Counter(row["source_acquisition_status"] for row in inventory).items())),
@@ -416,12 +468,24 @@ def build_fact_package(
     generated_at: str,
     run_id: str,
     trusted_now: str | None = None,
+    _acquired_at: str | None = None,
 ) -> tuple[dict[str, Any] | None, dict[str, Any]]:
     ticker = candidate["ticker"]
     company = str(payload.get("entityName") or ticker)
-    facts_root = payload.get("facts", {}).get("us-gaap", {})
+    namespaces = payload.get("facts")
+    if not isinstance(namespaces, Mapping):
+        return None, {"fact_extraction_status": "blocked", "fact_count": 0, "accounting_framework": "unknown_or_unsupported", "reason_codes": ["SUPPORTED_ACCOUNTING_FRAMEWORK_MISSING"]}
+    has_us_gaap = isinstance(namespaces.get("us-gaap"), Mapping) and bool(namespaces.get("us-gaap"))
+    has_ifrs = isinstance(namespaces.get("ifrs-full"), Mapping) and bool(namespaces.get("ifrs-full"))
+    if has_us_gaap and has_ifrs:
+        return None, {"fact_extraction_status": "blocked", "fact_count": 0, "accounting_framework": "ambiguous", "reason_codes": ["ACCOUNTING_FRAMEWORK_NAMESPACE_AMBIGUOUS"]}
+    if has_ifrs:
+        return None, {"fact_extraction_status": "blocked", "fact_count": 0, "accounting_framework": "ifrs", "reason_codes": ["IFRS_FRAMEWORK_UNSUPPORTED"]}
+    if not has_us_gaap:
+        return None, {"fact_extraction_status": "blocked", "fact_count": 0, "accounting_framework": "unknown_or_unsupported", "reason_codes": ["SUPPORTED_ACCOUNTING_FRAMEWORK_MISSING"]}
+    facts_root = namespaces["us-gaap"]
     if not isinstance(facts_root, Mapping):
-        return None, {"fact_extraction_status": "blocked", "fact_count": 0, "reason_codes": ["US_GAAP_FACTS_MISSING"]}
+        return None, {"fact_extraction_status": "blocked", "fact_count": 0, "accounting_framework": "us_gaap", "reason_codes": ["US_GAAP_FACTS_MISSING"]}
     observations: dict[str, list[tuple[str, Mapping[str, Any]]]] = {}
     for concept, tags in _CONCEPT_TAGS.items():
         entries: list[tuple[str, Mapping[str, Any]]] = []
@@ -440,11 +504,12 @@ def build_fact_package(
         return None, {
             "fact_extraction_status": "blocked",
             "fact_count": 0,
+            "accounting_framework": "us_gaap",
             "reason_codes": ["CONFLICTING_DURATION_FACTS"],
             "error": str(exc),
         }
     if "revenue" not in aligned:
-        return None, {"fact_extraction_status": "blocked", "fact_count": 0, "reason_codes": ["ALIGNED_REVENUE_FACT_MISSING"]}
+        return None, {"fact_extraction_status": "blocked", "fact_count": 0, "accounting_framework": "us_gaap", "reason_codes": ["ALIGNED_REVENUE_FACT_MISSING"]}
     facts = [
         _canonical_fact(
             candidate,
@@ -455,6 +520,7 @@ def build_fact_package(
             source_url=source_url,
             source_checksum=source_checksum,
             generated_at=generated_at,
+            acquired_at=_acquired_at or generated_at,
             run_id=run_id,
             trusted_now=trusted_now or generated_at,
         )
@@ -491,6 +557,7 @@ def build_fact_package(
     }
     return package, {
         "fact_extraction_status": "candidate_ready",
+        "accounting_framework": "us_gaap",
         "fact_count": len(facts),
         "reporting_period": f"{period['fiscal_year']}-{period['fiscal_period']}",
         "source_publication_date": period["source_publication_date"],
@@ -914,6 +981,7 @@ def _canonical_fact(
     source_url: str,
     source_checksum: str,
     generated_at: str,
+    acquired_at: str,
     run_id: str,
     trusted_now: str,
 ) -> dict[str, Any]:
@@ -923,7 +991,7 @@ def _canonical_fact(
     duration = duration_metadata(observation)
     validate_temporal_boundary(
         generated_at=generated_at,
-        acquired_at=generated_at,
+        acquired_at=acquired_at,
         source_publication_date=str(observation["filed"]),
         trusted_now=trusted_now,
     )
@@ -951,8 +1019,8 @@ def _canonical_fact(
         "source_accession": observation["accn"],
         "source_document_checksum": source_checksum,
         "source_publication_date": observation["filed"],
-        "observed_at": generated_at,
-        "acquired_at": generated_at,
+        "observed_at": acquired_at,
+        "acquired_at": acquired_at,
         "parser_version": "market-engine-data11-sec-companyfacts-canonical-extraction-v1",
         "source_approval_reference": f"{run_id}-{ticker.lower()}-source-approval-candidate",
         "canonical_mapping_approval_reference": f"{run_id}-{ticker.lower()}-mapping-review-candidate",
@@ -964,7 +1032,7 @@ def _blocked_inventory(candidate: Mapping[str, Any], reason: str, *, cik: str | 
         "rank": candidate["rank"],
         "ticker": candidate["ticker"],
         "instrument_id": candidate["instrument_id"],
-        "accounting_framework": "us_gaap",
+        "accounting_framework": "unknown_not_inspected",
         "cik": cik,
         "source_family": "official_sec_companyfacts",
         "source_acquisition_status": "blocked",
@@ -1031,8 +1099,6 @@ def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run the bounded ME-DATA11 targeted derivation pilot.")
     parser.add_argument("--run-id", required=True)
-    parser.add_argument("--generated-at", default=canonical_utc_text(datetime.now(UTC)))
-    parser.add_argument("--trusted-now", default=canonical_utc_text(datetime.now(UTC)))
     parser.add_argument("--ranking", type=Path, default=DEFAULT_RANKING)
     parser.add_argument("--ranking-manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--canonical-universe", type=Path, default=DEFAULT_UNIVERSE)
@@ -1043,7 +1109,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     _, output_dir = run_targeted_derivation(
         run_id=args.run_id,
-        generated_at=args.generated_at,
         ranking_path=args.ranking,
         ranking_manifest_path=args.ranking_manifest,
         universe_path=args.canonical_universe,
@@ -1051,7 +1116,6 @@ def main(argv: Sequence[str] | None = None) -> int:
         output_root=args.output_root,
         source_root=args.source_root,
         cohort_size=args.cohort_size,
-        trusted_now=args.trusted_now,
     )
     with (output_dir / "manifest.json").open(encoding="utf-8") as handle:
         summary = {"run_status": json.load(handle)["status"]}

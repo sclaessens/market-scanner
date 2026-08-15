@@ -19,7 +19,8 @@ authority outside the Decision Engine.
 - select a deterministic rank-first cohort of 8–12 supported equities;
 - resolve issuer identity with the official SEC ticker index and acquire
   bounded official CompanyFacts snapshots;
-- extract canonical US-GAAP duration facts without ticker-specific branches;
+- classify framework from inspected source namespaces and extract canonical
+  US-GAAP duration facts without ticker-specific branches;
 - reuse the DATA10 formula catalog and derivation engine;
 - keep every derivation pending until a separate checksum-bound operator
   decision is supplied;
@@ -29,8 +30,9 @@ authority outside the Decision Engine.
 ## Pilot outcome
 
 Run `me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z`
-selected ASB, ASH, ATR, AXP, BIO, BKH, BMRN, BMY, CHRW, and CI. The top-25
-contained no IFRS issuer, so framework diversity was not forced.
+selected ASB, ASH, ATR, AXP, BIO, BKH, BMRN, BMY, CHRW, and CI. Framework
+remains unknown for the uninspected top-25; all ten inspected cohort sources
+validated as US-GAAP, and no IFRS namespace was found in that inspected cohort.
 
 The original run acquired ten official source snapshots. Review remediation
 replayed those existing local snapshots without provider acquisition and
@@ -55,5 +57,5 @@ The next action is not ME-RUN33. A human must review the source evidence,
 mapping, fact, formula, derivation, validation, and governed-package files for
 ASH, BIO, and CI and provide explicit checksum-bound decisions. Valid approved
 bundles may then pass through DATA07, followed by DATA06 and RUN31. ME-RUN33
-remains conditional on that successful checkpoint; pending artifacts alone
-grant no consumption authority.
+remains conditional on that successful, result- and receipt-bound checkpoint;
+pending artifacts or caller-supplied after-state mappings grant no authority.

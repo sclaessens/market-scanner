@@ -425,9 +425,12 @@ ME-DATA11 targeted governed fundamental derivation at the highest-ranked
 technical candidate funnel and completed with blockers. It checksum-bound the
 authoritative top 25, acquired official SEC CompanyFacts snapshots for the ten
 highest-ranked supported equities, and reused the generic ME-DATA10 engine.
-Seven issuers produced nine pending derived metric candidates. No approval was
-fabricated, so authoritative downstream coverage remains unchanged and
-ME-RUN33 is next.
+Three issuers produced five pending derived metric candidates and seven were
+blocked. The top-25 framework remains unknown before inspection; all ten
+inspected cohort sources validated as US-GAAP. No approval was fabricated, so
+authoritative downstream coverage remains unchanged. ME-RUN33 remains
+conditional on human approval and a successful result-bound DATA07/DATA06/RUN31
+chain.
 
 Roadmap outcome:
 

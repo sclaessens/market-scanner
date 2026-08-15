@@ -143,7 +143,7 @@ ME-RM08 define the current active order.
 ## Next implementation
 
 ```text
-ME-RUN33 - First useful end-to-end candidate analysis release
+ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
 ```
 
 No canonical publication, portfolio data write, broker connection, order,

@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import copy
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 
+from market_engine.data.data11_governance import Data11GovernanceError
 from market_engine.data.targeted_diversified_fundamental_derivation import (
     COMPARISON_SCHEMA_VERSION,
     DEFAULT_MANIFEST,
@@ -21,6 +23,7 @@ from market_engine.data.targeted_diversified_fundamental_derivation import (
     build_fact_package,
     build_metric_comparison,
     derive_cohort_metrics,
+    load_read_only_replay_manifest,
     run_targeted_derivation,
     select_pilot_cohort,
 )
@@ -114,15 +117,16 @@ def test_cohort_is_bounded_rank_first_and_has_explicit_reason_codes() -> None:
 @pytest.mark.parametrize("size", [7, 13])
 def test_cohort_limit_fails_closed(size: int) -> None:
     with pytest.raises(TargetedDerivationError, match="cohort_size"):
-        run_targeted_derivation(run_id="test", generated_at="2026-08-13T00:00:00Z", cohort_size=size)
+        run_targeted_derivation(run_id="test", _generated_at="2026-08-13T00:00:00Z", cohort_size=size)
 
 
-def test_no_ifrs_is_forced_when_authoritative_funnel_has_none() -> None:
+def test_framework_diversity_is_not_claimed_before_source_inspection() -> None:
     funnel = _funnel()
     cohort = select_pilot_cohort(funnel, cohort_size=8)
-    assert funnel["accounting_framework_inventory"]["ifrs_candidates"] == 0
+    assert funnel["accounting_framework_inventory"]["equities_framework_unknown_not_inspected"] > 0
+    assert funnel["accounting_framework_inventory"]["source_validated_ifrs"] == 0
     assert cohort["cohort_size"] == 8
-    assert "not forced" in cohort["selection_policy"]["framework_diversity"]
+    assert "unknown before source inspection" in cohort["selection_policy"]["framework_diversity"]
 
 
 def test_sec_identity_index_is_generic_and_normalized() -> None:
@@ -160,6 +164,53 @@ def test_generic_fact_extraction_binds_identity_tag_period_unit_scale_and_source
     assert all(row["period_type"] == "duration" and row["unit"] == "USD" and row["scale"] == 0 for row in package["facts"])
     assert all(row["raw_source_concept"].startswith("us-gaap:") for row in package["facts"])
     assert all(row["source_document_checksum"] == "a" * 64 for row in package["facts"])
+
+
+@pytest.mark.parametrize(
+    ("facts", "framework", "reason"),
+    [
+        ({"ifrs-full": {"Revenue": {}}}, "ifrs", "IFRS_FRAMEWORK_UNSUPPORTED"),
+        ({"us-gaap": {"Revenue": {}}, "ifrs-full": {"Revenue": {}}}, "ambiguous", "ACCOUNTING_FRAMEWORK_NAMESPACE_AMBIGUOUS"),
+        ({"dei": {"EntityRegistrantName": {}}}, "unknown_or_unsupported", "SUPPORTED_ACCOUNTING_FRAMEWORK_MISSING"),
+    ],
+)
+def test_unsupported_or_ambiguous_framework_namespaces_fail_closed(facts: dict, framework: str, reason: str) -> None:
+    package, status = build_fact_package(
+        {"ticker": "AAA", "instrument_id": "equity:aaa", "rank": 1},
+        payload={"entityName": "Issuer", "facts": facts},
+        source_url="https://data.sec.gov/example", source_checksum="a" * 64,
+        generated_at="2026-08-13T00:00:00Z", run_id="test",
+    )
+    assert package is None
+    assert status["accounting_framework"] == framework
+    assert status["reason_codes"] == [reason]
+
+
+def test_production_clock_rejects_future_generated_time_and_public_time_overrides() -> None:
+    clock = lambda: datetime(2026, 8, 13, tzinfo=UTC)
+    with pytest.raises(Data11GovernanceError, match="generated_at must not be after trusted_now"):
+        run_targeted_derivation(run_id="future", _generated_at="2026-08-14T00:00:00Z", _clock=clock)
+    with pytest.raises(TypeError, match="trusted_now"):
+        run_targeted_derivation(run_id="override", trusted_now="2099-01-01T00:00:00Z")
+    with pytest.raises(TypeError, match="acquired_at"):
+        run_targeted_derivation(run_id="override", acquired_at="2099-01-01T00:00:00Z")
+
+
+def test_historical_replay_is_manifest_bound_and_read_only(tmp_path: Path) -> None:
+    manifest = {
+        "schema_version": "market-engine-data11-targeted-diversified-fundamental-derivation-v1",
+        "run_id": "historical", "generated_at": "2026-08-01T00:00:00Z",
+        "trusted_now": "2026-08-01T00:00:00Z", "status": "completed_with_blockers",
+    }
+    path = tmp_path / "manifest.json"
+    path.write_text(json.dumps(manifest), encoding="utf-8")
+    replay = load_read_only_replay_manifest(path, _clock=lambda: datetime(2026, 8, 13, tzinfo=UTC))
+    assert replay["mode"] == "read_only_historical_replay"
+    assert replay["provider_acquisition_allowed"] is False
+    assert replay["approval_allowed"] is False
+    assert replay["downstream_mutation_allowed"] is False
+    with pytest.raises(TypeError):
+        load_read_only_replay_manifest(path, _clock=lambda: datetime.now(UTC), provider_runner=lambda: None)
 
 
 def test_period_alignment_never_combines_different_accessions() -> None:
@@ -280,9 +331,9 @@ def test_full_bounded_run_writes_required_compact_artifacts_and_no_downstream_au
         return _companyfacts(ticker)
 
     _, output = run_targeted_derivation(
-        run_id="me-data11-test-run", generated_at="2026-08-13T00:00:00Z",
+        run_id="me-data11-test-run", _generated_at="2026-08-13T00:00:00Z",
         output_root=tmp_path / "evidence", source_root=tmp_path / "sources", cohort_size=8,
-        fetch_json=fetch,
+        fetch_json=fetch, _clock=lambda: datetime(2026, 8, 13, 1, tzinfo=UTC),
     )
     required = {
         "manifest.json", "candidate_funnel.json", "cohort_selection.json", "source_inventory.json",
@@ -293,10 +344,13 @@ def test_full_bounded_run_writes_required_compact_artifacts_and_no_downstream_au
     assert sorted(path.name for path in (output / "approval_candidates").iterdir()) == tickers
     derivation = json.loads((output / "derivation_summary.json").read_text())
     downstream = json.loads((output / "downstream_readiness_delta.json").read_text())
+    inventory = json.loads((output / "source_inventory.json").read_text())
     assert derivation["pilot_summary"]["minimum_safe_processing_target_met"] is True
     assert derivation["pilot_summary"]["approved_import_count"] == 0
     assert downstream["downstream_executed"] is False
     assert downstream["after_authoritative"] == downstream["before"]
+    assert inventory["accounting_framework_inventory"]["source_validated_us_gaap"] == 8
+    assert {row["acquired_at"] for row in inventory["instruments"]} == {"2026-08-13T01:00:00Z"}
 
 
 @pytest.mark.parametrize(

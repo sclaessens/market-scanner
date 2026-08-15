@@ -742,9 +742,10 @@ docs/market_engine/backlog/me_sr25_advisory_price_refresh.md
 Status: COMPLETED WITH BLOCKERS
 
 Outcome: the authoritative ME-RUN30 top 25 is checksum-bound and comparison-
-ready. A rank-first cohort of ten US-GAAP equities was acquired through the
-official SEC CompanyFacts route. Seven issuers produced nine safely processed
-derived metric candidates; three were structurally blocked. All candidates
+ready. A rank-first cohort of ten equities was inspected through existing
+official SEC CompanyFacts snapshots; all ten source namespaces validated as
+US-GAAP. Three issuers produced five safely processed derived metric
+candidates; seven were blocked. All candidates
 remain non-authoritative pending separate operator approval, so DATA07,
 DATA06, and RUN31 did not execute and their authoritative before/after counts
 remain unchanged.

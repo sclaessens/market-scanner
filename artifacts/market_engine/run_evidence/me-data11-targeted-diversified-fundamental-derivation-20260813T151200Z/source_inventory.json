@@ -1,4 +1,11 @@
 {
+  "accounting_framework_inventory": {
+    "equities_framework_unknown_not_inspected": 0,
+    "non_equity_candidates": 0,
+    "source_validated_ifrs": 0,
+    "source_validated_us_gaap": 10,
+    "unsupported_or_missing_framework": 0
+  },
   "instruments": [
     {
       "accounting_framework": "us_gaap",
@@ -322,8 +329,7 @@
     }
   ],
   "provider": "official_sec_companyfacts",
-  "provider_acquisition_replayed": false,
-  "provider_calls_performed": 0,
+  "provider_calls_performed": 10,
   "raw_source_retention": "local checksum-bound snapshots under the declared source root",
   "raw_sources_committed": false,
   "run_id": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z",

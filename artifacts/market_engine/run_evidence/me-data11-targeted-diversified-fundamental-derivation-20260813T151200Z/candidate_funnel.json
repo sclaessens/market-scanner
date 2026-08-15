@@ -1,13 +1,16 @@
 {
   "accounting_framework_inventory": {
-    "ifrs_candidates": 0,
+    "equities_framework_unknown_not_inspected": 24,
     "non_equity_candidates": 1,
-    "note": "The authoritative top-25 contains no IFRS candidate; framework diversity is not forced.",
-    "us_gaap_equity_candidates": 24
+    "note": "Framework is unknown before primary-source namespace inspection and is never inferred from asset type.",
+    "source_validated_ifrs": 0,
+    "source_validated_us_gaap": 0,
+    "unsupported_or_missing_framework": 0
   },
   "candidate_count": 25,
   "candidates": [
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -23,6 +26,7 @@
       "ticker": "ASB"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -38,6 +42,7 @@
       "ticker": "ASH"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -53,6 +58,7 @@
       "ticker": "ATR"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -68,6 +74,7 @@
       "ticker": "AXP"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -83,6 +90,7 @@
       "ticker": "BIO"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -98,6 +106,7 @@
       "ticker": "BKH"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -113,6 +122,7 @@
       "ticker": "BMRN"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -128,6 +138,7 @@
       "ticker": "BMY"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -143,6 +154,7 @@
       "ticker": "CHRW"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -158,6 +170,7 @@
       "ticker": "CI"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -173,6 +186,7 @@
       "ticker": "CNC"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -188,6 +202,7 @@
       "ticker": "CNO"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -203,6 +218,7 @@
       "ticker": "COLB"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -218,6 +234,7 @@
       "ticker": "CSCO"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -233,6 +250,7 @@
       "ticker": "CVS"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -248,6 +266,7 @@
       "ticker": "D"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "etf",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -263,6 +282,7 @@
       "ticker": "DIA"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -278,6 +298,7 @@
       "ticker": "EIX"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -293,6 +314,7 @@
       "ticker": "EPR"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -308,6 +330,7 @@
       "ticker": "ETR"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -323,6 +346,7 @@
       "ticker": "FE"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -338,6 +362,7 @@
       "ticker": "FHI"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -353,6 +378,7 @@
       "ticker": "FHN"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,
@@ -368,6 +394,7 @@
       "ticker": "FLG"
     },
     {
+      "accounting_framework_status": "unknown_not_inspected",
       "asset_type": "equity",
       "candidate_score": 75,
       "full_advice_ready": false,

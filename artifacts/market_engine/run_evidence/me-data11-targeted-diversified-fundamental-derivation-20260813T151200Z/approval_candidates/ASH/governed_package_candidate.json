@@ -6,6 +6,7 @@
   "records": [
     {
       "acquired_at": "2026-08-13T15:12:00Z",
+      "approval_decision_reference": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-derivation-approval-candidate",
       "company_name": "ASHLAND INC.",
       "fiscal_period": "Q3",
       "fiscal_year": 2026,

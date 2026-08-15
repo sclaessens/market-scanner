@@ -15,32 +15,32 @@ Base: `9169420427d33864851d36f2b183e35b8bd0c089`
 - canonical universe SHA-256: `c0e2c466af51ee3f34202148b5275f46248c893ce4b3851352d0fbded87148be`;
 - formula catalog SHA-256: `7ae5ca07ad9b45eaed54fccd9e77de254616da6f598d42cd44ff78dcd80673d1`.
 
-The top 25 contained 24 US-GAAP equities and DIA. It contained no IFRS issuer.
+The top 25 contained 24 equities and DIA. Accounting framework is unknown for
+the equities before source inspection and is not inferred from asset type.
 The rank-first ten-equity cohort was ASB, ASH, ATR, AXP, BIO, BKH, BMRN, BMY,
 CHRW, and CI.
 
 ## Pilot results
 
-Ten official SEC CompanyFacts snapshots were acquired. Seven issuers safely
-produced pending candidates: ASH (gross and operating margin), ATR (operating
-margin), BIO (gross and operating margin), BKH (operating margin), BMRN
-(operating margin), CHRW (operating margin), and CI (operating margin). ASB,
-AXP, and BMY were blocked because their newest aligned revenue period did not
-contain an approved gross-profit or operating-income numerator.
+Ten existing official SEC CompanyFacts snapshots were inspected and all ten
+contain a validated US-GAAP namespace. Three issuers safely produced pending
+candidates: ASH and BIO (gross and operating margin) and CI (operating margin).
+The other seven instruments fail closed on missing, non-applicable, unaligned,
+or conflicting latest-period inputs.
 
-Counts: 10 attempted, 7 pending-success, 3 blocked, 0 failed, 9 derived metric
+Counts: 10 attempted, 3 pending-success, 7 blocked, 0 failed, 5 derived metric
 candidates, 0 direct approved metrics, and 0 approved imports. No authoritative
 fundamental or advice-readiness transition occurred. Candidate-only evidence
-would make seven records partial after approval, but that is not claimed as an
+would make three records partial after approval, but that is not claimed as an
 authoritative delta.
 
 ## Blockers
 
-- all nine derived metrics require separate checksum-bound operator approval;
+- all five derived metrics require separate checksum-bound operator approval;
 - ASB, AXP, and BMY lack required latest-period numerator facts for the
   catalogued margin formulas;
-- the funnel provides no IFRS issuer, so cross-framework runtime evidence is
-  not available in this bounded pilot;
+- no IFRS namespace was found in the ten inspected sources; no claim is made
+  about uninspected top-25 frameworks;
 - direct approved revenue-growth and EPS-growth evidence is absent;
 - ME-RUN33 cannot consume pending evidence as authoritative input.
 
@@ -95,11 +95,22 @@ that import. ME-RUN33 is conditional on the completed approval/import
 checkpoint. No provider acquisition, approval, downstream run, recommendation,
 allocation, execution, portfolio mutation, or publication occurred.
 
+Final review remediation makes that checkpoint result-bound. Approval
+validation returns an immutable binding to the exact governed package,
+decision, identity, metric set, and calculation checksums. Authority-carrying
+caller kwargs are rejected. DATA06 can start only from a validated DATA07
+output and receipt, and RUN31 only from the corresponding validated DATA06
+pair. Any blocked, failed, exceptional, malformed, or checksum-inconsistent
+stage stops the chain. A downstream after-state is accepted only through the
+952-row checksum-bound producer/consumer authority loader; an ordinary mapping
+grants no authority. Production acquisition time comes from the internal UTC
+clock, while historical replay is manifest-bound and read-only.
+
 Remediation validation results:
 
-- focused ME-DATA11 and blocker regression suites: 89 passed;
-- full Market Engine suite: 1,765 passed and the one baseline failure above;
-- full repository suite: 2,432 passed and the same one baseline failure;
+- focused ME-DATA11 and blocker regression suites: 128 passed;
+- full Market Engine suite: 1,804 passed and the one baseline failure above;
+- full repository suite: 2,471 passed and the same one baseline failure;
 - Python compilation, strict JSON parsing, JSON Schema validation for every
   new artifact variant, checksum/replay validation, governance greps, and
   `git diff --check`: passed.

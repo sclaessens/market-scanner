@@ -8,6 +8,11 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
+from market_engine.data.data11_execution import (
+    execute_bound_stage_chain,
+    make_validated_approval_binding,
+    validated_after_payload,
+)
 from market_engine.data.primary_source_metric_derivation import (
     DATA07_GOVERNED_PACKAGE_SCHEMA_VERSION,
     DERIVED_PACKAGE_SCHEMA_VERSION,
@@ -440,6 +445,7 @@ def validate_approval_decision(
         issues.append("REQUIRED_REVIEWS_NOT_APPROVED")
     bindings = decision.get("artifact_bindings") if isinstance(decision.get("artifact_bindings"), Mapping) else {}
     payloads: dict[str, Mapping[str, Any]] = {}
+    paths: dict[str, Path] = {}
     for name in (
         "source_evidence", "mapping_review", "fact_package", "formula_catalog", "derived_package",
         "derivation_validation", "governed_package_candidate",
@@ -453,6 +459,7 @@ def validate_approval_decision(
             if binding.get("sha256") != _sha256(path):
                 issues.append(f"{name.upper()}_CHECKSUM_MISMATCH")
             payloads[name] = _strict_json(path)
+            paths[name] = path
         except Data11GovernanceError:
             issues.append(f"{name.upper()}_ARTIFACT_INVALID")
     fact = payloads.get("fact_package")
@@ -533,41 +540,96 @@ def validate_approval_decision(
             issues.append("APPROVAL_IDENTITY_MISMATCH")
         if isinstance(fact, Mapping) and isinstance(catalog, Mapping):
             try:
-                rebuilt = _build_derived_only_governed_candidate(derived, fact, run_id="replay", ticker=str(decision.get("ticker")))
+                ticker = str(decision.get("ticker"))
+                suffix = f"-{ticker.lower()}-primary-facts"
+                fact_package_id = str(fact.get("package_id") or "")
+                if not fact_package_id.endswith(suffix):
+                    raise ValueError("fact package id does not bind the governed package identity")
+                run_id = fact_package_id.removesuffix(suffix)
+                rebuilt = _build_derived_only_governed_candidate(derived, fact, run_id=run_id, ticker=ticker)
                 if isinstance(governed, Mapping):
-                    rebuilt["package_id"] = governed.get("package_id")
-                    rebuilt["records"][0]["snapshot_id"] = governed.get("records", [{}])[0].get("snapshot_id")
-                    rebuilt["records"][0]["source_reference"] = governed.get("records", [{}])[0].get("source_reference")
                     if _canonical_bytes(rebuilt) != _canonical_bytes(governed):
                         issues.append("GOVERNED_PACKAGE_REPLAY_MISMATCH")
             except (IndexError, KeyError, TypeError, ValueError):
                 issues.append("GOVERNED_PACKAGE_REPLAY_INVALID")
-    return _approval_result(sorted(set(issues)), decision_path, decision_id=decision.get("decision_id"), ticker=decision.get("ticker"))
+    if isinstance(governed, Mapping):
+        records = governed.get("records")
+        if not isinstance(records, list) or len(records) != 1 or not isinstance(records[0], Mapping):
+            issues.append("GOVERNED_PACKAGE_RECORD_SET_INVALID")
+        else:
+            record = records[0]
+            if record.get("ticker") != decision.get("ticker") or record.get("instrument_id") != decision.get("instrument_id"):
+                issues.append("GOVERNED_PACKAGE_IDENTITY_MISMATCH")
+            if record.get("approval_decision_reference") != decision.get("decision_id"):
+                issues.append("GOVERNED_PACKAGE_DECISION_REFERENCE_MISMATCH")
+            if governed.get("approval_decision_reference") != decision.get("decision_id"):
+                issues.append("GOVERNED_PACKAGE_DECISION_REFERENCE_MISMATCH")
+            record_metrics = record.get("metrics")
+            if not isinstance(record_metrics, Mapping):
+                issues.append("GOVERNED_PACKAGE_METRIC_SET_MISMATCH")
+            else:
+                metrics = sorted(record_metrics)
+                if metrics != decision.get("approved_derived_metrics"):
+                    issues.append("GOVERNED_PACKAGE_METRIC_SET_MISMATCH")
+                checksums = [
+                    metric.get("derivation_lineage", {}).get("calculation_checksum")
+                    for metric in record_metrics.values()
+                    if isinstance(metric, Mapping)
+                ]
+                if (
+                    any(not isinstance(value, str) for value in checksums)
+                    or sorted(checksums) != decision.get("approved_calculation_checksums")
+                ):
+                    issues.append("GOVERNED_PACKAGE_CALCULATION_SET_MISMATCH")
+    execution_binding = None
+    validated_execution_binding = None
+    governed_path = paths.get("governed_package_candidate")
+    if not issues and isinstance(governed, Mapping) and governed_path is not None:
+        validated_execution_binding = make_validated_approval_binding({
+            "decision_id": decision["decision_id"],
+            "decision_path": decision_file.as_posix(),
+            "decision_sha256": _sha256(decision_file),
+            "ticker": decision["ticker"],
+            "instrument_id": decision["instrument_id"],
+            "governed_package_path": governed_path.as_posix(),
+            "governed_package_sha256": _sha256(governed_path),
+            "governed_package_id": governed["package_id"],
+            "approved_metrics": decision["approved_derived_metrics"],
+            "calculation_checksums": decision["approved_calculation_checksums"],
+        })
+        execution_binding = validated_execution_binding.public_payload()
+    return _approval_result(
+        sorted(set(issues)),
+        decision_path,
+        decision_id=decision.get("decision_id"),
+        ticker=decision.get("ticker"),
+        execution_binding=execution_binding,
+        validated_execution_binding=validated_execution_binding,
+    )
 
 
 def execute_approved_candidate(
     decision_path: str | Path | None,
     *,
     data07_runner: Callable[..., Any],
-    data07_kwargs: Mapping[str, Any],
+    data07_operational_kwargs: Mapping[str, Any] | None = None,
     data06_runner: Callable[..., Any] | None = None,
-    data06_kwargs: Mapping[str, Any] | None = None,
+    data06_operational_kwargs: Mapping[str, Any] | None = None,
     run31_runner: Callable[..., Any] | None = None,
-    run31_kwargs: Mapping[str, Any] | None = None,
+    run31_operational_kwargs: Mapping[str, Any] | None = None,
     repository_root: str | Path = ".",
 ) -> dict[str, Any]:
     validation = validate_approval_decision(decision_path, repository_root=repository_root)
-    if validation["validation_status"] != "approved":
-        return {"status": "blocked", "reason_codes": validation["reason_codes"], "calls": {"data07": 0, "data06": 0, "run31": 0}}
-    results = {"data07": data07_runner(**dict(data07_kwargs))}
-    calls = {"data07": 1, "data06": 0, "run31": 0}
-    if data06_runner is not None:
-        results["data06"] = data06_runner(**dict(data06_kwargs or {}))
-        calls["data06"] = 1
-    if run31_runner is not None:
-        results["run31"] = run31_runner(**dict(run31_kwargs or {}))
-        calls["run31"] = 1
-    return {"status": "completed", "reason_codes": [], "calls": calls, "results": results}
+    return execute_bound_stage_chain(
+        approval_validation=validation,
+        decision_path=Path(decision_path).resolve() if decision_path is not None else "",
+        data07_runner=data07_runner,
+        data07_operational_kwargs=data07_operational_kwargs,
+        data06_runner=data06_runner,
+        data06_operational_kwargs=data06_operational_kwargs,
+        run31_runner=run31_runner,
+        run31_operational_kwargs=run31_operational_kwargs,
+    )
 
 
 def load_downstream_prestate(
@@ -651,7 +713,7 @@ def build_downstream_measurement(
     prestate: Mapping[str, Any],
     *,
     downstream_executed: bool,
-    authoritative_after: Mapping[str, Any] | None = None,
+    authoritative_after: Any = None,
 ) -> dict[str, Any]:
     if prestate.get("measurement_status") != "measured":
         return {
@@ -664,9 +726,11 @@ def build_downstream_measurement(
             "rows": [],
             "downstream_executed": downstream_executed,
         }
+    after_payload = validated_after_payload(authoritative_after) if downstream_executed else prestate
     if downstream_executed and (
-        (authoritative_after or {}).get("measurement_status") != "measured"
-        or not _fundamental_totals_reconcile(authoritative_after or {})
+        after_payload is None
+        or after_payload.get("measurement_status") != "measured"
+        or not _fundamental_totals_reconcile(after_payload)
     ):
         return {
             "schema_version": "market-engine-data11-downstream-readiness-delta-v2",
@@ -683,7 +747,7 @@ def build_downstream_measurement(
     rows = []
     for ticker in cohort["selected_tickers"]:
         baseline = prestate["by_ticker"][ticker]
-        current = (authoritative_after or prestate)["by_ticker"][ticker]
+        current = after_payload["by_ticker"][ticker]
         result = by_result[ticker]
         before_ready = baseline.get("canonical_advice_input_ready")
         after_ready = current.get("canonical_advice_input_ready")
@@ -700,7 +764,7 @@ def build_downstream_measurement(
             "reason_codes": result["reason_codes"],
         })
     before = dict(prestate["before"])
-    after = dict(before) if not downstream_executed else dict(authoritative_after["before"])
+    after = dict(before) if not downstream_executed else dict(after_payload["before"])
     outside_changes: list[dict[str, Any]] = []
     outside_regressions: list[str] = []
     status_order = {"complete": 3, "partial": 2, "missing": 1, "invalid": 0, "stale": 0, "conflicting": 0}
@@ -708,7 +772,7 @@ def build_downstream_measurement(
         for ticker, baseline in prestate["by_ticker"].items():
             if ticker in selected:
                 continue
-            current = authoritative_after["by_ticker"].get(ticker)
+            current = after_payload["by_ticker"].get(ticker)
             if current is None:
                 outside_changes.append({"ticker": ticker, "transition": "missing_after_record"})
                 outside_regressions.append(ticker)
@@ -842,6 +906,7 @@ def _build_derived_only_governed_candidate(
         "records": [{
             "ticker": ticker,
             "instrument_id": first["instrument_id"],
+            "approval_decision_reference": derived["approval_decision_reference"],
             "company_name": first["company_identity"],
             "provider_symbol": ticker,
             "provider": "governed_primary_source_derivation_candidate",

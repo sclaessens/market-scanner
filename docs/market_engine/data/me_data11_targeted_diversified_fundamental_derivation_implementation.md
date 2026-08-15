@@ -17,7 +17,9 @@ periods, issuer identity, raw tags, canonical mappings, and extraction status.
 
 ## Fact and formula behavior
 
-Generic US-GAAP tag priority data maps revenue, gross profit, and operating
+Framework is unknown in the top-25 funnel until source inspection. A non-empty
+`us-gaap` namespace establishes US-GAAP for the inspected issuer; IFRS-only,
+ambiguous, or unsupported namespaces fail closed. Generic US-GAAP tag priority data maps revenue, gross profit, and operating
 income into DATA10 canonical concepts. Duration facts are classified as
 discrete quarter, year-to-date, or annual. Selection first fixes the latest
 reporting identity and then prefers a discrete quarter for Q1-Q3 or an annual
@@ -41,7 +43,13 @@ candidate. The source and fact extracts, mappings, formulas, calculations, and
 governed package are semantically replayed during validation. Approval remains
 pending until all required human review fields and the mapping decision are
 explicitly approved. Without that decision, DATA07, DATA06, and RUN31 receive
-zero calls.
+zero calls. Successful validation creates an immutable execution binding to
+the exact decision and governed package path, checksum, package ID, ticker,
+instrument, approved metrics, and calculation checksums. Callers may supply
+only explicitly allowlisted operational settings. Every stage requires a
+versioned completed result, receipt, exact input binding, and matching artifact
+checksums; a blocked, failed, exceptional, or malformed stage prevents every
+later invocation.
 
 The downstream prestate is loaded through a separate tracked authority
 contract over the exact DATA06 and RUN31 artifacts. Invalid or unavailable
@@ -49,10 +57,19 @@ prestate is `unknown_not_measured`. With no approved import, the authoritative
 after-state equals the validated prestate and candidate-only status is reported
 separately as `candidate_partial_pending_approval`.
 
-All timestamps use canonical UTC with trailing `Z`. Source publication,
-acquisition, generation, and trusted evaluation time are ordered fail closed.
+When downstream execution is claimed, a mapping is never accepted directly.
+The after-state loader requires the validated stage-chain proof plus bound
+DATA06 and RUN31 artifacts, exact run and universe lineage, and complete
+per-ticker reconciliation across all 952 canonical instruments.
+
+All timestamps use canonical UTC with trailing `Z`. Production generation and
+acquisition use one internal UTC clock; neither is exposed as a normal CLI
+authority override. Source publication, acquisition, generation, and trusted
+evaluation time are ordered fail closed.
 Immutable acquisition-time freshness is retained separately from effective
-freshness recalculated at consumption time.
+freshness recalculated at consumption time. Historical replay is explicitly
+read-only, checksum-bound to its manifest, and grants no provider, approval, or
+downstream mutation authority.
 
 ## Evidence
 

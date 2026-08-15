@@ -26,7 +26,7 @@
     },
     "governed_package_candidate": {
       "path": "governed_package_candidate.json",
-      "sha256": "79ccdf1259030c0608adfc90ae62b0b74953f3c368eef5953160cd2012959500"
+      "sha256": "30ba4aa6b25a2bd3307459b41add3b8d3437f7fe025f4d4e37c3aaa08c9feec7"
     },
     "mapping_review": {
       "path": "mapping_review.json",

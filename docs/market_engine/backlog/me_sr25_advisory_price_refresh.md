@@ -197,7 +197,7 @@ The accelerated product route after ME-DATA11 is:
 
 ```text
 ME-SR25 (COMPLETED) -> ME-DATA11 (COMPLETED WITH BLOCKERS)
-  -> ME-RUN33 (NEXT) -> ME-CI12 (PLANNED)
+  -> ME-RUN33 (CONDITIONAL) -> ME-CI12 (PLANNED)
 ```
 
 ME-RUN33 is the first unreserved RUN identifier found in the authoritative
