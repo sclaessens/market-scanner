@@ -42,6 +42,9 @@ user confirmation
 - scheduled canonical refresh infrastructure with fail-closed publication;
 - advisory-only full-universe price evidence, freshness validation, and a
   validated analysis consumer;
+- advisory-only bounded daily OHLC history, current full-universe technical
+  screening, exact SR25 close reconciliation, and a conditional RUN33 input
+  handoff;
 - private manual transaction ledger, deterministic derived positions, and
   transaction-derived Portfolio Review context;
 - structured ChatGPT advisory contracts and local grounding validation.
@@ -58,6 +61,7 @@ user confirmation
 
 ```text
 ME-SR25 (COMPLETED) -> ME-DATA11 (READY FOR HUMAN APPROVAL)
+  -> ME-SR26 (IMPLEMENTED; POST-MERGE CANARY REQUIRED)
   -> approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 (CONDITIONAL) -> ME-CI12 (PLANNED)
 ```
@@ -74,6 +78,11 @@ See:
 - Advisory price artifact: immutable acquisition-time freshness evidence;
   current-price use requires a separate effective freshness calculation at
   each trusted load or consumption time.
+- Advisory OHLC history: separate non-canonical technical evidence. Its loader
+  replays checksums, universe/policy identity, bar semantics, and effective
+  freshness. Only that private validated context can enter current screening.
+- RUN33 handoff: input-only conditional contract. Pending DATA11 approval
+  forces every candidate ineligible and grants no downstream execution.
 - Portfolio Review: non-actionable position/exposure interpretation.
 - Fundamental derivation: deterministic evidence generation only; a pending
   candidate grants no DATA07, DATA06, or RUN31 authority.

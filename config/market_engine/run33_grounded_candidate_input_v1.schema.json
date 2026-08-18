@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "market-engine-run33-grounded-candidate-input-v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "records"],
+  "properties": {
+    "schema_version": {"const": "market-engine-run33-grounded-candidate-input-v1"},
+    "run_id": {"type": "string", "minLength": 1},
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["instrument_id", "canonical_ticker", "eligible_for_run33", "reason_codes", "technical_evidence_status", "price_evidence_status", "fundamental_evidence_status", "portfolio_context_status", "conditions"],
+        "properties": {
+          "instrument_id": {"type": "string", "minLength": 1}, "canonical_ticker": {"type": "string", "minLength": 1},
+          "eligible_for_run33": {"type": "boolean"},
+          "reason_codes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "technical_evidence_status": {"enum": ["completed", "blocked"]},
+          "price_evidence_status": {"enum": ["fresh", "stale", "missing", "invalid"]},
+          "fundamental_evidence_status": {"enum": ["complete", "partial", "missing"]},
+          "portfolio_context_status": {"enum": ["not_supplied", "authoritative_ledger_bound"]},
+          "conditions": {
+            "type": "object", "additionalProperties": false,
+            "required": ["current_technical_history", "current_technical_screening", "fresh_advisory_price", "technical_price_reconciliation", "authoritative_fundamental_context", "identity_reconciliation", "data11_checkpoint_approved"],
+            "properties": {
+              "current_technical_history": {"type": "boolean"}, "current_technical_screening": {"type": "boolean"},
+              "fresh_advisory_price": {"type": "boolean"}, "technical_price_reconciliation": {"type": "boolean"},
+              "authoritative_fundamental_context": {"type": "boolean"}, "identity_reconciliation": {"type": "boolean"},
+              "data11_checkpoint_approved": {"type": "boolean"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

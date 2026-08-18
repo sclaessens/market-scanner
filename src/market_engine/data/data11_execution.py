@@ -400,6 +400,7 @@ def load_downstream_after_authority(
         payload = _reconcile_after_state(authority, artifacts)
         payload["authority_path"] = authority_file.relative_to(root).as_posix()
         payload["authority_sha256"] = _sha256(authority_file)
+        payload["approval_binding"] = dict(execution_proof.approval_binding)
     except (Data11ExecutionError, KeyError, TypeError, ValueError):
         return None
     return ValidatedDownstreamAuthorityState(_PROOF_TOKEN, payload)

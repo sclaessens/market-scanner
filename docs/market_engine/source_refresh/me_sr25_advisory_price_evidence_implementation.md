@@ -103,8 +103,14 @@ current price.
 also supports reviewed manual dispatch. It checks out source read-only, builds
 under the runner temporary directory, and uploads a 14-day GitHub Actions
 artifact. It has no publication job and no write permission. ME-SR25 did not
-execute this workflow or contact the production provider; operational
-validation requires separate post-merge approval.
+execute this workflow during implementation. After merge, five scheduled runs
+completed successfully: `31777995934`, `31868074950`, `31930153267`,
+`32000009638`, and `32104872490`. The first four each classified 946 records
+fresh, one stale, and five invalid. Run `32104872490` classified only three
+fresh, 944 stale, and five invalid because almost the whole provider snapshot
+was one completed session behind at the 05:30 UTC acquisition window. Workflow
+success therefore proves execution and artifact delivery, not analytic
+freshness.
 
 ## Explicit non-goals
 
