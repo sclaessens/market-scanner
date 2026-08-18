@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "market-engine-run33-grounded-candidate-input-manifest-v1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "run_id", "generated_at", "status", "eligible_count", "candidate_input_sha256", "screening_manifest_sha256", "candidate_ranking_sha256", "universe_index_sha256", "history_manifest_sha256", "price_manifest_sha256", "price_observations_sha256", "reconciliation_sha256", "fundamental_prestate_authority", "validated_downstream_authority", "data11_checkpoint", "canonical_universe_sha256", "history_policy_sha256", "screening_policy_binding", "price_policy_sha256", "portfolio_context_binding", "downstream_execution", "authority_boundary", "artifact_sha256"],
+  "properties": {
+    "schema_version": {"const": "market-engine-run33-grounded-candidate-input-manifest-v1"}, "run_id": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["conditional_blocked_pending_data11_approval", "conditional_blocked_pending_downstream_refresh", "conditional_blocked_invalid_downstream_authority", "ready_for_run33"]},
+    "eligible_count": {"type": "integer", "minimum": 0, "maximum": 952},
+    "candidate_input_sha256": {"$ref": "#/$defs/sha"}, "screening_manifest_sha256": {"$ref": "#/$defs/sha"},
+    "candidate_ranking_sha256": {"$ref": "#/$defs/sha"}, "universe_index_sha256": {"$ref": "#/$defs/sha"},
+    "history_manifest_sha256": {"$ref": "#/$defs/sha"}, "price_manifest_sha256": {"$ref": "#/$defs/sha"},
+    "price_observations_sha256": {"$ref": "#/$defs/sha"}, "reconciliation_sha256": {"$ref": "#/$defs/sha"},
+    "fundamental_prestate_authority": {"$ref": "#/$defs/pathBinding"},
+    "validated_downstream_authority": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/downstreamBinding"}]},
+    "data11_checkpoint": {"$ref": "#/$defs/checkpoint"}, "canonical_universe_sha256": {"$ref": "#/$defs/sha"},
+    "history_policy_sha256": {"$ref": "#/$defs/sha"}, "screening_policy_binding": {"$ref": "#/$defs/screeningPolicy"},
+    "price_policy_sha256": {"$ref": "#/$defs/sha"}, "portfolio_context_binding": {"$ref": "#/$defs/portfolio"},
+    "downstream_execution": {"type": "object", "additionalProperties": false, "required": ["data07_calls", "data06_calls", "run31_calls", "run33_calls"], "properties": {"data07_calls": {"const": 0}, "data06_calls": {"const": 0}, "run31_calls": {"const": 0}, "run33_calls": {"const": 0}}},
+    "authority_boundary": {"const": "input_handoff_only_no_decision_authority"}, "artifact_sha256": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "pathBinding": {"type": "object", "additionalProperties": false, "required": ["path", "sha256"], "properties": {"path": {"type": "string", "minLength": 1}, "sha256": {"$ref": "#/$defs/sha"}}},
+    "downstreamBinding": {"type": "object", "additionalProperties": false, "required": ["authority_path", "authority_sha256", "data06_run_id", "run31_run_id", "payload_sha256"], "properties": {"authority_path": {"type": "string", "minLength": 1}, "authority_sha256": {"$ref": "#/$defs/sha"}, "data06_run_id": {"type": "string", "minLength": 1}, "run31_run_id": {"type": "string", "minLength": 1}, "payload_sha256": {"$ref": "#/$defs/sha"}}},
+    "checkpoint": {"type": "object", "additionalProperties": false, "required": ["status", "display_decisions", "approval_validations", "validated_downstream_authority_present"], "properties": {"status": {"enum": ["conditional_blocked_pending_data11_approval", "conditional_blocked_pending_downstream_refresh", "conditional_blocked_invalid_downstream_authority", "ready_for_run33"]}, "display_decisions": {"type": "object", "additionalProperties": {"type": ["string", "null"]}}, "approval_validations": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["path", "sha256", "validation_status", "reason_codes", "decision_id", "ticker"], "properties": {"path": {"type": "string", "minLength": 1}, "sha256": {"$ref": "#/$defs/sha"}, "validation_status": {"enum": ["approved", "blocked"]}, "reason_codes": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}, "decision_id": {"type": ["string", "null"]}, "ticker": {"type": ["string", "null"]}}}}, "validated_downstream_authority_present": {"type": "boolean"}}},
+    "screeningPolicy": {"type": "object", "additionalProperties": false, "required": ["schema_version", "policy_id", "path", "sha256"], "properties": {"schema_version": {"const": "market-engine-current-technical-screening-policy-v1"}, "policy_id": {"type": "string", "minLength": 1}, "path": {"type": "string", "minLength": 1}, "sha256": {"$ref": "#/$defs/sha"}}},
+    "portfolio": {"oneOf": [{"type": "object", "additionalProperties": false, "required": ["status", "ledger_sha256"], "properties": {"status": {"const": "not_supplied"}, "ledger_sha256": {"type": "null"}}}, {"type": "object", "additionalProperties": false, "required": ["status", "ledger_sha256", "ledger_digest", "event_count"], "properties": {"status": {"const": "authoritative_ledger_bound"}, "ledger_sha256": {"$ref": "#/$defs/sha"}, "ledger_digest": {"$ref": "#/$defs/sha"}, "event_count": {"type": "integer", "minimum": 0}}}]}
+  }
+}

@@ -8,18 +8,36 @@ the existing yfinance daily-history adapter with `auto_adjust=False`, excludes
 fallbacks. Files are immutable per run and live below the approved advisory
 artifact root. The loader accepts a path, never a caller mapping, and returns a
 private frozen validated context after checksum, policy, universe, identity,
-series, and effective-freshness replay.
+and full semantic replay. The replay derives the complete index, eligibility,
+global status, lag, failure, coverage, and observation bindings from the actual
+bars. Re-signing a false index, manifest, and checksum index therefore cannot
+turn old bars into current evidence. Producer-time status is immutable;
+effective freshness is recalculated at load time.
+
+Production acquisition and loading use an internal canonical UTC clock. Start
+and completion are measured separately. Public acquisition-time and
+`trusted_now` overrides do not exist; a private `_clock` seam is test-only and
+rejects non-canonical UTC values.
 
 `current_technical_screening.py` is the only ME-SR26 consumer. It rebuilds the
 existing MA20/50/200, ATR20, setup classification, score, and deterministic
-ranking. It never reads `data/processed` and does not copy RUN30 indicator or
-ranking values. RUN30 appears only in a drift report marked audit-only.
+ranking under a versioned, checksum-bound screening policy. Missing volume
+remains nullable and is never converted to zero. It never reads
+`data/processed` and does not copy RUN30 indicator or ranking values. RUN30
+appears only in a drift report marked audit-only.
 
 The same module validates SR25 evidence and emits
 `market-engine-technical-price-reconciliation-v1` plus
 `market-engine-run33-grounded-candidate-input-v1`. Optional portfolio context
 can only bind an authoritative private ledger path; derived caller mappings
 are rejected.
+
+The canonical handoff loader reloads and replays history, screening, SR25
+price, reconciliation, all 952 identities, approval validation, execution
+proof, and downstream after-authority. Only a private validated context in
+`ready_for_run33` state exposes candidate input. Pending approval, approved
+without refreshed downstream authority, invalid downstream authority, and
+ready states are separate and reachable.
 
 ## Artifact contracts
 
@@ -37,7 +55,9 @@ dispatch. The later window responds to SR25 run `32104872490`, where a 05:30
 UTC job was technically successful but 944 records were stale by one session.
 The workflow has read-only contents permission, no publication job, no Git
 write, 14-day retention, and `cancel-in-progress: false`. Artifact upload uses
-`always()` so blocker evidence survives; the final quality gate fails unless
-the history manifest is analytically completed.
+`always()` so blocker evidence survives. A runtime semantic replay gate allows
+`usable` evidence at the versioned 0.99 fresh-coverage threshold while keeping
+each isolated ticker blocked. Widespread one-session lag or global provider
+failure remains `unusable` and blocks screening.
 
 No workflow or provider canary was run during ME-SR26 implementation.

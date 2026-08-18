@@ -22,10 +22,19 @@ conditional RUN33 input handoff; it does not execute RUN33.
 - At least 80% of otherwise-valid series exactly one session late blocks the
   run as widespread provider-session lag. Individual fallbacks are capped at
   25; no retry wave exists.
+- A runtime semantic replay gate requires at least 0.99 fresh coverage. It
+  permits isolated blockers while keeping them ineligible and blocks global
+  provider lag or failure.
+- Production time is internal UTC authority; producer status is immutable and
+  effective freshness is recalculated at load.
+- Missing volume remains explicitly missing rather than becoming zero.
 - SR25 price and the latest history close must match identity, session,
   currency, source semantics, and exact decimal value.
 - DATA11 approval remains pending for ASH, BIO, and CI, so the RUN33 handoff is
   conditional and all candidates remain ineligible.
+- A synthetic test proves the separate positive route through canonical
+  approval validation, DATA07/DATA06/RUN31 receipts, execution proof,
+  downstream after-authority, and the private RUN33 handoff loader.
 
 ## Required next action
 

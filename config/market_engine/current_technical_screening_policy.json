@@ -1,0 +1,15 @@
+{
+  "schema_version": "market-engine-current-technical-screening-policy-v1",
+  "policy_id": "me-sr26-run30-technical-semantics-v1",
+  "indicator_contract": {
+    "moving_average_sessions": [20, 50, 200],
+    "average_true_range_proxy_sessions": 20,
+    "high_low_window_sessions": 20,
+    "support_window_excludes_latest_bar": true
+  },
+  "setup_contract": "run30-detect-technical-setup-v1",
+  "scoring_contract": "run30-candidate-score-v1",
+  "ranking_contract": "score-descending-then-symbol-then-instrument-id-v1",
+  "top_candidate_limit": 25,
+  "threshold_authority": "src/market_engine/run/full_canonical_universe_analysis.py"
+}

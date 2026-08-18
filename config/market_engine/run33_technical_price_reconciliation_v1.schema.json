@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "market-engine-technical-price-reconciliation-v1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "records", "counts"],
+  "properties": {
+    "schema_version": {"const": "market-engine-technical-price-reconciliation-v1"},
+    "records": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["instrument_id", "canonical_ticker", "status", "history_close", "advisory_price", "reason_codes"], "properties": {"instrument_id": {"type": "string", "minLength": 1}, "canonical_ticker": {"type": "string", "minLength": 1}, "status": {"enum": ["passed", "blocked"]}, "history_close": {"type": ["string", "null"]}, "advisory_price": {"type": ["string", "null"]}, "reason_codes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}}}},
+    "counts": {"type": "object", "additionalProperties": false, "properties": {"passed": {"type": "integer", "minimum": 0}, "blocked": {"type": "integer", "minimum": 0}}}
+  }
+}

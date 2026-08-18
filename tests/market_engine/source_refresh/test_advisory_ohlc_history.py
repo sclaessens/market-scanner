@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 from copy import deepcopy
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta, timezone
+from inspect import signature
+from io import StringIO
 from pathlib import Path
 
 import pytest
@@ -21,6 +23,11 @@ from market_engine.source_refresh.advisory_ohlc_history import (
 
 NOW = "2026-08-13T06:00:00Z"
 SHA = "a" * 40
+
+
+def _clock(value: str = NOW):
+    parsed = datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=UTC)
+    return lambda: parsed
 
 
 def _instrument(index: int) -> dict[str, object]:
@@ -63,17 +70,114 @@ def _provider(instruments, at, policy, overrides=None):
 
 
 def _build(inputs, overrides=None, run_id="fixture"):
-    return build_advisory_ohlc_history(run_id=run_id, source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"], acquisition_timestamp=NOW, provider=lambda rows, at, policy: _provider(rows, at, policy, overrides))
+    return build_advisory_ohlc_history(run_id=run_id, source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"], provider=lambda rows, at, policy: _provider(rows, at, policy, overrides), _clock=_clock())
+
+
+def _fully_rebind(root: Path) -> None:
+    manifest_path = root / "manifest.json"
+    index = json.loads((root / "history_index.json").read_text())
+    series = {}
+    for row in index["records"]:
+        if row["series_file"]:
+            series[row["instrument_id"]] = json.loads((root / row["series_file"]).read_text())
+    manifest = json.loads(manifest_path.read_text())
+    manifest["observations_sha256"] = history._sha256(history._canonical_json({"index": index, "series": series}))
+    unsigned = dict(manifest)
+    unsigned.pop("artifact_sha256", None)
+    manifest["artifact_sha256"] = history._sha256(history._canonical_json(unsigned))
+    manifest_path.write_bytes(history._canonical_json(manifest) + b"\n")
+    files = {
+        path.relative_to(root).as_posix(): history._sha256_file(path)
+        for path in root.rglob("*.json")
+        if path.name != "checksum_index.json"
+    }
+    (root / "checksum_index.json").write_bytes(
+        history._canonical_json({"schema_version": history.CHECKSUM_VERSION, "files": dict(sorted(files.items()))}) + b"\n"
+    )
 
 
 def test_roundtrip_binds_complete_identity_and_history(inputs) -> None:
     manifest, root = _build(inputs)
-    loaded = load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], trusted_now=NOW)
+    loaded = load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock())
     assert manifest["status_counts"] == {"fresh": 3, "stale": 0, "insufficient_history": 0, "missing": 0, "invalid": 0, "blocked_identity": 0, "blocked_adjustment_policy": 0, "attempted": 3}
     assert len(loaded.index) == len(loaded.series) == 3
     assert set(loaded.effective_status.values()) == {"fresh"}
     assert manifest["minimum_history_sessions"] == 252
     assert manifest["maximum_history_sessions"] == 420
+
+
+def test_self_rebound_old_bars_cannot_claim_fresh_semantic_replay(inputs) -> None:
+    _manifest, root = _build(inputs, run_id="self-rebound-old-bars")
+    series_path = next((root / "series").glob("*.json"))
+    payload = json.loads(series_path.read_text())
+    for bar in payload["bars"]:
+        bar["session"] = (date.fromisoformat(bar["session"]) - timedelta(days=7)).isoformat()
+    series_path.write_bytes(history._canonical_json(payload) + b"\n")
+    # Index freshness, global counts, lag claims, observations and every digest are
+    # deliberately retained/re-signed as if the now-old series were still current.
+    _fully_rebind(root)
+    with pytest.raises(AdvisoryHistoryIssue, match="HISTORY_SEMANTIC_REPLAY_INVALID"):
+        load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock())
+
+
+@pytest.mark.parametrize(
+    "attack",
+    ["source_id", "expected_session", "row_count", "first_session", "eligibility", "run_status", "bars"],
+)
+def test_fully_rebound_semantic_replay_attacks_fail_closed(inputs, attack) -> None:
+    _manifest, root = _build(inputs, run_id=f"rebound-{attack}")
+    index_path = root / "history_index.json"
+    index = json.loads(index_path.read_text())
+    series_path = root / index["records"][0]["series_file"]
+    series = json.loads(series_path.read_text())
+    if attack == "source_id":
+        series["source_id"] = "forged-provider"
+    elif attack == "expected_session":
+        series["expected_session"] = "2026-08-11"
+    elif attack == "row_count":
+        index["records"][0]["row_count"] -= 1
+    elif attack == "first_session":
+        index["records"][0]["first_session"] = "2020-01-01"
+    elif attack == "eligibility":
+        eligibility_path = root / "screening_eligibility.json"
+        eligibility = json.loads(eligibility_path.read_text())
+        eligibility["records"][0]["eligible_for_current_screening"] = False
+        eligibility_path.write_bytes(history._canonical_json(eligibility) + b"\n")
+    elif attack == "run_status":
+        manifest_path = root / "manifest.json"
+        manifest = json.loads(manifest_path.read_text())
+        manifest["run_status"] = "blocked_provider_session_lag"
+        manifest_path.write_bytes(history._canonical_json(manifest) + b"\n")
+    else:
+        series["bars"][-1]["session"] = "2026-08-11"
+    index_path.write_bytes(history._canonical_json(index) + b"\n")
+    series_path.write_bytes(history._canonical_json(series) + b"\n")
+    _fully_rebind(root)
+    with pytest.raises(AdvisoryHistoryIssue):
+        load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock())
+
+
+def test_public_time_authority_is_absent_and_cli_rejects_override() -> None:
+    assert "trusted_now" not in signature(load_advisory_ohlc_history).parameters
+    assert "acquisition_timestamp" not in signature(build_advisory_ohlc_history).parameters
+    stderr = StringIO()
+    with pytest.raises(SystemExit):
+        history.run_command(["quality-gate", "--artifact-root", "unused", "--trusted-now", NOW], stderr=stderr)
+
+
+def test_build_measures_internal_acquisition_start_and_completion_separately(inputs) -> None:
+    values = iter([
+        datetime(2026, 8, 13, 6, tzinfo=UTC),
+        datetime(2026, 8, 13, 6, 0, 5, tzinfo=UTC),
+    ])
+    seen = []
+    manifest, _root = build_advisory_ohlc_history(
+        run_id="internal-clock", source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"],
+        provider=lambda rows, at, policy: seen.append(at) or _provider(rows, at, policy), _clock=lambda: next(values),
+    )
+    assert seen == [datetime(2026, 8, 13, 6, tzinfo=UTC)]
+    assert manifest["acquisition_started_at"] == "2026-08-13T06:00:00Z"
+    assert manifest["acquisition_completed_at"] == "2026-08-13T06:00:05Z"
 
 
 def test_representative_history_payloads_pass_real_json_schema(inputs) -> None:
@@ -92,7 +196,7 @@ def test_workflow_is_read_only_artifact_only_and_has_quality_gate() -> None:
     assert "contents: read" in workflow
     assert "cancel-in-progress: false" in workflow
     assert "retention-days: 14" in workflow
-    assert "Enforce analytic freshness gate" in workflow
+    assert "Replay history semantics and enforce analytic usability" in workflow
     assert "if: always()" in workflow
     assert "publish" not in workflow.lower()
     assert "market-data" not in workflow
@@ -158,12 +262,12 @@ def test_widespread_exact_one_session_lag_blocks_current_authority(inputs) -> No
 
 def test_weekend_reuses_last_completed_session_without_staleness(inputs) -> None:
     weekend = "2026-08-16T06:00:00Z"
-    manifest, _ = build_advisory_ohlc_history(run_id="weekend", source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"], acquisition_timestamp=weekend, provider=lambda rows, at, policy: _provider(rows, at, policy))
+    manifest, _ = build_advisory_ohlc_history(run_id="weekend", source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"], provider=lambda rows, at, policy: _provider(rows, at, policy), _clock=_clock(weekend))
     assert manifest["status_counts"]["fresh"] == 3
 
 
 def test_provider_failure_is_distinct_and_fallback_is_bounded(inputs, monkeypatch) -> None:
-    manifest, _ = build_advisory_ohlc_history(run_id="failure", source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"], acquisition_timestamp=NOW, provider=lambda *_: (_ for _ in ()).throw(RuntimeError()))
+    manifest, _ = build_advisory_ohlc_history(run_id="failure", source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"], provider=lambda *_: (_ for _ in ()).throw(RuntimeError()), _clock=_clock())
     assert manifest["run_status"] == "blocked_provider_failure"
     calls = []
     monkeypatch.setattr(history, "download_yfinance_batch", lambda *args: {})
@@ -177,20 +281,23 @@ def test_tampered_series_manifest_policy_and_checksum_fail_closed(inputs) -> Non
     _manifest, root = _build(inputs)
     series = next((root / "series").glob("*.json")); series.write_text(series.read_text().replace('"close":"119.00"', '"close":"118.00"'))
     with pytest.raises(AdvisoryHistoryIssue, match="ARTIFACT_INTEGRITY_INVALID"):
-        load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], trusted_now=NOW)
+        load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock())
     _manifest, root2 = _build(inputs, run_id="manifest-tamper"); data = json.loads((root2 / "manifest.json").read_text()); data["run_status"] = "completed"; (root2 / "manifest.json").write_text(json.dumps(data))
-    with pytest.raises(AdvisoryHistoryIssue): load_advisory_ohlc_history(root2, universe_path=inputs["universe"], policy_path=inputs["policy"], trusted_now=NOW)
+    with pytest.raises(AdvisoryHistoryIssue): load_advisory_ohlc_history(root2, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock())
     _manifest, root3 = _build(inputs, run_id="policy-tamper"); policy = json.loads(Path(inputs["policy"]).read_text()); policy["max_individual_fallbacks"] = 1; Path(inputs["policy"]).write_text(json.dumps(policy))
     with pytest.raises(AdvisoryHistoryIssue, match="POLICY_BINDING_INVALID"):
-        load_advisory_ohlc_history(root3, universe_path=inputs["universe"], policy_path=inputs["policy"], trusted_now=NOW)
+        load_advisory_ohlc_history(root3, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock())
 
 
 def test_load_time_freshness_and_untrusted_time_forms_fail_closed(inputs) -> None:
     _manifest, root = _build(inputs)
-    loaded = load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], trusted_now="2026-08-14T23:00:00Z")
+    loaded = load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock("2026-08-14T23:00:00Z"))
     assert set(loaded.effective_status.values()) == {"stale"}
-    for value in ("2026-08-13T06:00:00", "2026-08-13T08:00:00+02:00", "2999-01-01T00:00:00Z"):
-        with pytest.raises(AdvisoryHistoryIssue): load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], trusted_now=value)
+    assert history._effective_analytic_authority_status(loaded) == "unusable"
+    for value in (lambda: datetime(2026, 8, 13, 6), lambda: datetime(2026, 8, 13, 8, tzinfo=timezone(timedelta(hours=2))), lambda: datetime(2026, 8, 13, 6, 0, 0, 1, tzinfo=UTC)):
+        with pytest.raises(AdvisoryHistoryIssue): load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=value)
+    with pytest.raises(AdvisoryHistoryIssue, match="CLOCK_INVALID"):
+        load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock("2026-08-12T06:00:00Z"))
 
 
 def test_full_universe_fixture_reconciles_952_with_explicit_distribution(tmp_path, monkeypatch) -> None:
@@ -205,13 +312,15 @@ def test_full_universe_fixture_reconciles_952_with_explicit_distribution(tmp_pat
         result[rows[-2]["instrument_id"]]["bars"] = result[rows[-2]["instrument_id"]]["bars"][:2]
         result[rows[-3]["instrument_id"]]["bars"][-1]["close"] = 1.5
         return result
-    manifest, _ = build_advisory_ohlc_history(run_id="full-952", source_main_sha=SHA, universe_path=universe_path, policy_path=policy_path, acquisition_timestamp=NOW, provider=provider)
+    manifest, _ = build_advisory_ohlc_history(run_id="full-952", source_main_sha=SHA, universe_path=universe_path, policy_path=policy_path, provider=provider, _clock=_clock())
     assert manifest["status_counts"] == {"fresh": 949, "stale": 0, "insufficient_history": 1, "missing": 1, "invalid": 1, "blocked_identity": 0, "blocked_adjustment_policy": 0, "attempted": 952}
+    assert manifest["run_status"] == "completed_with_blockers"
+    assert manifest["analytic_authority_status"] == "usable"
 
 
 @pytest.mark.parametrize("output", ["/tmp/absolute", "../escape", "artifacts/market_engine/advisory_ohlc_history_runs/extra"])
 def test_output_path_authority_is_checked_before_provider(inputs, output) -> None:
     calls = []
     with pytest.raises(AdvisoryHistoryIssue, match="OUTPUT_PATH_INVALID"):
-        build_advisory_ohlc_history(run_id="unsafe", source_main_sha=SHA, output_root=output, universe_path=inputs["universe"], policy_path=inputs["policy"], acquisition_timestamp=NOW, provider=lambda *_: calls.append(True))
+        build_advisory_ohlc_history(run_id="unsafe", source_main_sha=SHA, output_root=output, universe_path=inputs["universe"], policy_path=inputs["policy"], provider=lambda *_: calls.append(True), _clock=_clock())
     assert calls == []

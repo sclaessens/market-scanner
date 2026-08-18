@@ -10,6 +10,7 @@
   "maximum_history_sessions": 420,
   "request_calendar_days": 700,
   "widespread_one_session_lag_ratio": "0.80",
+  "minimum_fresh_screening_coverage_ratio": "0.99",
   "max_individual_fallbacks": 25,
   "artifact_retention_days": 14,
   "supported_currencies": ["AUD", "CAD", "CHF", "DKK", "EUR", "GBP", "HKD", "JPY", "NOK", "SEK", "USD"]
