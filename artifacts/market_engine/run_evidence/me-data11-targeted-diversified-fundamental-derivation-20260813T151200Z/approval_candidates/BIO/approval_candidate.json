@@ -1,0 +1,98 @@
+{
+  "approved_calculation_checksums": [
+    "3f7492543aaf16ef03acfb294bf1e508d7a7c36a3ccbbd91be2ae07814a7d4e5",
+    "7fe5388a6bcda01e837a80233851147f18399c4af112ac8e49cda05c72b52566"
+  ],
+  "approved_derived_metrics": [
+    "gross_margin",
+    "operating_margin"
+  ],
+  "artifact_bindings": {
+    "derivation_validation": {
+      "path": "derivation_validation.json",
+      "sha256": "ee48547288ca8dc882144c6de5fceebf204fc22fb166e87dc05a1e05b38b900a"
+    },
+    "derived_package": {
+      "path": "derived_package.json",
+      "sha256": "cafc861544cea6064b1d0fb3bcf9ac8a2ae45ffc2059a7675557cc59ee245106"
+    },
+    "fact_package": {
+      "path": "fact_package.json",
+      "sha256": "a69a4ea761fb32814543fef60e853c9889a8fe1791bcd29c2d8f13e608a10ec0"
+    },
+    "formula_catalog": {
+      "path": "formula_catalog.json",
+      "sha256": "97994f7868df5e1bd1a112085347a238177e954dd5136dcafb7d3d089792d0d0"
+    },
+    "governed_package_candidate": {
+      "path": "governed_package_candidate.json",
+      "sha256": "30ba4aa6b25a2bd3307459b41add3b8d3437f7fe025f4d4e37c3aaa08c9feec7"
+    },
+    "mapping_review": {
+      "path": "mapping_review.json",
+      "sha256": "d767a019b5fb11baeab0e7f7745675947fe893d99d6847cde4c70356f4427018"
+    },
+    "source_evidence": {
+      "path": "source_evidence.json",
+      "sha256": "954b9875d527ec9a452c35ad7595d4d087a8292a1368aa2c75074b459aae0fab"
+    }
+  },
+  "cik": "0000012208",
+  "decision": "pending",
+  "decision_id": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-bio-derivation-approval-candidate",
+  "instrument_id": "equity:bio",
+  "issuer_identity": "BIO-RAD LABORATORIES, INC.",
+  "limitations": [
+    "This candidate grants no authority while the decision or any review is pending.",
+    "Approval must be an explicit human decision over these exact checksum-bound artifacts."
+  ],
+  "reporting_period": "2026-Q2",
+  "reviewer_roles": [
+    "Operator",
+    "Data Steward",
+    "Governance Auditor"
+  ],
+  "reviews": {
+    "calculation_replay": {
+      "status": "pending"
+    },
+    "duration_classification": {
+      "status": "pending"
+    },
+    "formula_applicability": {
+      "status": "pending"
+    },
+    "formula_version": {
+      "status": "pending"
+    },
+    "freshness": {
+      "status": "pending"
+    },
+    "issuer_cik_instrument_identity": {
+      "status": "pending"
+    },
+    "permitted_local_use": {
+      "status": "pending"
+    },
+    "primary_source_status": {
+      "status": "pending"
+    },
+    "publication_boundary": {
+      "status": "pending"
+    },
+    "raw_tag_to_canonical_mapping": {
+      "status": "pending"
+    },
+    "reporting_period": {
+      "status": "pending"
+    },
+    "source_authenticity": {
+      "status": "pending"
+    },
+    "unit_currency_scale": {
+      "status": "pending"
+    }
+  },
+  "schema_version": "market-engine-data11-approval-decision-v1",
+  "ticker": "BIO"
+}

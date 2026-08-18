@@ -2,12 +2,12 @@
 
 Status: ACTIVE PRODUCT ROADMAP POINTER
 
-Effective date: 2026-08-12
+Effective date: 2026-08-13
 
 Roadmap decision: ME-RM08
 
 Base state verified at `main` commit
-`4753c94c0ab572d619fbb7b82496ba2864797a9f`, the merge commit for PR #477.
+`9169420427d33864851d36f2b183e35b8bd0c089`, the merge commit for PR #478.
 
 ## Active product objective
 
@@ -31,7 +31,7 @@ transactions, or move allocation authority outside the Decision Engine.
 |---|---|
 | Canonical universe | 952 instruments |
 | Broad technical analysis | Operational with explicit blockers |
-| Fundamental coverage | Partial; ME-DATA11 remains planned |
+| Fundamental coverage | ME-DATA11 ready for human approval: 3 persisted pending candidates, 0 approved imports |
 | Scheduled canonical price refresh | Workflow exists, but automatic canonical publication is blocked |
 | Latest canonical evidence result | ME-SR24 completed with blockers because no approved production price-evidence provider route exists |
 | Canonical `market-data` publication | Not operational for daily automatic updates |
@@ -47,16 +47,20 @@ transactions, or move allocation authority outside the Decision Engine.
 ME-RM08 - Realign roadmap around portfolio authority and advisory price freshness
   -> ME-PR03 - Manual portfolio transaction ledger and transaction-derived
                portfolio-aware candidate context (COMPLETED)
-  -> ME-SR25 - Implement advisory price evidence artifacts (IMPLEMENTED)
+  -> ME-SR25 - Implement advisory price evidence artifacts (COMPLETED / MERGED)
   -> ME-DATA11 - Target fundamental derivation at the highest-ranked technical
-                 candidate funnel
-  -> ME-RUN33 - First useful end-to-end candidate analysis release
-  -> ME-CI12 - ChatGPT consumption without new analysis logic
+                 candidate funnel (READY FOR HUMAN APPROVAL)
+  -> Human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
+  -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
+  -> ME-CI12 - ChatGPT consumption without new analysis logic (PLANNED)
 ```
 
-ME-PR03 is complete. ME-SR25 is implemented on its review branch and must not
-be silently replaced by canonical-publication work. A post-merge operational
-validation run remains separately approval-gated.
+ME-PR03 and ME-SR25 are complete. PR #478 merged ME-SR25 at
+`9169420427d33864851d36f2b183e35b8bd0c089`. ME-DATA11 then acquired official
+SEC evidence for ten ranked issuers. Review remediation persisted replayable
+pending approval candidates for ASH, BIO, and CI. Separate checksum-bound human
+approval remains the blocker to authoritative DATA07, DATA06, and RUN31
+changes; ME-RUN33 is not immediately executable.
 
 ## What ME-PR03 completed
 
@@ -139,10 +143,8 @@ ME-RM08 define the current active order.
 ## Next implementation
 
 ```text
-ME-DATA11 - Target fundamental derivation at the highest-ranked technical
-candidate funnel
+ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
 ```
 
-No canary, production provider activation, canonical publication, portfolio
-data write, broker connection, or order execution was performed by ME-SR25.
-Operational validation remains a separately approved post-merge action.
+No canonical publication, portfolio data write, broker connection, order,
+notification, or ME-RUN33 implementation was performed by ME-DATA11.

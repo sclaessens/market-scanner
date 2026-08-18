@@ -1,0 +1,431 @@
+{
+  "accounting_framework_inventory": {
+    "equities_framework_unknown_not_inspected": 24,
+    "non_equity_candidates": 1,
+    "note": "Framework is unknown before primary-source namespace inspection and is never inferred from asset type.",
+    "source_validated_ifrs": 0,
+    "source_validated_us_gaap": 0,
+    "unsupported_or_missing_framework": 0
+  },
+  "candidate_count": 25,
+  "candidates": [
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:asb",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 1,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "ASB",
+      "ticker": "ASB"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:ash",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 2,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "ASH",
+      "ticker": "ASH"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:atr",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 3,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "ATR",
+      "ticker": "ATR"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:axp",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 4,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "AXP",
+      "ticker": "AXP"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:bio",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 5,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "BIO",
+      "ticker": "BIO"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:bkh",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 6,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "BKH",
+      "ticker": "BKH"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:bmrn",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 7,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "BMRN",
+      "ticker": "BMRN"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:bmy",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 8,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "BMY",
+      "ticker": "BMY"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:chrw",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 9,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "CHRW",
+      "ticker": "CHRW"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:ci",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 10,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "CI",
+      "ticker": "CI"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:cnc",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 11,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "CNC",
+      "ticker": "CNC"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:cno",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 12,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "CNO",
+      "ticker": "CNO"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:colb",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 13,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "COLB",
+      "ticker": "COLB"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:csco",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 14,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "CSCO",
+      "ticker": "CSCO"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:cvs",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 15,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "CVS",
+      "ticker": "CVS"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:d",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 16,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "D",
+      "ticker": "D"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "etf",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "etf:dia",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 17,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "DIA",
+      "ticker": "DIA"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:eix",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 18,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "EIX",
+      "ticker": "EIX"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:epr",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 19,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "EPR",
+      "ticker": "EPR"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:etr",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 20,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "ETR",
+      "ticker": "ETR"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:fe",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 21,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "FE",
+      "ticker": "FE"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:fhi",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 22,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "FHI",
+      "ticker": "FHI"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:fhn",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 23,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "FHN",
+      "ticker": "FHN"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:flg",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 24,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "FLG",
+      "ticker": "FLG"
+    },
+    {
+      "accounting_framework_status": "unknown_not_inspected",
+      "asset_type": "equity",
+      "candidate_score": 75,
+      "full_advice_ready": false,
+      "instrument_id": "equity:gatx",
+      "missing_evidence": [
+        "fundamental_context",
+        "portfolio_context",
+        "market_context"
+      ],
+      "rank": 25,
+      "ranking_scope": "technical_setup_screening",
+      "source_symbol": "GATX",
+      "ticker": "GATX"
+    }
+  ],
+  "schema_version": "market-engine-data11-technical-candidate-funnel-v1",
+  "source_bindings": {
+    "authority_path": "config/market_engine/data11_run30_input_authority.json",
+    "authority_sha256": "8e6993d1ba52fbc4ca659b04dfdfc92386fb7a4c1233f52b8ed689b2c81d905d",
+    "canonical_universe_path": "config/market_engine/universes/canonical_universe.json",
+    "canonical_universe_sha256": "c0e2c466af51ee3f34202148b5275f46248c893ce4b3851352d0fbded87148be",
+    "canonical_universe_version": "me-data04-complete-canonical-local-market-dataset-v1",
+    "cutoff_date": "2026-07-10",
+    "manifest_path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/manifest.json",
+    "manifest_sha256": "1361c3d16aad412025d0dbd9612dfacfca0eeeff762fbd31bd73f0ad04a2ebae",
+    "ranking_path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+    "ranking_sha256": "15b933748a1b12f5957798ebd6636a609e72f97eb8fb19af6d0259ad201f5530",
+    "run30_universe_index_path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/universe_analysis_index.json",
+    "run30_universe_index_sha256": "175023d61713ad296faacc64f3259b457497dc45a3b127d2a5e36ef17a7b5059"
+  },
+  "source_run_id": "me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z",
+  "source_status": "completed_with_blockers",
+  "top_limit": 25
+}

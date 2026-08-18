@@ -2,9 +2,9 @@
 
 Status: ACTIVE
 
-Effective date: 2026-08-12
+Effective date: 2026-08-13
 
-Verified base: `4753c94c0ab572d619fbb7b82496ba2864797a9f`
+Verified base: `9169420427d33864851d36f2b183e35b8bd0c089`
 
 ## Product model
 
@@ -37,7 +37,8 @@ user confirmation
 - canonical universe of 952 instruments;
 - broad technical screening and candidate ranking with explicit readiness
   blockers;
-- partial governed fundamental evidence coverage;
+- checksum-bound targeted fundamental derivation candidates for the
+  authoritative technical top-25 funnel;
 - scheduled canonical refresh infrastructure with fail-closed publication;
 - advisory-only full-universe price evidence, freshness validation, and a
   validated analysis consumer;
@@ -47,8 +48,8 @@ user confirmation
 
 ## Current gaps
 
-- advisory-only price artifacts are implemented but require a separately
-  approved post-merge operational validation run;
+- ME-DATA11 review remediation produced three persisted, replayable pending
+  approval candidates but no operator-approved authoritative import;
 - automatic canonical `market-data` publication remains blocked;
 - fundamental evidence coverage remains partial;
 - later model invocation, position sizing, and notification work is deferred.
@@ -56,7 +57,9 @@ user confirmation
 ## Active implementation sequence
 
 ```text
-ME-SR25 -> ME-DATA11 -> ME-RUN33 -> ME-CI12
+ME-SR25 (COMPLETED) -> ME-DATA11 (READY FOR HUMAN APPROVAL)
+  -> approval / DATA07 / DATA06 / RUN31 checkpoint
+  -> ME-RUN33 (CONDITIONAL) -> ME-CI12 (PLANNED)
 ```
 
 See:
@@ -72,6 +75,8 @@ See:
   current-price use requires a separate effective freshness calculation at
   each trusted load or consumption time.
 - Portfolio Review: non-actionable position/exposure interpretation.
+- Fundamental derivation: deterministic evidence generation only; a pending
+  candidate grants no DATA07, DATA06, or RUN31 authority.
 - Decision Engine: only allocation authority.
 - ChatGPT: explanation and user interaction, not calculation or execution
   authority.

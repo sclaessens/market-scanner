@@ -1,0 +1,96 @@
+{
+  "approved_calculation_checksums": [
+    "eecdfeabdc981474c459585bf35c7d61d870f7da8eb9f8c08043ea19f37671ee"
+  ],
+  "approved_derived_metrics": [
+    "operating_margin"
+  ],
+  "artifact_bindings": {
+    "derivation_validation": {
+      "path": "derivation_validation.json",
+      "sha256": "2ad18a9c211b139802a12ceaf6f9eeea3407b7117e2e2ae34d024613acd9e240"
+    },
+    "derived_package": {
+      "path": "derived_package.json",
+      "sha256": "f488aee824a1feab698f7ac53c75154d0c9f81d2d43a0080f24d416391931406"
+    },
+    "fact_package": {
+      "path": "fact_package.json",
+      "sha256": "3c47176b0fd5c389ae6425326bac1a36403b46a8d1e8f2bf7d069814bb408116"
+    },
+    "formula_catalog": {
+      "path": "formula_catalog.json",
+      "sha256": "97994f7868df5e1bd1a112085347a238177e954dd5136dcafb7d3d089792d0d0"
+    },
+    "governed_package_candidate": {
+      "path": "governed_package_candidate.json",
+      "sha256": "e365f3f80055e30155d9299f8cd856af946a05ffa966b4a848154f5f9c54b46f"
+    },
+    "mapping_review": {
+      "path": "mapping_review.json",
+      "sha256": "ca8fe9c2f389d9022ccc3bc8be03974e5c5ab48149a8cb54515821a845b6c9a5"
+    },
+    "source_evidence": {
+      "path": "source_evidence.json",
+      "sha256": "7698018a96147c221f62a0dedd4eabdbc5256f60f4e03f7273fc10800667fe83"
+    }
+  },
+  "cik": "0001739940",
+  "decision": "pending",
+  "decision_id": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ci-derivation-approval-candidate",
+  "instrument_id": "equity:ci",
+  "issuer_identity": "The Cigna Group",
+  "limitations": [
+    "This candidate grants no authority while the decision or any review is pending.",
+    "Approval must be an explicit human decision over these exact checksum-bound artifacts."
+  ],
+  "reporting_period": "2026-Q2",
+  "reviewer_roles": [
+    "Operator",
+    "Data Steward",
+    "Governance Auditor"
+  ],
+  "reviews": {
+    "calculation_replay": {
+      "status": "pending"
+    },
+    "duration_classification": {
+      "status": "pending"
+    },
+    "formula_applicability": {
+      "status": "pending"
+    },
+    "formula_version": {
+      "status": "pending"
+    },
+    "freshness": {
+      "status": "pending"
+    },
+    "issuer_cik_instrument_identity": {
+      "status": "pending"
+    },
+    "permitted_local_use": {
+      "status": "pending"
+    },
+    "primary_source_status": {
+      "status": "pending"
+    },
+    "publication_boundary": {
+      "status": "pending"
+    },
+    "raw_tag_to_canonical_mapping": {
+      "status": "pending"
+    },
+    "reporting_period": {
+      "status": "pending"
+    },
+    "source_authenticity": {
+      "status": "pending"
+    },
+    "unit_currency_scale": {
+      "status": "pending"
+    }
+  },
+  "schema_version": "market-engine-data11-approval-decision-v1",
+  "ticker": "CI"
+}

@@ -48,10 +48,11 @@ ME-RUN30/31 and ME-DATA06-10 - broad analysis and evidence baseline
   -> ME-SR17-24 and ME-RUN32 - canonical refresh hardening and blocker evidence
   -> ME-RM08 - portfolio/advisory-price roadmap realignment (docs-only)
   -> ME-PR03 - manual transaction ledger and portfolio-aware candidate context (COMPLETED)
-  -> ME-SR25 - advisory price evidence artifact (IMPLEMENTED)
-  -> ME-DATA11 - targeted fundamental derivation for the technical candidate funnel (NEXT)
-  -> ME-RUN33 - accelerated full-universe candidate release
-  -> ME-CI12 - batch grounded advisory consumption
+  -> ME-SR25 - advisory price evidence artifact (COMPLETED / MERGED)
+  -> ME-DATA11 - targeted fundamental derivation for the technical candidate funnel (READY FOR HUMAN APPROVAL)
+  -> human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
+  -> ME-RUN33 - first useful end-to-end candidate analysis release (CONDITIONAL)
+  -> ME-CI12 - batch grounded advisory consumption (PLANNED)
   -> ME-PS01 - position-sizing decision contract
   -> ME-NL01/02/03 - notification sequence
 ```
@@ -722,7 +723,7 @@ docs/market_engine/backlog/me_pr03_manual_portfolio_transaction_ledger.md
 
 ### ME-SR25 — Advisory Price Evidence Artifact
 
-Status: IMPLEMENTED / OPERATIONAL VALIDATION REQUIRES SEPARATE APPROVAL
+Status: COMPLETED / MERGED BY PR #478
 
 Outcome: a daily retrievable, versioned, best-effort advisory price and
 freshness artifact now covers the authoritative universe and fails closed on
@@ -734,6 +735,25 @@ Detailed story:
 
 ```text
 docs/market_engine/backlog/me_sr25_advisory_price_refresh.md
+```
+
+### ME-DATA11 — Targeted Diversified Fundamental Derivation
+
+Status: COMPLETED WITH BLOCKERS
+
+Outcome: the authoritative ME-RUN30 top 25 is checksum-bound and comparison-
+ready. A rank-first cohort of ten equities was inspected through existing
+official SEC CompanyFacts snapshots; all ten source namespaces validated as
+US-GAAP. Three issuers produced five safely processed derived metric
+candidates; seven were blocked. All candidates
+remain non-authoritative pending separate operator approval, so DATA07,
+DATA06, and RUN31 did not execute and their authoritative before/after counts
+remain unchanged.
+
+Detailed story:
+
+```text
+docs/market_engine/backlog/me_data11_targeted_diversified_fundamental_derivation.md
 ```
 
 ## Current ChatGPT Advisory Artifact Chain

@@ -1,0 +1,30 @@
+{
+  "authority_id": "me-data11-run30-input-authority-2026-08-13",
+  "canonical_universe_size": 952,
+  "canonical_universe_version": "me-data04-complete-canonical-local-market-dataset-v1",
+  "ranking_scope": "technical_setup_screening",
+  "run_id": "me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z",
+  "schema_version": "market-engine-data11-run30-input-authority-v1",
+  "trusted_artifacts": {
+    "canonical_universe": {
+      "path": "config/market_engine/universes/canonical_universe.json",
+      "schema_version": "market-engine-canonical-local-market-data-universe-config-v1",
+      "sha256": "c0e2c466af51ee3f34202148b5275f46248c893ce4b3851352d0fbded87148be"
+    },
+    "run30_manifest": {
+      "path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/manifest.json",
+      "schema_version": "market-engine-run30-full-canonical-universe-analysis-v1",
+      "sha256": "1361c3d16aad412025d0dbd9612dfacfca0eeeff762fbd31bd73f0ad04a2ebae"
+    },
+    "run30_ranking": {
+      "path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "schema_version": "market-engine-run30-candidate-ranking-v1",
+      "sha256": "15b933748a1b12f5957798ebd6636a609e72f97eb8fb19af6d0259ad201f5530"
+    },
+    "run30_universe_index": {
+      "path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/universe_analysis_index.json",
+      "schema_version": "market-engine-run30-universe-analysis-index-v1",
+      "sha256": "175023d61713ad296faacc64f3259b457497dc45a3b127d2a5e36ef17a7b5059"
+    }
+  }
+}

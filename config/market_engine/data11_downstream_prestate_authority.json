@@ -1,0 +1,36 @@
+{
+  "authority_id": "me-data11-downstream-prestate-authority-2026-08-13",
+  "canonical_universe_size": 952,
+  "canonical_universe_version": "me-data04-complete-canonical-local-market-dataset-v1",
+  "schema_version": "market-engine-data11-downstream-prestate-authority-v1",
+  "trusted_artifacts": {
+    "data06_manifest": {
+      "path": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z/manifest.json",
+      "schema_version": "market-engine-data06-fundamental-evidence-coverage-v1",
+      "sha256": "559dc37009903f8c2e0bca34d7645f96977284280b836d534c5baa70ae56826a"
+    },
+    "data06_per_ticker": {
+      "path": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z/per_ticker_fundamental_status.json",
+      "schema_version": "market-engine-data06-per-ticker-fundamental-status-v1",
+      "sha256": "63c6b27d76b6d0f53ece2eb5db2b724f47eab3ddc9e2bba12d7af6528612ecc8"
+    },
+    "data06_summary": {
+      "path": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z/fundamental_coverage_summary.json",
+      "schema_version": "market-engine-data06-fundamental-coverage-summary-v1",
+      "sha256": "68195e722f10524a17b1ef9250f567db0ed298be479868bb45b93d7b2abb0ef2"
+    },
+    "run31_compact_index": {
+      "path": "artifacts/market_engine/run_evidence/me-run31-after-me-data06-review-fix-20260718T113254Z/run_evidence_index.json",
+      "schema_version": "market-engine-run31-compact-run-evidence-v1",
+      "sha256": "c420c6ec1de8fce049b4c1997aaacba5ffb165b8240ce0d4065f8463c52e259d"
+    },
+    "run31_evidence_summary": {
+      "path": "artifacts/market_engine/run_evidence/me-run31-after-me-data06-review-fix-20260718T113254Z/evidence_coverage_summary.json",
+      "sha256": "c9fa4d5b9e064bd3948c9572bc4dace62627b97c16fa2f10371a7e0b3bffd938"
+    },
+    "run31_top_level_checksums": {
+      "path": "artifacts/market_engine/run_evidence/me-run31-after-me-data06-review-fix-20260718T113254Z/top_level_checksums.json",
+      "sha256": "332160205d09831622725adac04b93b6530778ba94be29dbca1df601717373f3"
+    }
+  }
+}

@@ -1,0 +1,129 @@
+{
+  "approval_candidates": [
+    {
+      "approval_candidate_path": "artifacts/market_engine/run_evidence/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/approval_candidates/ASH/approval_candidate.json",
+      "approval_candidate_sha256": "0a6ceaf1049c86095802cb3590b01cac05954823554d2a952c69dc8a9acb3c13",
+      "bundle_path": "artifacts/market_engine/run_evidence/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/approval_candidates/ASH",
+      "ticker": "ASH"
+    },
+    {
+      "approval_candidate_path": "artifacts/market_engine/run_evidence/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/approval_candidates/BIO/approval_candidate.json",
+      "approval_candidate_sha256": "f852eccd55ed628932cd4453d7fbfaa76dfa9f030a6770e4fc3a697229dd0ca7",
+      "bundle_path": "artifacts/market_engine/run_evidence/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/approval_candidates/BIO",
+      "ticker": "BIO"
+    },
+    {
+      "approval_candidate_path": "artifacts/market_engine/run_evidence/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/approval_candidates/CI/approval_candidate.json",
+      "approval_candidate_sha256": "0e07c62869dde4dfde0c1a51f80d6b0772996a8a916da1fa86583c786c512998",
+      "bundle_path": "artifacts/market_engine/run_evidence/me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z/approval_candidates/CI",
+      "ticker": "CI"
+    }
+  ],
+  "generated_at": "2026-08-13T15:12:00Z",
+  "guardrails": {
+    "allocation_logic_added": false,
+    "broker_execution_performed": false,
+    "decision_engine_changed": false,
+    "market_data_mutation_performed": false,
+    "portfolio_or_watchlist_mutation_performed": false,
+    "publication_performed": false
+  },
+  "inputs": {
+    "candidate_ranking": {
+      "path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/candidate_ranking.json",
+      "sha256": "15b933748a1b12f5957798ebd6636a609e72f97eb8fb19af6d0259ad201f5530"
+    },
+    "canonical_universe": {
+      "path": "config/market_engine/universes/canonical_universe.json",
+      "sha256": "c0e2c466af51ee3f34202148b5275f46248c893ce4b3851352d0fbded87148be"
+    },
+    "downstream_prestate_authority": {
+      "path": "config/market_engine/data11_downstream_prestate_authority.json",
+      "sha256": "47b0c48bb91d85bd41f92c7d978ed5116670fa7223b4868f49147299e090a26c"
+    },
+    "formula_catalog": {
+      "path": "config/market_engine/data10_fundamental_metric_formula_catalog.json",
+      "sha256": "7ae5ca07ad9b45eaed54fccd9e77de254616da6f598d42cd44ff78dcd80673d1"
+    },
+    "ranking_manifest": {
+      "path": "artifacts/market_engine/universe_analysis_runs/me-run30-full-canonical-universe-analysis-ranking-20260714T143209Z/manifest.json",
+      "sha256": "1361c3d16aad412025d0dbd9612dfacfca0eeeff762fbd31bd73f0ad04a2ebae"
+    },
+    "run30_authority": {
+      "path": "config/market_engine/data11_run30_input_authority.json",
+      "sha256": "8e6993d1ba52fbc4ca659b04dfdfc92386fb7a4c1233f52b8ed689b2c81d905d"
+    }
+  },
+  "output_checksums": {
+    "approval_candidates/ASH/approval_candidate.json": "0a6ceaf1049c86095802cb3590b01cac05954823554d2a952c69dc8a9acb3c13",
+    "approval_candidates/ASH/derivation_validation.json": "ba365e0510d2405f9c3acb623f4fad8945f1f38aaea355098e4aa058fbba4a15",
+    "approval_candidates/ASH/derived_package.json": "01a19e6a436229fd9a4a1ef6133cae042374882da642d1e8d956001e28a97b09",
+    "approval_candidates/ASH/fact_package.json": "868a7513d2d569a3b5ebfc90901172464179237bc59a0c380738d300247c4e61",
+    "approval_candidates/ASH/formula_catalog.json": "97994f7868df5e1bd1a112085347a238177e954dd5136dcafb7d3d089792d0d0",
+    "approval_candidates/ASH/governed_package_candidate.json": "713fed9bf7f8dec7868488775082bde2b6857c1b4e86821de1a8f3b451fee220",
+    "approval_candidates/ASH/mapping_review.json": "c9af1bb1e2ed389d43e7e9dae9d3400eaa335724d812f9f3a7ab85db3c3da54d",
+    "approval_candidates/ASH/source_evidence.json": "1ea34302f5cb0464f422857e8d3f3f4505badf56155a6413438067244a039f45",
+    "approval_candidates/BIO/approval_candidate.json": "f852eccd55ed628932cd4453d7fbfaa76dfa9f030a6770e4fc3a697229dd0ca7",
+    "approval_candidates/BIO/derivation_validation.json": "ee48547288ca8dc882144c6de5fceebf204fc22fb166e87dc05a1e05b38b900a",
+    "approval_candidates/BIO/derived_package.json": "cafc861544cea6064b1d0fb3bcf9ac8a2ae45ffc2059a7675557cc59ee245106",
+    "approval_candidates/BIO/fact_package.json": "a69a4ea761fb32814543fef60e853c9889a8fe1791bcd29c2d8f13e608a10ec0",
+    "approval_candidates/BIO/formula_catalog.json": "97994f7868df5e1bd1a112085347a238177e954dd5136dcafb7d3d089792d0d0",
+    "approval_candidates/BIO/governed_package_candidate.json": "30ba4aa6b25a2bd3307459b41add3b8d3437f7fe025f4d4e37c3aaa08c9feec7",
+    "approval_candidates/BIO/mapping_review.json": "d767a019b5fb11baeab0e7f7745675947fe893d99d6847cde4c70356f4427018",
+    "approval_candidates/BIO/source_evidence.json": "954b9875d527ec9a452c35ad7595d4d087a8292a1368aa2c75074b459aae0fab",
+    "approval_candidates/CI/approval_candidate.json": "0e07c62869dde4dfde0c1a51f80d6b0772996a8a916da1fa86583c786c512998",
+    "approval_candidates/CI/derivation_validation.json": "2ad18a9c211b139802a12ceaf6f9eeea3407b7117e2e2ae34d024613acd9e240",
+    "approval_candidates/CI/derived_package.json": "f488aee824a1feab698f7ac53c75154d0c9f81d2d43a0080f24d416391931406",
+    "approval_candidates/CI/fact_package.json": "3c47176b0fd5c389ae6425326bac1a36403b46a8d1e8f2bf7d069814bb408116",
+    "approval_candidates/CI/formula_catalog.json": "97994f7868df5e1bd1a112085347a238177e954dd5136dcafb7d3d089792d0d0",
+    "approval_candidates/CI/governed_package_candidate.json": "e365f3f80055e30155d9299f8cd856af946a05ffa966b4a848154f5f9c54b46f",
+    "approval_candidates/CI/mapping_review.json": "ca8fe9c2f389d9022ccc3bc8be03974e5c5ab48149a8cb54515821a845b6c9a5",
+    "approval_candidates/CI/source_evidence.json": "7698018a96147c221f62a0dedd4eabdbc5256f60f4e03f7273fc10800667fe83",
+    "candidate_funnel.json": "3d81c76834388c2d9cd6eb04cb3df50a747e3da519b682bd7767005eee5264f4",
+    "cohort_selection.json": "e73f515bac5ea38c36d8cd6048ba1f8a311f0ca8f67c1fbe74b556fdad284ef9",
+    "derivation_summary.json": "d3e6d0cb6fa383d779d41722cacb515dabe96c1a16092f2f6fe12df13a031632",
+    "downstream_readiness_delta.json": "160e53a52c7ff5ee0358065a77eeabab7fccd4202c5e083fd67304a63cc65daf",
+    "fundamental_comparison_matrix.json": "443b6e421ec24c513a507a05d9bb68b665f3c128f472a1a8fc8b038fff70804e",
+    "report.md": "056b928a168ab132d987fab8bf34b5ccb7c5062471027e483bd8bd1f61fabe3d",
+    "source_inventory.json": "8bee023052ba906f17fc7b29c5b37c9a92c55afc6ca348832f423419262372d3"
+  },
+  "outputs": [
+    "approval_candidates/ASH/approval_candidate.json",
+    "approval_candidates/ASH/derivation_validation.json",
+    "approval_candidates/ASH/derived_package.json",
+    "approval_candidates/ASH/fact_package.json",
+    "approval_candidates/ASH/formula_catalog.json",
+    "approval_candidates/ASH/governed_package_candidate.json",
+    "approval_candidates/ASH/mapping_review.json",
+    "approval_candidates/ASH/source_evidence.json",
+    "approval_candidates/BIO/approval_candidate.json",
+    "approval_candidates/BIO/derivation_validation.json",
+    "approval_candidates/BIO/derived_package.json",
+    "approval_candidates/BIO/fact_package.json",
+    "approval_candidates/BIO/formula_catalog.json",
+    "approval_candidates/BIO/governed_package_candidate.json",
+    "approval_candidates/BIO/mapping_review.json",
+    "approval_candidates/BIO/source_evidence.json",
+    "approval_candidates/CI/approval_candidate.json",
+    "approval_candidates/CI/derivation_validation.json",
+    "approval_candidates/CI/derived_package.json",
+    "approval_candidates/CI/fact_package.json",
+    "approval_candidates/CI/formula_catalog.json",
+    "approval_candidates/CI/governed_package_candidate.json",
+    "approval_candidates/CI/mapping_review.json",
+    "approval_candidates/CI/source_evidence.json",
+    "candidate_funnel.json",
+    "cohort_selection.json",
+    "derivation_summary.json",
+    "downstream_readiness_delta.json",
+    "fundamental_comparison_matrix.json",
+    "report.md",
+    "source_inventory.json"
+  ],
+  "raw_sources_committed": false,
+  "run_id": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z",
+  "schema_version": "market-engine-data11-targeted-diversified-fundamental-derivation-v1",
+  "source_snapshot_root": "data/market_engine/source_snapshots/sec_companyfacts",
+  "status": "completed_with_blockers",
+  "trusted_now": "2026-08-13T15:12:00Z"
+}

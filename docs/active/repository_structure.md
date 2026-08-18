@@ -28,6 +28,16 @@ Engine work. It is not an exhaustive file inventory.
 - `src/market_engine/`: current Market Engine job-family runtime.
 - `src/market_engine/source_refresh/advisory_price_evidence.py`: ME-SR25
   advisory-only price acquisition, artifact validation, and consumer boundary.
+- `src/market_engine/data/targeted_diversified_fundamental_derivation.py`:
+  ME-DATA11 top-25 funnel binding, bounded SEC acquisition, generic DATA10
+  derivation orchestration, and comparison evidence.
+- `src/market_engine/data/data11_governance.py`: ME-DATA11 RUN30 and downstream
+  authority validation, period policy, approval replay, and bounded execution
+  gate.
+- `config/market_engine/data11_*_authority.json`: tracked checksum authorities
+  for RUN30 input and DATA06/RUN31 prestate.
+- `config/market_engine/data11_governance_artifacts_v1.schema.json`: schema for
+  the new authority, approval, source-evidence, and downstream variants.
 - `src/market_scanner/portfolio/`: portfolio source and contract metadata.
 - `scripts/portfolio/`: legacy/reference portfolio utilities unless a sprint
   explicitly promotes or replaces a narrow surface.

@@ -1,0 +1,200 @@
+{
+  "absolute_delta": {
+    "advice_input_ready": 0,
+    "full_advice_ready": 0,
+    "fundamental_complete": 0,
+    "fundamental_missing": 0,
+    "fundamental_partial": 0,
+    "invalid_stale_conflicting": 0,
+    "unable_to_advise": 0
+  },
+  "after_authoritative": {
+    "advice_input_ready": 6,
+    "full_advice_ready": 0,
+    "fundamental_complete": 6,
+    "fundamental_missing": 907,
+    "fundamental_partial": 39,
+    "invalid_stale_conflicting": 0,
+    "unable_to_advise": 946
+  },
+  "before": {
+    "advice_input_ready": 6,
+    "full_advice_ready": 0,
+    "fundamental_complete": 6,
+    "fundamental_missing": 907,
+    "fundamental_partial": 39,
+    "invalid_stale_conflicting": 0,
+    "unable_to_advise": 946
+  },
+  "candidate_only_non_authoritative": {
+    "status": "candidate_partial_pending_approval",
+    "ticker_count": 3
+  },
+  "changes_outside_selected_cohort": [],
+  "downstream_executed": false,
+  "measurement_status": "measured",
+  "outside_cohort_regression_tickers": [],
+  "outside_cohort_size": 942,
+  "prestate": {
+    "artifact_bindings": {
+      "data06_manifest": {
+        "path": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z/manifest.json",
+        "schema_version": "market-engine-data06-fundamental-evidence-coverage-v1",
+        "sha256": "559dc37009903f8c2e0bca34d7645f96977284280b836d534c5baa70ae56826a"
+      },
+      "data06_per_ticker": {
+        "path": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z/per_ticker_fundamental_status.json",
+        "schema_version": "market-engine-data06-per-ticker-fundamental-status-v1",
+        "sha256": "63c6b27d76b6d0f53ece2eb5db2b724f47eab3ddc9e2bba12d7af6528612ecc8"
+      },
+      "data06_summary": {
+        "path": "artifacts/market_engine/fundamental_evidence_coverage_runs/me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z/fundamental_coverage_summary.json",
+        "schema_version": "market-engine-data06-fundamental-coverage-summary-v1",
+        "sha256": "68195e722f10524a17b1ef9250f567db0ed298be479868bb45b93d7b2abb0ef2"
+      },
+      "run31_compact_index": {
+        "path": "artifacts/market_engine/run_evidence/me-run31-after-me-data06-review-fix-20260718T113254Z/run_evidence_index.json",
+        "schema_version": "market-engine-run31-compact-run-evidence-v1",
+        "sha256": "c420c6ec1de8fce049b4c1997aaacba5ffb165b8240ce0d4065f8463c52e259d"
+      },
+      "run31_evidence_summary": {
+        "path": "artifacts/market_engine/run_evidence/me-run31-after-me-data06-review-fix-20260718T113254Z/evidence_coverage_summary.json",
+        "sha256": "c9fa4d5b9e064bd3948c9572bc4dace62627b97c16fa2f10371a7e0b3bffd938"
+      },
+      "run31_top_level_checksums": {
+        "path": "artifacts/market_engine/run_evidence/me-run31-after-me-data06-review-fix-20260718T113254Z/top_level_checksums.json",
+        "sha256": "332160205d09831622725adac04b93b6530778ba94be29dbca1df601717373f3"
+      }
+    },
+    "authority_path": "config/market_engine/data11_downstream_prestate_authority.json",
+    "authority_sha256": "47b0c48bb91d85bd41f92c7d978ed5116670fa7223b4868f49147299e090a26c",
+    "data06_run_id": "me-data06-fundamental-evidence-coverage-review-fix-20260718T113254Z",
+    "run31_run_id": "me-run31-after-me-data06-review-fix-20260718T113254Z"
+  },
+  "reason_codes": [
+    "NO_APPROVED_IMPORT_AUTHORITATIVE_ARTIFACTS_UNCHANGED"
+  ],
+  "regressions_outside_selected_cohort": 0,
+  "regressions_outside_selected_cohort_basis": "Identical checksum-bound authoritative prestate and after-state because no downstream runner executed.",
+  "rows": [
+    {
+      "advice_readiness_transition": "unknown_not_measured_per_ticker",
+      "after_authoritative_fundamental_status": "missing",
+      "before_fundamental_status": "missing",
+      "candidate_only_status": "blocked",
+      "instrument_id": "equity:asb",
+      "reason_codes": [
+        "FORMULA_INPUT_CARDINALITY_INVALID",
+        "FORMULA_NOT_APPLICABLE",
+        "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
+        "FORMULA_OPERAND_SET_INVALID",
+        "NUMERATOR_MISSING"
+      ],
+      "ticker": "ASB"
+    },
+    {
+      "advice_readiness_transition": "unknown_not_measured_per_ticker",
+      "after_authoritative_fundamental_status": "missing",
+      "before_fundamental_status": "missing",
+      "candidate_only_status": "candidate_partial_pending_approval",
+      "instrument_id": "equity:ash",
+      "reason_codes": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "ticker": "ASH"
+    },
+    {
+      "advice_readiness_transition": "unknown_not_measured_per_ticker",
+      "after_authoritative_fundamental_status": "missing",
+      "before_fundamental_status": "missing",
+      "candidate_only_status": "blocked",
+      "instrument_id": "equity:atr",
+      "reason_codes": [
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
+      ],
+      "ticker": "ATR"
+    },
+    {
+      "advice_readiness_transition": "unknown_not_measured_per_ticker",
+      "after_authoritative_fundamental_status": "missing",
+      "before_fundamental_status": "missing",
+      "candidate_only_status": "blocked",
+      "instrument_id": "equity:axp",
+      "reason_codes": [
+        "FORMULA_INPUT_CARDINALITY_INVALID",
+        "FORMULA_NOT_APPLICABLE",
+        "FORMULA_NUMERATOR_CONCEPT_MISMATCH",
+        "FORMULA_OPERAND_SET_INVALID",
+        "NUMERATOR_MISSING"
+      ],
+      "ticker": "AXP"
+    },
+    {
+      "advice_readiness_transition": "unknown_not_measured_per_ticker",
+      "after_authoritative_fundamental_status": "missing",
+      "before_fundamental_status": "missing",
+      "candidate_only_status": "candidate_partial_pending_approval",
+      "instrument_id": "equity:bio",
+      "reason_codes": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "ticker": "BIO"
+    },
+    {
+      "advice_readiness_transition": "unknown_not_measured_per_ticker",
+      "after_authoritative_fundamental_status": "missing",
+      "before_fundamental_status": "missing",
+      "candidate_only_status": "blocked",
+      "instrument_id": "equity:bkh",
+      "reason_codes": [
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
+      ],
+      "ticker": "BKH"
+    },
+    {
+      "advice_readiness_transition": "unknown_not_measured_per_ticker",
+      "after_authoritative_fundamental_status": "missing",
+      "before_fundamental_status": "missing",
+      "candidate_only_status": "blocked",
+      "instrument_id": "equity:bmrn",
+      "reason_codes": [
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
+      ],
+      "ticker": "BMRN"
+    },
+    {
+      "advice_readiness_transition": "unknown_not_measured_per_ticker",
+      "after_authoritative_fundamental_status": "partial",
+      "before_fundamental_status": "partial",
+      "candidate_only_status": "blocked",
+      "instrument_id": "equity:bmy",
+      "reason_codes": [
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
+      ],
+      "ticker": "BMY"
+    },
+    {
+      "advice_readiness_transition": "unknown_not_measured_per_ticker",
+      "after_authoritative_fundamental_status": "missing",
+      "before_fundamental_status": "missing",
+      "candidate_only_status": "blocked",
+      "instrument_id": "equity:chrw",
+      "reason_codes": [
+        "PRIMARY_FACT_PACKAGE_UNAVAILABLE"
+      ],
+      "ticker": "CHRW"
+    },
+    {
+      "advice_readiness_transition": "unknown_not_measured_per_ticker",
+      "after_authoritative_fundamental_status": "missing",
+      "before_fundamental_status": "missing",
+      "candidate_only_status": "candidate_partial_pending_approval",
+      "instrument_id": "equity:ci",
+      "reason_codes": [
+        "CHECKSUM_BOUND_DERIVATION_APPROVAL_REQUIRED"
+      ],
+      "ticker": "CI"
+    }
+  ],
+  "schema_version": "market-engine-data11-downstream-readiness-delta-v2"
+}

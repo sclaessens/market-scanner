@@ -107,10 +107,11 @@ ME-RM08 defines the active sequence:
 ME-RM08 - Portfolio ledger and advisory price roadmap realignment
   -> ME-PR03 - Manual portfolio transaction ledger and portfolio-aware
                candidate context (COMPLETED)
-  -> ME-SR25 - Advisory price evidence artifact (IMPLEMENTED)
-  -> ME-DATA11 - Targeted fundamental derivation for the technical candidate funnel (NEXT)
-  -> ME-RUN33 - Accelerated full-universe candidate release
-  -> ME-CI12 - Batch grounded advisory consumption
+  -> ME-SR25 - Advisory price evidence artifact (COMPLETED / MERGED)
+  -> ME-DATA11 - Targeted fundamental derivation for the technical candidate funnel (READY FOR HUMAN APPROVAL)
+  -> Human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
+  -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
+  -> ME-CI12 - Batch grounded advisory consumption (PLANNED)
   -> ME-PS01 - Position-sizing decision contract
   -> ME-NL01/02/03 - Notification sequence
 ```
@@ -121,10 +122,12 @@ fundamental, model-invocation, or notification work. ME-SR25 then provides
 recent descriptive prices without weakening the blocked canonical
 publication boundary.
 
-ME-RUN33 is the first unreserved run identifier and is reserved for the
-accelerated candidate release. It must produce 5-15 grounded candidates or
-record explicit no-candidate evidence. ME-PI01 and ME-CI11D remain planned but
-deferred. Historical `Next` labels below do not override this section.
+ME-RUN33 is the first unreserved run identifier and remains reserved for the
+accelerated candidate release. It is not executable until checksum-bound human
+approval, DATA07 import, DATA06 refresh, and RUN31 evidence complete
+successfully. It must produce 5-15 grounded candidates or record explicit
+no-candidate evidence. ME-PI01 and ME-CI11D remain planned but deferred.
+Historical `Next` labels below do not override this section.
 
 ME-ADV01 implemented the first minimal deterministic advice engine.ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
 the ME-GH02 `ticker_status_index.json` and linked dry-run artifacts, writes
@@ -418,10 +421,16 @@ review of the 14 current blockers. That remains parked work, not the active
 product priority after ME-RM08. A publication canary or retry is not
 authorized.
 
-ME-DATA11 — target governed fundamental derivation at the highest-ranked
-technical candidate funnel — remains planned, has not started, and is next
-after ME-SR25. It must reuse the generic ME-DATA10 engine without ticker-
-specific code changes for issuer identity, source tags, or formula selection.
+ME-DATA11 targeted governed fundamental derivation at the highest-ranked
+technical candidate funnel and completed with blockers. It checksum-bound the
+authoritative top 25, acquired official SEC CompanyFacts snapshots for the ten
+highest-ranked supported equities, and reused the generic ME-DATA10 engine.
+Three issuers produced five pending derived metric candidates and seven were
+blocked. The top-25 framework remains unknown before inspection; all ten
+inspected cohort sources validated as US-GAAP. No approval was fabricated, so
+authoritative downstream coverage remains unchanged. ME-RUN33 remains
+conditional on human approval and a successful result-bound DATA07/DATA06/RUN31
+chain.
 
 Roadmap outcome:
 

@@ -1,0 +1,98 @@
+{
+  "approved_calculation_checksums": [
+    "ca34778c17b698f77af3dc2c4bfeefa8ba050144a9f9bfb87ecb8e1585f2f71e",
+    "d6fcde2d3b05569520404f01c1dd59a0a82d2054936bf4885754a95616fad69b"
+  ],
+  "approved_derived_metrics": [
+    "gross_margin",
+    "operating_margin"
+  ],
+  "artifact_bindings": {
+    "derivation_validation": {
+      "path": "derivation_validation.json",
+      "sha256": "ba365e0510d2405f9c3acb623f4fad8945f1f38aaea355098e4aa058fbba4a15"
+    },
+    "derived_package": {
+      "path": "derived_package.json",
+      "sha256": "01a19e6a436229fd9a4a1ef6133cae042374882da642d1e8d956001e28a97b09"
+    },
+    "fact_package": {
+      "path": "fact_package.json",
+      "sha256": "868a7513d2d569a3b5ebfc90901172464179237bc59a0c380738d300247c4e61"
+    },
+    "formula_catalog": {
+      "path": "formula_catalog.json",
+      "sha256": "97994f7868df5e1bd1a112085347a238177e954dd5136dcafb7d3d089792d0d0"
+    },
+    "governed_package_candidate": {
+      "path": "governed_package_candidate.json",
+      "sha256": "713fed9bf7f8dec7868488775082bde2b6857c1b4e86821de1a8f3b451fee220"
+    },
+    "mapping_review": {
+      "path": "mapping_review.json",
+      "sha256": "c9af1bb1e2ed389d43e7e9dae9d3400eaa335724d812f9f3a7ab85db3c3da54d"
+    },
+    "source_evidence": {
+      "path": "source_evidence.json",
+      "sha256": "1ea34302f5cb0464f422857e8d3f3f4505badf56155a6413438067244a039f45"
+    }
+  },
+  "cik": "0001674862",
+  "decision": "pending",
+  "decision_id": "me-data11-targeted-diversified-fundamental-derivation-20260813T151200Z-ash-derivation-approval-candidate",
+  "instrument_id": "equity:ash",
+  "issuer_identity": "ASHLAND INC.",
+  "limitations": [
+    "This candidate grants no authority while the decision or any review is pending.",
+    "Approval must be an explicit human decision over these exact checksum-bound artifacts."
+  ],
+  "reporting_period": "2026-Q3",
+  "reviewer_roles": [
+    "Operator",
+    "Data Steward",
+    "Governance Auditor"
+  ],
+  "reviews": {
+    "calculation_replay": {
+      "status": "pending"
+    },
+    "duration_classification": {
+      "status": "pending"
+    },
+    "formula_applicability": {
+      "status": "pending"
+    },
+    "formula_version": {
+      "status": "pending"
+    },
+    "freshness": {
+      "status": "pending"
+    },
+    "issuer_cik_instrument_identity": {
+      "status": "pending"
+    },
+    "permitted_local_use": {
+      "status": "pending"
+    },
+    "primary_source_status": {
+      "status": "pending"
+    },
+    "publication_boundary": {
+      "status": "pending"
+    },
+    "raw_tag_to_canonical_mapping": {
+      "status": "pending"
+    },
+    "reporting_period": {
+      "status": "pending"
+    },
+    "source_authenticity": {
+      "status": "pending"
+    },
+    "unit_currency_scale": {
+      "status": "pending"
+    }
+  },
+  "schema_version": "market-engine-data11-approval-decision-v1",
+  "ticker": "ASH"
+}
