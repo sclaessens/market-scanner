@@ -109,6 +109,7 @@ ME-RM08 - Portfolio ledger and advisory price roadmap realignment
                candidate context (COMPLETED)
   -> ME-SR25 - Advisory price evidence artifact (COMPLETED / MERGED)
   -> ME-DATA11 - Targeted fundamental derivation for the technical candidate funnel (READY FOR HUMAN APPROVAL)
+  -> ME-SR26 - Advisory OHLC history, current technical screening, and RUN33 handoff
   -> Human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
   -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - Batch grounded advisory consumption (PLANNED)
@@ -122,7 +123,8 @@ fundamental, model-invocation, or notification work. ME-SR25 then provides
 recent descriptive prices without weakening the blocked canonical
 publication boundary.
 
-ME-RUN33 is the first unreserved run identifier and remains reserved for the
+ME-SR26 prevents a July 10 technical ranking from being combined with a recent
+close and described as current. It adds no decision semantics. ME-RUN33 is the first unreserved run identifier and remains reserved for the
 accelerated candidate release. It is not executable until checksum-bound human
 approval, DATA07 import, DATA06 refresh, and RUN31 evidence complete
 successfully. It must produce 5-15 grounded candidates or record explicit

@@ -50,6 +50,7 @@ ME-RUN30/31 and ME-DATA06-10 - broad analysis and evidence baseline
   -> ME-PR03 - manual transaction ledger and portfolio-aware candidate context (COMPLETED)
   -> ME-SR25 - advisory price evidence artifact (COMPLETED / MERGED)
   -> ME-DATA11 - targeted fundamental derivation for the technical candidate funnel (READY FOR HUMAN APPROVAL)
+  -> ME-SR26 - advisory OHLC history and current technical screening handoff (IMPLEMENTED; CANARY PENDING)
   -> human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
   -> ME-RUN33 - first useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - batch grounded advisory consumption (PLANNED)

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "market-engine-advisory-ohlc-history-v1",
+  "title": "Market Engine advisory OHLC history contracts",
+  "oneOf": [
+    {"$ref": "#/$defs/manifest"},
+    {"$ref": "#/$defs/series"},
+    {"$ref": "#/$defs/index"}
+  ],
+  "$defs": {
+    "decimal": {"type": "string", "pattern": "^(?:0\\.[0-9]*[1-9][0-9]*|[1-9][0-9]*(?:\\.[0-9]+)?)$"},
+    "bar": {
+      "type": "object", "additionalProperties": false,
+      "required": ["session", "open", "high", "low", "close", "volume", "volume_status"],
+      "properties": {
+        "session": {"type": "string", "format": "date"},
+        "open": {"$ref": "#/$defs/decimal"}, "high": {"$ref": "#/$defs/decimal"},
+        "low": {"$ref": "#/$defs/decimal"}, "close": {"$ref": "#/$defs/decimal"},
+        "volume": {"type": ["string", "null"], "pattern": "^(?:0|[1-9][0-9]*)$"},
+        "volume_status": {"enum": ["provider_reported", "not_reported"]}
+      }
+    },
+    "series": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "instrument_id", "canonical_ticker", "source_symbol", "currency", "expected_session", "source_id", "price_basis", "corporate_action_adjustment_policy", "bars"],
+      "properties": {
+        "schema_version": {"const": "market-engine-advisory-ohlc-series-v1"},
+        "instrument_id": {"type": "string"}, "canonical_ticker": {"type": "string"},
+        "source_symbol": {"type": "string"}, "currency": {"type": "string"},
+        "expected_session": {"type": "string", "format": "date"}, "source_id": {"type": "string"},
+        "price_basis": {"const": "unadjusted_ohlc"},
+        "corporate_action_adjustment_policy": {"const": "provider_reported_unadjusted_with_adj_close_excluded"},
+        "bars": {"type": "array", "minItems": 1, "maxItems": 420, "items": {"$ref": "#/$defs/bar"}}
+      }
+    },
+    "manifest": {
+      "type": "object", "required": ["schema_version", "artifact_version", "run_id", "source_main_sha", "universe_sha256", "history_policy_sha256", "observations_sha256", "artifact_sha256", "status_counts", "provider_session_lag", "authority_boundary"],
+      "properties": {"schema_version": {"const": "market-engine-advisory-ohlc-history-manifest-v1"}, "artifact_version": {"const": "me-sr26-advisory-ohlc-history-v1"}, "run_id": {"type": "string"}, "source_main_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"}, "universe_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "history_policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "observations_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "status_counts": {"type": "object"}, "provider_session_lag": {"type": "object"}, "authority_boundary": {"const": "advisory_only_no_canonical_publication"}}
+    },
+    "index": {
+      "type": "object", "required": ["schema_version", "run_id", "records"],
+      "properties": {
+        "schema_version": {"const": "market-engine-advisory-ohlc-history-index-v1"},
+        "run_id": {"type": "string"},
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["instrument_id", "canonical_ticker", "history_status"],
+            "properties": {
+              "instrument_id": {"type": "string"},
+              "canonical_ticker": {"type": "string"},
+              "history_status": {"enum": ["fresh", "stale", "insufficient_history", "missing", "invalid", "blocked_identity", "blocked_adjustment_policy"]}
+            }
+          }
+        }
+      }
+    }
+  }
+}

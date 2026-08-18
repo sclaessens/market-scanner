@@ -1,0 +1,64 @@
+name: Advisory OHLC History and Current Technical Screening
+
+on:
+  schedule:
+    - cron: "30 9 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: advisory-ohlc-history-${{ github.repository }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-advisory-history-and-screening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout executable source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install project dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build bounded advisory history
+        env:
+          HISTORY_RUN_ID: me-sr26-advisory-history-${{ github.run_id }}
+        run: |
+          source_main_sha="$(git rev-parse HEAD)"
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history \
+            --run-id "$HISTORY_RUN_ID" \
+            --source-main-sha "$source_main_sha"
+
+      - name: Build current technical screening
+        env:
+          HISTORY_RUN_ID: me-sr26-advisory-history-${{ github.run_id }}
+          SCREENING_RUN_ID: me-sr26-current-screening-${{ github.run_id }}
+        run: |
+          PYTHONPATH=src python -m market_engine.run.current_technical_screening \
+            --run-id "$SCREENING_RUN_ID" \
+            --history-artifact-root "artifacts/market_engine/advisory_ohlc_history_runs/$HISTORY_RUN_ID"
+
+      - name: Upload advisory-only evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-screening-${{ github.run_id }}
+          path: |
+            artifacts/market_engine/advisory_ohlc_history_runs/
+            artifacts/market_engine/current_technical_screening_runs/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Enforce analytic freshness gate
+        env:
+          HISTORY_RUN_ID: me-sr26-advisory-history-${{ github.run_id }}
+        run: |
+          python -c 'import json, os, pathlib, sys; p=pathlib.Path("artifacts/market_engine/advisory_ohlc_history_runs")/os.environ["HISTORY_RUN_ID"] / "manifest.json"; m=json.loads(p.read_text()); sys.exit(0 if m["run_status"] == "completed" else 3)'

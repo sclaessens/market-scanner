@@ -28,6 +28,10 @@ Engine work. It is not an exhaustive file inventory.
 - `src/market_engine/`: current Market Engine job-family runtime.
 - `src/market_engine/source_refresh/advisory_price_evidence.py`: ME-SR25
   advisory-only price acquisition, artifact validation, and consumer boundary.
+- `src/market_engine/source_refresh/advisory_ohlc_history.py`: ME-SR26 bounded
+  history acquisition, semantic validation, freshness, and integrity replay.
+- `src/market_engine/run/current_technical_screening.py`: current screening,
+  SR25 reconciliation, and conditional RUN33 handoff contracts.
 - `src/market_engine/data/targeted_diversified_fundamental_derivation.py`:
   ME-DATA11 top-25 funnel binding, bounded SEC acquisition, generic DATA10
   derivation orchestration, and comparison evidence.
@@ -58,6 +62,8 @@ Engine work. It is not an exhaustive file inventory.
 - `config/market_engine/advisory_price/` and
   `config/market_engine/advisory_price_freshness_policy.json`: advisory price
   schemas and freshness policy.
+- `config/market_engine/advisory_ohlc_history_policy.json` and the ME-SR26
+  history/RUN33 schemas: non-canonical history and handoff policy authority.
 
 ## Historical material
 

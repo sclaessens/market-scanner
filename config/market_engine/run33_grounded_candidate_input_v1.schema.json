@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "market-engine-run33-grounded-candidate-input-v1",
+  "type": "object",
+  "required": ["schema_version", "run_id", "records"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "market-engine-run33-grounded-candidate-input-v1"},
+    "run_id": {"type": "string"},
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["instrument_id", "canonical_ticker", "eligible_for_run33", "reason_codes", "technical_evidence_status", "price_evidence_status", "fundamental_evidence_status", "portfolio_context_status", "conditions"],
+        "properties": {
+          "instrument_id": {"type": "string"}, "canonical_ticker": {"type": "string"},
+          "eligible_for_run33": {"type": "boolean"}, "reason_codes": {"type": "array", "items": {"type": "string"}},
+          "technical_evidence_status": {"type": "string"}, "price_evidence_status": {"type": "string"},
+          "fundamental_evidence_status": {"type": "string"}, "portfolio_context_status": {"type": "string"},
+          "conditions": {"type": "object", "minProperties": 7, "additionalProperties": {"type": "boolean"}}
+        }
+      }
+    }
+  }
+}
