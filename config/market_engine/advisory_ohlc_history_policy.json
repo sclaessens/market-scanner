@@ -1,0 +1,17 @@
+{
+  "schema_version": "market-engine-advisory-ohlc-history-policy-v1",
+  "policy_id": "me-sr26-advisory-daily-history-v1",
+  "interval": "1d",
+  "price_basis": "unadjusted_ohlc",
+  "corporate_action_adjustment_policy": "provider_reported_unadjusted_with_adj_close_excluded",
+  "indicator_max_warmup_sessions": 200,
+  "warmup_safety_margin_sessions": 52,
+  "minimum_history_sessions": 252,
+  "maximum_history_sessions": 420,
+  "request_calendar_days": 700,
+  "widespread_one_session_lag_ratio": "0.80",
+  "minimum_fresh_screening_coverage_ratio": "0.99",
+  "max_individual_fallbacks": 25,
+  "artifact_retention_days": 14,
+  "supported_currencies": ["AUD", "CAD", "CHF", "DKK", "EUR", "GBP", "HKD", "JPY", "NOK", "SEK", "USD"]
+}

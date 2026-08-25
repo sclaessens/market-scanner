@@ -3,13 +3,14 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator
 
 import market_engine.data.data11_execution as data11_execution
-from market_engine.data.data11_execution import load_downstream_after_authority
+from market_engine.data.data11_execution import load_downstream_after_authority, validated_after_payload
 from market_engine.data.data11_governance import (
     DEFAULT_DOWNSTREAM_AUTHORITY,
     DEFAULT_RUN30_AUTHORITY,
@@ -27,6 +28,10 @@ from market_engine.data.data11_governance import (
 )
 from market_engine.data.primary_source_metric_derivation import derive_primary_source_metrics
 from market_engine.data.targeted_diversified_fundamental_derivation import build_fact_package
+from market_engine.run import current_technical_screening as technical_screening
+from market_engine.source_refresh import advisory_ohlc_history as ohlc_history
+from market_engine.source_refresh import advisory_price_evidence as price_evidence
+from market_engine.data.scheduled_canonical_price_refresh import expected_completed_session, load_authoritative_universe
 
 
 def _write_json(path: Path, payload: dict) -> None:
@@ -911,6 +916,95 @@ def test_checksum_bound_952_row_after_state_is_accepted(tmp_path: Path) -> None:
     assert delta["measurement_status"] == "measured"
     assert delta["after_authoritative"] == load_downstream_prestate()["before"]
     assert delta["regressions_outside_selected_cohort"] == 0
+
+
+def test_validated_data11_stage_chain_reaches_ready_run33_handoff(tmp_path: Path, monkeypatch) -> None:
+    """Exercise the real approval, stage-proof, after-state and RUN33 authority route."""
+    now = datetime(2026, 8, 13, 6, tzinfo=UTC)
+    clock = lambda: now
+    monkeypatch.setattr(ohlc_history, "_repository_root", lambda: tmp_path)
+    monkeypatch.setattr(technical_screening, "_repository_root", lambda: tmp_path)
+    universe_path = ohlc_history.DEFAULT_UNIVERSE_SNAPSHOT
+    universe = load_authoritative_universe(universe_path)
+
+    def sessions(end: date) -> list[str]:
+        values = []
+        cursor = end
+        while len(values) < 252:
+            if cursor.weekday() < 5:
+                values.append(cursor.isoformat())
+            cursor -= timedelta(days=1)
+        return list(reversed(values))
+
+    bars_by_end = {}
+    def history_provider(instruments, acquired_at, policy):
+        result = {}
+        for instrument in instruments:
+            _profile, expected = expected_completed_session(instrument, acquired_at)
+            bars = bars_by_end.setdefault(expected, [
+                {"session": session, "open": f"{100 + index / 100:.2f}", "high": f"{102 + index / 100:.2f}", "low": f"{99 + index / 100:.2f}", "close": f"{101 + index / 100:.2f}", "volume": "1000", "volume_status": "provider_reported"}
+                for index, session in enumerate(sessions(expected))
+            ])
+            result[instrument["instrument_id"]] = {
+                "instrument_id": instrument["instrument_id"], "canonical_ticker": instrument["symbol"],
+                "source_symbol": instrument["source_symbol"], "currency": instrument["currency"],
+                "price_basis": policy["price_basis"],
+                "corporate_action_adjustment_policy": policy["corporate_action_adjustment_policy"],
+                "bars": bars,
+            }
+        return result
+
+    _history_manifest, history_root = ohlc_history._build_advisory_ohlc_history_impl(
+        run_id="positive-history", source_main_sha="d" * 40, universe_path=universe_path,
+        provider=history_provider, clock=clock,
+    )
+    _screening_manifest, screening_root = technical_screening._run_current_technical_screening_impl(
+        run_id="positive-screening", history_artifact_root=history_root,
+        universe_path=universe_path, now=clock(),
+    )
+    loaded_history = ohlc_history._load_advisory_ohlc_history_impl(history_root, universe_path=universe_path, now=clock())
+
+    def current_price_provider(instruments, _at):
+        return {
+            instrument["instrument_id"]: {
+                "instrument_id": instrument["instrument_id"], "canonical_ticker": instrument["symbol"],
+                "price": loaded_history.series[instrument["instrument_id"]]["bars"][-1]["close"],
+                "currency": instrument["currency"], "observation_type": price_evidence.OBSERVATION_TYPE,
+                "observation_timestamp": loaded_history.series[instrument["instrument_id"]]["bars"][-1]["session"] + "T20:00:00Z",
+                "source_id": price_evidence.SOURCE_ID,
+            }
+            for instrument in instruments
+        }
+
+    _price_manifest, price_root = price_evidence.build_advisory_price_artifact(
+        run_id="positive-price", source_main_sha="d" * 40, output_root=tmp_path / "positive-price",
+        universe_path=universe_path, retrieval_timestamp="2026-08-13T06:00:00Z", provider=current_price_provider,
+    )
+    decision = _approve(_approval_bundle(tmp_path / "approval"))
+    authority_path, proof, _authority, _payloads = _bound_after_state(tmp_path / "downstream", decision)
+    downstream = load_downstream_after_authority(authority_path.name, execution_proof=proof, repository_root=tmp_path / "downstream")
+    assert downstream is not None
+    assert validated_after_payload(downstream) is not None
+
+    manifest, handoff_root = technical_screening._build_run33_grounded_handoff_impl(
+        run_id="positive-handoff", screening_root=screening_root, history_root=history_root, price_root=price_root,
+        universe_path=universe_path, approval_decision_paths=[decision], downstream_authority=downstream, now=clock(),
+    )
+    assert manifest["status"] == "ready_for_run33"
+    assert manifest["eligible_count"] >= 1
+    Draft202012Validator(json.loads(Path("config/market_engine/run33_grounded_handoff_manifest_v1.schema.json").read_text())).validate(manifest)
+    Draft202012Validator(json.loads(Path("config/market_engine/run33_grounded_candidate_input_v1.schema.json").read_text())).validate(json.loads((handoff_root / "run33_candidate_input.json").read_text()))
+    Draft202012Validator(json.loads(Path("config/market_engine/run33_technical_price_reconciliation_v1.schema.json").read_text())).validate(json.loads((handoff_root / "technical_price_reconciliation.json").read_text()))
+    validated = technical_screening._load_validated_run33_handoff_impl(
+        handoff_root, screening_root=screening_root, history_root=history_root, price_root=price_root,
+        universe_path=universe_path, approval_decision_paths=[decision],
+        downstream_after_authority_path=authority_path.name, execution_proof=proof,
+        downstream_repository_root=tmp_path / "downstream", now=clock(),
+    )
+    payload = technical_screening.validated_run33_handoff_payload(validated)
+    assert payload is not None
+    assert len(payload["records"]) == len(universe["instruments"]) == 952
+    assert any(row["eligible_for_run33"] for row in payload["records"])
 
 
 @pytest.mark.parametrize("artifact", ["data06_per_ticker", "run31_per_ticker_index"])

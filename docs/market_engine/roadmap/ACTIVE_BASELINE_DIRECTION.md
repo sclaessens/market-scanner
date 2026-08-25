@@ -50,6 +50,8 @@ ME-RM08 - Realign roadmap around portfolio authority and advisory price freshnes
   -> ME-SR25 - Implement advisory price evidence artifacts (COMPLETED / MERGED)
   -> ME-DATA11 - Target fundamental derivation at the highest-ranked technical
                  candidate funnel (READY FOR HUMAN APPROVAL)
+  -> ME-SR26 - Acquire advisory OHLC history, rerun current technical screening,
+               and emit a conditional RUN33 handoff (IMPLEMENTED; CANARY PENDING)
   -> Human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
   -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - ChatGPT consumption without new analysis logic (PLANNED)
@@ -60,7 +62,8 @@ ME-PR03 and ME-SR25 are complete. PR #478 merged ME-SR25 at
 SEC evidence for ten ranked issuers. Review remediation persisted replayable
 pending approval candidates for ASH, BIO, and CI. Separate checksum-bound human
 approval remains the blocker to authoritative DATA07, DATA06, and RUN31
-changes; ME-RUN33 is not immediately executable.
+changes. ME-SR26 supplies current technical prerequisites without simulating
+that approval; ME-RUN33 is not immediately executable.
 
 ## What ME-PR03 completed
 
