@@ -28,6 +28,8 @@ from market_engine.source_refresh.advisory_ohlc_history import (
     _canonical_json,
     _effective_analytic_authority_status,
     _load_advisory_ohlc_history_impl,
+    _load_canonical_policy,
+    _load_canonical_universe,
     _sha256,
     _sha256_file,
     _system_utc_now,
@@ -91,18 +93,17 @@ DEFAULT_APPROVAL_DECISIONS = tuple(
 def run_current_technical_screening(
     *, run_id: str, history_artifact_root: str | Path,
     output_root: str | Path = DEFAULT_SCREENING_ROOT,
-    universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
-    history_policy_path: str | Path = DEFAULT_POLICY_PATH,
-    screening_policy_path: str | Path = DEFAULT_SCREENING_POLICY,
 ) -> tuple[dict[str, Any], Path]:
     """Run production screening with one internally captured UTC evaluation time."""
+    _load_canonical_universe()
+    _load_canonical_policy()
     return _run_current_technical_screening_impl(
         run_id=run_id,
         history_artifact_root=history_artifact_root,
         output_root=output_root,
-        universe_path=universe_path,
-        history_policy_path=history_policy_path,
-        screening_policy_path=screening_policy_path,
+        universe_path=DEFAULT_UNIVERSE_SNAPSHOT,
+        history_policy_path=DEFAULT_POLICY_PATH,
+        screening_policy_path=DEFAULT_SCREENING_POLICY,
         now=_system_utc_now(),
     )
 
@@ -189,19 +190,17 @@ def _derive_screening(history: Any, *, top_limit: int) -> tuple[list[dict[str, A
 def build_run33_grounded_handoff(
     *, run_id: str, screening_root: str | Path, history_root: str | Path, price_root: str | Path,
     output_root: str | Path = DEFAULT_HANDOFF_ROOT,
-    universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
-    history_policy_path: str | Path = DEFAULT_POLICY_PATH,
-    price_policy_path: str | Path = DEFAULT_PRICE_POLICY_PATH,
-    screening_policy_path: str | Path = DEFAULT_SCREENING_POLICY,
     portfolio_ledger_path: str | Path | None = None,
     approval_decision_paths: Sequence[str | Path] = DEFAULT_APPROVAL_DECISIONS,
     downstream_authority: ValidatedDownstreamAuthorityState | None = None,
 ) -> tuple[dict[str, Any], Path]:
     """Build the production handoff with one internally captured UTC time."""
+    _load_canonical_universe()
+    _load_canonical_policy()
     return _build_run33_grounded_handoff_impl(
         run_id=run_id, screening_root=screening_root, history_root=history_root, price_root=price_root,
-        output_root=output_root, universe_path=universe_path, history_policy_path=history_policy_path,
-        price_policy_path=price_policy_path, screening_policy_path=screening_policy_path,
+        output_root=output_root, universe_path=DEFAULT_UNIVERSE_SNAPSHOT, history_policy_path=DEFAULT_POLICY_PATH,
+        price_policy_path=DEFAULT_PRICE_POLICY_PATH, screening_policy_path=DEFAULT_SCREENING_POLICY,
         portfolio_ledger_path=portfolio_ledger_path, approval_decision_paths=approval_decision_paths,
         downstream_authority=downstream_authority, now=_system_utc_now(),
     )
@@ -265,10 +264,6 @@ def load_validated_run33_handoff(
     screening_root: str | Path,
     history_root: str | Path,
     price_root: str | Path,
-    universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
-    history_policy_path: str | Path = DEFAULT_POLICY_PATH,
-    price_policy_path: str | Path = DEFAULT_PRICE_POLICY_PATH,
-    screening_policy_path: str | Path = DEFAULT_SCREENING_POLICY,
     portfolio_ledger_path: str | Path | None = None,
     approval_decision_paths: Sequence[str | Path] = DEFAULT_APPROVAL_DECISIONS,
     downstream_after_authority_path: str | Path | None = None,
@@ -276,10 +271,12 @@ def load_validated_run33_handoff(
     downstream_repository_root: str | Path = ".",
 ) -> _ValidatedRun33HandoffContext:
     """Load the production handoff with one internally captured UTC time."""
+    _load_canonical_universe()
+    _load_canonical_policy()
     return _load_validated_run33_handoff_impl(
         handoff_root, screening_root=screening_root, history_root=history_root, price_root=price_root,
-        universe_path=universe_path, history_policy_path=history_policy_path,
-        price_policy_path=price_policy_path, screening_policy_path=screening_policy_path,
+        universe_path=DEFAULT_UNIVERSE_SNAPSHOT, history_policy_path=DEFAULT_POLICY_PATH,
+        price_policy_path=DEFAULT_PRICE_POLICY_PATH, screening_policy_path=DEFAULT_SCREENING_POLICY,
         portfolio_ledger_path=portfolio_ledger_path, approval_decision_paths=approval_decision_paths,
         downstream_after_authority_path=downstream_after_authority_path, execution_proof=execution_proof,
         downstream_repository_root=downstream_repository_root, now=_system_utc_now(),

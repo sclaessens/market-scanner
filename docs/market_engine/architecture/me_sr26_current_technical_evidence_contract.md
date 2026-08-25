@@ -1,5 +1,11 @@
 # ME-SR26 Current Technical Evidence Contract
 
+## Canonical production authority
+
+Public production callers select evidence artifact roots only. They cannot select the canonical universe, the ME-SR26 history or screening policies, the SR25 price policy used by RUN33, the provider, freshness time, or source provenance. Production resolves those inputs internally from `DEFAULT_UNIVERSE_SNAPSHOT`, `DEFAULT_POLICY_PATH`, `DEFAULT_SCREENING_POLICY`, `DEFAULT_PRICE_POLICY_PATH`, the approved provider adapter, the system UTC clock, and the executing repository's Git `HEAD`.
+
+Custom universe, policy, provider, time, and source-SHA inputs exist only on private deterministic implementation helpers. They are test seams and are not production authority APIs.
+
 Current technical authority requires this chain:
 
 ```text

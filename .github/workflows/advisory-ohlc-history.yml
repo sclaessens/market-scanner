@@ -32,10 +32,8 @@ jobs:
         env:
           HISTORY_RUN_ID: me-sr26-advisory-history-${{ github.run_id }}
         run: |
-          source_main_sha="$(git rev-parse HEAD)"
           PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history build \
-            --run-id "$HISTORY_RUN_ID" \
-            --source-main-sha "$source_main_sha"
+            --run-id "$HISTORY_RUN_ID"
 
       - name: Replay history semantics and enforce analytic usability
         env:

@@ -1,5 +1,9 @@
 # ME-SR26 — Advisory OHLC History and RUN33 Handoff
 
+## Authority closure status
+
+The implementation now enforces the intended boundary: public callers select evidence artifact paths, while the repository selects the canonical 952-identity universe, history policy, unchanged RUN30 screening policy, and SR25 price policy. Production also owns provider selection, UTC time, and source provenance derived from repository `HEAD`. Custom authority inputs are confined to private deterministic test helpers. Merge readiness remains subject to the complete validation and review record.
+
 Sprint ID: ME-SR26
 Status: IMPLEMENTED — POST-MERGE CANARY REQUIRED
 

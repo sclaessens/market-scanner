@@ -105,14 +105,31 @@ def test_screening_recalculates_full_indicators_and_is_deterministic(route) -> N
     assert keys == sorted(keys)
 
 
-def test_public_authority_apis_expose_no_freshness_time_override() -> None:
-    forbidden = {"_clock", "clock", "trusted_now", "now", "as_of", "evaluation_time", "acquisition_timestamp"}
+def test_public_authority_apis_expose_no_configuration_or_time_override() -> None:
+    forbidden = {
+        "provider", "_clock", "clock", "trusted_now", "now", "as_of", "evaluation_time",
+        "acquisition_timestamp", "universe_path", "universe_snapshot_path", "canonical_universe_path",
+        "policy_path", "history_policy_path", "screening_policy_path", "price_policy_path",
+        "source_main_sha",
+    }
     for authority_api in (
         run_current_technical_screening,
         build_run33_grounded_handoff,
         load_validated_run33_handoff,
     ):
         assert forbidden.isdisjoint(signature(authority_api).parameters)
+
+
+def test_public_screening_and_run33_reject_canonical_authority_overrides() -> None:
+    calls = (
+        (run_current_technical_screening, {"run_id": "x", "history_artifact_root": "history"}),
+        (build_run33_grounded_handoff, {"run_id": "x", "screening_root": "screening", "history_root": "history", "price_root": "price"}),
+        (load_validated_run33_handoff, {"handoff_root": "handoff", "screening_root": "screening", "history_root": "history", "price_root": "price"}),
+    )
+    for function, required in calls:
+        for parameter in ("universe_path", "history_policy_path", "screening_policy_path", "price_policy_path"):
+            with pytest.raises(TypeError, match=f"unexpected keyword argument '{parameter}'"):
+                function(**required, **{parameter: "forbidden"})
 
 
 def test_screening_uses_only_loaded_history_and_isolates_one_bad_ticker(route, monkeypatch) -> None:
@@ -256,15 +273,15 @@ def test_public_run33_cannot_revive_stale_history_or_price(route) -> None:
         price_root=price_root, universe_path=route["universe"], history_policy_path=route["history_policy"],
         price_policy_path=route["price_policy"], now=_clock()(),
     )
-    kwargs = dict(
+    authority_kwargs = dict(
         screening_root=screening_root, history_root=route["history_root"], price_root=price_root,
         universe_path=route["universe"], history_policy_path=route["history_policy"],
         price_policy_path=route["price_policy"],
     )
-    with pytest.raises(CurrentScreeningIssue, match="SCREENING_SEMANTIC_REPLAY_INVALID"):
-        load_validated_run33_handoff(handoff_root, **kwargs)
-    with pytest.raises(CurrentScreeningIssue, match="SCREENING_SEMANTIC_REPLAY_INVALID"):
-        build_run33_grounded_handoff(run_id="public-stale-rebuild", **kwargs)
+    with pytest.raises(TypeError, match="unexpected keyword argument 'universe_path'"):
+        load_validated_run33_handoff(handoff_root, **authority_kwargs)
+    with pytest.raises(TypeError, match="unexpected keyword argument 'universe_path'"):
+        build_run33_grounded_handoff(run_id="public-stale-rebuild", **authority_kwargs)
 
 
 def test_current_history_with_missing_advisory_price_remains_blocked(route) -> None:

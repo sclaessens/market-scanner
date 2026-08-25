@@ -1,5 +1,11 @@
 # ME-SR26 Advisory OHLC History Implementation
 
+## Production authority closure
+
+`build_advisory_ohlc_history()` and `load_advisory_ohlc_history()` always use the repository canonical universe and history policy. The builder uses the approved provider, captures UTC time internally, and derives `source_main_sha` by resolving `HEAD` from the repository containing the executing module. Git resolution fails closed; callers cannot supply or override the SHA.
+
+The private `_build_advisory_ohlc_history_impl()` and `_load_advisory_ohlc_history_impl()` helpers retain explicit universe, policy, provider, time, and SHA inputs solely for deterministic tests. Public production callers may choose artifact roots, but cannot redefine authority configuration.
+
 ## Architecture
 
 `advisory_ohlc_history.py` validates the destination before acquisition, uses

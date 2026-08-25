@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from collections import Counter
 from dataclasses import dataclass
@@ -67,18 +68,18 @@ class _ValidatedHistoryContext:
 
 
 def build_advisory_ohlc_history(
-    *, run_id: str, source_main_sha: str,
+    *, run_id: str,
     output_root: str | Path = DEFAULT_OUTPUT_ROOT,
-    universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
-    policy_path: str | Path = DEFAULT_POLICY_PATH,
 ) -> tuple[dict[str, Any], Path]:
-    """Build production history with the approved provider and internal UTC clock."""
+    """Build history with repository-owned authority and internal provenance."""
+    _load_canonical_universe()
+    _load_canonical_policy()
     return _build_advisory_ohlc_history_impl(
         run_id=run_id,
-        source_main_sha=source_main_sha,
+        source_main_sha=_current_repository_head_sha(),
         output_root=output_root,
-        universe_path=universe_path,
-        policy_path=policy_path,
+        universe_path=DEFAULT_UNIVERSE_SNAPSHOT,
+        policy_path=DEFAULT_POLICY_PATH,
         provider=_acquire_with_existing_adapter,
         clock=_system_utc_now,
     )
@@ -168,14 +169,15 @@ def _build_advisory_ohlc_history_impl(
 
 
 def load_advisory_ohlc_history(
-    artifact_root: str | Path, *, universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
-    policy_path: str | Path = DEFAULT_POLICY_PATH,
+    artifact_root: str | Path,
 ) -> _ValidatedHistoryContext:
-    """Load production history using internally authoritative UTC time."""
+    """Load history against repository-owned authority and current UTC time."""
+    _load_canonical_universe()
+    _load_canonical_policy()
     return _load_advisory_ohlc_history_impl(
         artifact_root,
-        universe_path=universe_path,
-        policy_path=policy_path,
+        universe_path=DEFAULT_UNIVERSE_SNAPSHOT,
+        policy_path=DEFAULT_POLICY_PATH,
         now=_system_utc_now(),
     )
 
@@ -587,6 +589,33 @@ def _load_policy(path: Path) -> dict[str, Any]:
     return value
 
 
+def _load_canonical_policy() -> dict[str, Any]:
+    value = _load_policy(DEFAULT_POLICY_PATH)
+    governed = {
+        "schema_version": POLICY_VERSION,
+        "indicator_max_warmup_sessions": 200,
+        "warmup_safety_margin_sessions": 52,
+        "minimum_history_sessions": 252,
+        "maximum_history_sessions": 420,
+        "widespread_one_session_lag_ratio": "0.80",
+        "minimum_fresh_screening_coverage_ratio": "0.99",
+        "max_individual_fallbacks": 25,
+        "artifact_retention_days": 14,
+        "price_basis": "unadjusted_ohlc",
+        "corporate_action_adjustment_policy": "provider_reported_unadjusted_with_adj_close_excluded",
+    }
+    if any(value.get(field) != expected for field, expected in governed.items()):
+        raise AdvisoryHistoryIssue("POLICY_INVALID", "governed history policy semantics changed")
+    return value
+
+
+def _load_canonical_universe() -> dict[str, Any]:
+    value = load_authoritative_universe(DEFAULT_UNIVERSE_SNAPSHOT)
+    if len(value.get("instruments", ())) != 952:
+        raise AdvisoryHistoryIssue("UNIVERSE_INVALID", "canonical universe must contain exactly 952 identities")
+    return value
+
+
 def _validate_manifest(value: Mapping[str, Any]) -> None:
     required = {
         "schema_version", "artifact_version", "artifact_type", "run_id", "source_main_sha",
@@ -620,7 +649,25 @@ def _validate_output_destination(output_root: str | Path, run_id: str) -> Path:
 
 
 def _repository_root() -> Path:
-    return Path.cwd().resolve()
+    return Path(__file__).resolve().parents[3]
+
+
+def _current_repository_head_sha() -> str:
+    """Resolve immutable production provenance from this source repository."""
+    try:
+        completed = subprocess.run(
+            ["git", "-C", str(_repository_root()), "rev-parse", "--verify", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise AdvisoryHistoryIssue("SOURCE_MAIN_SHA_UNRESOLVED", "repository HEAD cannot be resolved") from exc
+    source_main_sha = completed.stdout.strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", source_main_sha):
+        raise AdvisoryHistoryIssue("SOURCE_MAIN_SHA_UNRESOLVED", "repository HEAD is not a full lowercase Git SHA")
+    return source_main_sha
 
 
 def _positive_decimal(value: Any, field: str) -> Decimal:
@@ -681,7 +728,7 @@ def run_command(argv: Sequence[str] | None = None, *, stdout: TextIO = sys.stdou
     parser = argparse.ArgumentParser(description="Build and validate advisory-only current OHLC history evidence")
     commands = parser.add_subparsers(dest="command", required=True)
     build = commands.add_parser("build")
-    build.add_argument("--run-id", required=True); build.add_argument("--source-main-sha", required=True)
+    build.add_argument("--run-id", required=True)
     build.add_argument("--output-root", default=DEFAULT_OUTPUT_ROOT.as_posix())
     gate = commands.add_parser("quality-gate")
     gate.add_argument("--artifact-root", required=True)
@@ -692,7 +739,7 @@ def run_command(argv: Sequence[str] | None = None, *, stdout: TextIO = sys.stdou
             status = _effective_analytic_authority_status(context)
             print(json.dumps({"status": status, "run_status": context.manifest["run_status"]}, sort_keys=True), file=stdout)
             return 0 if status == "usable" else 3
-        manifest, path = build_advisory_ohlc_history(run_id=args.run_id, source_main_sha=args.source_main_sha, output_root=args.output_root)
+        manifest, path = build_advisory_ohlc_history(run_id=args.run_id, output_root=args.output_root)
     except AdvisoryHistoryIssue as exc:
         print(json.dumps({"status": "blocked", "code": exc.code}), file=stderr); return 2
     print(json.dumps({"status": manifest["run_status"], "artifact_path": path.as_posix(), "manifest": manifest}, sort_keys=True), file=stdout)

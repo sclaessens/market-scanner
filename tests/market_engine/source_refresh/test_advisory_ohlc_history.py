@@ -158,23 +158,64 @@ def test_fully_rebound_semantic_replay_attacks_fail_closed(inputs, attack) -> No
 
 
 def test_public_provider_and_time_authority_are_absent_and_cli_rejects_override() -> None:
-    forbidden = {"provider", "_clock", "clock", "trusted_now", "now", "as_of", "evaluation_time", "acquisition_timestamp"}
+    forbidden = {
+        "provider", "_clock", "clock", "trusted_now", "now", "as_of", "evaluation_time",
+        "acquisition_timestamp", "universe_path", "policy_path", "history_policy_path",
+        "screening_policy_path", "price_policy_path", "source_main_sha",
+    }
     assert forbidden.isdisjoint(signature(build_advisory_ohlc_history).parameters)
     assert forbidden.isdisjoint(signature(load_advisory_ohlc_history).parameters)
     with pytest.raises(TypeError, match="unexpected keyword argument 'provider'"):
-        build_advisory_ohlc_history(run_id="forbidden-provider", source_main_sha=SHA, provider=lambda *_: {})
+        build_advisory_ohlc_history(run_id="forbidden-provider", provider=lambda *_: {})
+    for function, args in (
+        (build_advisory_ohlc_history, {"run_id": "forbidden-authority"}),
+        (load_advisory_ohlc_history, {"artifact_root": "unused"}),
+    ):
+        for parameter in ("universe_path", "policy_path", "history_policy_path", "source_main_sha"):
+            with pytest.raises(TypeError, match=f"unexpected keyword argument '{parameter}'"):
+                function(**args, **{parameter: "forbidden"})
     with pytest.raises(TypeError, match="unexpected keyword argument '_clock'"):
         load_advisory_ohlc_history("unused", _clock=_clock())
     stderr = StringIO()
     with pytest.raises(SystemExit):
         history.run_command(["quality-gate", "--artifact-root", "unused", "--trusted-now", NOW], stderr=stderr)
+    with pytest.raises(SystemExit):
+        history.run_command(["build", "--run-id", "unused", "--source-main-sha", SHA], stderr=stderr)
 
 
-def test_public_loader_cannot_backdate_a_stale_artifact(inputs) -> None:
+def test_public_loader_cannot_backdate_a_stale_artifact(inputs, monkeypatch) -> None:
     _manifest, root = _build(inputs, run_id="public-no-backdating")
-    loaded = load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"])
+    monkeypatch.setattr(history, "DEFAULT_UNIVERSE_SNAPSHOT", inputs["universe"])
+    monkeypatch.setattr(history, "DEFAULT_POLICY_PATH", inputs["policy"])
+    monkeypatch.setattr(history, "_load_canonical_universe", lambda: {})
+    loaded = load_advisory_ohlc_history(root)
     assert set(loaded.effective_status.values()) == {"stale"}
     assert history._effective_analytic_authority_status(loaded) == "unusable"
+
+
+def test_production_source_sha_is_real_head_and_fails_closed(monkeypatch) -> None:
+    monkeypatch.setenv("SOURCE_MAIN_SHA", "0" * 40)
+    expected = history._current_repository_head_sha()
+    assert expected == history.subprocess.run(
+        ["git", "-C", str(history._repository_root()), "rev-parse", "--verify", "HEAD"],
+        check=True, capture_output=True, text=True, timeout=10,
+    ).stdout.strip()
+    captured = {}
+    monkeypatch.setattr(history, "_load_canonical_universe", lambda: {})
+    monkeypatch.setattr(history, "_load_canonical_policy", lambda: {})
+    monkeypatch.setattr(history, "_build_advisory_ohlc_history_impl", lambda **kwargs: (captured.update(kwargs) or {}, Path("unused")))
+    build_advisory_ohlc_history(run_id="derived-head")
+    assert captured["source_main_sha"] == expected
+    monkeypatch.setattr(history.subprocess, "run", lambda *args, **kwargs: (_ for _ in ()).throw(OSError("git unavailable")))
+    with pytest.raises(AdvisoryHistoryIssue, match="SOURCE_MAIN_SHA_UNRESOLVED"):
+        build_advisory_ohlc_history(run_id="unresolved-head")
+
+
+def test_canonical_production_universe_requires_exactly_952_identities(monkeypatch) -> None:
+    assert len(history._load_canonical_universe()["instruments"]) == 952
+    monkeypatch.setattr(history, "load_authoritative_universe", lambda _path: {"instruments": [{}] * 951})
+    with pytest.raises(AdvisoryHistoryIssue, match="UNIVERSE_INVALID"):
+        history._load_canonical_universe()
 
 
 def test_build_measures_internal_acquisition_start_and_completion_separately(inputs) -> None:

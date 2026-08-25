@@ -1,5 +1,9 @@
 # ME-SR26 Advisory OHLC History Audit
 
+## Final authority-boundary remediation
+
+The public history, screening, and RUN33 APIs no longer expose canonical universe or policy paths. RUN33 internally binds SR25 validation to `DEFAULT_PRICE_POLICY_PATH`. The public history builder no longer accepts `source_main_sha`; production provenance is the fail-closed Git `HEAD` of the executing repository. Provider and UTC freshness authority remain internal. Alternate universe, policy, SHA, provider, and time inputs remain available only through private deterministic test seams.
+
 ## Evidence reviewed
 
 - Base: `51025546bfeadd52c095382525bbbac19e98e415`.
