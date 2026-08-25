@@ -24,6 +24,13 @@ eligibility, manifest, observation digest, artifact digest, and checksum index;
 semantic replay still rejects the false freshness claims. Effective load-time
 freshness is separately recalculated under the internal UTC clock.
 
+API-surface tests verify that public history build cannot accept a provider or
+time override and that public history load, screening, and RUN33 build/load
+cannot accept any clock, `trusted_now`, `now`, `as_of`, evaluation-time, or
+acquisition-time alias. Deterministic provider/time injection is confined to
+private helpers. A public stale-history test and a public stale RUN33
+history/price test prove that backdating is unreachable.
+
 The pending handoff test proves zero DATA07, DATA06, RUN31, and RUN33 calls.
 A separate full synthetic positive test uses canonical approval validation,
 `execute_approved_candidate`, validated DATA07/DATA06/RUN31 results and
@@ -32,8 +39,8 @@ receipts, the private execution proof, `load_downstream_after_authority`, all
 `ready_for_run33` with eligible records. Forged mappings and fully rebound
 handoff JSON remain rejected. Missing volume stays nullable.
 
-Validation produced 171 passing focused history, screening/handoff, and DATA11
-authority tests. The complete repository suite produced 2,565 passes. The sole
+Validation produced 174 passing focused history, screening/handoff, and DATA11
+authority tests. The complete repository suite produced 2,568 passes. The sole
 repository-suite failure is
 `test_compact_checksums_match_committed_files_and_local_full_runs`, which
 expects the absent historical file

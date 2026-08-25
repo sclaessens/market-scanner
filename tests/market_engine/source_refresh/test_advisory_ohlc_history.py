@@ -70,7 +70,7 @@ def _provider(instruments, at, policy, overrides=None):
 
 
 def _build(inputs, overrides=None, run_id="fixture"):
-    return build_advisory_ohlc_history(run_id=run_id, source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"], provider=lambda rows, at, policy: _provider(rows, at, policy, overrides), _clock=_clock())
+    return history._build_advisory_ohlc_history_impl(run_id=run_id, source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"], provider=lambda rows, at, policy: _provider(rows, at, policy, overrides), clock=_clock())
 
 
 def _fully_rebind(root: Path) -> None:
@@ -98,7 +98,7 @@ def _fully_rebind(root: Path) -> None:
 
 def test_roundtrip_binds_complete_identity_and_history(inputs) -> None:
     manifest, root = _build(inputs)
-    loaded = load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock())
+    loaded = history._load_advisory_ohlc_history_impl(root, universe_path=inputs["universe"], policy_path=inputs["policy"], now=_clock()())
     assert manifest["status_counts"] == {"fresh": 3, "stale": 0, "insufficient_history": 0, "missing": 0, "invalid": 0, "blocked_identity": 0, "blocked_adjustment_policy": 0, "attempted": 3}
     assert len(loaded.index) == len(loaded.series) == 3
     assert set(loaded.effective_status.values()) == {"fresh"}
@@ -117,7 +117,7 @@ def test_self_rebound_old_bars_cannot_claim_fresh_semantic_replay(inputs) -> Non
     # deliberately retained/re-signed as if the now-old series were still current.
     _fully_rebind(root)
     with pytest.raises(AdvisoryHistoryIssue, match="HISTORY_SEMANTIC_REPLAY_INVALID"):
-        load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock())
+        history._load_advisory_ohlc_history_impl(root, universe_path=inputs["universe"], policy_path=inputs["policy"], now=_clock()())
 
 
 @pytest.mark.parametrize(
@@ -154,15 +154,27 @@ def test_fully_rebound_semantic_replay_attacks_fail_closed(inputs, attack) -> No
     series_path.write_bytes(history._canonical_json(series) + b"\n")
     _fully_rebind(root)
     with pytest.raises(AdvisoryHistoryIssue):
-        load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock())
+        history._load_advisory_ohlc_history_impl(root, universe_path=inputs["universe"], policy_path=inputs["policy"], now=_clock()())
 
 
-def test_public_time_authority_is_absent_and_cli_rejects_override() -> None:
-    assert "trusted_now" not in signature(load_advisory_ohlc_history).parameters
-    assert "acquisition_timestamp" not in signature(build_advisory_ohlc_history).parameters
+def test_public_provider_and_time_authority_are_absent_and_cli_rejects_override() -> None:
+    forbidden = {"provider", "_clock", "clock", "trusted_now", "now", "as_of", "evaluation_time", "acquisition_timestamp"}
+    assert forbidden.isdisjoint(signature(build_advisory_ohlc_history).parameters)
+    assert forbidden.isdisjoint(signature(load_advisory_ohlc_history).parameters)
+    with pytest.raises(TypeError, match="unexpected keyword argument 'provider'"):
+        build_advisory_ohlc_history(run_id="forbidden-provider", source_main_sha=SHA, provider=lambda *_: {})
+    with pytest.raises(TypeError, match="unexpected keyword argument '_clock'"):
+        load_advisory_ohlc_history("unused", _clock=_clock())
     stderr = StringIO()
     with pytest.raises(SystemExit):
         history.run_command(["quality-gate", "--artifact-root", "unused", "--trusted-now", NOW], stderr=stderr)
+
+
+def test_public_loader_cannot_backdate_a_stale_artifact(inputs) -> None:
+    _manifest, root = _build(inputs, run_id="public-no-backdating")
+    loaded = load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"])
+    assert set(loaded.effective_status.values()) == {"stale"}
+    assert history._effective_analytic_authority_status(loaded) == "unusable"
 
 
 def test_build_measures_internal_acquisition_start_and_completion_separately(inputs) -> None:
@@ -171,9 +183,9 @@ def test_build_measures_internal_acquisition_start_and_completion_separately(inp
         datetime(2026, 8, 13, 6, 0, 5, tzinfo=UTC),
     ])
     seen = []
-    manifest, _root = build_advisory_ohlc_history(
+    manifest, _root = history._build_advisory_ohlc_history_impl(
         run_id="internal-clock", source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"],
-        provider=lambda rows, at, policy: seen.append(at) or _provider(rows, at, policy), _clock=lambda: next(values),
+        provider=lambda rows, at, policy: seen.append(at) or _provider(rows, at, policy), clock=lambda: next(values),
     )
     assert seen == [datetime(2026, 8, 13, 6, tzinfo=UTC)]
     assert manifest["acquisition_started_at"] == "2026-08-13T06:00:00Z"
@@ -262,12 +274,12 @@ def test_widespread_exact_one_session_lag_blocks_current_authority(inputs) -> No
 
 def test_weekend_reuses_last_completed_session_without_staleness(inputs) -> None:
     weekend = "2026-08-16T06:00:00Z"
-    manifest, _ = build_advisory_ohlc_history(run_id="weekend", source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"], provider=lambda rows, at, policy: _provider(rows, at, policy), _clock=_clock(weekend))
+    manifest, _ = history._build_advisory_ohlc_history_impl(run_id="weekend", source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"], provider=lambda rows, at, policy: _provider(rows, at, policy), clock=_clock(weekend))
     assert manifest["status_counts"]["fresh"] == 3
 
 
 def test_provider_failure_is_distinct_and_fallback_is_bounded(inputs, monkeypatch) -> None:
-    manifest, _ = build_advisory_ohlc_history(run_id="failure", source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"], provider=lambda *_: (_ for _ in ()).throw(RuntimeError()), _clock=_clock())
+    manifest, _ = history._build_advisory_ohlc_history_impl(run_id="failure", source_main_sha=SHA, universe_path=inputs["universe"], policy_path=inputs["policy"], provider=lambda *_: (_ for _ in ()).throw(RuntimeError()), clock=_clock())
     assert manifest["run_status"] == "blocked_provider_failure"
     calls = []
     monkeypatch.setattr(history, "download_yfinance_batch", lambda *args: {})
@@ -281,23 +293,23 @@ def test_tampered_series_manifest_policy_and_checksum_fail_closed(inputs) -> Non
     _manifest, root = _build(inputs)
     series = next((root / "series").glob("*.json")); series.write_text(series.read_text().replace('"close":"119.00"', '"close":"118.00"'))
     with pytest.raises(AdvisoryHistoryIssue, match="ARTIFACT_INTEGRITY_INVALID"):
-        load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock())
+        history._load_advisory_ohlc_history_impl(root, universe_path=inputs["universe"], policy_path=inputs["policy"], now=_clock()())
     _manifest, root2 = _build(inputs, run_id="manifest-tamper"); data = json.loads((root2 / "manifest.json").read_text()); data["run_status"] = "completed"; (root2 / "manifest.json").write_text(json.dumps(data))
-    with pytest.raises(AdvisoryHistoryIssue): load_advisory_ohlc_history(root2, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock())
+    with pytest.raises(AdvisoryHistoryIssue): history._load_advisory_ohlc_history_impl(root2, universe_path=inputs["universe"], policy_path=inputs["policy"], now=_clock()())
     _manifest, root3 = _build(inputs, run_id="policy-tamper"); policy = json.loads(Path(inputs["policy"]).read_text()); policy["max_individual_fallbacks"] = 1; Path(inputs["policy"]).write_text(json.dumps(policy))
     with pytest.raises(AdvisoryHistoryIssue, match="POLICY_BINDING_INVALID"):
-        load_advisory_ohlc_history(root3, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock())
+        history._load_advisory_ohlc_history_impl(root3, universe_path=inputs["universe"], policy_path=inputs["policy"], now=_clock()())
 
 
 def test_load_time_freshness_and_untrusted_time_forms_fail_closed(inputs) -> None:
     _manifest, root = _build(inputs)
-    loaded = load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock("2026-08-14T23:00:00Z"))
+    loaded = history._load_advisory_ohlc_history_impl(root, universe_path=inputs["universe"], policy_path=inputs["policy"], now=_clock("2026-08-14T23:00:00Z")())
     assert set(loaded.effective_status.values()) == {"stale"}
     assert history._effective_analytic_authority_status(loaded) == "unusable"
     for value in (lambda: datetime(2026, 8, 13, 6), lambda: datetime(2026, 8, 13, 8, tzinfo=timezone(timedelta(hours=2))), lambda: datetime(2026, 8, 13, 6, 0, 0, 1, tzinfo=UTC)):
-        with pytest.raises(AdvisoryHistoryIssue): load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=value)
+        with pytest.raises(AdvisoryHistoryIssue): history._load_advisory_ohlc_history_impl(root, universe_path=inputs["universe"], policy_path=inputs["policy"], now=value())
     with pytest.raises(AdvisoryHistoryIssue, match="CLOCK_INVALID"):
-        load_advisory_ohlc_history(root, universe_path=inputs["universe"], policy_path=inputs["policy"], _clock=_clock("2026-08-12T06:00:00Z"))
+        history._load_advisory_ohlc_history_impl(root, universe_path=inputs["universe"], policy_path=inputs["policy"], now=_clock("2026-08-12T06:00:00Z")())
 
 
 def test_full_universe_fixture_reconciles_952_with_explicit_distribution(tmp_path, monkeypatch) -> None:
@@ -312,7 +324,7 @@ def test_full_universe_fixture_reconciles_952_with_explicit_distribution(tmp_pat
         result[rows[-2]["instrument_id"]]["bars"] = result[rows[-2]["instrument_id"]]["bars"][:2]
         result[rows[-3]["instrument_id"]]["bars"][-1]["close"] = 1.5
         return result
-    manifest, _ = build_advisory_ohlc_history(run_id="full-952", source_main_sha=SHA, universe_path=universe_path, policy_path=policy_path, provider=provider, _clock=_clock())
+    manifest, _ = history._build_advisory_ohlc_history_impl(run_id="full-952", source_main_sha=SHA, universe_path=universe_path, policy_path=policy_path, provider=provider, clock=_clock())
     assert manifest["status_counts"] == {"fresh": 949, "stale": 0, "insufficient_history": 1, "missing": 1, "invalid": 1, "blocked_identity": 0, "blocked_adjustment_policy": 0, "attempted": 952}
     assert manifest["run_status"] == "completed_with_blockers"
     assert manifest["analytic_authority_status"] == "usable"
@@ -322,5 +334,5 @@ def test_full_universe_fixture_reconciles_952_with_explicit_distribution(tmp_pat
 def test_output_path_authority_is_checked_before_provider(inputs, output) -> None:
     calls = []
     with pytest.raises(AdvisoryHistoryIssue, match="OUTPUT_PATH_INVALID"):
-        build_advisory_ohlc_history(run_id="unsafe", source_main_sha=SHA, output_root=output, universe_path=inputs["universe"], policy_path=inputs["policy"], provider=lambda *_: calls.append(True), _clock=_clock())
+        history._build_advisory_ohlc_history_impl(run_id="unsafe", source_main_sha=SHA, output_root=output, universe_path=inputs["universe"], policy_path=inputs["policy"], provider=lambda *_: calls.append(True), clock=_clock())
     assert calls == []

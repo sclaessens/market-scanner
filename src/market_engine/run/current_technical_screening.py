@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
-from typing import Any, Callable, Mapping, Sequence, TextIO
+from typing import Any, Mapping, Sequence, TextIO
 
 import pandas as pd
 
@@ -26,12 +26,12 @@ from market_engine.source_refresh.advisory_ohlc_history import (
     DEFAULT_UNIVERSE_SNAPSHOT,
     AdvisoryHistoryIssue,
     _canonical_json,
-    _clock_now,
     _effective_analytic_authority_status,
+    _load_advisory_ohlc_history_impl,
     _sha256,
     _sha256_file,
+    _system_utc_now,
     _utc_text,
-    load_advisory_ohlc_history,
 )
 from market_engine.source_refresh.advisory_price_evidence import (
     DEFAULT_POLICY_PATH as DEFAULT_PRICE_POLICY_PATH,
@@ -94,11 +94,31 @@ def run_current_technical_screening(
     universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
     history_policy_path: str | Path = DEFAULT_POLICY_PATH,
     screening_policy_path: str | Path = DEFAULT_SCREENING_POLICY,
-    _clock: Callable[[], datetime] | None = None,
 ) -> tuple[dict[str, Any], Path]:
+    """Run production screening with one internally captured UTC evaluation time."""
+    return _run_current_technical_screening_impl(
+        run_id=run_id,
+        history_artifact_root=history_artifact_root,
+        output_root=output_root,
+        universe_path=universe_path,
+        history_policy_path=history_policy_path,
+        screening_policy_path=screening_policy_path,
+        now=_system_utc_now(),
+    )
+
+
+def _run_current_technical_screening_impl(
+    *, run_id: str, history_artifact_root: str | Path,
+    output_root: str | Path = DEFAULT_SCREENING_ROOT,
+    universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
+    history_policy_path: str | Path = DEFAULT_POLICY_PATH,
+    screening_policy_path: str | Path = DEFAULT_SCREENING_POLICY,
+    now: datetime,
+) -> tuple[dict[str, Any], Path]:
+    """Private deterministic screening seam; public callers cannot set freshness time."""
     destination = _output_destination(output_root, DEFAULT_SCREENING_ROOT, run_id)
-    history = load_advisory_ohlc_history(
-        history_artifact_root, universe_path=universe_path, policy_path=history_policy_path, _clock=_clock
+    history = _load_advisory_ohlc_history_impl(
+        history_artifact_root, universe_path=universe_path, policy_path=history_policy_path, now=now
     )
     policy_source = Path(screening_policy_path)
     policy = _load_screening_policy(policy_source)
@@ -121,7 +141,7 @@ def run_current_technical_screening(
         "old_vs_new_screening_drift.json": {"schema_version": "market-engine-current-technical-run30-drift-v1", "old_run30_is_audit_only": True, "old_top_symbols": old_symbols, "new_top_symbols": new_symbols, "retained": sorted(set(old_symbols) & set(new_symbols)), "added": sorted(set(new_symbols) - set(old_symbols)), "removed": sorted(set(old_symbols) - set(new_symbols))},
     }
     authority_usable = _effective_analytic_authority_status(history) == "usable"
-    manifest_base = {"schema_version": SCREENING_MANIFEST_VERSION, "artifact_version": SCREENING_VERSION, "run_id": run_id, "generated_at": _utc_text(_clock_now(_clock)), "history_binding": history_binding, "universe_sha256": history.manifest["universe_sha256"], "history_policy_sha256": history.manifest["history_policy_sha256"], "screening_policy_binding": policy_binding, "cutoff_sessions": cutoff_sessions, "instrument_count": len(index_rows), "screened_count": sum(row["screening_status"] == "completed" for row in index_rows), "ranking_count": len(ranking_records), "candidate_ranking_sha256": _sha256(_canonical_json(ranking) + b"\n"), "universe_index_sha256": _sha256(_canonical_json(universe_index) + b"\n"), "run_status": "completed_with_blockers" if authority_usable and any(row["screening_status"] == "blocked" for row in index_rows) else ("completed" if authority_usable else "blocked_history_authority"), "analytic_authority_status": "usable" if authority_usable else "unusable", "authority_boundary": "technical_classification_only"}
+    manifest_base = {"schema_version": SCREENING_MANIFEST_VERSION, "artifact_version": SCREENING_VERSION, "run_id": run_id, "generated_at": _utc_text(now), "history_binding": history_binding, "universe_sha256": history.manifest["universe_sha256"], "history_policy_sha256": history.manifest["history_policy_sha256"], "screening_policy_binding": policy_binding, "cutoff_sessions": cutoff_sessions, "instrument_count": len(index_rows), "screened_count": sum(row["screening_status"] == "completed" for row in index_rows), "ranking_count": len(ranking_records), "candidate_ranking_sha256": _sha256(_canonical_json(ranking) + b"\n"), "universe_index_sha256": _sha256(_canonical_json(universe_index) + b"\n"), "run_status": "completed_with_blockers" if authority_usable and any(row["screening_status"] == "blocked" for row in index_rows) else ("completed" if authority_usable else "blocked_history_authority"), "analytic_authority_status": "usable" if authority_usable else "unusable", "authority_boundary": "technical_classification_only"}
     payloads["manifest.json"] = {**manifest_base, "artifact_sha256": _sha256(_canonical_json(manifest_base))}
     payloads["candidate_ranking.md"] = _ranking_markdown(ranking_records)
     payloads["top_candidates.md"] = _ranking_markdown(ranking_records)
@@ -176,14 +196,35 @@ def build_run33_grounded_handoff(
     portfolio_ledger_path: str | Path | None = None,
     approval_decision_paths: Sequence[str | Path] = DEFAULT_APPROVAL_DECISIONS,
     downstream_authority: ValidatedDownstreamAuthorityState | None = None,
-    _clock: Callable[[], datetime] | None = None,
 ) -> tuple[dict[str, Any], Path]:
+    """Build the production handoff with one internally captured UTC time."""
+    return _build_run33_grounded_handoff_impl(
+        run_id=run_id, screening_root=screening_root, history_root=history_root, price_root=price_root,
+        output_root=output_root, universe_path=universe_path, history_policy_path=history_policy_path,
+        price_policy_path=price_policy_path, screening_policy_path=screening_policy_path,
+        portfolio_ledger_path=portfolio_ledger_path, approval_decision_paths=approval_decision_paths,
+        downstream_authority=downstream_authority, now=_system_utc_now(),
+    )
+
+
+def _build_run33_grounded_handoff_impl(
+    *, run_id: str, screening_root: str | Path, history_root: str | Path, price_root: str | Path,
+    output_root: str | Path = DEFAULT_HANDOFF_ROOT,
+    universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
+    history_policy_path: str | Path = DEFAULT_POLICY_PATH,
+    price_policy_path: str | Path = DEFAULT_PRICE_POLICY_PATH,
+    screening_policy_path: str | Path = DEFAULT_SCREENING_POLICY,
+    portfolio_ledger_path: str | Path | None = None,
+    approval_decision_paths: Sequence[str | Path] = DEFAULT_APPROVAL_DECISIONS,
+    downstream_authority: ValidatedDownstreamAuthorityState | None = None,
+    now: datetime,
+) -> tuple[dict[str, Any], Path]:
+    """Private deterministic handoff-construction seam."""
     destination = _output_destination(output_root, DEFAULT_HANDOFF_ROOT, run_id)
-    now = _clock_now(_clock)
     for candidate in (Path(screening_root), Path(history_root), Path(price_root)):
         if candidate.is_symlink() or any(path.is_symlink() for path in candidate.rglob("*")):
             raise CurrentScreeningIssue("ARTIFACT_PATH_INVALID", "symlinks are forbidden in authority artifacts")
-    history = load_advisory_ohlc_history(history_root, universe_path=universe_path, policy_path=history_policy_path, _clock=lambda: now)
+    history = _load_advisory_ohlc_history_impl(history_root, universe_path=universe_path, policy_path=history_policy_path, now=now)
     screening_manifest, ranking, universe_index = _load_screening(screening_root, history, screening_policy_path=screening_policy_path)
     price = load_advisory_price_artifact(price_root, universe_path=universe_path, policy_path=price_policy_path, trusted_now=_utc_text(now))
     after_payload = validated_after_payload(downstream_authority)
@@ -233,8 +274,36 @@ def load_validated_run33_handoff(
     downstream_after_authority_path: str | Path | None = None,
     execution_proof: ValidatedExecutionProof | None = None,
     downstream_repository_root: str | Path = ".",
-    _clock: Callable[[], datetime] | None = None,
 ) -> _ValidatedRun33HandoffContext:
+    """Load the production handoff with one internally captured UTC time."""
+    return _load_validated_run33_handoff_impl(
+        handoff_root, screening_root=screening_root, history_root=history_root, price_root=price_root,
+        universe_path=universe_path, history_policy_path=history_policy_path,
+        price_policy_path=price_policy_path, screening_policy_path=screening_policy_path,
+        portfolio_ledger_path=portfolio_ledger_path, approval_decision_paths=approval_decision_paths,
+        downstream_after_authority_path=downstream_after_authority_path, execution_proof=execution_proof,
+        downstream_repository_root=downstream_repository_root, now=_system_utc_now(),
+    )
+
+
+def _load_validated_run33_handoff_impl(
+    handoff_root: str | Path,
+    *,
+    screening_root: str | Path,
+    history_root: str | Path,
+    price_root: str | Path,
+    universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
+    history_policy_path: str | Path = DEFAULT_POLICY_PATH,
+    price_policy_path: str | Path = DEFAULT_PRICE_POLICY_PATH,
+    screening_policy_path: str | Path = DEFAULT_SCREENING_POLICY,
+    portfolio_ledger_path: str | Path | None = None,
+    approval_decision_paths: Sequence[str | Path] = DEFAULT_APPROVAL_DECISIONS,
+    downstream_after_authority_path: str | Path | None = None,
+    execution_proof: ValidatedExecutionProof | None = None,
+    downstream_repository_root: str | Path = ".",
+    now: datetime,
+) -> _ValidatedRun33HandoffContext:
+    """Private deterministic handoff-validation seam."""
     if isinstance(handoff_root, Mapping):
         raise CurrentScreeningIssue("CALLER_CONTENT_FORBIDDEN", "RUN33 handoff authority requires an artifact path")
     root = Path(handoff_root)
@@ -245,14 +314,13 @@ def load_validated_run33_handoff(
     integrity = dict(manifest); artifact_sha = integrity.pop("artifact_sha256", None)
     if manifest.get("schema_version") != HANDOFF_MANIFEST_VERSION or artifact_sha != _sha256(_canonical_json(integrity)):
         raise CurrentScreeningIssue("HANDOFF_INTEGRITY_INVALID", "handoff manifest integrity is invalid")
-    now = _clock_now(_clock)
     try:
         generated_at = datetime.fromisoformat(str(manifest.get("generated_at", "")).replace("Z", "+00:00"))
     except ValueError as exc:
         raise CurrentScreeningIssue("HANDOFF_TIME_INVALID", "handoff generation time is invalid") from exc
     if generated_at.tzinfo is None or generated_at.astimezone(UTC) > now or _utc_text(generated_at) != manifest.get("generated_at"):
         raise CurrentScreeningIssue("HANDOFF_TIME_INVALID", "handoff generation time is invalid")
-    history = load_advisory_ohlc_history(history_root, universe_path=universe_path, policy_path=history_policy_path, _clock=lambda: now)
+    history = _load_advisory_ohlc_history_impl(history_root, universe_path=universe_path, policy_path=history_policy_path, now=now)
     screening_manifest, ranking, universe_index = _load_screening(screening_root, history, screening_policy_path=screening_policy_path)
     price = load_advisory_price_artifact(price_root, universe_path=universe_path, policy_path=price_policy_path, trusted_now=_utc_text(now))
     downstream = None

@@ -71,20 +71,39 @@ def build_advisory_ohlc_history(
     output_root: str | Path = DEFAULT_OUTPUT_ROOT,
     universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
     policy_path: str | Path = DEFAULT_POLICY_PATH,
-    provider: Provider | None = None,
-    _clock: Callable[[], datetime] | None = None,
 ) -> tuple[dict[str, Any], Path]:
+    """Build production history with the approved provider and internal UTC clock."""
+    return _build_advisory_ohlc_history_impl(
+        run_id=run_id,
+        source_main_sha=source_main_sha,
+        output_root=output_root,
+        universe_path=universe_path,
+        policy_path=policy_path,
+        provider=_acquire_with_existing_adapter,
+        clock=_system_utc_now,
+    )
+
+
+def _build_advisory_ohlc_history_impl(
+    *, run_id: str, source_main_sha: str,
+    output_root: str | Path = DEFAULT_OUTPUT_ROOT,
+    universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
+    policy_path: str | Path = DEFAULT_POLICY_PATH,
+    provider: Provider,
+    clock: Callable[[], datetime],
+) -> tuple[dict[str, Any], Path]:
+    """Private deterministic construction seam; never a production authority API."""
     destination = _validate_output_destination(output_root, run_id)
     if not re.fullmatch(r"[0-9a-f]{40}", source_main_sha):
         raise AdvisoryHistoryIssue("SOURCE_MAIN_SHA_INVALID", "source_main_sha must be a full Git SHA")
-    acquisition_started = _clock_now(_clock)
+    acquisition_started = _clock_now(clock)
     universe_source, policy_source = Path(universe_path), Path(policy_path)
     universe = load_authoritative_universe(universe_source)
     policy = _load_policy(policy_source)
     instruments = sorted(universe["instruments"], key=lambda row: str(row["instrument_id"]))
     expected = {str(row["instrument_id"]) for row in instruments}
     try:
-        raw = dict((provider or _acquire_with_existing_adapter)(instruments, acquisition_started, policy))
+        raw = dict(provider(instruments, acquisition_started, policy))
     except Exception as exc:
         raw = {key: {"error_code": "PROVIDER_ACQUISITION_FAILED", "error_detail": type(exc).__name__} for key in expected}
     extras = sorted(set(raw) - expected)
@@ -102,7 +121,7 @@ def build_advisory_ohlc_history(
         index_rows.append(row)
         if series is not None:
             series_by_id[str(instrument["instrument_id"])] = series
-    acquisition_completed = _clock_now(_clock)
+    acquisition_completed = _clock_now(clock)
     if acquisition_completed < acquisition_started:
         raise AdvisoryHistoryIssue("CLOCK_INVALID", "acquisition completion precedes acquisition start")
     replay = _semantic_replay(
@@ -151,8 +170,23 @@ def build_advisory_ohlc_history(
 def load_advisory_ohlc_history(
     artifact_root: str | Path, *, universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
     policy_path: str | Path = DEFAULT_POLICY_PATH,
-    _clock: Callable[[], datetime] | None = None,
 ) -> _ValidatedHistoryContext:
+    """Load production history using internally authoritative UTC time."""
+    return _load_advisory_ohlc_history_impl(
+        artifact_root,
+        universe_path=universe_path,
+        policy_path=policy_path,
+        now=_system_utc_now(),
+    )
+
+
+def _load_advisory_ohlc_history_impl(
+    artifact_root: str | Path, *, universe_path: str | Path = DEFAULT_UNIVERSE_SNAPSHOT,
+    policy_path: str | Path = DEFAULT_POLICY_PATH,
+    now: datetime,
+) -> _ValidatedHistoryContext:
+    """Private deterministic load seam; callers of public authority cannot set time."""
+    now = _clock_now(lambda: now)
     if isinstance(artifact_root, Mapping):
         raise AdvisoryHistoryIssue("CALLER_CONTENT_FORBIDDEN", "history authority requires an artifact path")
     root = Path(artifact_root)
@@ -243,7 +277,6 @@ def load_advisory_ohlc_history(
         raise AdvisoryHistoryIssue("MANIFEST_SEMANTIC_REPLAY_INVALID", "manifest expected sessions differ from replayed semantics")
     if manifest["observations_sha256"] != _sha256(_canonical_json({"index": replayed_index, "series": series})):
         raise AdvisoryHistoryIssue("OBSERVATIONS_BINDING_INVALID", "history observations binding is invalid")
-    now = _clock_now(_clock)
     if acquisition_completed > now:
         raise AdvisoryHistoryIssue("CLOCK_INVALID", "load clock precedes artifact acquisition completion")
     effective: dict[str, str] = {}
@@ -626,6 +659,10 @@ def _clock_now(clock: Callable[[], datetime] | None) -> datetime:
     if value.microsecond != 0:
         raise AdvisoryHistoryIssue("CLOCK_INVALID", "clock must produce canonical whole-second UTC")
     return value.astimezone(UTC)
+
+
+def _system_utc_now() -> datetime:
+    return _clock_now(None)
 
 
 def _utc_text(value: datetime) -> str: return value.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

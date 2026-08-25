@@ -27,6 +27,9 @@ conditional RUN33 input handoff; it does not execute RUN33.
   provider lag or failure.
 - Production time is internal UTC authority; producer status is immutable and
   effective freshness is recalculated at load.
+- The production history provider is internally selected. Public history,
+  screening, and RUN33 APIs accept artifact paths but no provider or
+  freshness-time override; deterministic injection is private and test-only.
 - Missing volume remains explicitly missing rather than becoming zero.
 - SR25 price and the latest history close must match identity, session,
   currency, source semantics, and exact decimal value.

@@ -18,6 +18,12 @@ portfolio snapshot cannot enter the chain. A recent price cannot repair
 missing or insufficient technical history. Pending fundamental evidence
 cannot become approved through the handoff.
 
+The production history builder selects its provider internally. Public history,
+screening, and RUN33 authority APIs expose no provider or freshness-time
+override. Each screening or handoff operation captures one internal canonical
+UTC time and applies it coherently to history and SR25 freshness. Artifact paths
+remain caller-selectable; evidence freshness does not.
+
 The reachable handoff states are pending approval, pending downstream refresh,
 invalid downstream authority, and ready for RUN33. Ready requires a canonical
 approval validation whose decision identity and checksum match the private

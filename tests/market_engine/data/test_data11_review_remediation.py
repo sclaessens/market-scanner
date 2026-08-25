@@ -954,15 +954,15 @@ def test_validated_data11_stage_chain_reaches_ready_run33_handoff(tmp_path: Path
             }
         return result
 
-    _history_manifest, history_root = ohlc_history.build_advisory_ohlc_history(
+    _history_manifest, history_root = ohlc_history._build_advisory_ohlc_history_impl(
         run_id="positive-history", source_main_sha="d" * 40, universe_path=universe_path,
-        provider=history_provider, _clock=clock,
+        provider=history_provider, clock=clock,
     )
-    _screening_manifest, screening_root = technical_screening.run_current_technical_screening(
+    _screening_manifest, screening_root = technical_screening._run_current_technical_screening_impl(
         run_id="positive-screening", history_artifact_root=history_root,
-        universe_path=universe_path, _clock=clock,
+        universe_path=universe_path, now=clock(),
     )
-    loaded_history = ohlc_history.load_advisory_ohlc_history(history_root, universe_path=universe_path, _clock=clock)
+    loaded_history = ohlc_history._load_advisory_ohlc_history_impl(history_root, universe_path=universe_path, now=clock())
 
     def current_price_provider(instruments, _at):
         return {
@@ -986,20 +986,20 @@ def test_validated_data11_stage_chain_reaches_ready_run33_handoff(tmp_path: Path
     assert downstream is not None
     assert validated_after_payload(downstream) is not None
 
-    manifest, handoff_root = technical_screening.build_run33_grounded_handoff(
+    manifest, handoff_root = technical_screening._build_run33_grounded_handoff_impl(
         run_id="positive-handoff", screening_root=screening_root, history_root=history_root, price_root=price_root,
-        universe_path=universe_path, approval_decision_paths=[decision], downstream_authority=downstream, _clock=clock,
+        universe_path=universe_path, approval_decision_paths=[decision], downstream_authority=downstream, now=clock(),
     )
     assert manifest["status"] == "ready_for_run33"
     assert manifest["eligible_count"] >= 1
     Draft202012Validator(json.loads(Path("config/market_engine/run33_grounded_handoff_manifest_v1.schema.json").read_text())).validate(manifest)
     Draft202012Validator(json.loads(Path("config/market_engine/run33_grounded_candidate_input_v1.schema.json").read_text())).validate(json.loads((handoff_root / "run33_candidate_input.json").read_text()))
     Draft202012Validator(json.loads(Path("config/market_engine/run33_technical_price_reconciliation_v1.schema.json").read_text())).validate(json.loads((handoff_root / "technical_price_reconciliation.json").read_text()))
-    validated = technical_screening.load_validated_run33_handoff(
+    validated = technical_screening._load_validated_run33_handoff_impl(
         handoff_root, screening_root=screening_root, history_root=history_root, price_root=price_root,
         universe_path=universe_path, approval_decision_paths=[decision],
         downstream_after_authority_path=authority_path.name, execution_proof=proof,
-        downstream_repository_root=tmp_path / "downstream", _clock=clock,
+        downstream_repository_root=tmp_path / "downstream", now=clock(),
     )
     payload = technical_screening.validated_run33_handoff_payload(validated)
     assert payload is not None

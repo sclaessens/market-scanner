@@ -14,10 +14,13 @@ bars. Re-signing a false index, manifest, and checksum index therefore cannot
 turn old bars into current evidence. Producer-time status is immutable;
 effective freshness is recalculated at load time.
 
-Production acquisition and loading use an internal canonical UTC clock. Start
-and completion are measured separately. Public acquisition-time and
-`trusted_now` overrides do not exist; a private `_clock` seam is test-only and
-rejects non-canonical UTC values.
+Production acquisition internally selects `_acquire_with_existing_adapter` and
+uses an internal canonical UTC clock. Public history build/load interfaces
+expose neither provider injection nor time overrides. Acquisition start and
+completion are measured separately. Deterministic providers and times exist
+only on private `_build_advisory_ohlc_history_impl()` and
+`_load_advisory_ohlc_history_impl()` test seams, which reject non-canonical UTC
+values and are never called from the CLI with caller-derived authority.
 
 `current_technical_screening.py` is the only ME-SR26 consumer. It rebuilds the
 existing MA20/50/200, ATR20, setup classification, score, and deterministic
@@ -38,6 +41,12 @@ proof, and downstream after-authority. Only a private validated context in
 `ready_for_run33` state exposes candidate input. Pending approval, approved
 without refreshed downstream authority, invalid downstream authority, and
 ready states are separate and reachable.
+
+Public screening and RUN33 build/load interfaces capture one internal UTC
+evaluation time per operation. That same internal value drives history
+effective freshness and the existing SR25 `trusted_now` compatibility call.
+Public callers may select artifact paths but cannot select, backdate, or alias
+the freshness evaluation time. Private deterministic helpers remain test-only.
 
 ## Artifact contracts
 
