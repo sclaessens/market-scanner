@@ -53,7 +53,8 @@ ME-RUN30/31 and ME-DATA06-10 - broad analysis and evidence baseline
   -> ME-SR26 implementation - advisory OHLC history and current technical screening handoff (COMPLETED)
   -> ME-SR26 operational canary (FIRST RUN BLOCKED BY RUNNER INTERRUPTION)
   -> runner interruption diagnostic (COMPLETED)
-  -> second controlled canary authorization (READY / NEXT)
+  -> second controlled canary (BLOCKED BY HOSTED-RUNNER COMMUNICATION LOSS)
+  -> runner/workflow hardening review (NEXT)
   -> successful controlled ME-SR26 canary (REQUIRED)
   -> human approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 - first useful end-to-end candidate analysis release (CONDITIONAL)
