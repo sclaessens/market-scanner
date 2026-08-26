@@ -82,12 +82,14 @@ Status: COMPLETED — DESIGN AND REVIEW ONLY.
 Two independent runner-level failures left no usable ME-SR26 history artifact.
 Static review proved that `threads=False` makes the 952-symbol yfinance path
 synchronous per ticker and that the 15-second timeout is request-scoped, not an
-aggregate provider deadline. The review selected minimal additive hardening:
-sequential deterministic chunks, structured heartbeat, lightweight resource
-and dependency telemetry, diagnostic-only `complete: false` checkpoints,
-immediate unique per-chunk Actions uploads, and fail-closed final assembly only
-after exact 952 reconciliation. No runtime or workflow implementation is part
-of ME-SR27.
+aggregate provider deadline. The corrected review selects executable static
+execution/upload/receipt/gate step groups for deterministic chunks and a
+parent-enforced 600-second worker-process deadline with TERM, five-second grace,
+and KILL escalation. It also requires structured heartbeat, lightweight
+resource and dependency telemetry, diagnostic-only `complete: false`
+checkpoints, unique immutable uploads, and fail-closed final assembly only after
+exact 952 and persistence-receipt reconciliation. No runtime or workflow
+implementation is part of ME-SR27.
 
 ### ME-SR28 — Bounded Advisory History Acquisition Observability and Diagnostic Retention
 
@@ -96,7 +98,8 @@ Status: NEXT — IMPLEMENTATION REQUIRED BEFORE ANY THIRD CANARY.
 Implement and deterministically test the ME-SR27 P0 contract without changing
 provider authority, the global maximum-25 fallback policy, history semantics,
 screening semantics, publication boundaries, or downstream sequencing. ME-SR28
-does not execute or authorize a third canary.
+must use repository-owned operational timeout configuration and cannot expose
+it as caller authority. It does not execute or authorize a third canary.
 
 ME-ADV01 implemented the first minimal deterministic advice engine.ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
 the ME-GH02 `ticker_status_index.json` and linked dry-run artifacts, writes

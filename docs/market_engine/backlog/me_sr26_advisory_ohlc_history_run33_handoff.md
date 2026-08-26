@@ -35,10 +35,12 @@ ME-SR27 completed that review. It proved the current primary `yf.download`
 invocation iterates 952 unique provider symbols synchronously under
 `threads=False`; the 15-second value is request-scoped and does not bound the
 whole phase. Heartbeat alone cannot survive hosted-runner disappearance.
-ME-SR28 must implement sequential deterministic chunks, resource and dependency
-telemetry, diagnostic-only partial checkpoints, immediate unique per-chunk
-artifact uploads, and exact fail-closed final assembly before a third canary
-can be proposed.
+ME-SR28 must implement statically sequenced deterministic chunk execution,
+official upload, persistence-receipt, and gate steps; a parent-enforced
+repository-configured worker-process deadline; resource and dependency
+telemetry; diagnostic-only partial checkpoints; and exact fail-closed final
+assembly before a third canary can be proposed. Local chunk completion is not
+durable evidence until its upload action succeeds.
 
 ## Outcome
 

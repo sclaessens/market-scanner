@@ -141,10 +141,12 @@ Historical `Next` labels below do not override this section.
 ME-SR27 closes the runner/workflow hardening review only. It proves the current
 provider phase is synchronous per ticker and lacks an application-level global
 deadline or durable progress boundary. ME-SR28 must implement the minimum
-reviewed sequential chunk, heartbeat/resource/version telemetry,
-diagnostic-only checkpoint, immediate per-chunk upload, and exact fail-closed
-final assembly design before any third-canary proposal. No downstream stage
-moves ahead of successful ME-SR26 operational validation.
+reviewed static sequential execution/upload/receipt/gate boundaries, a
+parent-enforced repository-configured worker-process deadline,
+heartbeat/resource/version telemetry, diagnostic-only checkpoints, and exact
+fail-closed final assembly design before any third-canary proposal. An upload
+is durable only after the official action completes successfully. No downstream
+stage moves ahead of successful ME-SR26 operational validation.
 
 ME-ADV01 implemented the first minimal deterministic advice engine.ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
 the ME-GH02 `ticker_status_index.json` and linked dry-run artifacts, writes

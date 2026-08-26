@@ -55,7 +55,9 @@ user confirmation
   approval candidates but no operator-approved authoritative import;
 - automatic canonical `market-data` publication remains blocked;
 - ME-SR26 operational validation remains blocked pending the reviewed ME-SR28
-  bounded-observability and diagnostic-retention implementation;
+  bounded-observability and diagnostic-retention implementation. Its minimum
+  contract uses static execution/upload/receipt/gate workflow boundaries and a
+  parent-enforced provider worker deadline; neither exists yet;
 - fundamental evidence coverage remains partial;
 - later model invocation, position sizing, and notification work is deferred.
 

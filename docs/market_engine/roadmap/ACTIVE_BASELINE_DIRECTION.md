@@ -77,9 +77,12 @@ level under `threads=False`, the 15-second timeout is request-scoped rather
 than an aggregate deadline, and the monolithic history step has no durable
 progress boundary before final artifact upload. ME-SR28 is therefore the next
 implementation sprint. It must add only the reviewed bounded chunk,
-heartbeat/resource/version telemetry, diagnostic-only checkpoint, immediate
-per-chunk upload, and fail-closed final assembly contract. A third canary is
-not ready or authorized until that implementation is reviewed and merged.
+static execution/upload/receipt/gate workflow boundaries, parent-enforced
+worker-process deadline, heartbeat/resource/version telemetry, diagnostic-only
+checkpoint, and fail-closed final assembly contract. Local completion is not
+persistence; only a successfully completed upload-action boundary is durable.
+A third canary is not ready or authorized until that implementation is reviewed
+and merged.
 
 ## What ME-PR03 completed
 

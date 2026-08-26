@@ -21,11 +21,13 @@ ME-SR28 — Bounded Advisory History Acquisition Observability and Diagnostic Re
 ```
 
 The minimum justified design preserves the existing history artifact and all
-analytic gates. It adds deterministic acquisition chunks within one sequential
-job, structured heartbeat and lightweight resource telemetry, runtime version
-capture before acquisition, atomic diagnostic-only checkpoints, and a unique
-immutable Actions artifact upload after every completed chunk. Final history
-assembly remains impossible until all 952 identities reconcile exactly.
+analytic gates. It adds deterministic acquisition chunks as statically
+sequenced steps within one job, an official `actions/upload-artifact@v4` step
+and persistence receipt after each execution step, a parent-enforced worker
+subprocess deadline, structured heartbeat and lightweight resource telemetry,
+runtime version capture before acquisition, and atomic diagnostic-only
+checkpoints. Final history assembly remains impossible until all 952 identities
+and every required persistence receipt reconcile exactly.
 
 ## Baseline
 
@@ -292,40 +294,156 @@ upload completed before the final artifact step.
 | Option | Benefits | Costs / risks | Decision |
 |---|---|---|---|
 | A. One 952-symbol batch plus telemetry | smallest provider change; unchanged request shape | still one opaque failure domain; no durable checkpoint until the end; heartbeat can vanish with VM | REJECTED AS SUFFICIENT; heartbeat retained as a component |
-| B. Fixed canonical chunks in one sequential job | bounded progress units; lower per-call materialization; deterministic order; enables upload boundaries; one runner/session and no concurrency | more provider invocations and cookie/rate-limit exposure; chunk contract and global fallback accounting required | SELECTED |
+| B. Fixed canonical chunks as statically sequenced steps in one job | bounded progress units; lower per-call materialization; deterministic order; creates executable upload-action boundaries; one runner and no concurrency | more provider invocations and cookie/rate-limit exposure; verbose workflow; process/session restarts; chunk contract and global fallback accounting required | SELECTED |
 | C. Matrix or one job per chunk | completed jobs retain artifacts after another runner fails; natural isolation | many runners/sessions, concurrency and rate-limit risk, cross-job authority envelope, artifact transfer/merge complexity, higher cost | P2_OPTIONAL only if the selected same-job design remains inadequate |
 | D. Provider adapter replacement or parallel redesign | could improve throughput | new provider/request semantics, compatibility risk, threshold effects, speculative root-cause response | REJECTED |
 
 The selected design uses fixed slices of the canonical instrument ordering,
-with an implementation target of at most 64 identities per primary chunk.
-Chunk size is an operational constant, not policy authority. Chunks execute
-sequentially within the existing job. Each chunk has an explicit wall-clock
-cap and writes through a temporary path followed by atomic rename. The
-implementation must fail closed when a chunk exceeds its cap; it must not
-silently skip or retry the chunk.
+with at most 64 identities per primary chunk. Chunk size is an operational
+constant, not policy authority. The workflow declares the resulting 15 primary
+chunk execution steps statically and places an official upload step immediately
+after each one. It does not ask one long-running Python step to invoke a later
+YAML action. Each execution step uses a parent/worker subprocess boundary,
+writes through a temporary path followed by atomic rename, and is followed by
+upload, persistence-receipt, and fail-closed gate steps before the next chunk
+may start.
 
-Primary batch chunks do not consume the fallback budget. After every primary
-chunk completes, missing frames are reconciled in the original canonical
-order and at most 25 singleton fallbacks execute globally, not per chunk. This
-preserves the governed fallback ceiling and deterministic selection order.
+Primary batch chunks do not consume the fallback budget. Only after all primary
+chunks have completed and persisted successfully does one repository-owned
+planning step reconcile missing frames in the original canonical order. One
+additional bounded fallback execution step then performs at most 25 singleton
+fallbacks globally, followed by its own upload, receipt, and gate boundary.
+This preserves the governed fallback ceiling and deterministic selection order.
 
 Chunking changes operational request grouping, so semantic equivalence must be
 proved with deterministic/mock tests. It does not change price basis, bar
 normalization, classification, provider-lag detection, fresh coverage, or
 final replay.
 
+## Executable persistence-boundary decision
+
+An `actions/upload-artifact@v4` action cannot execute in the middle of a
+long-running Python step. The original phrase "upload after every chunk" was
+therefore incomplete. The implementation options are:
+
+| Mechanism | Immediate upload | Runner-loss survival | Support and credentials | Continuity, authority, and complexity | Decision |
+|---|---|---|---|---|---|
+| A. Static chunk-execution step followed by upload action | YES, after every declared execution step | only uploads that completed survive | first-party supported action; normal workflow token/runtime surface; no new credential | same-job workspace remains available; deterministic order and one global fallback plan; verbose but directly testable | SELECTED P0 |
+| B. Repository process using an Actions artifact client/runtime interface | potentially, from inside acquisition | completed client uploads survive | adds client/runtime coupling and direct token/runtime-endpoint handling to repository code | fewer YAML steps but a larger credential, support, cleanup, and test surface inside production code | REJECTED for minimum design |
+| C. Sequential jobs or matrix partitions | YES, at each job exit | completed-job artifacts survive | first-party actions; ordinary workflow credentials | requires artifact download/assembly, cross-job staging, strict serialization, global fallback coordination, and more runner sessions | P2 only if same-job execution remains inadequate |
+| D. REST/CLI, cache, release, or external-store upload | mechanism-dependent | mechanism-dependent | no equally small supported workflow-artifact path; may add credentials and retention surface | higher cleanup, security, and authority risk | REJECTED |
+
+The P0 workflow persistence boundary is an official upload-action step, not
+chunk computation or local rename. For each statically declared chunk:
+
+1. a repository CLI execution step runs exactly one expected chunk and writes
+   atomic local staging plus a diagnostic checkpoint;
+2. `actions/upload-artifact@v4` uploads that chunk's diagnostic directory with
+   `if-no-files-found: error` and 14-day retention;
+3. only successful action completion and a non-empty action-provided artifact
+   ID/digest permit a repository CLI receipt step to write the local persistence
+   receipt; and
+4. a gate step stops the job after preserving a failure diagnostic, or permits
+   the next statically declared chunk only when execution, upload, and receipt
+   all succeeded.
+
+The execution step uses `continue-on-error: true` only to let the immediately
+following diagnostic upload run. The upload step uses `if: always()` plus the
+expected checkpoint path and fails when that file is absent. The receipt step
+runs only after upload success. The gate then converts any execution failure,
+upload failure, missing output, or receipt failure into a job failure before the
+next chunk. `continue-on-error` never permits analytic continuation.
+
+Names are immutable and collision-free:
+
+```text
+advisory-ohlc-history-diagnostic-<run_id>-primary-chunk-000
+advisory-ohlc-history-diagnostic-<run_id>-fallback-chunk-000
+```
+
+The run ID namespaces the diagnostic artifact but confers no authority. The
+chunk set and fixed zero-padded IDs come exclusively from repository-owned
+planning; callers cannot select or omit a production chunk. No name is reused.
+The artifact is durable only after the upload action reports success. If the
+runner disappears after local chunk completion but before or during upload,
+that chunk is not claimed as persisted. If it disappears after upload success
+but before receipt, the artifact survives but final assembly remains prohibited
+because the local receipt is absent.
+
+Final assembly does not resume from uploaded diagnostics. It reads atomic chunk
+results from the same job's local run-specific staging root and requires one
+local receipt, bound to the expected artifact name, ID, digest, run, source,
+universe, operational configuration, policy, and chunk digest, for every
+expected primary chunk and the required fallback stage, including a zero-
+fallback stage. A persistence receipt proves diagnostic upload only; final
+assembly separately requires `execution_status: success` for every primary
+chunk and the fallback stage. A missing persistence boundary blocks the final
+completeness claim. Runner loss ends the job; previously completed uploads
+remain independent evidence, but no later job reconstructs or publishes a final
+artifact.
+
+Same-job workspace and temporary staging disappear with the hosted runner.
+Successfully uploaded diagnostics expire through the existing 14-day Actions
+retention setting; no custom deletion credential or cleanup process is added.
+
+## Enforceable chunk-deadline decision
+
+A post-return elapsed-time check cannot bound a blocking synchronous provider
+call. The enforcement options are:
+
+| Mechanism | Genuine interruption | Compatibility and cleanup | Provider/session effects | Testability and risk | Decision |
+|---|---|---|---|---|---|
+| A. Parent-owned child subprocess per acquisition chunk | YES; parent can terminate and kill the worker process group | supported on GitHub-hosted Ubuntu and Python 3.11; parent owns reaping and staging cleanup | each workflow execution has an isolated yfinance/curl_cffi process and session; more cookie/session setup is an accepted operational cost | blocking mock can prove non-cooperative interruption; corruption contained to temporary chunk root | SELECTED P0 |
+| B. Unix signal/alarm around provider call | potentially | Unix-specific; delivery/main-thread constraints; uncertain interruption and cleanup through Python/C/curl layers | session can remain in-process | harder to prove safe unwinding and DataFrame state | REJECTED |
+| C. Smaller in-process provider invocations with checks between calls | NO for the currently blocking invocation | simple between calls | preserves one process/session | reduces exposure but does not enforce a deadline if one call hangs | REJECTED AS A DEADLINE |
+| D. Shell `timeout` or whole-job timeout | YES at coarse process/job boundary | supported on Ubuntu but provides weaker repository-owned classification and cleanup control | process ends | useful outer defense, not the selected diagnostic contract | RETAIN 90-minute job cap; REJECTED as sole chunk mechanism |
+
+The selected parent launches the provider worker with
+`start_new_session=True`, starts `time.monotonic()`, and owns a fixed
+`600`-second deadline. The value lives in a new repository-owned operational
+configuration, proposed as
+`config/market_engine/advisory_ohlc_history_runtime.json`, together with the
+fixed chunk size, `60`-second heartbeat interval, and `5`-second termination
+grace. Production uses that exact repository path and rejects caller/CLI
+overrides.
+
+This operational configuration is deliberately separate from the canonical
+history policy. A timeout can change whether a run completes, but cannot change
+which bars, universe, thresholds, fallbacks, freshness result, screening result,
+or final analytic artifact are accepted. Its digest is captured in diagnostic
+checkpoints and persistence receipts, not used as market-data authority.
+
+On deadline expiry the parent:
+
+1. classifies the chunk deterministically as `provider_chunk_timeout`;
+2. sends `SIGTERM` to the worker process group;
+3. waits at most the configured 5-second monotonic grace;
+4. sends `SIGKILL` to the process group if still alive and reaps it;
+5. removes only that chunk's temporary staging path;
+6. atomically writes a distinct `complete: false` timeout diagnostic; and
+7. returns a specific non-zero result for the workflow upload-and-gate sequence.
+
+There is no retry, no singleton fallback for a timed-out primary chunk, and no
+later chunk execution. The failure diagnostic may be uploaded and receive a
+persistence receipt if the runner remains healthy, but its execution status is
+failure and the gate stops the job. Existing completed chunk directories and
+uploaded artifacts remain untouched. Final history construction is prohibited.
+The same subprocess boundary applies to the one global fallback execution step,
+so no provider acquisition unit can remain indefinitely inside a synchronous
+library call.
+
 ## Checkpoint and partial-evidence authority contract
 
 Partial evidence is never authoritative.
 
-Every completed acquisition chunk writes an atomic diagnostic checkpoint under
-a distinct non-final root, for example:
+Every chunk execution outcome that the parent survives writes an atomic
+diagnostic checkpoint under a distinct non-final root, for example:
 
 ```text
 artifacts/market_engine/advisory_ohlc_history_diagnostics/<run_id>/
   preflight/runtime_environment.json
-  checkpoints/chunk-000/checkpoint.json
-  checkpoints/chunk-001/checkpoint.json
+  checkpoints/primary-chunk-000/checkpoint.json
+  checkpoints/fallback-chunk-000/checkpoint.json
 ```
 
 Minimum checkpoint content:
@@ -338,7 +456,9 @@ source_main_sha
 canonical_universe_sha256
 canonical_universe_identity_digest
 history_policy_sha256
+operational_runtime_config_sha256
 phase
+execution_status
 chunk_index
 chunk_count
 chunk_identity_digest
@@ -363,16 +483,18 @@ screening accepts only that validated context. RUN33 accepts only validated
 screening/history bindings. Checkpoint roots therefore fail closed at every
 existing production consumer.
 
-Each completed checkpoint is uploaded immediately with a unique immutable
+Each checkpoint reaches a separate upload-action step with a unique immutable
 artifact name such as:
 
 ```text
-advisory-ohlc-history-diagnostic-<run_id>-chunk-000
+advisory-ohlc-history-diagnostic-<run_id>-primary-chunk-000
 ```
 
-`actions/upload-artifact@v4` artifacts are immutable and immediately available
-after upload. Unique names are mandatory; v4 does not allow multiple jobs or
-steps to mutate one artifact. Retention remains 14 days.
+`actions/upload-artifact@v4` artifacts are immutable and available only after
+successful upload completion. Unique names are mandatory; v4 does not allow
+multiple jobs or steps to mutate one artifact. Retention remains 14 days. A
+local checkpoint is not described as persisted until the action returns its
+artifact ID and digest and the receipt step records them.
 
 Local chunk data required for final assembly may remain in a separate
 non-authoritative staging root. It is never exposed as a valid history
@@ -380,6 +502,10 @@ artifact. Final assembly must require:
 
 - the exact governed run/source/universe/policy envelope;
 - every expected chunk exactly once;
+- a successful persistence receipt for every expected primary chunk and the
+  required fallback stage, even when zero fallbacks are selected;
+- `execution_status: success` for every expected primary chunk and fallback
+  stage;
 - every canonical identity exactly once;
 - no unexpected or duplicate identity;
 - a cumulative count of exactly 952;
@@ -421,7 +547,7 @@ already completed—or external storage already written—survives those classes
 | Option | Assessment |
 |---|---|
 | Periodic local checkpoint only | useful for ordinary process failure; insufficient for runner/VM loss |
-| Separate upload after each completed deterministic chunk | selected P0; GitHub-native, immutable, bounded retention, low authority risk with distinct schema/root |
+| Static execution/upload/receipt/gate steps after each deterministic chunk | selected P0; executable GitHub-native boundary, immutable artifact, bounded retention, and low authority risk with distinct schema/root |
 | One workflow job per chunk | deferred; stronger runner isolation but materially higher orchestration, session, rate-limit, and merge complexity |
 | GitHub cache | rejected; cache is mutable/evictable build acceleration, not retained audit evidence |
 | Distinct artifacts from multiple completed jobs | P2 fallback if same-job chunk persistence remains insufficient |
@@ -472,23 +598,32 @@ forbidden.
 
 ### P0_REQUIRED_BEFORE_NEXT_CANARY
 
-1. Split the 952 canonical ordering into fixed sequential chunks of at most 64
-   identities within the existing job; do not introduce parallel jobs.
+1. Split the 952 canonical ordering into 15 fixed primary chunks of at most 64
+   identities and declare their execution/upload/receipt/gate steps statically
+   and sequentially within the existing job; do not introduce parallel jobs.
 2. Preserve one global maximum-25 singleton fallback budget and original
    deterministic fallback selection order across all chunks.
-3. Add an explicit bounded wall-clock cap per acquisition chunk and fail closed
-   without retry when exceeded; retain the 90-minute job cap.
+3. Run every primary and fallback provider chunk in a new-session child process
+   under a parent-owned 600-second monotonic deadline. On expiry send process-
+   group `SIGTERM`, allow 5 seconds, then `SIGKILL` and reap; clean temporary
+   staging, classify `provider_chunk_timeout`, execute no retry/fallback/later
+   chunk, and retain the 90-minute job cap.
 4. Emit structured phase/chunk events and a 60-second heartbeat with progress,
    elapsed time, RSS, available memory, load, and disk free.
-5. Capture and immediately upload a diagnostic runtime/preflight artifact
-   before provider acquisition.
-6. Atomically write a distinct `complete: false` diagnostic checkpoint after
-   every completed chunk and immediately upload it under a unique immutable
-   14-day Actions artifact name.
-7. Assemble the existing final history artifact only after exact 952 identity,
-   source, universe, policy, chunk, fallback-budget, and checksum reconciliation;
-   keep the existing quality gate and screening unchanged.
-8. Add fail-closed tests proving partial diagnostics cannot be loaded as
+5. Add repository-owned, non-caller-selectable operational configuration for
+   chunk size, 600-second deadline, 5-second termination grace, and heartbeat;
+   capture its digest without making it analytic policy.
+6. Capture and upload a diagnostic runtime/preflight artifact before provider
+   acquisition through its own executable upload-action boundary.
+7. Atomically write a distinct `complete: false` diagnostic checkpoint after
+   every chunk outcome. Follow each execution step with an official uniquely
+   named 14-day upload action, then record its returned artifact ID/digest in a
+   local persistence receipt and gate all later execution on success.
+8. Assemble the existing final history artifact only after exact 952 identity,
+   source, universe, policy, operational-config, chunk, persistence-receipt,
+   fallback-budget, and checksum reconciliation; keep the existing quality gate
+   and screening unchanged.
+9. Add fail-closed tests proving partial diagnostics cannot be loaded as
    history, cannot satisfy screening, and cannot reach RUN33.
 
 ### P1_RECOMMENDED
@@ -500,8 +635,8 @@ forbidden.
 
 ### P2_OPTIONAL
 
-- move chunks to distinct sequential matrix jobs only if same-job checkpoints
-  still fail to retain enough evidence;
+- move chunks to distinct sequential jobs only if the static same-job
+  execution/upload boundaries still fail to retain enough evidence;
 - retain raw non-authoritative chunk data for offline diagnosis if metadata-only
   checkpoints prove insufficient;
 - add external durable telemetry only if GitHub-native artifacts fail again.
@@ -510,6 +645,9 @@ forbidden.
 
 - a third canary with no code change;
 - heartbeat-only hardening;
+- a monolithic Python step that merely promises internal upload-action
+  execution;
+- a post-return elapsed-time check presented as a wall-clock deadline;
 - parallel provider acquisition without a separate rate-limit/semantic review;
 - per-chunk fallback budgets;
 - resumable acquisition;
@@ -561,22 +699,48 @@ ME-SR28 must add or preserve deterministic tests for:
    provider/history outputs;
 7. dependency capture occurs before the provider seam is invoked;
 8. checkpoint schema, exact fields, `complete: false`, atomic rename, source,
-   universe, policy, phase, count, and chunk binding;
+   universe, policy, operational-config, phase, execution status, count, and
+   chunk binding;
 9. partial checkpoint roots are rejected by the public history loader, current
    screening loader, and RUN33 handoff path;
 10. missing, duplicate, extra, corrupt, cross-run, cross-SHA, cross-universe,
-    cross-policy, or incomplete chunks block final assembly;
-11. process failure or synthetic chunk timeout leaves no final history artifact;
-12. complete chunk assembly is semantically equivalent to the existing
+    cross-policy, cross-operational-config, missing-receipt, or incomplete chunks
+    block final assembly;
+11. a deliberately blocking mock provider worker is terminated by the parent at
+    a fake/short test deadline without waiting for voluntary provider return;
+12. timeout classification is exactly `provider_chunk_timeout`, uses TERM then
+    bounded grace then KILL escalation when necessary, reaps the process, removes
+    only temporary staging, executes no retry, singleton fallback, or later
+    chunk, and leaves no final history artifact;
+13. timeout diagnostics remain `complete: false`, may be uploaded only through
+    the following workflow boundary, and cannot pass any production loader;
+14. one global fallback worker remains bounded by the same subprocess mechanism
+    and the global singleton budget remains at most 25;
+15. a completed local checkpoint is not persisted before successful action
+    completion and receipt creation; simulated failure before/during upload
+    creates no persistence receipt or final completeness claim;
+16. successful upload outputs bind a receipt to the exact unique artifact name,
+    artifact ID, artifact digest, run, source, universe, policy, operational
+    config, and chunk digest;
+17. previously completed uploads remain independent when a later chunk or upload
+    fails, and unique primary/fallback chunk names cannot overwrite each other;
+18. missing upload step, missing/empty action output, duplicate artifact name,
+    or missing persistence receipt blocks all later chunks or final assembly;
+19. complete chunk assembly is semantically equivalent to the existing
     monolithic mocked provider result, including status counts, lag detection,
     coverage, observations digest, nullable volume, and checksums;
-13. final history loader replay, current technical screening replay, and
+20. final history loader replay, current technical screening replay, and
     history/screening cross-binding remain unchanged;
-14. workflow structure retains `contents: read`, `cancel-in-progress: false`,
-    the 90-minute job cap, 14-day retention, unique preflight/chunk artifacts,
-    sequential execution, and no publication/downstream steps; and
-15. ordinary provider/Python/quality-gate failures preserve already completed
-    diagnostic uploads without allowing them to satisfy analytic gates.
+21. workflow structure retains `contents: read`, `cancel-in-progress: false`,
+    the 90-minute job cap, 14-day retention, statically ordered execution/upload/
+    receipt/gate groups, unique preflight/primary/fallback artifact names, and no
+    publication/downstream steps;
+22. ordinary provider/Python/quality-gate failures preserve already completed
+    diagnostic uploads without allowing them to satisfy analytic gates; and
+23. the production entry point rejects caller/CLI overrides of chunk size,
+    deadline, grace, and heartbeat, while successful fixture runs under two
+    sufficiently permissive operational deadlines produce identical analytic
+    history and screening outputs.
 
 Required existing suites include:
 
@@ -626,6 +790,7 @@ inspection plus deterministic local commands were read-only.
 ## Exact next sprint
 
 `ME-SR28 — Bounded Advisory History Acquisition Observability and Diagnostic
-Retention`: implement and test the P0 sequential chunk, heartbeat, resource and
-dependency telemetry, diagnostic checkpoint, immediate per-chunk upload, and
+Retention`: implement and test the P0 statically sequenced chunk execution/
+upload/receipt/gate boundaries, parent-enforced worker subprocess deadlines,
+heartbeat, resource and dependency telemetry, diagnostic checkpoint, and
 fail-closed final assembly contract. Do not execute a third canary in ME-SR28.
