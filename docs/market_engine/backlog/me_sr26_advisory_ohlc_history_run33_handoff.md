@@ -7,8 +7,11 @@ The implementation now enforces the intended boundary: public callers select evi
 Sprint ID: ME-SR26
 Status: IMPLEMENTED — POST-MERGE CANARY BLOCKED
 
-The single authorized post-merge canary on 2026-08-26 failed because GitHub
-Actions canceled bounded history acquisition before a manifest was emitted.
+The single authorized post-merge canary on 2026-08-26 was interrupted because
+the GitHub-hosted runner received a shutdown signal while bounded history
+acquisition was still executing and before a manifest was emitted. No
+application, provider, policy, universe, or workflow-timeout failure was
+evidenced, and the external termination cause remains unresolved.
 No artifact, quality-gate result, or screening evidence was produced, and no
 retry occurred. Operational validation remains open. RUN33 remains a separate
 conditional future controlled step and was not executed.
@@ -51,7 +54,8 @@ conditional RUN33 input handoff; it does not execute RUN33.
 
 ## Required next action
 
-Investigate the canceled history-build operation and skipped evidence upload in
-run `32951786805` through a separate reviewed remediation. Do not retry the
-canary, publish, advance `market-data`, or execute RUN33 without explicit new
-authorization.
+Determine why the GitHub-hosted runner received a shutdown signal during run
+`32951786805` and whether the interruption was transient infrastructure or a
+reproducible execution problem. Only then may a new controlled canary receive
+explicit authorization. Do not retry automatically, publish, advance
+`market-data`, or execute RUN33.

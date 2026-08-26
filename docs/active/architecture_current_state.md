@@ -60,8 +60,11 @@ user confirmation
 ## Active implementation sequence
 
 ```text
-ME-SR25 (COMPLETED) -> ME-DATA11 (READY FOR HUMAN APPROVAL)
-  -> ME-SR26 (IMPLEMENTED; POST-MERGE CANARY BLOCKED)
+ME-SR25 (COMPLETED) -> ME-DATA11 (READY FOR HUMAN APPROVAL; NOT NEXT)
+  -> ME-SR26 implementation (COMPLETED)
+  -> ME-SR26 operational canary (BLOCKED BY RUNNER INTERRUPTION)
+  -> diagnose runner interruption / determine canary reauthorization (NEXT)
+  -> successful controlled ME-SR26 canary (REQUIRED)
   -> approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 (CONDITIONAL) -> ME-CI12 (PLANNED)
 ```

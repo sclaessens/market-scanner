@@ -49,10 +49,13 @@ ME-RM08 - Realign roadmap around portfolio authority and advisory price freshnes
                portfolio-aware candidate context (COMPLETED)
   -> ME-SR25 - Implement advisory price evidence artifacts (COMPLETED / MERGED)
   -> ME-DATA11 - Target fundamental derivation at the highest-ranked technical
-                 candidate funnel (READY FOR HUMAN APPROVAL)
-  -> ME-SR26 - Acquire advisory OHLC history, rerun current technical screening,
-               and emit a conditional RUN33 handoff (IMPLEMENTED; POST-MERGE CANARY BLOCKED)
-  -> Human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
+                 candidate funnel (READY FOR HUMAN APPROVAL; NOT NEXT)
+  -> ME-SR26 implementation - advisory OHLC history, current technical screening,
+                              and conditional RUN33 handoff (COMPLETED)
+  -> ME-SR26 operational canary (BLOCKED BY RUNNER INTERRUPTION)
+  -> Diagnose runner interruption / determine canary reauthorization (NEXT)
+  -> Successful controlled ME-SR26 canary (REQUIRED)
+  -> Human approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - ChatGPT consumption without new analysis logic (PLANNED)
 ```

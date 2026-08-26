@@ -5,11 +5,15 @@
 BLOCKED on 2026-08-26.
 
 Exactly one reviewed manual `workflow_dispatch` of `Advisory OHLC History and
-Current Technical Screening` was executed from merged `main`. GitHub Actions
-canceled the bounded history-build step before it emitted a manifest. The
+Current Technical Screening` was executed from merged `main`. The GitHub-hosted
+runner received a shutdown signal while the bounded history-build process was
+still executing and before it emitted a manifest. The
 quality gate, technical screening, and `if: always()` artifact upload were
 skipped, leaving no artifact that could independently establish provider,
 freshness, replay, screening, or volume semantics. No retry was performed.
+This event is classified as `RUNNER_INTERRUPTED` with
+`EXTERNAL_RUNNER_TERMINATION_CAUSE_UNRESOLVED`, not as an application,
+provider, policy, universe, or ME-SR26 timeout failure.
 
 ## Pre-canary safety
 
@@ -40,6 +44,10 @@ freshness, replay, screening, or volume semantics. No retry was performed.
 | Completed | `2026-08-26T09:16:13Z` |
 | Workflow conclusion | `failure` |
 | Terminal step | `Build bounded advisory history` — `cancelled` |
+| History build started | `2026-08-26T09:13:06Z` |
+| Runner shutdown | `2026-08-26T09:16:10Z` |
+| Active build before interruption | approximately 3 minutes 4 seconds |
+| Diagnostic log | `The runner has received a shutdown signal.` |
 | Terminal log | `The operation was canceled.` |
 
 The checkout log independently records the executed source SHA. Source checkout
@@ -47,12 +55,23 @@ therefore matches the triggering workflow SHA and contains the merged PR head.
 The history builder produced no terminal JSON result before cancellation, so a
 history-manifest `source_main_sha` comparison was impossible.
 
+The runner explained that a shutdown signal can occur when the runner service
+is stopped or a manually started runner is canceled. Repository and GitHub
+evidence do not establish which external cause applied. The interruption
+occurred far below the configured 90-minute workflow timeout, so that timeout
+was not the cause. No Python traceback, ME-SR26 exception, provider error,
+semantic failure, policy failure, universe failure, or explicit application
+timeout was emitted before shutdown.
+
 ## Artifact evidence
 
 The GitHub Actions artifact API returned `total_count: 0`. The expected
 `advisory-ohlc-history-screening-32951786805` artifact does not exist. The
 artifact upload step was skipped despite its configured `if: always()` guard
-because GitHub canceled the operation before later workflow steps ran.
+because the runner terminated before later workflow steps could execute. This
+canary therefore did not test whether `if: always()` preserves evidence after
+an ordinary command-level failure; it does not establish a defect in that
+condition or justify a workflow implementation change.
 Consequently there are no downloaded manifest checksums to record and no
 evidence was modified.
 
@@ -121,15 +140,17 @@ only.
 
 BLOCKED.
 
-The workflow failed during real bounded history acquisition, no evidence
-artifact was uploaded, and the required runtime authority and integrity
-assertions could not be independently evaluated. ME-SR26 remains implemented
-but not operationally validated. RUN33 remains a separate conditional future
-step and was not executed or authorized.
+The runner was externally interrupted while the history-build process was
+still executing, no evidence artifact was uploaded, and the required runtime
+authority and integrity assertions could not be independently evaluated. No
+application or provider failure was evidenced. ME-SR26 remains implemented but
+not operationally validated. RUN33 remains a separate conditional future step
+and was not executed or authorized.
 
 ## Next action recommendation
 
-Open a separate reviewed remediation task to determine why GitHub canceled the
-history-build operation and why the `if: always()` evidence upload did not run.
-Do not dispatch another canary until that defect is understood and an explicit
-new authorization is granted.
+Determine why the GitHub-hosted runner received a shutdown signal during the
+history-build step and decide whether this was a transient infrastructure
+interruption or a reproducible execution problem. Only after that analysis may
+a new controlled canary be explicitly authorized; it would be a new validation
+run, not an automatic retry of run `32951786805`.
