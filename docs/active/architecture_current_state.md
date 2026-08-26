@@ -62,8 +62,9 @@ user confirmation
 ```text
 ME-SR25 (COMPLETED) -> ME-DATA11 (READY FOR HUMAN APPROVAL; NOT NEXT)
   -> ME-SR26 implementation (COMPLETED)
-  -> ME-SR26 operational canary (BLOCKED BY RUNNER INTERRUPTION)
-  -> diagnose runner interruption / determine canary reauthorization (NEXT)
+  -> ME-SR26 operational canary (FIRST RUN BLOCKED BY RUNNER INTERRUPTION)
+  -> runner interruption diagnostic (COMPLETED)
+  -> second controlled canary authorization (READY / NEXT)
   -> successful controlled ME-SR26 canary (REQUIRED)
   -> approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 (CONDITIONAL) -> ME-CI12 (PLANNED)
