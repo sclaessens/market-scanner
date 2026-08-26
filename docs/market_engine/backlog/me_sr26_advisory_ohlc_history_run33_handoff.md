@@ -5,7 +5,13 @@
 The implementation now enforces the intended boundary: public callers select evidence artifact paths, while the repository selects the canonical 952-identity universe, history policy, unchanged RUN30 screening policy, and SR25 price policy. Production also owns provider selection, UTC time, and source provenance derived from repository `HEAD`. Custom authority inputs are confined to private deterministic test helpers. Merge readiness remains subject to the complete validation and review record.
 
 Sprint ID: ME-SR26
-Status: IMPLEMENTED — POST-MERGE CANARY REQUIRED
+Status: IMPLEMENTED — POST-MERGE CANARY BLOCKED
+
+The single authorized post-merge canary on 2026-08-26 failed because GitHub
+Actions canceled bounded history acquisition before a manifest was emitted.
+No artifact, quality-gate result, or screening evidence was produced, and no
+retry occurred. Operational validation remains open. RUN33 remains a separate
+conditional future controlled step and was not executed.
 
 ## Outcome
 
@@ -45,7 +51,7 @@ conditional RUN33 input handoff; it does not execute RUN33.
 
 ## Required next action
 
-After merge, one reviewed `workflow_dispatch` canary must acquire all 952
-histories at the new 09:30 UTC window. Review the manifest status distribution,
-provider-lag evidence, checksum replay, screening count, top-25 gap, and
-workflow artifact. Do not publish, advance `market-data`, or execute RUN33.
+Investigate the canceled history-build operation and skipped evidence upload in
+run `32951786805` through a separate reviewed remediation. Do not retry the
+canary, publish, advance `market-data`, or execute RUN33 without explicit new
+authorization.

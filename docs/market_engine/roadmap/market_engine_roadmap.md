@@ -109,7 +109,7 @@ ME-RM08 - Portfolio ledger and advisory price roadmap realignment
                candidate context (COMPLETED)
   -> ME-SR25 - Advisory price evidence artifact (COMPLETED / MERGED)
   -> ME-DATA11 - Targeted fundamental derivation for the technical candidate funnel (READY FOR HUMAN APPROVAL)
-  -> ME-SR26 - Advisory OHLC history, current technical screening, and RUN33 handoff
+  -> ME-SR26 - Advisory OHLC history, current technical screening, and RUN33 handoff (IMPLEMENTED; POST-MERGE CANARY BLOCKED)
   -> Human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
   -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - Batch grounded advisory consumption (PLANNED)

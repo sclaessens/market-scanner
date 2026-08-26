@@ -51,7 +51,7 @@ ME-RM08 - Realign roadmap around portfolio authority and advisory price freshnes
   -> ME-DATA11 - Target fundamental derivation at the highest-ranked technical
                  candidate funnel (READY FOR HUMAN APPROVAL)
   -> ME-SR26 - Acquire advisory OHLC history, rerun current technical screening,
-               and emit a conditional RUN33 handoff (IMPLEMENTED; CANARY PENDING)
+               and emit a conditional RUN33 handoff (IMPLEMENTED; POST-MERGE CANARY BLOCKED)
   -> Human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
   -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - ChatGPT consumption without new analysis logic (PLANNED)
