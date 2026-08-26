@@ -112,7 +112,8 @@ ME-RM08 - Portfolio ledger and advisory price roadmap realignment
   -> ME-SR26 implementation - advisory OHLC history, current technical screening, and RUN33 handoff (COMPLETED)
   -> ME-SR26 operational canary (FIRST RUN BLOCKED BY RUNNER INTERRUPTION)
   -> Runner interruption diagnostic (COMPLETED)
-  -> Second controlled canary authorization (READY / NEXT)
+  -> Second controlled canary (BLOCKED BY HOSTED-RUNNER COMMUNICATION LOSS)
+  -> Runner/workflow hardening review (NEXT)
   -> Successful controlled ME-SR26 canary (REQUIRED)
   -> Human approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)

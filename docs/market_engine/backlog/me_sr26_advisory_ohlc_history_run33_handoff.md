@@ -5,7 +5,7 @@
 The implementation now enforces the intended boundary: public callers select evidence artifact paths, while the repository selects the canonical 952-identity universe, history policy, unchanged RUN30 screening policy, and SR25 price policy. Production also owns provider selection, UTC time, and source provenance derived from repository `HEAD`. Custom authority inputs are confined to private deterministic test helpers. Merge readiness remains subject to the complete validation and review record.
 
 Sprint ID: ME-SR26
-Status: IMPLEMENTED — SECOND CONTROLLED CANARY AUTHORIZATION READY
+Status: IMPLEMENTED — OPERATIONAL VALIDATION BLOCKED
 
 The single authorized post-merge canary on 2026-08-26 was interrupted because
 the GitHub-hosted runner received a shutdown signal while bounded history
@@ -22,7 +22,14 @@ exception, or provider failure. Deterministic history/provider tests remain
 healthy. It classified the event as
 `TRANSIENT_GITHUB_RUNNER_INTERRUPTION_LIKELY` and found a second controlled
 canary `RECANARY_SAFE_WITHOUT_CODE_CHANGES`. This does not itself dispatch or
-authorize the run; explicit human authorization remains required.
+authorize the run. A separately authorized second controlled canary was
+dispatched as run `32966745030`. After approximately 50 minutes in bounded
+history acquisition, GitHub reported that the hosted runner lost communication
+with the server. No history manifest, quality-gate result, screening, log
+archive, or uploaded artifact survived. The exact first-canary shutdown-signal
+text did not recur, but this second runner-level failure keeps operational
+validation blocked and requires runner/workflow hardening review before any
+later canary proposal.
 
 ## Outcome
 
@@ -62,6 +69,7 @@ conditional RUN33 input handoff; it does not execute RUN33.
 
 ## Required next action
 
-Review the diagnostic and explicitly authorize one new controlled ME-SR26
-canary without code changes if accepted. Treat it as a new validation run, not
-an automatic retry. Do not publish, advance `market-data`, or execute RUN33.
+Perform a documentation-and-diagnostics-only runner/workflow hardening review
+for run `32966745030`, including retained checkpoint and telemetry requirements.
+Do not authorize or dispatch a third canary in this step. Do not publish,
+advance `market-data`, or execute RUN33.
