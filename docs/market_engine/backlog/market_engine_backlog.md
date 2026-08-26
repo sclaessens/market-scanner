@@ -49,9 +49,12 @@ ME-RUN30/31 and ME-DATA06-10 - broad analysis and evidence baseline
   -> ME-RM08 - portfolio/advisory-price roadmap realignment (docs-only)
   -> ME-PR03 - manual transaction ledger and portfolio-aware candidate context (COMPLETED)
   -> ME-SR25 - advisory price evidence artifact (COMPLETED / MERGED)
-  -> ME-DATA11 - targeted fundamental derivation for the technical candidate funnel (READY FOR HUMAN APPROVAL)
-  -> ME-SR26 - advisory OHLC history and current technical screening handoff (IMPLEMENTED; CANARY PENDING)
-  -> human approval / DATA07 / DATA06 / RUN31 checkpoint (NEXT)
+  -> ME-DATA11 - targeted fundamental derivation for the technical candidate funnel (READY FOR HUMAN APPROVAL; NOT NEXT)
+  -> ME-SR26 implementation - advisory OHLC history and current technical screening handoff (COMPLETED)
+  -> ME-SR26 operational canary (BLOCKED BY RUNNER INTERRUPTION)
+  -> diagnose runner interruption / determine canary reauthorization (NEXT)
+  -> successful controlled ME-SR26 canary (REQUIRED)
+  -> human approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 - first useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - batch grounded advisory consumption (PLANNED)
   -> ME-PS01 - position-sizing decision contract
