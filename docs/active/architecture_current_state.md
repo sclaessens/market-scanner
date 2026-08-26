@@ -54,6 +54,8 @@ user confirmation
 - ME-DATA11 review remediation produced three persisted, replayable pending
   approval candidates but no operator-approved authoritative import;
 - automatic canonical `market-data` publication remains blocked;
+- ME-SR26 operational validation remains blocked pending the reviewed ME-SR28
+  bounded-observability and diagnostic-retention implementation;
 - fundamental evidence coverage remains partial;
 - later model invocation, position sizing, and notification work is deferred.
 
@@ -65,8 +67,10 @@ ME-SR25 (COMPLETED) -> ME-DATA11 (READY FOR HUMAN APPROVAL; NOT NEXT)
   -> ME-SR26 operational canary (FIRST RUN BLOCKED BY RUNNER INTERRUPTION)
   -> runner interruption diagnostic (COMPLETED)
   -> second controlled canary (BLOCKED BY HOSTED-RUNNER COMMUNICATION LOSS)
-  -> runner/workflow hardening review (NEXT)
-  -> successful controlled ME-SR26 canary (REQUIRED)
+  -> ME-SR27 runner/workflow hardening review (COMPLETED)
+  -> ME-SR28 bounded acquisition observability and diagnostic retention (NEXT)
+  -> reviewed ME-SR28 merge
+  -> third controlled ME-SR26 canary (REQUIRED; NOT YET AUTHORIZED)
   -> approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 (CONDITIONAL) -> ME-CI12 (PLANNED)
 ```

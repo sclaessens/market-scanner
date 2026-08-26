@@ -5,7 +5,7 @@
 The implementation now enforces the intended boundary: public callers select evidence artifact paths, while the repository selects the canonical 952-identity universe, history policy, unchanged RUN30 screening policy, and SR25 price policy. Production also owns provider selection, UTC time, and source provenance derived from repository `HEAD`. Custom authority inputs are confined to private deterministic test helpers. Merge readiness remains subject to the complete validation and review record.
 
 Sprint ID: ME-SR26
-Status: IMPLEMENTED — OPERATIONAL VALIDATION BLOCKED
+Status: IMPLEMENTED — OPERATIONAL VALIDATION BLOCKED; ME-SR28 NEXT
 
 The single authorized post-merge canary on 2026-08-26 was interrupted because
 the GitHub-hosted runner received a shutdown signal while bounded history
@@ -30,6 +30,15 @@ archive, or uploaded artifact survived. The exact first-canary shutdown-signal
 text did not recur, but this second runner-level failure keeps operational
 validation blocked and requires runner/workflow hardening review before any
 later canary proposal.
+
+ME-SR27 completed that review. It proved the current primary `yf.download`
+invocation iterates 952 unique provider symbols synchronously under
+`threads=False`; the 15-second value is request-scoped and does not bound the
+whole phase. Heartbeat alone cannot survive hosted-runner disappearance.
+ME-SR28 must implement sequential deterministic chunks, resource and dependency
+telemetry, diagnostic-only partial checkpoints, immediate unique per-chunk
+artifact uploads, and exact fail-closed final assembly before a third canary
+can be proposed.
 
 ## Outcome
 
@@ -69,7 +78,6 @@ conditional RUN33 input handoff; it does not execute RUN33.
 
 ## Required next action
 
-Perform a documentation-and-diagnostics-only runner/workflow hardening review
-for run `32966745030`, including retained checkpoint and telemetry requirements.
-Do not authorize or dispatch a third canary in this step. Do not publish,
-advance `market-data`, or execute RUN33.
+Implement and review ME-SR28's bounded acquisition observability and diagnostic
+retention contract. Do not authorize or dispatch a third canary during that
+implementation. Do not publish, advance `market-data`, or execute RUN33.

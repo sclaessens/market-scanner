@@ -55,8 +55,10 @@ ME-RM08 - Realign roadmap around portfolio authority and advisory price freshnes
   -> ME-SR26 operational canary (FIRST RUN BLOCKED BY RUNNER INTERRUPTION)
   -> Runner interruption diagnostic (COMPLETED)
   -> Second controlled canary (BLOCKED BY HOSTED-RUNNER COMMUNICATION LOSS)
-  -> Runner/workflow hardening review (NEXT)
-  -> Successful controlled ME-SR26 canary (REQUIRED)
+  -> ME-SR27 runner/workflow hardening review (COMPLETED)
+  -> ME-SR28 bounded acquisition observability and diagnostic retention (NEXT)
+  -> Reviewed ME-SR28 merge
+  -> Third controlled ME-SR26 canary (REQUIRED; NOT YET AUTHORIZED)
   -> Human approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - ChatGPT consumption without new analysis logic (PLANNED)
@@ -69,6 +71,15 @@ pending approval candidates for ASH, BIO, and CI. Separate checksum-bound human
 approval remains the blocker to authoritative DATA07, DATA06, and RUN31
 changes. ME-SR26 supplies current technical prerequisites without simulating
 that approval; ME-RUN33 is not immediately executable.
+
+ME-SR27 proved that the current 952-symbol yfinance call is serial at ticker
+level under `threads=False`, the 15-second timeout is request-scoped rather
+than an aggregate deadline, and the monolithic history step has no durable
+progress boundary before final artifact upload. ME-SR28 is therefore the next
+implementation sprint. It must add only the reviewed bounded chunk,
+heartbeat/resource/version telemetry, diagnostic-only checkpoint, immediate
+per-chunk upload, and fail-closed final assembly contract. A third canary is
+not ready or authorized until that implementation is reviewed and merged.
 
 ## What ME-PR03 completed
 
