@@ -52,8 +52,9 @@ ME-RM08 - Realign roadmap around portfolio authority and advisory price freshnes
                  candidate funnel (READY FOR HUMAN APPROVAL; NOT NEXT)
   -> ME-SR26 implementation - advisory OHLC history, current technical screening,
                               and conditional RUN33 handoff (COMPLETED)
-  -> ME-SR26 operational canary (BLOCKED BY RUNNER INTERRUPTION)
-  -> Diagnose runner interruption / determine canary reauthorization (NEXT)
+  -> ME-SR26 operational canary (FIRST RUN BLOCKED BY RUNNER INTERRUPTION)
+  -> Runner interruption diagnostic (COMPLETED)
+  -> Second controlled canary authorization (READY / NEXT)
   -> Successful controlled ME-SR26 canary (REQUIRED)
   -> Human approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)

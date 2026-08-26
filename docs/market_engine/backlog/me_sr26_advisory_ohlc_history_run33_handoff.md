@@ -5,7 +5,7 @@
 The implementation now enforces the intended boundary: public callers select evidence artifact paths, while the repository selects the canonical 952-identity universe, history policy, unchanged RUN30 screening policy, and SR25 price policy. Production also owns provider selection, UTC time, and source provenance derived from repository `HEAD`. Custom authority inputs are confined to private deterministic test helpers. Merge readiness remains subject to the complete validation and review record.
 
 Sprint ID: ME-SR26
-Status: IMPLEMENTED — POST-MERGE CANARY BLOCKED
+Status: IMPLEMENTED — SECOND CONTROLLED CANARY AUTHORIZATION READY
 
 The single authorized post-merge canary on 2026-08-26 was interrupted because
 the GitHub-hosted runner received a shutdown signal while bounded history
@@ -15,6 +15,14 @@ evidenced, and the external termination cause remains unresolved.
 No artifact, quality-gate result, or screening evidence was produced, and no
 retry occurred. Operational validation remains open. RUN33 remains a separate
 conditional future controlled step and was not executed.
+
+The read-only runner diagnostic found no competing run, repository cancellation
+path, workflow timeout, ordinary resource-exhaustion evidence, application
+exception, or provider failure. Deterministic history/provider tests remain
+healthy. It classified the event as
+`TRANSIENT_GITHUB_RUNNER_INTERRUPTION_LIKELY` and found a second controlled
+canary `RECANARY_SAFE_WITHOUT_CODE_CHANGES`. This does not itself dispatch or
+authorize the run; explicit human authorization remains required.
 
 ## Outcome
 
@@ -54,8 +62,6 @@ conditional RUN33 input handoff; it does not execute RUN33.
 
 ## Required next action
 
-Determine why the GitHub-hosted runner received a shutdown signal during run
-`32951786805` and whether the interruption was transient infrastructure or a
-reproducible execution problem. Only then may a new controlled canary receive
-explicit authorization. Do not retry automatically, publish, advance
-`market-data`, or execute RUN33.
+Review the diagnostic and explicitly authorize one new controlled ME-SR26
+canary without code changes if accepted. Treat it as a new validation run, not
+an automatic retry. Do not publish, advance `market-data`, or execute RUN33.
