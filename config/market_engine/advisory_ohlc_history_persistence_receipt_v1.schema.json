@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Market Engine advisory OHLC history diagnostic persistence receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "run_id", "source_main_sha", "canonical_universe_sha256",
+    "canonical_universe_identity_digest", "history_policy_sha256",
+    "operational_runtime_config_sha256", "stage_id", "chunk_identity_digest",
+    "expected_artifact_name", "artifact_id", "artifact_digest", "execution_status",
+    "checkpoint_sha256", "generated_at", "authority_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "market-engine-advisory-ohlc-history-persistence-receipt-v1"},
+    "run_id": {"type": "string"},
+    "source_main_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "canonical_universe_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "canonical_universe_identity_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "history_policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "operational_runtime_config_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "stage_id": {"type": "string"},
+    "chunk_identity_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "expected_artifact_name": {"type": "string"},
+    "artifact_id": {"type": "string", "minLength": 1},
+    "artifact_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "execution_status": {"enum": ["success", "failure"]},
+    "checkpoint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "authority_boundary": {"const": "diagnostic_persistence_only_never_analytic"}
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Market Engine advisory OHLC history operational runtime configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "primary_chunk_size",
+    "provider_stage_timeout_seconds",
+    "provider_termination_grace_seconds",
+    "heartbeat_interval_seconds"
+  ],
+  "properties": {
+    "schema_version": {"const": "market-engine-advisory-ohlc-history-runtime-v1"},
+    "primary_chunk_size": {"const": 64},
+    "provider_stage_timeout_seconds": {"const": 600},
+    "provider_termination_grace_seconds": {"const": 5},
+    "heartbeat_interval_seconds": {"const": 60}
+  }
+}

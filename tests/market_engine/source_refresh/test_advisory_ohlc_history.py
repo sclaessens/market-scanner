@@ -193,22 +193,18 @@ def test_public_loader_cannot_backdate_a_stale_artifact(inputs, monkeypatch) -> 
     assert history._effective_analytic_authority_status(loaded) == "unusable"
 
 
-def test_production_source_sha_is_real_head_and_fails_closed(monkeypatch) -> None:
+def test_monolithic_public_build_is_disabled_and_source_sha_resolution_remains_fail_closed(monkeypatch) -> None:
     monkeypatch.setenv("SOURCE_MAIN_SHA", "0" * 40)
     expected = history._current_repository_head_sha()
     assert expected == history.subprocess.run(
         ["git", "-C", str(history._repository_root()), "rev-parse", "--verify", "HEAD"],
         check=True, capture_output=True, text=True, timeout=10,
     ).stdout.strip()
-    captured = {}
-    monkeypatch.setattr(history, "_load_canonical_universe", lambda: {})
-    monkeypatch.setattr(history, "_load_canonical_policy", lambda: {})
-    monkeypatch.setattr(history, "_build_advisory_ohlc_history_impl", lambda **kwargs: (captured.update(kwargs) or {}, Path("unused")))
-    build_advisory_ohlc_history(run_id="derived-head")
-    assert captured["source_main_sha"] == expected
+    with pytest.raises(AdvisoryHistoryIssue, match="BOUNDED_RUNTIME_REQUIRED"):
+        build_advisory_ohlc_history(run_id="bounded-runtime-only")
     monkeypatch.setattr(history.subprocess, "run", lambda *args, **kwargs: (_ for _ in ()).throw(OSError("git unavailable")))
     with pytest.raises(AdvisoryHistoryIssue, match="SOURCE_MAIN_SHA_UNRESOLVED"):
-        build_advisory_ohlc_history(run_id="unresolved-head")
+        history._current_repository_head_sha()
 
 
 def test_canonical_production_universe_requires_exactly_952_identities(monkeypatch) -> None:

@@ -1,0 +1,7 @@
+{
+  "schema_version": "market-engine-advisory-ohlc-history-runtime-v1",
+  "primary_chunk_size": 64,
+  "provider_stage_timeout_seconds": 600,
+  "provider_termination_grace_seconds": 5,
+  "heartbeat_interval_seconds": 60
+}

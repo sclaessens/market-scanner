@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Market Engine advisory OHLC history diagnostic checkpoint",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "complete", "run_id", "source_main_sha",
+    "canonical_universe_sha256", "canonical_universe_identity_digest",
+    "history_policy_sha256", "operational_runtime_config_sha256", "phase",
+    "execution_status", "reason_code", "chunk_index", "chunk_count",
+    "chunk_identity_digest", "chunk_attempted_identity_count",
+    "chunk_completed_identity_count", "cumulative_attempted_identity_count",
+    "cumulative_completed_identity_count", "successful_frame_count",
+    "empty_frame_count", "provider_error_count", "fallbacks_used",
+    "generated_at", "authority_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "market-engine-advisory-ohlc-history-diagnostic-checkpoint-v1"},
+    "complete": {"const": false},
+    "run_id": {"type": "string"},
+    "source_main_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "canonical_universe_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "canonical_universe_identity_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "history_policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "operational_runtime_config_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "phase": {"type": "string"},
+    "execution_status": {"enum": ["success", "failure"]},
+    "reason_code": {"type": ["string", "null"]},
+    "chunk_index": {"type": ["integer", "null"], "minimum": 0},
+    "chunk_count": {"type": "integer", "minimum": 0},
+    "chunk_identity_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "chunk_attempted_identity_count": {"type": "integer", "minimum": 0},
+    "chunk_completed_identity_count": {"type": "integer", "minimum": 0},
+    "cumulative_attempted_identity_count": {"type": "integer", "minimum": 0},
+    "cumulative_completed_identity_count": {"type": "integer", "minimum": 0},
+    "successful_frame_count": {"type": "integer", "minimum": 0},
+    "empty_frame_count": {"type": "integer", "minimum": 0},
+    "provider_error_count": {"type": "integer", "minimum": 0},
+    "fallbacks_used": {"type": "integer", "minimum": 0, "maximum": 25},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "authority_boundary": {"const": "diagnostic_only_partial_never_analytic"}
+  }
+}
