@@ -54,8 +54,10 @@ ME-RUN30/31 and ME-DATA06-10 - broad analysis and evidence baseline
   -> ME-SR26 operational canary (FIRST RUN BLOCKED BY RUNNER INTERRUPTION)
   -> runner interruption diagnostic (COMPLETED)
   -> second controlled canary (BLOCKED BY HOSTED-RUNNER COMMUNICATION LOSS)
-  -> runner/workflow hardening review (NEXT)
-  -> successful controlled ME-SR26 canary (REQUIRED)
+  -> ME-SR27 runner/workflow hardening review (COMPLETED)
+  -> ME-SR28 bounded acquisition observability and diagnostic retention (NEXT)
+  -> reviewed ME-SR28 merge
+  -> third controlled ME-SR26 canary (REQUIRED; NOT YET AUTHORIZED)
   -> human approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 - first useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - batch grounded advisory consumption (PLANNED)
@@ -72,6 +74,32 @@ is not a prerequisite for the advisory-only ME-SR25 path.
 Historical sections below retain the state and `Next` labels that applied when
 each sprint closed. They do not override
 `docs/market_engine/roadmap/ACTIVE_BASELINE_DIRECTION.md`.
+
+### ME-SR27 — Advisory History Runner / Workflow Hardening
+
+Status: COMPLETED — DESIGN AND REVIEW ONLY.
+
+Two independent runner-level failures left no usable ME-SR26 history artifact.
+Static review proved that `threads=False` makes the 952-symbol yfinance path
+synchronous per ticker and that the 15-second timeout is request-scoped, not an
+aggregate provider deadline. The corrected review selects executable static
+execution/upload/receipt/gate step groups for deterministic chunks and a
+parent-enforced 600-second worker-process deadline with TERM, five-second grace,
+and KILL escalation. It also requires structured heartbeat, lightweight
+resource and dependency telemetry, diagnostic-only `complete: false`
+checkpoints, unique immutable uploads, and fail-closed final assembly only after
+exact 952 and persistence-receipt reconciliation. No runtime or workflow
+implementation is part of ME-SR27.
+
+### ME-SR28 — Bounded Advisory History Acquisition Observability and Diagnostic Retention
+
+Status: NEXT — IMPLEMENTATION REQUIRED BEFORE ANY THIRD CANARY.
+
+Implement and deterministically test the ME-SR27 P0 contract without changing
+provider authority, the global maximum-25 fallback policy, history semantics,
+screening semantics, publication boundaries, or downstream sequencing. ME-SR28
+must use repository-owned operational timeout configuration and cannot expose
+it as caller authority. It does not execute or authorize a third canary.
 
 ME-ADV01 implemented the first minimal deterministic advice engine.ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
 the ME-GH02 `ticker_status_index.json` and linked dry-run artifacts, writes

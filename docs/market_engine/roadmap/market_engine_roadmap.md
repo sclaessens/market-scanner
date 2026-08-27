@@ -113,8 +113,10 @@ ME-RM08 - Portfolio ledger and advisory price roadmap realignment
   -> ME-SR26 operational canary (FIRST RUN BLOCKED BY RUNNER INTERRUPTION)
   -> Runner interruption diagnostic (COMPLETED)
   -> Second controlled canary (BLOCKED BY HOSTED-RUNNER COMMUNICATION LOSS)
-  -> Runner/workflow hardening review (NEXT)
-  -> Successful controlled ME-SR26 canary (REQUIRED)
+  -> ME-SR27 runner/workflow hardening review (COMPLETED)
+  -> ME-SR28 bounded acquisition observability and diagnostic retention (NEXT)
+  -> Reviewed ME-SR28 merge
+  -> Third controlled ME-SR26 canary (REQUIRED; NOT YET AUTHORIZED)
   -> Human approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
   -> ME-CI12 - Batch grounded advisory consumption (PLANNED)
@@ -135,6 +137,16 @@ approval, DATA07 import, DATA06 refresh, and RUN31 evidence complete
 successfully. It must produce 5-15 grounded candidates or record explicit
 no-candidate evidence. ME-PI01 and ME-CI11D remain planned but deferred.
 Historical `Next` labels below do not override this section.
+
+ME-SR27 closes the runner/workflow hardening review only. It proves the current
+provider phase is synchronous per ticker and lacks an application-level global
+deadline or durable progress boundary. ME-SR28 must implement the minimum
+reviewed static sequential execution/upload/receipt/gate boundaries, a
+parent-enforced repository-configured worker-process deadline,
+heartbeat/resource/version telemetry, diagnostic-only checkpoints, and exact
+fail-closed final assembly design before any third-canary proposal. An upload
+is durable only after the official action completes successfully. No downstream
+stage moves ahead of successful ME-SR26 operational validation.
 
 ME-ADV01 implemented the first minimal deterministic advice engine.ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
 the ME-GH02 `ticker_status_index.json` and linked dry-run artifacts, writes
