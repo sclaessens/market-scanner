@@ -891,7 +891,23 @@ def _validate_receipt(run_id: str, stage_id: str, plan: Mapping[str, Any]) -> di
     }
     if any(receipt.get(key) != value for key, value in expected.items()):
         raise AdvisoryHistoryRuntimeIssue("RECEIPT_BINDING_INVALID", "persistence receipt binding is invalid")
+    artifact_id = receipt.get("artifact_id")
+    artifact_digest = receipt.get("artifact_digest")
+    if not isinstance(artifact_id, str) or not artifact_id.strip() or artifact_id != artifact_id.strip():
+        raise AdvisoryHistoryRuntimeIssue("RECEIPT_BINDING_INVALID", "persistence receipt artifact ID is invalid")
+    if not isinstance(artifact_digest, str) or not ARTIFACT_DIGEST.fullmatch(artifact_digest):
+        raise AdvisoryHistoryRuntimeIssue("RECEIPT_BINDING_INVALID", "persistence receipt artifact digest is invalid")
     return receipt
+
+
+def _validate_successful_persisted_stage(
+    run_id: str, stage_id: str, plan: Mapping[str, Any],
+) -> None:
+    _validate_prior_gate(run_id, stage_id)
+    _validate_receipt(run_id, stage_id, plan)
+    checkpoint = _read_json(_checkpoint_path(run_id, stage_id))
+    if checkpoint.get("execution_status") != "success":
+        raise AdvisoryHistoryRuntimeIssue("FINAL_ASSEMBLY_BLOCKED", "a persisted runtime stage did not succeed")
 
 
 def gate_stage(run_id: str, stage_id: str, *, execution_outcome: str) -> Path:
@@ -1014,12 +1030,9 @@ def assemble_final_history(run_id: str, *, stdout: TextIO = sys.stdout) -> tuple
     plan = _load_plan(run_id)
     expected_stages = [f"primary-chunk-{index:03d}" for index in range(PRIMARY_CHUNK_COUNT)] + [FALLBACK_STAGE_ID]
     _validate_exact_runtime_envelope(run_id, expected_stages)
+    _validate_successful_persisted_stage(run_id, PREFLIGHT_STAGE_ID, plan)
     for stage_id in expected_stages:
-        _validate_prior_gate(run_id, stage_id)
-        checkpoint = _read_json(_checkpoint_path(run_id, stage_id))
-        if checkpoint.get("execution_status") != "success":
-            raise AdvisoryHistoryRuntimeIssue("FINAL_ASSEMBLY_BLOCKED", "a provider stage did not succeed")
-        _validate_receipt(run_id, stage_id, plan)
+        _validate_successful_persisted_stage(run_id, stage_id, plan)
     fallback_plan = _validate_fallback_plan(run_id, plan)
     primary_results: dict[str, Mapping[str, Any]] = {}
     primary_identities: list[str] = []

@@ -87,6 +87,15 @@ reconciliation, and at most 25 globally selected singleton fallbacks. The
 fallback stage exists even when its selected count is zero. Any mismatch leaves
 no final manifest.
 
+Before provider-stage reconciliation, assembly revalidates the full preflight
+authority envelope through the same canonical stage helpers used for provider
+stages. This requires the exact checkpoint schema and authority bindings, a
+successful execution status, the exact passed gate, the receipt schema and
+diagnostic-only authority, its checkpoint SHA and artifact-name bindings, a
+non-empty canonical artifact ID, and the raw 64-hex upload-artifact digest.
+Missing or corrupt preflight evidence blocks assembly before any final manifest
+is created.
+
 The operational runtime config is not analytic history policy and is not added
 to the final analytic manifest. Chunked and monolithic mocked 952-identity
 fixtures produce byte-identical final analytic artifacts, including observation
@@ -94,14 +103,14 @@ and checksum semantics, plus byte-identical current technical screening output.
 
 ## Offline validation record
 
-- targeted ME-SR26/ME-SR28/provider-seam/screening/workflow suites: 132 passed;
-- new ME-SR28 runtime suite: 22 passed;
-- complete `source_refresh` suite: 176 passed;
+- targeted ME-SR26/ME-SR28/provider-seam/screening/workflow suites: 138 passed;
+- new ME-SR28 runtime suite: 28 passed;
+- complete `source_refresh` suite: 182 passed;
 - complete `run` suite: 216 passed;
-- complete Market Engine suite: 1,926 passed with one documented baseline
+- complete Market Engine suite: 1,932 passed with one documented baseline
   failure caused by the absent historical local DATA06 compact-checksum
   manifest;
-- complete repository suite: 2,593 passed with the same single documented
+- complete repository suite: 2,599 passed with the same single documented
   baseline failure;
 - Python compilation, changed JSON/schema validation, workflow YAML parsing,
   diff validation, and repository governance scans passed.

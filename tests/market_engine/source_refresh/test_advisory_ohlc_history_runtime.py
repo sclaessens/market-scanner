@@ -173,6 +173,28 @@ def _stage_success(
     _persist_and_gate(run_id, stage_id)
 
 
+def _complete_zero_fallback_runtime(
+    governed_runtime: dict[str, object], run_id: str,
+) -> tuple[dict[str, object], dict[str, dict[str, object]], Path]:
+    instruments = governed_runtime["instruments"]
+    policy = governed_runtime["policy"]
+    raw = {str(row["instrument_id"]): _raw_result(row, policy) for row in instruments}
+    runtime.create_preflight(run_id)
+    _persist_and_gate(run_id, runtime.PREFLIGHT_STAGE_ID)
+    plan = runtime._load_plan(run_id)
+    cumulative = 0
+    for row in plan["primary_chunks"]:
+        stage_id = row["stage_id"]
+        results = {instrument_id: raw[instrument_id] for instrument_id in row["instrument_ids"]}
+        cumulative += len(results)
+        _stage_success(run_id, plan, stage_id, results, cumulative)
+    fallback_plan = json.loads(runtime.plan_fallbacks(run_id).read_text())
+    assert fallback_plan["instrument_ids"] == []
+    _stage_success(run_id, plan, runtime.FALLBACK_STAGE_ID, {}, 952)
+    final_root = governed_runtime["root"] / history.DEFAULT_OUTPUT_ROOT / run_id
+    return plan, raw, final_root
+
+
 def test_runtime_config_and_canonical_chunk_plan_are_exact(governed_runtime) -> None:
     config = runtime._load_runtime_config()
     specs = runtime._primary_stage_specs(governed_runtime["instruments"], config["primary_chunk_size"])
@@ -374,20 +396,8 @@ def test_global_zero_fallback_stage_and_chunked_final_are_semantically_identical
     shutil.rmtree(monolithic_screening_root)
     shutil.rmtree(monolithic_root)
 
-    runtime.create_preflight(run_id)
-    _persist_and_gate(run_id, runtime.PREFLIGHT_STAGE_ID)
-    plan = runtime._load_plan(run_id)
-    cumulative = 0
-    for row in plan["primary_chunks"]:
-        stage_id = row["stage_id"]
-        results = {instrument_id: raw[instrument_id] for instrument_id in row["instrument_ids"]}
-        cumulative += len(results)
-        _stage_success(run_id, plan, stage_id, results, cumulative)
-    fallback_plan_path = runtime.plan_fallbacks(run_id)
-    fallback_plan = json.loads(fallback_plan_path.read_text())
-    assert fallback_plan["instrument_ids"] == []
-    assert fallback_plan["fallbacks_max"] == 25
-    _stage_success(run_id, plan, runtime.FALLBACK_STAGE_ID, {}, 952)
+    _plan, chunked_raw, _final_root = _complete_zero_fallback_runtime(governed_runtime, run_id)
+    assert chunked_raw == raw
     chunked_manifest, chunked_root = runtime.assemble_final_history(run_id)
     chunked_files = {
         path.relative_to(chunked_root).as_posix(): path.read_bytes()
@@ -412,6 +422,65 @@ def test_global_zero_fallback_stage_and_chunked_final_are_semantically_identical
         for path in chunked_screening_root.rglob("*") if path.is_file()
     }
     assert chunked_screening_files == monolithic_screening_files
+
+
+def test_final_assembly_blocks_missing_preflight_receipt(governed_runtime) -> None:
+    run_id = "missing-preflight-receipt"
+    _plan, _raw, final_root = _complete_zero_fallback_runtime(governed_runtime, run_id)
+    runtime._receipt_path(run_id, runtime.PREFLIGHT_STAGE_ID).unlink()
+    with pytest.raises(runtime.AdvisoryHistoryRuntimeIssue):
+        runtime.assemble_final_history(run_id)
+    assert not final_root.exists()
+
+
+def test_final_assembly_blocks_corrupt_preflight_receipt_binding(governed_runtime) -> None:
+    run_id = "corrupt-preflight-receipt"
+    _plan, _raw, final_root = _complete_zero_fallback_runtime(governed_runtime, run_id)
+    receipt_path = runtime._receipt_path(run_id, runtime.PREFLIGHT_STAGE_ID)
+    receipt = json.loads(receipt_path.read_text())
+    receipt["source_main_sha"] = "d" * 40
+    runtime._atomic_write_json(receipt_path, receipt)
+    with pytest.raises(runtime.AdvisoryHistoryRuntimeIssue, match="RECEIPT_BINDING_INVALID"):
+        runtime.assemble_final_history(run_id)
+    assert not final_root.exists()
+
+
+@pytest.mark.parametrize("mutation", ["missing", "corrupt"])
+def test_final_assembly_blocks_missing_or_corrupt_preflight_gate(governed_runtime, mutation: str) -> None:
+    run_id = f"{mutation}-preflight-gate"
+    _plan, _raw, final_root = _complete_zero_fallback_runtime(governed_runtime, run_id)
+    gate_path = runtime._gate_path(run_id, runtime.PREFLIGHT_STAGE_ID)
+    if mutation == "missing":
+        gate_path.unlink()
+    else:
+        gate = json.loads(gate_path.read_text())
+        gate["status"] = "failed"
+        runtime._atomic_write_json(gate_path, gate)
+    with pytest.raises(runtime.AdvisoryHistoryRuntimeIssue):
+        runtime.assemble_final_history(run_id)
+    assert not final_root.exists()
+
+
+@pytest.mark.parametrize("mutation", ["authority", "execution_status"])
+def test_final_assembly_blocks_corrupt_preflight_checkpoint(governed_runtime, mutation: str) -> None:
+    run_id = f"corrupt-preflight-checkpoint-{mutation}"
+    _plan, _raw, final_root = _complete_zero_fallback_runtime(governed_runtime, run_id)
+    checkpoint_path = runtime._checkpoint_path(run_id, runtime.PREFLIGHT_STAGE_ID)
+    checkpoint = json.loads(checkpoint_path.read_text())
+    receipt_path = runtime._receipt_path(run_id, runtime.PREFLIGHT_STAGE_ID)
+    receipt = json.loads(receipt_path.read_text())
+    if mutation == "authority":
+        checkpoint["source_main_sha"] = "d" * 40
+    else:
+        checkpoint["execution_status"] = "failure"
+        receipt["execution_status"] = "failure"
+    runtime._atomic_write_json(checkpoint_path, checkpoint)
+    if mutation == "execution_status":
+        receipt["checkpoint_sha256"] = runtime._sha256_file(checkpoint_path)
+        runtime._atomic_write_json(receipt_path, receipt)
+    with pytest.raises(runtime.AdvisoryHistoryRuntimeIssue):
+        runtime.assemble_final_history(run_id)
+    assert not final_root.exists()
 
 
 def test_fallback_selection_is_global_canonical_and_capped(governed_runtime) -> None:
