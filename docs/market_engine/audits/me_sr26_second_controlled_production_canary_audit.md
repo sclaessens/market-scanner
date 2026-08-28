@@ -33,9 +33,26 @@ runner/workflow hardening review before any later canary is considered.
 | Advisory-only boundary | PASS — no publication, Git write, canonical mutation, DATA11 approval, DATA07, DATA06, RUN31, RUN33, portfolio operation, or broker/order operation |
 | Roadmap sequencing | PASS — a successful controlled canary remained required before the downstream checkpoint and RUN33 |
 
-Exactly one new `workflow_dispatch` was authorized and performed. GitHub's
+Exactly one new `workflow_dispatch` was authorized and performed for this
+second controlled canary. GitHub's
 rerun functionality was not used. No second dispatch, local live-provider
 experiment, manual ticker retry, or downstream execution occurred.
+
+Across the wider validation period, exactly two controlled canaries occurred.
+Three production workflow executions reached history acquisition because the
+active schedule unintentionally launched run `32956572481`; that run is not a
+controlled canary.
+
+| Run | Event | Controlled canary | Failure mode |
+|---|---|---:|---|
+| `32951786805` | `workflow_dispatch` | yes | runner shutdown signal |
+| `32956572481` | `schedule` | no | runner shutdown signal |
+| `32966745030` | `workflow_dispatch` | yes | hosted-runner communication loss |
+
+Scheduled run `32956572481` executed SHA
+`19f207b35947040db5ee466c54a140160909c7ce`. It entered live history acquisition
+and later received `The runner has received a shutdown signal.` It provides
+additional hardening evidence but no controlled-canary validation authority.
 
 ## Execution record
 

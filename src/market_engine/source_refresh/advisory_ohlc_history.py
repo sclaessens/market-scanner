@@ -3,9 +3,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
+import uuid
 from collections import Counter
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
@@ -71,17 +74,15 @@ def build_advisory_ohlc_history(
     *, run_id: str,
     output_root: str | Path = DEFAULT_OUTPUT_ROOT,
 ) -> tuple[dict[str, Any], Path]:
-    """Build history with repository-owned authority and internal provenance."""
-    _load_canonical_universe()
-    _load_canonical_policy()
-    return _build_advisory_ohlc_history_impl(
-        run_id=run_id,
-        source_main_sha=_current_repository_head_sha(),
-        output_root=output_root,
-        universe_path=DEFAULT_UNIVERSE_SNAPSHOT,
-        policy_path=DEFAULT_POLICY_PATH,
-        provider=_acquire_with_existing_adapter,
-        clock=_system_utc_now,
+    """Reject the retired monolithic production route.
+
+    Deterministic tests retain the private construction seam. Production must
+    use advisory_ohlc_history_runtime so every provider stage is bounded and
+    every later stage is gated on durable diagnostic persistence.
+    """
+    raise AdvisoryHistoryIssue(
+        "BOUNDED_RUNTIME_REQUIRED",
+        "production history acquisition requires the bounded ME-SR28 runtime",
     )
 
 
@@ -159,12 +160,19 @@ def _build_advisory_ohlc_history_impl(
         payloads[f"series/{_safe_filename(instrument_id)}.json"] = series
     checksums = {name: _sha256(_canonical_json(value) + b"\n") for name, value in sorted(payloads.items())}
     checksum_payload = {"schema_version": CHECKSUM_VERSION, "files": checksums}
-    destination.mkdir(parents=True, exist_ok=False)
-    for name, value in payloads.items():
-        path = destination / name
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(_canonical_json(value) + b"\n")
-    (destination / "checksum_index.json").write_bytes(_canonical_json(checksum_payload) + b"\n")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_name(f".{destination.name}.{uuid.uuid4().hex}.tmp")
+    temporary.mkdir(parents=False, exist_ok=False)
+    try:
+        for name, value in payloads.items():
+            path = temporary / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(_canonical_json(value) + b"\n")
+        (temporary / "checksum_index.json").write_bytes(_canonical_json(checksum_payload) + b"\n")
+        os.replace(temporary, destination)
+    finally:
+        if temporary.exists():
+            shutil.rmtree(temporary)
     return manifest, destination
 
 
@@ -533,28 +541,43 @@ def _provider_lag(rows: Sequence[Mapping[str, Any]], policy: Mapping[str, Any]) 
 
 
 def _acquire_with_existing_adapter(instruments: Sequence[Mapping[str, Any]], acquired_at: datetime, policy: Mapping[str, Any]) -> Mapping[str, Mapping[str, Any]]:
+    result = dict(_acquire_primary_with_existing_adapter(instruments, acquired_at, policy))
+    fallback_candidates = [
+        row for row in instruments
+        if result.get(str(row["instrument_id"]), {}).get("error_code") == "PROVIDER_HISTORY_MISSING"
+    ][:int(policy["max_individual_fallbacks"])]
+    result.update(_acquire_fallback_with_existing_adapter(fallback_candidates, acquired_at, policy))
+    return result
+
+
+def _acquire_primary_with_existing_adapter(
+    instruments: Sequence[Mapping[str, Any]],
+    acquired_at: datetime,
+    policy: Mapping[str, Any],
+    *,
+    canonical_instruments: Sequence[Mapping[str, Any]] | None = None,
+) -> Mapping[str, Mapping[str, Any]]:
+    """Acquire one primary batch without consuming singleton fallback authority."""
     start = (acquired_at.date() - timedelta(days=int(policy["request_calendar_days"]))).isoformat()
     end = (acquired_at.date() + timedelta(days=1)).isoformat()
-    grouped: dict[str, list[Mapping[str, Any]]] = {}
+    canonical_grouped: dict[str, list[Mapping[str, Any]]] = {}
+    for row in canonical_instruments or instruments:
+        if row.get("source_mapping_status") == "mapped":
+            canonical_grouped.setdefault(_to_yfinance_symbol(str(row["source_symbol"])), []).append(row)
     result: dict[str, Mapping[str, Any]] = {}
+    by_symbol: dict[str, Mapping[str, Any]] = {}
     for row in instruments:
         if row.get("source_mapping_status") != "mapped":
             result[str(row["instrument_id"])] = {"error_code": "SOURCE_MAPPING_UNAUTHORIZED"}
             continue
-        grouped.setdefault(_to_yfinance_symbol(str(row["source_symbol"])), []).append(row)
-    by_symbol = {symbol: rows[0] for symbol, rows in grouped.items() if len(rows) == 1}
+        symbol = _to_yfinance_symbol(str(row["source_symbol"]))
+        if len(canonical_grouped[symbol]) > 1:
+            result[str(row["instrument_id"])] = {"error_code": "AMBIGUOUS_PROVIDER_IDENTITY"}
+        else:
+            by_symbol[symbol] = row
     batch = download_yfinance_batch(tuple(by_symbol), start, end)
-    for rows in grouped.values():
-        if len(rows) > 1:
-            for row in rows:
-                result[str(row["instrument_id"])] = {"error_code": "AMBIGUOUS_PROVIDER_IDENTITY"}
-    fallback_count = 0
     for provider_symbol, instrument in by_symbol.items():
         frame = batch.get(provider_symbol)
-        if (frame is None or frame.empty) and fallback_count < int(policy["max_individual_fallbacks"]):
-            fallback_count += 1
-            try: frame = _download_yfinance_history(provider_symbol, start, end)
-            except Exception: frame = None
         instrument_id = str(instrument["instrument_id"])
         if frame is None or frame.empty:
             result[instrument_id] = {"error_code": "PROVIDER_HISTORY_MISSING"}
@@ -564,6 +587,40 @@ def _acquire_with_existing_adapter(instruments: Sequence[Mapping[str, Any]], acq
                 result[instrument_id] = {"instrument_id": instrument_id, "canonical_ticker": instrument["symbol"], "source_symbol": instrument["source_symbol"], "currency": instrument["currency"], "price_basis": policy["price_basis"], "corporate_action_adjustment_policy": policy["corporate_action_adjustment_policy"], "bars": bars}
             except Exception as exc:
                 result[instrument_id] = {"error_code": "PROVIDER_SERIES_INVALID", "error_detail": type(exc).__name__}
+    return result
+
+
+def _acquire_fallback_with_existing_adapter(
+    instruments: Sequence[Mapping[str, Any]], acquired_at: datetime, policy: Mapping[str, Any]
+) -> Mapping[str, Mapping[str, Any]]:
+    """Acquire the repository-selected global singleton fallback stage."""
+    if len(instruments) > int(policy["max_individual_fallbacks"]):
+        raise AdvisoryHistoryIssue("FALLBACK_BUDGET_INVALID", "singleton fallback stage exceeds the global budget")
+    start = (acquired_at.date() - timedelta(days=int(policy["request_calendar_days"]))).isoformat()
+    end = (acquired_at.date() + timedelta(days=1)).isoformat()
+    result: dict[str, Mapping[str, Any]] = {}
+    for instrument in instruments:
+        instrument_id = str(instrument["instrument_id"])
+        provider_symbol = _to_yfinance_symbol(str(instrument["source_symbol"]))
+        try:
+            frame = _download_yfinance_history(provider_symbol, start, end)
+        except Exception:
+            frame = None
+        if frame is None or frame.empty:
+            result[instrument_id] = {"error_code": "PROVIDER_HISTORY_MISSING"}
+            continue
+        try:
+            result[instrument_id] = {
+                "instrument_id": instrument_id,
+                "canonical_ticker": instrument["symbol"],
+                "source_symbol": instrument["source_symbol"],
+                "currency": instrument["currency"],
+                "price_basis": policy["price_basis"],
+                "corporate_action_adjustment_policy": policy["corporate_action_adjustment_policy"],
+                "bars": _frame_bars(frame),
+            }
+        except Exception as exc:
+            result[instrument_id] = {"error_code": "PROVIDER_SERIES_INVALID", "error_detail": type(exc).__name__}
     return result
 
 

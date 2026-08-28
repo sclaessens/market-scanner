@@ -55,8 +55,9 @@ ME-RUN30/31 and ME-DATA06-10 - broad analysis and evidence baseline
   -> runner interruption diagnostic (COMPLETED)
   -> second controlled canary (BLOCKED BY HOSTED-RUNNER COMMUNICATION LOSS)
   -> ME-SR27 runner/workflow hardening review (COMPLETED)
-  -> ME-SR28 bounded acquisition observability and diagnostic retention (NEXT)
-  -> reviewed ME-SR28 merge
+  -> ME-SR28 bounded acquisition observability and diagnostic retention
+     (IMPLEMENTATION COMPLETE; REVIEW PENDING)
+  -> reviewed ME-SR28 merge (REQUIRED; NEXT)
   -> third controlled ME-SR26 canary (REQUIRED; NOT YET AUTHORIZED)
   -> human approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 - first useful end-to-end candidate analysis release (CONDITIONAL)
@@ -93,13 +94,14 @@ implementation is part of ME-SR27.
 
 ### ME-SR28 — Bounded Advisory History Acquisition Observability and Diagnostic Retention
 
-Status: NEXT — IMPLEMENTATION REQUIRED BEFORE ANY THIRD CANARY.
+Status: IMPLEMENTATION COMPLETE — REVIEW PENDING.
 
-Implement and deterministically test the ME-SR27 P0 contract without changing
-provider authority, the global maximum-25 fallback policy, history semantics,
-screening semantics, publication boundaries, or downstream sequencing. ME-SR28
-must use repository-owned operational timeout configuration and cannot expose
-it as caller authority. It does not execute or authorize a third canary.
+The ME-SR27 P0 contract is implemented with 15 static sequential chunk groups,
+parent-enforced worker-process deadlines, diagnostic uploads and receipts, one
+global maximum-25 fallback stage, exact final reconciliation, and unchanged
+history/screening semantics. Repository-owned operational timeout configuration
+is not caller authority. Review and merge are required next. ME-SR28 does not
+execute or authorize a third canary.
 
 ME-ADV01 implemented the first minimal deterministic advice engine.ME-ADV01 implemented the first minimal deterministic advice engine. It consumes
 the ME-GH02 `ticker_status_index.json` and linked dry-run artifacts, writes

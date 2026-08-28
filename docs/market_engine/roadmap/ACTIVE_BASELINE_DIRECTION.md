@@ -56,8 +56,9 @@ ME-RM08 - Realign roadmap around portfolio authority and advisory price freshnes
   -> Runner interruption diagnostic (COMPLETED)
   -> Second controlled canary (BLOCKED BY HOSTED-RUNNER COMMUNICATION LOSS)
   -> ME-SR27 runner/workflow hardening review (COMPLETED)
-  -> ME-SR28 bounded acquisition observability and diagnostic retention (NEXT)
-  -> Reviewed ME-SR28 merge
+  -> ME-SR28 bounded acquisition observability and diagnostic retention
+     (IMPLEMENTATION COMPLETE; REVIEW PENDING)
+  -> Reviewed ME-SR28 merge (REQUIRED; NEXT)
   -> Third controlled ME-SR26 canary (REQUIRED; NOT YET AUTHORIZED)
   -> Human approval / DATA07 / DATA06 / RUN31 checkpoint
   -> ME-RUN33 - First useful end-to-end candidate analysis release (CONDITIONAL)
@@ -75,14 +76,13 @@ that approval; ME-RUN33 is not immediately executable.
 ME-SR27 proved that the current 952-symbol yfinance call is serial at ticker
 level under `threads=False`, the 15-second timeout is request-scoped rather
 than an aggregate deadline, and the monolithic history step has no durable
-progress boundary before final artifact upload. ME-SR28 is therefore the next
-implementation sprint. It must add only the reviewed bounded chunk,
-static execution/upload/receipt/gate workflow boundaries, parent-enforced
-worker-process deadline, heartbeat/resource/version telemetry, diagnostic-only
-checkpoint, and fail-closed final assembly contract. Local completion is not
-persistence; only a successfully completed upload-action boundary is durable.
-A third canary is not ready or authorized until that implementation is reviewed
-and merged.
+progress boundary before final artifact upload. ME-SR28 now implements the
+reviewed static execution/upload/receipt/gate workflow boundaries,
+parent-enforced worker-process deadline, heartbeat/resource/version telemetry,
+diagnostic-only checkpoint, and fail-closed final assembly contract. Local
+completion is not persistence; only a successfully completed upload-action
+boundary is durable. Review and merge are next. A third canary is not ready or
+authorized until that review and merge complete.
 
 ## What ME-PR03 completed
 

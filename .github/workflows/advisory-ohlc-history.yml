@@ -1,8 +1,6 @@
 name: Advisory OHLC History and Current Technical Screening
 
 on:
-  schedule:
-    - cron: "30 9 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -16,6 +14,9 @@ jobs:
   build-advisory-history-and-screening:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    env:
+      HISTORY_RUN_ID: me-sr28-advisory-history-${{ github.run_id }}
+      SCREENING_RUN_ID: me-sr28-current-screening-${{ github.run_id }}
     steps:
       - name: Checkout executable source
         uses: actions/checkout@v4
@@ -28,28 +29,768 @@ jobs:
       - name: Install project dependencies
         run: pip install -r requirements.txt
 
-      - name: Build bounded advisory history
-        env:
-          HISTORY_RUN_ID: me-sr26-advisory-history-${{ github.run_id }}
+      - name: Capture advisory history runtime preflight
+        id: preflight
+        continue-on-error: true
         run: |
-          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history build \
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime preflight \
+            --run-id "$HISTORY_RUN_ID"
+
+      - name: Upload advisory history runtime preflight
+        id: upload_preflight
+        if: ${{ always() && steps.preflight.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-preflight
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/preflight/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record preflight persistence receipt
+        id: receipt_preflight
+        if: ${{ always() && steps.upload_preflight.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_preflight.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_preflight.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id preflight \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-preflight" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate runtime preflight
+        id: gate_preflight
+        if: ${{ always() && steps.preflight.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.preflight.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id preflight \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 000
+        id: execute_primary_000
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-000"
+
+      - name: Upload primary chunk 000 diagnostic
+        id: upload_primary_000
+        if: ${{ always() && steps.execute_primary_000.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-000
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-000/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 000 persistence receipt
+        id: receipt_primary_000
+        if: ${{ always() && steps.upload_primary_000.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_000.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_000.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-000" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-000" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 000
+        id: gate_primary_000
+        if: ${{ always() && steps.execute_primary_000.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_000.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-000" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 001
+        id: execute_primary_001
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-001"
+
+      - name: Upload primary chunk 001 diagnostic
+        id: upload_primary_001
+        if: ${{ always() && steps.execute_primary_001.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-001
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-001/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 001 persistence receipt
+        id: receipt_primary_001
+        if: ${{ always() && steps.upload_primary_001.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_001.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_001.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-001" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-001" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 001
+        id: gate_primary_001
+        if: ${{ always() && steps.execute_primary_001.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_001.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-001" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 002
+        id: execute_primary_002
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-002"
+
+      - name: Upload primary chunk 002 diagnostic
+        id: upload_primary_002
+        if: ${{ always() && steps.execute_primary_002.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-002
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-002/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 002 persistence receipt
+        id: receipt_primary_002
+        if: ${{ always() && steps.upload_primary_002.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_002.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_002.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-002" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-002" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 002
+        id: gate_primary_002
+        if: ${{ always() && steps.execute_primary_002.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_002.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-002" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 003
+        id: execute_primary_003
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-003"
+
+      - name: Upload primary chunk 003 diagnostic
+        id: upload_primary_003
+        if: ${{ always() && steps.execute_primary_003.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-003
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-003/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 003 persistence receipt
+        id: receipt_primary_003
+        if: ${{ always() && steps.upload_primary_003.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_003.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_003.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-003" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-003" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 003
+        id: gate_primary_003
+        if: ${{ always() && steps.execute_primary_003.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_003.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-003" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 004
+        id: execute_primary_004
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-004"
+
+      - name: Upload primary chunk 004 diagnostic
+        id: upload_primary_004
+        if: ${{ always() && steps.execute_primary_004.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-004
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-004/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 004 persistence receipt
+        id: receipt_primary_004
+        if: ${{ always() && steps.upload_primary_004.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_004.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_004.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-004" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-004" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 004
+        id: gate_primary_004
+        if: ${{ always() && steps.execute_primary_004.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_004.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-004" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 005
+        id: execute_primary_005
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-005"
+
+      - name: Upload primary chunk 005 diagnostic
+        id: upload_primary_005
+        if: ${{ always() && steps.execute_primary_005.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-005
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-005/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 005 persistence receipt
+        id: receipt_primary_005
+        if: ${{ always() && steps.upload_primary_005.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_005.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_005.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-005" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-005" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 005
+        id: gate_primary_005
+        if: ${{ always() && steps.execute_primary_005.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_005.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-005" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 006
+        id: execute_primary_006
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-006"
+
+      - name: Upload primary chunk 006 diagnostic
+        id: upload_primary_006
+        if: ${{ always() && steps.execute_primary_006.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-006
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-006/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 006 persistence receipt
+        id: receipt_primary_006
+        if: ${{ always() && steps.upload_primary_006.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_006.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_006.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-006" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-006" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 006
+        id: gate_primary_006
+        if: ${{ always() && steps.execute_primary_006.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_006.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-006" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 007
+        id: execute_primary_007
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-007"
+
+      - name: Upload primary chunk 007 diagnostic
+        id: upload_primary_007
+        if: ${{ always() && steps.execute_primary_007.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-007
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-007/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 007 persistence receipt
+        id: receipt_primary_007
+        if: ${{ always() && steps.upload_primary_007.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_007.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_007.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-007" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-007" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 007
+        id: gate_primary_007
+        if: ${{ always() && steps.execute_primary_007.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_007.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-007" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 008
+        id: execute_primary_008
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-008"
+
+      - name: Upload primary chunk 008 diagnostic
+        id: upload_primary_008
+        if: ${{ always() && steps.execute_primary_008.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-008
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-008/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 008 persistence receipt
+        id: receipt_primary_008
+        if: ${{ always() && steps.upload_primary_008.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_008.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_008.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-008" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-008" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 008
+        id: gate_primary_008
+        if: ${{ always() && steps.execute_primary_008.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_008.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-008" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 009
+        id: execute_primary_009
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-009"
+
+      - name: Upload primary chunk 009 diagnostic
+        id: upload_primary_009
+        if: ${{ always() && steps.execute_primary_009.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-009
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-009/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 009 persistence receipt
+        id: receipt_primary_009
+        if: ${{ always() && steps.upload_primary_009.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_009.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_009.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-009" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-009" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 009
+        id: gate_primary_009
+        if: ${{ always() && steps.execute_primary_009.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_009.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-009" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 010
+        id: execute_primary_010
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-010"
+
+      - name: Upload primary chunk 010 diagnostic
+        id: upload_primary_010
+        if: ${{ always() && steps.execute_primary_010.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-010
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-010/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 010 persistence receipt
+        id: receipt_primary_010
+        if: ${{ always() && steps.upload_primary_010.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_010.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_010.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-010" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-010" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 010
+        id: gate_primary_010
+        if: ${{ always() && steps.execute_primary_010.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_010.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-010" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 011
+        id: execute_primary_011
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-011"
+
+      - name: Upload primary chunk 011 diagnostic
+        id: upload_primary_011
+        if: ${{ always() && steps.execute_primary_011.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-011
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-011/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 011 persistence receipt
+        id: receipt_primary_011
+        if: ${{ always() && steps.upload_primary_011.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_011.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_011.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-011" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-011" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 011
+        id: gate_primary_011
+        if: ${{ always() && steps.execute_primary_011.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_011.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-011" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 012
+        id: execute_primary_012
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-012"
+
+      - name: Upload primary chunk 012 diagnostic
+        id: upload_primary_012
+        if: ${{ always() && steps.execute_primary_012.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-012
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-012/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 012 persistence receipt
+        id: receipt_primary_012
+        if: ${{ always() && steps.upload_primary_012.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_012.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_012.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-012" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-012" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 012
+        id: gate_primary_012
+        if: ${{ always() && steps.execute_primary_012.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_012.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-012" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 013
+        id: execute_primary_013
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-013"
+
+      - name: Upload primary chunk 013 diagnostic
+        id: upload_primary_013
+        if: ${{ always() && steps.execute_primary_013.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-013
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-013/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 013 persistence receipt
+        id: receipt_primary_013
+        if: ${{ always() && steps.upload_primary_013.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_013.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_013.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-013" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-013" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 013
+        id: gate_primary_013
+        if: ${{ always() && steps.execute_primary_013.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_013.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-013" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Execute primary chunk 014
+        id: execute_primary_014
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-014"
+
+      - name: Upload primary chunk 014 diagnostic
+        id: upload_primary_014
+        if: ${{ always() && steps.execute_primary_014.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-primary-chunk-014
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/primary-chunk-014/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record primary chunk 014 persistence receipt
+        id: receipt_primary_014
+        if: ${{ always() && steps.upload_primary_014.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_primary_014.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_primary_014.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-014" \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-primary-chunk-014" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate primary chunk 014
+        id: gate_primary_014
+        if: ${{ always() && steps.execute_primary_014.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_primary_014.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id "primary-chunk-014" \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Plan global singleton fallbacks
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime plan-fallbacks \
+            --run-id "$HISTORY_RUN_ID"
+
+      - name: Execute global fallback stage
+        id: execute_fallback
+        continue-on-error: true
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime execute-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id fallback-chunk-000
+
+      - name: Upload global fallback diagnostic
+        id: upload_fallback
+        if: ${{ always() && steps.execute_fallback.outcome != 'skipped' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: advisory-ohlc-history-diagnostic-${{ env.HISTORY_RUN_ID }}-fallback-chunk-000
+          path: artifacts/market_engine/advisory_ohlc_history_diagnostics/${{ env.HISTORY_RUN_ID }}/stages/fallback-chunk-000/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Record fallback persistence receipt
+        id: receipt_fallback
+        if: ${{ always() && steps.upload_fallback.outcome == 'success' }}
+        env:
+          ARTIFACT_ID: ${{ steps.upload_fallback.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.upload_fallback.outputs.artifact-digest }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime record-receipt \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id fallback-chunk-000 \
+            --artifact-name "advisory-ohlc-history-diagnostic-$HISTORY_RUN_ID-fallback-chunk-000" \
+            --artifact-id "$ARTIFACT_ID" \
+            --artifact-digest "$ARTIFACT_DIGEST"
+
+      - name: Gate global fallback stage
+        id: gate_fallback
+        if: ${{ always() && steps.execute_fallback.outcome != 'skipped' }}
+        env:
+          EXECUTION_OUTCOME: ${{ steps.execute_fallback.outcome }}
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime gate-stage \
+            --run-id "$HISTORY_RUN_ID" \
+            --stage-id fallback-chunk-000 \
+            --execution-outcome "$EXECUTION_OUTCOME"
+
+      - name: Assemble final advisory history
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime assemble \
             --run-id "$HISTORY_RUN_ID"
 
       - name: Replay history semantics and enforce analytic usability
-        env:
-          HISTORY_RUN_ID: me-sr26-advisory-history-${{ github.run_id }}
         run: |
-          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history quality-gate \
-            --artifact-root "artifacts/market_engine/advisory_ohlc_history_runs/$HISTORY_RUN_ID"
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime quality-gate \
+            --run-id "$HISTORY_RUN_ID"
+
+      - name: Emit technical screening start
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime emit-event \
+            --run-id "$HISTORY_RUN_ID" \
+            --event technical_screening_start
 
       - name: Build current technical screening
-        env:
-          HISTORY_RUN_ID: me-sr26-advisory-history-${{ github.run_id }}
-          SCREENING_RUN_ID: me-sr26-current-screening-${{ github.run_id }}
         run: |
           PYTHONPATH=src python -m market_engine.run.current_technical_screening \
             --run-id "$SCREENING_RUN_ID" \
             --history-artifact-root "artifacts/market_engine/advisory_ohlc_history_runs/$HISTORY_RUN_ID"
+
+      - name: Emit technical screening end
+        run: |
+          PYTHONPATH=src python -m market_engine.source_refresh.advisory_ohlc_history_runtime emit-event \
+            --run-id "$HISTORY_RUN_ID" \
+            --event technical_screening_end
 
       - name: Upload advisory-only evidence
         if: always()

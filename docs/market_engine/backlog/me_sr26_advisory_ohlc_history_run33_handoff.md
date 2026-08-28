@@ -5,7 +5,7 @@
 The implementation now enforces the intended boundary: public callers select evidence artifact paths, while the repository selects the canonical 952-identity universe, history policy, unchanged RUN30 screening policy, and SR25 price policy. Production also owns provider selection, UTC time, and source provenance derived from repository `HEAD`. Custom authority inputs are confined to private deterministic test helpers. Merge readiness remains subject to the complete validation and review record.
 
 Sprint ID: ME-SR26
-Status: IMPLEMENTED — OPERATIONAL VALIDATION BLOCKED; ME-SR28 NEXT
+Status: IMPLEMENTED — OPERATIONAL VALIDATION BLOCKED; ME-SR28 REVIEW NEXT
 
 The single authorized post-merge canary on 2026-08-26 was interrupted because
 the GitHub-hosted runner received a shutdown signal while bounded history
@@ -15,6 +15,17 @@ evidenced, and the external termination cause remains unresolved.
 No artifact, quality-gate result, or screening evidence was produced, and no
 retry occurred. Operational validation remains open. RUN33 remains a separate
 conditional future controlled step and was not executed.
+
+The validation period contained exactly two controlled canaries, runs
+`32951786805` and `32966745030`. It also contained an uncontrolled automatic
+`schedule` execution, run `32956572481` on SHA
+`19f207b35947040db5ee466c54a140160909c7ce`, which reached live history
+acquisition and later received `The runner has received a shutdown signal.`
+It is not a controlled canary. Thus three production workflow executions
+reached history acquisition, while the controlled-canary count remains exactly
+two. ME-SR28 removes the schedule and leaves `workflow_dispatch` as the sole
+trigger pending successful operational validation and a separate governance
+decision.
 
 The read-only runner diagnostic found no competing run, repository cancellation
 path, workflow timeout, ordinary resource-exhaustion evidence, application
@@ -35,12 +46,13 @@ ME-SR27 completed that review. It proved the current primary `yf.download`
 invocation iterates 952 unique provider symbols synchronously under
 `threads=False`; the 15-second value is request-scoped and does not bound the
 whole phase. Heartbeat alone cannot survive hosted-runner disappearance.
-ME-SR28 must implement statically sequenced deterministic chunk execution,
+ME-SR28 now implements statically sequenced deterministic chunk execution,
 official upload, persistence-receipt, and gate steps; a parent-enforced
 repository-configured worker-process deadline; resource and dependency
 telemetry; diagnostic-only partial checkpoints; and exact fail-closed final
-assembly before a third canary can be proposed. Local chunk completion is not
-durable evidence until its upload action succeeds.
+assembly. Local chunk completion is not durable evidence until its upload
+action succeeds. The implementation still requires review and merge before a
+third canary can be proposed.
 
 ## Outcome
 
@@ -80,6 +92,6 @@ conditional RUN33 input handoff; it does not execute RUN33.
 
 ## Required next action
 
-Implement and review ME-SR28's bounded acquisition observability and diagnostic
+Review and merge ME-SR28's bounded acquisition observability and diagnostic
 retention contract. Do not authorize or dispatch a third canary during that
-implementation. Do not publish, advance `market-data`, or execute RUN33.
+review. Do not publish, advance `market-data`, or execute RUN33.
