@@ -42,7 +42,7 @@ STAGING_ROOT = Path("artifacts/market_engine/advisory_ohlc_history_staging")
 PRIMARY_CHUNK_COUNT = 15
 FALLBACK_STAGE_ID = "fallback-chunk-000"
 PREFLIGHT_STAGE_ID = "preflight"
-ARTIFACT_DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
+ARTIFACT_DIGEST = re.compile(r"^[0-9a-f]{64}$")
 STAGE_ID = re.compile(r"^(?:preflight|primary-chunk-0(?:0[0-9]|1[0-4])|fallback-chunk-000)$")
 WORKER_TOKEN = re.compile(r"^[0-9a-f]{32}$")
 

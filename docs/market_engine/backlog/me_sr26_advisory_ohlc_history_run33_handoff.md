@@ -16,6 +16,17 @@ No artifact, quality-gate result, or screening evidence was produced, and no
 retry occurred. Operational validation remains open. RUN33 remains a separate
 conditional future controlled step and was not executed.
 
+The validation period contained exactly two controlled canaries, runs
+`32951786805` and `32966745030`. It also contained an uncontrolled automatic
+`schedule` execution, run `32956572481` on SHA
+`19f207b35947040db5ee466c54a140160909c7ce`, which reached live history
+acquisition and later received `The runner has received a shutdown signal.`
+It is not a controlled canary. Thus three production workflow executions
+reached history acquisition, while the controlled-canary count remains exactly
+two. ME-SR28 removes the schedule and leaves `workflow_dispatch` as the sole
+trigger pending successful operational validation and a separate governance
+decision.
+
 The read-only runner diagnostic found no competing run, repository cancellation
 path, workflow timeout, ordinary resource-exhaustion evidence, application
 exception, or provider failure. Deterministic history/provider tests remain

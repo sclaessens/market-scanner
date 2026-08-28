@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import signal
 import sys
@@ -22,7 +23,7 @@ from market_engine.source_refresh import advisory_ohlc_history_runtime as runtim
 
 SHA = "a" * 40
 NOW = datetime(2026, 8, 13, 6, tzinfo=UTC)
-ACTION_DIGEST = "sha256:" + "b" * 64
+ACTION_DIGEST = "0fde654d4c6e659b45783a725dc92f1bfb0baa6c2de64b34e814dc206ff4aaaf"
 
 
 def _instrument(index: int) -> dict[str, object]:
@@ -248,6 +249,23 @@ def test_receipt_requires_supported_action_outputs_and_true_outcome(governed_run
     assert not runtime._gate_path(run_id, runtime.PREFLIGHT_STAGE_ID).exists()
 
 
+def test_upload_artifact_v4_raw_sha256_output_contract(governed_runtime) -> None:
+    """upload-artifact v4 emits a bare lowercase SHA-256 hexadecimal digest."""
+    run_id = "official-action-digest-fixture"
+    runtime.create_preflight(run_id)
+    assert runtime.ARTIFACT_DIGEST.fullmatch(ACTION_DIGEST)
+    assert runtime.ARTIFACT_DIGEST.fullmatch(f"sha256:{ACTION_DIGEST}") is None
+    runtime.record_persistence_receipt(
+        run_id,
+        runtime.PREFLIGHT_STAGE_ID,
+        artifact_name=runtime._expected_artifact_name(run_id, runtime.PREFLIGHT_STAGE_ID),
+        artifact_id="123",
+        artifact_digest=ACTION_DIGEST,
+    )
+    receipt = runtime._read_json(runtime._receipt_path(run_id, runtime.PREFLIGHT_STAGE_ID))
+    assert receipt["artifact_digest"] == ACTION_DIGEST
+
+
 def test_checkpoint_authority_mismatch_blocks_persistence_receipt(governed_runtime) -> None:
     run_id = "checkpoint-binding"
     runtime.create_preflight(run_id)
@@ -293,6 +311,13 @@ def test_workflow_has_static_ordered_upload_receipt_gate_groups() -> None:
     assert positions == sorted(positions)
     assert workflow.index("name: Plan global singleton fallbacks") > positions[-1]
     assert workflow.index("name: Assemble final advisory history") > workflow.index("name: Gate global fallback stage")
+
+
+def test_workflow_is_manual_validation_only_and_has_no_automatic_trigger() -> None:
+    workflow = Path(".github/workflows/advisory-ohlc-history.yml").read_text(encoding="utf-8")
+    trigger_block = workflow.split("\nconcurrency:", maxsplit=1)[0]
+    assert re.findall(r"(?m)^  ([a-z_]+):", trigger_block) == ["workflow_dispatch"]
+    assert "schedule:" not in trigger_block
 
 
 def test_runtime_cli_exposes_no_operational_authority_overrides() -> None:

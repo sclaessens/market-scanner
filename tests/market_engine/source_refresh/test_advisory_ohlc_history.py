@@ -240,8 +240,8 @@ def test_representative_history_payloads_pass_real_json_schema(inputs) -> None:
 
 def test_workflow_is_read_only_artifact_only_and_has_quality_gate() -> None:
     workflow = Path(".github/workflows/advisory-ohlc-history.yml").read_text()
-    assert 'cron: "30 9 * * *"' in workflow
     assert "workflow_dispatch:" in workflow
+    assert "schedule:" not in workflow
     assert "contents: read" in workflow
     assert "cancel-in-progress: false" in workflow
     assert "retention-days: 14" in workflow
